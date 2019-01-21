@@ -1,6 +1,8 @@
 package org.molgenis.security.account;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_SELF;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,6 +31,7 @@ import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.DisabledException;
@@ -144,6 +147,20 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     verify(mailSender).send(expected);
   }
 
+  @SuppressWarnings("deprecation")
+  @Test(
+      expectedExceptions = MolgenisUserException.class,
+      expectedExceptionsMessageRegExp =
+          "An error occurred. Please contact the administrator. You are not signed up!")
+  public void createUserMailSendFailed()
+      throws UsernameAlreadyExistsException, EmailAlreadyExistsException {
+    when(idGenerator.generateId(SECURE_RANDOM)).thenReturn("3541db68-435b-416b-8c2c-cf2edf6ba435");
+    doThrow(new MailSendException("mail send failed"))
+        .when(mailSender)
+        .send(any(SimpleMailMessage.class));
+    accountService.createUser(user, "http://molgenis.org/activate");
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void resetPassword() {
@@ -191,7 +208,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     User user = mock(User.class);
 
     @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class, RETURNS_DEEP_STUBS);
+    Query<User> q = mock(Query.class, RETURNS_SELF);
     when(dataService.query(USER, User.class)).thenReturn(q);
     when(q.eq(EMAIL, "user@molgenis.org").findOne()).thenReturn(user);
 
