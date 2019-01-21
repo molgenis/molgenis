@@ -2,7 +2,7 @@ package org.molgenis.core.ui.admin.permission;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -39,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -124,9 +125,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
   @Configuration
   public static class Config extends WebMvcConfigurerAdapter {
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    DataService dataService;
-
+    @Mock DataService dataService;
     @Mock MutableAclService mutableAclService;
     @Mock MutableAclClassService mutableAclClassService;
     @Mock SystemEntityTypeRegistry systemEntityTypeRegistry;
@@ -241,8 +240,10 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
     when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1, user2));
     when(dataService.findAll(ROLE, Role.class)).thenReturn(Stream.of(role1, role2));
-    when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, "ONE").findOne())
-        .thenReturn(role1);
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, "ONE").findOne()).thenReturn(role1);
     when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 
     when(dataService.findAll(PLUGIN, Plugin.class)).thenReturn(Stream.of(plugin1, plugin2));

@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +28,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
@@ -48,8 +49,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   @Mock private RoleFactory roleFactory;
   @Mock private PackageFactory packageFactory;
 
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
+  @Mock private DataService dataService;
 
   @Mock private GroupMetadata groupMetadata;
   @Mock private RoleMembershipService roleMembershipService;
@@ -124,7 +124,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
     Role defaultManagerRole = mock(Role.class);
     when(defaultManagerRole.getIncludes()).thenReturn(singletonList(defaultEditorRole));
 
-    when(dataService.query(ROLE, Role.class).eq(eq(RoleMetadata.NAME), any(String.class)).findOne())
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(query);
+    when(query.eq(eq(RoleMetadata.NAME), any(String.class)).findOne())
         .thenReturn(defaultManagerRole, defaultEditorRole);
 
     groupService.persist(groupValue);
@@ -156,8 +159,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
     when(roleMetadata.getAttribute(NAME)).thenReturn(attribute);
     when(attribute.getName()).thenReturn(NAME);
 
-    when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, MANAGER.toUpperCase()).findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, MANAGER.toUpperCase()).findOne()).thenReturn(null);
 
     groupService.persist(groupValue);
   }
@@ -171,12 +176,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
   @Test
   public void testGetGroup() {
     Fetch fetch = buildGroupFetch();
-    when(dataService
-            .query(GroupMetadata.GROUP, Group.class)
-            .eq(GroupMetadata.NAME, "devs")
-            .fetch(fetch)
-            .findOne())
-        .thenReturn(group);
+    @SuppressWarnings("unchecked")
+    Query<Group> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
+    when(query.eq(GroupMetadata.NAME, "devs").fetch(fetch).findOne()).thenReturn(group);
     assertEquals(groupService.getGroup("devs"), group);
   }
 
@@ -184,12 +187,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
   public void testGetGroupNotFound() {
     Fetch fetch = buildGroupFetch();
     when(groupMetadata.getAttribute(GroupMetadata.NAME)).thenReturn(attribute);
-    when(dataService
-            .query(GroupMetadata.GROUP, Group.class)
-            .eq(GroupMetadata.NAME, "devs")
-            .fetch(fetch)
-            .findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<Group> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
+    when(query.eq(GroupMetadata.NAME, "devs").fetch(fetch).findOne()).thenReturn(null);
     groupService.getGroup("devs");
   }
 
@@ -298,8 +299,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
 
   @Test
   public void testIsGroupNameAvailableReturnsTrueIfNameIsAvailable() {
-    when(dataService.query(PACKAGE, Package.class).eq(PackageMetadata.ID, "foo_bar").findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<Package> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
+    when(query.eq(PackageMetadata.ID, "foo_bar").findOne()).thenReturn(null);
 
     PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
     final GroupValue groupValue =
@@ -316,8 +319,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
   @Test
   public void testIsGroupNameAvailableReturnsFalseIfNameIsNotAvailable() {
     Package mock = mock(Package.class);
-    when(dataService.query(PACKAGE, Package.class).eq(PackageMetadata.ID, "foo_bar").findOne())
-        .thenReturn(mock);
+    @SuppressWarnings("unchecked")
+    Query<Package> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
+    when(query.eq(PackageMetadata.ID, "foo_bar").findOne()).thenReturn(mock);
 
     PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
     final GroupValue groupValue =
@@ -333,11 +338,10 @@ public class GroupServiceTest extends AbstractMockitoTest {
 
   @Test
   public void deleteGroupTest() {
-    when(dataService
-            .query(GroupMetadata.GROUP, Group.class)
-            .eq(GroupMetadata.NAME, "devs")
-            .findOne())
-        .thenReturn(group);
+    @SuppressWarnings("unchecked")
+    Query<Group> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
+    when(query.eq(GroupMetadata.NAME, "devs").findOne()).thenReturn(group);
     groupService.deleteGroup("devs");
     verify(dataService).delete(GroupMetadata.GROUP, group);
   }

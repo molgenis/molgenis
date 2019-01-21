@@ -445,5 +445,5 @@ MagmaScript.toIdValue = function (value) {
   if (value === undefined) return undefined
   if (Array.isArray(value)) return value.map(MagmaScript.toIdValue)
   if (typeof value === 'object' && value['_idValue'] !== undefined) return value._idValue
-  return value
+  return JSON.parse(JSON.stringify(value))
 }

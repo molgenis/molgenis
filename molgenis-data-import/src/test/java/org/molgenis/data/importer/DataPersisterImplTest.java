@@ -2,7 +2,7 @@ package org.molgenis.data.importer;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
@@ -25,6 +25,7 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.importer.DataPersister.DataMode;
 import org.molgenis.data.importer.DataPersister.MetadataMode;
@@ -56,7 +57,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @BeforeMethod
   public void setUpBeforeMethod() {
-    dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
+    dataService = mock(DataService.class);
     dataPersisterImpl =
         new DataPersisterImpl(metaDataService, dataService, entityTypeDependencyResolver);
 
@@ -271,8 +272,9 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
         .thenReturn(existingEntityType1);
     when(dataService.findOneById(ENTITY_TYPE_META_DATA, entityType2.getId(), EntityType.class))
         .thenReturn(existingEntityType2);
-    when(dataService
-            .query(ENTITY_TYPE_META_DATA, EntityType.class)
+    Query<EntityType> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(query);
+    when(query
             .in(
                 EntityTypeMetadata.ID,
                 Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))
@@ -314,8 +316,9 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
         .thenReturn(existingEntityType1);
     when(dataService.findOneById(ENTITY_TYPE_META_DATA, entityType2.getId(), EntityType.class))
         .thenReturn(existingEntityType2);
-    when(dataService
-            .query(ENTITY_TYPE_META_DATA, EntityType.class)
+    Query<EntityType> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(query);
+    when(query
             .in(
                 EntityTypeMetadata.ID,
                 Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))

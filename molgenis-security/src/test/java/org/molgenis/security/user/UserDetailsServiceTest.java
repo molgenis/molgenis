@@ -1,6 +1,8 @@
 package org.molgenis.security.user;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.RETURNS_SELF;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
@@ -12,9 +14,9 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
@@ -30,16 +32,10 @@ import org.testng.annotations.Test;
 
 public class UserDetailsServiceTest extends AbstractMockitoTest {
   @Mock private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private User user;
-
   @Mock private RoleMembership currentMembership;
-
   @Mock private RoleMembership pastMembership;
-
   @Mock private Role role;
 
   private UserDetailsService userDetailsService;
@@ -62,15 +58,16 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(true);
-    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userQuery).when(dataService).query(USER, User.class);
+    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
 
     when(currentMembership.isCurrent()).thenReturn(true);
     when(currentMembership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    when(dataService
-            .query(ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.USER, user)
-            .findAll())
+    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
+    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
         .thenReturn(Stream.of(currentMembership, pastMembership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
@@ -95,15 +92,16 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(user.getUsername()).thenReturn(username);
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
-    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userQuery).when(dataService).query(USER, User.class);
+    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
 
     when(currentMembership.isCurrent()).thenReturn(true);
     when(currentMembership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    when(dataService
-            .query(ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.USER, user)
-            .findAll())
+    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
+    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
         .thenReturn(Stream.of(currentMembership, pastMembership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
@@ -127,15 +125,16 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(false);
-    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userQuery).when(dataService).query(USER, User.class);
+    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
 
     when(currentMembership.isCurrent()).thenReturn(true);
     when(currentMembership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    when(dataService
-            .query(ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.USER, user)
-            .findAll())
+    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
+    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
         .thenReturn(Stream.of(currentMembership, pastMembership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
@@ -156,7 +155,10 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
       expectedExceptionsMessageRegExp = "unknown user 'unknownUser'")
   public void testLoadUserByUsernameUnknownUser() {
     String username = "unknownUser";
-    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userQuery).when(dataService).query(USER, User.class);
+    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(null);
 
     userDetailsService.loadUserByUsername(username);
   }

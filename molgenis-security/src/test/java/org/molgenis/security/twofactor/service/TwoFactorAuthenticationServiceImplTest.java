@@ -1,6 +1,6 @@
 package org.molgenis.security.twofactor.service;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -8,6 +8,7 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import java.time.Instant;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.security.auth.User;
@@ -48,10 +49,10 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
     when(molgenisUser.getUsername()).thenReturn(USERNAME);
     when(molgenisUser.getId()).thenReturn("1324");
     when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
-    when(dataService
-            .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
-            .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
-            .findOne())
+    Query<UserSecret> userSecretQuery = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(UserSecretMetadata.USER_SECRET, UserSecret.class))
+        .thenReturn(userSecretQuery);
+    when(userSecretQuery.eq(UserSecretMetadata.USER_ID, molgenisUser.getId()).findOne())
         .thenReturn(userSecret);
   }
 
@@ -119,7 +120,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
     @Bean
     public DataService dataService() {
-      return mock(DataService.class, RETURNS_DEEP_STUBS);
+      return mock(DataService.class);
     }
 
     @Bean

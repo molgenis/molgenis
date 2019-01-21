@@ -51,8 +51,9 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
         importRunService.createEnglishMailText(importRun, ZoneId.of("Europe/Amsterdam"));
     assertEquals(
         mailText,
-        "The import started by you on Saturday, February 13, 2016 1:34:56 PM CET "
-            + "finished on 1:35:12 PM with status: FAILED\nMessage:\nEntity already exists.");
+        "The import started by you on Saturday, February 13, 2016 at 1:34:56 PM Central European Standard Time finished on 1:35:12 PM with status: FAILED\n"
+            + "Message:\n"
+            + "Entity already exists.");
   }
 
   @Test

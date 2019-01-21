@@ -23,6 +23,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,6 +48,7 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests {
         MockMvcBuilders.standaloneSetup(controller)
             .setMessageConverters(
                 new FormHttpMessageConverter(), gsonHttpMessageConverter, new RdfConverter())
+            .addFilter(new ForwardedHeaderFilter())
             .build();
   }
 

@@ -4,7 +4,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -23,6 +23,7 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
 import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
@@ -52,8 +53,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 
   @Mock private Repository<Entity> repository;
 
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
+  @Mock private DataService dataService;
 
   @Mock private EntityType entityType;
   @Mock private DecoratorConfiguration decoratorConfiguration;
@@ -132,11 +132,10 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
     when(dynamicRepositoryDecoratorFactory.createDecoratedRepository(
             eq(repository), any(Map.class)))
         .thenReturn(decoratedRepository);
-    when(dataService
-            .query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
-            .eq(ENTITY_TYPE_ID, "entityTypeId")
-            .findOne())
-        .thenReturn(decoratorConfiguration);
+    Query query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class))
+        .thenReturn(query);
+    when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(decoratorConfiguration);
 
     registry.addFactory(dynamicRepositoryDecoratorFactory);
 
@@ -149,11 +148,11 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
     when(repository.getName()).thenReturn("repositoryName");
     when(entityType.getId()).thenReturn("entityTypeId");
 
-    when(dataService
-            .query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
-            .eq(ENTITY_TYPE_ID, "entityTypeId")
-            .findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<DecoratorConfiguration> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class))
+        .thenReturn(query);
+    when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(null);
 
     assertEquals(registry.decorate(repository).getName(), "repositoryName");
   }

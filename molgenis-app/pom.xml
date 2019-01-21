@@ -13,7 +13,7 @@
 
   <properties>
     <owasp-check-format>HTML</owasp-check-format>
-    <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
+    <dockerfile-maven-version>1.4.10</dockerfile-maven-version>
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>

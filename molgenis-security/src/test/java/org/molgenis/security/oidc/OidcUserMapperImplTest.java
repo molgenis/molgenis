@@ -1,6 +1,7 @@
 package org.molgenis.security.oidc;
 
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.auth.UserMetadata;
@@ -28,9 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OidcUserMapperImplTest extends AbstractMockitoTest {
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private OidcUserMappingFactory oidcUserMappingFactory;
   @Mock private UserFactory userFactory;
   private OidcUserMapperImpl oidcUserMapperImpl;
@@ -71,12 +71,10 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
     when(oidcUserMapping.getUser()).thenReturn(user);
 
-    when(dataService
-            .query(OIDC_USER_MAPPING, OidcUserMapping.class)
-            .eq(OIDC_CLIENT, registrationId)
-            .and()
-            .eq(OIDC_USERNAME, username)
-            .findOne())
+    @SuppressWarnings("unchecked")
+    Query<OidcUserMapping> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(OIDC_USER_MAPPING, OidcUserMapping.class)).thenReturn(query);
+    when(query.eq(OIDC_CLIENT, registrationId).and().eq(OIDC_USERNAME, username).findOne())
         .thenReturn(oidcUserMapping);
 
     assertEquals(oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest), user);
@@ -108,13 +106,19 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
         .thenReturn(oidcClient);
 
     User user = mock(User.class);
-    when(dataService.query(UserMetadata.USER, User.class).eq(UserMetadata.EMAIL, email).findOne())
-        .thenReturn(user);
+    @SuppressWarnings("unchecked")
+    Query<User> query = mock(Query.class, RETURNS_SELF);
+    doReturn(query).when(dataService).query(UserMetadata.USER, User.class);
+    when(query.eq(UserMetadata.EMAIL, email).findOne()).thenReturn(user);
 
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
 
-    when(dataService
-            .query(OIDC_USER_MAPPING, OidcUserMapping.class)
+    @SuppressWarnings("unchecked")
+    Query<OidcUserMapping> oidcUserMappingQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(oidcUserMappingQuery)
+        .when(dataService)
+        .query(OIDC_USER_MAPPING, OidcUserMapping.class);
+    when(oidcUserMappingQuery
             .eq(OIDC_CLIENT, registrationId)
             .and()
             .eq(OIDC_USERNAME, username)
@@ -159,13 +163,19 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, registrationId, OidcClient.class))
         .thenReturn(oidcClient);
 
-    when(dataService.query(UserMetadata.USER, User.class).eq(UserMetadata.EMAIL, email).findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userQuery).when(dataService).query(UserMetadata.USER, User.class);
+    when(userQuery.eq(UserMetadata.EMAIL, email).findOne()).thenReturn(null);
 
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
 
-    when(dataService
-            .query(OIDC_USER_MAPPING, OidcUserMapping.class)
+    @SuppressWarnings("unchecked")
+    Query<OidcUserMapping> oidcUserMappingQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(oidcUserMappingQuery)
+        .when(dataService)
+        .query(OIDC_USER_MAPPING, OidcUserMapping.class);
+    when(oidcUserMappingQuery
             .eq(OIDC_CLIENT, registrationId)
             .and()
             .eq(OIDC_USERNAME, username)

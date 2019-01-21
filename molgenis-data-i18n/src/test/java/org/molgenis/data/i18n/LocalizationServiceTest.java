@@ -4,7 +4,9 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
@@ -22,11 +24,11 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.test.AbstractMockitoTest;
@@ -38,8 +40,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
 
   private LocalizationService localizationService;
 
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private DataService dataService;
+  @Mock private DataService dataService;
 
   @Mock private L10nStringFactory l10nStringFactory;
 
@@ -60,8 +61,10 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   @Test
   public void testGetMessage() {
     doReturn("string 1 - nl").when(enPlusNl).getString(DUTCH);
-    when(dataService.query(L10N_STRING, L10nString.class).eq(MSGID, "EN_PLUS_NL").findOne())
-        .thenReturn(enPlusNl);
+    @SuppressWarnings("unchecked")
+    Query<L10nString> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
+    when(query.eq(MSGID, "EN_PLUS_NL").findOne()).thenReturn(enPlusNl);
 
     assertEquals(
         localizationService.resolveCodeWithoutArguments("EN_PLUS_NL", DUTCH), "string 1 - nl");
@@ -69,8 +72,10 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
 
   @Test
   public void testGetMessages() {
-    when(dataService.query(L10N_STRING, L10nString.class).eq(NAMESPACE, "test").findAll())
-        .thenReturn(Stream.of(enPlusNl, nlOnly));
+    @SuppressWarnings("unchecked")
+    Query<L10nString> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
+    when(query.eq(NAMESPACE, "test").findAll()).thenReturn(Stream.of(enPlusNl, nlOnly));
     when(enPlusNl.getMessageID()).thenReturn("EN_PLUS_NL");
     doReturn("string 1 - nl").when(enPlusNl).getString(DUTCH);
     when(nlOnly.getMessageID()).thenReturn("NL_ONLY");
@@ -84,12 +89,10 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   @Test
   public void testAddMissingMessageIds() {
     Set<String> messageIds = ImmutableSet.of("EN_PLUS_NL", "NEW");
-    when(dataService
-            .query(L10N_STRING, L10nString.class)
-            .in(MSGID, messageIds)
-            .and()
-            .eq(NAMESPACE, "test")
-            .findAll())
+    @SuppressWarnings("unchecked")
+    Query<L10nString> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
+    when(query.in(MSGID, messageIds).and().eq(NAMESPACE, "test").findAll())
         .thenReturn(Stream.of(enPlusNl));
     when(enPlusNl.getMessageID()).thenReturn("EN_PLUS_NL");
 
@@ -105,8 +108,10 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
 
   @Test
   public void testDeleteNamespace() {
-    when(dataService.query(L10N_STRING, L10nString.class).eq(NAMESPACE, "test").findAll())
-        .thenReturn(Stream.of(enPlusNl, nlOnly));
+    @SuppressWarnings("unchecked")
+    Query<L10nString> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
+    when(query.eq(NAMESPACE, "test").findAll()).thenReturn(Stream.of(enPlusNl, nlOnly));
 
     localizationService.deleteNamespace("test");
     verify(dataService).delete(eq(L10N_STRING), deleteCaptor.capture());

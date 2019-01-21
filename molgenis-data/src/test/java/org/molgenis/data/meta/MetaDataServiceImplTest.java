@@ -7,7 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -61,9 +61,7 @@ import org.testng.annotations.Test;
 
 @SuppressWarnings("deprecation")
 public class MetaDataServiceImplTest extends AbstractMockitoTest {
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private RepositoryCollectionRegistry repoCollectionRegistry;
   @Mock private SystemEntityTypeRegistry systemEntityTypeRegistry;
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
@@ -544,11 +542,10 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
     Attribute attr1 = mock(Attribute.class);
     Attribute attr2 = mock(Attribute.class);
 
-    when(dataService
-            .query(ATTRIBUTE_META_DATA, Attribute.class)
-            .eq(REF_ENTITY_TYPE, entityTypeId)
-            .findAll())
-        .thenReturn(Stream.of(attr1, attr2));
+    @SuppressWarnings("unchecked")
+    Query<Attribute> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(query);
+    when(query.eq(REF_ENTITY_TYPE, entityTypeId).findAll()).thenReturn(Stream.of(attr1, attr2));
 
     assertEquals(
         metaDataServiceImpl.getReferringAttributes(entityTypeId).collect(toList()),

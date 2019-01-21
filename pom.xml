@@ -5,9 +5,9 @@
   <artifactId>molgenis</artifactId>
   <version>8.0.0-SNAPSHOT</version>
   <parent>
-    <groupId>io.spring.platform</groupId>
-    <artifactId>platform-bom</artifactId>
-    <version>Cairo-SR5</version>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.2.RELEASE</version>
   </parent>
   <packaging>pom</packaging>
 
@@ -77,9 +77,12 @@
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.1</elasticsearch.version>
-    <tomcat.version>9.0.14</tomcat.version>
     <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
+    <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
+    <webjars-locator-core.version>0.36</webjars-locator-core.version>
+    <!-- Java 11 support -->
+    <rest-assured.version>3.3.0</rest-assured.version>
 
     <!-- dependency versions not managed by parent pom -->
     <google.auto-value.version>1.4.1</google.auto-value.version>
@@ -91,7 +94,6 @@
     <org.everit.json.schema.version>1.5.1</org.everit.json.schema.version>
     <picard.version>1.102.0</picard.version>
     <json.version>20141113</json.version>
-    <Genotype-IO.version>1.0.3</Genotype-IO.version>
     <rsql-parser.version>2.0.0</rsql-parser.version>
     <UserAgentUtils.version>1.17</UserAgentUtils.version>
     <freemarker-java8.version>1.1.2</freemarker-java8.version>
@@ -101,14 +103,17 @@
     <handlebars.version>4.1.0</handlebars.version>
     <node.version>v8.12.0</node.version>
     <yarn.version>v1.7.0</yarn.version>
-    <simple-excel.version>1.2</simple-excel.version>
-    <poi-ooxml-schemas.version>4.0.0</poi-ooxml-schemas.version>
+    <poi-ooxml-schemas.version>4.0.1</poi-ooxml-schemas.version>
     <gson-extras.version>0.2.1</gson-extras.version>
+    <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
+    <commons-io.version>2.6</commons-io.version>
+    <commons-fileupload.version>1.3.3</commons-fileupload.version>
+    <poi.version>4.0.1</poi.version>
+    <jaxb-api.version>2.2.11</jaxb-api.version>
     <vcf-io.version>1.0.3</vcf-io.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
-    <mockito.version>2.7.22</mockito.version>
     <hamcrest-all.version>1.3</hamcrest-all.version>
     <awaitility.version>3.0.0</awaitility.version>
     <greenmail-webapp.version>1.5.5</greenmail-webapp.version>
@@ -119,7 +124,7 @@
     <swagger-maven-plugin.version>3.1.5</swagger-maven-plugin.version>
     <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
     <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.1</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
     <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
     <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
@@ -139,7 +144,7 @@
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
-    <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
+    <fmt-maven-plugin.version>2.7</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.12</checkstyle.version>
     <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
@@ -963,11 +968,6 @@
         <version>${sentry-logback.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.mokka88</groupId>
-        <artifactId>simple-excel</artifactId>
-        <version>${simple-excel.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi-ooxml-schemas</artifactId>
         <version>${poi-ooxml-schemas.version}</version>
@@ -976,6 +976,46 @@
         <groupId>org.danilopianini</groupId>
         <artifactId>gson-extras</artifactId>
         <version>${gson-extras.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${findbugs-jsr305.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-all</artifactId>
+        <version>${hamcrest.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>${commons-fileupload.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>${poi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi-ooxml</artifactId>
+        <version>${poi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${jaxb-api.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -997,6 +1037,14 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
   </dependencies>
 

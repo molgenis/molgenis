@@ -370,6 +370,13 @@
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <!-- unused, causes Java 11 issues -->
+        <exclusion>
+          <groupId>io.rest-assured</groupId>
+          <artifactId>xml-path</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>

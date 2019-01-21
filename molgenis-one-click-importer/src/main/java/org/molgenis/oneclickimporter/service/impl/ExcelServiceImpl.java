@@ -40,7 +40,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
       }
 
-    } catch (IOException | InvalidFormatException | EncryptedDocumentException ex) {
+    } catch (IOException | EncryptedDocumentException ex) {
       LOG.error(ex.getLocalizedMessage());
       throw new MolgenisDataException("Could not create excel workbook from file");
     }

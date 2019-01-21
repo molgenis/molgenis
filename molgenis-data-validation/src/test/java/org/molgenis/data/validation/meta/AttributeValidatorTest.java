@@ -1,7 +1,7 @@
 package org.molgenis.data.validation.meta;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.Sort.Direction.ASC;
@@ -21,6 +21,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -39,7 +40,7 @@ public class AttributeValidatorTest {
 
   @BeforeMethod
   public void beforeMethod() {
-    dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
+    dataService = mock(DataService.class);
     entityManager = mock(EntityManager.class);
     attributeValidator = new AttributeValidator(dataService, entityManager);
   }
@@ -334,8 +335,10 @@ public class AttributeValidatorTest {
     when(attr.getDataType()).thenReturn(AttributeType.XREF);
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
-    when(dataService.query(refEntityTypeId).eq(refIdAttributeName, "entityId").count())
-        .thenReturn(1L);
+    @SuppressWarnings("unchecked")
+    Query<Entity> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(refEntityTypeId)).thenReturn(query);
+    when(query.eq(refIdAttributeName, "entityId").count()).thenReturn(1L);
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
     attributeValidator.validateDefaultValue(attr, true);
@@ -360,8 +363,10 @@ public class AttributeValidatorTest {
     when(attr.getDataType()).thenReturn(AttributeType.XREF);
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
-    when(dataService.query(refEntityTypeId).eq(refIdAttributeName, "entityId").count())
-        .thenReturn(0L);
+    @SuppressWarnings("unchecked")
+    Query<Entity> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(refEntityTypeId)).thenReturn(query);
+    when(query.eq(refIdAttributeName, "entityId").count()).thenReturn(0L);
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
     attributeValidator.validateDefaultValue(attr, true);
