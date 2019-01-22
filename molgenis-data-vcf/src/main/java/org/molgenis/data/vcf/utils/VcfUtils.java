@@ -14,32 +14,19 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.datastructures.Sample;
-import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VcfUtils {
-  @Autowired private EntityTypeFactory entityTypeFactory;
-
-  @Autowired private AttributeFactory attributeFactory;
-
   /**
    * Creates a internal molgenis id from a vcf entity
    *
@@ -131,55 +118,5 @@ public class VcfUtils {
       default:
         throw new UnexpectedEnumException(dataType);
     }
-  }
-
-  /**
-   * Get pedigree data from VCF Now only support child, father, mother No fancy data structure
-   * either Output: result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
-   */
-  public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner) {
-    HashMap<String, Trio> result = new HashMap<>();
-
-    while (inputVcfFileScanner.hasNextLine()) {
-      String line = inputVcfFileScanner.nextLine();
-
-      // quit when we don't see header lines anymore
-      if (!line.startsWith(VcfRepository.PREFIX)) {
-        break;
-      }
-
-      // detect pedigree line
-      // expecting e.g. ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
-      if (line.startsWith("##PEDIGREE")) {
-        System.out.println("Pedigree data line: " + line);
-        String childID = null;
-        String motherID = null;
-        String fatherID = null;
-
-        String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
-        String[] lineSplit = lineStripped.split(",", -1);
-        for (String element : lineSplit) {
-          if (element.startsWith("Child")) {
-            childID = element.replace("Child=", "");
-          } else if (element.startsWith("Mother")) {
-            motherID = element.replace("Mother=", "");
-          } else if (element.startsWith("Father")) {
-            fatherID = element.replace("Father=", "");
-          } else {
-            throw new MolgenisDataException(
-                "Expected Child, Mother or Father, but found: " + element + " in line " + line);
-          }
-        }
-
-        if (childID != null && motherID != null && fatherID != null) {
-          // good
-          result.put(
-              childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
-        } else {
-          throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
-        }
-      }
-    }
-    return result;
   }
 }
