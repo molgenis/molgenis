@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Query;
@@ -441,6 +443,9 @@ public class QueryValidator {
     return value.toString();
   }
 
+  @SuppressWarnings("squid:S2447") // Null should not be returned from a "Boolean" method
+  @Nullable
+  @CheckForNull
   private static Boolean convertBool(Attribute attr, Object value) {
     if (value instanceof Boolean) {
       return (Boolean) value;
