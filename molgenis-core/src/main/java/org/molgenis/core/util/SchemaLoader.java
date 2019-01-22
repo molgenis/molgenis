@@ -63,7 +63,7 @@ public class SchemaLoader implements LSResourceResolver {
     String searchPattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + "/**/" + schemaName;
     Resource[] resources = resourcePatternResolver.getResources(searchPattern);
 
-    if ((resources == null) || (resources.length == 0)) {
+    if (resources.length == 0) {
       throw new RuntimeException("Could not find schema [" + schemaName + "]");
     }
 
