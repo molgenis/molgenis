@@ -376,8 +376,7 @@ public class RestService {
       EntityType mrefEntity = attr.getRefEntity();
       Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
       value =
-          mrefParamValues
-              .stream()
+          mrefParamValues.stream()
               .map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue, null))
               .map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
               .collect(toList());
@@ -465,16 +464,13 @@ public class RestService {
         .forEach(
             mappedByAttr -> {
               AttributeType type = mappedByAttr.getDataType();
-              switch (type) {
-                case ONE_TO_MANY:
-                  updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
-                  break;
-                default:
-                  throw new RuntimeException(
-                      format(
-                          "Attribute [%s] of type [%s] can't be mapped by another attribute",
-                          mappedByAttr.getName(), type.toString()));
+              if (type != ONE_TO_MANY) {
+                throw new RuntimeException(
+                    format(
+                        "Attribute [%s] of type [%s] can't be mapped by another attribute",
+                        mappedByAttr.getName(), type.toString()));
               }
+              updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
             });
   }
 
