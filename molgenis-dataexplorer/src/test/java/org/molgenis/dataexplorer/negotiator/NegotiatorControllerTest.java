@@ -281,6 +281,30 @@ public class NegotiatorControllerTest {
     assertEquals(actual, expected);
   }
 
+  @Test(
+      expectedExceptions = IllegalStateException.class,
+      expectedExceptionsMessageRegExp = "Negotiator config URL can't be null")
+  public void testExportToNegotiatorMissingNegotiatorURL() {
+    NegotiatorRequest request =
+        NegotiatorRequest.create(
+            "http://molgenis.org",
+            "molgenis_id_1",
+            "*=q=MOLGENIS",
+            "a nice molgenis query",
+            "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+    when(negotiatorConfig.getUsername()).thenReturn("username");
+    when(negotiatorConfig.getPassword()).thenReturn("password");
+
+    when(restTemplate.postForLocation(eq("http://directory.com"), queryCaptor.capture()))
+        .thenReturn(URI.create("http://directory.com/request/1280"));
+
+    String actual = negotiatorController.exportToNegotiator(request);
+    String expected = "http://directory.com/request/1280";
+
+    assertEquals(actual, expected);
+  }
+
   @Test
   public void testShowButtonNoPermissionsOnPlugin() {
     when(permissionService.hasPermission(
