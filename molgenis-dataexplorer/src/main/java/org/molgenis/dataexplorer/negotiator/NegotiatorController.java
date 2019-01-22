@@ -106,7 +106,8 @@ public class NegotiatorController extends PluginController {
       Function<Entity, String> getLabel = entity -> entity.getLabelValue().toString();
       disabledCollectionLabels = disabledCollections.stream().map(getLabel).collect(toList());
       enabledCollectionsLabels =
-          collectionEntities.stream()
+          collectionEntities
+              .stream()
               .filter(e -> !disabledCollections.contains(e))
               .map(getLabel)
               .collect(toList());
@@ -150,7 +151,8 @@ public class NegotiatorController extends PluginController {
     String expression = config.getString(ENABLED_EXPRESSION);
 
     List<Collection> nonDisabledCollectionEntities =
-        getCollectionEntities(request).stream()
+        getCollectionEntities(request)
+            .stream()
             .filter(entity -> expression == null || evaluateExpressionOnEntity(expression, entity))
             .map(entity -> getEntityCollection(entityConfig, entity))
             .collect(toList());
@@ -221,7 +223,8 @@ public class NegotiatorController extends PluginController {
   private List<Entity> getDisabledCollections(
       List<Entity> entities, NegotiatorEntityConfig config) {
     String expression = config.getString(ENABLED_EXPRESSION);
-    return entities.stream()
+    return entities
+        .stream()
         .filter(entity -> !evaluateExpressionOnEntity(expression, entity))
         .collect(Collectors.toList());
   }

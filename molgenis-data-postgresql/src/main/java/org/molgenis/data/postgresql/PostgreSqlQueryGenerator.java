@@ -83,7 +83,6 @@ class PostgreSqlQueryGenerator {
 
   private static String getSqlConstraintPrimaryKey(EntityType entityType, Attribute attr) {
     return "CONSTRAINT "
-
         + getPrimaryKeyName(entityType, attr)
         + " PRIMARY KEY ("
         + getColumnName(attr)
@@ -901,8 +900,8 @@ class PostgreSqlQueryGenerator {
           parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + '%');
           break;
         case IN:
-            getSqlWhereForInQueryRule(r, entityType, attr, parameters, mrefFilterIndex, result);
-            break;
+          getSqlWhereForInQueryRule(r, entityType, attr, parameters, mrefFilterIndex, result);
+          break;
         case NOT:
           result.append(" NOT ");
           break;
@@ -1045,9 +1044,13 @@ class PostgreSqlQueryGenerator {
     return result.toString().trim();
   }
 
-  private static void getSqlWhereForInQueryRule(QueryRule r, EntityType entityType,
-      Attribute attr, List<Object> parameters,
-      AtomicInteger mrefFilterIndex, StringBuilder result) {
+  private static void getSqlWhereForInQueryRule(
+      QueryRule r,
+      EntityType entityType,
+      Attribute attr,
+      List<Object> parameters,
+      AtomicInteger mrefFilterIndex,
+      StringBuilder result) {
     if (attr == null) {
       throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
     }

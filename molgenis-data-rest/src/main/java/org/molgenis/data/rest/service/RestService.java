@@ -376,7 +376,8 @@ public class RestService {
       EntityType mrefEntity = attr.getRefEntity();
       Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
       value =
-          mrefParamValues.stream()
+          mrefParamValues
+              .stream()
               .map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue, null))
               .map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
               .collect(toList());

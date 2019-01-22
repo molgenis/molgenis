@@ -143,7 +143,9 @@ public class GroupRestController {
   })
   @ResponseBody
   public List<GroupResponse> getGroups() {
-    return groupService.getGroups().stream()
+    return groupService
+        .getGroups()
+        .stream()
         .filter(group -> userPermissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
         .map(GroupResponse::fromEntity)
         .collect(Collectors.toList());
@@ -156,7 +158,9 @@ public class GroupRestController {
       @PathVariable(value = "groupName") String groupName) {
     checkGroupPermission(groupName, VIEW_MEMBERSHIP);
     Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
-    return roleMembershipService.getMemberships(Lists.newArrayList(roles)).stream()
+    return roleMembershipService
+        .getMemberships(Lists.newArrayList(roles))
+        .stream()
         .map(GroupMemberResponse::fromEntity)
         .collect(Collectors.toList());
   }
@@ -244,7 +248,9 @@ public class GroupRestController {
   @ResponseBody
   @PreAuthorize("hasAnyRole('SU', 'MANAGER')")
   public Collection<UserResponse> getUsers() {
-    return userService.getUsers().stream()
+    return userService
+        .getUsers()
+        .stream()
         .filter(u -> !u.getUsername().equals("anonymous"))
         .map(UserResponse::fromEntity)
         .collect(Collectors.toList());
@@ -266,7 +272,9 @@ public class GroupRestController {
   }
 
   private String getManagerRoleName(GroupValue groupValue) {
-    return groupValue.getRoles().stream()
+    return groupValue
+        .getRoles()
+        .stream()
         .filter(role -> role.getLabel().equals(MANAGER))
         .map(RoleValue::getName)
         .findFirst()

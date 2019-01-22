@@ -86,10 +86,7 @@ public class FileStore {
     return new File(storageDir + separator + fileName);
   }
 
-  /**
-   *
-   * @throws UncheckedIOException if the file with given name could not be deleted
-   */
+  /** @throws UncheckedIOException if the file with given name could not be deleted */
   public void delete(String fileName) {
     Path path = Paths.get(storageDir + separator + fileName);
     try {
