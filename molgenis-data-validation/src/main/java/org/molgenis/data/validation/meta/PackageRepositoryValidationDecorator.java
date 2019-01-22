@@ -90,8 +90,8 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
     super.deleteAll(
         ids.map(this::findOneById)
             .filter(
-                package_ -> {
-                  packageValidator.validate(package_);
+                aPackage -> {
+                  packageValidator.validate(aPackage);
                   return true;
                 })
             .map(Package::getId));
