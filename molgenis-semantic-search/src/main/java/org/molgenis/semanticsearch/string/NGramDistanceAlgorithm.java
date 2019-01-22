@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Chao Pang
  */
+@SuppressWarnings("squid:S2386") // false positive: Mutable fields should not be "public static"
 public class NGramDistanceAlgorithm {
   private static int N_GRAMS = 2;
   public static final Set<String> STOPWORDSLIST;
