@@ -83,6 +83,7 @@ class PostgreSqlQueryGenerator {
 
   private static String getSqlConstraintPrimaryKey(EntityType entityType, Attribute attr) {
     return "CONSTRAINT "
+
         + getPrimaryKeyName(entityType, attr)
         + " PRIMARY KEY ("
         + getColumnName(attr)
@@ -900,51 +901,8 @@ class PostgreSqlQueryGenerator {
           parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + '%');
           break;
         case IN:
-          {
-            if (attr == null) {
-              throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
-            }
-            Object inValue = r.getValue();
-            if (inValue == null) {
-              throw new MolgenisDataException("Missing value for IN query");
-            }
-            if (!(inValue instanceof Iterable<?>)) {
-              throw new MolgenisDataException(
-                  format(
-                      "IN value is of type [%s] instead of [Iterable]",
-                      inValue.getClass().getSimpleName()));
-            }
-
-            StringBuilder in = new StringBuilder();
-            Attribute inAttr = attr;
-            Stream<Object> postgreSqlIds =
-                stream((Iterable<?>) inValue)
-                    .map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
-            for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); ) {
-              Object postgreSqlId = it.next();
-              in.append('?');
-              if (it.hasNext()) {
-                in.append(',');
-              }
-              parameters.add(postgreSqlId);
-            }
-
-            if (isPersistedInOtherTable(attr)) {
-              result.append(getFilterColumnName(attr, mrefFilterIndex.get()));
-            } else {
-              result.append("this");
-            }
-
-            Attribute equalsAttr;
-            if (attr.isMappedBy()) {
-              equalsAttr = attr.getRefEntity().getIdAttribute();
-            } else {
-              equalsAttr = entityType.getAttribute(r.getField());
-            }
-            result.append('.').append(getColumnName(equalsAttr));
-            result.append(" IN (").append(in).append(')');
+            getSqlWhereForInQueryRule(r, entityType, attr, parameters, mrefFilterIndex, result);
             break;
-          }
         case NOT:
           result.append(" NOT ");
           break;
@@ -1085,6 +1043,53 @@ class PostgreSqlQueryGenerator {
     }
 
     return result.toString().trim();
+  }
+
+  private static void getSqlWhereForInQueryRule(QueryRule r, EntityType entityType,
+      Attribute attr, List<Object> parameters,
+      AtomicInteger mrefFilterIndex, StringBuilder result) {
+    if (attr == null) {
+      throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
+    }
+    Object inValue = r.getValue();
+    if (inValue == null) {
+      throw new MolgenisDataException("Missing value for IN query");
+    }
+    if (!(inValue instanceof Iterable<?>)) {
+      throw new MolgenisDataException(
+          format(
+              "IN value is of type [%s] instead of [Iterable]",
+              inValue.getClass().getSimpleName()));
+    }
+
+    StringBuilder in = new StringBuilder();
+    Attribute inAttr = attr;
+    Stream<Object> postgreSqlIds =
+        stream((Iterable<?>) inValue)
+            .map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
+    for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); ) {
+      Object postgreSqlId = it.next();
+      in.append('?');
+      if (it.hasNext()) {
+        in.append(',');
+      }
+      parameters.add(postgreSqlId);
+    }
+
+    if (isPersistedInOtherTable(attr)) {
+      result.append(getFilterColumnName(attr, mrefFilterIndex.get()));
+    } else {
+      result.append("this");
+    }
+
+    Attribute equalsAttr;
+    if (attr.isMappedBy()) {
+      equalsAttr = attr.getRefEntity().getIdAttribute();
+    } else {
+      equalsAttr = entityType.getAttribute(r.getField());
+    }
+    result.append('.').append(getColumnName(equalsAttr));
+    result.append(" IN (").append(in).append(')');
   }
 
   /** Package-private for testability */
