@@ -22,7 +22,7 @@ public class RecoveryAuthenticationProviderImpl implements RecoveryAuthenticatio
   }
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     if (!supports(authentication.getClass())) {
       throw new IllegalArgumentException("Only RecoveryAuthenticationToken is supported");
     }
