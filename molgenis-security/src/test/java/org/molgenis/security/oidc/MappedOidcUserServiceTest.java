@@ -1,14 +1,14 @@
 package org.molgenis.security.oidc;
 
 import org.mockito.Mock;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MappedOidcUserServiceTest extends AbstractMockitoTest {
   @Mock private OidcUserMapper oidcUserMapper;
-  @Mock private UserDetailsService userDetailsService;
+  @Mock private UserDetailsServiceImpl userDetailsService;
   private MappedOidcUserService mappedOidcUserService;
 
   @BeforeMethod

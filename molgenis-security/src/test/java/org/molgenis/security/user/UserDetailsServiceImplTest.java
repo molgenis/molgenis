@@ -30,7 +30,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class UserDetailsServiceTest extends AbstractMockitoTest {
+public class UserDetailsServiceImplTest extends AbstractMockitoTest {
   @Mock private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
   @Mock private DataService dataService;
   @Mock private User user;
@@ -38,16 +38,16 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
   @Mock private RoleMembership pastMembership;
   @Mock private Role role;
 
-  private UserDetailsService userDetailsService;
+  private UserDetailsServiceImpl userDetailsServiceImpl;
 
   @BeforeMethod
   public void setUp() {
-    userDetailsService = new UserDetailsService(dataService, grantedAuthoritiesMapper);
+    userDetailsServiceImpl = new UserDetailsServiceImpl(dataService, grantedAuthoritiesMapper);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testUserDetailsService() {
-    new UserDetailsService(null, null);
+    new UserDetailsServiceImpl(null, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -79,7 +79,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
-    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
     assertEquals(userDetails.getUsername(), username);
     assertEquals(userDetails.getAuthorities(), mappedAuthorities);
   }
@@ -112,7 +112,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
-    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
     assertEquals(userDetails.getUsername(), username);
     assertEquals(userDetails.getAuthorities(), mappedAuthorities);
   }
@@ -145,7 +145,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
-    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
     assertEquals(userDetails.getUsername(), username);
     assertEquals(userDetails.getAuthorities(), mappedAuthorities);
   }
@@ -160,6 +160,6 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     doReturn(userQuery).when(dataService).query(USER, User.class);
     when(userQuery.eq(USERNAME, username).findOne()).thenReturn(null);
 
-    userDetailsService.loadUserByUsername(username);
+    userDetailsServiceImpl.loadUserByUsername(username);
   }
 }

@@ -20,14 +20,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public class UserDetailsService
-    implements org.springframework.security.core.userdetails.UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
   private final DataService dataService;
   private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
-  public UserDetailsService(
+  public UserDetailsServiceImpl(
       DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper) {
     this.dataService = requireNonNull(dataService);
     this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);

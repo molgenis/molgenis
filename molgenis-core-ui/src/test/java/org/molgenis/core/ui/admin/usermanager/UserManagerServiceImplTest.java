@@ -14,7 +14,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +56,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
     @Override
     protected org.springframework.security.core.userdetails.UserDetailsService
         userDetailsService() {
-      return mock(UserDetailsService.class);
+      return mock(UserDetailsServiceImpl.class);
     }
 
     @Bean

@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.token.RunAsUserTokenFactory;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class JobExecutorTokenServiceImplTest extends AbstractMockitoTest {
-  @Mock private UserDetailsService userDetailsService;
+  @Mock private UserDetailsServiceImpl userDetailsService;
   @Mock private RunAsUserTokenFactory runAsUserTokenFactory;
 
   private JobExecutorTokenServiceImpl jobExecutorTokenServiceImpl;

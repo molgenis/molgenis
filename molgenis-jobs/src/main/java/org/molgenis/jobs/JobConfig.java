@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.jobs.scheduler.SchedulerConfig;
 import org.molgenis.security.token.RunAsUserTokenFactory;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.web.i18n.UserLocaleResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,23 +14,23 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(SchedulerConfig.class)
 public class JobConfig {
-  private final UserDetailsService userDetailsService;
+  private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final RunAsUserTokenFactory runAsUserTokenFactory;
   private final UserLocaleResolver userLocaleResolver;
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   public JobConfig(
-      UserDetailsService userDetailsService,
+      UserDetailsServiceImpl userDetailsServiceImpl,
       RunAsUserTokenFactory runAsUserTokenFactory,
       UserLocaleResolver userLocaleResolver) {
-    this.userDetailsService = requireNonNull(userDetailsService);
+    this.userDetailsServiceImpl = requireNonNull(userDetailsServiceImpl);
     this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
     this.userLocaleResolver = requireNonNull(userLocaleResolver);
   }
 
   @Bean
   public JobExecutorTokenService jobExecutorTokenService() {
-    return new JobExecutorTokenServiceImpl(userDetailsService, runAsUserTokenFactory);
+    return new JobExecutorTokenServiceImpl(userDetailsServiceImpl, runAsUserTokenFactory);
   }
 
   @Bean
