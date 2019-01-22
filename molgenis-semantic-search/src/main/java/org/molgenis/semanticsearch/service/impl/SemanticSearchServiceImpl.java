@@ -286,6 +286,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
   }
 
   /** package-private for testability */
+  @SuppressWarnings("squid:S1643") // Strings should not be concatenated using '+' in a loop
   Hit<OntologyTerm> findTags(Attribute attribute, List<String> ontologyIds) {
     String description =
         attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
