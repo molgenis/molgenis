@@ -7,6 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 /** Validates if metadata is internally consistent and correct. */
 public class NameValidator {
   // some words are reserved for the RestAPI and default packages/entities/attributes, etc.
+  @SuppressWarnings("squid:S2386") // false positive: Mutable fields should not be "public static"
   public static final Set<String> KEYWORDS =
       ImmutableSet.of("login", "logout", "csv", "base", "exist", "meta", "_idValue");
 
