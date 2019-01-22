@@ -277,7 +277,8 @@ public class MappingServiceController extends PluginController {
     Iterable<Entity> sourceEntities = () -> dataService.findAll(sourceEntityName, query).iterator();
 
     long total = dataService.count(sourceEntityName, new QueryImpl<>());
-    long nrSuccess = 0, nrErrors = 0;
+    long nrSuccess = 0;
+    long nrErrors = 0;
 
     Map<String, String> errorMessages = new LinkedHashMap<>();
     for (AlgorithmEvaluation evaluation :
