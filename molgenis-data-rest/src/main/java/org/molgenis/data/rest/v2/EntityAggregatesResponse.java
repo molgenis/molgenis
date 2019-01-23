@@ -64,7 +64,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2 {
       Integer threshold;
       if (aggs instanceof AnonymizedAggregateResult) {
         int thresholdInt = ((AnonymizedAggregateResult) aggs).getAnonymizationThreshold();
-        if (thresholdInt != AggregateAnonymizer.AGGREGATE_ANONYMIZATION_VALUE) {
+        if (thresholdInt != AnonymizedAggregateResult.AGGREGATE_ANONYMIZATION_VALUE) {
           threshold = thresholdInt;
         } else {
           threshold = null;

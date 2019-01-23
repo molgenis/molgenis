@@ -17,7 +17,7 @@ public class AggregateAnonymizerImpl implements AggregateAnonymizer {
               row,
               input -> {
                 if (input == null) return null;
-                return input <= threshold ? AGGREGATE_ANONYMIZATION_VALUE : input;
+                return input <= threshold ? AnonymizedAggregateResult.AGGREGATE_ANONYMIZATION_VALUE : input;
               });
       anonymizedmatrix.add(anonymizedRow);
     }
