@@ -95,6 +95,8 @@ public class ProgressImpl implements Progress {
     JobExecutionHolder.unset();
   }
 
+  @SuppressWarnings(
+      "squid:S2629") // "Preconditions" and logging arguments should not require evaluation
   @Override
   public void failed(String message, @Nullable @CheckForNull Throwable throwable) {
     JOB_EXECUTION_LOG.error("Failed. " + message, throwable);
