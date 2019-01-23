@@ -158,9 +158,8 @@ public class AlgorithmServiceImpl implements AlgorithmService {
 
     // jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
     // so check instance of result object here
-    if (result instanceof ScriptException) {
-      throw new ScriptException(
-          ((ScriptException) result).getMessage(), ((ScriptException) result).getCause());
+    if (result instanceof Throwable) {
+      throw new AlgorithmException((Throwable) result);
     }
 
     return convert(result, attributeMapping.getTargetAttribute());

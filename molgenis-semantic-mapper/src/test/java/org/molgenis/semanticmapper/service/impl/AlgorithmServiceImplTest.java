@@ -121,8 +121,9 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test(
-      expectedExceptions = ScriptException.class,
-      expectedExceptionsMessageRegExp = "algorithm is not defined")
+      expectedExceptions = AlgorithmException.class,
+      expectedExceptionsMessageRegExp =
+          "org.molgenis.script.core.ScriptException: algorithm is not defined")
   public void testApplyWithInvalidScript() {
     AttributeMapping attributeMapping = mock(AttributeMapping.class);
     String algorithm = "algorithm";

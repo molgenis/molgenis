@@ -6,4 +6,8 @@ public class AlgorithmException extends RuntimeException {
   public AlgorithmException(String message) {
     super(message);
   }
+
+  public AlgorithmException(Throwable cause) {
+    super(cause);
+  }
 }
