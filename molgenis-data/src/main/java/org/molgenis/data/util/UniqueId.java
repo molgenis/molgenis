@@ -12,15 +12,15 @@ import java.nio.ByteBuffer;
 public class UniqueId {
 
   // Get the MAC address (i.e., the "node" from a UUID1)
-  private final long clockSeqAndNode = UUIDGen.getClockSeqAndNode();
-  private final byte[] node =
+  private static final long CLOCK_SEQ_AND_NODE = UUIDGen.getClockSeqAndNode();
+  private static final byte[] NODE =
       new byte[] {
-        (byte) ((clockSeqAndNode >> 40) & 0xff),
-        (byte) ((clockSeqAndNode >> 32) & 0xff),
-        (byte) ((clockSeqAndNode >> 24) & 0xff),
-        (byte) ((clockSeqAndNode >> 16) & 0xff),
-        (byte) ((clockSeqAndNode >> 8) & 0xff),
-        (byte) ((clockSeqAndNode) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE >> 40) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE >> 32) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE >> 24) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE >> 16) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE >> 8) & 0xff),
+        (byte) ((CLOCK_SEQ_AND_NODE) & 0xff),
       };
   private final ThreadLocal<ByteBuffer> tlbb =
       ThreadLocal.withInitial(() -> ByteBuffer.allocate(16));
@@ -29,10 +29,10 @@ public class UniqueId {
   private volatile long lastTimestamp;
   private final Object lock = new Object();
 
-  private final int maxShort = 0xffff;
+  private static final int MAX_SHORT = 0xffff;
 
   public byte[] getId() {
-    if (seq == maxShort) {
+    if (seq == MAX_SHORT) {
       throw new RuntimeException("Too fast");
     }
 
@@ -47,7 +47,7 @@ public class UniqueId {
       ByteBuffer bb = tlbb.get();
       bb.rewind();
       bb.putLong(time);
-      bb.put(node);
+      bb.put(NODE);
       bb.putShort((short) seq);
       return bb.array();
     }
