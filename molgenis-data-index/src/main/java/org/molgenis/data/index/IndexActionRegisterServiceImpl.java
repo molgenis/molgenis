@@ -16,7 +16,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDI
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
+import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;

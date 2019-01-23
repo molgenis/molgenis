@@ -32,7 +32,7 @@ import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.transaction.TransactionManager;
+import org.molgenis.data.transaction.TransactionConstants;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
@@ -51,7 +51,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   @BeforeMethod
   public void beforeMethod() {
     TransactionSynchronizationManager.bindResource(
-        TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
+        TransactionConstants.TRANSACTION_ID_RESOURCE_NAME, "1");
     indexActionRegisterServiceImpl =
         new IndexActionRegisterServiceImpl(
             dataService, indexActionFactory, indexActionGroupFactory, new IndexingStrategy());
@@ -60,7 +60,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   @AfterMethod
   public void afterMethod() {
     TransactionSynchronizationManager.unbindResource(
-        TransactionManager.TRANSACTION_ID_RESOURCE_NAME);
+        TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
   }
 
   @SuppressWarnings("unchecked")

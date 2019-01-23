@@ -5,7 +5,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableName;
-import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
+import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 
 import com.google.common.collect.ImmutableList;

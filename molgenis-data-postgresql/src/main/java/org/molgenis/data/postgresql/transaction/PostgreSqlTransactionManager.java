@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.transaction.MolgenisTransaction;
+import org.molgenis.data.transaction.TransactionConstants;
 import org.molgenis.data.transaction.TransactionExceptionTranslator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
 import org.molgenis.data.transaction.TransactionListener;
@@ -61,8 +62,10 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager
     Object dataSourceTransactionManager = super.doGetTransaction();
 
     String id;
-    if (TransactionSynchronizationManager.hasResource(TRANSACTION_ID_RESOURCE_NAME)) {
-      id = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
+    if (TransactionSynchronizationManager.hasResource(
+        TransactionConstants.TRANSACTION_ID_RESOURCE_NAME)) {
+      id = (String) TransactionSynchronizationManager.getResource(
+          TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
     } else {
       id = idGenerator.generateId().toLowerCase();
     }
@@ -81,7 +84,7 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager
 
     if (!definition.isReadOnly()) {
       TransactionSynchronizationManager.bindResource(
-          TRANSACTION_ID_RESOURCE_NAME, molgenisTransaction.getId());
+          TransactionConstants.TRANSACTION_ID_RESOURCE_NAME, molgenisTransaction.getId());
       transactionListeners.forEach(j -> j.transactionStarted(molgenisTransaction.getId()));
     }
   }
@@ -170,7 +173,8 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager
     }
 
     super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
-    TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
+    TransactionSynchronizationManager.unbindResourceIfPossible(
+        TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
 
     transactionListeners.forEach(j -> j.doCleanupAfterCompletion(molgenisTransaction.getId()));
   }
