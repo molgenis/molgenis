@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
  * SortV1#DEFAULT_DIRECTION}.
  *
  * @author Oliver Gierke
- * @deprecated use {@link org.molgenis.data.Sort} instead.
  */
 public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
 
