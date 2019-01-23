@@ -64,8 +64,10 @@ public class PostgreSqlTransactionManager extends DataSourceTransactionManager
     String id;
     if (TransactionSynchronizationManager.hasResource(
         TransactionConstants.TRANSACTION_ID_RESOURCE_NAME)) {
-      id = (String) TransactionSynchronizationManager.getResource(
-          TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
+      id =
+          (String)
+              TransactionSynchronizationManager.getResource(
+                  TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
     } else {
       id = idGenerator.generateId().toLowerCase();
     }

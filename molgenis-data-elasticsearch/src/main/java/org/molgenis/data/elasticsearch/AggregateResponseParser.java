@@ -311,7 +311,8 @@ class AggregateResponseParser {
       // Get entities for ids
       // Use Iterables.transform to work around List<String> to Iterable<Object> cast error
       Stream<Object> idLabelsWithoutNull =
-          idLabels.stream()
+          idLabels
+              .stream()
               .filter(Objects::nonNull)
               .map(
                   untypedIdLabel ->

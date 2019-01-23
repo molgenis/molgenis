@@ -1,8 +1,6 @@
 package org.molgenis.semanticsearch.semantic;
 
-/**
- * @param <I> item type
- */
+/** @param <I> item type */
 public interface SearchResult<I> {
   I getItem();
 

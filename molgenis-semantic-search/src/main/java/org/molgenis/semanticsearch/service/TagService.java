@@ -33,8 +33,7 @@ public interface TagService<O, C> {
    * @param entityType the entity the tagged attribute sits on
    * @param tag the tag to add
    */
-  void addAttributeTag(
-      EntityType entityType, SemanticTag<Attribute, O, C> tag);
+  void addAttributeTag(EntityType entityType, SemanticTag<Attribute, O, C> tag);
 
   /**
    * Removes attribute tag
@@ -42,8 +41,7 @@ public interface TagService<O, C> {
    * @param entityType the entity the tagged attribute sits on
    * @param tag the tag to remove
    */
-  void removeAttributeTag(
-      EntityType entityType, SemanticTag<Attribute, O, C> tag);
+  void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, O, C> tag);
 
   /**
    * Tags an entity.

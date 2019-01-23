@@ -15,9 +15,7 @@ public class SemanticTag<S, O, C> {
   private final C codeSystem;
   private final String identifier;
 
-  /**
-   * @param <S> subject type
-   */
+  /** @param <S> subject type */
   public static <S> SemanticTag<S, LabeledResource, LabeledResource> asTag(
       S subjectType, Entity tagEntity) {
     String identifier = tagEntity.getString(TagMetadata.ID);
@@ -42,12 +40,7 @@ public class SemanticTag<S, O, C> {
     return new SemanticTag<>(identifier, subjectType, relation, objectResource, codeSystem);
   }
 
-  public SemanticTag(
-      String identifier,
-      S subject,
-      Relation relation,
-      O object,
-      C codeSystem) {
+  public SemanticTag(String identifier, S subject, Relation relation, O object, C codeSystem) {
     this.identifier = identifier;
     this.subject = subject;
     this.relation = relation;
