@@ -11,7 +11,7 @@
     "unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@molgenis/molgenis-ui-context": "^0.2.0",
+    "@molgenis/molgenis-ui-context": "^0.3.0",
     "vue": "^2.5.17"
   },
   "devDependencies": {
