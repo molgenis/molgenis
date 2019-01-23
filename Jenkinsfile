@@ -107,7 +107,7 @@ pipeline {
             }
             agent {
                 kubernetes {
-                    label('molgenis-it')
+                    label('molgenis-it-jdk11')
                 }
             }
             stages {
