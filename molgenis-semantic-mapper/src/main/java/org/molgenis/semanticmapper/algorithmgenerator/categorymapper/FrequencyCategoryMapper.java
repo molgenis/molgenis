@@ -27,10 +27,7 @@ public class FrequencyCategoryMapper extends CategoryMapper {
 
       if (convertFactor == null) continue;
 
-      if (smallestFactor == -1) {
-        smallestFactor = convertFactor;
-        bestTargetCategory = targetCategory;
-      } else if (smallestFactor > convertFactor) {
+      if (smallestFactor == -1 || smallestFactor > convertFactor) {
         smallestFactor = convertFactor;
         bestTargetCategory = targetCategory;
       }
