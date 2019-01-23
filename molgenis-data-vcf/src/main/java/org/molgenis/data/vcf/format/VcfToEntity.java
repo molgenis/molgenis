@@ -261,6 +261,7 @@ public class VcfToEntity {
     }
     switch (format.getType()) {
       case CHARACTER:
+      case STRING:
         if (isListValue) {
           // TODO support list of primitives datatype
           return STRING;
@@ -278,12 +279,6 @@ public class VcfToEntity {
           return STRING;
         }
         return INT;
-      case STRING:
-        if (isListValue) {
-          // TODO support list of primitives datatype
-          return STRING;
-        }
-        return STRING;
       default:
         throw new UnexpectedEnumException(format.getType());
     }
