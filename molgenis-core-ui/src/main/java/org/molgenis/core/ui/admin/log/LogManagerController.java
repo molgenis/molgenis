@@ -104,8 +104,7 @@ public class LogManagerController extends PluginController {
     try {
       ci.configureByResource(url);
     } catch (JoranException e) {
-      LOG.error("Error reloading log configuration", e);
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error reloading log configuration", e);
     }
   }
 }
