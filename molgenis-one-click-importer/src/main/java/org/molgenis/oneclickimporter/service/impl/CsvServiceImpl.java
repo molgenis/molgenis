@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CsvServiceImpl implements CsvService {
+  private static final Character CSV_SEPARATOR = ',';
+
   @Override
   public List<String[]> buildLinesFromFile(File file) throws IOException {
     CSVReader reader =
