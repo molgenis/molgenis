@@ -1,11 +1,11 @@
 package org.molgenis.data.excel.xlsx;
 
 import static java.util.Objects.requireNonNull;
-import static jdk.nashorn.internal.runtime.JSType.toLong;
 import static org.molgenis.data.DataConverter.toBoolean;
 import static org.molgenis.data.DataConverter.toDouble;
 import static org.molgenis.data.DataConverter.toInt;
 import static org.molgenis.data.DataConverter.toLocalDate;
+import static org.molgenis.data.DataConverter.toLong;
 
 import java.io.IOException;
 import java.nio.file.Files;
