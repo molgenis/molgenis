@@ -106,8 +106,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   @Autowired private ClientRegistrationRepository clientRegistrationRepository;
 
-  public MolgenisWebAppSecurityConfig()
-  {
+  public MolgenisWebAppSecurityConfig() {
     SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
   }
 

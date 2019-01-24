@@ -3,7 +3,6 @@ package org.molgenis.core.ui;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
-import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import org.molgenis.core.ui.browserdetection.BrowserDetectionFilter;

@@ -99,19 +99,16 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
 
-  @Autowired
-  private IdGenerator idGenerator;
+  @Autowired private IdGenerator idGenerator;
 
   @Override
-  public void configureAsyncSupport(AsyncSupportConfigurer configurer)
-  {
+  public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
     configurer.setDefaultTimeout(60 * 1000);
     configurer.setTaskExecutor(asyncTaskExecutor());
   }
 
   @Bean
-  public AsyncTaskExecutor asyncTaskExecutor()
-  {
+  public AsyncTaskExecutor asyncTaskExecutor() {
     ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
     threadPoolTaskExecutor.setCorePoolSize(5);
     threadPoolTaskExecutor.setMaxPoolSize(10);
@@ -267,11 +264,11 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
     Resource[] resources =
         new Resource[] {
-            new FileSystemResource(
-                AppDataRootProvider.getAppDataRoot().toString()
-                    + File.separator
-                    + "molgenis-server.properties"),
-            new ClassPathResource("/molgenis.properties")
+          new FileSystemResource(
+              AppDataRootProvider.getAppDataRoot().toString()
+                  + File.separator
+                  + "molgenis-server.properties"),
+          new ClassPathResource("/molgenis.properties")
         };
     pspc.setLocations(resources);
     pspc.setFileEncoding("UTF-8");
@@ -346,16 +343,15 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   // TODO get rid of code duplication
   // TODO move to own config class and include in platform config
   @Bean
-  public BlobStore blobStore()
-  {
+  public BlobStore blobStore() {
     // get molgenis home directory
     Path appDataRoot = AppDataRootProvider.getAppDataRoot();
 
     // create molgenis store directory in molgenis data directory if not exists
-    String molgenisFileStoreDirStr = Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
+    String molgenisFileStoreDirStr =
+        Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
     File molgenisDataDir = new File(molgenisFileStoreDirStr);
-    if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs())
-    {
+    if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
       throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
     }
     return new DiskBlobStore(Paths.get(molgenisFileStoreDirStr), idGenerator);
