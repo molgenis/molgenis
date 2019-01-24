@@ -46,7 +46,8 @@ styling in the theme builder in future.
 ### Making bootstrap 3 and 4 themes look the same
 There is not a real trick for this. Throughout the application the classes between bootstrap 3 and 4
 are not always consistent. There are however always some steps that need to be done to accomplish
-this.  
+this. 
+
 #### 1. Determine which font-size you want to use. 
 Bootstrap 3 uses 14px as basic font size whereas bootstrap 4 uses 16 px. To change the default of
 bootstrap 3 to 16px, set the ```@font-size-base``` to 16px in the "Typography" section. To change the
@@ -61,9 +62,8 @@ you can use the info color, or another if you prefer.
 To make the menu look the same, use your browsers debugger to compare the bootstrap 3 and 4 theme
 and copy css styling between the two until they look the same. Do the same alterations in your
 bootstrap css. Some of the alterations you want to do cannot be done in the theme builders. Paste
-this css code well documented on top of you bootstrap theme file. You might want to use the 
-```!important``` in some cases, but be careful with that.
+this css code well documented on top of you bootstrap theme file. Be carefull with the ```!important```.
 
-#### 4. Don't mind the sign in and sign out button
+#### 4. Sign in and sign out button
 These buttons have such different classes between the bootstrap 3 and 4 molgenis menu, that you
 probably don't want to focus too much on them. 
