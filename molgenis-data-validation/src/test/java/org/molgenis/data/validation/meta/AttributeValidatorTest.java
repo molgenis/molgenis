@@ -17,13 +17,16 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -336,9 +339,15 @@ public class AttributeValidatorTest {
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class, RETURNS_SELF);
-    when(dataService.query(refEntityTypeId)).thenReturn(query);
+    when(repository.query()).thenReturn(query);
     when(query.eq(refIdAttributeName, "entityId").count()).thenReturn(1L);
+    MetaDataService metaDataService = mock(MetaDataService.class);
+    when(metaDataService.getRepository(refEntityType)).thenReturn(Optional.of(repository));
+    when(dataService.getMeta()).thenReturn(metaDataService);
+
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
     attributeValidator.validateDefaultValue(attr, true);
@@ -364,9 +373,15 @@ public class AttributeValidatorTest {
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class, RETURNS_SELF);
-    when(dataService.query(refEntityTypeId)).thenReturn(query);
+    when(repository.query()).thenReturn(query);
     when(query.eq(refIdAttributeName, "entityId").count()).thenReturn(0L);
+    MetaDataService metaDataService = mock(MetaDataService.class);
+    when(metaDataService.getRepository(refEntityType)).thenReturn(Optional.of(repository));
+    when(dataService.getMeta()).thenReturn(metaDataService);
+
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
     attributeValidator.validateDefaultValue(attr, true);

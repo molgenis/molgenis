@@ -47,6 +47,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
+import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -204,7 +205,10 @@ public class AttributeValidator {
           Entity refEntity = (Entity) typedValue;
           EntityType refEntityType = attr.getRefEntity();
           if (dataService
-                  .query(refEntityType.getId())
+                  .getMeta()
+                  .getRepository(refEntityType)
+                  .orElseThrow(() -> new UnknownRepositoryException(refEntityType.getId()))
+                  .query()
                   .eq(refEntityType.getIdAttribute().getName(), refEntity.getIdValue())
                   .count()
               == 0) {
