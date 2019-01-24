@@ -54,22 +54,25 @@
                         <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
                     </button>
                 </div>
-            <#if isAdmin?has_content && isAdmin>
-                <div class="col-md-1">
+                <div id="delete-dropdown-container" class="col-md-1" hidden>
                     <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             Delete <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#"
-                                                       id="delete-data-btn">Data</a></li>
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#"
-                                                       id="delete-data-metadata-btn">Data and meta data</a></li>
+                            <li id="delete-data-dropdown-item" role="presentation" hidden><a role="menuitem"
+                                                                                             tabindex="-1" href="#"
+                                                                                             id="delete-data-option">Data</a>
+                            </li>
+                            <li id="delete-metadata-dropdown-item" role="presentation" hidden><a role="menuitem"
+                                                                                                 tabindex="-1"
+                                                                                                 href="#"
+                                                                                                 id="delete-data-metadata-option">Data
+                                and meta data</a></li>
                         </ul>
                     </div>
                 </div>
-            </#if>
             </div>
         </div>
     </div>

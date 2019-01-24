@@ -1,26 +1,29 @@
 package org.molgenis.data.security.auth;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.requireNonNull;
-
 @Component
-public class UserRepositoryDecoratorFactory extends AbstractSystemRepositoryDecoratorFactory<User, UserMetaData>
-{
-	private final PasswordEncoder passwordEncoder;
+public class UserRepositoryDecoratorFactory
+    extends AbstractSystemRepositoryDecoratorFactory<User, UserMetadata> {
+  private final PasswordEncoder passwordEncoder;
+  private final UserValidator userValidator;
 
-	public UserRepositoryDecoratorFactory(UserMetaData userMetaData, PasswordEncoder passwordEncoder)
-	{
-		super(userMetaData);
-		this.passwordEncoder = requireNonNull(passwordEncoder);
-	}
+  public UserRepositoryDecoratorFactory(
+      UserMetadata userMetadata, PasswordEncoder passwordEncoder, UserValidator userValidator) {
+    super(userMetadata);
+    this.passwordEncoder = requireNonNull(passwordEncoder);
+    this.userValidator = requireNonNull(userValidator);
+  }
 
-	@Override
-	public Repository<User> createDecoratedRepository(Repository<User> repository)
-	{
-		return new UserRepositoryDecorator(repository, passwordEncoder);
-	}
+  @Override
+  public Repository<User> createDecoratedRepository(Repository<User> repository) {
+    Repository<User> decoratedRepository = new UserRepositoryDecorator(repository, passwordEncoder);
+    decoratedRepository = new UserRepositoryValidationDecorator(decoratedRepository, userValidator);
+    return decoratedRepository;
+  }
 }

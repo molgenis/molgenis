@@ -1,6 +1,18 @@
 package org.molgenis.amazon.bucket;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
+
 import com.amazonaws.services.s3.AmazonS3Client;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.amazon.bucket.config.AmazonBucketTestConfig;
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
@@ -13,6 +25,7 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.security.auth.SecurityPackage;
 import org.molgenis.jobs.Progress;
 import org.molgenis.util.ResourceUtils;
@@ -24,123 +37,123 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+@ContextConfiguration(classes = {AmazonBucketIngesterTest.Config.class})
+public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
+  @Autowired private AmazonBucketIngester amazonBucketIngester;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+  @Autowired private ImportServiceFactory importServiceFactoryMock;
 
-@ContextConfiguration(classes = { AmazonBucketIngesterTest.Config.class })
-public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	private AmazonBucketIngester amazonBucketIngester;
+  @Autowired private FileRepositoryCollectionFactory fileRepositoryCollectionFactoryMock;
 
-	@Autowired
-	private ImportServiceFactory importServiceFactoryMock;
+  private FileRepositoryCollection fileRepositoryCollectionMock;
 
-	@Autowired
-	private FileRepositoryCollectionFactory fileRepositoryCollectionFactoryMock;
+  private final File f = new File("");
+  private EntityImportReport report;
 
-	private FileRepositoryCollection fileRepositoryCollectionMock;
+  private Progress progress;
+  private ImportService importServiceMock;
 
-	private final File f = new File("");
-	private EntityImportReport report;
+  @BeforeTest
+  public void setUp() {
+    fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
+    progress = mock(Progress.class);
+    importServiceMock = mock(ImportService.class);
+    report = mock(EntityImportReport.class);
+  }
 
-	private Progress progress;
-	private ImportService importServiceMock;
+  @Test
+  public void ingest() {
+    Map<String, Integer> imported = new HashMap<>();
+    imported.put("test", 1);
+    when(report.getNrImportedEntitiesMap()).thenReturn(imported);
+    when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
+        .thenReturn(fileRepositoryCollectionMock);
+    when(importServiceFactoryMock.getImportService("test_data_only.xlsx"))
+        .thenReturn(importServiceMock);
+    when(importServiceMock.doImport(
+            any(), eq(MetadataAction.UPSERT), eq(ADD_UPDATE_EXISTING), eq(null)))
+        .thenReturn(report);
+    when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
-	@BeforeTest
-	public void setUp()
-	{
-		fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
-		progress = mock(Progress.class);
-		importServiceMock = mock(ImportService.class);
-		report = mock(EntityImportReport.class);
-	}
+    amazonBucketIngester.ingest(
+        "jobExecutionID",
+        "targetEntityTypeName",
+        "bucket",
+        "key(.*)",
+        null,
+        "test",
+        "test",
+        "region1",
+        true,
+        progress);
+    verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
+    verify(importServiceMock)
+        .doImport(any(), eq(MetadataAction.UPSERT), eq(ADD_UPDATE_EXISTING), eq(null));
+  }
 
-	@Test
-	public void ingest()
-	{
-		Map<String, Integer> imported = new HashMap<>();
-		imported.put("test", 1);
-		when(report.getNrImportedEntitiesMap()).thenReturn(imported);
-		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
-				fileRepositoryCollectionMock);
-		when(importServiceFactoryMock.getImportService("test_data_only.xlsx")).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null))).thenReturn(report);
-		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
+  @Configuration
+  @Import({AmazonBucketTestConfig.class})
+  public static class Config {
+    @Bean
+    public AmazonBucketIngester ingester() {
+      return new AmazonBucketIngester(
+          importServiceFactory(),
+          fileRepositoryCollectionFactory(),
+          fileMetaFactory(),
+          fileStore(),
+          amazonBucketClient());
+    }
 
-		amazonBucketIngester.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", null, "test", "test",
-				"region1", true, progress);
-		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
-		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null));
-	}
+    @Bean
+    public FileStore fileStore() {
+      return mock(FileStore.class);
+    }
 
-	@Configuration
-	@Import({ AmazonBucketTestConfig.class })
-	public static class Config
-	{
-		@Bean
-		public AmazonBucketIngester ingester()
-		{
-			return new AmazonBucketIngester(importServiceFactory(), fileRepositoryCollectionFactory(),
-					fileMetaFactory(), fileStore(), amazonBucketClient());
-		}
+    @Bean
+    public ImportServiceFactory importServiceFactory() {
+      return mock(ImportServiceFactory.class);
+    }
 
-		@Bean
-		public FileStore fileStore()
-		{
-			return mock(FileStore.class);
-		}
+    @Bean
+    public FileRepositoryCollectionFactory fileRepositoryCollectionFactory() {
+      return mock(FileRepositoryCollectionFactory.class);
+    }
 
-		@Bean
-		public ImportServiceFactory importServiceFactory()
-		{
-			return mock(ImportServiceFactory.class);
-		}
+    @Bean
+    public FileMetaFactory fileMetaFactory() {
+      FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
+      when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
+      return fileMetaFactory;
+    }
 
-		@Bean
-		public FileRepositoryCollectionFactory fileRepositoryCollectionFactory()
-		{
-			return mock(FileRepositoryCollectionFactory.class);
-		}
+    @Bean
+    public AmazonBucketClient amazonBucketClient() {
 
-		@Bean
-		public FileMetaFactory fileMetaFactory()
-		{
-			FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
-			when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
-			return fileMetaFactory;
-		}
+      AmazonS3Client client = mock(AmazonS3Client.class);
 
-		@Bean
-		public AmazonBucketClient amazonBucketClient()
-		{
+      AmazonBucketClient amazonBucketClient = mock(AmazonBucketClient.class);
+      File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
+      when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
+      try {
+        when(amazonBucketClient.downloadFile(
+                any(),
+                any(),
+                eq("jobExecutionID"),
+                eq("bucket"),
+                eq("key(.*)"),
+                any(),
+                eq(true),
+                any()))
+            .thenReturn(file);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      return amazonBucketClient;
+    }
 
-			AmazonS3Client client = mock(AmazonS3Client.class);
-
-			AmazonBucketClient amazonBucketClient = mock(AmazonBucketClient.class);
-			File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
-			when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
-			try
-			{
-				when(amazonBucketClient.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"),
-						any(), eq(true), any())).thenReturn(file);
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-			return amazonBucketClient;
-		}
-
-		@Bean
-		public SecurityPackage securityPackage()
-		{
-			return mock(SecurityPackage.class);
-		}
-	}
+    @Bean
+    public SecurityPackage securityPackage() {
+      return mock(SecurityPackage.class);
+    }
+  }
 }

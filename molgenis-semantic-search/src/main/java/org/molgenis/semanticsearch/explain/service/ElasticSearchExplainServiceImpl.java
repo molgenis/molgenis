@@ -1,5 +1,12 @@
 package org.molgenis.semanticsearch.explain.service;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -9,64 +16,57 @@ import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService {
+  private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
-import static java.util.Objects.requireNonNull;
+  private final ElasticsearchService elasticsearchService;
+  private final ExplainServiceHelper explainServiceHelper;
 
-public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
-{
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
+  public ElasticSearchExplainServiceImpl(
+      ElasticsearchService elasticsearchService, ExplainServiceHelper explainServiceHelper) {
+    this.elasticsearchService = requireNonNull(elasticsearchService);
+    this.explainServiceHelper = requireNonNull(explainServiceHelper);
+  }
 
-	private final ElasticsearchService elasticsearchService;
-	private final ExplainServiceHelper explainServiceHelper;
+  public Explanation explain(Query<Entity> q, EntityType entityType, Object entityId) {
+    Explanation explanation = elasticsearchService.explain(entityType, entityId, q);
+    if (explanation != null) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug(explanation.toString());
+      }
 
-	public ElasticSearchExplainServiceImpl(ElasticsearchService elasticsearchService,
-			ExplainServiceHelper explainServiceHelper)
-	{
-		this.elasticsearchService = requireNonNull(elasticsearchService);
-		this.explainServiceHelper = requireNonNull(explainServiceHelper);
-	}
+      return explanation;
+    }
+    return null;
+  }
 
-	public Explanation explain(Query<Entity> q, EntityType entityType, Object entityId)
-	{
-		Explanation explanation = elasticsearchService.explain(entityType, entityId, q);
-		if (explanation != null)
-		{
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug(explanation.toString());
-			}
+  public Set<ExplainedQueryString> findQueriesFromExplanation(
+      Map<String, String> originalQueryInMap, Explanation explanation) {
+    Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<>();
+    Set<String> matchedQueryTerms = explainServiceHelper.findMatchedWords(explanation);
+    for (String matchedQueryTerm : matchedQueryTerms) {
+      Map<String, Double> matchedQueryRule =
+          explainServiceHelper.findMatchQueries(matchedQueryTerm, originalQueryInMap);
 
-			return explanation;
-		}
-		return null;
-	}
+      if (matchedQueryRule.size() > 0) {
+        Entry<String, Double> entry =
+            matchedQueryRule
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingDouble(Entry::getValue))
+                .orElseThrow(
+                    () ->
+                        new IllegalStateException(
+                            "matchedQueryRule.entrySet() shouldn't return an empty Set"));
 
-	public Set<ExplainedQueryString> findQueriesFromExplanation(Map<String, String> originalQueryInMap,
-			Explanation explanation)
-	{
-		Set<ExplainedQueryString> matchedQueryStrings = new LinkedHashSet<>();
-		Set<String> matchedQueryTerms = explainServiceHelper.findMatchedWords(explanation);
-		for (String matchedQueryTerm : matchedQueryTerms)
-		{
-			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(matchedQueryTerm,
-					originalQueryInMap);
-
-			if (matchedQueryRule.size() > 0)
-			{
-				Entry<String, Double> entry = matchedQueryRule.entrySet()
-															  .stream()
-															  .max(Comparator.comparingDouble(Entry::getValue))
-															  .get();
-
-				matchedQueryStrings.add(ExplainedQueryString.create(matchedQueryTerm, entry.getKey(),
-						originalQueryInMap.get(entry.getKey()), entry.getValue()));
-			}
-		}
-		return matchedQueryStrings;
-	}
+        matchedQueryStrings.add(
+            ExplainedQueryString.create(
+                matchedQueryTerm,
+                entry.getKey(),
+                originalQueryInMap.get(entry.getKey()),
+                entry.getValue()));
+      }
+    }
+    return matchedQueryStrings;
+  }
 }

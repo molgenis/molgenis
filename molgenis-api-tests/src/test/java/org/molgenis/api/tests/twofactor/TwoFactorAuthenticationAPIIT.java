@@ -1,8 +1,24 @@
 package org.molgenis.api.tests.twofactor;
 
+import static io.restassured.RestAssured.baseURI;
+import static io.restassured.RestAssured.given;
+import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_HOST;
+import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
+import static org.molgenis.api.tests.utils.RestTestUtils.UNAUTHORIZED;
+import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
+import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
+import static org.molgenis.api.tests.utils.RestTestUtils.login;
+import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
+
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.Matchers;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
@@ -11,119 +27,113 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+public class TwoFactorAuthenticationAPIIT {
+  private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationAPIIT.class);
 
-import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.given;
-import static org.molgenis.api.tests.utils.RestTestUtils.*;
+  // Request parameters
+  private static final String PATH = "api/v1/";
 
-public class TwoFactorAuthenticationAPIIT
-{
-	private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationAPIIT.class);
+  // User credentials
+  private String testUsername;
+  private static final String TWO_FA_AUTH_TEST_USER_PASSWORD = "two_fa_auth_test_user_password";
 
-	// Request parameters
-	private static final String PATH = "api/v1/";
+  private String adminToken;
+  private String testUserToken;
 
-	// User credentials
-	private String testUsername;
-	private static final String TWO_FA_AUTH_TEST_USER_PASSWORD = "two_fa_auth_test_user_password";
+  /**
+   * Pass down system properties via the mvn commandline argument
+   *
+   * <p>example: mvn test -Dtest="TwoFactorAuthenticaitonAPIIT"
+   * -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin"
+   * -DREST_TEST_ADMIN_PW="admin"
+   */
+  @BeforeClass
+  public void beforeClass() {
+    LOG.info("Read environment variables");
+    String envHost = System.getProperty("REST_TEST_HOST");
+    baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
+    LOG.info("baseURI: " + baseURI);
 
-	private String adminToken;
-	private String testUserToken;
+    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
+    String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
+    LOG.info("adminUserName: " + adminUserName);
 
-	/**
-	 * Pass down system properties via the mvn commandline argument
-	 * <p>
-	 * example:
-	 * mvn test -Dtest="TwoFactorAuthenticaitonAPIIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
-	 */
-	@BeforeClass
-	public void beforeClass()
-	{
-		LOG.info("Read environment variables");
-		String envHost = System.getProperty("REST_TEST_HOST");
-		baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
-		LOG.info("baseURI: " + baseURI);
+    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+    String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
+    LOG.info("adminPassword: " + adminPassword);
 
-		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-		LOG.info("adminUserName: " + adminUserName);
+    adminToken = login(adminUserName, adminPassword);
+    testUsername = "two_fa_auth_test_user" + System.currentTimeMillis();
+    createUser(adminToken, testUsername, TWO_FA_AUTH_TEST_USER_PASSWORD);
+  }
 
-		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
-		LOG.info("adminPassword: " + adminPassword);
+  @Test
+  public void test2faEnforced() {
+    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
 
-		adminToken = login(adminUserName, adminPassword);
-		testUsername = "two_fa_auth_test_user" + System.currentTimeMillis();
-		createUser(adminToken, testUsername, TWO_FA_AUTH_TEST_USER_PASSWORD);
-	}
+    Gson gson = new Gson();
+    Map<String, String> loginBody = new HashMap<>();
+    loginBody.put("username", testUsername);
+    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-	@Test
-	public void test2faEnforced()
-	{
-		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
+    given()
+        .contentType(APPLICATION_JSON)
+        .body(gson.toJson(loginBody))
+        .when()
+        .post(PATH + "login")
+        .then()
+        .statusCode(UNAUTHORIZED)
+        .body(
+            "errors.message[0]",
+            Matchers.equalTo(
+                "Login using /api/v1/login is disabled, two factor authentication is enabled"));
+  }
 
-		Gson gson = new Gson();
-		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", testUsername);
-		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+  @Test
+  public void test2faEnabled() {
+    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
 
-		given().contentType(APPLICATION_JSON)
-			   .body(gson.toJson(loginBody))
-			   .when()
-			   .post(PATH + "login")
-			   .then()
-			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   Matchers.equalTo("Login using /api/v1/login is disabled, two factor authentication is enabled"));
-	}
+    Gson gson = new Gson();
+    Map<String, String> loginBody = new HashMap<>();
+    loginBody.put("username", testUsername);
+    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-	@Test
-	public void test2faEnabled()
-	{
-		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
+    ValidatableResponse response =
+        given()
+            .contentType(APPLICATION_JSON)
+            .body(gson.toJson(loginBody))
+            .when()
+            .post(PATH + "login")
+            .then()
+            .statusCode(OKE);
 
-		Gson gson = new Gson();
-		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", testUsername);
-		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+    testUserToken = response.extract().path("token");
+  }
 
-		ValidatableResponse response = given().contentType(APPLICATION_JSON)
-											  .body(gson.toJson(loginBody))
-											  .when()
-											  .post(PATH + "login")
-											  .then()
-											  .statusCode(OKE);
+  @AfterClass(alwaysRun = true)
+  public void afterClass() {
+    // Clean up permissions
+    removeRightsForUser(adminToken, testUsername);
 
-		testUserToken = response.extract().path("token");
-	}
+    // Clean up Token for user
+    cleanupUserToken(testUserToken);
 
-	@AfterClass(alwaysRun = true)
-	public void afterClass()
-	{
-		// Clean up permissions
-		removeRightsForUser(adminToken, testUsername);
+    // Disable two factor authentication
+    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+  }
 
-		// Clean up Token for user
-		cleanupUserToken(testUserToken);
-
-		// Disable two factor authentication
-		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
-	}
-
-	/**
-	 * Enable or disable 2 factor authentication
-	 *
-	 * @param adminToken admin token for login in RESTAPI
-	 * @param state      state of 2 factor authentication (can be Enforced, Enabled, Disabled)
-	 */
-	private void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state)
-	{
-		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(state.getLabel())
-			   .when()
-			   .put("api/v1/sys_set_auth/auth/sign_in_2fa");
-	}
+  /**
+   * Enable or disable 2 factor authentication
+   *
+   * @param adminToken admin token for login in RESTAPI
+   * @param state state of 2 factor authentication (can be Enforced, Enabled, Disabled)
+   */
+  private void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state) {
+    given()
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .contentType(APPLICATION_JSON)
+        .body(state.getLabel())
+        .when()
+        .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+  }
 }

@@ -1,5 +1,7 @@
 package org.molgenis.core.ui.admin.usermanager;
 
+import static org.molgenis.core.ui.admin.usermanager.UserManagerController.URI;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -8,138 +10,103 @@ import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import static org.molgenis.core.ui.admin.usermanager.UserManagerController.URI;
-import static org.molgenis.core.ui.admin.usermanager.UserManagerController.VIEW_STATE;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Api("User manager")
 @Controller
 @RequestMapping(URI)
-@SessionAttributes(VIEW_STATE)
-public class UserManagerController extends PluginController
-{
-	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
-	static final String VIEW_STATE = "viewState";
-	private final UserManagerService pluginUserManagerService;
+public class UserManagerController extends PluginController {
+  public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
+  private final UserManagerService pluginUserManagerService;
 
-	public UserManagerController(UserManagerService pluginUserManagerService)
-	{
-		super(URI);
-		if (pluginUserManagerService == null)
-		{
-			throw new IllegalArgumentException("PluginUserManagerService is null");
-		}
-		this.pluginUserManagerService = pluginUserManagerService;
-	}
+  public UserManagerController(UserManagerService pluginUserManagerService) {
+    super(URI);
+    if (pluginUserManagerService == null) {
+      throw new IllegalArgumentException("PluginUserManagerService is null");
+    }
+    this.pluginUserManagerService = pluginUserManagerService;
+  }
 
-	@ApiOperation("Return user manager view")
-	@ApiResponses({ @ApiResponse(code = 200, message = "Return the user manager view") })
-	@GetMapping
-	public String init(Model model)
-	{
-		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
+  @ApiOperation("Return user manager view")
+  @ApiResponses({@ApiResponse(code = 200, message = "Return the user manager view")})
+  @GetMapping
+  public String init(Model model) {
+    model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
 
-		if (!model.containsAttribute(VIEW_STATE))
-		{
-			model.addAttribute(VIEW_STATE, "users");
-		}
+    return "view-usermanager";
+  }
 
-		return "view-usermanager";
-	}
+  @ApiOperation("Sets activation status for a user")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Ok", response = ActivationResponse.class),
+    @ApiResponse(
+        code = 404,
+        message = "If response doesn't have success set to true, the user wasn't found",
+        response = ActivationResponse.class)
+  })
+  @PutMapping("/activation")
+  @ResponseStatus(HttpStatus.OK)
+  public @ResponseBody ActivationResponse activation(@RequestBody Activation activation) {
+    ActivationResponse activationResponse = new ActivationResponse();
+    activationResponse.setId(activation.getId());
+    pluginUserManagerService.setActivationUser(activation.getId(), activation.getActive());
+    activationResponse.setSuccess(true);
+    return activationResponse;
+  }
 
-	@ApiOperation("Sets viewState")
-	@ApiResponses({ @ApiResponse(code = 200, message = "Ok"),
-			@ApiResponse(code = 500, message = "ViewState could not be set") })
-	@PutMapping("/setViewState/{viewState}")
-	@ResponseStatus(HttpStatus.OK)
-	public void setViewState(@PathVariable("viewState") String viewState, Model model)
-	{
-		model.addAttribute(VIEW_STATE, viewState);
-	}
+  public class ActivationResponse {
+    private boolean success = false;
+    private String id;
 
-	@ApiOperation("Sets activation status for a user")
-	@ApiResponses({ @ApiResponse(code = 200, message = "Ok", response = ActivationResponse.class),
-			@ApiResponse(code = 404, message = "If response doesn't have success set to true, the user wasn't found", response = ActivationResponse.class) })
-	@PutMapping("/activation")
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody
-	ActivationResponse activation(@RequestBody Activation activation)
-	{
-		ActivationResponse activationResponse = new ActivationResponse();
-		activationResponse.setId(activation.getId());
-		pluginUserManagerService.setActivationUser(activation.getId(), activation.getActive());
-		activationResponse.setSuccess(true);
-		return activationResponse;
-	}
+    public boolean isSuccess() {
+      return success;
+    }
 
-	public class ActivationResponse
-	{
-		private boolean success = false;
-		private String id;
+    public void setSuccess(boolean success) {
+      this.success = success;
+    }
 
-		public boolean isSuccess()
-		{
-			return success;
-		}
+    public String getId() {
+      return id;
+    }
 
-		public void setSuccess(boolean success)
-		{
-			this.success = success;
-		}
+    public void setId(String id) {
+      this.id = id;
+    }
+  }
 
-		public String getId()
-		{
-			return id;
-		}
+  public class Activation {
+    private String id;
+    private Boolean active;
 
-		public void setId(String id)
-		{
-			this.id = id;
-		}
-	}
+    Activation(String id, Boolean active) {
+      this.id = id;
+      this.active = active;
+    }
 
-	public class Activation
-	{
-		private String id;
-		private Boolean active;
+    /** @return the id */
+    public String getId() {
+      return id;
+    }
 
-		Activation(String id, Boolean active)
-		{
-			this.id = id;
-			this.active = active;
-		}
+    /** @param id the id to set */
+    public void setId(String id) {
+      this.id = id;
+    }
 
-		/**
-		 * @return the id
-		 */
-		public String getId()
-		{
-			return id;
-		}
+    /** @return the active */
+    public Boolean getActive() {
+      return active;
+    }
 
-		/**
-		 * @param id the id to set
-		 */
-		public void setId(String id)
-		{
-			this.id = id;
-		}
-
-		/**
-		 * @return the active
-		 */
-		public Boolean getActive()
-		{
-			return active;
-		}
-
-		/**
-		 * @param active the active to set
-		 */
-		public void setActive(Boolean active)
-		{
-			this.active = active;
-		}
-	}
+    /** @param active the active to set */
+    public void setActive(Boolean active) {
+      this.active = active;
+    }
+  }
 }

@@ -1,68 +1,57 @@
 package org.molgenis.data.migrate.version;
 
-import org.molgenis.util.AppDataRootProvider;
-
-import java.io.*;
-import java.nio.file.Path;
-import java.util.Properties;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-/**
- * Some utilities for the migration steps that need to access molgenis-server.properties
- */
-public class MigrationUtils
-{
-	public static final String VERSION_KEY = "molgenis.version";
-	public static final String DB_KEY = "db_uri";
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.util.Properties;
+import org.molgenis.util.AppDataRootProvider;
 
-	static File propertiesFile;
+/** Some utilities for the migration steps that need to access molgenis-server.properties */
+public class MigrationUtils {
+  public static final String VERSION_KEY = "molgenis.version";
+  public static final String DB_KEY = "db_uri";
 
-	private MigrationUtils()
-	{
-	}
+  static File propertiesFile;
 
-	private static String getServerProperty(String key)
-	{
-		return getMolgenisServerProperties().getProperty(key);
-	}
+  private MigrationUtils() {}
 
-	public static String getDatabaseName()
-	{
-		String prop = getServerProperty(DB_KEY);
-		if (prop == null)
-		{
-			return null;
-		}
+  private static String getServerProperty(String key) {
+    return getMolgenisServerProperties().getProperty(key);
+  }
 
-		return prop.substring(prop.lastIndexOf('/') + 1);
-	}
+  public static String getDatabaseName() {
+    String prop = getServerProperty(DB_KEY);
+    if (prop == null) {
+      return null;
+    }
 
-	public static Properties getMolgenisServerProperties()
-	{
-		try (InputStreamReader in = new InputStreamReader(new FileInputStream(getMolgenisServerPropertiesFile()),
-				UTF_8))
-		{
-			Properties p = new Properties();
-			p.load(in);
+    return prop.substring(prop.lastIndexOf('/') + 1);
+  }
 
-			return p;
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
-	}
+  public static Properties getMolgenisServerProperties() {
+    try (InputStreamReader in =
+        new InputStreamReader(new FileInputStream(getMolgenisServerPropertiesFile()), UTF_8)) {
+      Properties p = new Properties();
+      p.load(in);
 
-	public static File getMolgenisServerPropertiesFile()
-	{
-		if (propertiesFile == null || !propertiesFile.exists())
-		{
-			// get molgenis home directory
-			Path appDataRootPath = AppDataRootProvider.getAppDataRoot();
-			propertiesFile = new File(appDataRootPath.toString(), "molgenis-server.properties");
-		}
+      return p;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
 
-		return propertiesFile;
-	}
+  public static File getMolgenisServerPropertiesFile() {
+    if (propertiesFile == null || !propertiesFile.exists()) {
+      // get molgenis home directory
+      Path appDataRootPath = AppDataRootProvider.getAppDataRoot();
+      propertiesFile = new File(appDataRootPath.toString(), "molgenis-server.properties");
+    }
+
+    return propertiesFile;
+  }
 }

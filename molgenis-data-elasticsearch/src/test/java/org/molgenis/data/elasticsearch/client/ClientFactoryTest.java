@@ -1,5 +1,14 @@
 package org.molgenis.data.elasticsearch.client;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.net.InetSocketAddress;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -9,63 +18,52 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.annotations.Test;
 
-import java.net.InetSocketAddress;
+public class ClientFactoryTest extends AbstractMockitoTest {
+  @Mock private PreBuiltTransportClientFactory preBuildClientFactory;
+  @Mock private PreBuiltTransportClient unConnectedClient;
+  @Mock private PreBuiltTransportClient connectedClient;
+  @Mock private DiscoveryNode node;
+  private RetryTemplate retryTemplate = new RetryTemplate();
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
+  @Test
+  public void testCreateClient() throws Exception {
+    initMockClient();
+    int port = 8032;
+    String clusterName = "testCluster";
 
-public class ClientFactoryTest extends AbstractMockitoTest
-{
-	@Mock
-	private PreBuiltTransportClientFactory preBuildClientFactory;
-	@Mock
-	private PreBuiltTransportClient unConnectedClient;
-	@Mock
-	private PreBuiltTransportClient connectedClient;
-	@Mock
-	private DiscoveryNode node;
-	private RetryTemplate retryTemplate = new RetryTemplate();
+    when(preBuildClientFactory.build(clusterName, null))
+        .thenReturn(unConnectedClient, unConnectedClient, connectedClient);
 
-	@Test
-	public void testCreateClient() throws Exception
-	{
-		initMockClient();
-		int port = 8032;
-		String clusterName = "testCluster";
+    ClientFactory clientFactory =
+        new ClientFactory(
+            retryTemplate,
+            clusterName,
+            singletonList(new InetSocketAddress(port)),
+            preBuildClientFactory);
+    Client client = clientFactory.createClient();
 
-		when(preBuildClientFactory.build(clusterName, null)).thenReturn(unConnectedClient, unConnectedClient,
-				connectedClient);
+    assertEquals(client, connectedClient);
+    verify(preBuildClientFactory, times(3)).build(clusterName, null);
+    verify(unConnectedClient, times(2)).close();
+  }
 
-		ClientFactory clientFactory = new ClientFactory(retryTemplate, clusterName,
-				singletonList(new InetSocketAddress(port)), preBuildClientFactory);
-		Client client = clientFactory.createClient();
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testCreateClientNullAddresses() {
+    new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory);
+  }
 
-		assertEquals(client, connectedClient);
-		verify(preBuildClientFactory, times(3)).build(clusterName, null);
-		verify(unConnectedClient, times(2)).close();
-	}
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void testCreateClientEmptyAddresses() {
+    new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory);
+  }
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testCreateClientNullAddresses()
-	{
-		new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory);
-	}
+  private void initMockClient() {
+    when(connectedClient.addTransportAddresses(any(TransportAddress.class)))
+        .thenReturn(connectedClient);
+    when(unConnectedClient.addTransportAddresses(any(TransportAddress.class)))
+        .thenReturn(unConnectedClient);
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void testCreateClientEmptyAddresses()
-	{
-		new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory);
-	}
-
-	private void initMockClient()
-	{
-		when(connectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(connectedClient);
-		when(unConnectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(unConnectedClient);
-
-		when(connectedClient.connectedNodes()).thenReturn(singletonList(node));
-		when(unConnectedClient.connectedNodes()).thenReturn(emptyList());
-	}
+    when(connectedClient.connectedNodes()).thenReturn(singletonList(node));
+    when(unConnectedClient.connectedNodes()).thenReturn(emptyList());
+  }
 }

@@ -1,52 +1,55 @@
 package org.molgenis.security.core;
 
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
+import static org.testng.Assert.assertEquals;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Map;
+import java.util.Set;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-import java.util.Set;
+public class PermissionRegistryTest {
+  private PermissionRegistry permissionRegistry = new PermissionRegistry();
 
-import static org.molgenis.security.core.PermissionSet.*;
-import static org.testng.Assert.assertEquals;
+  private enum TestPermission implements Permission {
+    READ,
+    UPDATE,
+    DELETE;
 
-public class PermissionRegistryTest
-{
-	private PermissionRegistry permissionRegistry = new PermissionRegistry();
+    @Override
+    public String getDefaultDescription() {
+      return toString();
+    }
+  }
 
-	private enum TestPermission implements Permission
-	{
-		READ, UPDATE, DELETE;
+  @BeforeClass
+  public void setUp() {
+    permissionRegistry.addMapping(TestPermission.READ, READ, WRITE, WRITEMETA);
+    permissionRegistry.addMapping(TestPermission.UPDATE, WRITE, WRITEMETA);
+    permissionRegistry.addMapping(TestPermission.DELETE, WRITE, WRITEMETA);
+  }
 
-		@Override
-		public String getDefaultDescription()
-		{
-			return toString();
-		}
-	}
+  @Test
+  public void testGetPermissions() {
+    assertEquals(
+        permissionRegistry.getPermissions(TestPermission.UPDATE),
+        ImmutableSet.of(WRITE, WRITEMETA));
+  }
 
-	@BeforeClass
-	public void setUp()
-	{
-		permissionRegistry.addMapping(TestPermission.READ, READ, WRITE, WRITEMETA);
-		permissionRegistry.addMapping(TestPermission.UPDATE, WRITE, WRITEMETA);
-		permissionRegistry.addMapping(TestPermission.DELETE, WRITE, WRITEMETA);
-	}
-
-	@Test
-	public void testGetPermissions()
-	{
-		assertEquals(permissionRegistry.getPermissions(TestPermission.UPDATE), ImmutableSet.of(WRITE, WRITEMETA));
-	}
-
-	@Test
-	public void testGetPermissionSets()
-	{
-		Map<PermissionSet, Set<Permission>> expected = ImmutableMap.of(WRITEMETA,
-				ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE), WRITE,
-				ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE), READ,
-				ImmutableSet.of(TestPermission.READ));
-		assertEquals(permissionRegistry.getPermissionSets(), expected);
-	}
+  @Test
+  public void testGetPermissionSets() {
+    Map<PermissionSet, Set<Permission>> expected =
+        ImmutableMap.of(
+            WRITEMETA,
+            ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE),
+            WRITE,
+            ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE),
+            READ,
+            ImmutableSet.of(TestPermission.READ));
+    assertEquals(permissionRegistry.getPermissionSets(), expected);
+  }
 }

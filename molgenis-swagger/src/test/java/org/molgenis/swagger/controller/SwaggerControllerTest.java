@@ -1,5 +1,18 @@
 package org.molgenis.swagger.controller;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertEquals;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.stream.Stream;
+import javax.servlet.http.HttpServletResponse;
 import org.mockito.Mock;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -16,105 +29,84 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.stream.Stream;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
-
 @SecurityTestExecutionListeners
-public class SwaggerControllerTest extends AbstractTestNGSpringContextTests
-{
-	@Mock
-	private MetaDataService metaDataService;
-	@Mock
-	private TokenService tokenService;
-	@Mock
-	private HttpServletResponse response;
-	@Mock
-	private EntityType type1;
-	@Mock
-	private EntityType type2;
-	@Mock
-	private Model model;
+public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
+  @Mock private MetaDataService metaDataService;
+  @Mock private TokenService tokenService;
+  @Mock private HttpServletResponse response;
+  @Mock private EntityType type1;
+  @Mock private EntityType type2;
+  @Mock private Model model;
 
-	private SwaggerController swaggerController;
+  private SwaggerController swaggerController;
 
-	@BeforeMethod
-	public void beforeMethod() throws IOException
-	{
-		initMocks(this);
-		reset(metaDataService, type1, type2, tokenService);
-		swaggerController = new SwaggerController(metaDataService, tokenService);
-	}
+  @BeforeMethod
+  public void beforeMethod() throws IOException {
+    initMocks(this);
+    reset(metaDataService, type1, type2, tokenService);
+    swaggerController = new SwaggerController(metaDataService, tokenService);
+  }
 
-	@Test
-	@WithMockUser
-	public void testInit() throws Exception
-	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+  @Test
+  @WithMockUser
+  public void testInit() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		when(tokenService.generateAndStoreToken("user", "For Swagger UI")).thenReturn("ABCDEFG");
-		assertEquals("view-swagger-ui", swaggerController.init(model));
-		verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
-		verify(model).addAttribute("baseUrl", "http://localhost");
-		verify(model).addAttribute("token", "ABCDEFG");
-		verifyNoMoreInteractions(model);
-	}
+    when(tokenService.generateAndStoreToken("user", "For Swagger UI")).thenReturn("ABCDEFG");
+    assertEquals("view-swagger-ui", swaggerController.init(model));
+    verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
+    verify(model).addAttribute("baseUrl", "http://localhost");
+    verify(model).addAttribute("token", "ABCDEFG");
+    verifyNoMoreInteractions(model);
+  }
 
-	@Test
-	public void testInitWithoutUser() throws Exception
-	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+  @Test
+  public void testInitWithoutUser() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		assertEquals("view-swagger-ui", swaggerController.init(model));
-		verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
-		verify(model).addAttribute("baseUrl", "http://localhost");
-		verifyNoMoreInteractions(model);
-	}
+    assertEquals("view-swagger-ui", swaggerController.init(model));
+    verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
+    verify(model).addAttribute("baseUrl", "http://localhost");
+    verifyNoMoreInteractions(model);
+  }
 
-	@Test
-	public void testSwagger()
-	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+  @Test
+  public void testSwagger() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		when(type1.getId()).thenReturn("abc_EntityType2ëæ");
-		when(type2.getId()).thenReturn("abc_EntityType1ëæ");
-		when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
+    when(type1.getId()).thenReturn("abc_EntityType2ëæ");
+    when(type2.getId()).thenReturn("abc_EntityType1ëæ");
+    when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
 
-		assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals("view-swagger", swaggerController.swagger(model, response));
 
-		verify(model).addAttribute("scheme", "http");
-		verify(model).addAttribute("host", "localhost");
-		verify(model).addAttribute("entityTypes", newArrayList("abc_EntityType1ëæ", "abc_EntityType2ëæ"));
-		verify(model).addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
-		verify(model).addAttribute("languageCodes", LanguageService.getLanguageCodes().collect(toList()));
-		verifyNoMoreInteractions(model);
-	}
+    verify(model).addAttribute("scheme", "http");
+    verify(model).addAttribute("host", "localhost");
+    verify(model)
+        .addAttribute("entityTypes", newArrayList("abc_EntityType1ëæ", "abc_EntityType2ëæ"));
+    verify(model).addAttribute("attributeTypes", AttributeType.getOptionsLowercase());
+    verify(model)
+        .addAttribute("languageCodes", LanguageService.getLanguageCodes().collect(toList()));
+    verifyNoMoreInteractions(model);
+  }
 
-	@Test
-	public void testSwaggerHostAddsPort() throws URISyntaxException
-	{
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setScheme("http");
-		request.setMethod("GET");
-		request.setServletPath("/plugin/swagger/");
-		request.setServerPort(8080);
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+  @Test
+  public void testSwaggerHostAddsPort() throws URISyntaxException {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setMethod("GET");
+    request.setServletPath("/plugin/swagger/");
+    request.setServerPort(8080);
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+    when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
 
-		assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals("view-swagger", swaggerController.swagger(model, response));
 
-		verify(model).addAttribute("scheme", "http");
-		verify(model).addAttribute("host", "localhost:8080");
-	}
+    verify(model).addAttribute("scheme", "http");
+    verify(model).addAttribute("host", "localhost:8080");
+  }
 }

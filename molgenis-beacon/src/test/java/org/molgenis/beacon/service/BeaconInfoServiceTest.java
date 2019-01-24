@@ -1,5 +1,14 @@
 package org.molgenis.beacon.service;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.beacon.config.BeaconMetadata.BEACON;
+import static org.testng.Assert.assertEquals;
+
+import java.util.List;
+import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
@@ -9,58 +18,45 @@ import org.molgenis.data.DataService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
-import java.util.stream.Stream;
+public class BeaconInfoServiceTest {
+  private BeaconInfoService beaconInfoService;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.beacon.config.BeaconMetadata.BEACON;
-import static org.testng.Assert.assertEquals;
+  @Mock private DataService dataService;
 
-public class BeaconInfoServiceTest
-{
-	private BeaconInfoService beaconInfoService;
+  @BeforeMethod
+  public void beforeMethod() {
+    initMocks(this);
+    beaconInfoService = new BeaconInfoServiceImpl(dataService);
+  }
 
-	@Mock
-	private DataService dataService;
+  @Test
+  public void getAvailableBeaconsTest() {
+    List<BeaconDatasetResponse> beaconDatasets =
+        newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
+    BeaconResponse beaconResponse =
+        BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "", beaconDatasets);
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		initMocks(this);
-		beaconInfoService = new BeaconInfoServiceImpl(dataService);
-	}
+    Beacon beacon = mock(Beacon.class);
+    when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
 
-	@Test
-	public void getAvailableBeaconsTest()
-	{
-		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
-		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
-				beaconDatasets);
+    when(dataService.findAll(BEACON, Beacon.class)).thenReturn(Stream.of(beacon));
 
-		Beacon beacon = mock(Beacon.class);
-		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
+    List<BeaconResponse> expectedBeaconList = newArrayList(beaconResponse);
+    assertEquals(beaconInfoService.getAvailableBeacons(), expectedBeaconList);
+  }
 
-		when(dataService.findAll(BEACON, Beacon.class)).thenReturn(Stream.of(beacon));
+  @Test
+  public void infoTest() {
+    List<BeaconDatasetResponse> beaconDatasets =
+        newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
+    BeaconResponse beaconResponse =
+        BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "", beaconDatasets);
 
-		List<BeaconResponse> expectedBeaconList = newArrayList(beaconResponse);
-		assertEquals(beaconInfoService.getAvailableBeacons(), expectedBeaconList);
-	}
+    Beacon beacon = mock(Beacon.class);
+    when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
 
-	@Test
-	public void infoTest()
-	{
-		List<BeaconDatasetResponse> beaconDatasets = newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
-		BeaconResponse beaconResponse = BeaconResponse.create("beacon", "My Beacon", "0.3.0", null, "", "", "",
-				beaconDatasets);
+    when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
 
-		Beacon beacon = mock(Beacon.class);
-		when(beacon.toBeaconResponse()).thenReturn(beaconResponse);
-
-		when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
-
-		assertEquals(beaconInfoService.info("beacon"), beaconResponse);
-	}
+    assertEquals(beaconInfoService.info("beacon"), beaconResponse);
+  }
 }

@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MappingJobExecutionFactory
-		extends AbstractSystemEntityFactory<MappingJobExecution, MappingJobExecutionMetadata, String>
-{
-	MappingJobExecutionFactory(MappingJobExecutionMetadata mappingJobExecutionMetadata, EntityPopulator entityPopulator)
-	{
-		super(MappingJobExecution.class, mappingJobExecutionMetadata, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<MappingJobExecution, MappingJobExecutionMetadata, String> {
+  MappingJobExecutionFactory(
+      MappingJobExecutionMetadata mappingJobExecutionMetadata, EntityPopulator entityPopulator) {
+    super(MappingJobExecution.class, mappingJobExecutionMetadata, entityPopulator);
+  }
 }

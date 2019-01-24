@@ -1,28 +1,29 @@
 package org.molgenis.jobs;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.jobs.model.JobExecution;
 
-public interface Progress
-{
-	void start();
+public interface Progress {
+  void start();
 
-	void setProgressMax(int max);
+  void setProgressMax(int max);
 
-	void progress(int progress, String message);
+  void progress(int progress, String message);
 
-	void increment(int amount);
+  void increment(int amount);
 
-	void status(String message);
+  void status(String message);
 
-	void failed(Exception ex);
+  void failed(String message, @Nullable @CheckForNull Throwable throwable);
 
-	void canceled();
+  void canceled();
 
-	void success();
+  void success();
 
-	Long timeRunning();
+  Long timeRunning();
 
-	void setResultUrl(String string);
+  void setResultUrl(String string);
 
-	JobExecution getJobExecution();
+  JobExecution getJobExecution();
 }

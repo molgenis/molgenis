@@ -1,17 +1,5 @@
 package org.molgenis.jobs.schedule;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.jobs.model.ScheduledJob;
-import org.molgenis.jobs.model.ScheduledJobMetadata;
-import org.quartz.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import static java.text.MessageFormat.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
@@ -20,151 +8,150 @@ import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
-/**
- * Schedules and unschedules {@link ScheduledJob}s with Quartz.
- */
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.jobs.model.ScheduledJob;
+import org.molgenis.jobs.model.ScheduledJobMetadata;
+import org.molgenis.validation.ConstraintViolation;
+import org.quartz.CronExpression;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+/** Schedules and unschedules {@link ScheduledJob}s with Quartz. */
 @Service
-public class JobScheduler
-{
-	/**
-	 * the key under which the JobScheduler puts the ScheduledJob ID in the JobDataMap
-	 */
-	static final String SCHEDULED_JOB_ID = "scheduledJobID";
-	static final String SCHEDULED_JOB_GROUP = Scheduler.DEFAULT_GROUP; // Group under which the jobs are scheduled in Quartz.
-	private static final Logger LOG = LoggerFactory.getLogger(JobScheduler.class);
+public class JobScheduler {
+  /** the key under which the JobScheduler puts the ScheduledJob ID in the JobDataMap */
+  static final String SCHEDULED_JOB_ID = "scheduledJobID";
 
-	private final Scheduler quartzScheduler;
-	private final DataService dataService;
+  static final String SCHEDULED_JOB_GROUP =
+      Scheduler.DEFAULT_GROUP; // Group under which the jobs are scheduled in Quartz.
+  private static final Logger LOG = LoggerFactory.getLogger(JobScheduler.class);
 
-	JobScheduler(Scheduler quartzScheduler, DataService dataService)
-	{
-		this.quartzScheduler = requireNonNull(quartzScheduler);
-		this.dataService = requireNonNull(dataService);
-	}
+  private final Scheduler quartzScheduler;
+  private final DataService dataService;
 
-	/**
-	 * Executes a {@link ScheduledJob} immediately.
-	 *
-	 * @param scheduledJobId ID of the {@link ScheduledJob} to run
-	 */
-	public synchronized void runNow(String scheduledJobId)
-	{
-		ScheduledJob scheduledJob = getJob(scheduledJobId);
+  JobScheduler(Scheduler quartzScheduler, DataService dataService) {
+    this.quartzScheduler = requireNonNull(quartzScheduler);
+    this.dataService = requireNonNull(dataService);
+  }
 
-		try
-		{
-			JobKey jobKey = new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP);
-			if (quartzScheduler.checkExists(jobKey))
-			{
-				// Run job now
-				quartzScheduler.triggerJob(jobKey);
-			}
-			else
-			{
-				// Schedule with 'now' trigger
-				Trigger trigger = newTrigger().withIdentity(scheduledJobId, SCHEDULED_JOB_GROUP).startNow().build();
-				schedule(scheduledJob, trigger);
-			}
-		}
-		catch (SchedulerException e)
-		{
-			LOG.error("Error runNow ScheduledJob", e);
-			throw new MolgenisDataException("Error job runNow", e);
-		}
-	}
+  /**
+   * Executes a {@link ScheduledJob} immediately.
+   *
+   * @param scheduledJobId ID of the {@link ScheduledJob} to run
+   */
+  public synchronized void runNow(String scheduledJobId) {
+    ScheduledJob scheduledJob = getJob(scheduledJobId);
 
-	private ScheduledJob getJob(String scheduledJobId)
-	{
-		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
-		if (scheduledJob == null)
-		{
-			throw new UnknownEntityException(SCHEDULED_JOB, scheduledJobId);
-		}
-		return scheduledJob;
-	}
+    try {
+      JobKey jobKey = new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP);
+      if (quartzScheduler.checkExists(jobKey)) {
+        // Run job now
+        quartzScheduler.triggerJob(jobKey);
+      } else {
+        // Schedule with 'now' trigger
+        Trigger trigger =
+            newTrigger().withIdentity(scheduledJobId, SCHEDULED_JOB_GROUP).startNow().build();
+        schedule(scheduledJob, trigger);
+      }
+    } catch (SchedulerException e) {
+      LOG.error("Error runNow ScheduledJob", e);
+      throw new MolgenisDataException("Error job runNow", e);
+    }
+  }
 
-	/**
-	 * Schedule a {@link ScheduledJob} with a cron expression defined in the entity.
-	 * <p>
-	 * Reschedules job if the job already exists.
-	 * <p>
-	 * If active is false, it unschedules the job
-	 *
-	 * @param scheduledJob the {@link ScheduledJob} to schedule
-	 */
-	public synchronized void schedule(ScheduledJob scheduledJob)
-	{
-		String id = scheduledJob.getId();
-		String cronExpression = scheduledJob.getCronExpression();
-		String name = scheduledJob.getName();
+  private ScheduledJob getJob(String scheduledJobId) {
+    ScheduledJob scheduledJob =
+        dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
+    if (scheduledJob == null) {
+      throw new UnknownEntityException(SCHEDULED_JOB, scheduledJobId);
+    }
+    return scheduledJob;
+  }
 
-		// Validate cron expression
-		if (!CronExpression.isValidExpression(cronExpression))
-		{
-			throw new MolgenisValidationException(
-					singleton(new ConstraintViolation("Invalid cronexpression '" + cronExpression + "'", null)));
-		}
+  /**
+   * Schedule a {@link ScheduledJob} with a cron expression defined in the entity.
+   *
+   * <p>Reschedules job if the job already exists.
+   *
+   * <p>If active is false, it unschedules the job
+   *
+   * @param scheduledJob the {@link ScheduledJob} to schedule
+   */
+  public synchronized void schedule(ScheduledJob scheduledJob) {
+    String id = scheduledJob.getId();
+    String cronExpression = scheduledJob.getCronExpression();
+    String name = scheduledJob.getName();
 
-		try
-		{
-			// If already scheduled, remove it from the quartzScheduler
-			if (quartzScheduler.checkExists(new JobKey(id, SCHEDULED_JOB_GROUP)))
-			{
-				unschedule(id);
-			}
+    // Validate cron expression
+    if (!CronExpression.isValidExpression(cronExpression)) {
+      throw new MolgenisValidationException(
+          singleton(
+              new ConstraintViolation("Invalid cronexpression '" + cronExpression + "'", null)));
+    }
 
-			// If not active, do not schedule it
-			if (!scheduledJob.getBoolean(ScheduledJobMetadata.ACTIVE))
-			{
-				return;
-			}
+    try {
+      // If already scheduled, remove it from the quartzScheduler
+      if (quartzScheduler.checkExists(new JobKey(id, SCHEDULED_JOB_GROUP))) {
+        unschedule(id);
+      }
 
-			// Schedule with 'cron' trigger
-			Trigger trigger = newTrigger().withIdentity(id, SCHEDULED_JOB_GROUP)
-										  .withSchedule(cronSchedule(cronExpression))
-										  .build();
-			schedule(scheduledJob, trigger);
+      // If not active, do not schedule it
+      if (!scheduledJob.getBoolean(ScheduledJobMetadata.ACTIVE)) {
+        return;
+      }
 
-			LOG.info("Scheduled Job '{}' with trigger '{}'", name, trigger);
-		}
-		catch (SchedulerException e)
-		{
-			LOG.error("Error schedule job", e);
-			throw new ScheduledJobException("Error schedule job", e);
-		}
-	}
+      // Schedule with 'cron' trigger
+      Trigger trigger =
+          newTrigger()
+              .withIdentity(id, SCHEDULED_JOB_GROUP)
+              .withSchedule(cronSchedule(cronExpression))
+              .build();
+      schedule(scheduledJob, trigger);
 
-	/**
-	 * Remove a job from the quartzScheduler
-	 *
-	 * @param scheduledJobId ID of the ScheduledJob to unschedule
-	 */
-	synchronized void unschedule(String scheduledJobId)
-	{
-		try
-		{
-			quartzScheduler.deleteJob(new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP));
-		}
-		catch (SchedulerException e)
-		{
-			String message = format("Error deleting ScheduledJob ''{0}''", scheduledJobId);
-			LOG.error(message, e);
-			throw new ScheduledJobException(message, e);
-		}
-	}
+      LOG.info("Scheduled Job '{}' with trigger '{}'", name, trigger);
+    } catch (SchedulerException e) {
+      LOG.error("Error schedule job", e);
+      throw new ScheduledJobException("Error schedule job", e);
+    }
+  }
 
-	private void schedule(ScheduledJob scheduledJob, Trigger trigger) throws SchedulerException
-	{
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(SCHEDULED_JOB_ID, scheduledJob.getIdValue());
-		JobDetail job = newJob(MolgenisQuartzJob.class).withIdentity(scheduledJob.getId(), SCHEDULED_JOB_GROUP)
-													   .usingJobData(jobDataMap)
-													   .build();
-		quartzScheduler.scheduleJob(job, trigger);
-	}
+  /**
+   * Remove a job from the quartzScheduler
+   *
+   * @param scheduledJobId ID of the ScheduledJob to unschedule
+   */
+  synchronized void unschedule(String scheduledJobId) {
+    try {
+      quartzScheduler.deleteJob(new JobKey(scheduledJobId, SCHEDULED_JOB_GROUP));
+    } catch (SchedulerException e) {
+      String message = format("Error deleting ScheduledJob ''{0}''", scheduledJobId);
+      LOG.error(message, e);
+      throw new ScheduledJobException(message, e);
+    }
+  }
 
-	public void scheduleJobs()
-	{
-		dataService.findAll(SCHEDULED_JOB, ScheduledJob.class).forEach(this::schedule);
-	}
+  private void schedule(ScheduledJob scheduledJob, Trigger trigger) throws SchedulerException {
+    JobDataMap jobDataMap = new JobDataMap();
+    jobDataMap.put(SCHEDULED_JOB_ID, scheduledJob.getIdValue());
+    JobDetail job =
+        newJob(MolgenisQuartzJob.class)
+            .withIdentity(scheduledJob.getId(), SCHEDULED_JOB_GROUP)
+            .usingJobData(jobDataMap)
+            .build();
+    quartzScheduler.scheduleJob(job, trigger);
+  }
+
+  public void scheduleJobs() {
+    dataService.findAll(SCHEDULED_JOB, ScheduledJob.class).forEach(this::schedule);
+  }
 }

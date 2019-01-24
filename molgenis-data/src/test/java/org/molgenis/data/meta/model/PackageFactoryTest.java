@@ -1,46 +1,69 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.populate.EntityPopulator;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import org.molgenis.data.config.EntityBaseTestConfig;
+import org.molgenis.data.config.MetadataTestConfig;
+import org.molgenis.data.meta.AbstractEntityFactoryTest;
 import org.molgenis.security.core.model.PackageValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+@ContextConfiguration(
+    classes = {
+      EntityBaseTestConfig.class,
+      PackageMetadata.class,
+      PackageFactory.class,
+      MetadataTestConfig.class
+    })
+public class PackageFactoryTest extends AbstractEntityFactoryTest {
 
-@ContextConfiguration(classes = { PackageFactory.class, PackageMetadata.class, EntityPopulator.class })
-public class PackageFactoryTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	PackageFactory packageFactory;
+  @Autowired PackageFactory factory;
 
-	@Test
-	public void testCreatePackageValue()
-	{
-		PackageValue packageValue = PackageValue.builder()
-												.setName("name")
-												.setLabel("label")
-												.setDescription("description")
-												.build();
+  @Override
+  @Test
+  public void testCreate() {
+    super.testCreate(factory, Package.class);
+  }
 
-		Package actual = packageFactory.create(packageValue);
+  @Override
+  @Test
+  public void testCreateWithId() {
+    super.testCreateWithId(factory, Package.class);
+  }
 
-		assertEquals(actual.getId(), "name");
-		assertEquals(actual.getLabel(), "label");
-		assertEquals(actual.getDescription(), "description");
-	}
+  @Override
+  @Test
+  public void testCreateWithEntity() {
+    super.testCreateWithEntity(factory, Package.class);
+  }
 
-	@Test
-	public void testCreatePackageValueNulls()
-	{
-		PackageValue packageValue = PackageValue.builder().setName("name").setLabel("label").build();
+  @Test
+  public void testCreatePackageValue() {
+    PackageValue packageValue =
+        PackageValue.builder()
+            .setName("name")
+            .setLabel("label")
+            .setDescription("description")
+            .build();
 
-		Package actual = packageFactory.create(packageValue);
+    Package actual = factory.create(packageValue);
 
-		assertEquals(actual.getId(), "name");
-		assertEquals(actual.getLabel(), "label");
-		assertNull(actual.getDescription());
-	}
+    assertEquals(actual.getId(), "name");
+    assertEquals(actual.getLabel(), "label");
+    assertEquals(actual.getDescription(), "description");
+  }
+
+  @Test
+  public void testCreatePackageValueNulls() {
+    PackageValue packageValue = PackageValue.builder().setName("name").setLabel("label").build();
+
+    Package actual = factory.create(packageValue);
+
+    assertEquals(actual.getId(), "name");
+    assertEquals(actual.getLabel(), "label");
+    assertNull(actual.getDescription());
+  }
 }

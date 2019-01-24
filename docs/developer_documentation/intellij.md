@@ -64,9 +64,21 @@ Molgenis now should compile and test. In particular the molgenis-core-ui module 
 Build, Make project should work fine now and spew out no errors, only warnings.
 
 ## Java Code Style settings
-* In the root folder of the molgenis project, you'll find eclipse-java-molgenis-style.xml.
-Open Settings, Editor, Code Style, and import it as the molgenis profile.
-Select it for the molgenis project.
+We format our code according to the Google Java Format.
+You can run the formatter in maven using target `fmt:format`.
+Maven will invoke `fmt:check` at build time and fail if the code isn't formatted properly.
+
+* Install and enable the [IntelliJ plugin which replaces the Reformat Code action](https://plugins.jetbrains.com/plugin/8527-google-java-format).
+* Download and import the [IntelliJ Java Google Style file](https://github.com/molgenis/molgenis/blob/master/intellij-molgenis-style.xml) to fix the import order.
+* Uncheck the reformat checkbox in the git commit dialog, [it is broken](https://github.com/google/google-java-format/issues/228).
+
+## Git commit hook
+If you miss the reformat checkbox, you can configure a git commit hook in the folder where you checked out the molgenis repository.
+Add a file called `.git/hooks/pre-commit` with the following contents:
+
+```#!/bin/sh
+mvn fmt:format
+```
 
 ## Use MOLGENIS file-templates
 
@@ -207,3 +219,15 @@ Now, whenever you make changes to one or more JavaScript files, the correspondin
 the npm watch task. Once it's built, tab out of IntelliJ to trigger a refresh of the exploded war.
 As soon as IntelliJ loses focus, you'll see a task progress bar in the bottom right corner of IntelliJ.
 Wait for that task to finish and then refresh the browser. The changes will be loaded.
+
+## Speed up building the project by skipping the javascript build
+
+Building the project can be sped up by not building the javascript. To skip building the javascript, use:
+
+`-Dskip.js=true`
+
+to the maven build command.
+
+* Note: 
+    - If javascript was not already built, javascript will be missing and the application will not function properly.
+    - If changes were made to the javascript these changes will not be built into the application (as building will be skipped). 

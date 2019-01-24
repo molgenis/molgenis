@@ -14,7 +14,12 @@
         baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}',
-        isSuperUser: ${isSuperUser?c}
+        isSuperUser: ${isSuperUser?c},
+        pluginUrls: {
+            'dataexplorer': <#if dataexplorer??>'${dataexplorer}'<#else>null</#if>,
+            'importwizard': <#if importwizard??>'${importwizard}'<#else>null</#if>,
+            'metadata-manager': <#if metadata_manager??>'${metadata_manager}'<#else>null</#if>,
+        }
     }
 </script>
 

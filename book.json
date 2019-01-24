@@ -26,6 +26,26 @@
           "selected": true
         },
         {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.4/",
+          "text": "MOLGENIS 7.4"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.3/",
+          "text": "MOLGENIS 7.3"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.2/",
+          "text": "MOLGENIS 7.2"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.1/",
+          "text": "MOLGENIS 7.1"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.0/",
+          "text": "MOLGENIS 7.0"
+        },
+        {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/6.1/",
           "text": "MOLGENIS 6.1"
         },

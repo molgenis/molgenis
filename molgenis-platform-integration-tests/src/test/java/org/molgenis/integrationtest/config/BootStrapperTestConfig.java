@@ -6,7 +6,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ SystemEntityTypeBootstrapper.class, TestPackage.class })
-public class BootStrapperTestConfig
-{
-}
+@Import({SystemEntityTypeBootstrapper.class, TestPackage.class})
+public class BootStrapperTestConfig {}

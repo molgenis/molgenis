@@ -1,8 +1,31 @@
 package org.molgenis.semanticsearch.service.impl;
 
-import com.google.common.base.Joiner;
+import static com.google.common.collect.Streams.stream;
+import static java.util.Collections.emptySet;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+
 import com.google.common.base.Splitter;
-import com.google.common.collect.*;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Explanation;
@@ -34,371 +57,355 @@ import org.molgenis.semanticsearch.string.Stemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+public class SemanticSearchServiceImpl implements SemanticSearchService {
+  private static final Logger LOG = LoggerFactory.getLogger(SemanticSearchServiceImpl.class);
 
-import static java.util.Collections.emptySet;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+  private final DataService dataService;
+  private final OntologyService ontologyService;
+  private final SemanticSearchServiceHelper semanticSearchServiceHelper;
+  private final ElasticSearchExplainService elasticSearchExplainService;
+  private final OntologyTagService ontologyTagService;
 
-public class SemanticSearchServiceImpl implements SemanticSearchService
-{
-	private static final Logger LOG = LoggerFactory.getLogger(SemanticSearchServiceImpl.class);
+  private static final int MAX_NUM_TAGS = 100;
+  private static final float CUTOFF = 0.4f;
+  private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
+  private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
 
-	private final DataService dataService;
-	private final OntologyService ontologyService;
-	private final SemanticSearchServiceHelper semanticSearchServiceHelper;
-	private final ElasticSearchExplainService elasticSearchExplainService;
-	private final OntologyTagService ontologyTagService;
+  // We only explain the top 10 suggested attributes because beyond that the attributes are not high
+  // quliaty anymore
+  private static final int MAX_NUMBER_EXPLAINED_ATTRIBUTES = 10;
 
-	private static final int MAX_NUM_TAGS = 100;
-	private static final float CUTOFF = 0.4f;
-	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
-	private Joiner termJoiner = Joiner.on(' ');
-	private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
+  public SemanticSearchServiceImpl(
+      DataService dataService,
+      OntologyService ontologyService,
+      SemanticSearchServiceHelper semanticSearchServiceHelper,
+      ElasticSearchExplainService elasticSearchExplainService,
+      OntologyTagService ontologyTagService) {
+    this.dataService = requireNonNull(dataService);
+    this.ontologyService = requireNonNull(ontologyService);
+    this.semanticSearchServiceHelper = requireNonNull(semanticSearchServiceHelper);
+    this.elasticSearchExplainService = requireNonNull(elasticSearchExplainService);
+    this.ontologyTagService = requireNonNull(ontologyTagService);
+  }
 
-	// We only explain the top 10 suggested attributes because beyond that the attributes are not high quliaty anymore
-	private static final int MAX_NUMBER_EXPLAINED_ATTRIBUTES = 10;
+  /** public for testability */
+  public Hits<ExplainedAttribute> findAttributes(
+      EntityType sourceEntityType, Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms) {
+    Iterable<String> attributeIdentifiers =
+        semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType);
 
-	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
-			SemanticSearchServiceHelper semanticSearchServiceHelper,
-			ElasticSearchExplainService elasticSearchExplainService, OntologyTagService ontologyTagService)
-	{
-		this.dataService = requireNonNull(dataService);
-		this.ontologyService = requireNonNull(ontologyService);
-		this.semanticSearchServiceHelper = requireNonNull(semanticSearchServiceHelper);
-		this.elasticSearchExplainService = requireNonNull(elasticSearchExplainService);
-		this.ontologyTagService = requireNonNull(ontologyTagService);
-	}
+    QueryRule disMaxQueryRule =
+        semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(queryTerms, ontologyTerms);
 
-	/**
-	 * public for testability
-	 */
-	public Hits<ExplainedAttribute> findAttributes(EntityType sourceEntityType, Set<String> queryTerms,
-			Collection<OntologyTerm> ontologyTerms)
-	{
-		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType);
+    List<QueryRule> finalQueryRules =
+        Lists.newArrayList(new QueryRule(AttributeMetadata.ID, Operator.IN, attributeIdentifiers));
 
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(queryTerms,
-				ontologyTerms);
+    if (!disMaxQueryRule.getNestedRules().isEmpty()) {
+      finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
+    }
 
-		List<QueryRule> finalQueryRules = Lists.newArrayList(
-				new QueryRule(AttributeMetadata.ID, Operator.IN, attributeIdentifiers));
+    Stream<Entity> attributeEntities =
+        dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(finalQueryRules));
 
-		if (disMaxQueryRule.getNestedRules().size() > 0)
-		{
-			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
-		}
+    Map<String, String> collectExpanedQueryMap =
+        semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms, ontologyTerms);
 
-		Stream<Entity> attributeEntities = dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(finalQueryRules));
+    // Because the explain-API can be computationally expensive we limit the explanation to the top
+    // 10 attributes
+    List<ExplainedAttribute> attributeSearchHits = new ArrayList<>();
+    AtomicInteger count = new AtomicInteger(0);
+    attributeEntities.forEach(
+        attributeEntity -> {
+          Attribute attribute =
+              sourceEntityType.getAttribute(attributeEntity.getString(AttributeMetadata.NAME));
+          Set<ExplainedQueryString> explainedQueryStrings;
+          boolean isHighQuality;
+          if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES) {
+            explainedQueryStrings =
+                convertAttributeToExplainedAttribute(
+                    attribute, collectExpanedQueryMap, new QueryImpl<>(finalQueryRules));
 
-		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
-				ontologyTerms);
+            isHighQuality =
+                isSingleMatchHighQuality(
+                    queryTerms,
+                    Sets.newHashSet(collectExpanedQueryMap.values()),
+                    explainedQueryStrings);
+          } else {
+            explainedQueryStrings = emptySet();
+            isHighQuality = false;
+          }
+          attributeSearchHits.add(
+              ExplainedAttribute.create(attribute, explainedQueryStrings, isHighQuality));
+          count.incrementAndGet();
+        });
 
-		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		List<ExplainedAttribute> attributeSearchHits = new ArrayList<>();
-		AtomicInteger count = new AtomicInteger(0);
-		attributeEntities.forEach(attributeEntity ->
-		{
-			Attribute attribute = sourceEntityType.getAttribute(attributeEntity.getString(AttributeMetadata.NAME));
-			Set<ExplainedQueryString> explainedQueryStrings;
-			boolean isHighQuality;
-			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
-			{
-				explainedQueryStrings = convertAttributeToExplainedAttribute(attribute, collectExpanedQueryMap,
-						new QueryImpl<>(finalQueryRules));
+    return Hits.create(
+        attributeSearchHits
+            .stream()
+            .map(explainedAttribute -> Hit.create(explainedAttribute, 1f))
+            .collect(toList()));
+  }
 
-				isHighQuality = isSingleMatchHighQuality(queryTerms, Sets.newHashSet(collectExpanedQueryMap.values()),
-						explainedQueryStrings);
-			}
-			else
-			{
-				explainedQueryStrings = emptySet();
-				isHighQuality = false;
-			}
-			attributeSearchHits.add(ExplainedAttribute.create(attribute, explainedQueryStrings, isHighQuality));
-			count.incrementAndGet();
-		});
+  boolean isSingleMatchHighQuality(
+      Collection<String> queryTerms,
+      Collection<String> ontologyTermQueries,
+      Iterable<ExplainedQueryString> explanations) {
+    Map<String, Double> matchedTags = new HashMap<>();
 
-		return Hits.create(attributeSearchHits.stream()
-											  .map(explainedAttribute -> Hit.create(explainedAttribute, 1f))
-											  .collect(toList()));
-	}
+    for (ExplainedQueryString explanation : explanations) {
+      matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
+    }
 
-	boolean isSingleMatchHighQuality(Collection<String> queryTerms, Collection<String> ontologyTermQueries,
-			Iterable<ExplainedQueryString> explanations)
-	{
-		Map<String, Double> matchedTags = new HashMap<>();
+    ontologyTermQueries.removeAll(queryTerms);
 
-		for (ExplainedQueryString explanation : explanations)
-		{
-			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
-		}
+    if (!queryTerms.isEmpty()
+        && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token))) return true;
 
-		ontologyTermQueries.removeAll(queryTerms);
+    return (!ontologyTermQueries.isEmpty()
+        && ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)));
+  }
 
-		if (!queryTerms.isEmpty() && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token)))
-			return true;
+  boolean isGoodMatch(Map<String, Double> matchedTags, String label) {
+    label = label.toLowerCase();
+    return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100
+        || Sets.newHashSet(label.split(" "))
+            .stream()
+            .allMatch(
+                word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
+  }
 
-		if (!ontologyTermQueries.isEmpty() && ontologyTermQueries.stream()
-																 .allMatch(token -> isGoodMatch(matchedTags, token)))
-			return true;
+  @Override
+  public EntityTypeSearchResults findAttributes(
+      EntityType sourceEntityType, EntityType targetEntityType, Set<String> searchTerms) {
+    List<AttributeSearchResults> attributeSearchResults =
+        stream(targetEntityType.getAtomicAttributes())
+            .filter(targetAttribute -> targetAttribute.getExpression() == null)
+            .map(
+                targetAttribute ->
+                    findAttributes(
+                        sourceEntityType, targetEntityType,
+                        targetAttribute, searchTerms))
+            .collect(toList());
+    return EntityTypeSearchResults.create(targetEntityType, attributeSearchResults);
+  }
 
-		return false;
-	}
+  @Override
+  public AttributeSearchResults findAttributes(
+      EntityType sourceEntityType,
+      EntityType targetEntityType,
+      Attribute targetAttribute,
+      Set<String> searchTerms) {
+    // Find relevant attributes base on tags
+    Multimap<Relation, OntologyTerm> tagsForAttribute =
+        ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute);
+    Collection<OntologyTerm> ontologyTermsFromTags = tagsForAttribute.values();
 
-	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
-	{
-		label = label.toLowerCase();
-		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100 || Sets.newHashSet(
-				label.split(" "))
-																								 .stream()
-																								 .allMatch(
-																										 word -> matchedTags
-																												 .containsKey(
-																														 word)
-																												 &&
-																												 matchedTags
-																														 .get(word)
-																														 .intValue()
-																														 == 100);
-	}
+    Set<String> queryTerms = createLexicalSearchQueryTerms(targetAttribute, searchTerms);
 
-	@Override
-	public EntityTypeSearchResults findAttributes(EntityType sourceEntityType, EntityType targetEntityType,
-			Set<String> searchTerms)
-	{
-		List<AttributeSearchResults> attributeSearchResults = stream(
-				targetEntityType.getAtomicAttributes().spliterator(), false).filter(
-				targetAttribute -> targetAttribute.getExpression() == null)
-																			.map(targetAttribute -> findAttributes(
-																					sourceEntityType, targetEntityType,
-																					targetAttribute, searchTerms))
-																			.collect(toList());
-		return EntityTypeSearchResults.create(targetEntityType, attributeSearchResults);
-	}
+    Collection<OntologyTerm> ontologyTerms = ontologyTermsFromTags;
 
-	@Override
-	public AttributeSearchResults findAttributes(EntityType sourceEntityType, EntityType targetEntityType,
-			Attribute targetAttribute, Set<String> searchTerms)
-	{
-		// Find relevant attributes base on tags
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityType,
-				targetAttribute);
-		Collection<OntologyTerm> ontologyTermsFromTags = tagsForAttribute.values();
+    if (null != searchTerms && !searchTerms.isEmpty()) {
+      Set<String> escapedSearchTerms =
+          searchTerms
+              .stream()
+              .filter(StringUtils::isNotBlank)
+              .map(QueryParser::escape)
+              .collect(Collectors.toSet());
+      ontologyTerms =
+          ontologyService.findExactOntologyTerms(
+              ontologyService.getAllOntologiesIds(), escapedSearchTerms, MAX_NUM_TAGS);
+    } else if (null == ontologyTerms || ontologyTerms.isEmpty()) {
+      List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+      Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
+      if (unitOntology != null) {
+        allOntologiesIds.remove(unitOntology.getId());
+      }
+      Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
+      ontologyTerms =
+          ontologyTermHit != null
+              ? Arrays.asList(ontologyTermHit.getResult())
+              : Collections.emptyList();
+    }
 
-		Set<String> queryTerms = createLexicalSearchQueryTerms(targetAttribute, searchTerms);
+    Hits<ExplainedAttribute> hits = findAttributes(sourceEntityType, queryTerms, ontologyTerms);
+    return AttributeSearchResults.create(targetAttribute, hits);
+  }
 
-		Collection<OntologyTerm> ontologyTerms = ontologyTermsFromTags;
+  /**
+   * A helper function to create a list of queryTerms based on the information from the
+   * targetAttribute as well as user defined searchTerms. If the user defined searchTerms exist, the
+   * targetAttribute information will not be used.
+   *
+   * @return list of queryTerms
+   */
+  public Set<String> createLexicalSearchQueryTerms(
+      Attribute targetAttribute, Set<String> searchTerms) {
+    Set<String> queryTerms = new HashSet<>();
 
-		if (null != searchTerms && !searchTerms.isEmpty())
-		{
-			Set<String> escapedSearchTerms = searchTerms.stream()
-														.filter(StringUtils::isNotBlank)
-														.map(QueryParser::escape)
-														.collect(Collectors.toSet());
-			ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(),
-					escapedSearchTerms, MAX_NUM_TAGS);
-		}
-		else if (null == ontologyTerms || ontologyTerms.isEmpty())
-		{
-			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
-			if (unitOntology != null)
-			{
-				allOntologiesIds.remove(unitOntology.getId());
-			}
-			Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
-			ontologyTerms =
-					ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult()) : Collections.emptyList();
-		}
+    if (searchTerms != null && !searchTerms.isEmpty()) {
+      queryTerms.addAll(searchTerms);
+    }
 
-		Hits<ExplainedAttribute> hits = findAttributes(sourceEntityType, queryTerms, ontologyTerms);
-		return AttributeSearchResults.create(targetAttribute, hits);
-	}
+    if (queryTerms.isEmpty()) {
+      if (StringUtils.isNotBlank(targetAttribute.getLabel())) {
+        queryTerms.add(targetAttribute.getLabel());
+      }
 
-	/**
-	 * A helper function to create a list of queryTerms based on the information from the targetAttribute as well as
-	 * user defined searchTerms. If the user defined searchTerms exist, the targetAttribute information will not be
-	 * used.
-	 *
-	 * @return list of queryTerms
-	 */
-	public Set<String> createLexicalSearchQueryTerms(Attribute targetAttribute, Set<String> searchTerms)
-	{
-		Set<String> queryTerms = new HashSet<>();
+      if (StringUtils.isNotBlank(targetAttribute.getDescription())) {
+        queryTerms.add(targetAttribute.getDescription());
+      }
+    }
 
-		if (searchTerms != null && !searchTerms.isEmpty())
-		{
-			queryTerms.addAll(searchTerms);
-		}
+    return queryTerms;
+  }
 
-		if (queryTerms.isEmpty())
-		{
-			if (StringUtils.isNotBlank(targetAttribute.getLabel()))
-			{
-				queryTerms.add(targetAttribute.getLabel());
-			}
+  /**
+   * A helper function to explain each of the matched attributes returned by the explain-API
+   *
+   * @param attribute The attribute found
+   * @param collectExpandedQueryMap ?
+   * @param query the query used to find the attribute
+   * @return Set of explained query strings
+   */
+  public Set<ExplainedQueryString> convertAttributeToExplainedAttribute(
+      Attribute attribute, Map<String, String> collectExpandedQueryMap, Query<Entity> query) {
+    EntityType attributeMetaData = dataService.getEntityType(ATTRIBUTE_META_DATA);
+    String attributeID = attribute.getIdentifier();
+    Explanation explanation =
+        elasticSearchExplainService.explain(query, attributeMetaData, attributeID);
+    return elasticSearchExplainService.findQueriesFromExplanation(
+        collectExpandedQueryMap, explanation);
+  }
 
-			if (StringUtils.isNotBlank(targetAttribute.getDescription()))
-			{
-				queryTerms.add(targetAttribute.getDescription());
-			}
-		}
+  @Override
+  public Hits<OntologyTerm> findOntologyTerms(
+      Attribute attribute, Collection<Ontology> ontologies) {
+    List<String> ontologyIds = ontologies.stream().map(Ontology::getId).collect(toList());
+    Hit<OntologyTerm> ontologyTermHit = findTags(attribute, ontologyIds);
+    return ontologyTermHit != null ? Hits.create(ontologyTermHit) : Hits.create();
+  }
 
-		return queryTerms;
-	}
+  /** package-private for testability */
+  @SuppressWarnings("squid:S1643") // Strings should not be concatenated using '+' in a loop
+  Hit<OntologyTerm> findTags(Attribute attribute, List<String> ontologyIds) {
+    String description =
+        attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
+    Set<String> searchTerms = splitIntoTerms(description);
 
-	/**
-	 * A helper function to explain each of the matched attributes returned by the explain-API
-	 *
-	 * @param attribute               The attribute found
-	 * @param collectExpandedQueryMap ?
-	 * @param query                   the query used to find the attribute
-	 * @return Set of explained query strings
-	 */
-	public Set<ExplainedQueryString> convertAttributeToExplainedAttribute(Attribute attribute,
-			Map<String, String> collectExpandedQueryMap, Query<Entity> query)
-	{
-		EntityType attributeMetaData = dataService.getEntityType(ATTRIBUTE_META_DATA);
-		String attributeID = attribute.getIdentifier();
-		Explanation explanation = elasticSearchExplainService.explain(query, attributeMetaData, attributeID);
-		return elasticSearchExplainService.findQueriesFromExplanation(collectExpandedQueryMap, explanation);
-	}
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("findAttributeOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
+    }
 
-	@Override
-	public Hits<OntologyTerm> findOntologyTerms(Attribute attribute, Collection<Ontology> ontologies)
-	{
-		List<String> ontologyIds = ontologies.stream().map(Ontology::getId).collect(toList());
-		Hit<OntologyTerm> ontologyTermHit = findTags(attribute, ontologyIds);
-		return ontologyTermHit != null ? Hits.create(ontologyTermHit) : Hits.create();
-	}
+    List<OntologyTerm> candidates =
+        ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
 
-	/**
-	 * package-private for testability
-	 */
-	Hit<OntologyTerm> findTags(Attribute attribute, List<String> ontologyIds)
-	{
-		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
-		Set<String> searchTerms = splitIntoTerms(description);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Candidates: {}", candidates);
+    }
 
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("findAttributeOntologyTerms({},{},{})", ontologyIds, searchTerms, MAX_NUM_TAGS);
-		}
+    List<Hit<OntologyTerm>> hits =
+        candidates
+            .stream()
+            .filter(
+                ontologyTerm ->
+                    filterOntologyTerm(
+                        splitIntoTerms(Stemmer.stemAndJoin(searchTerms)), ontologyTerm))
+            .map(
+                ontologyTerm ->
+                    Hit.create(
+                        ontologyTerm, bestMatchingSynonym(ontologyTerm, searchTerms).getScore()))
+            .sorted(Ordering.natural().reverse())
+            .collect(toList());
 
-		List<OntologyTerm> candidates = ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Hits: {}", hits);
+    }
 
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Candidates: {}", candidates);
-		}
+    Hit<OntologyTerm> result = null;
+    String bestMatchingSynonym = null;
+    for (Hit<OntologyTerm> hit : hits) {
+      String bestMatchingSynonymForHit =
+          bestMatchingSynonym(hit.getResult(), searchTerms).getResult();
+      if (result == null) {
+        result = hit;
+        bestMatchingSynonym = bestMatchingSynonymForHit;
+      } else {
+        Set<String> jointTerms =
+            Sets.union(
+                splitIntoTerms(bestMatchingSynonym), splitIntoTerms(bestMatchingSynonymForHit));
+        String joinedSynonyms = String.join(" ", jointTerms);
+        Hit<OntologyTerm> joinedHit =
+            Hit.create(
+                OntologyTerm.and(result.getResult(), hit.getResult()),
+                distanceFrom(joinedSynonyms, searchTerms));
+        if (joinedHit.compareTo(result) > 0) {
+          result = joinedHit;
+          bestMatchingSynonym = bestMatchingSynonym + " " + bestMatchingSynonymForHit;
+        }
+      }
 
-		List<Hit<OntologyTerm>> hits = candidates.stream()
-												 .filter(ontologyTerm -> filterOntologyTerm(
-														 splitIntoTerms(Stemmer.stemAndJoin(searchTerms)),
-														 ontologyTerm))
-												 .map(ontolgoyTerm -> Hit.create(ontolgoyTerm,
-														 bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
-												 .sorted(Ordering.natural().reverse())
-												 .collect(toList());
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("result: {}", result);
+      }
+    }
+    if (result != null && result.getScore() >= CUTOFF) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Tag {} with {}", attribute, result);
+      }
+      return result;
+    }
+    return null;
+  }
 
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Hits: {}", hits);
-		}
+  private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ontologyTerm) {
+    Set<String> ontologyTermSynonyms =
+        semanticSearchServiceHelper.getOtLabelAndSynonyms(ontologyTerm);
 
-		Hit<OntologyTerm> result = null;
-		String bestMatchingSynonym = null;
-		for (Hit<OntologyTerm> hit : hits)
-		{
-			String bestMatchingSynonymForHit = bestMatchingSynonym(hit.getResult(), searchTerms).getResult();
-			if (result == null)
-			{
-				result = hit;
-				bestMatchingSynonym = bestMatchingSynonymForHit;
-			}
-			else
-			{
-				Set<String> jointTerms = Sets.union(splitIntoTerms(bestMatchingSynonym),
-						splitIntoTerms(bestMatchingSynonymForHit));
-				String joinedSynonyms = termJoiner.join(jointTerms);
-				Hit<OntologyTerm> joinedHit = Hit.create(OntologyTerm.and(result.getResult(), hit.getResult()),
-						distanceFrom(joinedSynonyms, searchTerms));
-				if (joinedHit.compareTo(result) > 0)
-				{
-					result = joinedHit;
-					bestMatchingSynonym = bestMatchingSynonym + " " + bestMatchingSynonymForHit;
-				}
-			}
+    for (String synonym : ontologyTermSynonyms) {
+      Set<String> splitIntoTerms = splitIntoTerms(Stemmer.stemAndJoin(splitIntoTerms(synonym)));
+      if (!splitIntoTerms.isEmpty() && keywordsFromAttribute.containsAll(splitIntoTerms))
+        return true;
+    }
 
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("result: {}", result);
-			}
-		}
-		if (result != null && result.getScore() >= CUTOFF)
-		{
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Tag {} with {}", attribute, result);
-			}
-			return result;
-		}
-		return null;
-	}
+    return false;
+  }
 
-	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ontologyTerm)
-	{
-		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.getOtLabelAndSynonyms(ontologyTerm);
+  /**
+   * Computes the best matching synonym which is closest to a set of search terms.<br>
+   * Will stem the {@link OntologyTerm} 's synonyms and the search terms, and then compute the
+   * maximum {@link StringDistance} between them. 0 means disjunct, 1 means identical
+   *
+   * @param ontologyTerm the {@link OntologyTerm}
+   * @param searchTerms the search terms
+   * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
+   */
+  Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms) {
+    // ontologyTerm.getSynonyms() will never be empty because it contains itself as a synonym
+    Optional<Hit<String>> bestSynonym =
+        ontologyTerm
+            .getSynonyms()
+            .stream()
+            .map(synonym -> Hit.create(synonym, distanceFrom(synonym, searchTerms)))
+            .max(Comparator.naturalOrder());
 
-		for (String synonym : ontologyTermSynonyms)
-		{
-			Set<String> splitIntoTerms = splitIntoTerms(Stemmer.stemAndJoin(splitIntoTerms(synonym)));
-			if (!splitIntoTerms.isEmpty() && keywordsFromAttribute.containsAll(splitIntoTerms)) return true;
-		}
+    return bestSynonym.orElseThrow(
+        () ->
+            new IllegalStateException("ontologyTerm.getSynonyms() shouldn't return an empty list"));
+  }
 
-		return false;
-	}
+  float distanceFrom(String synonym, Set<String> searchTerms) {
+    String s1 = Stemmer.stemAndJoin(splitIntoTerms(synonym));
+    String s2 = Stemmer.stemAndJoin(searchTerms);
+    float distance = (float) NGramDistanceAlgorithm.stringMatching(s1, s2) / 100;
+    LOG.debug("Similarity between: {} and {} is {}", s1, s2, distance);
+    return distance;
+  }
 
-	/**
-	 * Computes the best matching synonym which is closest to a set of search terms.<br/>
-	 * Will stem the {@link OntologyTerm} 's synonyms and the search terms, and then compute the maximum
-	 * {@link StringDistance} between them. 0 means disjunct, 1 means identical
-	 *
-	 * @param ontologyTerm the {@link OntologyTerm}
-	 * @param searchTerms  the search terms
-	 * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
-	 */
-	public Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms)
-	{
-		Optional<Hit<String>> bestSynonym = ontologyTerm.getSynonyms()
-														.stream()
-														.map(synonym -> Hit.create(synonym,
-																distanceFrom(synonym, searchTerms)))
-														.max(Comparator.naturalOrder());
-		return bestSynonym.get();
-	}
-
-	float distanceFrom(String synonym, Set<String> searchTerms)
-	{
-		String s1 = Stemmer.stemAndJoin(splitIntoTerms(synonym));
-		String s2 = Stemmer.stemAndJoin(searchTerms);
-		float distance = (float) NGramDistanceAlgorithm.stringMatching(s1, s2) / 100;
-		LOG.debug("Similarity between: {} and {} is {}", s1, s2, distance);
-		return distance;
-	}
-
-	private Set<String> splitIntoTerms(String description)
-	{
-		return FluentIterable.from(termSplitter.split(description))
-							 .transform(String::toLowerCase)
-							 .filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w))
-							 .filter(StringUtils::isNotEmpty)
-							 .toSet();
-	}
+  private Set<String> splitIntoTerms(String description) {
+    return FluentIterable.from(termSplitter.split(description))
+        .transform(String::toLowerCase)
+        .filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w))
+        .filter(StringUtils::isNotEmpty)
+        .toSet();
+  }
 }

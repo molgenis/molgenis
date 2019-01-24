@@ -1,5 +1,23 @@
 package org.molgenis.data.excel;
 
+import static org.apache.poi.ss.usermodel.CellType.BLANK;
+import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
+import static org.apache.poi.ss.usermodel.CellType.ERROR;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -13,141 +31,121 @@ import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.ZoneId;
-import java.util.*;
+public class ExcelEntityTest {
+  private ExcelEntity excelEntity;
+  private List<CellProcessor> cellProcessors;
+  private Row row;
+  private Cell cell;
+  private Map<String, Integer> colNamesMap;
 
-import static org.apache.poi.ss.usermodel.CellType.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+  @BeforeMethod
+  public void beforeMethod() {
+    cellProcessors = new ArrayList<>();
+    row = mock(Row.class);
 
-public class ExcelEntityTest
-{
-	private ExcelEntity excelEntity;
-	private List<CellProcessor> cellProcessors;
-	private Row row;
-	private Cell cell;
-	private Map<String, Integer> colNamesMap;
+    cell = mock(Cell.class);
+    when(row.getCell(0)).thenReturn(cell);
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		cellProcessors = new ArrayList<>();
-		row = mock(Row.class);
+    cellProcessors.add(new LowerCaseProcessor());
+    colNamesMap = new LinkedHashMap<>();
+    colNamesMap.put("attr1", 0);
 
-		cell = mock(Cell.class);
-		when(row.getCell(0)).thenReturn(cell);
+    excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, mock(EntityType.class));
+  }
 
-		cellProcessors.add(new LowerCaseProcessor());
-		colNamesMap = new LinkedHashMap<>();
-		colNamesMap.put("attr1", 0);
+  @Test
+  public void getStringType() {
+    when(cell.getCellTypeEnum()).thenReturn(STRING);
+    when(cell.getStringCellValue()).thenReturn("XXX");
 
-		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, mock(EntityType.class));
-	}
+    Object val = excelEntity.get("attr1");
+    assertNotNull(val);
+    assertEquals(val, "xxx");
+  }
 
-	@Test
-	public void getStringType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(STRING);
-		when(cell.getStringCellValue()).thenReturn("XXX");
+  @Test
+  public void getBlankType() {
+    when(cell.getCellTypeEnum()).thenReturn(BLANK);
+    Object val = excelEntity.get("attr1");
+    assertNull(val);
+  }
 
-		Object val = excelEntity.get("attr1");
-		assertNotNull(val);
-		assertEquals(val, "xxx");
-	}
+  @Test
+  public void getIntegerType() {
+    when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
+    when(cell.getNumericCellValue()).thenReturn(1d);
 
-	@Test
-	public void getBlankType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(BLANK);
-		Object val = excelEntity.get("attr1");
-		assertNull(val);
-	}
+    Object val = excelEntity.get("attr1");
+    assertNotNull(val);
+    assertEquals(val, "1");
+  }
 
-	@Test
-	public void getIntegerType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
-		when(cell.getNumericCellValue()).thenReturn(1d);
+  @Test
+  public void getDoubleType() {
+    when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
+    when(cell.getNumericCellValue()).thenReturn(1.8d);
 
-		Object val = excelEntity.get("attr1");
-		assertNotNull(val);
-		assertEquals(val, "1");
-	}
+    Object val = excelEntity.get("attr1");
+    assertNotNull(val);
+    assertEquals(val, "1.8");
+  }
 
-	@Test
-	public void getDoubleType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
-		when(cell.getNumericCellValue()).thenReturn(1.8d);
+  @Test
+  public void getNumericDateType() {
+    double dateDouble = 35917.0;
+    TimeZone utcTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
+    Date javaDate = DateUtil.getJavaDate(dateDouble, utcTimeZone);
 
-		Object val = excelEntity.get("attr1");
-		assertNotNull(val);
-		assertEquals(val, "1.8");
-	}
+    when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
+    when(cell.getNumericCellValue()).thenReturn(dateDouble);
+    when(cell.getDateCellValue()).thenReturn(javaDate);
+    CellStyle cellStyle = mock(CellStyle.class);
+    when(cell.getCellStyle()).thenReturn(cellStyle);
+    short dataFormat = 0x0e;
+    when(cellStyle.getDataFormat()).thenReturn(dataFormat);
 
-	@Test
-	public void getNumericDateType()
-	{
-		double dateDouble = 35917.0;
-		TimeZone utcTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
-		Date javaDate = DateUtil.getJavaDate(dateDouble, utcTimeZone);
+    Object val = excelEntity.get("attr1");
 
-		when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
-		when(cell.getNumericCellValue()).thenReturn(dateDouble);
-		when(cell.getDateCellValue()).thenReturn(javaDate);
-		CellStyle cellStyle = mock(CellStyle.class);
-		when(cell.getCellStyle()).thenReturn(cellStyle);
-		short dataFormat = 0x0e;
-		when(cellStyle.getDataFormat()).thenReturn(dataFormat);
+    assertNotNull(val);
+    assertEquals(val, "1998-05-02t00:00");
+  }
 
-		Object val = excelEntity.get("attr1");
+  @Test
+  public void getBooleanType() {
+    when(cell.getCellTypeEnum()).thenReturn(BOOLEAN);
+    when(cell.getBooleanCellValue()).thenReturn(true);
 
-		assertNotNull(val);
-		assertEquals(val, "1998-05-02t00:00");
-	}
+    Object val = excelEntity.get("attr1");
+    assertNotNull(val);
+    assertEquals(val, "true");
+  }
 
-	@Test
-	public void getBooleanType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(BOOLEAN);
-		when(cell.getBooleanCellValue()).thenReturn(true);
+  @Test(expectedExceptions = MolgenisDataException.class)
+  public void getErrorType() {
+    when(cell.getCellTypeEnum()).thenReturn(ERROR);
+    excelEntity.get("attr1");
+  }
 
-		Object val = excelEntity.get("attr1");
-		assertNotNull(val);
-		assertEquals(val, "true");
-	}
+  @Test
+  public void set() {
+    excelEntity.set("attr1", "test");
+    assertEquals(excelEntity.get("attr1"), "test");
+  }
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void getErrorType()
-	{
-		when(cell.getCellTypeEnum()).thenReturn(ERROR);
-		excelEntity.get("attr1");
-	}
+  @Test
+  public void setEntity() {
+    Entity entity =
+        new DynamicEntity(mock(EntityType.class)) {
+          @Override
+          protected void validateValueType(String attrName, Object value) {
+            // noop
+          }
+        };
+    entity.set("attr1", "test1");
+    entity.set("attr2", "test2");
 
-	@Test
-	public void set()
-	{
-		excelEntity.set("attr1", "test");
-		assertEquals(excelEntity.get("attr1"), "test");
-	}
-
-	@Test
-	public void setEntity()
-	{
-		Entity entity = new DynamicEntity(mock(EntityType.class))
-		{
-			@Override
-			protected void validateValueType(String attrName, Object value)
-			{
-				// noop
-			}
-		};
-		entity.set("attr1", "test1");
-		entity.set("attr2", "test2");
-
-		excelEntity.set(entity);
-		assertEquals(excelEntity.get("attr1"), "test1");
-		assertNull(excelEntity.get("attr2"));
-	}
+    excelEntity.set(entity);
+    assertEquals(excelEntity.get("attr1"), "test1");
+    assertNull(excelEntity.get("attr2"));
+  }
 }

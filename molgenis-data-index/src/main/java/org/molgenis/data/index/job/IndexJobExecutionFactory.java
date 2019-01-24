@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IndexJobExecutionFactory
-		extends AbstractSystemEntityFactory<IndexJobExecution, IndexJobExecutionMeta, String>
-{
-	IndexJobExecutionFactory(IndexJobExecutionMeta indexJobExecutionMeta, EntityPopulator entityPopulator)
-	{
-		super(IndexJobExecution.class, indexJobExecutionMeta, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<IndexJobExecution, IndexJobExecutionMetadata, String> {
+  IndexJobExecutionFactory(
+      IndexJobExecutionMetadata indexJobExecutionMeta, EntityPopulator entityPopulator) {
+    super(IndexJobExecution.class, indexJobExecutionMeta, entityPopulator);
+  }
 }

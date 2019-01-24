@@ -1,30 +1,42 @@
 package org.molgenis.data.importer;
 
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.MetaDataService;
-import org.springframework.core.Ordered;
-
-import javax.annotation.Nullable;
+import io.micrometer.core.annotation.Timed;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.molgenis.data.DataAction;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
+import org.springframework.core.Ordered;
 
-public interface ImportService extends Ordered
-{
-	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, @Nullable String packageId);
+public interface ImportService extends Ordered {
+  @Timed(
+      value = "service.import",
+      description = "Timing information for the import service.",
+      histogram = true)
+  EntityImportReport doImport(
+      RepositoryCollection source,
+      MetadataAction metadataAction,
+      DataAction dataAction,
+      @Nullable @CheckForNull String packageId);
 
-	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
+  EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 
-	boolean canImport(File file, RepositoryCollection source);
+  boolean canImport(File file, RepositoryCollection source);
 
-	List<DatabaseAction> getSupportedDatabaseActions();
+  List<MetadataAction> getSupportedMetadataActions();
 
-	boolean getMustChangeEntityName();
+  List<DataAction> getSupportedDataActions();
 
-	Set<String> getSupportedFileExtensions();
+  boolean getMustChangeEntityName();
 
-	Map<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
-			RepositoryCollection repositoryCollection, String defaultPackage);
+  Set<String> getSupportedFileExtensions();
+
+  Map<String, Boolean> determineImportableEntities(
+      MetaDataService metaDataService,
+      RepositoryCollection repositoryCollection,
+      String defaultPackage);
 }

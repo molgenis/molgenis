@@ -273,9 +273,26 @@ describe('actions', () => {
         {type: 'SET_ERROR', payload: ''},
         {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: questionnaire.items[0][questionnaire.meta.idAttribute]},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
         {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
+    })
+
+    it('should do nothing, only resolve the promise when questionnaire has already been retrieved', done => {
+      const questionnaireId = 'test_quest'
+
+      const state = {
+        username: 'testuser'
+      }
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_LOADING', payload: false}
       ]
 
@@ -302,9 +319,9 @@ describe('actions', () => {
   })
 
   describe('GET_QUESTIONNAIRE_OVERVIEW', () => {
-    it('should return return a questionnaire', done => {
+    it('should return a questionnaire', done => {
       const questionnaireId = 'test_quest'
-      const questionnaire = 'questionnaire'
+      const questionnaire = {items: [{label: 'label'}]}
       mockApiGetSuccess('/api/v2/test_quest', questionnaire)
 
       const expectedMutations = [
@@ -314,7 +331,48 @@ describe('actions', () => {
         {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, {}, expectedMutations, [], done)
+      const state = {}
+
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, state, expectedMutations, [], done)
+    })
+
+    it('should a questionnaire and fetch report header data if set on questionnaire ', done => {
+      const questionnaireId = 'other_quest'
+      const questionnaire = {
+        items: [
+          {
+            label: 'label', report_header: {_href: '/api/v2/reportHeaderData'}
+          }
+        ]
+      }
+      const reportHeaderDataResp = {
+        logo: 'data:123-abc',
+        intro: 'intro',
+        'intro-en': 'intro-en',
+        'intro-fr': 'intro-fr'
+      }
+      const reportHeaderData = {
+        logoDataUrl: 'data:123-abc',
+        introText: 'intro-en'
+      }
+      const get = td.function('api.get')
+      td.when(get('/api/v2/other_quest')).thenResolve(questionnaire)
+      td.when(get('/api/v2/reportHeaderData')).thenResolve(reportHeaderDataResp)
+      td.replace(api, 'get', get)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
+        {type: 'SET_QUESTIONNAIRE_REPORT_HEADER', payload: reportHeaderData},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      const state = {
+        language: 'en'
+      }
+
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, state, expectedMutations, [], done)
     })
 
     it('should commit any errors to the store', done => {
@@ -366,6 +424,8 @@ describe('actions', () => {
   })
 
   describe('AUTO_SAVE_QUESTIONNAIRE', () => {
+    let error = {}
+
     const state = {
       questionnaire: {
         meta: {
@@ -378,10 +438,11 @@ describe('actions', () => {
       },
       questionnaireRowId: 'test_row',
       field1: {
-        $valid: () => true
+        $valid: () => true,
+        $error: error
       }
     }
-    const payload = {formState: state, formData: {field1: 'updated value'}}
+    let payload = {formState: state, formData: {field1: 'updated value'}}
 
     const options = {
       body: JSON.stringify('updated value'),
@@ -401,8 +462,6 @@ describe('actions', () => {
 
       const expectedMutations = [
         {type: 'SET_FORM_DATA', payload: payload.formData},
-        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
-        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
@@ -417,12 +476,21 @@ describe('actions', () => {
 
       const expectedMutations = [
         {type: 'SET_FORM_DATA', payload: payload.formData},
-        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
-        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false},
         {type: 'DECREMENT_SAVING_QUEUE', payload}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
+    })
+
+    it('should not post when errors other then "required" field errors are present', done => {
+      state.field1.$error.other = 'other error'
+      payload = {formState: state, formData: {field1: 'updated value'}}
+
+      const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)

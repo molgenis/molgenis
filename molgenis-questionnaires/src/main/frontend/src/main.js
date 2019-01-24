@@ -8,6 +8,7 @@ import i18n from '@molgenis/molgenis-i18n-js'
 import 'font-awesome/css/font-awesome.min.css'
 
 store.commit('SET_USERNAME', window.QUESTIONNAIRE_STATE.username)
+store.commit('SET_LANGUAGE', window.QUESTIONNAIRE_STATE.lng || window.QUESTIONNAIRE_STATE.fallbackLng)
 
 Vue.use(i18n, {
   lng: window.QUESTIONNAIRE_STATE.lng,

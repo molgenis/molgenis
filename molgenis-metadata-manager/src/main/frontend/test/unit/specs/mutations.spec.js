@@ -27,6 +27,19 @@ describe('mutations', () => {
     })
   })
 
+  describe('Testing mutation SET_LANGUAGE_CODES', () => {
+    it('Sets sorted list of language codes', () => {
+      const state = {
+        languageCodes: []
+      }
+      const languageCodes = ['nl', 'de', 'en']
+      const expectedLanguageCodes = ['de', 'en', 'nl']
+      mutations.__SET_LANGUAGE_CODES__(state, languageCodes)
+
+      expect(state.languageCodes).to.deep.equal(expectedLanguageCodes)
+    })
+  })
+
   describe('Testing mutation CREATE_ALERT', () => {
     it('Updates alert message', () => {
       const state = {
@@ -105,7 +118,8 @@ describe('mutations', () => {
     it('Sets selected entity type to edit', () => {
       const state = {
         editorEntityType: {},
-        initialEditorEntityType: {}
+        initialEditorEntityType: {},
+        selectedAttributeId: null
       }
       const editorEntityType = {
         id: 'root_gender',
@@ -158,6 +172,7 @@ describe('mutations', () => {
       mutations.__SET_EDITOR_ENTITY_TYPE__(state, editorEntityType)
       expect(state.editorEntityType).to.deep.equal(editorEntityType)
       expect(state.initialEditorEntityType).to.deep.equal(JSON.parse(JSON.stringify(editorEntityType)))
+      expect(state.selectedAttributeId).to.deep.equal(null)
     })
   })
 
@@ -276,7 +291,7 @@ describe('mutations', () => {
       }
 
       const expected = [
-        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: null, orderBy: null},
+        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: {id: 'refEntityId'}, orderBy: null},
         {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},
         {id: '3', name: 'attribute 3', type: 'string', mappedByAttribute: null, refEntityType: null}
       ]

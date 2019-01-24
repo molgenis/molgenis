@@ -12,32 +12,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class OntologyConfig
-{
-	@Autowired
-	DataService dataService;
+public class OntologyConfig {
+  @Autowired DataService dataService;
 
-	@Bean
-	public OntologyService ontologyService()
-	{
-		return new OntologyServiceImpl(ontologyRepository(), ontologyTermRepository());
-	}
+  @Bean
+  public OntologyService ontologyService() {
+    return new OntologyServiceImpl(ontologyRepository(), ontologyTermRepository());
+  }
 
-	@Bean
-	public OntologyRepository ontologyRepository()
-	{
-		return new OntologyRepository();
-	}
+  @Bean
+  public OntologyRepository ontologyRepository() {
+    return new OntologyRepository();
+  }
 
-	@Bean
-	public OntologyTermRepository ontologyTermRepository()
-	{
-		return new OntologyTermRepository(dataService);
-	}
+  @Bean
+  public OntologyTermRepository ontologyTermRepository() {
+    return new OntologyTermRepository(dataService);
+  }
 
-	@Bean
-	public TermFrequencyService termFrequencyService()
-	{
-		return new OntologyTermFrequencyServiceImpl(dataService);
-	}
+  @Bean
+  public TermFrequencyService termFrequencyService() {
+    return new OntologyTermFrequencyServiceImpl(dataService);
+  }
 }

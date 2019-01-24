@@ -3,23 +3,22 @@ package org.molgenis.integrationtest.data.decorator;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-//Decorator specifically for DynamicDecoratorIT
-public class PostFixingRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
-{
-	private static final Logger LOG = LoggerFactory.getLogger(PostFixingRepositoryDecorator.class);
+// Decorator specifically for DynamicDecoratorIT
+public class PostFixingRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
+  private final String attributeName;
+  private final String text;
 
-	public PostFixingRepositoryDecorator(Repository<Entity> delegateRepository)
-	{
-		super(delegateRepository);
-	}
+  PostFixingRepositoryDecorator(
+      Repository<Entity> delegateRepository, String attributeName, String text) {
+    super(delegateRepository);
+    this.attributeName = attributeName;
+    this.text = text;
+  }
 
-	@Override
-	public void update(Entity entity)
-	{
-		entity.set("string_attr", entity.getString("string_attr") + "_TEST");
-		super.update(entity);
-	}
+  @Override
+  public void update(Entity entity) {
+    entity.set(attributeName, entity.getString(attributeName) + text);
+    super.update(entity);
+  }
 }

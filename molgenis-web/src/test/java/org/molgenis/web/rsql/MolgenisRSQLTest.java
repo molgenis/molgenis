@@ -1,9 +1,16 @@
 package org.molgenis.web.rsql;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.testng.Assert.assertEquals;
+
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
@@ -14,153 +21,160 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.assertEquals;
+public class MolgenisRSQLTest extends AbstractMockitoTest {
+  @Mock private EntityType entityType;
+  @Mock private EntityType genderEntityType;
+  private MolgenisRSQL molgenisRSQL;
 
-public class MolgenisRSQLTest extends AbstractMockitoTest
-{
-	private MolgenisRSQL molgenisRSQL;
-	@Mock
-	private EntityType entityType;
-	@Mock
-	private EntityType genderEntityType;
+  @BeforeMethod
+  public void beforeMethod() {
+    molgenisRSQL = new MolgenisRSQL(new RSQLParser());
+  }
 
-	public MolgenisRSQLTest()
-	{
-		super(Strictness.WARN);
-	}
+  @Test
+  public void testEquals() throws RSQLParserException {
+    Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(nameAttr).when(entityType).getAttribute("name");
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		molgenisRSQL = new MolgenisRSQL(new RSQLParser());
-		when(entityType.getId()).thenReturn("Person").getMock();
-		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
-		when(nameAttr.getDataType()).thenReturn(STRING);
-		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
-		when(ageAttr.getDataType()).thenReturn(INT);
-		when(entityType.getAttribute("name")).thenReturn(nameAttr);
-		when(entityType.getAttribute("age")).thenReturn(ageAttr);
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet", entityType);
+    assertEquals(q, new QueryImpl<>().eq("name", "piet"));
 
-		when(genderEntityType.getId()).thenReturn("Gender").getMock();
-		Attribute genderIdAttribute = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(genderIdAttribute.getDataType()).thenReturn(INT);
-		when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);
-		Attribute genderAttr = when(mock(Attribute.class).getName()).thenReturn("gender").getMock();
-		when(genderAttr.getDataType()).thenReturn(XREF);
-		when(genderAttr.getRefEntity()).thenReturn(genderEntityType);
-		when(entityType.getAttribute("gender")).thenReturn(genderAttr);
+    q = molgenisRSQL.createQuery("name=='piet paulusma'", entityType);
+    assertEquals(q, new QueryImpl<>().eq("name", "piet paulusma"));
 
-	}
+    q = molgenisRSQL.createQuery("age==87", entityType);
+    assertEquals(q, new QueryImpl<>().eq("age", 87));
+  }
 
-	@Test
-	public void testEquals() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("name==piet", entityType);
-		assertEquals(q, new QueryImpl<>().eq("name", "piet"));
+  @Test(expectedExceptions = UnknownAttributeException.class)
+  public void testUnknowAttribute() throws RSQLParserException {
+    molgenisRSQL.createQuery("nonexistingattribute==piet", entityType);
+  }
 
-		q = molgenisRSQL.createQuery("name=='piet paulusma'", entityType);
-		assertEquals(q, new QueryImpl<>().eq("name", "piet paulusma"));
+  @Test
+  public void testGreaterThanOrEqual() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-		q = molgenisRSQL.createQuery("age==87", entityType);
-		assertEquals(q, new QueryImpl<>().eq("age", 87));
-	}
+    Query<Entity> q = molgenisRSQL.createQuery("age>=87", entityType);
+    assertEquals(q, new QueryImpl<>().ge("age", 87));
+  }
 
-	@Test(expectedExceptions = UnknownAttributeException.class)
-	public void testUnknowAttribute() throws RSQLParserException
-	{
-		molgenisRSQL.createQuery("nonexistingattribute==piet", entityType);
-	}
+  @Test
+  public void testGreaterThan() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-	@Test
-	public void testGreaterThanOrEqual() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("age>=87", entityType);
-		assertEquals(q, new QueryImpl<>().ge("age", 87));
-	}
+    Query<Entity> q = molgenisRSQL.createQuery("age>87", entityType);
+    assertEquals(q, new QueryImpl<>().gt("age", 87));
+  }
 
-	@Test
-	public void testGreaterThan() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("age>87", entityType);
-		assertEquals(q, new QueryImpl<>().gt("age", 87));
-	}
+  @Test
+  public void testLessThanOrEqual() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-	@Test
-	public void testLessThanOrEqual() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("age<=87", entityType);
-		assertEquals(q, new QueryImpl<>().le("age", 87));
-	}
+    Query<Entity> q = molgenisRSQL.createQuery("age<=87", entityType);
+    assertEquals(q, new QueryImpl<>().le("age", 87));
+  }
 
-	@Test
-	public void testLessThan() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("age<87", entityType);
-		assertEquals(q, new QueryImpl<>().lt("age", 87));
-	}
+  @Test
+  public void testLessThan() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-	@Test
-	public void testAnd() throws RSQLParserException
-	{
-		// ';' and 'and' or synonyms
+    Query<Entity> q = molgenisRSQL.createQuery("age<87", entityType);
+    assertEquals(q, new QueryImpl<>().lt("age", 87));
+  }
 
-		Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", entityType);
-		assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
+  @Test
+  public void testAnd() throws RSQLParserException {
+    Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(nameAttr).when(entityType).getAttribute("name");
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-		q = molgenisRSQL.createQuery("name==piet;age==87", entityType);
-		assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
-	}
+    // ';' and 'and' or synonyms
 
-	@Test
-	public void testOr() throws RSQLParserException
-	{
-		// ',' and 'or' or synonyms
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", entityType);
+    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
 
-		Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", entityType);
-		assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
+    q = molgenisRSQL.createQuery("name==piet;age==87", entityType);
+    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
+  }
 
-		q = molgenisRSQL.createQuery("name==piet,age==87", entityType);
-		assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
-	}
+  @Test
+  public void testOr() throws RSQLParserException {
+    Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(nameAttr).when(entityType).getAttribute("name");
+    doReturn(ageAttr).when(entityType).getAttribute("age");
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void testGreaterThanOnNonNumericalAttribute() throws RSQLParserException
-	{
-		molgenisRSQL.createQuery("name>87", entityType);
-	}
+    // ',' and 'or' or synonyms
 
-	@Test(expectedExceptions = NumberFormatException.class)
-	public void testGreaterThanWithNonNumericalArg() throws RSQLParserException
-	{
-		molgenisRSQL.createQuery("age>bogus", entityType);
-	}
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", entityType);
+    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
 
-	@Test
-	public void testComplexQuery() throws RSQLParserException
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityType);
-		assertEquals(q, new QueryImpl<>().nest()
-										 .nest()
-										 .eq("name", "piet")
-										 .and()
-										 .eq("age", 87)
-										 .unnest()
-										 .or()
-										 .nest()
-										 .eq("name", "klaas")
-										 .and()
-										 .gt("age", 100)
-										 .unnest()
-										 .unnest());
-	}
+    q = molgenisRSQL.createQuery("name==piet,age==87", entityType);
+    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
+  }
 
-	@Test
-	public void testXrefIntegerIdValue()
-	{
-		Query<Entity> q = molgenisRSQL.createQuery("gender==2", entityType);
-		assertEquals(q, new QueryImpl<>().eq("gender", 2));
-	}
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void testGreaterThanOnNonNumericalAttribute() throws RSQLParserException {
+    Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    doReturn(nameAttr).when(entityType).getAttribute("name");
+
+    molgenisRSQL.createQuery("name>87", entityType);
+  }
+
+  @Test(expectedExceptions = NumberFormatException.class)
+  public void testGreaterThanWithNonNumericalArg() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
+
+    molgenisRSQL.createQuery("age>bogus", entityType);
+  }
+
+  @Test
+  public void testComplexQuery() throws RSQLParserException {
+    Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(nameAttr).when(entityType).getAttribute("name");
+    doReturn(ageAttr).when(entityType).getAttribute("age");
+
+    Query<Entity> q =
+        molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityType);
+    assertEquals(
+        q,
+        new QueryImpl<>()
+            .nest()
+            .nest()
+            .eq("name", "piet")
+            .and()
+            .eq("age", 87)
+            .unnest()
+            .or()
+            .nest()
+            .eq("name", "klaas")
+            .and()
+            .gt("age", 100)
+            .unnest()
+            .unnest());
+  }
+
+  @Test
+  public void testXrefIntegerIdValue() {
+    Attribute genderIdAttribute = mock(Attribute.class);
+    when(genderIdAttribute.getDataType()).thenReturn(INT);
+    when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);
+    Attribute genderAttr = mock(Attribute.class);
+    when(genderAttr.getDataType()).thenReturn(XREF);
+    when(genderAttr.getRefEntity()).thenReturn(genderEntityType);
+    doReturn(genderAttr).when(entityType).getAttribute("gender");
+
+    Query<Entity> q = molgenisRSQL.createQuery("gender==2", entityType);
+    assertEquals(q, new QueryImpl<>().eq("gender", 2));
+  }
 }

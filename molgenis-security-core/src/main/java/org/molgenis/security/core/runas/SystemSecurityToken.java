@@ -1,34 +1,53 @@
 package org.molgenis.security.core.runas;
 
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static java.util.Collections.singletonList;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_MODIFY_AUDITING;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 
-/**
- * Authentication token for the SYSTEM user
- */
-public class SystemSecurityToken extends UsernamePasswordAuthenticationToken
-{
-	private static final long serialVersionUID = 2019504169566855264L;
+import com.google.common.collect.ImmutableList;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-	public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
-	public static final String USER_SYSTEM = "SYSTEM";
+/** Authentication token for the SYSTEM user */
+public class SystemSecurityToken extends AbstractAuthenticationToken {
+  private static final SystemSecurityToken INSTANCE = new SystemSecurityToken();
 
-	public SystemSecurityToken()
-	{
-		super(new User(USER_SYSTEM, "", singletonList(new SimpleGrantedAuthority(ROLE_SYSTEM))), "",
-				Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM),
-						new SimpleGrantedAuthority(ROLE_ACL_TAKE_OWNERSHIP),
-						new SimpleGrantedAuthority(ROLE_ACL_MODIFY_AUDITING),
-						new SimpleGrantedAuthority(ROLE_ACL_GENERAL_CHANGES)));
-	}
+  private SystemSecurityToken() {
+    super(
+        ImmutableList.of(
+            new SimpleGrantedAuthority(ROLE_SYSTEM),
+            new SimpleGrantedAuthority(ROLE_ACL_TAKE_OWNERSHIP),
+            new SimpleGrantedAuthority(ROLE_ACL_MODIFY_AUDITING),
+            new SimpleGrantedAuthority(ROLE_ACL_GENERAL_CHANGES)));
+  }
+
+  public static SystemSecurityToken getInstance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public Object getCredentials() {
+    return null;
+  }
+
+  @Override
+  public Object getPrincipal() {
+    return SystemPrincipal.getInstance();
+  }
+
+  @Override
+  public boolean isAuthenticated() {
+    return true;
+  }
+
+  public static class SystemPrincipal {
+    private static final SystemPrincipal INSTANCE = new SystemPrincipal();
+
+    private SystemPrincipal() {}
+
+    public static SystemPrincipal getInstance() {
+      return SystemPrincipal.INSTANCE;
+    }
+  }
 }

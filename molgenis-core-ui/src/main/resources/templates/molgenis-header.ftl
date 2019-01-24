@@ -6,7 +6,6 @@
 <#include "polyfill-macros.ftl">
 <#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
-    <#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,19 +14,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <#if googleSignIn><meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}"></#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
+    <#-- Include browser polyfills before any script tags are inserted -->
+    <@polyfill/>
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
-
-        <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
-
-        <#-- Include browser polyfills before any script tags are inserted -->
-        <@polyfill/>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
@@ -45,21 +40,6 @@
                     <script src="<@resource_href "${js_file_name?html}"/>"></script>
                 </#if>
             </#list>
-        </#if>
-
-        <#if googleSignIn>
-            <#if authenticated?? && authenticated>
-            <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
-                <script>
-                    function onLoad() {
-                        gapi.load('auth2', function () {
-                            gapi.auth2.init();
-                        });
-                    }
-                </script>
-            </#if>
-
-            <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
         </#if>
 
         <script>
@@ -91,7 +71,14 @@
 
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
+
+        <#-- Include molgenis-menu css -->
+        <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
+
     </#if>
+
+    <#-- Load css specified via settigns -->
+    <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
 
     <#-- Load css specified by plugins -->
     <#list css as css_file_name>
@@ -109,37 +96,34 @@
                 <#assign plugin_id="NULL">
             </#if>
 
-            <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
+            <@topmenu menu plugin_id pluginid_with_query_string/>
         </#if>
     <#else>
-        <#assign menu=molgenis_ui.getMenuJson()>
+        <#assign menu=gson.toJson(menu)>
 
         <#-- VUE -->
-        <div id="molgenis-menu"></div>
-
         <script type="text/javascript">
             window.molgenisMenu = {
                 menu: ${menu}
                 <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
+                <#if app_settings.logoTopHref??>, topLogoMaxHeight: ${app_settings.logoTopMaxHeight}</#if>
                 <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
                 <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
                 , authenticated: ${authenticated?c}
                 , loginHref: '/login'
-                <#if googleSignIn>, logoutFunction: function () {
-                    var auth2 = gapi.auth2.getAuthInstance()
-                    auth2.signOut()
-                }</#if>
-                , googleSignIn: ${googleSignIn?c}
                 , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
             }
         </script>
 
         <#-- Include the Vue version of the molgenis menu  -->
-        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>
+        <div id="molgenis-site-menu"></div>
+        <script type=text/javascript src="<@resource_href "/js/menu/menu.umd.js"/>"></script>
+
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid">
+<div class="container-fluid"
+     style="padding-top: <#if app_settings.logoTopHref??>${app_settings.logoTopMaxHeight + 60}<#elseif version gt 1>60</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -183,35 +167,6 @@
 <div class="row">
     <div class="col-md-12">
         <div id="plugin-container">
-            <#if app_settings.logoTopHref?has_content>
-                <script>
-                    // Calculate the amount of pixels that the content needs to
-                    // be pushed down based on the height of the uploaded banner
-                    var maxHeight = 0
-
-                    function setContainerHeight() {
-                        var img = document.getElementById('logo-top');
-                        img.style['height'] = 'auto'
-
-                        <#if app_settings.fixedHeightLogo??>
-                        img.style['max-height'] = '${app_settings.fixedHeightLogo?string}px'
-                        </#if>
-
-                        var height = img.height
-                        maxHeight = height + 60
-
-                        var container = document.querySelector('body>.container-fluid')
-                        container.setAttribute("style", "padding-top: " + maxHeight + "px;")
-                    }
-
-                    $(window).resize(function() {
-                        setContainerHeight()
-                    })
-
-                    setContainerHeight()
-                </script>
-            </#if>
-
             <#assign plugin_description_key = plugin_id + '_description_text'>
             <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
                 ${i18n[plugin_description_key]}
@@ -225,13 +180,15 @@
     <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
             <#if app_settings.logoTopHref?has_content>
-            <header id="top-logo-banner">
-                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"></a>
+            <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
+                <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
+                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
+                                 style="max-height: ${app_settings.logoTopMaxHeight}px"></a>
             </header>
             </#if>
             <div class="navbar-header">
                 <#list menu.items as item>
-                    <#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
+                    <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
                             <img class="img-responsive" style="max-width:100%;max-height:100%;"
                                  src="${app_settings.logoNavBarHref?html}"
@@ -255,23 +212,23 @@
                     <#list menu.items as item>
 
                     <#-- Single menu items -->
-                        <#if item.type != "MENU">
-                            <#if item.name != "Home" || !app_settings.logoNavBarHref?has_content>
+                        <#if !item.isMenu()>
+                            <#if item.label != "Home" || !app_settings.logoNavBarHref?has_content>
                                 <#if item.url == pluginid_with_query_string>
-                                    <li class="active"><a href="#">${item.name?html}</a></li>
+                                    <li class="active"><a href="#">${item.label?html}</a></li>
                                 <#else>
-                                    <li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
+                                    <li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.label?html}</a>
                                     </li>
                                 </#if>
                             </#if>
 
                         <#-- Dropdown menu items -->
-                        <#elseif item.type == "MENU">
+                        <#else>
                             <#assign sub_menu = item>
                             <#assign menu_counter = 0>
                             <li class="dropdown">
                                 <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button"
-                                   aria-expanded="false">${item.name?html}<b class="caret"></b></a>
+                                   aria-expanded="false">${item.label?html}<b class="caret"></b></a>
 
                                 <ul class="dropdown-menu" role="menu">
                                     <@dropdown sub_menu menu_counter />
@@ -301,14 +258,7 @@
 
                 <script>
                      $("#signout-button").click(function () {
-                    <#if googleSignIn>
-                        var auth2 = gapi.auth2.getAuthInstance();
-                        auth2.signOut().then(function () {
-                    </#if>
                             $('#logout-form').submit();
-                    <#if googleSignIn>
-                        });
-                    </#if>
                      });
                 </script>
 
@@ -327,20 +277,20 @@
     </nav> <#-- close navbar -->
 </#macro>
 
-<#-- dropdown for entity -->
+<#-- dropdown for sub_menu -->
 <#macro dropdown sub_menu menu_counter>
     <#assign this_menu_counter = menu_counter + 1>
 
     <#list sub_menu.items as sub_item>
-        <#if sub_item.type != "MENU">
+        <#if !sub_item.isMenu()>
             <li>
                 <a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if>
-                   href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.name?html}</a>
+                   href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.label?html}</a>
             </li>
-        <#elseif sub_item.type == "MENU">
+        <#else>
             <li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
                 <a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if>
-                   href="#">${sub_item.name?html}</a>
+                   href="#">${sub_item.label?html}</a>
             </li>
 
             <@dropdown sub_item this_menu_counter />

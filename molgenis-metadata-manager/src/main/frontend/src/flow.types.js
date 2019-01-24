@@ -18,7 +18,8 @@ export type State = {
   selectedAttributeId: ?string,
   editorEntityType: EditorEntityType,
   initialEditorEntityType: ?EditorEntityType,
-  loading: number
+  loading: number,
+  languageCodes: Array<string>
 }
 
 export type Alert = {
@@ -61,9 +62,9 @@ export type EditorEntityTypeIdentifier = {
 export type EditorEntityType = {
   'id': string,
   'label': string,
-  'i18nLabel'?: ?any,
+  'labelI18n'?: ?any,
   'description'?: ?string,
-  'i18nDescription'?: ?any,
+  'descriptionI18n'?: ?any,
   'abstract0'?: ?boolean,
   'backend'?: ?string,
   'package0'?: ?EditorPackageIdentifier,
@@ -95,9 +96,10 @@ export type EditorAttributeIdentifier = {
 export type EditorAttribute = {
   'id': string,
   'name': string,
-  'type': ?string,
+  'type'?: string,
   'parent': ?EditorAttributeIdentifier,
   'refEntityType': ?EditorEntityTypeIdentifier,
+  'cascadeDelete': ?boolean,
   'mappedByAttribute': ?EditorAttributeIdentifier,
   'orderBy': ?EditorSort,
   'expression': ?string,
@@ -105,9 +107,9 @@ export type EditorAttribute = {
   'auto': ?boolean,
   'visible': ?boolean,
   'label': ?string,
-  'i18nLabel': ?any,
+  'labelI18n': ?any,
   'description': ?string,
-  'i18nDescription': ?any,
+  'descriptionI18n': ?any,
   'aggregatable': ?boolean,
   'enumOptions': ?Array<string>,
   'rangeMin': ?number,
@@ -115,6 +117,7 @@ export type EditorAttribute = {
   'readonly': ?boolean,
   'unique': ?boolean,
   'tags': ?Array<Tag>,
+  'nullableExpression': ?string,
   'visibleExpression': ?string,
   'validationExpression': ?string,
   'defaultValue': ?string,

@@ -1,45 +1,43 @@
 package org.molgenis.dataexplorer.negotiator.config;
 
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMetadata.NEGOTIATOR_URL;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMetadata.PASSWORD;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMetadata.USERNAME;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import javax.annotation.Nullable;
+public class NegotiatorConfig extends StaticEntity {
+  public NegotiatorConfig(Entity entity) {
+    super(entity);
+  }
 
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMeta.*;
+  public NegotiatorConfig(EntityType entityType) {
+    super(entityType);
+  }
 
-public class NegotiatorConfig extends StaticEntity
-{
-	public NegotiatorConfig(Entity entity)
-	{
-		super(entity);
-	}
+  public NegotiatorConfig(String identifier, EntityType entityType) {
+    super(identifier, entityType);
+  }
 
-	public NegotiatorConfig(EntityType entityType)
-	{
-		super(entityType);
-	}
+  @Nullable
+  @CheckForNull
+  public String getUsername() {
+    return getString(USERNAME);
+  }
 
-	public NegotiatorConfig(String identifier, EntityType entityType)
-	{
-		super(identifier, entityType);
-	}
-	@Nullable
-	public String getUsername()
-	{
-		return getString(USERNAME);
-	}
+  @Nullable
+  @CheckForNull
+  public String getPassword() {
+    return getString(PASSWORD);
+  }
 
-	@Nullable
-	public String getPassword()
-	{
-		return getString(PASSWORD);
-	}
-
-	@Nullable
-	public String getNegotiatorURL()
-	{
-		return getString(NEGOTIATOR_URL);
-	}
-
+  @Nullable
+  @CheckForNull
+  public String getNegotiatorURL() {
+    return getString(NEGOTIATOR_URL);
+  }
 }

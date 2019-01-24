@@ -77,7 +77,8 @@
                 {name: 'molgenis', url: '${molgenisUrl}'},
                 {name: 'core-ui', url: '${baseUrl}/swagger/core-ui-swagger.json'},
                 {name: 'beacon', url: '${baseUrl}/swagger/beacon-swagger.json'},
-                {name: 'security', url: '${baseUrl}/swagger/security-swagger.json'}],
+                {name: 'security', url: '${baseUrl}/swagger/security-swagger.json'},
+                {name: 'metrics', url: '${baseUrl}/swagger/metrics-swagger.json'}],
             dom_id: '#swagger-ui',
             deepLinking: true,
             presets: [

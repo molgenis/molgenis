@@ -328,6 +328,18 @@ $.when($,
 
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
+                const deleteMeta = entityMetaData.permissions.indexOf('DELETE_METADATA') >= 0;
+                const deleteData = entityMetaData.permissions.indexOf('DELETE_DATA') >= 0;
+                if (deleteMeta || deleteData){
+                    $('#delete-dropdown-container').show()
+                    if (deleteMeta) {
+                        $('#delete-metadata-dropdown-item').show()
+                    }
+                    if (deleteData) {
+                        $('#delete-data-dropdown-item').show()
+                    }
+                }
+
                 selectedEntityMetaData = entityMetaData;
                 selectedAttributes = [];
                 self.createHeader(entityMetaData);
@@ -654,7 +666,7 @@ $.when($,
                 $(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
             });
 
-            $('#delete-data-btn').on('click', function () {
+            function deleteData () {
                 bootbox.confirm("Are you sure you want to delete all data for this entity?", function (confirmed) {
                     if (confirmed) {
                         $.ajax('/api/v1/' + selectedEntityMetaData.name, {'type': 'DELETE'}).done(function () {
@@ -662,7 +674,10 @@ $.when($,
                         });
                     }
                 });
-            });
+            }
+
+            $('#delete-data-btn').on('click', deleteData)
+            $('#delete-data-option').on('click', deleteData)
 
             $('#copy-data-btn').on('click', function () {
                 bootbox.prompt({
@@ -694,7 +709,7 @@ $.when($,
                 });
             });
 
-            $('#delete-data-metadata-btn').on('click', function () {
+            $('#delete-data-metadata-option').on('click', function () {
                 bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function (confirmed) {
                     if (confirmed) {
                         $.ajax('/api/v1/' + selectedEntityMetaData.name + '/meta', {'type': 'DELETE'}).done(function () {

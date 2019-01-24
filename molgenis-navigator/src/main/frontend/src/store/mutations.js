@@ -1,29 +1,56 @@
 // @flow
-import type {Package, State, Entity} from '../flow.types'
-export const SET_PACKAGES = '__SET_PACKAGES__'
-export const SET_ENTITIES = '__SET_ENTITIES__'
-export const SET_PATH = '__SET_PATH__'
-export const RESET_PATH = '__RESET_PATH__'
-export const SET_QUERY = '__SET_QUERY__'
-export const SET_ERROR = '__SET_ERROR__'
+import type { Alert, Clipboard, Folder, Resource, Job, State } from '../flow.types'
+
+export const ADD_ALERTS = '__ADD_ALERTS__'
+export const REMOVE_ALERT = '__REMOVE_ALERT__'
+export const ADD_JOB = '__ADD_JOB__'
+export const UPDATE_JOB = '__UPDATE_JOB__'
+export const REMOVE_JOB = '__REMOVE_JOB__'
+export const SET_FOLDER = '__SET_FOLDER__'
+export const SET_RESOURCES = '__SET_RESOURCES__'
+export const SET_SELECTED_RESOURCES = '__SET_SELECTED_RESOURCES__'
+export const SET_SHOW_HIDDEN_RESOURCES = '__SET_SHOW_HIDDEN_RESOURCES__'
+export const SET_CLIPBOARD = '__SET_CLIPBOARD__'
+export const RESET_CLIPBOARD = '__RESET_CLIPBOARD__'
 
 export default {
-  [SET_PACKAGES] (state: State, packages: Array<Package>) {
-    state.packages = packages
+  [ADD_ALERTS] (state: State, alerts: Array<Alert>) {
+    state.alerts = state.alerts.concat(alerts)
   },
-  [SET_PATH] (state: State, packages: Array<Package>) {
-    state.path = packages
+  [REMOVE_ALERT] (state: State, index: number) {
+    let alerts = state.alerts.slice()
+    alerts.splice(index, 1)
+    state.alerts = alerts
   },
-  [RESET_PATH] (state: State) {
-    state.path.splice(0, state.path.length)
+  [ADD_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.concat([job])
   },
-  [SET_ENTITIES] (state: State, entities: Array<Entity>) {
-    state.entities = entities
+  [UPDATE_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.map(
+      existingJob => existingJob.type === job.type && existingJob.id === job.id
+        ? job : existingJob)
   },
-  [SET_QUERY] (state: State, query: string) {
-    state.query = query
+  [REMOVE_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.filter(existingJob => !(existingJob.type === job.type && existingJob.id === job.id))
   },
-  [SET_ERROR] (state: State, error: any) {
-    state.error = error
+  [SET_FOLDER] (state: State, folder: Folder) {
+    state.folder = folder
+  },
+  [SET_RESOURCES] (state: State, resources: Array<Resource>) {
+    state.selectedResources = []
+    state.resources = resources
+  },
+  [SET_SELECTED_RESOURCES] (state: State, resources: Array<Resource>) {
+    state.selectedResources = resources
+  },
+  [SET_SHOW_HIDDEN_RESOURCES] (state: State, showHiddenResources: boolean) {
+    state.showHiddenResources = showHiddenResources
+  },
+  [SET_CLIPBOARD] (state: State, clipboard: Clipboard) {
+    state.selectedResources = []
+    state.clipboard = clipboard
+  },
+  [RESET_CLIPBOARD] (state: State) {
+    state.clipboard = null
   }
 }

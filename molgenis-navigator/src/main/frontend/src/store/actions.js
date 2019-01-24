@@ -1,223 +1,183 @@
 // @flow
-import type {Entity, Package} from '../flow.types'
-import {INITIAL_STATE} from './state'
-// $FlowFixMe
-import api from '@molgenis/molgenis-api-client'
-import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from './mutations'
+import type { Folder, Resource, Job, State } from '../flow.types'
+import {
+  fetchJob,
+  getResourcesByFolderId,
+  getResourcesByQuery,
+  createResource,
+  copyResources,
+  deleteResources,
+  moveResources,
+  updateResource,
+  downloadResources
+} from '../utils/api.js'
+import {
+  ADD_ALERTS,
+  RESET_CLIPBOARD,
+  SET_FOLDER,
+  SET_RESOURCES,
+  ADD_JOB,
+  UPDATE_JOB,
+  SET_SELECTED_RESOURCES
+} from './mutations'
 
-export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
-export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
-export const RESET_STATE = '__RESET_STATE__'
-export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
-export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
-export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
+export const FETCH_RESOURCES = '__FETCH_RESOURCES__'
+export const FETCH_RESOURCES_BY_QUERY = '__FETCH_RESOURCES_BY_QUERY__'
+export const FETCH_RESOURCES_BY_FOLDER = '__FETCH_RESOURCES_BY_FOLDER__'
+export const SELECT_RESOURCE = '__SELECT_RESOURCE__'
+export const DESELECT_RESOURCE = '__DESELECT_RESOURCE__'
+export const SELECT_ALL_RESOURCES = '__SELECT_ALL_RESOURCES__'
+export const DESELECT_ALL_RESOURCES = '__DESELECT_ALL_RESOURCES__'
+export const DELETE_SELECTED_RESOURCES = '__DELETE_SELECTED_RESOURCES__'
+export const CREATE_RESOURCE = '__CREATE_RESOURCE__'
+export const UPDATE_RESOURCE = '__UPDATE_RESOURCE__'
+export const MOVE_CLIPBOARD_RESOURCES = '__MOVE_CLIPBOARD_RESOURCES__'
+export const COPY_CLIPBOARD_RESOURCES = '__COPY_CLIPBOARD_RESOURCES__'
+export const POLL_JOB = '__POLL_JOB__'
+export const DOWNLOAD_SELECTED_RESOURCES = '__DOWNLOAD_SELECTED_RESOURCES__'
 
-const SYS_PACKAGE_ID = 'sys'
-
-/**
- * Recursively build the path, going backwards starting at the currentPackage
- *
- * @param packages, the complete list of packages
- * @param currentPackage, the tail
- * @param path the path where building
- * @returns path, in order array of packages (grandparent, parent, child, ....)
- */
-function buildPath (packages, currentPackage: Package, path: Array<Package>) {
-  if (currentPackage.parent) {
-    const currentParent = currentPackage.parent
-    const parentPackage = packages.find(function (packageItem) {
-      return packageItem.id === currentParent.id
-    })
-    path = buildPath(packages, parentPackage, path)
-  }
-  path.push(currentPackage)
-  return path
-}
-
-/**
- * Transform the result to an Entity object
- *
- * @param item result row form query to backend
- * @returns {{id: *, type: string, label: *, description: *}}
- */
-function toEntity (item: any) {
-  return {
-    'id': item.id,
-    'type': 'entity',
-    'label': item.label,
-    'description': item.description
-  }
-}
-
-/**
- * Get a MOLGENIS rest api encoded query for the Package table
- * The query retrieves the first 1000 packages
- *
- * @param query
- */
-function getPackageQuery (query: string) {
-  return '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
-}
-
-/**
- * Get a MOLGENIS rest api encoded query for the EntityType table
- * The query retrieves the first 1000 EntityTypes
- *
- * @param query
- */
-function getEntityTypeQuery (query: string) {
-  return '/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false'
-}
-
-/**
- *
- * Validating specific input for searchbox
- *
- * @param query query to send to api/v2
- */
-function validateQuery (query: string) {
-  if (query.indexOf('"') > -1) {
-    throw new Error('Double quotes not are allowed in queries, please use single quotes.')
+function finishJob (commit: Function, dispatch: Function, state: State,
+  job: Job) {
+  switch (job.type) {
+    case 'COPY':
+    case 'DELETE':
+      if (job.status === 'SUCCESS') {
+        dispatch(FETCH_RESOURCES)
+      }
+      break
+    case 'DOWNLOAD':
+      break
+    default:
+      throw new Error('unexpected job type \'' + job.type + '\'')
   }
 }
 
-/**
- * Filter out system package unless user is superUser
- * @param packages
- * @returns {Array.<Package>}
- */
-function filterNonVisiblePackages (packages: Array<Package>) {
-  if (INITIAL_STATE.isSuperUser) {
-    return packages
-  }
-
-  return packages
-    .filter(_package => _package.id !== SYS_PACKAGE_ID)
-    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
-}
-
-/**
- * Filter out all system entities unless user is superUser
- * @param entities
- * @returns {Array.<Entity>}
- */
-function filterNonVisibleEntities (entities: Array<Entity>) {
-  if (INITIAL_STATE.isSuperUser) {
-    return entities
-  }
-
-  return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+function pollJob (commit: Function, dispatch: Function, state: State,
+  job: Job) {
+  fetchJob(job).then(updatedJob => {
+    commit(UPDATE_JOB, updatedJob)
+    switch (updatedJob.status) {
+      case 'RUNNING':
+        setTimeout(() => pollJob(commit, dispatch, state, updatedJob), 500)
+        break
+      case 'SUCCESS':
+      case 'FAILED':
+        finishJob(commit, dispatch, state, updatedJob)
+        break
+    }
+  }).catch(error => {
+    commit(ADD_ALERTS, error.alerts)
+  })
 }
 
 export default {
-  [QUERY_PACKAGES] ({commit}: { commit: Function }, query: ?string) {
-    let uri
-
-    if (!query) {
-      uri = '/api/v2/sys_md_Package?sort=label&num=1000'
+  [FETCH_RESOURCES] ({state, dispatch}: { state: State, dispatch: Function }) {
+    if (state.query) {
+      dispatch(FETCH_RESOURCES_BY_QUERY, state.query)
     } else {
-      try {
-        validateQuery(query)
-        uri = getPackageQuery(query)
-        api.get(uri).then(response => {
-          commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
-        }, error => {
-          commit(SET_ERROR, error)
-        })
-      } catch (error) {
-        commit(SET_ERROR, error.message)
-      }
+      dispatch(FETCH_RESOURCES_BY_FOLDER, state.route.params.folderId)
     }
   },
-  [QUERY_ENTITIES] ({commit}: { commit: Function }, query: string) {
-    if (query) {
-      try {
-        validateQuery(query)
-        api.get(getEntityTypeQuery(query)).then(response => {
-          const entities = response.items.map(toEntity)
-          commit(SET_ENTITIES, filterNonVisibleEntities(entities))
-        }, error => {
-          commit(SET_ERROR, error)
-        })
-      } catch (error) {
-        commit(SET_ERROR, error.message)
-      }
+  [FETCH_RESOURCES_BY_QUERY] ({commit}: { commit: Function }, query: string) {
+    getResourcesByQuery(query).then(data => {
+      commit(SET_RESOURCES, data.resources)
+    }).catch(error => {
+      commit(ADD_ALERTS, error.alerts)
+    })
+  },
+  [FETCH_RESOURCES_BY_FOLDER] ({commit, dispatch}: { commit: Function, dispatch: Function }, folderId: ?string) {
+    getResourcesByFolderId(folderId).then(data => {
+      // if folder changed, then remove selection
+      // if folder same, then update selection
+
+      commit(SET_FOLDER, data.folder)
+      commit(SET_RESOURCES, data.resources)
+    }).catch(error => {
+      commit(ADD_ALERTS, error.alerts)
+    })
+  },
+  [SELECT_ALL_RESOURCES] ({commit, state}: { commit: Function, state: State }) {
+    commit(SET_SELECTED_RESOURCES, state.resources.slice())
+  },
+  [DESELECT_ALL_RESOURCES] ({commit}: { commit: Function }) {
+    commit(SET_SELECTED_RESOURCES, [])
+  },
+  [SELECT_RESOURCE] ({commit, state}: { commit: Function, state: State }, resource: Resource) {
+    commit(SET_SELECTED_RESOURCES, state.selectedResources.concat(resource))
+  },
+  [DESELECT_RESOURCE] ({commit, state}: { commit: Function, state: State }, resource: Resource) {
+    commit(SET_SELECTED_RESOURCES, state.selectedResources.filter(selectedResource => !(selectedResource.type === resource.type && selectedResource.id === resource.id)))
+  },
+  [DELETE_SELECTED_RESOURCES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
+    if (state.selectedResources.length > 0) {
+      deleteResources(state.selectedResources).then(job => {
+        commit(SET_SELECTED_RESOURCES, [])
+        commit(ADD_JOB, job)
+        setTimeout(() => dispatch(POLL_JOB, job), 500)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
     }
   },
-  [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
-      const entities = response.items.map(toEntity)
-      commit(SET_ENTITIES, entities)
-    }, error => {
-      commit(SET_ERROR, error)
+  [CREATE_RESOURCE] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    resource: Resource) {
+    createResource(resource, state.folder).then(() => {
+      dispatch(FETCH_RESOURCES)
+    }).catch(error => {
+      commit(ADD_ALERTS, error.alerts)
     })
   },
-  [RESET_STATE] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""').then(response => {
-      const visibleRootPackages = filterNonVisiblePackages(response.items)
-      commit(SET_PACKAGES, visibleRootPackages)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""').then(response => {
-      const entities = response.items.map(toEntity)
-      const visibleRootEntities = filterNonVisibleEntities(entities)
-      commit(SET_ENTITIES, visibleRootEntities)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
-
-    commit(RESET_PATH)
+  [UPDATE_RESOURCE] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    updatedResource: Resource) {
+    const resource = state.resources.find(
+      resource => resource.type === updatedResource.type && resource.id === updatedResource.id)
+    if (resource !== undefined) {
+      updateResource(resource, updatedResource).then(() => {
+        dispatch(FETCH_RESOURCES)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    } else {
+      throw new Error(
+        'UPDATE_RESOURCE requires updated resource to refer to existing resource')
+    }
   },
-  [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function }, lookupId: string) {
-    api.get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
-      // At the moment each entity is stored in either a single package, or no package at all
-      if (response.items.length > 0) {
-        const entityType = response.items[0]
-        const _package = entityType['package']
-        if (_package) {
-          dispatch(GET_STATE_FOR_PACKAGE, _package.id)
-        } else {
-          // In case entity is not in package fallback to searching for entity name.
-          const entityLabel = entityType.label
-          commit(SET_QUERY, entityLabel)
-          dispatch(QUERY_ENTITIES, entityLabel)
-        }
-      } else {
-        dispatch(RESET_STATE)
-      }
-    }, error => {
-      commit(SET_ERROR, error)
-    })
+  [MOVE_CLIPBOARD_RESOURCES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    folder: ?Folder) {
+    if (state.clipboard && state.clipboard.resources.length > 0) {
+      moveResources(state.clipboard.resources, folder).then(() => {
+        commit(RESET_CLIPBOARD)
+        dispatch(FETCH_RESOURCES)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    }
   },
-  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
-      const packages = filterNonVisiblePackages(response.items)
-
-      if (!selectedPackageId) {
-        dispatch(RESET_STATE)
-      } else {
-        const selectedPackage = packages.find(function (packageItem) {
-          return packageItem.id === selectedPackageId
-        })
-
-        if (!selectedPackage) {
-          commit(SET_ERROR, 'couldn\'t find package.')
-          dispatch(RESET_STATE)
-        } else {
-          // Find child packages.
-          const childPackages = packages.filter(function (packageItem) {
-            return packageItem.parent && packageItem.parent.id === selectedPackage.id
-          })
-          commit(SET_PACKAGES, childPackages)
-
-          const path = buildPath(packages, selectedPackage, [])
-          commit(SET_PATH, path)
-          dispatch(GET_ENTITIES_IN_PACKAGE, selectedPackageId)
-        }
-      }
-    }, error => {
-      commit(SET_ERROR, error)
-    })
+  [COPY_CLIPBOARD_RESOURCES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    folder: ?Folder) {
+    if (state.clipboard && state.clipboard.resources.length > 0) {
+      copyResources(state.clipboard.resources, folder).then(job => {
+        commit(RESET_CLIPBOARD)
+        commit(ADD_JOB, job)
+        dispatch(POLL_JOB, job)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    }
+  },
+  [POLL_JOB] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    job: Job) {
+    pollJob(commit, dispatch, state, job)
+  },
+  [DOWNLOAD_SELECTED_RESOURCES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
+    if (state.selectedResources.length > 0) {
+      downloadResources(state.selectedResources).then(job => {
+        commit(SET_SELECTED_RESOURCES, [])
+        commit(ADD_JOB, job)
+        setTimeout(() => dispatch(POLL_JOB, job), 500)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    }
   }
 }

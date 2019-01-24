@@ -1,36 +1,31 @@
 package org.molgenis.app.manager.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-/**
- * Thrown when an app name contains illegal characters
- */
-// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false positives at dev time
-@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
-public class IllegalAppNameException extends CodedRuntimeException
-{
-	private static final String ERROR_CODE = "AM10";
+import org.molgenis.i18n.CodedRuntimeException;
 
-	private final String name;
+/** Thrown when an app name contains illegal characters */
+// S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
+// positives at dev time
+@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+public class IllegalAppNameException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "AM10";
 
-	public IllegalAppNameException(String id)
-	{
-		super(ERROR_CODE);
-		this.name = requireNonNull(id);
-	}
+  private final String name;
 
-	@Override
-	public String getMessage()
-	{
-		return format("name:%s", name);
-	}
+  public IllegalAppNameException(String id) {
+    super(ERROR_CODE);
+    this.name = requireNonNull(id);
+  }
 
-	@Override
-	protected Object[] getLocalizedMessageArguments()
-	{
-		return new Object[] { name };
-	}
+  @Override
+  public String getMessage() {
+    return format("name:%s", name);
+  }
+
+  @Override
+  protected Object[] getLocalizedMessageArguments() {
+    return new Object[] {name};
+  }
 }

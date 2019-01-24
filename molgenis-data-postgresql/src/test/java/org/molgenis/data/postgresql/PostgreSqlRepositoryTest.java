@@ -1,9 +1,39 @@
 package org.molgenis.data.postgresql;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.postgresql.PostgreSqlExceptionTranslator.VALUE_TOO_LONG_MSG;
+import static org.testng.Assert.assertEquals;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+import javax.sql.DataSource;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.molgenis.data.Entity;
@@ -12,9 +42,9 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.validation.ConstraintViolation;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -24,271 +54,252 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+public class PostgreSqlRepositoryTest {
+  private PostgreSqlRepository postgreSqlRepo;
+  @Mock private JdbcTemplate jdbcTemplate;
+  @Mock private PostgreSqlEntityFactory postgreSqlEntityFactory;
+  @Mock private DataSource dataSource;
+  @Mock private EntityType entityType;
+  @Mock private Query<Entity> query;
+  @Mock private RowMapper<Entity> rowMapper;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
-import static org.mockito.quality.Strictness.STRICT_STUBS;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.postgresql.PostgreSqlExceptionTranslator.VALUE_TOO_LONG_MSG;
-import static org.testng.Assert.assertEquals;
+  private MockitoSession mockitoSession;
 
-public class PostgreSqlRepositoryTest
-{
-	private PostgreSqlRepository postgreSqlRepo;
-	@Mock
-	private JdbcTemplate jdbcTemplate;
-	@Mock
-	private PostgreSqlEntityFactory postgreSqlEntityFactory;
-	@Mock
-	private DataSource dataSource;
-	@Mock
-	private EntityType entityType;
-	@Mock
-	private Query<Entity> query;
-	@Mock
-	private RowMapper<Entity> rowMapper;
+  @BeforeMethod
+  public void setUpBeforeMethod() throws Exception {
+    mockitoSession = mockitoSession().initMocks(this).strictness(STRICT_STUBS).startMocking();
+    postgreSqlRepo =
+        new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
+  }
 
-	private MockitoSession mockitoSession;
+  @AfterMethod
+  public void afterMethod() {
+    mockitoSession.finishMocking();
+  }
 
-	@BeforeMethod
-	public void setUpBeforeMethod() throws Exception
-	{
-		mockitoSession = mockitoSession().initMocks(this).strictness(STRICT_STUBS).startMocking();
-		postgreSqlRepo = new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
-	}
+  // TODO test all query operators for one-to-many
+  @Test
+  public void countQueryOneToManyEquals() throws Exception {
+    String oneToManyAttrName = "oneToManyAttr";
+    String refIdAttrName = "refEntityId";
+    Attribute refIdAttr = mock(Attribute.class);
+    when(refIdAttr.getName()).thenReturn(refIdAttrName);
+    when(refIdAttr.getDataType()).thenReturn(INT);
 
-	@AfterMethod
-	public void afterMethod()
-	{
-		mockitoSession.finishMocking();
-	}
+    String xrefAttrName = "xrefAttr";
+    Attribute xrefAttr = mock(Attribute.class);
+    when(xrefAttr.getName()).thenReturn(xrefAttrName);
 
-	// TODO test all query operators for one-to-many
-	@Test
-	public void countQueryOneToManyEquals() throws Exception
-	{
-		String oneToManyAttrName = "oneToManyAttr";
-		String refIdAttrName = "refEntityId";
-		Attribute refIdAttr = mock(Attribute.class);
-		when(refIdAttr.getName()).thenReturn(refIdAttrName);
-		when(refIdAttr.getDataType()).thenReturn(INT);
+    EntityType refEntityMeta = mock(EntityType.class);
+    when(refEntityMeta.getId()).thenReturn("refEntityId");
+    when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 
-		String xrefAttrName = "xrefAttr";
-		Attribute xrefAttr = mock(Attribute.class);
-		when(xrefAttr.getName()).thenReturn(xrefAttrName);
+    String idAttrName = "entityId";
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getName()).thenReturn(idAttrName);
 
-		EntityType refEntityMeta = mock(EntityType.class);
-		when(refEntityMeta.getId()).thenReturn("refEntityId");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+    Attribute oneToManyAttr = mock(Attribute.class);
+    when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
+    when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
+    when(oneToManyAttr.isMappedBy()).thenReturn(true);
+    when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
-		String idAttrName = "entityId";
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.getName()).thenReturn(idAttrName);
+    when(entityType.getId()).thenReturn("entityId");
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    doReturn(oneToManyAttr).when(entityType).getAttribute(oneToManyAttrName);
 
-		Attribute oneToManyAttr = mock(Attribute.class);
-		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
-		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.isMappedBy()).thenReturn(true);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
+    int queryValue = 2;
+    QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
+    when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		when(entityType.getId()).thenReturn("entityId");
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		doReturn(oneToManyAttr).when(entityType).getAttribute(oneToManyAttrName);
+    String sql =
+        "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+    long count = 123L;
+    when(jdbcTemplate.queryForObject(sql, new Object[] {queryValue}, Long.class)).thenReturn(count);
 
-		int queryValue = 2;
-		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
-		when(query.getRules()).thenReturn(singletonList(queryRule));
+    assertEquals(postgreSqlRepo.count(query), count);
+  }
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
-		long count = 123L;
-		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
+  @Test
+  public void findAllQueryOneToManyEquals() throws Exception {
+    String oneToManyAttrName = "oneToManyAttr";
+    String refIdAttrName = "refEntityId";
+    Attribute refIdAttr = mock(Attribute.class);
+    when(refIdAttr.getName()).thenReturn(refIdAttrName);
+    when(refIdAttr.getDataType()).thenReturn(INT);
+    when(refIdAttr.isUnique()).thenReturn(true);
 
-		assertEquals(postgreSqlRepo.count(query), count);
-	}
+    String xrefAttrName = "xrefAttr";
+    Attribute xrefAttr = mock(Attribute.class);
+    when(xrefAttr.getName()).thenReturn(xrefAttrName);
 
-	@Test
-	public void findAllQueryOneToManyEquals() throws Exception
-	{
-		String oneToManyAttrName = "oneToManyAttr";
-		String refIdAttrName = "refEntityId";
-		Attribute refIdAttr = mock(Attribute.class);
-		when(refIdAttr.getName()).thenReturn(refIdAttrName);
-		when(refIdAttr.getDataType()).thenReturn(INT);
-		when(refIdAttr.isUnique()).thenReturn(true);
+    EntityType refEntityMeta = mock(EntityType.class);
+    when(refEntityMeta.getId()).thenReturn("refEntityId");
+    when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+    doReturn(refIdAttr).when(refEntityMeta).getAttribute(refIdAttrName);
 
-		String xrefAttrName = "xrefAttr";
-		Attribute xrefAttr = mock(Attribute.class);
-		when(xrefAttr.getName()).thenReturn(xrefAttrName);
+    String idAttrName = "entityId";
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getName()).thenReturn(idAttrName);
+    when(idAttr.getDataType()).thenReturn(STRING);
 
-		EntityType refEntityMeta = mock(EntityType.class);
-		when(refEntityMeta.getId()).thenReturn("refEntityId");
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		doReturn(refIdAttr).when(refEntityMeta).getAttribute(refIdAttrName);
+    Attribute oneToManyAttr = mock(Attribute.class);
+    when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
+    when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
+    when(oneToManyAttr.isMappedBy()).thenReturn(true);
+    when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
-		String idAttrName = "entityId";
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.getName()).thenReturn(idAttrName);
-		when(idAttr.getDataType()).thenReturn(STRING);
+    when(entityType.getId()).thenReturn("entityId");
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(entityType.getAttribute("entityId")).thenReturn(idAttr);
+    doReturn(oneToManyAttr).when(entityType).getAttribute(oneToManyAttrName);
+    when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
+    EntityType entityType = this.entityType;
+    postgreSqlRepo =
+        new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
 
-		Attribute oneToManyAttr = mock(Attribute.class);
-		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
-		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.isMappedBy()).thenReturn(true);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
+    int queryValue = 2;
+    QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
+    when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		when(entityType.getId()).thenReturn("entityId");
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getAttribute("entityId")).thenReturn(idAttr);
-		doReturn(oneToManyAttr).when(entityType).getAttribute(oneToManyAttrName);
-		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
-		EntityType entityType = this.entityType;
-		postgreSqlRepo = new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
+    String sql =
+        "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"entityId\" = \"refEntityId#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ? ORDER BY \"entityId\" ASC LIMIT 1000";
 
-		int queryValue = 2;
-		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
-		when(query.getRules()).thenReturn(singletonList(queryRule));
+    when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
+    Entity entity0 = mock(Entity.class);
+    when(jdbcTemplate.query(sql, new Object[] {queryValue}, rowMapper))
+        .thenReturn(singletonList(entity0));
+    assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
+  }
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"entityId\" = \"refEntityId#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ? ORDER BY \"entityId\" ASC LIMIT 1000";
+  @Test
+  public void testUpdateEntitiesExist() {
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getName()).thenReturn("attr");
+    when(idAttr.getDataType()).thenReturn(STRING);
 
-		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
-		Entity entity0 = mock(Entity.class);
-		when(jdbcTemplate.query(sql, new Object[] { queryValue }, rowMapper)).thenReturn(singletonList(entity0));
-		assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
-	}
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
+    when(entityType.getId()).thenReturn("entity");
 
-	@Test
-	public void testUpdateEntitiesExist()
-	{
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.getName()).thenReturn("attr");
-		when(idAttr.getDataType()).thenReturn(STRING);
+    Entity entity0 = mock(Entity.class);
+    Entity entity1 = mock(Entity.class);
 
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
-		when(entityType.getId()).thenReturn("entity");
+    when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
+        .thenReturn(new int[] {2});
 
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
+    postgreSqlRepo.update(Stream.of(entity0, entity1));
+    verify(jdbcTemplate).batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class));
+    verifyNoMoreInteractions(jdbcTemplate);
+  }
 
-		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(
-				new int[] { 2 });
+  @SuppressWarnings("unchecked")
+  @Test(
+      expectedExceptions = MolgenisValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Cannot update \\[entity\\] with id \\[id1\\] because it does not exist")
+  public void testUpdateEntityDoesNotExist() {
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getName()).thenReturn("attr");
+    when(idAttr.getDataType()).thenReturn(STRING);
 
-		postgreSqlRepo.update(Stream.of(entity0, entity1));
-		verify(jdbcTemplate).batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class));
-		verifyNoMoreInteractions(jdbcTemplate);
-	}
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
+    when(entityType.getId()).thenReturn("entity");
+    when(entityType.getAttribute("attr")).thenReturn(idAttr);
 
-	@SuppressWarnings("unchecked")
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Cannot update \\[entity\\] with id \\[id1\\] because it does not exist")
-	public void testUpdateEntityDoesNotExist()
-	{
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.getName()).thenReturn("attr");
-		when(idAttr.getDataType()).thenReturn(STRING);
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn("id0");
+    Entity entity1 = mock(Entity.class);
+    when(entity1.getIdValue()).thenReturn("id1");
 
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
-		when(entityType.getId()).thenReturn("entity");
-		when(entityType.getAttribute("attr")).thenReturn(idAttr);
+    when(jdbcTemplate.query(any(String.class), any(Object[].class), (RowMapper) isNull()))
+        .thenReturn(singletonList(entity0));
+    when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
+        .thenReturn(new int[] {1});
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn("id0");
-		Entity entity1 = mock(Entity.class);
-		when(entity1.getIdValue()).thenReturn("id1");
+    postgreSqlRepo.update(Stream.of(entity0, entity1));
+  }
 
-		when(jdbcTemplate.query(any(String.class), any(Object[].class), (RowMapper) isNull())).thenReturn(
-				singletonList(entity0));
-		when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class))).thenReturn(
-				new int[] { 1 });
+  @SuppressWarnings("ConstantConditions")
+  @Test(
+      expectedExceptions = NullPointerException.class,
+      expectedExceptionsMessageRegExp = "PostgreSqlRepository.add\\(\\) failed: entity was null")
+  public void testAddEntityNull() {
+    Entity entity = null;
+    postgreSqlRepo.add(entity);
+  }
 
-		postgreSqlRepo.update(Stream.of(entity0, entity1));
-	}
+  @DataProvider(name = "provideValidMrefIds")
+  public Object[][] provideValidMrefIds() throws SQLException {
+    ResultSet stringRow = mock(ResultSet.class);
+    doReturn("idValue").when(stringRow).getString(1);
+    doReturn("refValue").when(stringRow).getString(3);
 
-	@SuppressWarnings("ConstantConditions")
-	@Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "PostgreSqlRepository.add\\(\\) failed: entity was null")
-	public void testAddEntityNull()
-	{
-		Entity entity = null;
-		postgreSqlRepo.add(entity);
-	}
+    ResultSet intRow = mock(ResultSet.class);
+    doReturn(1).when(intRow).getInt(1);
+    doReturn(2).when(intRow).getInt(3);
 
-	@DataProvider(name = "provideValidMrefIds")
-	public Object[][] provideValidMrefIds() throws SQLException
-	{
-		ResultSet stringRow = mock(ResultSet.class);
-		doReturn("idValue").when(stringRow).getString(1);
-		doReturn("refValue").when(stringRow).getString(3);
+    ResultSet longRow = mock(ResultSet.class);
+    doReturn(1L).when(longRow).getLong(1);
+    doReturn(2L).when(longRow).getLong(3);
 
-		ResultSet intRow = mock(ResultSet.class);
-		doReturn(1).when(intRow).getInt(1);
-		doReturn(2).when(intRow).getInt(3);
+    return new Object[][] {
+      {STRING, STRING, stringRow, ImmutableMap.of("idValue", ImmutableList.of("refValue"))},
+      {INT, INT, intRow, ImmutableMap.of(1, ImmutableList.of(2))},
+      {LONG, LONG, longRow, ImmutableMap.of(1L, ImmutableList.of(2L))}
+    };
+  }
 
-		ResultSet longRow = mock(ResultSet.class);
-		doReturn(1L).when(longRow).getLong(1);
-		doReturn(2L).when(longRow).getLong(3);
+  @Test(
+      expectedExceptions = MolgenisValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "One of the mref values in entity type \\[test_entity\\] attribute \\[mref_attr\\] is too long.")
+  public void testMrefValueTooLong() {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getName()).thenReturn("mref_attr");
 
-		return new Object[][] { { STRING, STRING, stringRow, ImmutableMap.of("idValue", ImmutableList.of("refValue")) },
-				{ INT, INT, intRow, ImmutableMap.of(1, ImmutableList.of(2)) },
-				{ LONG, LONG, longRow, ImmutableMap.of(1L, ImmutableList.of(2L)) } };
-	}
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getName()).thenReturn("id");
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(entityType.getId()).thenReturn("test_entity");
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "One of the mref values in entity type \\[test_entity\\] attribute \\[mref_attr\\] is too long.")
-	public void testMrefValueTooLong()
-	{
-		Attribute attr = mock(Attribute.class);
-		when(attr.getName()).thenReturn("mref_attr");
+    MolgenisValidationException mve =
+        new MolgenisValidationException(new ConstraintViolation(VALUE_TOO_LONG_MSG));
 
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.getName()).thenReturn("id");
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(entityType.getId()).thenReturn("test_entity");
+    when(jdbcTemplate.batchUpdate(any(), any(BatchPreparedStatementSetter.class))).thenThrow(mve);
 
-		MolgenisValidationException mve = new MolgenisValidationException(new ConstraintViolation(VALUE_TOO_LONG_MSG));
+    HashMap<String, Object> value = newHashMap();
+    value.put("mref_attr", "TOOLONG");
 
-		when(jdbcTemplate.batchUpdate(any(), any(BatchPreparedStatementSetter.class))).thenThrow(mve);
+    postgreSqlRepo.addMrefs(newArrayList(value), attr);
+  }
 
-		HashMap<String, Object> value = newHashMap();
-		value.put("mref_attr", "TOOLONG");
+  @Test(dataProvider = "provideValidMrefIds")
+  public void testMrefIdRowCallbackHandlerString(
+      AttributeType idType, AttributeType refType, ResultSet row, Map<Object, List<Object>> result)
+      throws SQLException {
+    Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
+    RowCallbackHandler mrefIdRowCallbackHandler =
+        postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType, mrefIDs);
+    mrefIdRowCallbackHandler.processRow(row);
 
-		postgreSqlRepo.addMrefs(newArrayList(value), attr);
-	}
+    assertEquals(mrefIDs.asMap(), result);
+  }
 
-	@Test(dataProvider = "provideValidMrefIds")
-	public void testMrefIdRowCallbackHandlerString(AttributeType idType, AttributeType refType, ResultSet row,
-			Map<Object, List<Object>> result) throws SQLException
-	{
-		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
-		RowCallbackHandler mrefIdRowCallbackHandler = postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType,
-				mrefIDs);
-		mrefIdRowCallbackHandler.processRow(row);
+  @DataProvider(name = "provideInvalidMrefIds")
+  public Object[][] provideInvalidMrefIds() throws SQLException {
+    return new Object[][] {{XREF, STRING}, {INT, MREF}};
+  }
 
-		assertEquals(mrefIDs.asMap(), result);
-	}
-
-	@DataProvider(name = "provideInvalidMrefIds")
-	public Object[][] provideInvalidMrefIds() throws SQLException
-	{
-		return new Object[][] { { XREF, STRING }, { INT, MREF } };
-	}
-
-	@Test(dataProvider = "provideInvalidMrefIds", expectedExceptions = UnexpectedEnumException.class)
-	public void testMrefIdRowCallbackHandlerInvalidType(AttributeType idType, AttributeType refType) throws SQLException
-	{
-		RowCallbackHandler mrefIdRowCallbackHandler = postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType,
-				ArrayListMultimap.create());
-		mrefIdRowCallbackHandler.processRow(mock(ResultSet.class));
-	}
+  @Test(dataProvider = "provideInvalidMrefIds", expectedExceptions = UnexpectedEnumException.class)
+  public void testMrefIdRowCallbackHandlerInvalidType(AttributeType idType, AttributeType refType)
+      throws SQLException {
+    RowCallbackHandler mrefIdRowCallbackHandler =
+        postgreSqlRepo.getJunctionTableRowCallbackHandler(
+            idType, refType, ArrayListMultimap.create());
+    mrefIdRowCallbackHandler.processRow(mock(ResultSet.class));
+  }
 }

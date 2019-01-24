@@ -1,197 +1,170 @@
 package org.molgenis.security.account;
 
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+class RegisterRequest {
+  private String recaptcha;
+  @NotNull private String username;
 
-class RegisterRequest
-{
-	@NotNull
-	private String username;
-	@NotNull
-	@Size(min = MIN_PASSWORD_LENGTH)
-	private String password;
-	@NotNull
-	@Size(min = MIN_PASSWORD_LENGTH)
-	private String confirmPassword;
-	@NotNull
-	@Email
-	private String email;
-	private String phone;
-	private String fax;
-	private String tollFreePhone;
-	private String title;
-	@NotNull
-	private String lastname;
-	@NotNull
-	private String firstname;
-	private Integer institute;
-	private String department;
-	private Integer position;
-	private String address;
-	private String city;
-	private String country;
+  @NotNull
+  @Size(min = MIN_PASSWORD_LENGTH)
+  private String password;
 
-	public String getUsername()
-	{
-		return username;
-	}
+  @NotNull
+  @Size(min = MIN_PASSWORD_LENGTH)
+  private String confirmPassword;
 
-	public void setUsername(String username)
-	{
-		this.username = username;
-	}
+  @NotNull @Email private String email;
+  private String phone;
+  private String fax;
+  private String tollFreePhone;
+  private String title;
+  @NotNull private String lastname;
+  @NotNull private String firstname;
+  private Integer institute;
+  private String department;
+  private Integer position;
+  private String address;
+  private String city;
+  private String country;
 
-	public String getPassword()
-	{
-		return password;
-	}
+  public String getRecaptcha() {
+    return recaptcha;
+  }
 
-	public void setPassword(String password)
-	{
-		this.password = password;
-	}
+  public void setRecaptcha(String recaptcha) {
+    this.recaptcha = recaptcha;
+  }
 
-	public String getConfirmPassword()
-	{
-		return confirmPassword;
-	}
+  public String getUsername() {
+    return username;
+  }
 
-	public void setConfirmPassword(String confirmPassword)
-	{
-		this.confirmPassword = confirmPassword;
-	}
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
-	public String getEmail()
-	{
-		return email;
-	}
+  public String getPassword() {
+    return password;
+  }
 
-	public void setEmail(String email)
-	{
-		this.email = email;
-	}
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
-	public String getPhone()
-	{
-		return phone;
-	}
+  public String getConfirmPassword() {
+    return confirmPassword;
+  }
 
-	public void setPhone(String phone)
-	{
-		this.phone = phone;
-	}
+  public void setConfirmPassword(String confirmPassword) {
+    this.confirmPassword = confirmPassword;
+  }
 
-	public String getFax()
-	{
-		return fax;
-	}
+  public String getEmail() {
+    return email;
+  }
 
-	public void setFax(String fax)
-	{
-		this.fax = fax;
-	}
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-	public String getTollFreePhone()
-	{
-		return tollFreePhone;
-	}
+  public String getPhone() {
+    return phone;
+  }
 
-	public void setTollFreePhone(String tollFreePhone)
-	{
-		this.tollFreePhone = tollFreePhone;
-	}
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
 
-	public String getTitle()
-	{
-		return title;
-	}
+  public String getFax() {
+    return fax;
+  }
 
-	public void setTitle(String title)
-	{
-		this.title = title;
-	}
+  public void setFax(String fax) {
+    this.fax = fax;
+  }
 
-	public String getLastname()
-	{
-		return lastname;
-	}
+  public String getTollFreePhone() {
+    return tollFreePhone;
+  }
 
-	public void setLastname(String lastname)
-	{
-		this.lastname = lastname;
-	}
+  public void setTollFreePhone(String tollFreePhone) {
+    this.tollFreePhone = tollFreePhone;
+  }
 
-	public String getFirstname()
-	{
-		return firstname;
-	}
+  public String getTitle() {
+    return title;
+  }
 
-	public void setFirstname(String firstname)
-	{
-		this.firstname = firstname;
-	}
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-	public Integer getInstitute()
-	{
-		return institute;
-	}
+  public String getLastname() {
+    return lastname;
+  }
 
-	public void setInstitute(Integer institute)
-	{
-		this.institute = institute;
-	}
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
 
-	public String getDepartment()
-	{
-		return department;
-	}
+  public String getFirstname() {
+    return firstname;
+  }
 
-	public void setDepartment(String department)
-	{
-		this.department = department;
-	}
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
 
-	public Integer getPosition()
-	{
-		return position;
-	}
+  public Integer getInstitute() {
+    return institute;
+  }
 
-	public void setPosition(Integer position)
-	{
-		this.position = position;
-	}
+  public void setInstitute(Integer institute) {
+    this.institute = institute;
+  }
 
-	public String getAddress()
-	{
-		return address;
-	}
+  public String getDepartment() {
+    return department;
+  }
 
-	public void setAddress(String address)
-	{
-		this.address = address;
-	}
+  public void setDepartment(String department) {
+    this.department = department;
+  }
 
-	public String getCity()
-	{
-		return city;
-	}
+  public Integer getPosition() {
+    return position;
+  }
 
-	public void setCity(String city)
-	{
-		this.city = city;
-	}
+  public void setPosition(Integer position) {
+    this.position = position;
+  }
 
-	public String getCountry()
-	{
-		return country;
-	}
+  public String getAddress() {
+    return address;
+  }
 
-	public void setCountry(String country)
-	{
-		this.country = country;
-	}
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
+  public String getCity() {
+    return city;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
 }

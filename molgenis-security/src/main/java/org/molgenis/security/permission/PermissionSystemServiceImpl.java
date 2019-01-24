@@ -1,51 +1,47 @@
 package org.molgenis.security.permission;
 
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+
+import java.util.Collection;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionSystemService;
-import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-
-import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-
-/**
- * @deprecated use {@link org.springframework.security.acls.model.MutableAclService}
- */
+/** @deprecated use {@link org.springframework.security.acls.model.MutableAclService} */
 @Deprecated
 @Component
-public class PermissionSystemServiceImpl implements PermissionSystemService
-{
-	private final MutableAclService mutableAclService;
+public class PermissionSystemServiceImpl implements PermissionSystemService {
+  private final MutableAclService mutableAclService;
 
-	public PermissionSystemServiceImpl(MutableAclService mutableAclService)
-	{
-		this.mutableAclService = requireNonNull(mutableAclService);
-	}
+  public PermissionSystemServiceImpl(MutableAclService mutableAclService) {
+    this.mutableAclService = requireNonNull(mutableAclService);
+  }
 
-	@Override
-	public void giveUserWriteMetaPermissions(EntityType entityType)
-	{
-		giveUserWriteMetaPermissions(singletonList(entityType));
-	}
+  @Override
+  public void giveUserWriteMetaPermissions(EntityType entityType) {
+    giveUserWriteMetaPermissions(singletonList(entityType));
+  }
 
-	@Override
-	public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes)
-	{
-		Sid sid = SidUtils.createUserSid(getCurrentUsername());
-		runAsSystem(() -> entityTypes.forEach(entityType ->
-		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType));
-			acl.insertAce(acl.getEntries().size(), PermissionSet.WRITEMETA, sid, true);
-			mutableAclService.updateAcl(acl);
-		}));
-	}
+  @Override
+  public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes) {
+    Sid sid = SidUtils.createSecurityContextSid();
+    runAsSystem(
+        () ->
+            entityTypes.forEach(
+                entityType -> {
+                  MutableAcl acl =
+                      (MutableAcl)
+                          mutableAclService.readAclById(new EntityTypeIdentity(entityType));
+                  acl.insertAce(acl.getEntries().size(), PermissionSet.WRITEMETA, sid, true);
+                  mutableAclService.updateAcl(acl);
+                }));
+  }
 }

@@ -1,73 +1,122 @@
 package org.molgenis.data.decorator.meta;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import java.util.List;
+import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.molgenis.test.AbstractMockitoTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
+  @Mock private DynamicRepositoryDecoratorRegistry registry;
+  @Mock private DataService dataService;
+  @Mock private DynamicDecorator existingDecorator;
+  @Mock private DynamicDecorator removedDecorator;
+  @Mock private DynamicDecorator newDecorator;
+  @Mock private DynamicRepositoryDecoratorFactory dynamicRepositoryDecoratorFactory;
+  @Mock private DynamicDecoratorFactory dynamicDecoratorFactory;
 
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
-import static org.testng.Assert.assertEquals;
+  @Captor private ArgumentCaptor<Stream<DecoratorParameters>> parameterCaptor;
 
-public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest
-{
-	@Mock
-	private DynamicRepositoryDecoratorRegistry registry;
-	@Mock
-	private DataService dataService;
-	@Mock
-	private DynamicDecorator decorator1;
-	@Mock
-	private DynamicDecorator decorator2;
-	@Mock
-	private DynamicDecorator decorator3;
-	@Mock
-	private DynamicRepositoryDecoratorFactory dynamicRepositoryDecoratorFactory;
+  private DynamicDecoratorPopulator populator;
 
-	@Test
-	public void testPopulate()
-	{
-		when(decorator1.getId()).thenReturn("id1");
-		when(decorator2.getId()).thenReturn("id2");
-		when(decorator3.getId()).thenReturn("id3");
-		DynamicDecoratorFactory dynamicDecoratorFactory = mock(DynamicDecoratorFactory.class);
+  @BeforeMethod
+  public void beforeMethod() {
+    populator = new DynamicDecoratorPopulator(dataService, registry, dynamicDecoratorFactory);
+  }
 
-		when(decorator3.setLabel(any())).thenReturn(decorator3);
-		when(decorator3.setDescription(any())).thenReturn(decorator3);
+  @Test
+  public void testPopulate() {
+    when(existingDecorator.getId()).thenReturn("id1");
+    when(removedDecorator.getId()).thenReturn("id2");
+    when(newDecorator.getId()).thenReturn("id3");
 
-		when(registry.getFactoryIds()).thenAnswer(invocation -> Stream.of("id1", "id3"));
-		when(registry.getFactory("id3")).thenReturn(dynamicRepositoryDecoratorFactory);
-		when(dataService.findAll(DYNAMIC_DECORATOR, DynamicDecorator.class)).thenAnswer(
-				invocation -> Stream.of(decorator1, decorator2));
+    when(newDecorator.setLabel(any())).thenReturn(newDecorator);
+    when(newDecorator.setDescription(any())).thenReturn(newDecorator);
+    when(newDecorator.setSchema(any())).thenReturn(newDecorator);
 
-		when(dataService.findOneById(DYNAMIC_DECORATOR, "id1", DynamicDecorator.class)).thenReturn(decorator1);
+    when(registry.getFactoryIds()).thenAnswer(invocation -> Stream.of("id1", "id3"));
+    when(registry.getFactory("id3")).thenReturn(dynamicRepositoryDecoratorFactory);
+    when(dataService.findAll(DYNAMIC_DECORATOR, DynamicDecorator.class))
+        .thenAnswer(invocation -> Stream.of(existingDecorator, removedDecorator));
 
-		when(dynamicDecoratorFactory.create("id3")).thenReturn(decorator3);
-		when(dynamicRepositoryDecoratorFactory.getLabel()).thenReturn("label3");
-		when(dynamicRepositoryDecoratorFactory.getDescription()).thenReturn("desc3");
+    when(dataService.findOneById(DYNAMIC_DECORATOR, "id1", DynamicDecorator.class))
+        .thenReturn(existingDecorator);
 
-		DynamicDecoratorPopulator populator = new DynamicDecoratorPopulator(dataService, registry,
-				dynamicDecoratorFactory);
-		populator.populate();
+    when(dynamicDecoratorFactory.create("id3")).thenReturn(newDecorator);
+    when(dynamicRepositoryDecoratorFactory.getLabel()).thenReturn("label3");
+    when(dynamicRepositoryDecoratorFactory.getDescription()).thenReturn("desc3");
 
-		ArgumentCaptor<Stream<DynamicDecorator>> decoratorCaptor = forClass(Stream.class);
-		ArgumentCaptor<Stream<Object>> stringCaptor = forClass(Stream.class);
+    populator.populate();
 
-		verify(dataService).add(eq(DYNAMIC_DECORATOR), decoratorCaptor.capture());
-		verify(dataService).deleteAll(eq(DYNAMIC_DECORATOR), stringCaptor.capture());
-		List<DynamicDecorator> addedDecorators = decoratorCaptor.getValue().collect(Collectors.toList());
-		List<Object> deletedDecorators = stringCaptor.getValue().collect(Collectors.toList());
-		assertEquals(addedDecorators.size(), 1);
-		assertEquals(addedDecorators.get(0).getId(), "id3");
-		assertEquals(deletedDecorators.size(), 1);
-		assertEquals(deletedDecorators.get(0), "id2");
-	}
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<DynamicDecorator>> decoratorCaptor = forClass(Stream.class);
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Object>> stringCaptor = forClass(Stream.class);
+
+    verify(dataService).add(eq(DYNAMIC_DECORATOR), decoratorCaptor.capture());
+    verify(dataService).deleteAll(eq(DYNAMIC_DECORATOR), stringCaptor.capture());
+    List<DynamicDecorator> addedDecorators = decoratorCaptor.getValue().collect(toList());
+    List<Object> deletedDecorators = stringCaptor.getValue().collect(toList());
+    assertEquals(addedDecorators.size(), 1);
+    assertEquals(addedDecorators.get(0).getId(), "id3");
+    assertEquals(deletedDecorators.size(), 1);
+    assertEquals(deletedDecorators.get(0), "id2");
+  }
+
+  @Test
+  public void testRemoveReferences() {
+    List<Object> idsToRemove = asList("id1", "id3");
+    DecoratorConfiguration config = mock(DecoratorConfiguration.class);
+    DecoratorParameters params1 = mock(DecoratorParameters.class);
+    DecoratorParameters params2 = mock(DecoratorParameters.class);
+    when(params1.getId()).thenReturn("id1");
+    when(params2.getId()).thenReturn("id2");
+    when(config.getEntities(PARAMETERS, DecoratorParameters.class))
+        .thenReturn(asList(params1, params2));
+
+    populator.removeReferencesOrDeleteIfEmpty(idsToRemove, config);
+
+    verify(config).setDecoratorParameters(parameterCaptor.capture());
+    assertEquals(parameterCaptor.getValue().collect(toList()), singletonList(params2));
+  }
+
+  @Test
+  public void testRemoveReferenceAndDeleteConfiguration() {
+    List<Object> idsToRemove = asList("id1", "id2", "id3");
+    DecoratorConfiguration config = mock(DecoratorConfiguration.class);
+    when(config.getIdValue()).thenReturn("configId");
+    DecoratorParameters params1 = mock(DecoratorParameters.class);
+    DecoratorParameters params2 = mock(DecoratorParameters.class);
+    when(params1.getId()).thenReturn("id1");
+    when(params2.getId()).thenReturn("id2");
+    when(config.getEntities(PARAMETERS, DecoratorParameters.class))
+        .thenReturn(asList(params1, params2));
+
+    DecoratorConfiguration returnedConfig =
+        populator.removeReferencesOrDeleteIfEmpty(idsToRemove, config);
+
+    verify(dataService).deleteById(DECORATOR_CONFIGURATION, "configId");
+    assertNull(returnedConfig);
+  }
 }

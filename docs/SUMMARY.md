@@ -8,29 +8,36 @@
 - User Documentation
     - Data
       - Import data
-        - [Quick data upload](user_documentation/guide-quick-upload.md)
-        - [Advanced data upload](user_documentation/guide-upload.md)
-            - [EMX format](user_documentation/ref-emx.md)
-            - [Localization](user_documentation/guide-l10n.md)
-      - Finding data 
-        - [Using search-all](user_documentation/guide-search.md)
-        - [Using dataexplorer](user_documentation/guide-explore.md)
+        - [Quick data upload](user_documentation/import-data/guide-quick-upload.md)
+        - [Advanced data upload](user_documentation/import-data/guide-upload.md)
+            - [EMX format](user_documentation/import-data/ref-emx.md)
+            - [Localization](user_documentation/import-data/guide-l10n.md)
+      - Finding data
+        - [Using Navigator](user_documentation/finding-data/guide-navigator.md)
+        - [Using search-all](user_documentation/finding-data/guide-search.md)
+        - [Using dataexplorer](user_documentation/finding-data/guide-explore.md)
       - Modify data
-        - [Using expressions](user_documentation/ref-expressions.md)
-        - [Modify metadata](user_documentation/guide-metadata-manager.md)
-        - [SORTA](user_documentation/guide-SORTA.md)
-      - [Downloading data](user_documentation/guide-emx-download.md)
-      - [Scheduled Jobs](user_documentation/guide-schedule.md)
-    - [Admin features](user_documentation/guide-admin.md)
-      - [Customize your MOLGENIS](user_documentation/guide-customize.md)
-      - [Using the App manager](user_documentation/guide-app-manager.md)
-      - [Authentication methods](user_documentation/guide-authentication.md)        
-    - [Biobanks](user_documentation/biobanking.md)
-      - [Biobank Directory](user_documentation/biobank-directory.md)
+        - [Using expressions](user_documentation/modify-data/ref-expressions.md)
+        - [Modify metadata](user_documentation/modify-data/guide-metadata-manager.md)
+        - [SORTA](user_documentation/modify-data/guide-SORTA.md)
+      - [Downloading data](user_documentation/modify-data/guide-emx-download.md)
+      - [Scheduled Jobs](user_documentation/modify-data/guide-schedule.md)
+    - Sysadmin features
+      - Security
+        - [Users](user_documentation/admin-features/security/guide-user-management.md)
+        - [Groups and Roles](user_documentation/admin-features/security/guide-groups-roles.md)
+        - [Permissions](user_documentation/admin-features/security/guide-permission-manager.md)
+        - [Authentication](user_documentation/admin-features/security/guide-authentication.md)
+      - [Settings](user_documentation/admin-features/guide-settings.md)
+      - [Customize MOLGENIS](user_documentation/admin-features/guide-customize.md)
+      - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)              
+    - Catalogues
+      - [Biobanking](user_documentation/catalogues/biobanking.md)
+        - [Biobank Directory](user_documentation/catalogues/biobank-directory.md)
     - [Questionnaires](user_documentation/guide-questionnaire.md)
-    - [Scripts](user_documentation/guide-scripts.md)
-      - [R](user_documentation/guide-R.md)
-      - [Python](user_documentation/guide-python.md)
+    - [Scripts](user_documentation/scripts/guide-scripts.md)
+      - [R](user_documentation/scripts/guide-R.md)
+      - [Python](user_documentation/scripts/guide-python.md)
 - Developer documentation
     - [Architecture](developer_documentation/architecture.md)
     - [Technologies](developer_documentation/technologies.md)
@@ -49,6 +56,7 @@
       - [App development](developer_documentation/app-development.md)
       - [Frontend development](developer_documentation/frontend-development.md)
       - [UX Frontend](developer_documentation/frontend.md)
+      - [Creating bootstrap themes](developer_documentation/creating-themes.md)
     - Backend  
       - [Security](developer_documentation/security.md)
       - [Data Backend](developer_documentation/backend.md)

@@ -1,87 +1,75 @@
 package org.molgenis.data.rest;
 
-import org.molgenis.data.QueryRule;
-
+import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.List;
+import org.molgenis.data.QueryRule;
 
-public class EntityCollectionRequest
-{
-	public static final int MAX_ROWS = 10000;
-	public static final int DEFAULT_ROW_COUNT = 100;
-	private List<QueryRule> q;
-	@SuppressWarnings("deprecation")
-	private SortV1 sort;
-	private String[] attributes;
-	private String[] expand;
+public class EntityCollectionRequest {
+  public static final int MAX_ROWS = 10000;
+  public static final int DEFAULT_ROW_COUNT = 100;
+  private List<QueryRule> q;
 
-	@Min(0)
-	private int start = 0;
+  @SuppressWarnings("deprecation")
+  private SortV1 sort;
 
-	@Min(0)
-	@Max(value = MAX_ROWS, message = "No more than {value} rows can be requested")
-	private int num = DEFAULT_ROW_COUNT;
+  private String[] attributes;
+  private String[] expand;
 
-	public int getStart()
-	{
-		return start;
-	}
+  @Min(0)
+  private int start = 0;
 
-	public void setStart(int start)
-	{
-		this.start = start;
-	}
+  @Min(0)
+  @Max(value = MAX_ROWS, message = "No more than {value} rows can be requested")
+  private int num = DEFAULT_ROW_COUNT;
 
-	public int getNum()
-	{
-		return num;
-	}
+  public int getStart() {
+    return start;
+  }
 
-	public void setNum(int num)
-	{
-		this.num = num;
-	}
+  public void setStart(int start) {
+    this.start = start;
+  }
 
-	public List<QueryRule> getQ()
-	{
-		return q;
-	}
+  public int getNum() {
+    return num;
+  }
 
-	public void setQ(List<QueryRule> q)
-	{
-		this.q = q;
-	}
+  public void setNum(int num) {
+    this.num = num;
+  }
 
-	@SuppressWarnings("deprecation")
-	public SortV1 getSort()
-	{
-		return sort;
-	}
+  public List<QueryRule> getQ() {
+    return q;
+  }
 
-	@SuppressWarnings("deprecation")
-	public void setSort(SortV1 sort)
-	{
-		this.sort = sort;
-	}
+  public void setQ(List<QueryRule> q) {
+    this.q = q;
+  }
 
-	public String[] getAttributes()
-	{
-		return attributes;
-	}
+  @SuppressWarnings("deprecation")
+  public SortV1 getSort() {
+    return sort;
+  }
 
-	public void setAttributes(String[] attributes)
-	{
-		this.attributes = attributes;
-	}
+  @SuppressWarnings("deprecation")
+  public void setSort(SortV1 sort) {
+    this.sort = sort;
+  }
 
-	public String[] getExpand()
-	{
-		return expand;
-	}
+  public String[] getAttributes() {
+    return attributes;
+  }
 
-	public void setExpand(String[] expand)
-	{
-		this.expand = expand;
-	}
+  public void setAttributes(String[] attributes) {
+    this.attributes = attributes;
+  }
+
+  public String[] getExpand() {
+    return expand;
+  }
+
+  public void setExpand(String[] expand) {
+    this.expand = expand;
+  }
 }

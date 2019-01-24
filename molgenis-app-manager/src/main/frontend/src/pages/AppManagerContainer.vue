@@ -42,7 +42,7 @@
             <div class="d-flex justify-content-center p-4">
               <p class="text-muted">
                 <small>Zip should contain <em>index.html</em> and <em>config.json</em>, consult <a target="_blank"
-                                                                                                   href="https://molgenis.gitbooks.io/molgenis/content/user_documentation/guide-app-manager.html">manual</a>
+                                                                                                   href="https://molgenis.gitbooks.io/molgenis/content/user_documentation/admin-features/guide-app-manager.html">manual</a>
                   for details.
                 </small>
               </p>

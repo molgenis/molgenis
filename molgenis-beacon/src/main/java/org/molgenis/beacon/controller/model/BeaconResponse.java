@@ -1,69 +1,59 @@
 package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
+import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
-/**
- * A Beacon
- */
+/** A Beacon */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconResponse.class)
-@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class BeaconResponse
-{
-	/**
-	 * Unique identifier of the beacon.
-	 */
-	public abstract String getId();
+@SuppressWarnings(
+    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+public abstract class BeaconResponse {
+  /** Unique identifier of the beacon. */
+  public abstract String getId();
 
-	/**
-	 * Name of the beacon.
-	 */
-	public abstract String getName();
+  /** Name of the beacon. */
+  public abstract String getName();
 
-	/**
-	 * Version of the API provided by the beacon.
-	 */
-	public abstract String getApiVersion();
+  /** Version of the API provided by the beacon. */
+  public abstract String getApiVersion();
 
-	/**
-	 * Organization owning the beacon.
-	 */
-	@Nullable
-	public abstract BeaconOrganizationResponse getOrganization();
+  /** Organization owning the beacon. */
+  @Nullable
+  @CheckForNull
+  public abstract BeaconOrganizationResponse getOrganization();
 
-	/**
-	 * Description of the beacon.
-	 */
-	@Nullable
-	public abstract String getDescription();
+  /** Description of the beacon. */
+  @Nullable
+  @CheckForNull
+  public abstract String getDescription();
 
-	/**
-	 * Version of the beacon.
-	 */
-	@Nullable
-	public abstract String getVersion();
+  /** Version of the beacon. */
+  @Nullable
+  @CheckForNull
+  public abstract String getVersion();
 
-	/**
-	 * URL to the welcome page for this beacon (RFC 3986 format).
-	 */
-	@Nullable
-	public abstract String getWelcomeUrl();
+  /** URL to the welcome page for this beacon (RFC 3986 format). */
+  @Nullable
+  @CheckForNull
+  public abstract String getWelcomeUrl();
 
-	/**
-	 * Datasets served by the beacon. Any beacon should specify at least one
-	 * dataset.
-	 */
-	public abstract List<BeaconDatasetResponse> getDatasets();
+  /** Datasets served by the beacon. Any beacon should specify at least one dataset. */
+  public abstract List<BeaconDatasetResponse> getDatasets();
 
-	public static BeaconResponse create(String id, String name, String apiVersion,
-			BeaconOrganizationResponse organization, String description, String version, String welcomeUrl,
-			List<BeaconDatasetResponse> datasets)
-	{
-		return new AutoValue_BeaconResponse(id, name, apiVersion, organization, description, version, welcomeUrl,
-				datasets);
-	}
+  public static BeaconResponse create(
+      String id,
+      String name,
+      String apiVersion,
+      BeaconOrganizationResponse organization,
+      String description,
+      String version,
+      String welcomeUrl,
+      List<BeaconDatasetResponse> datasets) {
+    return new AutoValue_BeaconResponse(
+        id, name, apiVersion, organization, description, version, welcomeUrl, datasets);
+  }
 }

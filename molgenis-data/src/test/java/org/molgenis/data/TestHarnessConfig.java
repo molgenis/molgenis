@@ -5,8 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ EntityTestHarness.class, EntitySelfXrefTestHarness.class, OneToManyTestHarness.class, TestPackage.class })
+@Import({
+  EntityTestHarness.class,
+  EntitySelfXrefTestHarness.class,
+  OneToManyTestHarness.class,
+  TestPackage.class
+})
 @ComponentScan("org.molgenis.data.staticentity")
-public class TestHarnessConfig
-{
-}
+public class TestHarnessConfig {}

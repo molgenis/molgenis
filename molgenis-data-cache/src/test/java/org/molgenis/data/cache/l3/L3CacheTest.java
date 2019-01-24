@@ -1,10 +1,33 @@
 package org.molgenis.data.cache.l3;
 
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.RepositoryCapability.CACHEABLE;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -17,186 +40,160 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Stream;
+public class L3CacheTest extends AbstractMolgenisSpringTest {
+  private L3Cache l3Cache;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.RepositoryCapability.CACHEABLE;
-import static org.molgenis.data.meta.AttributeType.INT;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+  private EntityType entityType;
 
-public class L3CacheTest extends AbstractMolgenisSpringTest
-{
-	private L3Cache l3Cache;
+  private Entity entity1;
+  private Entity entity2;
+  private Entity entity3;
 
-	private EntityType entityType;
+  private final String repositoryName = "TestRepository";
+  private static final String COUNTRY = "Country";
+  private static final String ID = "ID";
 
-	private Entity entity1;
-	private Entity entity2;
-	private Entity entity3;
+  @Mock private Repository<Entity> decoratedRepository;
 
-	private final String repositoryName = "TestRepository";
-	private static final String COUNTRY = "Country";
-	private static final String ID = "ID";
+  @Mock private TransactionInformation transactionInformation;
 
-	@Mock
-	private Repository<Entity> decoratedRepository;
+  @Mock private TransactionManager transactionManager;
 
-	@Mock
-	private TransactionInformation transactionInformation;
+  private MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
-	@Mock
-	private TransactionManager transactionManager;
+  @Autowired private EntityTypeFactory entityTypeFactory;
 
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
+  @Autowired private AttributeFactory attributeFactory;
 
-	@Autowired
-	private AttributeFactory attributeFactory;
+  public L3CacheTest() {
+    super(Strictness.WARN);
+  }
 
-	public L3CacheTest()
-	{
-		super(Strictness.WARN);
-	}
+  @BeforeClass
+  public void beforeClass() {
+    entityType = entityTypeFactory.create(repositoryName);
+    entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
+    entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		entityType = entityTypeFactory.create(repositoryName);
-		entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
-		entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
+    entity1 = new DynamicEntity(entityType);
+    entity1.set(ID, 1);
+    entity1.set(COUNTRY, "NL");
 
-		entity1 = new DynamicEntity(entityType);
-		entity1.set(ID, 1);
-		entity1.set(COUNTRY, "NL");
+    entity2 = new DynamicEntity(entityType);
+    entity2.set(ID, 2);
+    entity2.set(COUNTRY, "NL");
 
-		entity2 = new DynamicEntity(entityType);
-		entity2.set(ID, 2);
-		entity2.set(COUNTRY, "NL");
+    entity3 = new DynamicEntity(entityType);
+    entity3.set(ID, 3);
+    entity3.set(COUNTRY, "GB");
+  }
 
-		entity3 = new DynamicEntity(entityType);
-		entity3.set(ID, 3);
-		entity3.set(COUNTRY, "GB");
-	}
+  @SuppressWarnings("unchecked")
+  @BeforeMethod
+  public void beforeMethod() {
+    reset(decoratedRepository);
 
-	@SuppressWarnings("unchecked")
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		reset(decoratedRepository);
+    when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
+    when(decoratedRepository.getName()).thenReturn(repositoryName);
+    when(decoratedRepository.getEntityType()).thenReturn(entityType);
 
-		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
-		when(decoratedRepository.getName()).thenReturn(repositoryName);
-		when(decoratedRepository.getEntityType()).thenReturn(entityType);
+    l3Cache = new L3Cache(transactionManager, transactionInformation, meterRegistry);
+  }
 
-		l3Cache = new L3Cache(transactionManager, transactionInformation);
-	}
+  @Test
+  public void testGet() {
+    Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
+    Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-	@Test
-	public void testGet()
-	{
-		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
-		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
+    when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
+    Fetch fetch = mock(Fetch.class);
+    Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-		Fetch fetch = mock(Fetch.class);
-		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
 
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
+    verify(decoratedRepository, atLeast(0)).getName();
+    verify(decoratedRepository, atLeast(0)).getEntityType();
+    verifyNoMoreInteractions(decoratedRepository);
+  }
 
-		verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
-		verify(decoratedRepository, atLeast(0)).getName();
-		verify(decoratedRepository, atLeast(0)).getEntityType();
-		verifyNoMoreInteractions(decoratedRepository);
-	}
+  @Test
+  public void testGetThrowsException() {
+    Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
+    Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-	@Test
-	public void testGetThrowsException()
-	{
-		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
-		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
+    when(decoratedRepository.findAll(fetchLessQuery))
+        .thenThrow(new MolgenisDataException("What table?"));
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenThrow(new MolgenisDataException("What table?"));
+    Fetch fetch = mock(Fetch.class);
+    Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-		Fetch fetch = mock(Fetch.class);
-		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
+    try {
+      l3Cache.get(decoratedRepository, query);
+      // check that exception is thrown by the get method
+      fail("Get should throw exception");
+    } catch (UncheckedExecutionException expected) {
 
-		try
-		{
-			l3Cache.get(decoratedRepository, query);
-			// check that exception is thrown by the get method
-			fail("Get should throw exception");
-		}
-		catch (UncheckedExecutionException expected)
-		{
+    }
+    // Check that exception isn't cached.
+    try {
+      l3Cache.get(decoratedRepository, query);
+      fail("Get should throw exception");
+    } catch (UncheckedExecutionException expected) {
 
-		}
-		// Check that exception isn't cached.
-		try
-		{
-			l3Cache.get(decoratedRepository, query);
-			fail("Get should throw exception");
-		}
-		catch (UncheckedExecutionException expected)
-		{
+    }
+    verify(decoratedRepository, times(2)).findAll(fetchLessQuery);
+  }
 
-		}
-		verify(decoratedRepository, times(2)).findAll(fetchLessQuery);
-	}
+  @Test
+  public void testAfterCommitTransactionDirtyRepository() {
+    Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
+    Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-	@Test
-	public void testAfterCommitTransactionDirtyRepository()
-	{
-		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
-		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
+    when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
+    Fetch fetch = mock(Fetch.class);
+    Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-		Fetch fetch = mock(Fetch.class);
-		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
 
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    when(transactionInformation.getDirtyRepositories())
+        .thenReturn(Collections.singleton(repositoryName));
+    l3Cache.afterCommitTransaction("ABCDE");
 
-		when(transactionInformation.getDirtyRepositories()).thenReturn(Collections.singleton(repositoryName));
-		l3Cache.afterCommitTransaction("ABCDE");
+    when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity3, entity2));
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity3, entity2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
 
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
+    verify(decoratedRepository, times(2)).findAll(fetchLessQuery);
+  }
 
-		verify(decoratedRepository, times(2)).findAll(fetchLessQuery);
-	}
+  @Test
+  public void testAfterCommitTransactionCleanRepository() {
+    Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
+    Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-	@Test
-	public void testAfterCommitTransactionCleanRepository()
-	{
-		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
-		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
+    when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
+    Fetch fetch = mock(Fetch.class);
+    Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-		Fetch fetch = mock(Fetch.class);
-		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
 
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    when(transactionInformation.getDirtyRepositories()).thenReturn(Collections.singleton("blah"));
+    l3Cache.afterCommitTransaction("ABCDE");
 
-		when(transactionInformation.getDirtyRepositories()).thenReturn(Collections.singleton("blah"));
-		l3Cache.afterCommitTransaction("ABCDE");
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
 
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-
-		verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
-		verify(decoratedRepository, atLeast(0)).getName();
-		verify(decoratedRepository, atLeast(0)).getEntityType();
-		verifyNoMoreInteractions(decoratedRepository);
-	}
+    verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
+    verify(decoratedRepository, atLeast(0)).getName();
+    verify(decoratedRepository, atLeast(0)).getEntityType();
+    verifyNoMoreInteractions(decoratedRepository);
+  }
 }

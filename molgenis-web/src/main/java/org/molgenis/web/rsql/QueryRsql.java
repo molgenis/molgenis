@@ -10,18 +10,15 @@ import org.molgenis.data.meta.model.EntityType;
  *
  * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
-public class QueryRsql
-{
-	private final Node rootNode;
+public class QueryRsql {
+  private final Node rootNode;
 
-	public QueryRsql(Node rootNode)
-	{
-		this.rootNode = rootNode;
-	}
+  public QueryRsql(Node rootNode) {
+    this.rootNode = rootNode;
+  }
 
-	public Query<Entity> createQuery(EntityType entityType)
-	{
-		MolgenisRSQLVisitor rsqlVisitor = new MolgenisRSQLVisitor(entityType);
-		return rootNode.accept(rsqlVisitor);
-	}
+  public Query<Entity> createQuery(EntityType entityType) {
+    MolgenisRSQLVisitor rsqlVisitor = new MolgenisRSQLVisitor(entityType);
+    return rootNode.accept(rsqlVisitor);
+  }
 }

@@ -71,7 +71,8 @@
                     targetEntityName: $('#target').val(),
                     sourceEntityName: $('#source').val(),
                     targetAttributeName: $('#targetAttribute').val(),
-                    algorithm: algorithm
+                    algorithm: algorithm,
+                    depth: parseInt($('#depth').val(), 10)
                 };
 
                 var items = [];
@@ -168,6 +169,7 @@
                 source: $('#source').val(),
                 targetAttribute: $('#targetAttribute').val(),
                 sourceAttribute: getSourceAttrs(algorithm)[0],
+                depth: parseInt($('#depth').val(), 10),
                 algorithm: algorithm
             });
         }
@@ -226,8 +228,10 @@
                     attributeInfo.push('<br />' + attribute.description);
                 }
 
-                if (attribute.type === 'XREF' || attribute.type === 'CATEGORICAL' || attribute.type === 'MREF' || attribute.type === 'CATEGORICAL_MREF') {
-                    attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntityType + '" target="_blank">category look up</a>');
+                if(dataExplorerUri) {
+                    if (attribute.type === 'XREF' || attribute.type === 'CATEGORICAL' || attribute.type === 'MREF' || attribute.type === 'CATEGORICAL_MREF') {
+                        attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntityType + '" target="_blank">category look up</a>');
+                    }
                 }
 
                 attributeInfo.push('</td><td>' + attribute.name + '</td>');

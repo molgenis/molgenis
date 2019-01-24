@@ -1,5 +1,12 @@
 package org.molgenis.oneclickimporter.service;
 
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
+import static org.testng.Assert.assertEquals;
+
+import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
@@ -9,122 +16,120 @@ import org.molgenis.oneclickimporter.service.impl.OneClickImporterNamingServiceI
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.stream.Stream;
+public class OneClickImporterNamingServiceTest {
+  @Mock private DataService dataService;
+  private OneClickImporterNamingService oneClickImporterNamingService;
 
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.testng.Assert.assertEquals;
+  @BeforeClass
+  public void beforeClass() {
+    initMocks(this);
+  }
 
-public class OneClickImporterNamingServiceTest
-{
-	@Mock
-	private DataService dataService;
-	private OneClickImporterNamingService oneClickImporterNamingService;
+  @Test
+  public void testGetLabelWithPostFixWhenNoDuplicate() {
+    String label = "label";
+    when(dataService.findAll(
+            ENTITY_TYPE_META_DATA,
+            new QueryImpl<EntityType>().like(LABEL, label),
+            EntityType.class))
+        .thenReturn(Stream.empty());
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
+    String expected = "label";
 
-	@Test
-	public void testGetLabelWithPostFixWhenNoDuplicate()
-	{
-		String label = "label";
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, new QueryImpl<EntityType>().like(LABEL, label),
-				EntityType.class)).thenReturn(Stream.empty());
+    assertEquals(actual, expected);
+  }
 
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
-		String expected = "label";
+  @Test
+  public void testGetLabelWithPostFixWhenOneDuplicate() {
+    EntityType e1 = Mockito.mock(EntityType.class);
+    when(e1.getLabel()).thenReturn("label");
 
-		assertEquals(actual, expected);
-	}
+    String label = "label";
+    when(dataService.findAll(
+            ENTITY_TYPE_META_DATA,
+            new QueryImpl<EntityType>().like(LABEL, label),
+            EntityType.class))
+        .thenReturn(Stream.of(e1));
 
-	@Test
-	public void testGetLabelWithPostFixWhenOneDuplicate()
-	{
-		EntityType e1 = Mockito.mock(EntityType.class);
-		when(e1.getLabel()).thenReturn("label");
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
+    String expected = "label (1)";
 
-		String label = "label";
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, new QueryImpl<EntityType>().like(LABEL, label),
-				EntityType.class)).thenReturn(Stream.of(e1));
+    assertEquals(actual, expected);
+  }
 
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
-		String expected = "label (1)";
+  @Test
+  public void testGetLabelWithPostFixWhenFiveDuplicate() {
+    EntityType e1 = Mockito.mock(EntityType.class);
+    when(e1.getLabel()).thenReturn("label");
 
-		assertEquals(actual, expected);
-	}
+    EntityType e2 = Mockito.mock(EntityType.class);
+    when(e2.getLabel()).thenReturn("label (1)");
 
-	@Test
-	public void testGetLabelWithPostFixWhenFiveDuplicate()
-	{
-		EntityType e1 = Mockito.mock(EntityType.class);
-		when(e1.getLabel()).thenReturn("label");
+    EntityType e3 = Mockito.mock(EntityType.class);
+    when(e3.getLabel()).thenReturn("label (2)");
 
-		EntityType e2 = Mockito.mock(EntityType.class);
-		when(e2.getLabel()).thenReturn("label (1)");
+    EntityType e4 = Mockito.mock(EntityType.class);
+    when(e4.getLabel()).thenReturn("label (3)");
 
-		EntityType e3 = Mockito.mock(EntityType.class);
-		when(e3.getLabel()).thenReturn("label (2)");
+    EntityType e5 = Mockito.mock(EntityType.class);
+    when(e5.getLabel()).thenReturn("label (4)");
 
-		EntityType e4 = Mockito.mock(EntityType.class);
-		when(e4.getLabel()).thenReturn("label (3)");
+    String label = "label";
+    when(dataService.findAll(
+            ENTITY_TYPE_META_DATA,
+            new QueryImpl<EntityType>().like(LABEL, label),
+            EntityType.class))
+        .thenReturn(Stream.of(e1, e2, e3, e4, e5));
 
-		EntityType e5 = Mockito.mock(EntityType.class);
-		when(e5.getLabel()).thenReturn("label (4)");
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
+    String expected = "label (5)";
 
-		String label = "label";
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, new QueryImpl<EntityType>().like(LABEL, label),
-				EntityType.class)).thenReturn(Stream.of(e1, e2, e3, e4, e5));
+    assertEquals(actual, expected);
+  }
 
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
-		String expected = "label (5)";
+  @Test
+  public void testGetLabelWithPostFixDuplicateInNoOrder() {
+    EntityType e1 = Mockito.mock(EntityType.class);
+    when(e1.getLabel()).thenReturn("label");
 
-		assertEquals(actual, expected);
-	}
+    EntityType e2 = Mockito.mock(EntityType.class);
+    when(e2.getLabel()).thenReturn("label (1)");
 
-	@Test
-	public void testGetLabelWithPostFixDuplicateInNoOrder()
-	{
-		EntityType e1 = Mockito.mock(EntityType.class);
-		when(e1.getLabel()).thenReturn("label");
+    EntityType e3 = Mockito.mock(EntityType.class);
+    when(e3.getLabel()).thenReturn("label (3)");
 
-		EntityType e2 = Mockito.mock(EntityType.class);
-		when(e2.getLabel()).thenReturn("label (1)");
+    String label = "label";
+    when(dataService.findAll(
+            ENTITY_TYPE_META_DATA,
+            new QueryImpl<EntityType>().like(LABEL, label),
+            EntityType.class))
+        .thenReturn(Stream.of(e1, e2, e3));
 
-		EntityType e3 = Mockito.mock(EntityType.class);
-		when(e3.getLabel()).thenReturn("label (3)");
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
+    String expected = "label (2)";
 
-		String label = "label";
-		when(dataService.findAll(ENTITY_TYPE_META_DATA, new QueryImpl<EntityType>().like(LABEL, label),
-				EntityType.class)).thenReturn(Stream.of(e1, e2, e3));
+    assertEquals(actual, expected);
+  }
 
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
-		String expected = "label (2)";
+  @Test
+  public void testCreateValidIdFromFileName() {
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    assertEquals(
+        oneClickImporterNamingService.createValidIdFromFileName("test-file1.xlsx"), "test_file1");
+    assertEquals(
+        oneClickImporterNamingService.createValidIdFromFileName("test-f@#.xlsx"), "test_f_#");
+    assertEquals(
+        oneClickImporterNamingService.createValidIdFromFileName("test!##%.xlsx"), "test_##_");
+  }
 
-		assertEquals(actual, expected);
-	}
-
-	@Test
-	public void testCreateValidIdFromFileName()
-	{
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		assertEquals(oneClickImporterNamingService.createValidIdFromFileName("test-file1.xlsx"), "test_file1");
-		assertEquals(oneClickImporterNamingService.createValidIdFromFileName("test-f@#.xlsx"), "test_f_#");
-		assertEquals(oneClickImporterNamingService.createValidIdFromFileName("test!##%.xlsx"), "test_##_");
-	}
-
-	@Test
-	public void testAsValidAttributeName()
-	{
-		oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-		assertEquals(oneClickImporterNamingService.asValidColumnName("name#!3"), "name#_3");
-	}
+  @Test
+  public void testAsValidAttributeName() {
+    oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
+    assertEquals(oneClickImporterNamingService.asValidColumnName("name#!3"), "name#_3");
+  }
 }

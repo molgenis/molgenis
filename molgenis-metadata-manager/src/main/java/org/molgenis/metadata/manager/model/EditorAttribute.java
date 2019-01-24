@@ -1,101 +1,162 @@
 package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.util.AutoGson;
-
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorAttribute.class)
-@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class EditorAttribute
-{
-	public abstract String getId();
+@SuppressWarnings(
+    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+public abstract class EditorAttribute {
+  public abstract String getId();
 
-	@Nullable
-	public abstract String getName();
+  @Nullable
+  @CheckForNull
+  public abstract String getName();
 
-	@Nullable
-	public abstract String getType();
+  @Nullable
+  @CheckForNull
+  public abstract String getType();
 
-	@Nullable
-	public abstract EditorAttributeIdentifier getParent();
+  @Nullable
+  @CheckForNull
+  public abstract EditorAttributeIdentifier getParent();
 
-	@Nullable
-	public abstract EditorEntityTypeIdentifier getRefEntityType();
+  @Nullable
+  @CheckForNull
+  public abstract EditorEntityTypeIdentifier getRefEntityType();
 
-	@Nullable
-	public abstract EditorAttributeIdentifier getMappedByAttribute();
+  public abstract boolean isCascadeDelete();
 
-	@Nullable
-	public abstract EditorSort getOrderBy();
+  @Nullable
+  @CheckForNull
+  public abstract EditorAttributeIdentifier getMappedByAttribute();
 
-	@Nullable
-	public abstract String getExpression();
+  @Nullable
+  @CheckForNull
+  public abstract EditorSort getOrderBy();
 
-	public abstract boolean isNullable();
+  @Nullable
+  @CheckForNull
+  public abstract String getExpression();
 
-	public abstract boolean isAuto();
+  public abstract boolean isNullable();
 
-	public abstract boolean isVisible();
+  public abstract boolean isAuto();
 
-	@Nullable
-	public abstract String getLabel();
+  public abstract boolean isVisible();
 
-	public abstract Map<String, String> getLabelI18n();
+  @Nullable
+  @CheckForNull
+  public abstract String getLabel();
 
-	@Nullable
-	public abstract String getDescription();
+  public abstract Map<String, String> getLabelI18n();
 
-	public abstract Map<String, String> getDescriptionI18n();
+  @Nullable
+  @CheckForNull
+  public abstract String getDescription();
 
-	public abstract boolean isAggregatable();
+  public abstract Map<String, String> getDescriptionI18n();
 
-	@Nullable
-	public abstract List<String> getEnumOptions();
+  public abstract boolean isAggregatable();
 
-	@Nullable
-	public abstract Long getRangeMin();
+  @Nullable
+  @CheckForNull
+  public abstract List<String> getEnumOptions();
 
-	@Nullable
-	public abstract Long getRangeMax();
+  @Nullable
+  @CheckForNull
+  public abstract Long getRangeMin();
 
-	public abstract boolean isReadonly();
+  @Nullable
+  @CheckForNull
+  public abstract Long getRangeMax();
 
-	public abstract boolean isUnique();
+  public abstract boolean isReadonly();
 
-	public abstract List<EditorTagIdentifier> getTags();
+  public abstract boolean isUnique();
 
-	@Nullable
-	public abstract String getNullableExpression();
+  public abstract List<EditorTagIdentifier> getTags();
 
-	@Nullable
-	public abstract String getVisibleExpression();
+  @Nullable
+  @CheckForNull
+  public abstract String getNullableExpression();
 
-	@Nullable
-	public abstract String getValidationExpression();
+  @Nullable
+  @CheckForNull
+  public abstract String getVisibleExpression();
 
-	@Nullable
-	public abstract String getDefaultValue();
+  @Nullable
+  @CheckForNull
+  public abstract String getValidationExpression();
 
-	public abstract Integer getSequenceNumber();
+  @Nullable
+  @CheckForNull
+  public abstract String getDefaultValue();
 
-	public static EditorAttribute create(String id, @Nullable String name, @Nullable String type,
-			EditorAttributeIdentifier parent, EditorEntityTypeIdentifier refEntityType,
-			EditorAttributeIdentifier mappedByAttribute, EditorSort orderBy, String expression, boolean nullable,
-			boolean auto, boolean visible, @Nullable String label, Map<String, String> i18nLabel,
-			@Nullable String description, Map<String, String> i18nDescription, boolean aggregatable,
-			@Nullable List<String> enumOptions, @Nullable Long rangeMin, @Nullable Long rangeMax, boolean readonly,
-			boolean unique, List<EditorTagIdentifier> tags, @Nullable String nullableExpression,
-			@Nullable String visibleExpression,
-			@Nullable String validationExpression, @Nullable String defaultValue, Integer sequenceNumber)
-	{
-		return new AutoValue_EditorAttribute(id, name, type, parent, refEntityType, mappedByAttribute, orderBy,
-				expression, nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable,
-				enumOptions, rangeMin, rangeMax, readonly, unique, tags, nullableExpression, visibleExpression,
-				validationExpression,
-				defaultValue, sequenceNumber);
-	}
+  public abstract Integer getSequenceNumber();
+
+  public static EditorAttribute create(
+      String id,
+      @Nullable @CheckForNull String name,
+      @Nullable @CheckForNull String type,
+      EditorAttributeIdentifier parent,
+      EditorEntityTypeIdentifier refEntityType,
+      boolean cascadeDelete,
+      EditorAttributeIdentifier mappedByAttribute,
+      EditorSort orderBy,
+      String expression,
+      boolean nullable,
+      boolean auto,
+      boolean visible,
+      @Nullable @CheckForNull String label,
+      Map<String, String> i18nLabel,
+      @Nullable @CheckForNull String description,
+      Map<String, String> i18nDescription,
+      boolean aggregatable,
+      @Nullable @CheckForNull List<String> enumOptions,
+      @Nullable @CheckForNull Long rangeMin,
+      @Nullable @CheckForNull Long rangeMax,
+      boolean readonly,
+      boolean unique,
+      List<EditorTagIdentifier> tags,
+      @Nullable @CheckForNull String nullableExpression,
+      @Nullable @CheckForNull String visibleExpression,
+      @Nullable @CheckForNull String validationExpression,
+      @Nullable @CheckForNull String defaultValue,
+      Integer sequenceNumber) {
+    return new AutoValue_EditorAttribute(
+        id,
+        name,
+        type,
+        parent,
+        refEntityType,
+        cascadeDelete,
+        mappedByAttribute,
+        orderBy,
+        expression,
+        nullable,
+        auto,
+        visible,
+        label,
+        i18nLabel,
+        description,
+        i18nDescription,
+        aggregatable,
+        enumOptions,
+        rangeMin,
+        rangeMax,
+        readonly,
+        unique,
+        tags,
+        nullableExpression,
+        visibleExpression,
+        validationExpression,
+        defaultValue,
+        sequenceNumber);
+  }
 }

@@ -10,8 +10,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ AppDbSettings.class, SettingsPackage.class, SettingsPopulator.class, SettingsEntityType.class,
-		PropertyType.class, MenuManagerServiceImpl.class })
-public class SettingsTestConfig
-{
-}
+@Import({
+  AppDbSettings.class,
+  SettingsPackage.class,
+  SettingsPopulator.class,
+  SettingsEntityType.class,
+  PropertyType.class,
+  MenuManagerServiceImpl.class
+})
+public class SettingsTestConfig {}

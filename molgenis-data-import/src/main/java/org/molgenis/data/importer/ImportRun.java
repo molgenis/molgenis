@@ -1,154 +1,137 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.data.importer.ImportRunMetadata.ENDDATE;
+import static org.molgenis.data.importer.ImportRunMetadata.ID;
+import static org.molgenis.data.importer.ImportRunMetadata.IMPORTEDENTITIES;
+import static org.molgenis.data.importer.ImportRunMetadata.MESSAGE;
+import static org.molgenis.data.importer.ImportRunMetadata.NOTIFY;
+import static org.molgenis.data.importer.ImportRunMetadata.PROGRESS;
+import static org.molgenis.data.importer.ImportRunMetadata.STARTDATE;
+import static org.molgenis.data.importer.ImportRunMetadata.STATUS;
+import static org.molgenis.data.importer.ImportRunMetadata.USERNAME;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
-import javax.annotation.Nullable;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+public class ImportRun extends StaticEntity {
+  private static final List<ValueLabel> status_options;
+  private static final List<ValueLabel> notify_options;
 
-import static org.molgenis.data.importer.ImportRunMetaData.*;
+  static {
+    status_options = new ArrayList<>();
+    status_options.add(new org.molgenis.util.ValueLabel("RUNNING", "RUNNING"));
+    status_options.add(new org.molgenis.util.ValueLabel("FINISHED", "FINISHED"));
+    status_options.add(new org.molgenis.util.ValueLabel("FAILED", "FAILED"));
 
-public class ImportRun extends StaticEntity
-{
-	private static final List<ValueLabel> status_options;
-	private static final List<ValueLabel> notify_options;
+    notify_options = new ArrayList<>();
+    notify_options.add(new org.molgenis.util.ValueLabel("API", "API"));
+    notify_options.add(new org.molgenis.util.ValueLabel("UI", "UI"));
+  }
 
-	static
-	{
-		status_options = new ArrayList<>();
-		status_options.add(new org.molgenis.util.ValueLabel("RUNNING", "RUNNING"));
-		status_options.add(new org.molgenis.util.ValueLabel("FINISHED", "FINISHED"));
-		status_options.add(new org.molgenis.util.ValueLabel("FAILED", "FAILED"));
+  public ImportRun(Entity entity) {
+    super(entity);
+  }
 
-		notify_options = new ArrayList<>();
-		notify_options.add(new org.molgenis.util.ValueLabel("API", "API"));
-		notify_options.add(new org.molgenis.util.ValueLabel("UI", "UI"));
-	}
+  public ImportRun(EntityType entityType) {
+    super(entityType);
+  }
 
-	public ImportRun(Entity entity)
-	{
-		super(entity);
-	}
+  public ImportRun(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public ImportRun(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public ImportRun(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public void setId(String id) {
+    set(ID, id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public Instant getStartDate() {
+    return getInstant(STARTDATE);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public void setStartDate(Instant startDate) {
+    set(STARTDATE, startDate);
+  }
 
-	public Instant getStartDate()
-	{
-		return getInstant(STARTDATE);
-	}
+  public Optional<Instant> getEndDate() {
+    return Optional.ofNullable(getInstant(ENDDATE));
+  }
 
-	public void setStartDate(Instant startDate)
-	{
-		set(STARTDATE, startDate);
-	}
+  public void setEndDate(Instant endDate) {
+    set(ENDDATE, endDate);
+  }
 
-	@Nullable
-	public Instant getEndDate()
-	{
-		return getInstant(ENDDATE);
-	}
+  public String getUsername() {
+    return getString(USERNAME);
+  }
 
-	public void setEndDate(Instant endDate)
-	{
-		set(ENDDATE, endDate);
-	}
+  public void setUsername(String username) {
+    set(USERNAME, username);
+  }
 
-	public String getUsername()
-	{
-		return getString(USERNAME);
-	}
+  public String getStatus() {
+    return getString(STATUS);
+  }
 
-	public void setUsername(String username)
-	{
-		set(USERNAME, username);
-	}
+  public void setStatus(String status) {
+    set(STATUS, status);
+  }
 
-	public String getStatus()
-	{
-		return getString(STATUS);
-	}
+  @Nullable
+  @CheckForNull
+  public String getMessage() {
+    return getString(MESSAGE);
+  }
 
-	public void setStatus(String status)
-	{
-		set(STATUS, status);
-	}
+  public void setMessage(String message) {
+    set(MESSAGE, message);
+  }
 
-	@Nullable
-	public String getMessage()
-	{
-		return getString(MESSAGE);
-	}
+  public int getProgress() {
+    Integer progress = getInt(PROGRESS);
+    return progress != null ? progress : 0;
+  }
 
-	public void setMessage(String message)
-	{
-		set(MESSAGE, message);
-	}
+  public void setProgress(int progress) {
+    set(PROGRESS, progress);
+  }
 
-	public int getProgress()
-	{
-		Integer progress = getInt(PROGRESS);
-		return progress != null ? progress : 0;
-	}
+  @Nullable
+  @CheckForNull
+  public String getImportedEntities() {
+    return getString(IMPORTEDENTITIES);
+  }
 
-	public void setProgress(int progress)
-	{
-		set(PROGRESS, progress);
-	}
+  public void setImportedEntities(String importedEntities) {
+    set(IMPORTEDENTITIES, importedEntities);
+  }
 
-	@Nullable
-	public String getImportedEntities()
-	{
-		return getString(IMPORTEDENTITIES);
-	}
+  public boolean getNotify() {
+    return getBoolean(NOTIFY) != null && getBoolean(NOTIFY);
+  }
 
-	public void setImportedEntities(String importedEntities)
-	{
-		set(IMPORTEDENTITIES, importedEntities);
-	}
+  public void setNotify(boolean notify) {
+    set(NOTIFY, notify);
+  }
 
-	public boolean getNotify()
-	{
-		return getBoolean(NOTIFY) != null && getBoolean(NOTIFY);
-	}
+  /** Status is enum. This method returns all available enum options. */
+  public List<ValueLabel> getStatusOptions() {
+    return status_options;
+  }
 
-	public void setNotify(boolean notify)
-	{
-		set(NOTIFY, notify);
-	}
-
-	/**
-	 * Status is enum. This method returns all available enum options.
-	 */
-	public List<ValueLabel> getStatusOptions()
-	{
-		return status_options;
-	}
-
-	public List<ValueLabel> getNotifyOptions()
-	{
-		return notify_options;
-	}
+  public List<ValueLabel> getNotifyOptions() {
+    return notify_options;
+  }
 }

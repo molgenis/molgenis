@@ -1,7 +1,7 @@
 // @flow
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import { SET_ERRORS, SET_RESULTS } from '../store/mutations'
+import {SET_ERROR, SET_RESULTS} from '../store/mutations'
 
 export const SEARCH_ALL = '__SEARCH_ALL__'
 
@@ -12,7 +12,7 @@ export default {
       api.get(uri).then(response => {
         commit(SET_RESULTS, response)
       }, error => {
-        commit(SET_ERRORS, error)
+        commit(SET_ERROR, error)
       })
     }
   }

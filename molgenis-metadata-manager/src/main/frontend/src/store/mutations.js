@@ -11,6 +11,7 @@ import type {
 import { INITIAL_STATE } from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
+export const SET_LANGUAGE_CODES: string = '__SET_LANGUAGE_CODES__'
 export const SET_ENTITY_TYPES: string = '__SET_ENTITY_TYPES__'
 export const SET_SELECTED_ENTITY_TYPE_ID: string = '__SET_SELECTED_ENTITY_TYPE_ID__'
 export const SET_ATTRIBUTE_TYPES: string = '__SET_ATTRIBUTE_TYPES__'
@@ -34,9 +35,13 @@ const SYS_PACKAGE_ID = 'sys'
  * @param (targetIndex) The index of the second element to swap.
  * @return {Array} A new array with the elements swapped.
  */
-const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number, targetIndex: number) => {
-  if (array.length === 1) return array
-  array.splice(targetIndex, 1, array.splice(originalIndex, 1, array[targetIndex])[0])
+const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number,
+  targetIndex: number) => {
+  if (array.length === 1) {
+    return array
+  }
+  array.splice(targetIndex, 1,
+    array.splice(originalIndex, 1, array[targetIndex])[0])
   return array
 }
 
@@ -46,7 +51,8 @@ const swapArrayElements = (array: Array<EditorAttribute>, originalIndex: number,
  * @returns {Array.<Object>}
  */
 const filterNonVisibleEntities = (entities: Array<Object>) => {
-  return INITIAL_STATE.isSuperUser ? entities : entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+  return INITIAL_STATE.isSuperUser ? entities : entities.filter(
+    entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
 /**
@@ -60,16 +66,38 @@ const filterNonVisiblePackages = (packages: Array<EditorPackageIdentifier>) => {
   }
 
   return packages
-    .filter(_package => _package.id !== SYS_PACKAGE_ID)
-    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
+  .filter(_package => _package.id !== SYS_PACKAGE_ID)
+  .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
-const compareByLabel = (a, b) => a.label && b.label ? a.label.localeCompare(b.label) : 0
+const compareByLabel = (a, b) => a.label && b.label ? a.label.localeCompare(
+  b.label) : 0
+
+const isReferenceType = (type?: string) => {
+  var isReferenceType
+  switch (type) {
+    case 'categorical':
+    case 'categorical_mref':
+    case 'file':
+    case 'mref':
+    case 'onetomany':
+    case 'xref':
+      isReferenceType = true
+      break
+    default:
+      isReferenceType = false
+      break
+  }
+  return isReferenceType
+}
 
 export default {
   [SET_PACKAGES] (state: State, packages: Array<EditorPackageIdentifier>) {
     const visiblePackages = filterNonVisiblePackages(packages)
     state.packages = visiblePackages.sort(compareByLabel)
+  },
+  [SET_LANGUAGE_CODES] (state: State, languageCodes: Array<string>) {
+    state.languageCodes = languageCodes.slice().sort()
   },
   [SET_ENTITY_TYPES] (state: State, entityTypes: Array<Object>) {
     const visibleEntities = filterNonVisibleEntities(entityTypes)
@@ -90,6 +118,7 @@ export default {
   [SET_EDITOR_ENTITY_TYPE] (state: State, editorEntityType: EditorEntityType) {
     state.editorEntityType = editorEntityType
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
+    state.selectedAttributeId = null
   },
   /**
    * Update currently selected EditorEntityType
@@ -103,14 +132,16 @@ export default {
       update.value.unique = true
       update.value.nullable = false
 
-      const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
+      const index = state.editorEntityType.attributes.findIndex(
+        attribute => attribute.id === update.value.id)
       state.editorEntityType.attributes[index] = update.value
     }
     if (update.value && update.key === 'labelAttribute') {
       update.value.nullable = false
       update.value.visible = true
 
-      const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
+      const index = state.editorEntityType.attributes.findIndex(
+        attribute => attribute.id === update.value.id)
       state.editorEntityType.attributes[index] = update.value
     }
     state.editorEntityType[update.key] = update.value
@@ -121,14 +152,17 @@ export default {
    * Updates an editorEntityType attribute via index
    */
   [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state: State, update: Update) {
-    const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
+    const index = state.editorEntityType.attributes.findIndex(
+      attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
     const attr = state.editorEntityType.attributes[index]
     if (key === 'type') {
+      if (isReferenceType(attr.type) && !isReferenceType(update.value)) {
+        attr.refEntityType = null
+      }
       if (attr.type === 'onetomany' || update.value === 'onetomany') {
         attr.mappedByAttribute = null
-        attr.refEntityType = null
         attr.orderBy = null
       }
       attr[key] = update.value
@@ -149,20 +183,25 @@ export default {
   /**
    * Move the selectedAttribute up or down based on the moveOrder
    */
-  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER] (state: State, update: UpdateOrder) {
+  [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER] (state: State,
+    update: UpdateOrder) {
     const moveOrder = update.moveOrder
     const attributes = state.editorEntityType.attributes
 
     const originalIndex = update.selectedAttributeIndex
-    const targetIndex = moveOrder === 'up' ? originalIndex - 1 : originalIndex + 1
+    const targetIndex = moveOrder === 'up'
+      ? originalIndex - 1
+      : originalIndex + 1
 
-    state.editorEntityType.attributes = swapArrayElements(attributes, originalIndex, targetIndex)
+    state.editorEntityType.attributes = swapArrayElements(attributes,
+      originalIndex, targetIndex)
   },
   /**
    * Deletes the selected attribute using the ID of the selected attribute found in the state
    */
   [DELETE_SELECTED_ATTRIBUTE] (state: State, selectedAttributeId: string) {
-    state.editorEntityType.attributes = state.editorEntityType.attributes.filter(attribute => attribute.id !== selectedAttributeId)
+    state.editorEntityType.attributes = state.editorEntityType.attributes.filter(
+      attribute => attribute.id !== selectedAttributeId)
   },
   /**
    * Alert mutations

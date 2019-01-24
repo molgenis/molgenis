@@ -11,6 +11,7 @@ If you downloaded the example archive, you probably noticed that the structure o
 ```
 |-- config.json
 |-- index.html
+|-- app-template.html
 |-- js
     |-- example.js
 |-- css
@@ -20,19 +21,25 @@ If you downloaded the example archive, you probably noticed that the structure o
 The index.html is your main entry point, and the contents will be interpreted and rendered by a FreeMarker engine. 
 Relative to your index.html you can include js and css. 
 
-##### Note
-If you use absolute paths, MOLGENIS is unable to serve your resources properly
+> note: If you use absolute paths, MOLGENIS is unable to serve your resources properly
 
 ### Example
+
 The following example assumes we have a setup according to the tree structure shown in the previous paragraph.
 
 _index.html_
 ```html
-<link href="css/example.css"
-<div class="container">
-    <h1>This is an example of including resources with relative paths</h1>
-</div>
-<script src="js/example.js"></script>
+<html>
+  <head>
+    <link href="css/example.css"/>
+  </head>
+  <body>
+    <div class="container">
+      <h1>This is an example of including resources with relative paths</h1>
+    </div>
+    <script src="js/example.js"></script>
+  </body>
+</html>
 ```
 
 _example.js_
@@ -49,6 +56,16 @@ _example.css_
 }
 ```
 
+> **For production usage**
+
+_app-template.html_
+
+This file is needed by the target MOLGENIS-instance. It will be used to render the index.html for the production app.
+
+```javascript
+<div id="app"></div>
+```
+
 ## Configuration
 The config.json is a small configuration file that will tell MOLGENIS about your app. 
 It contains the following parameters
@@ -60,7 +77,8 @@ It contains the following parameters
 | version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
 | apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
 | name | string |yes | The name of the app. May not contain '/'
-| includeMenuAndFooter | boolean |yes | If you want to use the MOLGENIS menu, you can this value to __true__ |
+| includeMenuAndFooter | boolean |yes | 
+  If you want MOLGENIS to serve your app with the standard header (with menu and polyfill), and footer, set this value to __true__ |
 | runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
 ### Example
@@ -106,20 +124,89 @@ Build tools like webpack already generate your source files with a hash code inc
 To use webpack in rapid prototyping of your MOLGENIS apps, use the standard webpack template 
 and make some small tweaks to make it a `build -> compress -> upload` workflow.
 
-Make sure that you set the following two parameters in your production config
+First you need to install 2 plugins:
+
+```javascript
+yarn --dev add zip-webpack-plugin@2.0.0
+yarn --dev add generate-json-webpack-plugin
+```
+
+Make sure that you set the following two parameters in your production config. 
+
+In **config/index.js**
+
 ```js
+const packageJson = require('../package')
+
 module.exports = {
   // ...
   build: {
     // ...
     assetsSubDirectory: '',
-    assetsPublicPath: ''
+    assetsPublicPath: '/plugin/app/' + packageJson.name,
     // ...
   }
 }
 ```
+
+In **build/webpack.prod.conf.js**
+
+```javascript
+plugins: [
+  
+  ...  
+  
+  new HtmlWebpackPlugin({
+    filename: process.env.NODE_ENV === 'testing'
+      ? 'index.html'
+      : config.build.index,
+    template: 'app-template.html',
+    inject: true,
+    minify: {
+      removeComments: true,
+      collapseWhitespace: true,
+      removeAttributeQuotes: true
+      // more options:
+      // https://github.com/kangax/html-minifier#options-quick-reference
+    },
+    // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    chunksSortMode: 'dependency'
+  }),
+      
+  ...   
+  
+  new GenerateJsonPlugin('config.json', {
+      name: packageJson.name,
+      label: packageJson.name,
+      description: packageJson.description,
+      version: packageJson.version,
+      apiDependency: "v2",
+      includeMenuAndFooter: true,
+      runtimeOptions: {
+        language: "en"
+      }
+    }),
+
+    // copy custom static assets
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../static'),
+        to: config.build.assetsSubDirectory,
+        ignore: ['.*']
+      }
+    ]),
+
+    new ZipPlugin({
+      filename: packageJson.name + '.zip'
+    })
+  ]
+```
+
 These settings will ensure that your compiled resources are already in the correct file structure, and references to your resources are relative.
 
-##### Note
-If you set `includeMenuAndFooter: true`, you will have to edit your `index.html` to only include 
-the contents of your body. So remove all `<head>`, `<body`, and `<html>` tags, and move your included resources as body content. The example archive contains an `index.html` as a good example
+**app-template.html**
+
+This file is needed by the target MOLGENIS-instance. It will be used to render the index.html for the production app.
+```javascript
+<div id="app"></div>
+```

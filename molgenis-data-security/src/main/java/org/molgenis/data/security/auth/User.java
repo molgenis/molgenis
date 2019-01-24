@@ -1,290 +1,275 @@
 package org.molgenis.data.security.auth;
 
+import static org.molgenis.data.security.auth.UserMetadata.ACTIVATIONCODE;
+import static org.molgenis.data.security.auth.UserMetadata.ACTIVE;
+import static org.molgenis.data.security.auth.UserMetadata.ADDRESS;
+import static org.molgenis.data.security.auth.UserMetadata.AFFILIATION;
+import static org.molgenis.data.security.auth.UserMetadata.CHANGE_PASSWORD;
+import static org.molgenis.data.security.auth.UserMetadata.CITY;
+import static org.molgenis.data.security.auth.UserMetadata.COUNTRY;
+import static org.molgenis.data.security.auth.UserMetadata.DEPARTMENT;
+import static org.molgenis.data.security.auth.UserMetadata.EMAIL;
+import static org.molgenis.data.security.auth.UserMetadata.FAX;
+import static org.molgenis.data.security.auth.UserMetadata.FIRSTNAME;
+import static org.molgenis.data.security.auth.UserMetadata.GOOGLEACCOUNTID;
+import static org.molgenis.data.security.auth.UserMetadata.ID;
+import static org.molgenis.data.security.auth.UserMetadata.LANGUAGECODE;
+import static org.molgenis.data.security.auth.UserMetadata.LASTNAME;
+import static org.molgenis.data.security.auth.UserMetadata.MIDDLENAMES;
+import static org.molgenis.data.security.auth.UserMetadata.PASSWORD;
+import static org.molgenis.data.security.auth.UserMetadata.PHONE;
+import static org.molgenis.data.security.auth.UserMetadata.ROLE;
+import static org.molgenis.data.security.auth.UserMetadata.SUPERUSER;
+import static org.molgenis.data.security.auth.UserMetadata.TITLE;
+import static org.molgenis.data.security.auth.UserMetadata.TOLLFREEPHONE;
+import static org.molgenis.data.security.auth.UserMetadata.TWO_FACTOR_AUTHENTICATION;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import javax.annotation.Nullable;
+public class User extends StaticEntity {
+  public User(Entity entity) {
+    super(entity);
+  }
 
-import static org.molgenis.data.security.auth.UserMetaData.*;
+  public User(EntityType entityType) {
+    super(entityType);
+  }
 
-public class User extends StaticEntity
-{
-	public User(Entity entity)
-	{
-		super(entity);
-	}
+  public User(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public User(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public User(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public void setId(String id) {
+    set(ID, id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public String getUsername() {
+    return getString(USERNAME);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public void setUsername(String username) {
+    set(USERNAME, username);
+  }
 
-	public String getUsername()
-	{
-		return getString(USERNAME);
-	}
+  public String getPassword() {
+    return getString(PASSWORD);
+  }
 
-	public void setUsername(String username)
-	{
-		set(USERNAME, username);
-	}
+  public void setPassword(String password) {
+    set(PASSWORD, password);
+  }
 
-	public String getPassword()
-	{
-		return getString(PASSWORD);
-	}
+  @Nullable
+  @CheckForNull
+  public String getActivationCode() {
+    return getString(ACTIVATIONCODE);
+  }
 
-	public void setPassword(String password)
-	{
-		set(PASSWORD, password);
-	}
+  public void setActivationCode(String activationCode) {
+    set(ACTIVATIONCODE, activationCode);
+  }
 
-	@Nullable
-	public String getActivationCode()
-	{
-		return getString(ACTIVATIONCODE);
-	}
+  public boolean isTwoFactorAuthentication() {
+    Boolean twoFactorAuthentication = getBoolean(TWO_FACTOR_AUTHENTICATION);
+    if (twoFactorAuthentication == null) {
+      twoFactorAuthentication = false;
+    }
+    return twoFactorAuthentication;
+  }
 
-	public void setActivationCode(String activationCode)
-	{
-		set(ACTIVATIONCODE, activationCode);
-	}
+  public void setTwoFactorAuthentication(boolean twoFactorAuthentication) {
+    set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
+  }
 
-	public boolean isTwoFactorAuthentication()
-	{
-		Boolean twoFactorAuthentication = getBoolean(TWO_FACTOR_AUTHENTICATION);
-		if (twoFactorAuthentication == null)
-		{
-			twoFactorAuthentication = false;
-		}
-		return twoFactorAuthentication;
-	}
+  public Boolean isActive() {
+    return getBoolean(ACTIVE);
+  }
 
-	public void setTwoFactorAuthentication(boolean twoFactorAuthentication)
-	{
-		set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
-	}
+  public void setActive(Boolean active) {
+    set(ACTIVE, active);
+  }
 
-	public Boolean isActive()
-	{
-		return getBoolean(ACTIVE);
-	}
+  public Boolean isSuperuser() {
+    return getBoolean(SUPERUSER);
+  }
 
-	public void setActive(Boolean active)
-	{
-		set(ACTIVE, active);
-	}
+  public void setSuperuser(Boolean superuser) {
+    set(SUPERUSER, superuser);
+  }
 
-	public Boolean isSuperuser()
-	{
-		return getBoolean(SUPERUSER);
-	}
+  @Nullable
+  @CheckForNull
+  public String getFirstName() {
+    return getString(FIRSTNAME);
+  }
 
-	public void setSuperuser(Boolean superuser)
-	{
-		set(SUPERUSER, superuser);
-	}
+  public void setFirstName(String firstName) {
+    set(FIRSTNAME, firstName);
+  }
 
-	@Nullable
-	public String getFirstName()
-	{
-		return getString(FIRSTNAME);
-	}
+  @Nullable
+  @CheckForNull
+  public String getMiddleNames() {
+    return getString(MIDDLENAMES);
+  }
 
-	public void setFirstName(String firstName)
-	{
-		set(FIRSTNAME, firstName);
-	}
+  public void setMiddleNames(String middleNames) {
+    set(MIDDLENAMES, middleNames);
+  }
 
-	@Nullable
-	public String getMiddleNames()
-	{
-		return getString(MIDDLENAMES);
-	}
+  @Nullable
+  @CheckForNull
+  public String getLastName() {
+    return getString(LASTNAME);
+  }
 
-	public void setMiddleNames(String middleNames)
-	{
-		set(MIDDLENAMES, middleNames);
-	}
+  public void setLastName(String lastName) {
+    set(LASTNAME, lastName);
+  }
 
-	@Nullable
-	public String getLastName()
-	{
-		return getString(LASTNAME);
-	}
+  @Nullable
+  @CheckForNull
+  public String getTitle() {
+    return getString(TITLE);
+  }
 
-	public void setLastName(String lastName)
-	{
-		set(LASTNAME, lastName);
-	}
+  public void setTitle(String title) {
+    set(TITLE, title);
+  }
 
-	@Nullable
-	public String getTitle()
-	{
-		return getString(TITLE);
-	}
+  @Nullable
+  @CheckForNull
+  public String getAffiliation() {
+    return getString(AFFILIATION);
+  }
 
-	public void setTitle(String title)
-	{
-		set(TITLE, title);
-	}
+  public void setAffiliation(String affiliation) {
+    set(AFFILIATION, affiliation);
+  }
 
-	@Nullable
-	public String getAffiliation()
-	{
-		return getString(AFFILIATION);
-	}
+  @Nullable
+  @CheckForNull
+  public String getDepartment() {
+    return getString(DEPARTMENT);
+  }
 
-	public void setAffiliation(String affiliation)
-	{
-		set(AFFILIATION, affiliation);
-	}
+  public void setDepartment(String department) {
+    set(DEPARTMENT, department);
+  }
 
-	@Nullable
-	public String getDepartment()
-	{
-		return getString(DEPARTMENT);
-	}
+  @Nullable
+  @CheckForNull
+  public String getRole() {
+    return getString(ROLE);
+  }
 
-	public void setDepartment(String department)
-	{
-		set(DEPARTMENT, department);
-	}
+  public void setRole(String role) {
+    set(ROLE, role);
+  }
 
-	@Nullable
-	public String getRole()
-	{
-		return getString(ROLE);
-	}
+  @Nullable
+  @CheckForNull
+  public String getAddress() {
+    return getString(ADDRESS);
+  }
 
-	public void setRole(String role)
-	{
-		set(ROLE, role);
-	}
+  public void setAddress(String address) {
+    set(ADDRESS, address);
+  }
 
-	@Nullable
-	public String getAddress()
-	{
-		return getString(ADDRESS);
-	}
+  @Nullable
+  @CheckForNull
+  public String getPhone() {
+    return getString(PHONE);
+  }
 
-	public void setAddress(String address)
-	{
-		set(ADDRESS, address);
-	}
+  public void setPhone(String phone) {
+    set(PHONE, phone);
+  }
 
-	@Nullable
-	public String getPhone()
-	{
-		return getString(PHONE);
-	}
+  public String getEmail() {
+    return getString(EMAIL);
+  }
 
-	public void setPhone(String phone)
-	{
-		set(PHONE, phone);
-	}
+  public void setEmail(String email) {
+    set(EMAIL, email);
+  }
 
-	public String getEmail()
-	{
-		return getString(EMAIL);
-	}
+  @Nullable
+  @CheckForNull
+  public String getFax() {
+    return getString(FAX);
+  }
 
-	public void setEmail(String email)
-	{
-		set(EMAIL, email);
-	}
+  public void setFax(String fax) {
+    set(FAX, fax);
+  }
 
-	@Nullable
-	public String getFax()
-	{
-		return getString(FAX);
-	}
+  @Nullable
+  @CheckForNull
+  public String getTollFreePhone() {
+    return getString(TOLLFREEPHONE);
+  }
 
-	public void setFax(String fax)
-	{
-		set(FAX, fax);
-	}
+  public void setTollFreePhone(String tollFreePhone) {
+    set(TOLLFREEPHONE, tollFreePhone);
+  }
 
-	@Nullable
-	public String getTollFreePhone()
-	{
-		return getString(TOLLFREEPHONE);
-	}
+  @Nullable
+  @CheckForNull
+  public String getCity() {
+    return getString(CITY);
+  }
 
-	public void setTollFreePhone(String tollFreePhone)
-	{
-		set(TOLLFREEPHONE, tollFreePhone);
-	}
+  public void setCity(String city) {
+    set(CITY, city);
+  }
 
-	@Nullable
-	public String getCity()
-	{
-		return getString(CITY);
-	}
+  @Nullable
+  @CheckForNull
+  public String getCountry() {
+    return getString(COUNTRY);
+  }
 
-	public void setCity(String city)
-	{
-		set(CITY, city);
-	}
+  public void setCountry(String country) {
+    set(COUNTRY, country);
+  }
 
-	@Nullable
-	public String getCountry()
-	{
-		return getString(COUNTRY);
-	}
+  public Boolean isChangePassword() {
+    return getBoolean(CHANGE_PASSWORD);
+  }
 
-	public void setCountry(String country)
-	{
-		set(COUNTRY, country);
-	}
+  public void setChangePassword(Boolean changePassword) {
+    set(CHANGE_PASSWORD, changePassword);
+  }
 
-	public Boolean isChangePassword()
-	{
-		return getBoolean(CHANGE_PASSWORD);
-	}
+  @Nullable
+  @CheckForNull
+  public String getLanguageCode() {
+    return getString(LANGUAGECODE);
+  }
 
-	public void setChangePassword(Boolean changePassword)
-	{
-		set(CHANGE_PASSWORD, changePassword);
-	}
+  public void setLanguageCode(String languageCode) {
+    set(LANGUAGECODE, languageCode);
+  }
 
-	@Nullable
-	public String getLanguageCode()
-	{
-		return getString(LANGUAGECODE);
-	}
+  @Nullable
+  @CheckForNull
+  public String getGoogleAccountId() {
+    return getString(GOOGLEACCOUNTID);
+  }
 
-	public void setLanguageCode(String languageCode)
-	{
-		set(LANGUAGECODE, languageCode);
-	}
-
-	@Nullable
-	public String getGoogleAccountId()
-	{
-		return getString(GOOGLEACCOUNTID);
-	}
-
-	public void setGoogleAccountId(String googleAccountId)
-	{
-		set(GOOGLEACCOUNTID, googleAccountId);
-	}
-
+  public void setGoogleAccountId(String googleAccountId) {
+    set(GOOGLEACCOUNTID, googleAccountId);
+  }
 }

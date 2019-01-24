@@ -33,22 +33,13 @@
             <tr>
                 <th></th>
                 <th>Mapping name</th>
+                <th>Max depth</th>
                 <th>Target entities</th>
                 <th>Mapped sources</th>
             </tr>
             </thead>
             <tbody>
                 <#list mappingProjects as project>
-                    <#assign broken = false>
-                    <#if project.mappingTargets[0]??>
-                        <#list project.mappingTargets[0].entityMappings as mapping>
-                            <#if !mapping.name??><#assign broken = true></#if>
-                        </#list>
-                    <#else>
-                        <#assign broken = true>
-                    </#if>
-
-                    <#if broken == false>
                     <tr>
                         <td>
                             <form method="post" action="${context_url}/removeMappingProject"
@@ -64,33 +55,45 @@
                             </form>
                         </td>
                         <td>
-                            <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
-                        <td>
+                          <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a>
+                        </td>
+                        <td class="text-center">
+                          <#if project.depth gt 1 >
+                          <form method="post" action="${context_url}/mappingproject/setDepth" class="pull-left">
+                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                            <input type="hidden" name="depth" value="${project.depth - 1}"/>
+                            <button type="submit" class="btn btn-default btn-xs plus-btn"><span
+                                class="glyphicon glyphicon-minus"></span></button>
+                          </form>
+                          </#if>
+                          ${project.depth}
+                          <form method="post" action="${context_url}/mappingproject/setDepth" class="pull-right">
+                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                            <input type="hidden" name="depth" value="${project.depth + 1}"/>
+                            <button type="submit" class="btn btn-default btn-xs minus-btn"><span
+                                class="glyphicon glyphicon-plus"></span></button>
+                          </form>
+                        </td>
+                      <td>
+                          <#if project.mappingTargets?size != 0>
                             <#list project.mappingTargets as target>
-                                ${target.name?html}<#if target_has_next>, </#if>
+                              <#if target??>${target.name?html}<#else><span class="bg-danger text-white">Target undefined or unknown</span></#if><#if target_has_next>, </#if>
                             </#list>
+                          <#else>
+                            <span class="bg-danger text-white">Targets undefined or unknown</span>
+                          </#if>
                         </td>
                         <td>
-                            <#list project.mappingTargets[0].entityMappings as mapping>
-                            ${mapping.name}<#if mapping_has_next>, </#if>
-                            </#list>
+                          <#list project.mappingTargets as target>
+                            <#if target??>
+                              <#list target.entityMappings as mapping>
+                                <#if mapping.name??>${mapping.name?html}<#else><span class="bg-danger text-white">Source undefined or unknown</span></#if><#if mapping_has_next>, </#if>
+                              </#list>
+                            </#if>
+                            <#break>
+                          </#list>
                         </td>
                     </tr>
-                    <#else>
-                    <tr class="danger">
-                        <td>
-                            <form method="post" action="${context_url}/removeMappingProject"
-                                  class="pull-left verify">
-                                <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-                                <button type="submit" class="btn btn-danger btn-xs"><span
-                                        class="glyphicon glyphicon-trash"></span></button>
-                            </form>
-                        </td>
-                        <td>${project.name?html}</td>
-                        <td colspan="2"><b>Broken project: some entities are missing</b></td>
-                    </tr>
-                    </#if>
-
                 </#list>
             </tbody>
         </table>
@@ -117,7 +120,16 @@
                                required="required">
                     </div>
 
-                    <hr></hr>
+                    <div class="form-group">
+                        <label>Max Depth</label>
+                        <input name="depth" type="number" class="form-control"
+                               placeholder="Maximum mapping depth for references"
+                               required="required"
+                               value="3" min="1">
+                      <span class="help-block">Maximum depth for evaluation of nested reference attributes.</span>
+                    </div>
+
+                    <hr/>
 
                     <div class="form-group">
                         <label>Select the Target entity</label>

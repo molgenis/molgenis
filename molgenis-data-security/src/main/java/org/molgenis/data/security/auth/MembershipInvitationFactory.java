@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MembershipInvitationFactory
-		extends AbstractSystemEntityFactory<MembershipInvitation, MembershipInvitationMetadata, String>
-{
-	MembershipInvitationFactory(MembershipInvitationMetadata invitationMetadata, EntityPopulator entityPopulator)
-	{
-		super(MembershipInvitation.class, invitationMetadata, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<
+        MembershipInvitation, MembershipInvitationMetadata, String> {
+  MembershipInvitationFactory(
+      MembershipInvitationMetadata invitationMetadata, EntityPopulator entityPopulator) {
+    super(MembershipInvitation.class, invitationMetadata, entityPopulator);
+  }
 }

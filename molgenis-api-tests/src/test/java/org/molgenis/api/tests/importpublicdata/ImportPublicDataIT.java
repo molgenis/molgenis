@@ -1,19 +1,5 @@
 package org.molgenis.api.tests.importpublicdata;
 
-import com.google.common.base.Strings;
-import io.restassured.RestAssured;
-import org.molgenis.api.tests.utils.RestTestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static io.restassured.RestAssured.given;
 import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.login;
@@ -21,120 +7,127 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
-/**
- * Regression test that should be run on the build server.
- */
-public class ImportPublicDataIT
-{
-	private static final Logger LOG = LoggerFactory.getLogger(ImportPublicDataIT.class);
+import com.google.common.base.Strings;
+import io.restassured.RestAssured;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.molgenis.api.tests.utils.RestTestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-	private String adminToken;
-	private List<String> testUrls = Collections.emptyList();
-	private String uploadTopLevelPackage;
-	private List<String> entitiesToRemove = Collections.emptyList();
+/** Regression test that should be run on the build server. */
+public class ImportPublicDataIT {
+  private static final Logger LOG = LoggerFactory.getLogger(ImportPublicDataIT.class);
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		LOG.info("Read environment variables");
-		String envHost = System.getProperty("REST_TEST_HOST");
-		RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
-		LOG.info("baseURI: " + RestAssured.baseURI);
+  private String adminToken;
+  private List<String> testUrls = Collections.emptyList();
+  private String uploadTopLevelPackage;
+  private List<String> entitiesToRemove = Collections.emptyList();
 
-		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
-		LOG.info("adminUserName: " + adminUserName);
+  @BeforeClass
+  public void beforeClass() {
+    LOG.info("Read environment variables");
+    String envHost = System.getProperty("REST_TEST_HOST");
+    RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
+    LOG.info("baseURI: " + RestAssured.baseURI);
 
-		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
+    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
+    String adminUserName =
+        Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
+    LOG.info("adminUserName: " + adminUserName);
 
-		adminToken = login(adminUserName, adminPassword);
+    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+    String adminPassword =
+        Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 
-		LOG.info("Importing Test data");
+    adminToken = login(adminUserName, adminPassword);
 
-		// Folder to look for test data
-		String uploadFolder = getExpectedEnvVariable("molgenis.test.upload.folder");
+    LOG.info("Importing Test data");
 
-		// File to import
-		String uploadFile = getExpectedEnvVariable("molgenis.test.upload.file");
+    // Folder to look for test data
+    String uploadFolder = getExpectedEnvVariable("molgenis.test.upload.folder");
 
-		// Optional package to delete after test
-		uploadTopLevelPackage = getOptionalEnvVariable("molgenis.test.upload.package.to.remove");
+    // File to import
+    String uploadFile = getExpectedEnvVariable("molgenis.test.upload.file");
 
-		// Optional comma separated list of entities to delete after test
-		String entitiesToRemoveString = getOptionalEnvVariable("molgenis.test.upload.entities.to.remove");
-		if (!Strings.isNullOrEmpty(entitiesToRemoveString))
-		{
-			entitiesToRemove = Arrays.asList(entitiesToRemoveString.split("\\s*,\\s*"));
-		}
+    // Optional package to delete after test
+    uploadTopLevelPackage = getOptionalEnvVariable("molgenis.test.upload.package.to.remove");
 
-		// Comma separated list of urls to test
-		String testUrlList = getExpectedEnvVariable("molgenis.test.upload.check.urls");
-		testUrls = Arrays.asList(testUrlList.split("\\s*,\\s*"));
+    // Optional comma separated list of entities to delete after test
+    String entitiesToRemoveString =
+        getOptionalEnvVariable("molgenis.test.upload.entities.to.remove");
+    if (!Strings.isNullOrEmpty(entitiesToRemoveString)) {
+      entitiesToRemove = Arrays.asList(entitiesToRemoveString.split("\\s*,\\s*"));
+    }
 
-		String importStatus = "PENDING";
-		if (uploadFile.endsWith(".xlsx"))
-		{
-			importStatus = RestTestUtils.uploadEMX(adminToken, uploadFolder, uploadFile);
-		}
-		else if (uploadFile.endsWith(".vcf"))
-		{
-			importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
-		}
-		else
-		{
-			assertTrue("Import failed, import test template does not support give file type, " + uploadFile, false);
-		}
+    // Comma separated list of urls to test
+    String testUrlList = getExpectedEnvVariable("molgenis.test.upload.check.urls");
+    testUrls = Arrays.asList(testUrlList.split("\\s*,\\s*"));
 
-		assertEquals("File import failed, file: " + uploadFile, "FINISHED", importStatus);
-	}
+    String importStatus = "PENDING";
+    if (uploadFile.endsWith(".xlsx")) {
+      importStatus = RestTestUtils.uploadEMX(adminToken, uploadFolder, uploadFile);
+    } else if (uploadFile.endsWith(".vcf")) {
+      importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
+    } else {
+      assertTrue(
+          "Import failed, import test template does not support give file type, " + uploadFile,
+          false);
+    }
 
-	private String getExpectedEnvVariable(String envName)
-	{
-		String envVariable = System.getenv(envName);
-		assertFalse("Expected enviroment variable '" + envName
-						+ "' not found. This test should be run on the build server, are you trying to run it locally?",
-				Strings.isNullOrEmpty(envVariable));
-		LOG.info("Test upload " + envName + ": " + envVariable);
-		return envVariable;
-	}
+    assertEquals("File import failed, file: " + uploadFile, "FINISHED", importStatus);
+  }
 
-	@Nullable
-	private String getOptionalEnvVariable(String envName)
-	{
-		String envVariable = System.getenv(envName);
-		if (!Strings.isNullOrEmpty(envVariable))
-		{
-			LOG.info("Test upload " + envName + ": " + envVariable);
-		}
-		return envVariable;
-	}
+  private String getExpectedEnvVariable(String envName) {
+    String envVariable = System.getenv(envName);
+    assertFalse(
+        "Expected enviroment variable '"
+            + envName
+            + "' not found. This test should be run on the build server, are you trying to run it locally?",
+        Strings.isNullOrEmpty(envVariable));
+    LOG.info("Test upload " + envName + ": " + envVariable);
+    return envVariable;
+  }
 
-	@Test
-	public void testDataWasUploaded()
-	{
-		testUrls.forEach(testUrl -> given().log()
-										   .all()
-										   .header(X_MOLGENIS_TOKEN, adminToken)
-										   .contentType("text/plain")
-										   .when()
-										   .get(testUrl)
-										   .then()
-										   .log()
-										   .all()
-										   .statusCode(200));
+  @Nullable
+  @CheckForNull
+  private String getOptionalEnvVariable(String envName) {
+    String envVariable = System.getenv(envName);
+    if (!Strings.isNullOrEmpty(envVariable)) {
+      LOG.info("Test upload " + envName + ": " + envVariable);
+    }
+    return envVariable;
+  }
 
-	}
+  @Test
+  public void testDataWasUploaded() {
+    testUrls.forEach(
+        testUrl ->
+            given()
+                .log()
+                .all()
+                .header(X_MOLGENIS_TOKEN, adminToken)
+                .contentType("text/plain")
+                .when()
+                .get(testUrl)
+                .then()
+                .log()
+                .all()
+                .statusCode(200));
+  }
 
-	@AfterClass(alwaysRun = true)
-	public void afterClass()
-	{
-		if (!Strings.isNullOrEmpty(uploadTopLevelPackage))
-		{
-			RestTestUtils.removePackages(adminToken, Collections.singletonList(uploadTopLevelPackage));
-		}
+  @AfterClass(alwaysRun = true)
+  public void afterClass() {
+    if (!Strings.isNullOrEmpty(uploadTopLevelPackage)) {
+      RestTestUtils.removePackages(adminToken, Collections.singletonList(uploadTopLevelPackage));
+    }
 
-		RestTestUtils.removeEntities(adminToken, entitiesToRemove);
-
-	}
+    RestTestUtils.removeEntities(adminToken, entitiesToRemove);
+  }
 }

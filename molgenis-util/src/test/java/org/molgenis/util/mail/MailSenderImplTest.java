@@ -1,5 +1,9 @@
 package org.molgenis.util.mail;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.MailSender;
@@ -7,45 +11,31 @@ import org.springframework.mail.SimpleMailMessage;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
+public class MailSenderImplTest extends AbstractMockitoTest {
+  private MailSenderImpl mailSender;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+  @Mock private MailSettings mailSettings;
+  @Mock private MailSenderFactory mailSenderFactory;
+  @Mock private MailSender actualMailSender;
+  @Mock private SimpleMailMessage simpleMailMessage;
+  @Mock private SimpleMailMessage secondSimpleMailMessage;
 
-public class MailSenderImplTest extends AbstractMockitoTest
-{
-	private MailSenderImpl mailSender;
+  @BeforeMethod
+  public void beforeMethod() throws IOException {
+    mailSender = new MailSenderImpl(mailSettings, mailSenderFactory);
+  }
 
-	@Mock
-	private MailSettings mailSettings;
-	@Mock
-	private MailSenderFactory mailSenderFactory;
-	@Mock
-	private MailSender actualMailSender;
-	@Mock
-	private SimpleMailMessage simpleMailMessage;
-	@Mock
-	private SimpleMailMessage secondSimpleMailMessage;
+  @Test
+  public void testSendSingleMessage() {
+    when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
+    mailSender.send(simpleMailMessage);
+    verify(actualMailSender).send(simpleMailMessage);
+  }
 
-	@BeforeMethod
-	public void beforeMethod() throws IOException
-	{
-		mailSender = new MailSenderImpl(mailSettings, mailSenderFactory);
-	}
-
-	@Test
-	public void testSendSingleMessage()
-	{
-		when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
-		mailSender.send(simpleMailMessage);
-		verify(actualMailSender).send(simpleMailMessage);
-	}
-
-	@Test
-	public void testSendTwoMessages()
-	{
-		when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
-		mailSender.send(simpleMailMessage, secondSimpleMailMessage);
-		verify(actualMailSender).send(simpleMailMessage, secondSimpleMailMessage);
-	}
+  @Test
+  public void testSendTwoMessages() {
+    when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
+    mailSender.send(simpleMailMessage, secondSimpleMailMessage);
+    verify(actualMailSender).send(simpleMailMessage, secondSimpleMailMessage);
+  }
 }

@@ -15,7 +15,7 @@
 
     <div v-if="showForm">
 
-      <h5>{{dataTableLabel}}</h5>
+      <h1>{{dataTableLabel}}</h1>
 
       <form-component
         id="data-row-edit-form"
@@ -40,7 +40,7 @@
             class="btn btn-primary"
             type="submit"
             @click.prevent="onSubmit"
-            :disabled="formState.$pristine || formState.$invalid">
+            :disabled="formState.$invalid && formState.$touched">
             {{ 'data-row-edit-save-button-label' | i18n }}
           </button>
 
@@ -50,8 +50,14 @@
             class="btn btn-primary"
             type="button"
             disabled="disabled">
-            {{ 'data-row-edit-save-busy-state-label' | i18n }} <i class="fa fa-spinner fa-spin "></i>
+            {{ 'data-row-edit-save-busy-state-label' | i18n }} <i
+            class="fa fa-spinner fa-spin "></i>
           </button>
+
+          <span v-if="!isSaving && formState.$invalid && formState.$touched"
+                class="alert text-danger">
+              {{ 'data-row-edit-invalid-fields-msg' | i18n }}
+          </span>
         </div>
       </div>
 
@@ -63,9 +69,9 @@
 </template>
 
 <script>
-  import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+  import { FormComponent } from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
-  import api from '@molgenis/molgenis-api-client'
+  import * as repository from '@/repository/dataRowRepository'
 
   export default {
     name: 'DataRowEdit',
@@ -97,13 +103,19 @@
         this.formData = updatedFormData
       },
       onSubmit () {
-        this.isSaving = true
-        const options = {
-          body: JSON.stringify(this.formData)
+        const formState = this.formState
+        this.formFields
+          .filter(field => field.type !== 'field-group') // field-groups have no validation to show
+          .forEach((field) => {
+            const fieldState = formState[field.id]
+            fieldState.$touched = true // trigger field to show validation result to user
+          })
+        if (this.formState.$valid) {
+          this.isSaving = true
+          repository
+            .save(this.formData, this.formFields, this.dataTableId, this.dataRowId)
+            .then(this.goBackToPluginCaller, this.handleError)
         }
-        const postDetails = this.dataRowId !== null ? this.dataTableId + '/' + this.dataRowId : this.dataTableId
-        const uri = '/api/v1/' + postDetails + '?_method=PUT'
-        api.post(uri, options).then(this.goBackToPluginCaller, this.handleError)
       },
       goBackToPluginCaller () {
         window.history.go(-1)
@@ -113,43 +125,22 @@
       },
       handleError (message) {
         this.alert = {
-          message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message') : message,
+          message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message')
+            : message,
           type: 'danger'
         }
+        this.showForm = true
+        this.isSaving = false
       },
-      initializeForm (formFields, formData) {
-        const mappedData = EntityToFormMapper.generateForm(formFields, formData)
+      initializeForm (mappedData) {
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
+        this.dataTableLabel = mappedData.formLabel
         this.showForm = true
-      },
-      parseEditResponse (response) {
-        // noinspection JSUnusedLocalSymbols
-        const { _meta, _href, ...rowData } = response
-        this.dataTableLabel = _meta.label
-        return {_meta, rowData}
-      },
-      parseAddResponse (response) {
-        let meta = response.meta
-        meta.attributes = meta.attributes.map(attribute => {
-          attribute.readOnly = false
-          return attribute
-        })
-        return meta
       }
     },
     created: function () {
-      if (this.dataRowId !== null) {
-        api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
-          const { _meta, rowData } = this.parseEditResponse(response)
-          this.initializeForm(_meta, rowData)
-        }, this.handleError)
-      } else {
-        api.get('/api/v2/' + this.dataTableId + '?num=0').then((response) => {
-          const meta = this.parseAddResponse(response)
-          this.initializeForm(meta, {})
-        }, this.handleError)
-      }
+      repository.fetch(this.dataTableId, this.dataRowId).then(this.initializeForm, this.handleError)
     },
     components: {
       FormComponent

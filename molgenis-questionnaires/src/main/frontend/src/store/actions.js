@@ -31,8 +31,12 @@ const actions = {
       cleanScreen(commit)
       api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(response => {
         commit('SET_QUESTIONNAIRE_ROW_ID', response.id)
-        dispatch('GET_QUESTIONNAIRE', questionnaireId)
-        resolve(response.id)
+        dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
+          resolve(response.id)
+        }, error => {
+          handleError(commit, error)
+          reject(error)
+        })
       }, error => {
         handleError(commit, error)
         reject(error)
@@ -52,6 +56,7 @@ const actions = {
         return api.get(getUrl).then(response => {
           commit('SET_QUESTIONNAIRE', response)
           const data = response.items[0]
+          commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
           const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
           commit('SET_FORM_DATA', form.formData)
           const chapters = form.formFields.filter(field => field.type === 'field-group')
@@ -64,17 +69,34 @@ const actions = {
           handleError(commit, error)
           reject(error)
         })
+      } else {
+        commit('SET_LOADING', false)
+        resolve()
       }
-
-      commit('SET_LOADING', false)
     })
   },
 
-  'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
+  'GET_QUESTIONNAIRE_OVERVIEW' ({commit, state}: VuexContext, questionnaireId: string) {
     cleanScreen(commit)
     return api.get(`/api/v2/${questionnaireId}`).then(response => {
       commit('SET_QUESTIONNAIRE', response)
-      commit('SET_LOADING', false)
+
+      if (response.items[0].report_header) {
+        const reportDataEndPoint = response.items[0].report_header._href
+
+        api.get(reportDataEndPoint).then(reportDataResponse => {
+          const reportHeaderData = {
+            logoDataUrl: reportDataResponse.logo,
+            introText: reportDataResponse['intro-' + state.language]
+          }
+          commit('SET_QUESTIONNAIRE_REPORT_HEADER', reportHeaderData)
+          commit('SET_LOADING', false)
+        }, error => {
+          handleError(commit, error)
+        })
+      } else {
+        commit('SET_LOADING', false)
+      }
     }, error => {
       handleError(commit, error)
     })
@@ -95,15 +117,11 @@ const actions = {
 
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
     commit('SET_FORM_DATA', formData)
-    // Set state to open allow required fields to be empty on auto-save
-    commit('UPDATE_FORM_STATUS', 'OPEN')
 
     Vue.nextTick(() => {
       const fieldState = formState[updatedAttribute]
       const updatedValue = formData[updatedAttribute]
-      if (fieldState && fieldState.$valid) {
-        // Set state to submitted to have the form validate required fields
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
+      if (fieldState && Object.keys(fieldState.$error).every((errorKey) => errorKey === 'required')) {
         const options = {
           body: JSON.stringify(updatedValue),
           method: 'PUT'
@@ -117,8 +135,6 @@ const actions = {
         }).then(() => {
           commit('DECREMENT_SAVING_QUEUE')
         })
-      } else {
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
       }
     })
   },

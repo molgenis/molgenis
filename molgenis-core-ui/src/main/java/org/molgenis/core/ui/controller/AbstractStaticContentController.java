@@ -9,72 +9,60 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public abstract class AbstractStaticContentController extends PluginController
-{
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractStaticContentController.class);
+public abstract class AbstractStaticContentController extends PluginController {
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractStaticContentController.class);
 
-	private static final String ERROR_MESSAGE_PAGE = "An error occurred trying loading this page.";
-	private static final String ERROR_MESSAGE_SUBMIT = "An error occurred trying to save the content.";
-	private static final String ERROR_MESSAGE_ATTR = "errorMessage";
+  private static final String ERROR_MESSAGE_PAGE = "An error occurred trying loading this page.";
+  private static final String ERROR_MESSAGE_SUBMIT =
+      "An error occurred trying to save the content.";
+  private static final String ERROR_MESSAGE_ATTR = "errorMessage";
 
-	@Autowired
-	private StaticContentService staticContentService;
+  @Autowired private StaticContentService staticContentService;
 
-	private final String uniqueReference;
+  private final String uniqueReference;
 
-	public AbstractStaticContentController(final String uniqueReference, final String uri)
-	{
-		super(uri);
-		this.uniqueReference = uniqueReference;
-	}
+  public AbstractStaticContentController(final String uniqueReference, final String uri) {
+    super(uri);
+    this.uniqueReference = uniqueReference;
+  }
 
-	@GetMapping
-	public String init(final Model model)
-	{
-		try
-		{
-			model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
-			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit(uniqueReference));
-		}
-		catch (RuntimeException re)
-		{
-			LOG.error("", re);
-			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
-		}
+  @GetMapping
+  public String init(final Model model) {
+    try {
+      model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
+      model.addAttribute(
+          "isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit(uniqueReference));
+    } catch (RuntimeException re) {
+      LOG.error("", re);
+      model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
+    }
 
-		return "view-staticcontent";
-	}
+    return "view-staticcontent";
+  }
 
-	@GetMapping("/edit")
-	public String initEditView(final Model model)
-	{
-		this.staticContentService.checkPermissions(this.uniqueReference);
-		try
-		{
-			model.addAttribute("content", this.staticContentService.getContent(this.uniqueReference));
-		}
-		catch (RuntimeException re)
-		{
-			LOG.error("", re);
-			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
-		}
+  @GetMapping("/edit")
+  public String initEditView(final Model model) {
+    this.staticContentService.checkPermissions(this.uniqueReference);
+    try {
+      model.addAttribute("content", this.staticContentService.getContent(this.uniqueReference));
+    } catch (RuntimeException re) {
+      LOG.error("", re);
+      model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
+    }
 
-		return "view-staticcontent-edit";
-	}
+    return "view-staticcontent-edit";
+  }
 
-	@PostMapping("/edit")
-	public String submitContent(@RequestParam(value = "content") final String content, final Model model)
-	{
-		this.staticContentService.checkPermissions(this.uniqueReference);
-		try
-		{
-			this.staticContentService.submitContent(this.uniqueReference, content);
-		}
-		catch (RuntimeException re)
-		{
-			LOG.error("", re);
-			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_SUBMIT);
-		}
-		return this.initEditView(model);
-	}
+  @PostMapping("/edit")
+  public String submitContent(
+      @RequestParam(value = "content") final String content, final Model model) {
+    this.staticContentService.checkPermissions(this.uniqueReference);
+    try {
+      this.staticContentService.submitContent(this.uniqueReference, content);
+    } catch (RuntimeException re) {
+      LOG.error("", re);
+      model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_SUBMIT);
+    }
+    return this.initEditView(model);
+  }
 }

@@ -1,31 +1,31 @@
 package org.molgenis.data.migrate.bootstrap;
 
-import org.molgenis.data.migrate.framework.MolgenisUpgrade;
-import org.molgenis.data.migrate.framework.MolgenisUpgradeService;
-import org.springframework.stereotype.Component;
-
 import static java.util.Objects.requireNonNull;
 
-/**
- * Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping.
- */
+import javax.sql.DataSource;
+import org.molgenis.data.migrate.framework.MolgenisUpgrade;
+import org.molgenis.data.migrate.framework.MolgenisUpgradeService;
+import org.molgenis.data.migrate.version.Step33UpdateForeignKeyDeferred;
+import org.molgenis.data.migrate.version.Step34AddRoleMetrics;
+import org.molgenis.data.migrate.version.Step35UpdateAclSystemSid;
+import org.springframework.stereotype.Component;
+
+/** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
 @Component
-public class MolgenisUpgradeBootstrapper
-{
-	private final MolgenisUpgradeService upgradeService;
+public class MolgenisUpgradeBootstrapper {
+  private final MolgenisUpgradeService upgradeService;
+  private final DataSource dataSource;
 
-	public MolgenisUpgradeBootstrapper(MolgenisUpgradeService upgradeService)
-	{
-		this.upgradeService = requireNonNull(upgradeService);
-	}
+  public MolgenisUpgradeBootstrapper(MolgenisUpgradeService upgradeService, DataSource dataSource) {
+    this.upgradeService = requireNonNull(upgradeService);
+    this.dataSource = requireNonNull(dataSource);
+  }
 
-	public void bootstrap()
-	{
-		// add upgrade steps here
-		// upgradeService.addUpgrade(new Step1Xxx(...));
-		// upgradeService.addUpgrade(new Step2Yyy(...));
-		// upgradeService.addUpgrade(new Step3Zzz(...));
+  public void bootstrap() {
+    upgradeService.addUpgrade(new Step33UpdateForeignKeyDeferred(dataSource));
+    upgradeService.addUpgrade(new Step34AddRoleMetrics(dataSource));
+    upgradeService.addUpgrade(new Step35UpdateAclSystemSid(dataSource));
 
-		upgradeService.upgrade();
-	}
+    upgradeService.upgrade();
+  }
 }

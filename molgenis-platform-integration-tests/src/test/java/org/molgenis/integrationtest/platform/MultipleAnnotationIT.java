@@ -1,7 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,95 +28,78 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+@ContextConfiguration(classes = {MultipleAnnotationIT.Config.class})
+@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+public class MultipleAnnotationIT extends AbstractTestNGSpringContextTests {
+  @Autowired private BeanClass bean;
 
-@ContextConfiguration(classes = { MultipleAnnotationIT.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public class MultipleAnnotationIT extends AbstractTestNGSpringContextTests
-{
-	@Autowired
-	private BeanClass bean;
+  @Test
+  @WithMockUser
+  public void testMethodAnnotationOrder() {
+    // Tests that RunAsSystem aspect takes place AFTER spring auth checks and BEFORE spring
+    // transaction management
+    // and that its order is independent of the annotation order.
+    assertEquals(getCurrentUsername(), "user");
+    bean.runAsSystemMethod();
+    assertEquals(getCurrentUsername(), "user");
+    bean.runAsSystemMethod2();
+    assertEquals(getCurrentUsername(), "user");
+  }
 
-	@Test
-	@WithMockUser
-	public void testMethodAnnotationOrder()
-	{
-		// Tests that RunAsSystem aspect takes place AFTER spring auth checks and BEFORE spring transaction management
-		// and that its order is independent of the annotation order.
-		assertEquals(getCurrentUsername(), "user");
-		bean.runAsSystemMethod();
-		assertEquals(getCurrentUsername(), "user");
-		bean.runAsSystemMethod2();
-		assertEquals(getCurrentUsername(), "user");
-	}
+  public static class BeanClass {
+    @RunAsSystem
+    @Transactional
+    @PreAuthorize("ROLE_USER")
+    public void runAsSystemMethod() {
+      assertTrue(SecurityUtils.currentUserIsSystem());
+    }
 
-	public static class BeanClass
-	{
-		@RunAsSystem
-		@Transactional
-		@PreAuthorize("ROLE_USER")
-		public void runAsSystemMethod()
-		{
-			assertEquals(getCurrentUsername(), "SYSTEM");
-		}
+    @PreAuthorize("ROLE_USER")
+    @RunAsSystem
+    @Transactional
+    public void runAsSystemMethod2() {
+      assertTrue(SecurityUtils.currentUserIsSystem());
+    }
+  }
 
-		@PreAuthorize("ROLE_USER")
-		@RunAsSystem
-		@Transactional
-		public void runAsSystemMethod2()
-		{
-			assertEquals(getCurrentUsername(), "SYSTEM");
-		}
-	}
+  private static String getCurrentUsername() {
+    return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+        .getUsername();
+  }
 
-	private static String getCurrentUsername()
-	{
-		return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-	}
+  @EnableTransactionManagement
+  @EnableAspectJAutoProxy
+  @Import(RunAsSystemAspect.class)
+  @Configuration
+  public static class Config {
+    @Bean
+    public BeanClass bean() {
+      return new BeanClass();
+    }
 
-	@EnableTransactionManagement
-	@EnableAspectJAutoProxy
-	@Import(RunAsSystemAspect.class)
-	@Configuration
-	public static class Config
-	{
-		@Bean
-		public BeanClass bean()
-		{
-			return new BeanClass();
-		}
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+      return new AbstractPlatformTransactionManager() {
+        @Override
+        protected Object doGetTransaction() throws TransactionException {
+          assertTrue(SecurityUtils.currentUserIsSystem());
+          return new Object();
+        }
 
-		@Bean
-		public PlatformTransactionManager transactionManager()
-		{
-			return new AbstractPlatformTransactionManager()
-			{
-				@Override
-				protected Object doGetTransaction() throws TransactionException
-				{
-					assertEquals(getCurrentUsername(), "SYSTEM");
-					return new Object();
-				}
+        @Override
+        protected void doBegin(Object transaction, TransactionDefinition definition)
+            throws TransactionException {
+          assertTrue(SecurityUtils.currentUserIsSystem());
+        }
 
-				@Override
-				protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException
-				{
-					assertEquals(getCurrentUsername(), "SYSTEM");
-				}
+        @Override
+        protected void doCommit(DefaultTransactionStatus status) throws TransactionException {
+          assertTrue(SecurityUtils.currentUserIsSystem());
+        }
 
-				@Override
-				protected void doCommit(DefaultTransactionStatus status) throws TransactionException
-				{
-					assertEquals(getCurrentUsername(), "SYSTEM");
-				}
-
-				@Override
-				protected void doRollback(DefaultTransactionStatus status) throws TransactionException
-				{
-
-				}
-			};
-		}
-
-	}
+        @Override
+        protected void doRollback(DefaultTransactionStatus status) throws TransactionException {}
+      };
+    }
+  }
 }

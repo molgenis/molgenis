@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FileIngestJobExecutionFactory
-		extends AbstractSystemEntityFactory<FileIngestJobExecution, FileIngestJobExecutionMetaData, String>
-{
-	FileIngestJobExecutionFactory(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData,
-			EntityPopulator entityPopulator)
-	{
-		super(FileIngestJobExecution.class, fileIngestJobExecutionMetaData, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<
+        FileIngestJobExecution, FileIngestJobExecutionMetadata, String> {
+  FileIngestJobExecutionFactory(
+      FileIngestJobExecutionMetadata fileIngestJobExecutionMetadata,
+      EntityPopulator entityPopulator) {
+    super(FileIngestJobExecution.class, fileIngestJobExecutionMetadata, entityPopulator);
+  }
 }

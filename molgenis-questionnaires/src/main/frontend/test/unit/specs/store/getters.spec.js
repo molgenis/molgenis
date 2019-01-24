@@ -21,7 +21,11 @@ describe('getters', () => {
             type: 'number',
             visible: (data) => true,
             required: () => true,
-            validate: () => true
+            validate: () => true,
+            range: {
+              min: 3,
+              max: 7
+            }
           },
           {
             id: 'chapter-1-field-3',
@@ -119,18 +123,115 @@ describe('getters', () => {
             validate: () => true
           }
         ]
+      },
+      {
+        id: 'chapter-5',
+        label: 'Fifth chapter',
+        type: 'field-group',
+        visible: () => true,
+        children: [
+          {
+            id: 'chapter-5-field-1',
+            type: 'field-group',
+            visible: () => true,
+            children: [
+              {
+                id: 'chapter-5-field-2',
+                type: 'text',
+                visible: (data) => true,
+                required: () => true,
+                validate: () => false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'chapter-6',
+        label: 'Sixth chapter',
+        type: 'field-group',
+        visible: () => true,
+        children: [
+          {
+            id: 'chapter-6-field-1',
+            type: 'field-group',
+            visible: () => true,
+            children: [
+              {
+                id: 'chapter-6-field-2',
+                type: 'number',
+                visible: (data) => true,
+                required: () => true,
+                validate: () => true,
+                range: {
+                  min: 3
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'chapter-7',
+        label: 'Seventh chapter',
+        type: 'field-group',
+        visible: () => true,
+        children: [
+          {
+            id: 'chapter-7-field-1',
+            type: 'field-group',
+            visible: () => true,
+            children: [
+              {
+                id: 'chapter-7-field-2',
+                type: 'number',
+                visible: (data) => true,
+                required: () => true,
+                validate: () => true,
+                range: {
+                  max: 5
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'chapter-8',
+        label: 'Eight chapter',
+        type: 'field-group',
+        visible: () => true,
+        children: [
+          {
+            id: 'chapter-8-field-1',
+            type: 'field-group',
+            visible: () => true,
+            children: [
+              {
+                id: 'chapter-8-field-2',
+                type: 'checkbox',
+                visible: (data) => true,
+                required: () => true,
+                validate: () => true
+              }
+            ]
+          }
+        ]
       }
     ],
     formData: {
       'chapter-1-field-1': 'value',
-      'chapter-1-field-2': 'value',
+      'chapter-1-field-2': 5, // between min and max
       'chapter-1-field-3': undefined,
       'chapter-2-field-1': undefined,
       'chapter-3-field-2': undefined,
       'chapter-4-field-2': undefined,
       'chapter-4-field-4': undefined,
       'chapter-4-field-5': 'value',
-      'chapter-4-field-6': 'value'
+      'chapter-4-field-6': 'value',
+      'chapter-6-field-2': 1, // below min
+      'chapter-7-field-2': 6, // above max
+      'chapter-8-field-2': []
     },
     questionnaire: {
       meta: {
@@ -170,7 +271,11 @@ describe('getters', () => {
         'chapter-1': true,
         'chapter-2': false,
         'chapter-3': true,
-        'chapter-4': false
+        'chapter-4': false,
+        'chapter-5': false,
+        'chapter-6': false,
+        'chapter-7': false,
+        'chapter-8': false
       }
 
       expect(actual).to.deep.equal(expected)
@@ -200,6 +305,26 @@ describe('getters', () => {
           id: 'chapter-4',
           label: 'Fourth chapter',
           index: 4
+        },
+        {
+          id: 'chapter-5',
+          label: 'Fifth chapter',
+          index: 5
+        },
+        {
+          id: 'chapter-6',
+          label: 'Sixth chapter',
+          index: 6
+        },
+        {
+          id: 'chapter-7',
+          label: 'Seventh chapter',
+          index: 7
+        },
+        {
+          id: 'chapter-8',
+          label: 'Eight chapter',
+          index: 8
         }
       ]
 
@@ -214,7 +339,11 @@ describe('getters', () => {
         'chapter-1': 100,
         'chapter-2': 0,
         'chapter-3': 0,
-        'chapter-4': 67
+        'chapter-4': 67,
+        'chapter-5': 0,
+        'chapter-6': 100,
+        'chapter-7': 100,
+        'chapter-8': 0
       }
 
       expect(actual).to.deep.equal(expected)
@@ -256,7 +385,7 @@ describe('getters', () => {
   describe('getTotalNumberOfChapters', () => {
     it('should return the total number of chapters', () => {
       const actual = getters.getTotalNumberOfChapters(state)
-      const expected = 4
+      const expected = 8
 
       expect(actual).to.deep.equal(expected)
     })

@@ -1,5 +1,14 @@
 package org.molgenis.security;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
+import static org.testng.Assert.assertEquals;
+
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.security.user.UserServiceImpl;
@@ -18,111 +27,91 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.io.IOException;
+@ContextConfiguration(classes = {MolgenisChangePasswordFilterTest.Config.class})
+@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContextTests {
+  @Autowired private MolgenisChangePasswordFilter filter;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
-import static org.testng.Assert.assertEquals;
+  @Autowired private UserService userService;
 
-@ContextConfiguration(classes = { MolgenisChangePasswordFilterTest.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public class MolgenisChangePasswordFilterTest extends AbstractTestNGSpringContextTests
-{
-	@Autowired
-	private MolgenisChangePasswordFilter filter;
+  private MockHttpServletRequest request;
+  private MockHttpServletResponse response;
+  private FilterChain chain;
 
-	@Autowired
-	private UserService userService;
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    request = new MockHttpServletRequest();
+    response = new MockHttpServletResponse();
+    chain = mock(FilterChain.class);
+  }
 
-	private MockHttpServletRequest request;
-	private MockHttpServletResponse response;
-	private FilterChain chain;
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterChangePassword() throws IOException, ServletException {
+    User user = mock(User.class);
+    when(user.isChangePassword()).thenReturn(true);
+    when(userService.getUser("user")).thenReturn(user);
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		chain = mock(FilterChain.class);
-	}
+    request.setRequestURI("/login");
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterChangePassword() throws IOException, ServletException
-	{
-		User user = mock(User.class);
-		when(user.isChangePassword()).thenReturn(true);
-		when(userService.getUser("user")).thenReturn(user);
+    filter.doFilter(request, response, chain);
 
-		request.setRequestURI("/login");
+    assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
+  }
 
-		filter.doFilter(request, response, chain);
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterNoChangePassword() throws IOException, ServletException {
+    User user = mock(User.class);
+    when(user.isChangePassword()).thenReturn(false);
+    when(userService.getUser("user")).thenReturn(user);
 
-		assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
-	}
+    request.setRequestURI("/login");
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterNoChangePassword() throws IOException, ServletException
-	{
-		User user = mock(User.class);
-		when(user.isChangePassword()).thenReturn(false);
-		when(userService.getUser("user")).thenReturn(user);
+    filter.doFilter(request, response, chain);
 
-		request.setRequestURI("/login");
+    verify(chain).doFilter(request, response);
+  }
 
-		filter.doFilter(request, response, chain);
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterIgnoreOwnUri() throws IOException, ServletException {
+    request.setRequestURI("/account/password/change");
 
-		verify(chain).doFilter(request, response);
-	}
+    filter.doFilter(request, response, chain);
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterIgnoreOwnUri() throws IOException, ServletException
-	{
-		request.setRequestURI("/account/password/change");
+    verify(chain).doFilter(request, response);
+  }
 
-		filter.doFilter(request, response, chain);
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterChangePasswordHackyUri() throws IOException, ServletException {
+    User user = mock(User.class);
+    when(user.isChangePassword()).thenReturn(true);
+    when(userService.getUser("user")).thenReturn(user);
 
-		verify(chain).doFilter(request, response);
-	}
+    request.setRequestURI("/api/v2/account/password/change");
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterChangePasswordHackyUri() throws IOException, ServletException
-	{
-		User user = mock(User.class);
-		when(user.isChangePassword()).thenReturn(true);
-		when(userService.getUser("user")).thenReturn(user);
+    filter.doFilter(request, response, chain);
 
-		request.setRequestURI("/api/v2/account/password/change");
+    assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
+  }
 
-		filter.doFilter(request, response, chain);
+  @Configuration
+  static class Config {
+    @Bean
+    public MolgenisChangePasswordFilter molgenisChangePasswordFilter() {
+      return new MolgenisChangePasswordFilter(userService(), redirectStrategy());
+    }
 
-		assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
-	}
+    @Bean
+    public RedirectStrategy redirectStrategy() {
+      return new DefaultRedirectStrategy();
+    }
 
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public MolgenisChangePasswordFilter molgenisChangePasswordFilter()
-		{
-			return new MolgenisChangePasswordFilter(userService(), redirectStrategy());
-		}
-
-		@Bean
-		public RedirectStrategy redirectStrategy()
-		{
-			return new DefaultRedirectStrategy();
-		}
-
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
-	}
+    @Bean
+    public UserService userService() {
+      return mock(UserServiceImpl.class);
+    }
+  }
 }

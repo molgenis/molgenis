@@ -6,6 +6,7 @@ import {
   OverViewSection,
   PdfSection,
   QuestionnaireEntityResponse,
+  ReportHeaderData,
   ResponseMetaAttribute,
   Translation
 } from '../flow.types'
@@ -22,7 +23,8 @@ export default {
    * @param translations Objects containing local spesific translations for "True" and "False"
    * @returns OverView
    */
-  buildOverViewObject: function (questionnaireResp: QuestionnaireEntityResponse, translations: Translation): OverView {
+  buildOverViewObject: function (questionnaireResp: QuestionnaireEntityResponse,
+    translations: Translation): OverView {
     const answers = questionnaireResp.items[0]
 
     const buildAnswerLabel = function (attribute: ResponseMetaAttribute): ?string {
@@ -30,7 +32,8 @@ export default {
       if (answers.hasOwnProperty(attribute.name)) {
         const questionId = attribute.name
         const answerType = attribute.fieldType
-        const refLabelAttribute = attribute.refEntity ? attribute.refEntity.labelAttribute : undefined
+        const refLabelAttribute = attribute.refEntity
+          ? attribute.refEntity.labelAttribute : undefined
         const answer = answers[questionId]
         switch (answerType) {
           case 'MREF':
@@ -38,7 +41,8 @@ export default {
             answerLabel = answer.map(a => a[refLabelAttribute]).join(', ')
             break
           case 'BOOL':
-            answerLabel = answer ? translations.trueLabel : translations.falseLabel
+            answerLabel = answer ? translations.trueLabel
+              : translations.falseLabel
             break
           case 'ENUM':
             answerLabel = answer.join(', ')
@@ -59,7 +63,8 @@ export default {
       return answerLabel !== '' ? answerLabel : undefined
     }
 
-    const buildChapterSection = function (sections: Array<OverViewAnswer | OverViewSection>, attribute: ResponseMetaAttribute): OverViewAnswer | OverViewSection {
+    const buildChapterSection = function (sections: Array<OverViewAnswer | OverViewSection>,
+      attribute: ResponseMetaAttribute): OverViewAnswer | OverViewSection {
       if (attribute.fieldType === 'COMPOUND') {
         const subSections = attribute.attributes.reduce(buildChapterSection, [])
         if (subSections.length > 0) {
@@ -82,19 +87,22 @@ export default {
       return sections
     }
 
-    const chapters = questionnaireResp.meta.attributes.reduce((chapters: Array<OverViewChapter>, attribute: ResponseMetaAttribute): OverView => {
-      if (attribute.fieldType === 'COMPOUND') {
-        const chapterSections = attribute.attributes.reduce(buildChapterSection, [])
-        if (chapterSections.length > 0) {
-          chapters.push({
-            id: attribute.name,
-            title: attribute.label,
-            chapterSections: chapterSections
-          })
+    const chapters = questionnaireResp.meta.attributes.reduce(
+      (chapters: Array<OverViewChapter>,
+        attribute: ResponseMetaAttribute): OverView => {
+        if (attribute.fieldType === 'COMPOUND') {
+          const chapterSections = attribute.attributes.reduce(
+            buildChapterSection, [])
+          if (chapterSections.length > 0) {
+            chapters.push({
+              id: attribute.name,
+              title: attribute.label,
+              chapterSections: chapterSections
+            })
+          }
         }
-      }
-      return chapters
-    }, [])
+        return chapters
+      }, [])
 
     return {
       title: questionnaireResp.meta.label,
@@ -102,7 +110,8 @@ export default {
     }
   },
 
-  buildPdfContent: function (questionnaire: OverView): Array<PdfSection> {
+  buildPdfContent: function (questionnaire: OverView,
+    reportHeaderData: ReportHeaderData): Array<PdfSection> {
     let content = []
 
     const printQuestionAndAnswer = (question: OverViewAnswer) => {
@@ -127,6 +136,33 @@ export default {
       content.push({text: chapter.title, style: 'chapterTitle'})
     }
 
+    const buildIntroText = () => {
+      return {
+        text: reportHeaderData.introText,
+        style: 'introText'
+      }
+    }
+
+    const buildHeaderLogo = () => {
+      return {
+        image: reportHeaderData.logoDataUrl,
+        alignment: 'right'
+      }
+    }
+
+    content.push({text: questionnaire.title, style: 'header'})
+
+    if (reportHeaderData) {
+      if (reportHeaderData.logoDataUrl && reportHeaderData.introText) {
+        content.push(buildHeaderLogo())
+        content.push(buildIntroText())
+      } else if (reportHeaderData.introText) {
+        content.push(buildIntroText())
+      } else if (reportHeaderData.logoDataUrl) {
+        content.push(buildHeaderLogo())
+      }
+    }
+
     questionnaire.chapters.forEach((chapter) => {
       printChapter(chapter)
       chapter.chapterSections.forEach(printSection)
@@ -137,22 +173,48 @@ export default {
 
   printContent: function (docTitle: string, content: Object) {
     let docDefinition = {
+      pageSize: 'LETTER',
+      footer: function (currentPage, pageCount) {
+        return {
+          text: currentPage.toString() + ' / ' + pageCount,
+          alignment: 'right',
+          style: 'pageNumber'
+        }
+      },
       info: {
         title: 'questionnaire-overview'
       },
       content,
       styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 5, 0, 10]
+        },
+        pageNumber: {
+          fontSize: 10,
+          italics: true,
+          margin: [10, 10, 10, 10]
+        },
+        introText: {
+          fontSize: 10,
+          bold: false,
+          italics: false,
+          margin: [0, 0, 0, 20]
+        },
         chapterTitle: {
           fontSize: 16,
           bold: true,
           margin: [0, 20, 0, 10]
         },
         sectionTitle: {
-          fontSize: 14,
+          fontSize: 10,
+          bold: true,
           margin: [0, 10, 0, 5]
         },
         questionLabel: {
           fontSize: 10,
+          bold: true,
           margin: [0, 5]
         },
         answerLabel: {

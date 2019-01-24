@@ -6,6 +6,4 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(AggregateAnonymizerImpl.class)
-public class AggregationTestConfig
-{
-}
+public class AggregationTestConfig {}

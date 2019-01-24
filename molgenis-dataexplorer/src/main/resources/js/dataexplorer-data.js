@@ -46,7 +46,7 @@
      * @memberOf molgenis.dataexplorer.data
      */
     function createDataTable() {
-        var useDateEditRowPlugin = this.useDateEditRowPlugin;
+      var useDataEditRowPlugin = this.useDateEditRowPlugin
         $.get('/permission/sys_FreemarkerTemplate/read').done(function (canRead) {
             var tableProperties = {
                 entity: getEntity().name,
@@ -67,7 +67,7 @@
                     };
                 }
             }
-            if (useDateEditRowPlugin) {
+          if (useDataEditRowPlugin) {
                 tableProperties.onEditClick = function (tableId, tableRowId) {
                     window.location.assign(window.location.origin + '/plugin/data-row-edit/' + tableId + '/' + tableRowId)
                 },
@@ -86,9 +86,10 @@
     function onRowInspect(e) {
         var entityId = e.id;
         var entityTypeId = e.name;
-
-        $('#entityReport').load("dataexplorer/details", {entityTypeId: entityTypeId, entityId: entityId}, function () {
-            $('#entityReportModal').modal("show");
+        $('#entityReport').load("dataexplorer/details", {entityTypeId: entityTypeId, entityId: entityId}, function( response, status, xhr ) {
+            if ( status !== "error" ) {
+                $('#entityReportModal').modal("show");
+            }
         });
     }
 

@@ -19,6 +19,7 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
+        <input id="depth" type="hidden" name="depth" value="${mappingProject.depth}"/>
         <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.id?html}"/>
         <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.id?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
@@ -26,7 +27,7 @@
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
                value="${attributeMapping.targetAttribute.dataType?html}"/>
         <input id="sourceAttributeSize" type="hidden" value="${sourceAttributesSize?html}"/>
-        <input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
+        <input id="dataExplorerUri" type="hidden" value="<#if dataExplorerUri??>${dataExplorerUri?html}</#if>"/>
     </div>
 </div>
 <div class="row">

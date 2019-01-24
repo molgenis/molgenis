@@ -8,7 +8,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ L1Cache.class, L2Cache.class, L3Cache.class, EntityHydration.class })
-public class CacheTestConfig
-{
-}
+@Import({L1Cache.class, L2Cache.class, L3Cache.class, EntityHydration.class})
+public class CacheTestConfig {}

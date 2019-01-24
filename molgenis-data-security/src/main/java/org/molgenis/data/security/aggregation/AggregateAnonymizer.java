@@ -8,9 +8,8 @@ import org.molgenis.data.aggregation.AggregateResult;
  *
  * @see AggregateQuery
  */
-public interface AggregateAnonymizer
-{
-	long AGGREGATE_ANONYMIZATION_VALUE = -1;
+public interface AggregateAnonymizer {
+  long AGGREGATE_ANONYMIZATION_VALUE = -1;
 
-	AnonymizedAggregateResult anonymize(AggregateResult aggregateResult, int threshold);
+  AnonymizedAggregateResult anonymize(AggregateResult aggregateResult, int threshold);
 }

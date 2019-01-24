@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IndexActionGroupFactory
-		extends AbstractSystemEntityFactory<IndexActionGroup, IndexActionGroupMetaData, String>
-{
-	IndexActionGroupFactory(IndexActionGroupMetaData indexActionGroupMetaData, EntityPopulator entityPopulator)
-	{
-		super(IndexActionGroup.class, indexActionGroupMetaData, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<IndexActionGroup, IndexActionGroupMetadata, String> {
+  IndexActionGroupFactory(
+      IndexActionGroupMetadata indexActionGroupMetaData, EntityPopulator entityPopulator) {
+    super(IndexActionGroup.class, indexActionGroupMetaData, entityPopulator);
+  }
 }

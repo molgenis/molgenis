@@ -1,137 +1,100 @@
 package org.molgenis.core.ui.menumanager;
 
-import com.google.common.collect.Iterables;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.core.ui.menumanager.MenuManagerController.URI;
+import static org.springframework.http.HttpStatus.OK;
+
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeTraverser;
-import org.molgenis.core.ui.menu.Menu;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Comparator;
+import java.util.List;
+import javax.servlet.http.Part;
+import javax.validation.Valid;
 import org.molgenis.core.util.FileUploadUtils;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.*;
+import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.Part;
-import javax.validation.Valid;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import static org.molgenis.core.ui.menumanager.MenuManagerController.URI;
-import static org.springframework.http.HttpStatus.OK;
-
-/**
- * Plugin to view and modify the app UI menu
- */
+/** Plugin to view and modify the app UI menu */
 @Controller
 @RequestMapping(URI)
-public class MenuManagerController extends PluginController
-{
-	public static final String ID = "menumanager";
-	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+public class MenuManagerController extends PluginController {
+  public static final String ID = "menumanager";
+  public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final MenuManagerService menuManagerService;
-	private final FileStore fileStore;
-	private final Ui molgenisUi;
-	private final AppSettings appSettings;
+  private final MenuManagerService menuManagerService;
+  private final MenuReaderService menuReaderService;
+  private final FileStore fileStore;
+  private final AppSettings appSettings;
 
-	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
+  private static final String ERRORMESSAGE_LOGO =
+      "The logo needs to be an image file like png or jpg.";
 
-	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, Ui molgenisUi,
-			AppSettings appSettings)
-	{
-		super(URI);
-		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
-		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
-		if (appSettings == null) throw new IllegalArgumentException("appSettings is null");
-		this.menuManagerService = menuManagerService;
-		this.molgenisUi = molgenisUi;
-		this.fileStore = fileStore;
-		this.appSettings = appSettings;
-	}
+  public MenuManagerController(
+      MenuManagerService menuManagerService,
+      MenuReaderService menuReaderService,
+      FileStore fileStore,
+      AppSettings appSettings) {
+    super(URI);
+    this.menuManagerService = requireNonNull(menuManagerService);
+    this.menuReaderService = requireNonNull(menuReaderService);
+    this.fileStore = requireNonNull(fileStore);
+    this.appSettings = requireNonNull(appSettings);
+  }
 
-	@GetMapping
-	public String init(Model model)
-	{
-		List<UiMenuItem> menus = new TreeTraverser<UiMenuItem>()
-		{
-			@Override
-			public Iterable<UiMenuItem> children(UiMenuItem root)
-			{
-				if (root.getType() == UiMenuItemType.MENU)
-				{
-					UiMenu menu = (UiMenu) root;
-					return Iterables.filter(menu.getItems(),
-							molgenisUiMenuItem -> molgenisUiMenuItem.getType() == UiMenuItemType.MENU);
-				}
-				else return Collections.emptyList();
-			}
-		}.preOrderTraversal(molgenisUi.getMenu()).toList();
+  @GetMapping
+  public String init(Model model) {
+    List<Plugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
+    plugins.sort(Comparator.comparing(Plugin::getId));
+    model.addAttribute("plugins", plugins);
+    model.addAttribute("menu", menuReaderService.getMenu());
+    return "view-menumanager";
+  }
 
-		List<Plugin> plugins = Lists.newArrayList(menuManagerService.getPlugins());
-		plugins.sort(Comparator.comparing(Plugin::getId));
+  @PostMapping("/save")
+  @ResponseStatus(OK)
+  public void save(@Valid @RequestBody Menu molgenisMenu) {
+    menuManagerService.saveMenu(molgenisMenu);
+  }
 
-		model.addAttribute("menus", menus);
-		model.addAttribute("plugins", plugins);
-		model.addAttribute("molgenis_ui", molgenisUi);
-		return "view-menumanager";
-	}
+  /** Upload a new molgenis logo */
+  @PreAuthorize("hasAnyRole('ROLE_SU')")
+  @PostMapping("/upload-logo")
+  public String uploadLogo(@RequestParam("logo") Part part, Model model) throws IOException {
+    String contentType = part.getContentType();
+    if ((contentType == null) || !contentType.startsWith("image")) {
+      model.addAttribute("errorMessage", ERRORMESSAGE_LOGO);
+    } else {
+      // Create the logo subdir in the filestore if it doesn't exist
+      File logoDir = new File(fileStore.getStorageDir() + "/logo");
+      if (!logoDir.exists() && !logoDir.mkdir()) {
+        throw new IOException("Unable to create directory [" + logoDir.getAbsolutePath() + "]");
+      }
 
-	@PostMapping("/save")
-	@ResponseStatus(OK)
-	public void save(@Valid @RequestBody Menu molgenisMenu)
-	{
-		menuManagerService.saveMenu(molgenisMenu);
-	}
+      // Store the logo in the logo dir of the filestore
+      String file = "/logo/" + FileUploadUtils.getOriginalFileName(part);
+      try (InputStream inputStream = part.getInputStream()) {
+        fileStore.store(inputStream, file);
+      }
 
-	@PostMapping("logo")
-	public void uploadLogo(@Valid @RequestBody File newLogo)
-	{
-		System.out.println(newLogo.getName());
-	}
+      // Set logo
+      appSettings.setLogoNavBarHref(file);
+    }
 
-	/**
-	 * Upload a new molgenis logo
-	 */
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@PostMapping("/upload-logo")
-	public String uploadLogo(@RequestParam("logo") Part part, Model model) throws IOException
-	{
-		String contentType = part.getContentType();
-		if ((contentType == null) || !contentType.startsWith("image"))
-		{
-			model.addAttribute("errorMessage", ERRORMESSAGE_LOGO);
-		}
-		else
-		{
-			// Create the logo subdir in the filestore if it doesn't exist
-			File logoDir = new File(fileStore.getStorageDir() + "/logo");
-			if (!logoDir.exists())
-			{
-				if (!logoDir.mkdir())
-				{
-					throw new IOException("Unable to create directory [" + logoDir.getAbsolutePath() + "]");
-				}
-			}
-
-			// Store the logo in the logo dir of the filestore
-			String file = "/logo/" + FileUploadUtils.getOriginalFileName(part);
-			try (InputStream inputStream = part.getInputStream())
-			{
-				fileStore.store(inputStream, file);
-			}
-
-			// Set logo
-			appSettings.setLogoNavBarHref(file);
-		}
-
-		return init(model);
-	}
+    return init(model);
+  }
 }

@@ -5,13 +5,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DataL10nConfig
-{
-	public static final String NAMESPACE = "data";
+public class DataL10nConfig {
+  public static final String NAMESPACE = "data";
 
-	@Bean
-	public PropertiesMessageSource dataMessageSource()
-	{
-		return new PropertiesMessageSource(NAMESPACE);
-	}
+  @Bean
+  public PropertiesMessageSource dataMessageSource() {
+    return new PropertiesMessageSource(NAMESPACE);
+  }
 }

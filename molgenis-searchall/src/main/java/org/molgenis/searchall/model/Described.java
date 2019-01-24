@@ -1,28 +1,26 @@
 package org.molgenis.searchall.model;
 
-import javax.annotation.Nullable;
-
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
-public interface Described
-{
-	String getLabel();
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
-	@Nullable
-	String getDescription();
+public interface Described {
+  String getLabel();
 
-	default boolean isLabelOrDescriptionMatch(String searchterm)
-	{
-		return isLabelMatch(searchterm) || isDescriptionMatch(searchterm);
-	}
+  @Nullable
+  @CheckForNull
+  String getDescription();
 
-	default boolean isLabelMatch(String searchterm)
-	{
-		return containsIgnoreCase(getLabel(), searchterm);
-	}
+  default boolean isLabelOrDescriptionMatch(String searchterm) {
+    return isLabelMatch(searchterm) || isDescriptionMatch(searchterm);
+  }
 
-	default boolean isDescriptionMatch(String searchterm)
-	{
-		return containsIgnoreCase(getDescription(), searchterm);
-	}
+  default boolean isLabelMatch(String searchterm) {
+    return containsIgnoreCase(getLabel(), searchterm);
+  }
+
+  default boolean isDescriptionMatch(String searchterm) {
+    return containsIgnoreCase(getDescription(), searchterm);
+  }
 }

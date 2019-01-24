@@ -11,8 +11,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ ExpressionValidator.class, EntityAttributesValidator.class, AttributeValidator.class,
-		EntityTypeValidator.class, PackageValidator.class, TagValidator.class, QueryValidator.class })
-public class ValidationTestConfig
-{
-}
+@Import({
+  ExpressionValidator.class,
+  EntityAttributesValidator.class,
+  AttributeValidator.class,
+  EntityTypeValidator.class,
+  PackageValidator.class,
+  TagValidator.class,
+  QueryValidator.class
+})
+public class ValidationTestConfig {}

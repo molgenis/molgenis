@@ -1,45 +1,37 @@
 package org.molgenis.data.decorator.meta;
 
+import static com.google.common.collect.Streams.stream;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
+
+import java.util.stream.Stream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+public class DecoratorConfiguration extends StaticEntity {
+  public DecoratorConfiguration(Entity entity) {
+    super(entity);
+  }
 
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DYNAMIC_DECORATORS;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+  public DecoratorConfiguration(EntityType entityType) {
+    super(entityType);
+  }
 
-public class DecoratorConfiguration extends StaticEntity
-{
-	public DecoratorConfiguration(Entity entity)
-	{
-		super(entity);
-	}
+  public String getEntityTypeId() {
+    return getString(ENTITY_TYPE_ID);
+  }
 
-	public DecoratorConfiguration(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public void setEntityTypeId(String entityTypeId) {
+    set(ENTITY_TYPE_ID, entityTypeId);
+  }
 
-	public String getEntityTypeId()
-	{
-		return getString(ENTITY_TYPE_ID);
-	}
+  public Stream<DecoratorParameters> getDecoratorParameters() {
+    return stream(getEntities(PARAMETERS, DecoratorParameters.class));
+  }
 
-	public void setEntityTypeId(String entityTypeId)
-	{
-		set(ENTITY_TYPE_ID, entityTypeId);
-	}
-
-	public Stream<DynamicDecorator> getDecorators()
-	{
-		return StreamSupport.stream(getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false);
-	}
-
-	public void setDecorators(List<DynamicDecorator> decorators)
-	{
-		set(DYNAMIC_DECORATORS, decorators);
-	}
+  public void setDecoratorParameters(Stream<DecoratorParameters> parameters) {
+    set(PARAMETERS, parameters.collect(toList()));
+  }
 }

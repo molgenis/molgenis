@@ -1,6 +1,14 @@
 package org.molgenis.core.ui.data.config;
 
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withCreatedEntity;
+import static org.testng.Assert.assertEquals;
+
 import com.google.auto.value.AutoValue;
+import java.net.URI;
 import org.molgenis.util.AutoGson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -15,59 +23,48 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.net.URI;
+@ContextConfiguration(classes = {HttpClientConfig.class})
+public class HttpClientConfigTest extends AbstractTestNGSpringContextTests {
+  @Autowired RestTemplate restTemplate;
+  MockRestServiceServer server;
+  TestNegotiatorQuery testNegotiatorQuery = TestNegotiatorQuery.createQuery("url", "ntoken");
 
-import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withCreatedEntity;
-import static org.testng.Assert.assertEquals;
+  @BeforeClass
+  public void beforeClass() {
+    server = MockRestServiceServer.bindTo(restTemplate).build();
+  }
 
-@ContextConfiguration(classes = { HttpClientConfig.class })
-public class HttpClientConfigTest extends AbstractTestNGSpringContextTests
-{
-	@Autowired
-	RestTemplate restTemplate;
-	MockRestServiceServer server;
-	TestNegotiatorQuery testNegotiatorQuery = TestNegotiatorQuery.createQuery("url", "ntoken");
+  @Test
+  public void testGsonSerialization() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("Authorization", "Basic ABCDE");
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		server = MockRestServiceServer.bindTo(restTemplate).build();
-	}
+    HttpEntity<TestNegotiatorQuery> entity = new HttpEntity<>(testNegotiatorQuery, headers);
+    server
+        .expect(once(), requestTo("http://directory.url/request"))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(content().string("{\"URL\":\"url\",\"nToken\":\"ntoken\"}"))
+        .andExpect(MockRestRequestMatchers.header("Authorization", "Basic ABCDE"))
+        .andRespond(withCreatedEntity(URI.create("http://directory.url/request/DEF")));
 
-	@Test
-	public void testGsonSerialization()
-	{
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Basic ABCDE");
+    String redirectURL =
+        restTemplate.postForLocation("http://directory.url/request", entity).toASCIIString();
+    assertEquals(redirectURL, "http://directory.url/request/DEF");
 
-		HttpEntity<TestNegotiatorQuery> entity = new HttpEntity<>(testNegotiatorQuery, headers);
-		server.expect(once(), requestTo("http://directory.url/request"))
-			  .andExpect(method(HttpMethod.POST))
-			  .andExpect(content().string("{\"URL\":\"url\",\"nToken\":\"ntoken\"}"))
-			  .andExpect(MockRestRequestMatchers.header("Authorization", "Basic ABCDE"))
-			  .andRespond(withCreatedEntity(URI.create("http://directory.url/request/DEF")));
+    // Verify all expectations met
+    server.verify();
+  }
 
-		String redirectURL = restTemplate.postForLocation("http://directory.url/request", entity).toASCIIString();
-		assertEquals(redirectURL, "http://directory.url/request/DEF");
+  @AutoValue
+  @AutoGson(autoValueClass = AutoValue_HttpClientConfigTest_TestNegotiatorQuery.class)
+  public abstract static class TestNegotiatorQuery {
+    public abstract String getURL();
 
-		// Verify all expectations met
-		server.verify();
-	}
+    public abstract String getnToken();
 
-	@AutoValue
-	@AutoGson(autoValueClass = AutoValue_HttpClientConfigTest_TestNegotiatorQuery.class)
-	public abstract static class TestNegotiatorQuery
-	{
-		public abstract String getURL();
-
-		public abstract String getnToken();
-
-		public static TestNegotiatorQuery createQuery(String url, String nToken)
-		{
-			return new AutoValue_HttpClientConfigTest_TestNegotiatorQuery(url, nToken);
-		}
-	}
+    public static TestNegotiatorQuery createQuery(String url, String nToken) {
+      return new AutoValue_HttpClientConfigTest_TestNegotiatorQuery(url, nToken);
+    }
+  }
 }

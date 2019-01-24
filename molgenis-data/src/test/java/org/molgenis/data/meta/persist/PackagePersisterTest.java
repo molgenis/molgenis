@@ -1,5 +1,17 @@
 package org.molgenis.data.meta.persist;
 
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Set;
+import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -10,69 +22,55 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Set;
-import java.util.stream.Stream;
+public class PackagePersisterTest extends AbstractMockitoTest {
+  @Mock private DataService dataService;
 
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.testng.Assert.assertEquals;
+  private PackagePersister packagePersister;
 
-public class PackagePersisterTest extends AbstractMockitoTest
-{
-	@Mock
-	private DataService dataService;
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    packagePersister = new PackagePersister(dataService);
+  }
 
-	private PackagePersister packagePersister;
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testPackagePersister() {
+    new PackagePersister(null);
+  }
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		packagePersister = new PackagePersister(dataService);
-	}
+  @Test
+  public void testUpsertPackages() throws Exception {
+    String newPackageName = "newPackage";
+    String unchangedPackageName = "unchangedPackage";
+    String updatedPackageName = "updatedPackage";
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testPackagePersister()
-	{
-		new PackagePersister(null);
-	}
+    Package newPackage = mock(Package.class);
+    when(newPackage.getId()).thenReturn("newPackageId");
 
-	@Test
-	public void testUpsertPackages() throws Exception
-	{
-		String newPackageName = "newPackage";
-		String unchangedPackageName = "unchangedPackage";
-		String updatedPackageName = "updatedPackage";
+    Package unchangedPackage = mock(Package.class);
+    when(unchangedPackage.getId()).thenReturn("unchangedPackageId");
 
-		Package newPackage = mock(Package.class);
-		when(newPackage.getId()).thenReturn("newPackageId");
+    Package updatedPackage = mock(Package.class);
+    when(updatedPackage.getId()).thenReturn("updatedPackageId");
 
-		Package unchangedPackage = mock(Package.class);
-		when(unchangedPackage.getId()).thenReturn("unchangedPackageId");
+    Package existingUpdatedPackage = mock(Package.class);
+    when(existingUpdatedPackage.getId()).thenReturn("updatedPackageId");
 
-		Package updatedPackage = mock(Package.class);
-		when(updatedPackage.getId()).thenReturn("updatedPackageId");
+    @SuppressWarnings("unchecked")
+    Query<Package> query = mock(Query.class);
+    when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
+    when(query.in(eq(PackageMetadata.ID), any(Set.class))).thenReturn(query);
+    when(query.findAll()).thenReturn(Stream.of(unchangedPackage, existingUpdatedPackage));
 
-		Package existingUpdatedPackage = mock(Package.class);
-		when(existingUpdatedPackage.getId()).thenReturn("updatedPackageId");
+    packagePersister.upsertPackages(Stream.of(newPackage, unchangedPackage, updatedPackage));
 
-		@SuppressWarnings("unchecked")
-		Query<Package> query = mock(Query.class);
-		when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
-		when(query.in(eq(PackageMetadata.ID), any(Set.class))).thenReturn(query);
-		when(query.findAll()).thenReturn(Stream.of(unchangedPackage, existingUpdatedPackage));
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(dataService).add(eq(PACKAGE), addCaptor.capture());
+    assertEquals(addCaptor.getValue().collect(toList()), singletonList(newPackage));
 
-		packagePersister.upsertPackages(Stream.of(newPackage, unchangedPackage, updatedPackage));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).add(eq(PACKAGE), addCaptor.capture());
-		assertEquals(addCaptor.getValue().collect(toList()), singletonList(newPackage));
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).update(eq(PACKAGE), updateCaptor.capture());
-		assertEquals(updateCaptor.getValue().collect(toList()), singletonList(updatedPackage));
-	}
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(dataService).update(eq(PACKAGE), updateCaptor.capture());
+    assertEquals(updateCaptor.getValue().collect(toList()), singletonList(updatedPackage));
+  }
 }

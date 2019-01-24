@@ -16,27 +16,25 @@
 package org.molgenis.web.converter;
 
 import com.google.gson.Gson;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.lang.Nullable;
-
 import java.io.Writer;
 import java.lang.reflect.Type;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
 /**
- * Subclassed customization of {@link GsonHttpMessageConverter} that works around https://jira.spring.io/browse/SPR-16461
+ * Subclassed customization of {@link GsonHttpMessageConverter} that works around
+ * https://jira.spring.io/browse/SPR-16461
  */
-public class MolgenisGsonHttpMessageConverter extends GsonHttpMessageConverter
-{
+public class MolgenisGsonHttpMessageConverter extends GsonHttpMessageConverter {
 
-	public MolgenisGsonHttpMessageConverter(Gson gson)
-	{
-		super(gson);
-	}
+  public MolgenisGsonHttpMessageConverter(Gson gson) {
+    super(gson);
+  }
 
-	@Override
-	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception
-	{
-		super.writeInternal(o, null, writer);
-	}
-
+  @Override
+  protected void writeInternal(Object o, @Nullable @CheckForNull Type type, Writer writer)
+      throws Exception {
+    super.writeInternal(o, null, writer);
+  }
 }
