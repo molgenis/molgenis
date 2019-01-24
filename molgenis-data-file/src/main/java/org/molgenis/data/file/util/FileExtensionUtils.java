@@ -22,7 +22,6 @@ public class FileExtensionUtils {
     for (String possibleExtension : possibleExtensions) {
       if (null == longestExtension) {
         longestExtension = possibleExtension;
-        continue;
       } else {
         if (longestExtension.length() < possibleExtension.length())
           longestExtension = possibleExtension;

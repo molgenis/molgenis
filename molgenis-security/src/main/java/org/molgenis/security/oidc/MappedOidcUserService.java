@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashSet;
 import java.util.Set;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -13,12 +13,12 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class MappedOidcUserService extends OidcUserService {
   private final OidcUserMapper oidcUserMapper;
-  private final UserDetailsService userDetailsService;
+  private final UserDetailsServiceImpl userDetailsServiceImpl;
 
   public MappedOidcUserService(
-      OidcUserMapper oidcUserMapper, UserDetailsService userDetailsService) {
+      OidcUserMapper oidcUserMapper, UserDetailsServiceImpl userDetailsServiceImpl) {
     this.oidcUserMapper = requireNonNull(oidcUserMapper);
-    this.userDetailsService = requireNonNull(userDetailsService);
+    this.userDetailsServiceImpl = requireNonNull(userDetailsServiceImpl);
   }
 
   @Override
@@ -31,7 +31,7 @@ public class MappedOidcUserService extends OidcUserService {
   private MappedOidcUser createOidcUser(OidcUser oidcUser, OidcUserRequest userRequest) {
     User user = oidcUserMapper.toUser(oidcUser, userRequest);
     String userNameAttributeName = getUserNameAttributeName(userRequest);
-    Set<GrantedAuthority> authorities = new HashSet<>(userDetailsService.getAuthorities(user));
+    Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
     return new MappedOidcUser(
         authorities,
         oidcUser.getIdToken(),

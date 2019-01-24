@@ -57,13 +57,7 @@ public class ImportJob implements Runnable {
       EntityImportReport importReport =
           importService.doImport(source, metadataAction, databaseAction, packageId);
 
-      session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
-
-      try {
-        session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
-      } catch (IllegalStateException e) {
-        // session invalidated
-      }
+      setSessionSecurityContext();
 
       importRunService.finishImportRun(
           importRunId,
@@ -75,6 +69,14 @@ public class ImportJob implements Runnable {
     } catch (Exception e) {
       LOG.info("Import failed.", e);
       importRunService.failImportRun(importRunId, e.getLocalizedMessage());
+    }
+  }
+
+  private void setSessionSecurityContext() {
+    try {
+      session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+    } catch (IllegalStateException e) {
+      // session invalidated
     }
   }
 

@@ -59,7 +59,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class GroupRestController {
   public static final String USER = "/user";
 
+  @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
   private static final String SECURITY_API_PATH = "/api/plugin/security";
+
   static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
   private static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
   private static final String GROUP_PERMISSION_END_POINT =

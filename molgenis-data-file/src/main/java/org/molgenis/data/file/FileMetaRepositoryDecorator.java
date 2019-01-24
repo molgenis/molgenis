@@ -2,6 +2,7 @@ package org.molgenis.data.file;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.UncheckedIOException;
 import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
@@ -60,8 +61,9 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
   }
 
   private void deleteFile(FileMeta fileMeta) {
-    boolean deleteOk = fileStore.delete(fileMeta.getId());
-    if (!deleteOk) {
+    try {
+      fileStore.delete(fileMeta.getId());
+    } catch (UncheckedIOException e) {
       LOG.warn("Could not delete file '{}' from file store", fileMeta.getId());
     }
   }

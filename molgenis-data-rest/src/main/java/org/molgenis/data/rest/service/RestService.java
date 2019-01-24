@@ -465,16 +465,13 @@ public class RestService {
         .forEach(
             mappedByAttr -> {
               AttributeType type = mappedByAttr.getDataType();
-              switch (type) {
-                case ONE_TO_MANY:
-                  updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
-                  break;
-                default:
-                  throw new RuntimeException(
-                      format(
-                          "Attribute [%s] of type [%s] can't be mapped by another attribute",
-                          mappedByAttr.getName(), type.toString()));
+              if (type != ONE_TO_MANY) {
+                throw new RuntimeException(
+                    format(
+                        "Attribute [%s] of type [%s] can't be mapped by another attribute",
+                        mappedByAttr.getName(), type.toString()));
               }
+              updateMappedByEntitiesOneToMany(entity, existingEntity, mappedByAttr);
             });
   }
 

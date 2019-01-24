@@ -26,16 +26,14 @@ public class RDFMediaType {
     Set<MediaType> types =
         new HashSet<>(
             Arrays.asList(
-                new MediaType[] {
-                  TEXT_TURTLE,
-                  APPLICATION_RDF_XML,
-                  APPLICATION_X_TURTLE,
-                  TEXT_RDF_N3,
-                  APPLICATION_JSON,
-                  APPLICATION_TRIG,
-                  APPLICATION_JSONLD,
-                  APPLICATION_NQUADS
-                }));
+                TEXT_TURTLE,
+                APPLICATION_RDF_XML,
+                APPLICATION_X_TURTLE,
+                TEXT_RDF_N3,
+                APPLICATION_JSON,
+                APPLICATION_TRIG,
+                APPLICATION_JSONLD,
+                APPLICATION_NQUADS));
     rdfMediaTypes = Collections.unmodifiableSet(types);
   }
 

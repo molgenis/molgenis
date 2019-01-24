@@ -8,7 +8,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 import java.util.Collection;
 import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
-import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -20,8 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class SecurityCoreITConfig {
   @SuppressWarnings("unchecked")
   @Bean
-  public UserDetailsService userDetailsService() {
-    UserDetailsService userDetailsService = mock(UserDetailsService.class);
+  public UserDetailsServiceImpl userDetailsService() {
+    UserDetailsServiceImpl userDetailsService = mock(UserDetailsServiceImpl.class);
     UserDetails adminUserDetails = mock(UserDetails.class);
     when(adminUserDetails.isEnabled()).thenReturn(true);
     Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));

@@ -7,7 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -84,9 +86,14 @@ public class FileStore {
     return new File(storageDir + separator + fileName);
   }
 
-  public boolean delete(String fileName) {
-    File file = new File(storageDir + separator + fileName);
-    return file.delete();
+  /** @throws UncheckedIOException if the file with given name could not be deleted */
+  public void delete(String fileName) {
+    Path path = Paths.get(storageDir + separator + fileName);
+    try {
+      Files.delete(path);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public String getStorageDir() {

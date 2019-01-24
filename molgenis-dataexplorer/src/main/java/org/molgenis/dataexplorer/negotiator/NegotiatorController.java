@@ -196,10 +196,15 @@ public class NegotiatorController extends PluginController {
 
   private String postQueryToNegotiator(
       NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity) {
+    String negotiatorURL = config.getNegotiatorURL();
+    if (negotiatorURL == null) {
+      throw new IllegalStateException("Negotiator config URL can't be null");
+    }
+
     try {
-      LOG.trace("NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
+      LOG.trace("NEGOTIATOR_URL: [{}]", negotiatorURL);
       String redirectURL =
-          restTemplate.postForLocation(config.getNegotiatorURL(), queryHttpEntity).toASCIIString();
+          restTemplate.postForLocation(negotiatorURL, queryHttpEntity).toASCIIString();
       LOG.trace("Redirecting to {}", redirectURL);
       return redirectURL;
     } catch (RestClientException e) {
