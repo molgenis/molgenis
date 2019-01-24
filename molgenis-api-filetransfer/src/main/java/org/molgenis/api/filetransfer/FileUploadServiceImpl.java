@@ -4,19 +4,17 @@ import static java.nio.channels.Channels.newChannel;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.blob.BlobMetadata;
 import org.molgenis.data.blob.BlobStore;
-import org.molgenis.data.blob.WritableBlobChannel;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.springframework.stereotype.Service;
@@ -46,7 +44,8 @@ class FileUploadServiceImpl implements FileUploadService {
     List<FileMeta> fileMetaList = new ArrayList<>();
     try {
       while (fileItemIterator.hasNext()) {
-        FileMeta fileMeta = upload(fileItemIterator.next());
+        FileItemStream fileItemStream = fileItemIterator.next();
+        FileMeta fileMeta = upload(fileItemStream);
         fileMetaList.add(fileMeta);
       }
     } catch (FileUploadException e) {
@@ -58,6 +57,19 @@ class FileUploadServiceImpl implements FileUploadService {
   }
 
   private FileMeta upload(FileItemStream fileItemStream) throws IOException {
+    ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream());
+    BlobMetadata blobMetadata = blobStore.store(fromChannel);
+
+    FileMeta fileMeta = fileMetaFactory.create(blobMetadata.getId());
+    fileMeta.setFilename(fileItemStream.getName());
+    fileMeta.setContentType(fileItemStream.getContentType());
+    fileMeta.setSize(blobMetadata.getSize());
+    fileMeta.setUrl(fileDownloadUriGenerator.generateUri(fileMeta.getId()));
+    dataService.add(FILE_META, fileMeta);
+
+    return fileMeta;
+
+    /*
     long nrBytes;
     ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream());
     WritableBlobChannel writableBlobChannel = blobStore.newChannel();
@@ -73,5 +85,6 @@ class FileUploadServiceImpl implements FileUploadService {
     dataService.add(FILE_META, fileMeta);
 
     return fileMeta;
+    */
   }
 }

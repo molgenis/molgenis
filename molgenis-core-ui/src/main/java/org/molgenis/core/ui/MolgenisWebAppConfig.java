@@ -28,6 +28,7 @@ import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.blob.DiskBlobStore;
+import org.molgenis.data.blob.MinioBlobStore;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
@@ -79,6 +80,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+// import org.molgenis.data.blob.DiskBlobStore;
+
 @Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private AppSettings appSettings;
@@ -103,7 +106,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-    configurer.setDefaultTimeout(60 * 1000);
+      configurer.setDefaultTimeout(60 * 1000);
     configurer.setTaskExecutor(asyncTaskExecutor());
   }
 
@@ -340,21 +343,27 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     return result;
   }
 
+  private static final boolean useMinioStore = true;
+
   // TODO get rid of code duplication
   // TODO move to own config class and include in platform config
   @Bean
   public BlobStore blobStore() {
-    // get molgenis home directory
-    Path appDataRoot = AppDataRootProvider.getAppDataRoot();
+    if (useMinioStore) {
+      return new MinioBlobStore(idGenerator);
+    } else {
+      // get molgenis home directory
+      Path appDataRoot = AppDataRootProvider.getAppDataRoot();
 
-    // create molgenis store directory in molgenis data directory if not exists
-    String molgenisFileStoreDirStr =
-        Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
-    File molgenisDataDir = new File(molgenisFileStoreDirStr);
-    if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
-      throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
+      // create molgenis store directory in molgenis data directory if not exists
+      String molgenisFileStoreDirStr =
+          Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
+      File molgenisDataDir = new File(molgenisFileStoreDirStr);
+      if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
+        throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
+      }
+      return new DiskBlobStore(Paths.get(molgenisFileStoreDirStr), idGenerator);
     }
-    return new DiskBlobStore(Paths.get(molgenisFileStoreDirStr), idGenerator);
   }
 
   // Override in subclass if you need more freemarker variables
