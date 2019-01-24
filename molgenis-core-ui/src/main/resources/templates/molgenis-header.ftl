@@ -190,7 +190,7 @@
                 <#list menu.items as item>
                     <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-                            <img class="img-responsive" style="max-width:100%;max-height:100%;"
+                            <img class="img-responsive molgenis-navbar-logo" style="height:2em;font-size:16px;"
                                  src="${app_settings.logoNavBarHref?html}"
                                  alt="${app_settings.title?html}">
                         </a>
