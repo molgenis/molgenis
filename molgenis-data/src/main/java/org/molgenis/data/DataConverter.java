@@ -1,22 +1,24 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Streams.stream;
-import static java.util.Collections.singletonList;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
-import org.springframework.core.convert.ConversionFailedException;
+import org.molgenis.util.UnexpectedEnumException;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 public class DataConverter {
@@ -24,8 +26,11 @@ public class DataConverter {
 
   private DataConverter() {}
 
+  /** @throws ConversionException if convertion failed or no converter was found */
   @SuppressWarnings("unchecked")
-  public static <T> T convert(Object source, Class<T> targetType) {
+  @Nullable
+  @CheckForNull
+  private static <T> T convert(@Nullable @CheckForNull Object source, Class<T> targetType) {
     if (source == null) {
       return null;
     }
@@ -34,7 +39,11 @@ public class DataConverter {
       return (T) source;
     }
 
-    return getConversionService().convert(source, targetType);
+    try {
+      return getConversionService().convert(source, targetType);
+    } catch (ConversionException e) {
+      throw new DataConversionException(e);
+    }
   }
 
   /**
@@ -43,48 +52,75 @@ public class DataConverter {
    * @param source value to convert
    * @param attr attribute that defines the type of the converted value
    * @return converted value or the input value if the attribute type is a reference type
+   * @throws AttributeValueConversionException if conversion failed
    */
   public static Object convert(Object source, Attribute attr) {
     try {
-      switch (attr.getDataType()) {
-        case BOOL:
-          return toBoolean(source);
-        case XREF:
-        case CATEGORICAL:
-        case CATEGORICAL_MREF:
-        case MREF:
-        case FILE:
-        case ONE_TO_MANY:
-          return source;
-        case COMPOUND:
-          throw new UnsupportedOperationException();
-        case DATE:
-          return toLocalDate(source);
-        case DATE_TIME:
-          return toInstant(source);
-        case DECIMAL:
-          return toDouble(source);
-        case INT:
-          return toInt(source);
-        case LONG:
-          return toLong(source);
-        default:
-          return toString(source);
-      }
-    } catch (ConversionFailedException cfe) {
-      throw new MolgenisDataException(
-          String.format(
+      return convert(source, attr.getDataType());
+    } catch (DataConversionException e) {
+      throw new AttributeValueConversionException(
+          format(
               "Conversion failure in entity type [%s] attribute [%s]; %s",
-              attr.getEntity().getId(), attr.getName(), cfe.getMessage()));
+              attr.getEntity().getId(), attr.getName(), e.getMessage()),
+          e);
     }
   }
 
-  public static String toString(Object source) {
-    if (source == null) return null;
-    if (source instanceof String) return (String) source;
-    if (source instanceof Entity) {
-      Object labelValue = ((Entity) source).getLabelValue();
-      return labelValue != null ? labelValue.toString() : null;
+  private static Object convert(Object source, AttributeType attributeType) {
+    Object value;
+    switch (attributeType) {
+      case BOOL:
+        value = toBoolean(source);
+        break;
+      case XREF:
+      case CATEGORICAL:
+      case CATEGORICAL_MREF:
+      case MREF:
+      case FILE:
+      case ONE_TO_MANY:
+        value = source;
+        break;
+      case COMPOUND:
+        throw new UnsupportedOperationException();
+      case DATE:
+        value = toLocalDate(source);
+        break;
+      case DATE_TIME:
+        value = toInstant(source);
+        break;
+      case DECIMAL:
+        value = toDouble(source);
+        break;
+      case INT:
+        value = toInt(source);
+        break;
+      case LONG:
+        value = toLong(source);
+        break;
+      case EMAIL:
+      case ENUM:
+      case HTML:
+      case HYPERLINK:
+      case SCRIPT:
+      case STRING:
+      case TEXT:
+        value = toString(source);
+        break;
+      default:
+        throw new UnexpectedEnumException(attributeType);
+    }
+    return value;
+  }
+
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static String toString(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof String) {
+      return (String) source;
     }
     if (source instanceof Iterable<?>) {
       StringBuilder sb = new StringBuilder();
@@ -95,104 +131,106 @@ public class DataConverter {
 
       return sb.toString();
     }
-
-    if (getConversionService() == null) return source.toString();
-
-    try {
-      return convert(source, String.class);
-    } catch (ConverterNotFoundException e) {
-      return source.toString();
-    }
+    return convert(source, String.class);
   }
 
-  public static Integer toInt(Object source) {
-    if (source == null) return null;
-    if (source instanceof Integer) return (Integer) source;
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static Integer toInt(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof Integer) {
+      return (Integer) source;
+    }
     return convert(source, Integer.class);
   }
 
-  public static Long toLong(Object source) {
-    if (source == null) return null;
-    if (source instanceof Long) return (Long) source;
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static Long toLong(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof Long) {
+      return (Long) source;
+    }
     return convert(source, Long.class);
   }
 
-  /** @return true, false or null */
+  /**
+   * @return true, false or null
+   * @throws DataConversionException if conversion failed
+   */
   @SuppressWarnings("squid:S2447") // null is a valid return value
-  public static Boolean toBoolean(Object source) {
-    if (source == null) return null;
-    if (source instanceof Boolean) return (Boolean) source;
+  @Nullable
+  @CheckForNull
+  public static Boolean toBoolean(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof Boolean) {
+      return (Boolean) source;
+    }
     return convert(source, Boolean.class);
   }
 
-  public static Double toDouble(Object source) {
-    if (source == null) return null;
-    if (source instanceof Double) return (Double) source;
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static Double toDouble(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof Double) {
+      return (Double) source;
+    }
     return convert(source, Double.class);
   }
 
-  public static LocalDate toLocalDate(Object source) {
-    if (source == null) return null;
-    if (source instanceof LocalDate) return (LocalDate) source;
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static LocalDate toLocalDate(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof LocalDate) {
+      return (LocalDate) source;
+    }
     return convert(source, LocalDate.class);
   }
 
-  public static Instant toInstant(Object source) {
-    if (source == null) return null;
-    if (source instanceof Instant) return (Instant) source;
+  /** @throws DataConversionException if conversion failed */
+  @Nullable
+  @CheckForNull
+  public static Instant toInstant(@Nullable @CheckForNull Object source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof Instant) {
+      return (Instant) source;
+    }
     return convert(source, Instant.class);
   }
 
-  public static Entity toEntity(Object source) {
-    if (source == null) return null;
-    if (source instanceof Entity) return (Entity) source;
-    return convert(source, Entity.class);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static List<String> toList(Object source) {
-    if (source == null) return null;
-    else if (source instanceof Iterable<?>) {
-      return stream((Iterable<?>) source)
-          .map(
-              obj -> {
-                Object objValue;
-                if (obj instanceof Entity) {
-                  objValue = ((Entity) obj).getIdValue();
-                } else {
-                  objValue = obj;
-                }
-                return DataConverter.toString(objValue);
-              })
-          .collect(Collectors.toList());
-    } else if (source instanceof String) return ListEscapeUtils.toList((String) source);
-    else return ListEscapeUtils.toList(source.toString());
-  }
-
-  static List<Integer> toIntList(Object source) {
-    if (source == null) return null;
-    else if (source instanceof String) {
-      List<String> stringList = ListEscapeUtils.toList((String) source);
-      List<Integer> intList = new ArrayList<>();
-      for (String s : stringList) {
-        if (!StringUtils.isNumeric(s)) {
-          throw new IllegalArgumentException(s + " is not an integer");
-        }
-        intList.add(Integer.parseInt(s));
-      }
-
-      return intList;
+  /** @throws DataConversionException if conversion failed */
+  public static List<String> toList(@Nullable @CheckForNull Object source) {
+    List<String> stringList;
+    if (source == null) {
+      stringList = emptyList();
     } else if (source instanceof Iterable<?>) {
-      ArrayList<Integer> intList = new ArrayList<>();
-      for (Object o : (Iterable<?>) source) {
-        if (o instanceof Entity) {
-          o = ((Entity) o).getIdValue();
-        }
-        intList.add(toInt(o));
-      }
-      return intList;
-    } else if (source instanceof Integer) return new ArrayList<>(singletonList((Integer) source));
-    else return null;
+      Iterable<?> iterable = (Iterable<?>) source;
+      stringList = stream(iterable).map(DataConverter::toString).collect(Collectors.toList());
+    } else if (source instanceof String) {
+      String string = (String) source;
+      stringList = ListEscapeUtils.toList(string);
+    } else {
+      stringList = ListEscapeUtils.toList(source.toString());
+    }
+    return stringList;
   }
 
   private static ConversionService getConversionService() {
