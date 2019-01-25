@@ -5,7 +5,7 @@ module.exports = {
     config.externals = {
       'jquery': 'jQuery',
       'bootstrap': 'bootstrap',
-      'popper.js': 'popper.js',
+      'popper.js': 'popper.js'
     }
   }
 }
