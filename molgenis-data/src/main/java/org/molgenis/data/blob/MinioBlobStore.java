@@ -7,9 +7,20 @@ import io.minio.ObjectStat;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import org.molgenis.data.populate.IdGenerator;
+import org.springframework.beans.factory.annotation.Value;
 
 public class MinioBlobStore implements BlobStore {
-  private static final String BUCKET_NAME = "molgenis";
+  @Value("${minio_bucket_name:molgenis}")
+  private String bucketName = "molgenis";
+
+  @Value("${minio_endpoint:http://127.0.0.1:9000}")
+  private String minioEndpoint;
+
+  @Value("${minio_access_key:molgenis}")
+  private String minioAccessKey;
+
+  @Value("${minio_secret_key:molgenis}")
+  private String minioSecretKey;
 
   private IdGenerator idGenerator;
   private MinioClient minioClient;
@@ -17,7 +28,7 @@ public class MinioBlobStore implements BlobStore {
   public MinioBlobStore(IdGenerator idGenerator) {
     this.idGenerator = requireNonNull(idGenerator);
     try {
-      minioClient = new MinioClient("http://127.0.0.1:9000", "molgenis", "molgenis");
+      minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -33,14 +44,14 @@ public class MinioBlobStore implements BlobStore {
     String blobId = generateBlobId();
     String contentType = "unknown/content-type";
     try {
-      minioClient.putObject(BUCKET_NAME, blobId, Channels.newInputStream(fromChannel), contentType);
+      minioClient.putObject(bucketName, blobId, Channels.newInputStream(fromChannel), contentType);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
     ObjectStat objectStat;
     try {
-      objectStat = minioClient.statObject(BUCKET_NAME, blobId);
+      objectStat = minioClient.statObject(bucketName, blobId);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -52,7 +63,7 @@ public class MinioBlobStore implements BlobStore {
   @Override
   public void delete(String blobId) {
     try {
-      minioClient.removeObject(BUCKET_NAME, blobId);
+      minioClient.removeObject(bucketName, blobId);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -61,7 +72,7 @@ public class MinioBlobStore implements BlobStore {
   @Override
   public ReadableByteChannel newChannel(String blobId) {
     try {
-      return Channels.newChannel(minioClient.getObject(BUCKET_NAME, blobId));
+      return Channels.newChannel(minioClient.getObject(bucketName, blobId));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
