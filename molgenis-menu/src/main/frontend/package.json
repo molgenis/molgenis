@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --name menu src/main.ts --dest ../../../target/classes/js/menu",
+    "build": "vue-cli-service build --target lib --name context src/main.ts --dest ../../../target/classes/js/menu",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
     "unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@molgenis/molgenis-ui-context": "^0.3.0",
+    "@molgenis/molgenis-ui-context": "^0.4.0",
     "vue": "^2.5.17"
   },
   "devDependencies": {
