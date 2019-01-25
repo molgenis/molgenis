@@ -7,8 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Entity factory base class
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityType, P>
     implements EntityFactory<E, P> {
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);
-
   private final Class<E> entityClass;
   private final Constructor<E> entityConstructorWithEntity;
   private final Constructor<E> entityConstructorWithEntityType;
@@ -62,7 +58,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
     try {
       entity = entityConstructorWithEntityType.newInstance(systemEntityType);
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException(e);
+      throw new EntityConstructionException(e);
     }
     entityPopulator.populate(entity);
     return entity;
@@ -88,7 +84,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
     try {
       return entityConstructorWithEntity.newInstance(entity);
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException(e);
+      throw new EntityConstructionException(e);
     }
   }
 
@@ -96,12 +92,11 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
     try {
       return entityClass.getConstructor(Entity.class);
     } catch (NoSuchMethodException e) {
-      LOG.error(
-          "[{}] is missing the required constructor [public {}({})",
-          entityClass.getName(),
-          entityClass.getSimpleName(),
-          Entity.class.getSimpleName());
-      throw new RuntimeException(e);
+      String message =
+          String.format(
+              "[%s] is missing the required constructor [public %s(%s)]",
+              entityClass.getName(), entityClass.getSimpleName(), Entity.class.getSimpleName());
+      throw new EntityConstructionException(message, e);
     }
   }
 
@@ -109,12 +104,11 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
     try {
       return entityClass.getConstructor(EntityType.class);
     } catch (NoSuchMethodException e) {
-      LOG.error(
-          "[{}] is missing the required constructor [public {}({})",
-          entityClass.getName(),
-          entityClass.getSimpleName(),
-          EntityType.class.getSimpleName());
-      throw new RuntimeException(e);
+      String message =
+          String.format(
+              "[%s] is missing the required constructor [public %s(%s)]",
+              entityClass.getName(), entityClass.getSimpleName(), EntityType.class.getSimpleName());
+      throw new EntityConstructionException(message, e);
     }
   }
 }
