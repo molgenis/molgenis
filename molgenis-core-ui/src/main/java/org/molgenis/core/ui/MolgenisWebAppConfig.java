@@ -106,7 +106,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-      configurer.setDefaultTimeout(60 * 1000);
+    configurer.setDefaultTimeout(60 * 1000);
     configurer.setTaskExecutor(asyncTaskExecutor());
   }
 
