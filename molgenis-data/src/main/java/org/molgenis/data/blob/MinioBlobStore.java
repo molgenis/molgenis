@@ -8,24 +8,21 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import org.molgenis.data.populate.IdGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MinioBlobStore implements BlobStore {
-  @Value("${minio_bucket_name:molgenis}")
-  private String bucketName = "molgenis";
+  private final String bucketName;
+  private final IdGenerator idGenerator;
+  private final MinioClient minioClient;
 
-  @Value("${minio_endpoint:http://127.0.0.1:9000}")
-  private String minioEndpoint;
-
-  @Value("${minio_access_key:molgenis}")
-  private String minioAccessKey;
-
-  @Value("${minio_secret_key:molgenis}")
-  private String minioSecretKey;
-
-  private IdGenerator idGenerator;
-  private MinioClient minioClient;
-
-  public MinioBlobStore(IdGenerator idGenerator) {
+  public MinioBlobStore(
+      @Value("${minio_bucket_name:molgenis}") String bucketName,
+      @Value("${minio_endpoint:http://127.0.0.1:9000}") String minioEndpoint,
+      @Value("${minio_access_key:molgenis}") String minioAccessKey,
+      @Value("${minio_secret_key:molgenis}") String minioSecretKey,
+      IdGenerator idGenerator) {
+    this.bucketName = requireNonNull(bucketName);
     this.idGenerator = requireNonNull(idGenerator);
     try {
       minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey);
