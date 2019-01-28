@@ -25,11 +25,12 @@ public class DuplicateAttributeNameExceptionTest extends ExceptionMessageTest {
   public Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
-        "en", "Duplicate attribute name attr for entity type 'entity'.(sheet: 'attributes', row 20)"
+        "en",
+        "Duplicate attribute name 'attr' for entity type 'entity'.(sheet: 'attributes', row 20)"
       },
       {
         "nl",
-        "Dubbele attribuut name attr for entiteit type 'entity'. (werkblad: 'attributes', rij 20)"
+        "Dubbele attribuut name 'attr' for entiteit type 'entity'. (werkblad: 'attributes', rij 20)"
       }
     };
   }

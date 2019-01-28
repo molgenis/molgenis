@@ -24,7 +24,7 @@ public class InvalidEmxAttributeExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "Unknown column 'onzin' on sheet 'entities'"},
+      new Object[] {"en", "Unsupported column 'onzin' on sheet 'entities'"},
       {"nl", "Onbekende column 'onzin' op werkblad 'entities'"}
     };
   }

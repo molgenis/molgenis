@@ -2,7 +2,6 @@ package org.molgenis.data.importer.emx.exception;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.testng.Assert.*;
 
 import org.molgenis.data.meta.model.Attribute;
@@ -21,10 +20,9 @@ public class InvalidDataTypeExceptionTest extends ExceptionMessageTest {
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
     Attribute attr = mock(Attribute.class);
-    when(attr.getName()).thenReturn("attrname");
-    when(attr.getDataType()).thenReturn(LONG);
+    when(attr.getLabel()).thenReturn("attrname");
     assertExceptionMessageEquals(
-        new InvalidDataTypeException("columnType", attr, "entityType", "attributes", 7),
+        new InvalidDataTypeException("auto", "string", attr, "entityType", "attributes", 7),
         lang,
         message);
   }
@@ -35,11 +33,11 @@ public class InvalidDataTypeExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en",
-        "Invalid value for attribute 'attrname' van entity 'entityType', columnType attributes can only be of data type 'LONG'(sheet: 'attributes', row 7)"
+        "Invalid value for column 'dataType' of attribute 'null' of entity 'entityType', auto attributes can only be of data type 'string'(sheet: 'attributes', row 7)"
       },
       {
         "nl",
-        "Incorrecte waarde voor attribute 'attrname' van entity 'entityType', columnType attributen kunnen alleen van data type 'LONG' zijn. (werkblad: 'attributes', rij 7)"
+        "Incorrecte waarde voor kolom dataType van attribuut 'null' van entity 'entityType', auto attributen kunnen alleen van data type 'string' zijn. (werkblad: 'attributes', rij 7)"
       }
     };
   }

@@ -30,11 +30,11 @@ public class NillableReferenceAggregatableExceptionTest extends ExceptionMessage
     return new Object[][] {
       new Object[] {
         "en",
-        "Nullable attribute 'attr' of entity 'entity' cannot be of type 'CATEGORICAL'. (sheet: 'attributes', row 3)"
+        "Nullable aggregatable attribute 'attr' of entity 'entity' cannot be of type 'CATEGORICAL'. (sheet: 'attributes', row 3)"
       },
       {
         "nl",
-        "Optioneel attribuut 'attr' van entiteit 'entity' kan niet van type 'CATEGORICAL' zijn. (werkblad: 'attributes', rij 3)"
+        "Optioneel aggregeerbaar attribuut 'attr' van entiteit 'entity' kan niet van type 'CATEGORICAL' zijn. (werkblad: 'attributes', rij 3)"
       }
     };
   }

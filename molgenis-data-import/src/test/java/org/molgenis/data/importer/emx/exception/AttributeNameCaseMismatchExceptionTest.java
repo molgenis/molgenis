@@ -25,11 +25,11 @@ public class AttributeNameCaseMismatchExceptionTest extends ExceptionMessageTest
   public Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
-        "en", "Unsupported attribute metadata: Test, did you mean attributes? (sheet: 'test')"
+        "en", "Unsupported attribute metadata: 'Test', did you mean 'test'? (sheet: 'attributes')"
       },
       {
         "nl",
-        "Niet ondersteunde attribuut metadata: Test, bedoelde u misschien attributes? (werkblad: 'test')"
+        "Niet ondersteunde attribuut metadata: 'Test', bedoelde u misschien 'test'? (werkblad: 'attributes')"
       }
     };
   }

@@ -6,25 +6,18 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class InvalidDataTypeException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "IMP06";
+public class InvalidReferenceDataTypeException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "IMP21";
   private final String identifier;
   private final Attribute attribute;
   private final String entityType;
   private final String sheet;
   private final int rowIndex;
-  private final String allowedDatatype;
 
-  public InvalidDataTypeException(
-      String identifier,
-      String allowedDatatype,
-      Attribute attribute,
-      String entityType,
-      String sheet,
-      int rowIndex) {
+  public InvalidReferenceDataTypeException(
+      String identifier, Attribute attribute, String entityType, String sheet, int rowIndex) {
     super(ERROR_CODE);
     this.identifier = requireNonNull(identifier);
-    this.allowedDatatype = allowedDatatype;
     this.attribute = requireNonNull(attribute);
     this.entityType = requireNonNull(entityType);
     this.sheet = requireNonNull(sheet);
@@ -34,12 +27,12 @@ public class InvalidDataTypeException extends CodedRuntimeException {
   @Override
   public String getMessage() {
     return format(
-        "Identifier:%s, allowedDatatype:%s, attribute:%s entityType:%s, sheet:%s, rowIndex:%s",
-        identifier, allowedDatatype, attribute.getLabel(), entityType, sheet, rowIndex);
+        "Identifier:%s, attribute: %s, entityType:%s, sheet:%s, rowIndex:%s",
+        identifier, attribute.getLabel(), entityType, sheet, rowIndex);
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {identifier, allowedDatatype, attribute, entityType, sheet, rowIndex};
+    return new Object[] {identifier, attribute, entityType, sheet, rowIndex};
   }
 }

@@ -70,6 +70,7 @@ import org.molgenis.data.importer.emx.exception.InvalidCompoundException;
 import org.molgenis.data.importer.emx.exception.InvalidDataTypeException;
 import org.molgenis.data.importer.emx.exception.InvalidEmxAttributeException;
 import org.molgenis.data.importer.emx.exception.InvalidRangeException;
+import org.molgenis.data.importer.emx.exception.InvalidReferenceDataTypeException;
 import org.molgenis.data.importer.emx.exception.InvalidValueException;
 import org.molgenis.data.importer.emx.exception.MissingCompoundException;
 import org.molgenis.data.importer.emx.exception.MissingEmxAttributeAttributeValueException;
@@ -960,7 +961,8 @@ public class EmxMetadataParser implements MetadataParser {
 
   void validateAutoAttrValue(int rowIndex, Attribute attr, String emxEntityName) {
     if (attr.isAuto() && !isStringType(attr)) {
-      throw new InvalidDataTypeException("auto", attr, emxEntityName, EMX_ATTRIBUTES, rowIndex);
+      throw new InvalidDataTypeException(
+          "auto", "string", attr, emxEntityName, EMX_ATTRIBUTES, rowIndex);
     }
   }
 
@@ -1042,7 +1044,7 @@ public class EmxMetadataParser implements MetadataParser {
       String emxIsLabelAttr) {
     boolean isLabelAttr = parseBoolean(emxIsLabelAttr, rowIndex, EMX_ATTRIBUTES_LABEL_ATTRIBUTE);
     if (isLabelAttr && isReferenceType(attr)) {
-      throw new InvalidDataTypeException(
+      throw new InvalidReferenceDataTypeException(
           EMX_ATTRIBUTES_LABEL_ATTRIBUTE, attr, emxEntityName, EMX_ATTRIBUTES, rowIndex);
     }
 
@@ -1057,7 +1059,7 @@ public class EmxMetadataParser implements MetadataParser {
       String emxIsLookupAttr) {
     boolean isLookAttr = parseBoolean(emxIsLookupAttr, rowIndex, EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE);
     if (isLookAttr && isReferenceType(attr)) {
-      throw new InvalidDataTypeException(
+      throw new InvalidReferenceDataTypeException(
           EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, attr, emxEntityName, EMX_ATTRIBUTES, rowIndex);
     }
 
@@ -1151,11 +1153,11 @@ public class EmxMetadataParser implements MetadataParser {
       int rowIndex, String attributeName, String entityTypeId) {
     if (Strings.isNullOrEmpty(attributeName)) {
       throw new MissingEmxAttributeAttributeValueException(
-          "name", attributeName, entityTypeId, EMX_ATTRIBUTES, rowIndex);
+          "name", "", entityTypeId, EMX_ATTRIBUTES, rowIndex);
     }
     if (Strings.isNullOrEmpty(entityTypeId)) {
       throw new MissingEmxAttributeAttributeValueException(
-          EMX_ATTRIBUTES_ENTITY, attributeName, entityTypeId, EMX_ATTRIBUTES, rowIndex);
+          EMX_ATTRIBUTES_ENTITY, attributeName, "", EMX_ATTRIBUTES, rowIndex);
     }
   }
 

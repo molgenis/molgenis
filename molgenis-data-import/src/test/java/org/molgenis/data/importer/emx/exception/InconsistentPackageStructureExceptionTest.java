@@ -26,7 +26,7 @@ public class InconsistentPackageStructureExceptionTest extends ExceptionMessageT
     return new Object[][] {
       new Object[] {
         "en",
-        "Package name should be fully qualified. (package: pack, parentpackage: parent sheet: 'packages', row 2)"
+        "Package name should be fully qualified. (package: 'pack', parentpackage: 'parent' sheet: 'packages', row 2)"
       },
       {
         "nl",

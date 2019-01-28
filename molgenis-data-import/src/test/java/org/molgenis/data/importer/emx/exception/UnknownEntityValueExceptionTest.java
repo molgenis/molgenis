@@ -27,9 +27,12 @@ public class UnknownEntityValueExceptionTest extends ExceptionMessageTest {
   public Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
-        "en", "Unknown refEntity 'value' for entity 'attr'. (sheet: 'attributes', row 9)"
+        "en", "Unknown 'refEntity' value 'value' for entity 'attr'. (sheet: 'attributes', row 9)"
       },
-      {"nl", "Onbekende refEntity 'value' for entiteit 'attr'. (werkblad: 'attributes', rij 9)"}
+      {
+        "nl",
+        "Onbekende 'refEntity' waarde 'value' for entiteit 'attr'. (werkblad: 'attributes', rij 9)"
+      }
     };
   }
 }
