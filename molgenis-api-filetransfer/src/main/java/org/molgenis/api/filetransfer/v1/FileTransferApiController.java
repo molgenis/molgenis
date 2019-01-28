@@ -17,6 +17,8 @@ import org.molgenis.api.filetransfer.FileUploadService;
 import org.molgenis.api.filetransfer.v1.model.FileUploadResponse;
 import org.molgenis.api.filetransfer.v1.model.FilesUploadResponse;
 import org.molgenis.data.file.model.FileMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RestController
 @RequestMapping(URI_API)
 class FileTransferApiController {
+  private static final Logger LOG = LoggerFactory.getLogger(FileTransferApiController.class);
+
   private static final String VERSION = "v1";
   static final String URI_API = FileTransferApiNamespace.URI_API + '/' + VERSION;
   static final String PATH_DOWNLOAD = "download";
@@ -71,7 +75,10 @@ class FileTransferApiController {
               FilesUploadResponse filesUploadResponse =
                   FilesUploadResponse.create(
                       fileMetaList.stream().map(this::toFileUploadResponse).collect(toList()));
-              deferredResult.setResult(filesUploadResponse);
+              boolean ok = deferredResult.setResult(filesUploadResponse);
+              if (!ok) {
+                LOG.error("request expired");
+              }
             });
 
     return deferredResult;
