@@ -1,8 +1,11 @@
 package org.molgenis.data.importer.emx.exception;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.testng.Assert.*;
 
-import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -17,9 +20,11 @@ public class InvalidDataTypeExceptionTest extends ExceptionMessageTest {
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getName()).thenReturn("attrname");
+    when(attr.getDataType()).thenReturn(LONG);
     assertExceptionMessageEquals(
-        new InvalidDataTypeException(
-            "columnType", AttributeType.LONG, "attrname", "entityType", "attributes", 7),
+        new InvalidDataTypeException("columnType", attr, "entityType", "attributes", 7),
         lang,
         message);
   }

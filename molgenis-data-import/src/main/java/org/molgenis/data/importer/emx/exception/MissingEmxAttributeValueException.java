@@ -5,13 +5,13 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class MissingEmxPackageAttributeValueException extends CodedRuntimeException {
+public class MissingEmxAttributeValueException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP12";
   private final String name;
   private final String sheet;
   private final int rowIndex;
 
-  public MissingEmxPackageAttributeValueException(String name, String sheet, int rowIndex) {
+  public MissingEmxAttributeValueException(String name, String sheet, int rowIndex) {
     super(ERROR_CODE);
     this.name = requireNonNull(name);
     this.sheet = requireNonNull(sheet);

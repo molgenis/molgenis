@@ -1,13 +1,11 @@
 package org.molgenis.data.importer.emx.exception;
 
-import static org.testng.Assert.*;
-
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class MissingEmxPackageAttributeValueExceptionTest extends ExceptionMessageTest {
+public class MissingEmxAttributeValueExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
     messageSource.addMolgenisNamespaces("data-import");
@@ -17,7 +15,7 @@ public class MissingEmxPackageAttributeValueExceptionTest extends ExceptionMessa
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
-        new MissingEmxPackageAttributeValueException("column", "packages", 2), lang, message);
+        new MissingEmxAttributeValueException("column", "packages", 2), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")

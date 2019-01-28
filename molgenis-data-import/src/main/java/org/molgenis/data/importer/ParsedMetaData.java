@@ -19,6 +19,20 @@ public class ParsedMetaData {
   private final ImmutableMap<String, Language> languages;
   private final ImmutableMap<String, L10nString> l10nStrings;
 
+  // For test
+  public ParsedMetaData(
+      ImmutableMap<String, EntityType> entities,
+      ImmutableMap<String, Package> packages,
+      ImmutableMap<String, Tag> tags,
+      ImmutableMap<String, Language> languages,
+      ImmutableMap<String, L10nString> l10nStrings) {
+    this.entities = entities;
+    this.packages = packages;
+    this.tags = tags;
+    this.languages = languages;
+    this.l10nStrings = l10nStrings;
+  }
+
   public ParsedMetaData(
       List<? extends EntityType> entities,
       Map<String, ? extends Package> packages,
