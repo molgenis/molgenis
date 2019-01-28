@@ -15,6 +15,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.GenericDependencyResolver;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,6 +58,8 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
     new GenericDependencyResolver()
         .resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
         .forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+
+    new ApplicationContextProvider().setApplicationContext(applicationContext);
   }
 
   // long method name, because if a method annotated with @BeforeMethod and the same method name

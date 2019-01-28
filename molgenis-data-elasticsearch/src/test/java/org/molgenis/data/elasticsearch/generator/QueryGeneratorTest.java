@@ -57,8 +57,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -100,11 +98,6 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest {
 
   public QueryGeneratorTest() {
     super(Strictness.WARN);
-  }
-
-  @BeforeClass
-  public static void setUpBeforeClass() {
-    DataConverter.setConversionService(new DefaultFormattingConversionService());
   }
 
   @BeforeMethod
