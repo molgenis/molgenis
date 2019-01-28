@@ -16,13 +16,25 @@ import static org.testng.Assert.assertNull;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Iterator;
+import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DataConverterTest {
+  @BeforeClass
+  public static void setUpBeforeClass() {
+    DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+    conversionService.addConverter(new StringToDateConverter());
+    conversionService.addConverter(new StringToDateTimeConverter());
+    DataConverter.setConversionService(conversionService);
+  }
+
   @Test
   public void testToIntNull() {
     assertNull(DataConverter.toInt(null));

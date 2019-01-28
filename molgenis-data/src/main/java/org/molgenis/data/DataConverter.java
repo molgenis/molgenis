@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.ApplicationContextProvider;
@@ -19,7 +17,6 @@ import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 
 public class DataConverter {
   private static ConversionService conversionService;
@@ -233,20 +230,16 @@ public class DataConverter {
     return stringList;
   }
 
+  /** testability */
+  public static void setConversionService(ConversionService conversionService) {
+    DataConverter.conversionService = conversionService;
+  }
+
   private static ConversionService getConversionService() {
     if (conversionService == null) {
-      if (ApplicationContextProvider.getApplicationContext() == null) {
-        // We are not in a Spring managed environment
-        conversionService = new DefaultConversionService();
-        ((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
-        ((DefaultConversionService) conversionService)
-            .addConverter(new StringToDateTimeConverter());
-      } else {
-        conversionService =
-            ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
-      }
+      conversionService =
+          ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
     }
-
     return conversionService;
   }
 }
