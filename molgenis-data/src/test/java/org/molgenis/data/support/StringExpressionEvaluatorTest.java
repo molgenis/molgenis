@@ -9,8 +9,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.gson.JsonSyntaxException;
+import org.molgenis.data.AttributeValueConversionException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeTest;
@@ -122,7 +122,7 @@ public class StringExpressionEvaluatorTest {
   }
 
   @Test(
-      expectedExceptions = MolgenisDataException.class,
+      expectedExceptions = AttributeValueConversionException.class,
       expectedExceptionsMessageRegExp =
           "Conversion failure in entity type \\[test\\] attribute \\[id\\]; Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
   public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails() {
