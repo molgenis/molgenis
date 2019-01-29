@@ -13,7 +13,6 @@ import static org.molgenis.data.vcf.model.VcfAttributes.ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
 import static org.molgenis.data.vcf.model.VcfAttributes.REF;
-import static org.molgenis.data.vcf.utils.VcfWriterUtils.EFFECT;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -109,7 +108,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest {
     metaDataCanAnnotate.addAttribute(
         attributeFactory
             .create()
-            .setName(EFFECT)
+            .setName("EFFECT")
             .setDataType(STRING)
             .setDescription(
                 "EFFECT annotations: 'Alt_Allele | Gene_Name | Annotation | Putative_impact | Gene_ID | Feature_type | Feature_ID | Transcript_biotype | Rank_total | HGVS_c | HGVS_p | cDNA_position | CDS_position | Protein_position | Distance_to_feature | Errors'"));
@@ -155,7 +154,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest {
     entity1.set("AN", "22");
     entity1.set("GTC", "0,1,10");
     entity1.set(
-        EFFECT,
+        "EFFECT",
         "A|TUBB8|missense_variant|MODERATE|TUBB8|transcript|NM_177987.2|Coding|4/4|c.1286C>T|p.Thr429Met|1286/1504|1286/1335|429/444||");
 
     entity2.set(VcfAttributes.CHROM, "1");
@@ -166,7 +165,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest {
     entity2.set(VcfAttributes.QUAL, ".");
     entity2.set(VcfAttributes.FILTER, "PASS");
     entity2.set(
-        EFFECT,
+        "EFFECT",
         "A|TUBB8|missense_variant|MODERATE|TUBB8|transcript|NM_177987.2|Coding|4/4|c.1286C>T|p.Thr429Met|1286/1504|1286/1335|429/444||,A|GEN2|missense_variant|MODERATE|GEN2|transcript|NM_177987.2|Coding|4/4|c.1286C>T|p.Thr429Met|1286/1504|1286/1335|429/444||");
 
     entity3.set(VcfAttributes.CHROM, "1");
