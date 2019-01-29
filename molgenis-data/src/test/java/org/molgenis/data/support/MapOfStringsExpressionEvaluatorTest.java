@@ -21,16 +21,11 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {
-      MapOfStringsExpressionEvaluatorTest.Config.class,
-      DefaultFormattingConversionService.class
-    })
+@ContextConfiguration(classes = MapOfStringsExpressionEvaluatorTest.Config.class)
 public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
   private Entity entity;
   private EntityType emd;
