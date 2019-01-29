@@ -7,7 +7,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 public class EmxImportException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP03";
-  private Throwable cause;
+  private final Throwable cause;
   private final String sheet;
   private final int rowIndex;
 
