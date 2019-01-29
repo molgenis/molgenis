@@ -7,8 +7,6 @@ import org.molgenis.data.validation.meta.NameValidator;
  * labels that are not duplicate
  */
 public interface OneClickImporterNamingService {
-  // matches everything that is not 'a-z', 'A-Z', '0-9', '_' or '#'
-  String ILLEGAL_CHARACTER_REGEX = "[^a-zA-Z0-9_#]+";
 
   /**
    * Generates a label with a postfix if the supplied label is already present in the database

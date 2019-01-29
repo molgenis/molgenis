@@ -5,6 +5,8 @@ import java.util.Objects;
 import org.molgenis.data.aggregation.AggregateResult;
 
 public class AnonymizedAggregateResult extends AggregateResult {
+  public static final long AGGREGATE_ANONYMIZATION_VALUE = -1;
+
   private final int anonymizationThreshold;
 
   AnonymizedAggregateResult(

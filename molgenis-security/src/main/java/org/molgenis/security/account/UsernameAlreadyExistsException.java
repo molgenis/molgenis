@@ -1,6 +1,7 @@
 package org.molgenis.security.account;
 
 /** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+@Deprecated
 public class UsernameAlreadyExistsException extends Exception {
   private static final long serialVersionUID = 1L;
 

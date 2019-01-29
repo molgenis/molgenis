@@ -6,7 +6,7 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
+import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.bindResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.getResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource;
