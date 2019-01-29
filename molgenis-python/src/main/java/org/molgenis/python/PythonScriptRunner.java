@@ -24,6 +24,11 @@ public class PythonScriptRunner implements ScriptRunner {
   }
 
   @Override
+  public boolean hasFileOutput(Script script) {
+    return false;
+  }
+
+  @Override
   public String runScript(Script script, Map<String, Object> parameters) {
     String generatedScript = ScriptUtils.generateScript(script, parameters);
     StringPythonOutputHandler handler = new StringPythonOutputHandler();

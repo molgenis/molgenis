@@ -6,14 +6,14 @@ import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.core.GenerateScriptException;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptMetadata;
@@ -70,11 +70,9 @@ public class SavedScriptRunner {
    */
   public ScriptResult runScript(String scriptName, Map<String, Object> parameters) {
     Script script =
-        dataService.findOne(
-            SCRIPT, new QueryImpl<Script>().eq(ScriptMetadata.NAME, scriptName), Script.class);
-
+        dataService.query(SCRIPT, Script.class).eq(ScriptMetadata.NAME, scriptName).findOne();
     if (script == null) {
-      throw new UnknownScriptException("Unknown script [" + scriptName + "]");
+      throw new UnknownEntityException(SCRIPT, scriptName);
     }
 
     if (script.getParameters() != null) {
@@ -85,26 +83,30 @@ public class SavedScriptRunner {
       }
     }
 
+    Map<String, Object> scriptParameters = new HashMap<>(parameters);
     if (script.isGenerateToken()) {
       String token =
           tokenService.generateAndStoreToken(
               SecurityUtils.getCurrentUsername(), "For script " + script.getName());
-      parameters.put("molgenisToken", token);
-    }
-
-    FileMeta fileMeta = null;
-    if (StringUtils.isNotEmpty(script.getResultFileExtension())) {
-      String name = generateRandomString();
-      File file = fileStore.getFileUnchecked(name + "." + script.getResultFileExtension());
-      parameters.put("outputFile", file.getAbsolutePath());
-      fileMeta = createFileMeta(name, file);
-      dataService.add(FILE_META, fileMeta);
+      scriptParameters.put("molgenisToken", token);
     }
 
     ScriptRunner scriptRunner =
         scriptRunnerFactory.getScriptRunner(script.getScriptType().getName());
 
-    String output = scriptRunner.runScript(script, parameters);
+    FileMeta fileMeta = null;
+    if (scriptRunner.hasFileOutput(script)) {
+      String name = generateRandomString();
+      String resultFileExtension = script.getResultFileExtension();
+      if (resultFileExtension != null) {
+        name += "." + script.getResultFileExtension();
+      }
+      File file = fileStore.getFileUnchecked(name);
+      scriptParameters.put("outputFile", file.getAbsolutePath());
+      fileMeta = createFileMeta(name, file);
+      dataService.add(FILE_META, fileMeta);
+    }
+    String output = scriptRunner.runScript(script, scriptParameters);
 
     return new ScriptResult(fileMeta, output);
   }
