@@ -42,6 +42,7 @@ public class AppDataRootInitializer {
     AppDataRootProvider.setAppDataRoot(appDataRoot);
   }
 
+  @SuppressWarnings("squid:S2083") // MOLGENIS_HOME is trusted
   private static Path getAppDataRoot() {
     LOG.debug("Trying to retrieve app data root from Java system property '{}'", MOLGENIS_HOME);
     String appDataRootPathname = System.getProperty(MOLGENIS_HOME);
