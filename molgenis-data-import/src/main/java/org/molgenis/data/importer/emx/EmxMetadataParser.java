@@ -483,7 +483,7 @@ public class EmxMetadataParser implements MetadataParser {
    * @param repo {@link Repository} for the packages
    * @param intermediateResults {@link IntermediateParseResults} containing the parsed tag entities
    */
-  protected void parsePackagesSheet(
+  private void parsePackagesSheet(
       Repository<Entity> repo, IntermediateParseResults intermediateResults) {
     if (repo == null) return;
 
@@ -611,7 +611,7 @@ public class EmxMetadataParser implements MetadataParser {
     }
 
     String entityTypeId;
-    entityTypeId = setEntityTypeId(emxEntityName, emxEntityPackage);
+    entityTypeId = toEntityTypeId(emxEntityName, emxEntityPackage);
 
     EntityType entityType = intermediateResults.getEntityType(entityTypeId);
     if (entityType == null) {
@@ -708,7 +708,7 @@ public class EmxMetadataParser implements MetadataParser {
     }
   }
 
-  private String setEntityTypeId(String emxEntityName, String emxEntityPackage) {
+  private String toEntityTypeId(String emxEntityName, String emxEntityPackage) {
     String entityTypeId;
     if (!Strings.isNullOrEmpty(emxEntityPackage)) {
       entityTypeId = emxEntityPackage + PACKAGE_SEPARATOR + emxEntityName;
@@ -816,7 +816,6 @@ public class EmxMetadataParser implements MetadataParser {
       Map<String, Map<String, EmxAttribute>> attributesMap,
       Map<String, Set<String>> rootAttributes) {
     for (Map.Entry<String, Map<String, EmxAttribute>> entry : attributesMap.entrySet()) {
-
       String entityTypeId = entry.getKey();
       Map<String, EmxAttribute> attributes = entry.getValue();
 
