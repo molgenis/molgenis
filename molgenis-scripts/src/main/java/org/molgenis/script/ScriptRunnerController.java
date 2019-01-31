@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -62,7 +63,8 @@ public class ScriptRunnerController {
    * @param parameters parameter values for the script
    * @throws IOException if an input or output exception occurs when redirecting
    */
-  @RequestMapping(value = "/scripts/{name}/start")
+  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/start")
   public void startScript(
       @PathVariable("name") String scriptName,
       @RequestParam Map<String, Object> parameters,
@@ -73,7 +75,8 @@ public class ScriptRunnerController {
     response.sendRedirect(jobsController.createJobExecutionViewHref(scriptJobExecutionHref, 1000));
   }
 
-  @RequestMapping(value = "/scripts/{name}/submit", produces = TEXT_PLAIN_VALUE)
+  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/submit", produces = TEXT_PLAIN_VALUE)
   public ResponseEntity<String> submitScript(
       @PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters) {
     ScriptJobExecution scriptJobExecution = scriptJobExecutionFactory.create();
@@ -98,7 +101,8 @@ public class ScriptRunnerController {
    * @throws ScriptException if the script name is unknown or one of the script parameters is
    *     missing
    */
-  @RequestMapping("/scripts/{name}/run")
+  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/run")
   public void runScript(
       @PathVariable("name") String scriptName,
       @RequestParam Map<String, Object> parameters,
