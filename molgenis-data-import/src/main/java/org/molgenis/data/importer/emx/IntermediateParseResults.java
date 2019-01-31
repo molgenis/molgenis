@@ -83,7 +83,8 @@ public final class IntermediateParseResults {
         attr.setNillable(false);
       }
       if (emxAttr.isLookupAttr()) {
-        attr.setLookupAttributeIndex(lookupAttributeIndex++);
+        attr.setLookupAttributeIndex(lookupAttributeIndex);
+        lookupAttributeIndex++;
       }
     }
 
@@ -95,14 +96,21 @@ public final class IntermediateParseResults {
     }
 
     if (!entityType.getLookupAttributes().iterator().hasNext()) {
-      Attribute ownIdAttr = entityType.getOwnIdAttribute();
-      if (ownIdAttr != null && ownIdAttr.isVisible()) {
-        ownIdAttr.setLookupAttributeIndex(lookupAttributeIndex++);
-      }
-      Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-      if (ownLabelAttr != null) {
-        ownLabelAttr.setLookupAttributeIndex(lookupAttributeIndex);
-      }
+      setDefaultLookupAttributes(entityType, lookupAttributeIndex);
+    }
+  }
+
+  public static void setDefaultLookupAttributes(EntityType entityType, int lookupAttributeIndex) {
+    Attribute ownIdAttr = entityType.getOwnIdAttribute();
+    if (ownIdAttr != null && ownIdAttr.isVisible()) {
+      ownIdAttr.setLookupAttributeIndex(lookupAttributeIndex);
+      lookupAttributeIndex++;
+    }
+    Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
+    if (ownLabelAttr != null
+        && ownIdAttr != null
+        && !ownIdAttr.getName().equals(ownLabelAttr.getName())) {
+      ownLabelAttr.setLookupAttributeIndex(lookupAttributeIndex);
     }
   }
 
