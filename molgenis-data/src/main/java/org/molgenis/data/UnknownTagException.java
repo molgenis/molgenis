@@ -3,7 +3,7 @@ package org.molgenis.data;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-/** Thrown when a Plugin is requested that doesn't exist */
+/** Thrown when a Tag is requested that doesn't exist */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
 @SuppressWarnings("squid:MaximumInheritanceDepth")
