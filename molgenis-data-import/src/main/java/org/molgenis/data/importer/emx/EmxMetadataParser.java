@@ -154,12 +154,12 @@ public class EmxMetadataParser implements MetadataParser {
   public static final String EMX_ATTRIBUTES_TAGS = "tags";
 
   // Column names in the tag sheet
-  static final String EMX_TAG_IDENTIFIER = "identifier";
-  static final String EMX_TAG_OBJECT_IRI = "objectIRI";
-  static final String EMX_TAG_LABEL = "label";
-  static final String EMX_TAG_RELATION_LABEL = "relationLabel";
-  static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
-  static final String EMX_TAG_RELATION_IRI = "relationIRI";
+  private static final String EMX_TAG_IDENTIFIER = "identifier";
+  private static final String EMX_TAG_OBJECT_IRI = "objectIRI";
+  private static final String EMX_TAG_LABEL = "label";
+  private static final String EMX_TAG_RELATION_LABEL = "relationLabel";
+  private static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
+  private static final String EMX_TAG_RELATION_IRI = "relationIRI";
 
   // Column names in the language sheet
   private static final String EMX_LANGUAGE_CODE = "code";
@@ -570,7 +570,7 @@ public class EmxMetadataParser implements MetadataParser {
    * @param intermediateResults {@link IntermediateParseResults} containing the attributes already
    *     parsed
    */
-  protected void parseEntitiesSheet(
+  private void parseEntitiesSheet(
       Repository<Entity> entitiesRepo, IntermediateParseResults intermediateResults) {
     if (entitiesRepo != null) {
       checkEntitySheetHeaders(entitiesRepo);
@@ -858,7 +858,7 @@ public class EmxMetadataParser implements MetadataParser {
     return compoundAttribute;
   }
 
-  protected void parseSingleAttribute(
+  private void parseSingleAttribute(
       IntermediateParseResults intermediateResults,
       Map<String, Map<String, EmxAttribute>> attributesMap,
       int rowIndex,
@@ -968,44 +968,36 @@ public class EmxMetadataParser implements MetadataParser {
   void setRange(
       Entity emxAttrEntity, String emxEntityName, String emxName, Attribute attr, int rowIndex) {
     String emxRangeMin = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MIN);
+    Long rangeMin =
+        toRange(emxEntityName, emxName, rowIndex, emxRangeMin, EMX_ATTRIBUTES_RANGE_MIN);
+
+    String emxRangeMax = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MAX);
+    Long rangeMax =
+        toRange(emxEntityName, emxName, rowIndex, emxRangeMax, EMX_ATTRIBUTES_RANGE_MAX);
+
+    if (rangeMin != null || rangeMax != null) {
+      attr.setRange(new Range(rangeMin, rangeMax));
+    }
+  }
+
+  private Long toRange(
+      String emxEntityName,
+      String emxName,
+      int rowIndex,
+      String emxRangeMin,
+      String emxAttributesRangeMin) {
     Long rangeMin;
     if (emxRangeMin != null) {
       try {
         rangeMin = Long.valueOf(emxRangeMin);
       } catch (NumberFormatException e) {
         throw new InvalidRangeException(
-            emxRangeMin,
-            emxName,
-            EMX_ATTRIBUTES_RANGE_MIN,
-            emxEntityName,
-            EMX_ATTRIBUTES,
-            rowIndex);
+            emxRangeMin, emxName, emxAttributesRangeMin, emxEntityName, EMX_ATTRIBUTES, rowIndex);
       }
     } else {
       rangeMin = null;
     }
-
-    String emxRangeMax = emxAttrEntity.getString(EMX_ATTRIBUTES_RANGE_MAX);
-    Long rangeMax;
-    if (emxRangeMax != null) {
-      try {
-        rangeMax = Long.valueOf(emxRangeMax);
-      } catch (NumberFormatException e) {
-        throw new InvalidRangeException(
-            emxRangeMax,
-            emxName,
-            EMX_ATTRIBUTES_RANGE_MAX,
-            emxEntityName,
-            EMX_ATTRIBUTES,
-            rowIndex);
-      }
-    } else {
-      rangeMax = null;
-    }
-
-    if (rangeMin != null || rangeMax != null) {
-      attr.setRange(new Range(rangeMin, rangeMax));
-    }
+    return rangeMin;
   }
 
   void setEnumOptions(Entity emxAttrEntity, String emxEntityName, Attribute attr, int rowIndex) {
