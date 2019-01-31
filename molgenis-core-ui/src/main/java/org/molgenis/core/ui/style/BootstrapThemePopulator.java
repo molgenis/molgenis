@@ -61,13 +61,14 @@ public class BootstrapThemePopulator {
         LOG.debug(String.format("%d new themes detected, adding themes..", numberOfNewThemes));
       }
 
-      newThemes.forEach(nt -> {
-        try {
-          addNewTheme(nt, bootstrap4Themes);
-        } catch (IOException | MolgenisStyleException e) {
-          LOG.error("error adding new bootstrap themes", e);
-        }
-      });
+      newThemes.forEach(
+          nt -> {
+            try {
+              addNewTheme(nt, bootstrap4Themes);
+            } catch (IOException | MolgenisStyleException e) {
+              LOG.error("error adding new bootstrap themes", e);
+            }
+          });
 
     } catch (IOException e) {
       LOG.error("error populating bootstrap themes", e);
