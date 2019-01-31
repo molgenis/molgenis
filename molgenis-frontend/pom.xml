@@ -34,7 +34,7 @@
                 <echo message="Download archives"/>
                 <get dest="${project.build.directory}/archives">
                   <url url="${registry.url}/@molgenis/app-manager/-/app-manager-0.0.1-alpha.0.tgz"/>
-                  <!--<url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.0.1-alpha.0.tgz"/>-->
+                  <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.0.1-alpha.3.tgz"/>
                   <url
                     url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.0.1-alpha.0.tgz"/>
                   <!--<url url="${registry.url}/@molgenis/menu/-/menu-0.0.1-alpha.0.tgz"/>-->
