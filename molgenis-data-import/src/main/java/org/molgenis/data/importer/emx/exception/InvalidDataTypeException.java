@@ -28,7 +28,7 @@ public class InvalidDataTypeException extends CodedRuntimeException {
     this.attribute = requireNonNull(attribute);
     this.entityType = requireNonNull(entityType);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

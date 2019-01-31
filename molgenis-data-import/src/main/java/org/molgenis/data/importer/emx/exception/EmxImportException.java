@@ -15,7 +15,7 @@ public class EmxImportException extends CodedRuntimeException {
     super(ERROR_CODE, cause);
     this.cause = requireNonNull(cause);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

@@ -24,7 +24,7 @@ public class InvalidCompoundException extends CodedRuntimeException {
     this.attributeName = requireNonNull(attributeName);
     this.entityTypeId = requireNonNull(entityTypeId);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

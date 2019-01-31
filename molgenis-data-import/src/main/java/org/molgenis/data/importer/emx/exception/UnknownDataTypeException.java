@@ -15,7 +15,7 @@ public class UnknownDataTypeException extends CodedRuntimeException {
     super(ERROR_CODE);
     this.emxDataType = requireNonNull(emxDataType);
     this.emxAttributes = requireNonNull(emxAttributes);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

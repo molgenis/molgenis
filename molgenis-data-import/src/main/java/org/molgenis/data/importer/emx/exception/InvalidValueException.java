@@ -20,7 +20,7 @@ public class InvalidValueException extends CodedRuntimeException {
     this.identifier = requireNonNull(identifier);
     this.allowedValue = requireNonNull(allowedValue);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

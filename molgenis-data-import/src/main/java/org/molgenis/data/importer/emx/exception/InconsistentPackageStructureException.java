@@ -18,7 +18,7 @@ public class InconsistentPackageStructureException extends CodedRuntimeException
     this.name = requireNonNull(name);
     this.parentName = requireNonNull(parentName);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

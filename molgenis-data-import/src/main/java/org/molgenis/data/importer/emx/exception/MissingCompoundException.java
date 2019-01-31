@@ -24,7 +24,7 @@ public class MissingCompoundException extends CodedRuntimeException {
     this.attributeName = requireNonNull(attributeName);
     this.entityTypeId = requireNonNull(entityTypeId);
     this.emxAttributes = requireNonNull(emxAttributes);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

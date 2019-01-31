@@ -25,7 +25,7 @@ public class NillableReferenceAggregatableException extends CodedRuntimeExceptio
     this.emxName = requireNonNull(emxName);
     this.dataType = requireNonNull(dataType);
     this.emxAttributes = requireNonNull(emxAttributes);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

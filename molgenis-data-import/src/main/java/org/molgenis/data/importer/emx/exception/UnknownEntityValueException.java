@@ -19,7 +19,7 @@ public class UnknownEntityValueException extends CodedRuntimeException {
     this.refEntityName = requireNonNull(refEntityName);
     this.emxAttribute = requireNonNull(emxAttribute);
     this.entityName = requireNonNull(entityName);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
     this.sheet = requireNonNull(sheet);
   }
 

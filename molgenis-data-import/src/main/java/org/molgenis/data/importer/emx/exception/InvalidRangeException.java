@@ -26,7 +26,7 @@ public class InvalidRangeException extends CodedRuntimeException {
     this.emxName = requireNonNull(emxName);
     this.emxEntityName = requireNonNull(emxEntityName);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
     this.columnName = requireNonNull(columnName);
   }
 

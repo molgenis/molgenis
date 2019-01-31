@@ -15,7 +15,7 @@ public class MissingEmxAttributeValueException extends CodedRuntimeException {
     super(ERROR_CODE);
     this.name = requireNonNull(name);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override

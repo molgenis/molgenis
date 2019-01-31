@@ -19,7 +19,7 @@ public class MissingEmxAttributeAttributeValueException extends CodedRuntimeExce
     this.name = requireNonNull(name);
     this.emxEntityName = requireNonNull(emxEntityName);
     this.sheet = requireNonNull(sheet);
-    this.rowIndex = requireNonNull(rowIndex);
+    this.rowIndex = rowIndex;
   }
 
   @Override
