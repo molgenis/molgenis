@@ -32,7 +32,7 @@ public class InvalidCompoundExceptionTest extends ExceptionMessageTest {
       },
       {
         "nl",
-        "partOfattribuut 'attr' van attribuut 'attrName' van entiteit 'entityTypeId' moet refereren naar een attribuut van type compound. (werkblad: 'attributes', rij 3)"
+        "partOfattribuut 'attr' van attribuut 'attrName' van entiteit 'entityTypeId' moet refereren naar een attribuut van type 'compound'. (werkblad: 'attributes', rij 3)"
       }
     };
   }

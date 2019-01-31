@@ -36,7 +36,7 @@ public class InvalidReferenceDataTypeExceptionTest extends ExceptionMessageTest 
       },
       {
         "nl",
-        "Incorrecte waarde voor kolom dataType van attribuut {1, label} van entity 'entityType', 'string' attributen kunnen niet van referentie data types zijn (werkblad: 'attributes', rij 7)"
+        "Incorrecte waarde voor kolom dataType van attribuut 'null' van entity 'entityType', 'string' attributen kunnen niet van referentie data types zijn (werkblad: 'attributes', rij 7)"
       }
     };
   }

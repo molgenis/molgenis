@@ -24,9 +24,12 @@ public class PackageResolveExceptionTest extends ExceptionMessageTest {
   public Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
-        "en", "Could not resolve packages. Is there a circular reference?(sheet: packages)"
+        "en", "Could not resolve packages. Is there a circular reference?(sheet: 'packages')"
       },
-      {"nl", "Kon map volgorde niet bepalen. Is er een circulaire referentie? (werkblad: packages)"}
+      {
+        "nl",
+        "Kon map volgorde niet bepalen. Is er een circulaire referentie? (werkblad: 'packages')"
+      }
     };
   }
 }

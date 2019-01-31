@@ -25,11 +25,11 @@ public class MissingRootPackageExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en",
-        "Missing root package. There must be at least one package without a parent. (sheet: packages)"
+        "Missing root package. There must be at least one package without a parent. (sheet: 'packages')"
       },
       {
         "nl",
-        "Onbrekende hoofdmap. Minstens 1 map zonder bovenliggende map nodig. (werkblad: packages)"
+        "Onbrekende hoofdmap. Minstens 1 map zonder bovenliggende map nodig. (werkblad: 'packages')"
       }
     };
   }
