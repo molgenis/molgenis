@@ -71,8 +71,10 @@ var Job = React.createClass({
         let activeTable = {
             'PENDING': true,
             'RUNNING': true,
+            'CANCELING': true,
             'SUCCESS': false,
-            'FAILED': false
+            'FAILED': false,
+            'CANCELED': false
         }
         return activeTable[this.props.job.status];
     },

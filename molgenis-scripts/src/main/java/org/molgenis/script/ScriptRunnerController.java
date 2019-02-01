@@ -64,7 +64,9 @@ public class ScriptRunnerController {
    * @throws IOException if an input or output exception occurs when redirecting
    */
   @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
-  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/start")
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/scripts/{name}/start")
   public void startScript(
       @PathVariable("name") String scriptName,
       @RequestParam Map<String, Object> parameters,
@@ -76,7 +78,10 @@ public class ScriptRunnerController {
   }
 
   @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
-  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/submit", produces = TEXT_PLAIN_VALUE)
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/scripts/{name}/submit",
+      produces = TEXT_PLAIN_VALUE)
   public ResponseEntity<String> submitScript(
       @PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters) {
     ScriptJobExecution scriptJobExecution = scriptJobExecutionFactory.create();
@@ -102,7 +107,9 @@ public class ScriptRunnerController {
    *     missing
    */
   @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
-  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value = "/scripts/{name}/run")
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/scripts/{name}/run")
   public void runScript(
       @PathVariable("name") String scriptName,
       @RequestParam Map<String, Object> parameters,
