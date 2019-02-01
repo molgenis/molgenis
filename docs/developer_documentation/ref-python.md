@@ -1,24 +1,24 @@
 ** 
-The MOLGENIS python API client allows you to retrieve, create, update and delete entities using python.
+The MOLGENIS python REST Client allows you to retrieve, create, update and delete entities using python.
 **
 
-Download molgenis.py from a molgenis server for instance using wget in the folder you want to run your molgenis api
+You can install the Python REST Client as a package with `pip`: 
 ```
-wget https://molgenis.mydomain.example/molgenis.py
+pip install molgenis-py-client
 ``` 
 Now you can create a python script. 
-To get started, you should import the python api, connect to a molgenis server and login:
+To get started, you should import the Python client, connect to a molgenis server and login:
 ```python
-import molgenis
-session = molgenis.Session("https://molgenis.mydomain.example/api/")
+import molgenis.client
+session = molgenis.client.Session("https://molgenis.mydomain.example/api/")
 session.login("username","password")
 ```
 Always put the import and molgenis.Session in your script to make the api work. 
 
 # Overview example
 ```python
-import molgenis
-session = molgenis.Session("https://molgenis.mydomain.example/api/")
+import molgenis.client
+session = molgenis.client.Session("https://molgenis.mydomain.example/api/")
 session.login("username","password")
 my_table = session.get("package_entityName")
 print(my_table)
