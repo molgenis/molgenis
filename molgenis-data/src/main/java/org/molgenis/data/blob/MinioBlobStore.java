@@ -25,7 +25,8 @@ public class MinioBlobStore implements BlobStore {
     this.bucketName = requireNonNull(bucketName);
     this.idGenerator = requireNonNull(idGenerator);
     try {
-      minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey);
+      minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey, "eu-central-1");
+      minioClient.traceOn(System.out);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

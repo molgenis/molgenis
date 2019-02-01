@@ -57,27 +57,30 @@ class FileTransferApiController {
 
     DeferredResult<FilesUploadResponse> deferredResult = new DeferredResult<>();
     deferredResult.onError(
-        (Throwable t) -> {
-          deferredResult.setErrorResult(
-              ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                  .body("An error occurred: " + t.getMessage()));
-        });
+        (Throwable t) ->
+            deferredResult.setErrorResult(
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + t.getMessage())));
     deferredResult.onTimeout(
-        () -> {
-          deferredResult.setErrorResult(
-              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timeout occurred."));
-        });
+        () ->
+            deferredResult.setErrorResult(
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                    .body("Request timeout occurred.")));
 
     ForkJoinPool.commonPool()
         .submit(
             () -> {
-              List<FileMeta> fileMetaList = fileUploadService.upload(fileItemIterator);
-              FilesUploadResponse filesUploadResponse =
-                  FilesUploadResponse.create(
-                      fileMetaList.stream().map(this::toFileUploadResponse).collect(toList()));
-              boolean ok = deferredResult.setResult(filesUploadResponse);
-              if (!ok) {
-                LOG.error("request expired");
+              try {
+                List<FileMeta> fileMetaList = fileUploadService.upload(fileItemIterator);
+                FilesUploadResponse filesUploadResponse =
+                    FilesUploadResponse.create(
+                        fileMetaList.stream().map(this::toFileUploadResponse).collect(toList()));
+                boolean ok = deferredResult.setResult(filesUploadResponse);
+                if (!ok) {
+                  LOG.error("request expired");
+                }
+              } catch (Exception e) {
+                LOG.error("", e);
               }
             });
 

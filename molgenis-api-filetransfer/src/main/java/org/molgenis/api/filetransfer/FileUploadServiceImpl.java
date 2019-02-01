@@ -57,8 +57,10 @@ class FileUploadServiceImpl implements FileUploadService {
   }
 
   private FileMeta upload(FileItemStream fileItemStream) throws IOException {
-    ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream());
-    BlobMetadata blobMetadata = blobStore.store(fromChannel);
+    BlobMetadata blobMetadata;
+    try (ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream())) {
+      blobMetadata = blobStore.store(fromChannel);
+    }
 
     FileMeta fileMeta = fileMetaFactory.create(blobMetadata.getId());
     fileMeta.setFilename(fileItemStream.getName());
