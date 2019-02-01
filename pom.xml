@@ -1108,7 +1108,6 @@
     <module>molgenis-i18n</module>
     <module>molgenis-beacon</module>
     <module>molgenis-metrics</module>
-    <module>molgenis-menu</module>
     <module>molgenis-frontend</module>
   </modules>
 </project>
