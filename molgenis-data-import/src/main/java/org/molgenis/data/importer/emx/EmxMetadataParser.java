@@ -984,20 +984,20 @@ public class EmxMetadataParser implements MetadataParser {
       String emxEntityName,
       String emxName,
       int rowIndex,
-      String emxRangeMin,
+      String emxRange,
       String emxAttributesRangeMin) {
-    Long rangeMin;
-    if (emxRangeMin != null) {
+    Long range;
+    if (emxRange != null) {
       try {
-        rangeMin = Long.valueOf(emxRangeMin);
+        range = Long.valueOf(emxRange);
       } catch (NumberFormatException e) {
         throw new InvalidRangeException(
-            emxRangeMin, emxName, emxAttributesRangeMin, emxEntityName, EMX_ATTRIBUTES, rowIndex);
+            emxRange, emxName, emxAttributesRangeMin, emxEntityName, EMX_ATTRIBUTES, rowIndex);
       }
     } else {
-      rangeMin = null;
+      range = null;
     }
-    return rangeMin;
+    return range;
   }
 
   void setEnumOptions(Entity emxAttrEntity, String emxEntityName, Attribute attr, int rowIndex) {
