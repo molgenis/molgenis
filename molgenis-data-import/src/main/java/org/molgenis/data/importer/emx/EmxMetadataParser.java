@@ -985,14 +985,14 @@ public class EmxMetadataParser implements MetadataParser {
       String emxName,
       int rowIndex,
       String emxRange,
-      String emxAttributesRangeMin) {
+      String emxAttributesRange) {
     Long range;
     if (emxRange != null) {
       try {
         range = Long.valueOf(emxRange);
       } catch (NumberFormatException e) {
         throw new InvalidRangeException(
-            emxRange, emxName, emxAttributesRangeMin, emxEntityName, EMX_ATTRIBUTES, rowIndex);
+            emxRange, emxName, emxAttributesRange, emxEntityName, EMX_ATTRIBUTES, rowIndex);
       }
     } else {
       range = null;
