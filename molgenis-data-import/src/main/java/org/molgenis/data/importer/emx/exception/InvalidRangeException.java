@@ -7,7 +7,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 public class InvalidRangeException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP08";
-  private final String emxRangeMin;
+  private final String emxRange;
   private final String emxName;
   private final String emxEntityName;
   private final String sheet;
@@ -15,14 +15,14 @@ public class InvalidRangeException extends CodedRuntimeException {
   private final String columnName;
 
   public InvalidRangeException(
-      String emxRangeMin,
+      String emxRange,
       String emxName,
       String columnName,
       String emxEntityName,
       String sheet,
       int rowIndex) {
     super(ERROR_CODE);
-    this.emxRangeMin = requireNonNull(emxRangeMin);
+    this.emxRange = requireNonNull(emxRange);
     this.emxName = requireNonNull(emxName);
     this.emxEntityName = requireNonNull(emxEntityName);
     this.sheet = requireNonNull(sheet);
@@ -33,12 +33,12 @@ public class InvalidRangeException extends CodedRuntimeException {
   @Override
   public String getMessage() {
     return format(
-        "emxRangeMin:%s, columnName:%s, emxEntityName:%s, emxName:%s, sheet:%s, rowIndex:%s",
-        emxRangeMin, columnName, emxEntityName, emxName, sheet, rowIndex);
+        "emxRange:%s, columnName:%s, emxEntityName:%s, emxName:%s, sheet:%s, rowIndex:%s",
+        emxRange, columnName, emxEntityName, emxName, sheet, rowIndex);
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {emxRangeMin, columnName, emxName, emxEntityName, sheet, rowIndex};
+    return new Object[] {emxRange, columnName, emxName, emxEntityName, sheet, rowIndex};
   }
 }
