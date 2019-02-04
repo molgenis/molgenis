@@ -119,7 +119,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
         new TestProgress(
             4,
             4,
-            "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata",
+            "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata.",
             "");
     assertEquals(progress.getMessage(), expectedProgress.getMessage());
     assertEquals(progress.getProgress(), expectedProgress.getProgress());

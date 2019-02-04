@@ -23,7 +23,7 @@ import org.molgenis.data.meta.model.Tag;
  */
 public final class IntermediateParseResults {
   /** Maps full name to EntityType */
-  private final Map<String, EntityType> entities;
+  private final Map<String, EntityType> entityTypes;
   /** Maps full name to PackageImpl (with tags) */
   private final Map<String, Package> packages;
   /** Contains all tag entities from the tag sheet */
@@ -38,7 +38,7 @@ public final class IntermediateParseResults {
   public IntermediateParseResults(EntityTypeFactory entityTypeFactory) {
     this.entityTypeFactory = entityTypeFactory;
     this.tags = new LinkedHashMap<>();
-    this.entities = new LinkedHashMap<>();
+    this.entityTypes = new LinkedHashMap<>();
     this.packages = new LinkedHashMap<>();
     this.languages = new LinkedHashMap<>();
     this.l10nStrings = new LinkedHashMap<>();
@@ -116,14 +116,14 @@ public final class IntermediateParseResults {
         pack = p;
       }
     }
-    EntityType emd =
+    EntityType entityType =
         entityTypeFactory.create(fullyQualifiedName).setLabel(entityTypeLabel).setPackage(pack);
-    entities.put(fullyQualifiedName, emd);
-    return emd;
+    entityTypes.put(fullyQualifiedName, entityType);
+    return entityType;
   }
 
   public EntityType getEntityType(String name) {
-    return entities.get(name);
+    return entityTypes.get(name);
   }
 
   public void addLanguage(Language language) {
@@ -140,8 +140,12 @@ public final class IntermediateParseResults {
    * @param name simple name of the entity
    * @return true if entity with simple name name is known, false otherwise
    */
-  public boolean knowsEntity(String name) {
-    return entities.containsKey(name);
+  public boolean hasEntityType(String name) {
+    return entityTypes.containsKey(name);
+  }
+
+  public boolean hasPackage(String name) {
+    return packages.containsKey(name);
   }
 
   public void addPackage(String name, Package p) {
@@ -149,11 +153,11 @@ public final class IntermediateParseResults {
   }
 
   public ImmutableMap<String, EntityType> getEntityMap() {
-    return copyOf(entities);
+    return copyOf(entityTypes);
   }
 
-  public ImmutableList<EntityType> getEntities() {
-    return copyOf(entities.values());
+  public ImmutableList<EntityType> getEntityTypes() {
+    return copyOf(entityTypes.values());
   }
 
   public ImmutableMap<String, Package> getPackages() {
@@ -175,7 +179,7 @@ public final class IntermediateParseResults {
   @Override
   public String toString() {
     return "IntermediateParseResults [entities="
-        + entities
+        + entityTypes
         + ", packages="
         + packages
         + ", tags="
@@ -196,7 +200,7 @@ public final class IntermediateParseResults {
       return false;
     }
     IntermediateParseResults that = (IntermediateParseResults) o;
-    return Objects.equals(getEntities(), that.getEntities())
+    return Objects.equals(getEntityTypes(), that.getEntityTypes())
         && Objects.equals(getPackages(), that.getPackages())
         && Objects.equals(getTags(), that.getTags())
         && Objects.equals(getLanguages(), that.getLanguages())
@@ -205,6 +209,7 @@ public final class IntermediateParseResults {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getEntities(), getPackages(), getTags(), getLanguages(), getL10nStrings());
+    return Objects.hash(
+        getEntityTypes(), getPackages(), getTags(), getLanguages(), getL10nStrings());
   }
 }
