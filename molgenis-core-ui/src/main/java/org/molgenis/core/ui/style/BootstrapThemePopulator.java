@@ -56,11 +56,6 @@ public class BootstrapThemePopulator {
                           == null)
               .collect(Collectors.toList());
 
-      int numberOfNewThemes = newThemes.size();
-      if (LOG.isDebugEnabled() && numberOfNewThemes > 0) {
-        LOG.debug(String.format("%d new themes detected, adding themes..", numberOfNewThemes));
-      }
-
       newThemes.forEach(
           nt -> {
             try {
@@ -92,10 +87,8 @@ public class BootstrapThemePopulator {
   private void addNewTheme(Resource bootstrap3Resource, Resource[] bootstrap4Themes)
       throws IOException, MolgenisStyleException {
     String bootstrap3FileName = bootstrap3Resource.getFilename();
-    if (LOG.isDebugEnabled()) {
 
-      LOG.debug(String.format("Add theme with name %s", bootstrap3FileName));
-    }
+    LOG.debug("Add theme with name {}", bootstrap3FileName);
 
     InputStream bootstrap3Data = null;
     InputStream bootstrap4Data = null;
@@ -110,11 +103,8 @@ public class BootstrapThemePopulator {
         Resource bootstrap4resource = bootstrap4Optional.get();
         bootstrap4FileName = bootstrap4resource.getFilename();
         bootstrap4Data = bootstrap4resource.getInputStream();
-        if (LOG.isDebugEnabled()) {
-          LOG.debug(
-              String.format("Adding matching bootstrap 4 theme with name %s", bootstrap4FileName));
-        }
-      } else if (LOG.isDebugEnabled()) {
+        LOG.debug("Adding matching bootstrap 4 theme with name {}", bootstrap4FileName);
+      } else {
         LOG.debug("No matching bootstrap 4 theme found, falling back to default");
       }
 
