@@ -2,6 +2,8 @@ package org.molgenis.core.ui.controller;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -32,7 +34,14 @@ public class UiContextController {
   @GetMapping("/**")
   @ResponseBody
   public UiContextResponse getContext() {
+
+    JsonObject menu = new JsonParser().parse(appSettings.getMenu()).getAsJsonObject();
+    String loginHref =  "/login";
+    String helpLink = "{label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}";
+
+
     return UiContextResponse.builder()
+        .setMenu(menu)
         .setLogoNavBarHref(appSettings.getLogoNavBarHref())
         .setLogoTopHref(appSettings.getLogoTopHref())
         .setLogoTopMaxHeight(appSettings.getLogoTopMaxHeight())

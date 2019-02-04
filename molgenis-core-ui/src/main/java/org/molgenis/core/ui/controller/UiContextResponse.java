@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.controller;
 
 import com.google.auto.value.AutoValue;
+import com.google.gson.JsonObject;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -18,6 +19,12 @@ public abstract class UiContextResponse {
   @CheckForNull
   public abstract String getLogoNavBarHref();
 
+  public abstract JsonObject getMenu();
+
+  public abstract String loginHref();
+
+  public abstract String helpLink();
+
   public static Builder builder() {
     return new AutoValue_UiContextResponse.Builder();
   }
@@ -30,6 +37,8 @@ public abstract class UiContextResponse {
     public abstract Builder setLogoTopMaxHeight(Integer logoTopMaxHeight);
 
     public abstract Builder setLogoNavBarHref(String logoNavBarHref);
+
+    public abstract Builder setMenu(JsonObject menu);
 
     public abstract UiContextResponse build();
   }
