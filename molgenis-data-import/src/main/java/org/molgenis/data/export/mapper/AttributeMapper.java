@@ -25,9 +25,11 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_TA
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_UNIQUE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VALIDATION_EXPRESSION;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VISIBLE;
+import static org.springframework.util.StringUtils.capitalize;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +37,14 @@ import java.util.Map.Entry;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.i18n.LanguageService;
 
 public class AttributeMapper {
 
   public static final ImmutableMap<String, String> ATTRIBUTE_ATTRS;
 
   static {
-    ATTRIBUTE_ATTRS =
+    Builder builder =
         ImmutableMap.<String, String>builder()
             .put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME)
             .put(EMX_ATTRIBUTES_LABEL, AttributeMetadata.LABEL)
@@ -65,8 +68,18 @@ public class AttributeMapper {
             .put(EMX_ATTRIBUTES_EXPRESSION, AttributeMetadata.EXPRESSION)
             .put(EMX_ATTRIBUTES_VALIDATION_EXPRESSION, AttributeMetadata.VALIDATION_EXPRESSION)
             .put(EMX_ATTRIBUTES_DEFAULT_VALUE, AttributeMetadata.DEFAULT_VALUE)
-            .put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS)
-            .build();
+            .put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS);
+    LanguageService.getLanguageCodes()
+        .forEach(
+            languageCode -> {
+              builder.put(
+                  EMX_ATTRIBUTES_LABEL + "-" + languageCode,
+                  AttributeMetadata.LABEL + capitalize(languageCode));
+              builder.put(
+                  EMX_ATTRIBUTES_DESCRIPTION + "-" + languageCode,
+                  AttributeMetadata.DESCRIPTION + capitalize(languageCode));
+            });
+    ATTRIBUTE_ATTRS = builder.build();
   }
 
   private AttributeMapper() {}
