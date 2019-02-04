@@ -21,9 +21,13 @@ public abstract class UiContextResponse {
 
   public abstract JsonObject getMenu();
 
-  public abstract String loginHref();
+  public abstract String getloginHref();
 
-  public abstract String helpLink();
+  public abstract String gethelpLink();
+
+  public abstract Boolean getAuthenticated();
+
+  public abstract Boolean getShowCookieWall();
 
   public static Builder builder() {
     return new AutoValue_UiContextResponse.Builder();
@@ -38,7 +42,15 @@ public abstract class UiContextResponse {
 
     public abstract Builder setLogoNavBarHref(String logoNavBarHref);
 
+    public abstract Builder setLoginHref(String loginHref);
+
+    public abstract Builder setHelpLink(String helpLink);
+
     public abstract Builder setMenu(JsonObject menu);
+
+    public abstract Builder setAuthenticated(Boolean authenticated);
+
+    public abstract Builder setShowCookieWall(Boolean showCookieWall);
 
     public abstract UiContextResponse build();
   }
