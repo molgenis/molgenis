@@ -107,8 +107,8 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     mockMvc
         .perform(get("/api/context"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.logoNavBarHref", is(appSettings.getLogoNavBarHref())))
-        .andExpect(jsonPath("$.logoTopHref", is(appSettings.getLogoTopHref())))
+        .andExpect(jsonPath("$.navBarLogo", is(appSettings.getLogoNavBarHref())))
+        .andExpect(jsonPath("$.logoTop", is(appSettings.getLogoTopHref())))
         .andExpect(jsonPath("$.logoTopMaxHeight", is(appSettings.getLogoTopMaxHeight())))
         .andExpect(jsonPath("$.loginHref", is(UiContextController.LOGIN_HREF)))
         .andExpect(jsonPath("$.helpLink", is(UiContextController.HELP_LINK_JSON)))

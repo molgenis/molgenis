@@ -55,8 +55,8 @@ public class UiContextController {
 
     return UiContextResponse.builder()
         .setMenu(menu)
-        .setLogoNavBarHref(appSettings.getLogoNavBarHref())
-        .setLogoTopHref(appSettings.getLogoTopHref())
+        .setNavBarLogo(appSettings.getLogoNavBarHref())
+        .setLogoTop(appSettings.getLogoTopHref())
         .setLogoTopMaxHeight(appSettings.getLogoTopMaxHeight())
         .setLoginHref(LOGIN_HREF)
         .setHelpLink(HELP_LINK_JSON)

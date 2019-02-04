@@ -11,13 +11,13 @@ public abstract class UiContextResponse {
 
   @Nullable
   @CheckForNull
-  public abstract String getLogoTopHref();
+  public abstract String getLogoTop();
 
   public abstract Integer getLogoTopMaxHeight();
 
   @Nullable
   @CheckForNull
-  public abstract String getLogoNavBarHref();
+  public abstract String getNavBarLogo();
 
   public abstract JsonObject getMenu();
 
@@ -36,11 +36,11 @@ public abstract class UiContextResponse {
   @AutoValue.Builder
   public abstract static class Builder {
 
-    public abstract Builder setLogoTopHref(String logoTopHref);
+    public abstract Builder setLogoTop(String logoTop);
 
     public abstract Builder setLogoTopMaxHeight(Integer logoTopMaxHeight);
 
-    public abstract Builder setLogoNavBarHref(String logoNavBarHref);
+    public abstract Builder setNavBarLogo(String logoNavBar);
 
     public abstract Builder setLoginHref(String loginHref);
 
