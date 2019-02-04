@@ -15,6 +15,7 @@ import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.jobs.model.JobExecution.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailSender;
@@ -24,15 +25,14 @@ import org.springframework.mail.SimpleMailMessage;
  * Tracks progress and stores it in a {@link JobExecution} entity. The entity may be a subclass of
  * {@link JobExecution}.
  */
-public class ProgressImpl implements Progress {
+class ProgressImpl implements Progress {
   private static final Logger JOB_EXECUTION_LOG = LoggerFactory.getLogger(JobExecution.class);
 
   private final JobExecution jobExecution;
   private final JobExecutionUpdater updater;
   private final MailSender mailSender;
 
-  public ProgressImpl(
-      JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender) {
+  ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender) {
     this.jobExecution = requireNonNull(jobExecution);
     this.mailSender = requireNonNull(mailSender);
     this.updater = requireNonNull(updater);
@@ -125,6 +125,28 @@ public class ProgressImpl implements Progress {
                 "%s (Mail not sent: %s)", jobExecution.getProgressMessage(), e.getMessage()));
       }
     }
+  }
+
+  @Override
+  public void canceling() {
+    // workaround:
+    // JobExecutionHolder stores set JobExecutions in a ThreadLocal resulting in logging not
+    // working when this method is called from another thread.
+    synchronized (this) {
+      JobExecution currentJobExecution = JobExecutionHolder.get();
+      if (currentJobExecution == null) {
+        JobExecutionHolder.set(this.jobExecution);
+      }
+
+      JOB_EXECUTION_LOG.warn("Canceling ...");
+
+      if (currentJobExecution == null) {
+        JobExecutionHolder.unset();
+      }
+    }
+
+    jobExecution.setStatus(Status.CANCELING);
+    update();
   }
 
   @Override

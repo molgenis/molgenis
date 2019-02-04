@@ -12,6 +12,7 @@
  */
 
 import React from "react";
+import $ from "jquery";
 import {ProgressBar} from "../ProgressBar";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 
@@ -52,15 +53,20 @@ var Job = React.createClass({
                 <a className="btn btn-default" role="button"
                    href={job.resultUrl}>Go to result</a>}
             </div>
+            <button type="button" className={'btn btn-warning ' + ((!this._isActive() || this.props.job.status === 'CANCELING') ? 'disabled ' : '') + 'pull-right'} onClick={this._cancelJobClick}>Cancel</button>
         </div>
     },
     _showLogClick: function () {
         this.setState({showLog: !this.state.showLog})
     },
+    _cancelJobClick: function () {
+        $.post('/plugin/jobs/cancel/' + encodeURIComponent(this.props.job._meta.name) + '/' + encodeURIComponent(this.props.job.identifier))
+    },
     _getCssClass: function () {
         let cssTable = {
             'PENDING': 'info',
             'RUNNING': 'primary',
+            'CANCELING': 'warning',
             'SUCCESS': 'success',
             'FAILED': 'danger',
             'CANCELED': 'warning',
@@ -71,8 +77,10 @@ var Job = React.createClass({
         let activeTable = {
             'PENDING': true,
             'RUNNING': true,
+            'CANCELING': true,
             'SUCCESS': false,
-            'FAILED': false
+            'FAILED': false,
+            'CANCELED': false
         }
         return activeTable[this.props.job.status];
     },
