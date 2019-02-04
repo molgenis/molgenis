@@ -23,8 +23,9 @@ session.login("username","password")
 my_table = session.get("package_entityName")
 print(my_table)
 ```
-To get a full overview of all functions in the python api, download the following zip:
-[MolgenisPythonFunctions.zip](../data/MolgenisPythonFunctions.zip)
+To get a full overview of all functions in the python client, you can look at the 
+[examples on GitHub](https://github.com/molgenis/molgenis-py-client/tree/master/examples).
+
 # Methods
 ## login
 ```python
@@ -44,9 +45,9 @@ session.logout()
 Logout from the MOLGENIS REST API and destroy the session.
 
 
-##getById
+##get_by_id
 ```python
-session.getById("tableId", "rowId")
+session.get_by_id("tableId", "rowId")
 ```
 Retrieves a single entity row from an entity repository.<br/><br/>
 
