@@ -19,6 +19,7 @@ import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeSta
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.REQUIRED;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.UNKNOWN;
 import static org.molgenis.data.importer.PackageResolver.resolvePackages;
+import static org.molgenis.data.importer.emx.IntermediateParseResults.setDefaultLookupAttributes;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.FILE;
@@ -418,18 +419,7 @@ public class EmxMetadataParser implements MetadataParser {
               // in case no lookup attributes were defined:
               // try to set own id attribute and own label attribute as lookup attributes
               if (Iterables.size(entityType.getLookupAttributes()) == 0) {
-                int lookupAttrIdx = 0;
-
-                Attribute ownIdAttr = entityType.getOwnIdAttribute();
-                if (ownIdAttr != null && ownIdAttr.isVisible()) {
-                  ownIdAttr.setLookupAttributeIndex(lookupAttrIdx++);
-                }
-
-                Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-                if (ownLabelAttr != null
-                    && (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))) {
-                  ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
-                }
+                setDefaultLookupAttributes(entityType, 0);
               }
             });
   }
