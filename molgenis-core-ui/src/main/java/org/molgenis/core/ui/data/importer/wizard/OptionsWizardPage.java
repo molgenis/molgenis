@@ -70,6 +70,9 @@ public class OptionsWizardPage extends AbstractWizardPage {
     importWizard.setMetadataImportOption(metadataImportOption);
 
     if (importWizard.getMustChangeEntityName()) {
+      // userGivenName will be validated by the NameValidator and can't contain any
+      // characters that have special meaning for the file system
+      @SuppressWarnings("squid:S2083")
       String userGivenName = request.getParameter("name");
       if (StringUtils.isEmpty(userGivenName)) {
         result.addError(new ObjectError("wizard", "Please enter an entity name"));
@@ -98,9 +101,6 @@ public class OptionsWizardPage extends AbstractWizardPage {
                   .createFileRepositoryCollection(tmpFile)
                   .getFileNameExtensions());
 
-      // userGivenName has already been validated by the NameValidator and can't contain any
-      // characters that have special meaning for the file system
-      @SuppressWarnings("squid:S2083")
       File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
       if (!tmpFile.renameTo(file)) {
         LOG.error("Failed to rename '{}' to '{}'", tmpFile.getName(), file.getName());
