@@ -8,6 +8,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.molgenis.core.ui.wizard.AbstractWizardController;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataAction;
@@ -32,6 +34,7 @@ import org.molgenis.data.importer.ImportRunService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
+import org.molgenis.data.importer.emx.exception.EmxImportException;
 import org.molgenis.data.rest.util.Href;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
@@ -122,7 +125,6 @@ public class ImportWizardController extends AbstractWizardController {
     this.fileStore = fileStore;
     this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
     this.importRunService = importRunService;
-    this.dataService = dataService;
     this.asyncImportJobs = executorService;
   }
 
@@ -148,6 +150,7 @@ public class ImportWizardController extends AbstractWizardController {
   public ResponseEntity<String> importFileByUrl(
       HttpServletRequest request,
       @RequestParam("url") String url,
+      @RequestParam(value = "protocol", required = false) String protocol,
       @RequestParam(value = "entityTypeId", required = false) String entityTypeId,
       @RequestParam(value = "packageId", required = false) String packageId,
       @RequestParam(value = "metadataAction", required = false) String metadataAction,
@@ -156,7 +159,10 @@ public class ImportWizardController extends AbstractWizardController {
       throws URISyntaxException {
     ImportRun importRun;
     try {
-      File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
+
+      String constructedUrl = getDownloadUrl(url, protocol);
+
+      File tmpFile = fileLocationToStoredRenamedFile(constructedUrl, entityTypeId);
       if (packageId != null && !dataService.getMeta().getPackage(packageId).isPresent()) {
         return ResponseEntity.badRequest()
             .contentType(TEXT_PLAIN)
@@ -168,6 +174,30 @@ public class ImportWizardController extends AbstractWizardController {
       return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(e.getMessage());
     }
     return createCreatedResponseEntity(importRun);
+  }
+
+  private String getDownloadUrl(
+      @RequestParam("url") String url,
+      @RequestParam(value = "protocol", required = false) String protocol) {
+    String prefix;
+    switch (protocol) {
+      case "ftp":
+        prefix = "ftp://";
+        break;
+      case "http":
+        prefix = "http://";
+        break;
+      case "https":
+      default:
+        prefix = "https://";
+        break;
+    }
+    String constructedUrl = prefix + url;
+    if (!UrlValidator.getInstance().isValid(constructedUrl)) {
+      // FIXME
+      throw new EmxImportException(new MalformedURLException(), "", -1);
+    }
+    return constructedUrl;
   }
 
   /**
