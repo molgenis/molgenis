@@ -361,19 +361,40 @@ public class EmxMetadataParserTest extends AbstractMockitoTest {
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     emxMetadataParser.setAttrVisible(0, attr, "test");
+    verify(attr).setVisibleExpression("test");
+  }
+
+  @Test
+  public void setAttrVisibleEmptyString() {
+    initMetaFactories();
+
+    Attribute attr = mock(Attribute.class);
+    when(attr.getDataType()).thenReturn(COMPOUND);
+    EmxAttribute emxAttr = mock(EmxAttribute.class);
+    when(emxAttr.getAttr()).thenReturn(attr);
+    emxMetadataParser.setAttrVisible(0, attr, "");
+    verify(attr, times(0)).setVisibleExpression("");
   }
 
   @Test
   public void setAttrNullable() {
     initMetaFactories();
 
-    Entity emxAttrEntity = mock(Entity.class);
     Attribute attr = mock(Attribute.class);
     when(attr.getString("nillable")).thenReturn("test");
     emxMetadataParser.setAttrNullable(0, attr, "test");
+    verify(attr).setNullableExpression("test");
+  }
+
+  @Test
+  public void setAttrNullableEmptyString() {
+    initMetaFactories();
+
+    Attribute attr = mock(Attribute.class);
+    when(attr.getString("nillable")).thenReturn("");
+    emxMetadataParser.setAttrNullable(0, attr, "");
+    verify(attr, times(0)).setNullableExpression("");
   }
 
   @Test
