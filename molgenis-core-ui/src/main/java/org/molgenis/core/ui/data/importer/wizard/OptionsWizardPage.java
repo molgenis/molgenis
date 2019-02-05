@@ -93,13 +93,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
       File tmpFile = importWizard.getFile();
       String fileName = tmpFile.getName();
 
-      // FIXME: can this be done a bit cleaner?
-      String extension =
-          FileExtensionUtils.findExtensionFromPossibilities(
-              fileName,
-              fileRepositoryCollectionFactory
-                  .createFileRepositoryCollection(tmpFile)
-                  .getFileNameExtensions());
+      String extension = getExtension(tmpFile, fileName);
 
       File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
       if (!tmpFile.renameTo(file)) {
@@ -115,6 +109,14 @@ public class OptionsWizardPage extends AbstractWizardPage {
     }
 
     return null;
+  }
+
+  private String getExtension(File tmpFile, String fileName) {
+    return FileExtensionUtils.findExtensionFromPossibilities(
+        fileName,
+        fileRepositoryCollectionFactory
+            .createFileRepositoryCollection(tmpFile)
+            .getFileNameExtensions());
   }
 
   private String validateInput(File file, ImportWizard wizard) {
