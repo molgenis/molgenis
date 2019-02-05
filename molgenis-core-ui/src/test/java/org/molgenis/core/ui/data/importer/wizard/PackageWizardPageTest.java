@@ -51,8 +51,8 @@ public class PackageWizardPageTest extends AbstractMockitoTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     BindingResult bindingResult = mock(BindingResult.class);
     ImportWizard wizard = mock(ImportWizard.class);
-    when(wizard.getMetadataImportOption()).thenReturn(UPSERT.toString().toLowerCase());
-    when(wizard.getDataImportOption()).thenReturn(ADD.toString().toLowerCase());
+    when(wizard.getMetadataImportOption()).thenReturn(UPSERT);
+    when(wizard.getDataImportOption()).thenReturn(ADD);
     Map<String, Collection<String>> result = new HashMap<>();
     result.put("test", null);
 

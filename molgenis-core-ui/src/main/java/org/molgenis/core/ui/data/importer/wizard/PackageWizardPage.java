@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -54,64 +53,52 @@ public class PackageWizardPage extends AbstractWizardPage {
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
-    String metadataImportOption = importWizard.getMetadataImportOption();
-    String dataImportOption = importWizard.getDataImportOption();
+    MetadataAction metadataAction = importWizard.getMetadataImportOption();
+    DataAction entityDbAction = importWizard.getDataImportOption();
 
-    if (dataImportOption != null) {
-      try {
-        // convert input to database action
-        MetadataAction metadataAction = ImportWizardUtil.toMetadataAction(metadataImportOption);
-        if (metadataAction == null) {
-          throw new IOException("unknown metadata action: " + metadataImportOption);
+    try {
+      RepositoryCollection repositoryCollection =
+          fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
+
+      ImportService importService =
+          importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
+
+      // Do integration test only if there are no previous errors found
+      if (metadataAction != MetadataAction.IGNORE
+          && !importWizard.getEntitiesImportable().containsValue(false)) {
+        // The package name that is selected in the "package selection" page
+        String selectedPackage = request.getParameter("selectedPackage");
+
+        // The entities that can be imported
+        Map<String, Boolean> entitiesImportable =
+            importService.determineImportableEntities(
+                metaDataService, repositoryCollection, selectedPackage);
+
+        // The results of the attribute checks are stored in maps with the entityname as key,
+        // those need to be updated with the packagename
+        updateFieldReports(importWizard, selectedPackage, entitiesImportable);
+        // Set the entities that can be imported
+        importWizard.setEntitiesImportable(entitiesImportable);
+
+        // The entities that can not be imported. If even one entity can not be imported,
+        // everything fails
+        List<String> entitiesNotImportable =
+            entitiesImportable
+                .entrySet()
+                .stream()
+                .filter(entity -> !entity.getValue())
+                .map(Map.Entry::getKey)
+                .collect(toList());
+
+        if (!entitiesNotImportable.isEmpty()) {
+          throw new MolgenisDataException(
+              "You are trying to upload entities that are not compatible with the already existing entities: "
+                  + entitiesNotImportable.toString());
         }
-        DataAction entityDbAction = ImportWizardUtil.toDataAction(dataImportOption);
-        if (entityDbAction == null) {
-          throw new IOException("unknown data action: " + dataImportOption);
-        }
-
-        RepositoryCollection repositoryCollection =
-            fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
-
-        ImportService importService =
-            importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
-
-        // Do integration test only if there are no previous errors found
-        if (metadataAction != MetadataAction.IGNORE
-            && !importWizard.getEntitiesImportable().containsValue(false)) {
-          // The package name that is selected in the "package selection" page
-          String selectedPackage = request.getParameter("selectedPackage");
-
-          // The entities that can be imported
-          Map<String, Boolean> entitiesImportable =
-              importService.determineImportableEntities(
-                  metaDataService, repositoryCollection, selectedPackage);
-
-          // The results of the attribute checks are stored in maps with the entityname as key,
-          // those need to be updated with the packagename
-          updateFieldReports(importWizard, selectedPackage, entitiesImportable);
-          // Set the entities that can be imported
-          importWizard.setEntitiesImportable(entitiesImportable);
-
-          // The entities that can not be imported. If even one entity can not be imported,
-          // everything fails
-          List<String> entitiesNotImportable =
-              entitiesImportable
-                  .entrySet()
-                  .stream()
-                  .filter(entity -> !entity.getValue())
-                  .map(Map.Entry::getKey)
-                  .collect(toList());
-
-          if (!entitiesNotImportable.isEmpty()) {
-            throw new MolgenisDataException(
-                "You are trying to upload entities that are not compatible with the already existing entities: "
-                    + entitiesNotImportable.toString());
-          }
-        }
-
-      } catch (RuntimeException | IOException e) {
-        ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
       }
+
+    } catch (RuntimeException e) {
+      ImportWizardUtil.handleException(e, importWizard, result, LOG, entityDbAction.name());
     }
     return null;
   }

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
@@ -23,6 +24,7 @@ import org.molgenis.data.file.util.FileExtensionUtils;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.NoWritablePackageException;
 import org.molgenis.data.security.PackagePermissionUtils;
@@ -64,10 +66,10 @@ public class OptionsWizardPage extends AbstractWizardPage {
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
-    String dataImportOption = request.getParameter("data-option");
-    importWizard.setDataImportOption(dataImportOption);
-    String metadataImportOption = request.getParameter("metadata-option");
-    importWizard.setMetadataImportOption(metadataImportOption);
+    DataAction dataAction = getImportOption(request);
+    importWizard.setDataImportOption(dataAction);
+    MetadataAction metadataAction = getMetaImportOption(request);
+    importWizard.setMetadataImportOption(metadataAction);
 
     if (importWizard.getMustChangeEntityName()) {
       // userGivenName will be validated by the NameValidator and can't contain any
@@ -86,7 +88,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
           return null;
         }
       } catch (MolgenisDataException e) {
-        ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
+        ImportWizardUtil.handleException(e, importWizard, result, LOG, dataAction.name());
         return null;
       }
 
@@ -105,10 +107,18 @@ public class OptionsWizardPage extends AbstractWizardPage {
     try {
       return validateInput(importWizard.getFile(), importWizard);
     } catch (Exception e) {
-      ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
+      ImportWizardUtil.handleException(e, importWizard, result, LOG, "FIXME");
     }
 
     return null;
+  }
+
+  private MetadataAction getMetaImportOption(HttpServletRequest request) {
+    return ImportWizardUtil.toMetadataAction(request.getParameter("metadata-option"));
+  }
+
+  private DataAction getImportOption(HttpServletRequest request) {
+    return ImportWizardUtil.toDataAction(request.getParameter("data-option"));
   }
 
   private String getExtension(File tmpFile, String fileName) {

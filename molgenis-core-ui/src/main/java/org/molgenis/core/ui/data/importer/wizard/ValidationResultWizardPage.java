@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletRequest;
@@ -51,47 +50,36 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
-    String metadataImportOption = importWizard.getMetadataImportOption();
-    String dataImportOption = importWizard.getDataImportOption();
+    MetadataAction metadataAction = importWizard.getMetadataImportOption();
+    DataAction dataAction = importWizard.getDataImportOption();
 
-    if (dataImportOption != null) {
-      try {
-        // convert input to database action
-        MetadataAction metadataAction = ImportWizardUtil.toMetadataAction(metadataImportOption);
-        if (metadataAction == null) {
-          throw new IOException("unknown metadata action: " + metadataImportOption);
-        }
-        DataAction dataAction = ImportWizardUtil.toDataAction(dataImportOption);
-        if (dataAction == null) {
-          throw new IOException("unknown data action: " + dataImportOption);
-        }
+    try {
 
-        RepositoryCollection repositoryCollection =
-            fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
-        ImportService importService =
-            importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
+      RepositoryCollection repositoryCollection =
+          fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
+      ImportService importService =
+          importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
 
-        synchronized (this) {
-          ImportRun importRun =
-              importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false);
-          ((ImportWizard) wizard).setImportRunId(importRun.getId());
+      synchronized (this) {
+        ImportRun importRun =
+            importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false);
+        ((ImportWizard) wizard).setImportRunId(importRun.getId());
 
-          asyncImportJobs.execute(
-              new ImportJob(
-                  importService,
-                  SecurityContextHolder.getContext(),
-                  repositoryCollection,
-                  metadataAction,
-                  dataAction,
-                  importRun.getId(),
-                  importRunService,
-                  request.getSession(),
-                  importWizard.getSelectedPackage()));
-        }
-
-      } catch (RuntimeException | IOException e) {
-        ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
+        asyncImportJobs.execute(
+            new ImportJob(
+                importService,
+                SecurityContextHolder.getContext(),
+                repositoryCollection,
+                metadataAction,
+                dataAction,
+                importRun.getId(),
+                importRunService,
+                request.getSession(),
+                importWizard.getSelectedPackage()));
       }
+
+    } catch (RuntimeException e) {
+      ImportWizardUtil.handleException(e, importWizard, result, LOG, dataAction.name());
     }
 
     return null;

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataAction;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.MetadataAction;
 
@@ -90,20 +91,34 @@ public class ImportWizard extends Wizard {
     return this;
   }
 
-  public String getMetadataImportOption() {
-    return entityTypeImportOption;
+  public MetadataAction getMetadataImportOption() {
+    MetadataAction action;
+    try {
+      action = MetadataAction.valueOf(entityTypeImportOption);
+    } catch (IllegalArgumentException e) {
+      // FIXME
+      throw new MolgenisDataException(e);
+    }
+    return action;
   }
 
-  public void setMetadataImportOption(String entityTypeImportOption) {
-    this.entityTypeImportOption = entityTypeImportOption;
+  public void setMetadataImportOption(MetadataAction entityTypeImportOption) {
+    this.entityTypeImportOption = entityTypeImportOption.name();
   }
 
-  public String getDataImportOption() {
-    return dataImportOption;
+  public DataAction getDataImportOption() {
+    DataAction action;
+    try {
+      action = DataAction.valueOf(dataImportOption);
+    } catch (IllegalArgumentException e) {
+      // FIXME
+      throw new MolgenisDataException(e);
+    }
+    return action;
   }
 
-  public void setDataImportOption(String dataImportOption) {
-    this.dataImportOption = dataImportOption;
+  public void setDataImportOption(DataAction dataImportOption) {
+    this.dataImportOption = dataImportOption.name();
   }
 
   public String getValidationMessage() {

@@ -19,47 +19,51 @@ class ImportWizardUtil {
   static @Nullable @CheckForNull MetadataAction toMetadataAction(String actionStr) {
     // convert input to database action
     MetadataAction metadataAction;
-
-    switch (actionStr) {
-      case "add":
-        metadataAction = MetadataAction.ADD;
-        break;
-      case "update":
-        metadataAction = MetadataAction.UPDATE;
-        break;
-      case "upsert":
-        metadataAction = MetadataAction.UPSERT;
-        break;
-      case "ignore":
-        metadataAction = MetadataAction.IGNORE;
-        break;
-      default:
-        metadataAction = null;
-        break;
+    if (actionStr != null) {
+      switch (actionStr) {
+        case "add":
+          metadataAction = MetadataAction.ADD;
+          break;
+        case "update":
+          metadataAction = MetadataAction.UPDATE;
+          break;
+        case "upsert":
+          metadataAction = MetadataAction.UPSERT;
+          break;
+        case "ignore":
+          metadataAction = MetadataAction.IGNORE;
+          break;
+        default:
+          metadataAction = null;
+          break;
+      }
+    } else {
+      metadataAction = null;
     }
-
     return metadataAction;
   }
 
   static @Nullable @CheckForNull DataAction toDataAction(String actionStr) {
     // convert input to database action
     DataAction dataAction;
-
-    switch (actionStr) {
-      case "add":
-        dataAction = DataAction.ADD;
-        break;
-      case "add_update":
-        dataAction = DataAction.ADD_UPDATE_EXISTING;
-        break;
-      case "update":
-        dataAction = DataAction.UPDATE;
-        break;
-      default:
-        dataAction = null;
-        break;
+    if (actionStr != null) {
+      switch (actionStr) {
+        case "add":
+          dataAction = DataAction.ADD;
+          break;
+        case "add_update":
+          dataAction = DataAction.ADD_UPDATE_EXISTING;
+          break;
+        case "update":
+          dataAction = DataAction.UPDATE;
+          break;
+        default:
+          dataAction = null;
+          break;
+      }
+    } else {
+      dataAction = null;
     }
-
     return dataAction;
   }
 
