@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.gson.Gson;
 import java.io.File;
 import java.nio.file.Files;
+import org.junit.AfterClass;
 import org.mockito.Mock;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.settings.AppSettings;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -85,11 +87,13 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
   @BeforeClass
   public void setUpBeforeClass() {
     AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
-    UserDetails userDetails =
-        when(mock(UserDetails.class).getUsername()).thenReturn("username").getMock();
-    Authentication authentication =
-        when(mock(Authentication.class).getPrincipal()).thenReturn(userDetails).getMock();
+    Authentication authentication = mock(AnonymousAuthenticationToken.class);
     SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
+
+  @AfterClass
+  public void resetAuth() {
+    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
   }
 
   @Test
@@ -105,7 +109,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     when(cookieWallService.showCookieWall()).thenReturn(false);
 
     mockMvc
-        .perform(get("/api/context"))
+        .perform(get("/plugin/app-ui-context"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.navBarLogo", is(appSettings.getLogoNavBarHref())))
         .andExpect(jsonPath("$.logoTop", is(appSettings.getLogoTopHref())))
