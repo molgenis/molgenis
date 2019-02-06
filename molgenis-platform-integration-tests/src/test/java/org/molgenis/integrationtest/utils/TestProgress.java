@@ -86,6 +86,9 @@ public class TestProgress implements Progress {
     return null;
   }
 
+  @Override
+  public void canceling() {}
+
   private void updateMessage(String message) {
     if (!message.isEmpty() && !this.message.isEmpty()) {
       this.message = "\n" + this.message;

@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.jobs;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.testng.Assert.assertEquals;
@@ -11,26 +12,23 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.jobs.JobsService;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.menu.MenuReaderService;
-import org.molgenis.web.menu.model.Menu;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class JobsControllerTest extends AbstractMockitoTest {
+  @Mock private JobsService jobsService;
   @Mock private UserAccountService userAccountService;
   @Mock private DataService dataService;
   @Mock private JobExecutionMetaData jobMetaDataMetaData;
   @Mock private JobScheduler jobScheduler;
   @Mock private MenuReaderService menuReaderService;
-  @Mock private Menu menu;
-  @Mock private JobExecution jobExecution;
-  @Mock private EntityType jobExecutionEntityType;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
 
   private JobsController jobsController;
@@ -39,12 +37,21 @@ public class JobsControllerTest extends AbstractMockitoTest {
   public void beforeClass() {
     jobsController =
         new JobsController(
+            jobsService,
             userAccountService,
             dataService,
             jobMetaDataMetaData,
             jobScheduler,
             menuReaderService,
             userPermissionEvaluator);
+  }
+
+  @Test
+  public void testCancel() {
+    String jobExecutionType = "MyJobExecutionType";
+    String jobExecutionId = "MyJobExecutionId";
+    jobsController.cancel(jobExecutionType, jobExecutionId);
+    verify(jobsService).cancel(jobExecutionType, jobExecutionId);
   }
 
   @Test

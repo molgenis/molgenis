@@ -143,7 +143,7 @@ in org.molgenis.data and subpackages from included modules
   MutableAclClassServiceImpl.class,
   PermissionRegistry.class,
   DataPermissionConfig.class,
-  JsonTestConfig.class
+  JsonTestConfig.class,
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
   @Autowired private PlatformBootstrapper platformBootstrapper;

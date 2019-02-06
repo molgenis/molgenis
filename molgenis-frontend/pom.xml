@@ -33,17 +33,17 @@
               <target>
                 <echo message="Download archives"/>
                 <get dest="${project.build.directory}/archives">
-                  <url url="${registry.url}/@molgenis/app-manager/-/app-manager-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/menu/-/menu-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/navigator/-/navigator-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/questionnaires/-/questionnaires-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/searchall/-/searchall-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/security/-/security-0.0.3.tgz"/>
-                  <url url="${registry.url}/@molgenis/settings/-/settings-0.0.3.tgz"/>
+                  <url url="${registry.url}/@molgenis/app-manager/-/app-manager-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/menu/-/menu-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/navigator/-/navigator-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/questionnaires/-/questionnaires-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/searchall/-/searchall-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/security/-/security-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/settings/-/settings-0.1.0.tgz"/>
                 </get>
               </target>
             </configuration>

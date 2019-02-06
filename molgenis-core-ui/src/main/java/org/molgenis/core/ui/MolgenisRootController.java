@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/")
 public class MolgenisRootController {
+  @SuppressWarnings("squid:S3752") // multiple methods required
   @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST})
   public String index() {
     return "forward:" + MolgenisMenuController.URI;

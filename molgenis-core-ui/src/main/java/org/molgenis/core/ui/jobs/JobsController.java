@@ -18,6 +18,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.jobs.JobsService;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -42,6 +43,7 @@ public class JobsController extends PluginController {
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
   private static final int MAX_JOBS_TO_RETURN = 20;
 
+  private final JobsService jobsService;
   private final UserAccountService userAccountService;
   private final DataService dataService;
   private final JobExecutionMetaData jobMetaDataMetaData;
@@ -50,6 +52,7 @@ public class JobsController extends PluginController {
   private final UserPermissionEvaluator userPermissionEvaluator;
 
   JobsController(
+      JobsService jobsService,
       UserAccountService userAccountService,
       DataService dataService,
       JobExecutionMetaData jobMetaDataMetaData,
@@ -63,6 +66,7 @@ public class JobsController extends PluginController {
     this.jobScheduler = requireNonNull(jobScheduler);
     this.menuReaderService = requireNonNull(menuReaderService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+    this.jobsService = requireNonNull(jobsService);
   }
 
   @GetMapping
@@ -112,6 +116,14 @@ public class JobsController extends PluginController {
     }
 
     return jobs;
+  }
+
+  @PostMapping("/cancel/{jobExecutionType}/{jobExecutionId}")
+  @ResponseStatus(NO_CONTENT)
+  public void cancel(
+      @PathVariable("jobExecutionType") String jobExecutionType,
+      @PathVariable("jobExecutionId") String jobExecutionId) {
+    jobsService.cancel(jobExecutionType, jobExecutionId);
   }
 
   @PostMapping("/run/{scheduledJobId}")
