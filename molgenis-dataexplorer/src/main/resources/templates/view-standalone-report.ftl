@@ -3,7 +3,7 @@
 
 <@header css js/>
 
-<button class="btn btn-primary" id="view-full-dataset-btn">View all ${entityTypeId}</button>
+<button class="btn btn-primary" id="view-full-dataset-btn">View all ${entityTypeLabel}</button>
 <hr>
 <#include viewName+".ftl">
 
