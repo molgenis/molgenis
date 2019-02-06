@@ -226,6 +226,8 @@ public class ImportWizardController extends AbstractWizardController {
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
+
+    @SuppressWarnings("squid:S2083")
     URL url = new URL(fileLocation);
 
     try (InputStream is = url.openStream()) {
