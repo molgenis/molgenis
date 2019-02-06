@@ -38,12 +38,13 @@ public class JobExecutionMetaData extends SystemEntityType {
   public static final String SCHEDULED_JOB_ID = "scheduledJobId";
   public static final String PENDING = "PENDING";
   public static final String RUNNING = "RUNNING";
+  public static final String CANCELING = "CANCELING";
   public static final String SUCCESS = "SUCCESS";
   public static final String FAILED = "FAILED";
   public static final String CANCELED = "CANCELED";
 
   private final List<String> jobStatusOptions =
-      newArrayList(PENDING, RUNNING, SUCCESS, FAILED, CANCELED);
+      newArrayList(PENDING, RUNNING, CANCELING, SUCCESS, FAILED, CANCELED);
   private JobPackage jobPackage;
 
   JobExecutionMetaData(JobPackage jobPackage) {

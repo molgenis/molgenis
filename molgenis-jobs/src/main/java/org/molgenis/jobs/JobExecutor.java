@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.mail.MailSender;
 import org.springframework.stereotype.Service;
 
 /** Executes {@link ScheduledJob}s. */
@@ -34,11 +33,10 @@ public class JobExecutor {
 
   private final DataService dataService;
   private final EntityManager entityManager;
-  private final JobExecutionUpdater jobExecutionUpdater;
-  private final MailSender mailSender;
   private final ExecutorService executorService;
   private final JobFactoryRegistry jobFactoryRegistry;
   private final JobExecutionContextFactory jobExecutionContextFactory;
+  private final JobExecutionRegistry jobExecutionRegistry;
 
   private JobExecutionTemplate jobExecutionTemplate;
   private final Gson gson;
@@ -46,18 +44,16 @@ public class JobExecutor {
   public JobExecutor(
       DataService dataService,
       EntityManager entityManager,
-      JobExecutionUpdater jobExecutionUpdater,
-      MailSender mailSender,
       ExecutorService executorService,
       JobFactoryRegistry jobFactoryRegistry,
-      JobExecutionContextFactory jobExecutionContextFactory) {
+      JobExecutionContextFactory jobExecutionContextFactory,
+      JobExecutionRegistry jobExecutionRegistry) {
     this.dataService = requireNonNull(dataService);
     this.entityManager = requireNonNull(entityManager);
-    this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
-    this.mailSender = requireNonNull(mailSender);
     this.executorService = requireNonNull(executorService);
-    this.jobFactoryRegistry = jobFactoryRegistry;
+    this.jobFactoryRegistry = requireNonNull(jobFactoryRegistry);
     this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
+    this.jobExecutionRegistry = requireNonNull(jobExecutionRegistry);
 
     this.jobExecutionTemplate = new JobExecutionTemplate();
     this.gson = new Gson();
@@ -80,7 +76,9 @@ public class JobExecutor {
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 
     try {
-      runJob(jobExecution, molgenisJob);
+      Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
+      runJob(jobExecution, molgenisJob, progress);
+      jobExecutionRegistry.unregisterJobExecution(jobExecution);
     } catch (Exception ex) {
       LOG.error("Error creating job for JobExecution.", ex);
       jobExecution.setStatus(JobExecution.Status.FAILED);
@@ -122,18 +120,31 @@ public class JobExecutor {
       JobExecution jobExecution, ExecutorService executorService) {
     overwriteJobExecutionUser(jobExecution);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
-    return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService)
-        .handle(
-            (voidResult, throwable) -> {
-              if (throwable != null) {
-                LOG.error(
-                    format(
-                        "Job of type '%s' with id '%s' completed with exception",
-                        jobExecution.getType(), jobExecution.getIdentifier()),
-                    throwable);
-              }
-              return voidResult;
-            });
+
+    Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
+    CompletableFuture<Void> completableFuture =
+        CompletableFuture.runAsync(
+            () -> runJob(jobExecution, molgenisJob, progress), executorService);
+
+    return completableFuture.handle(
+        (voidResult, throwable) -> {
+          if (throwable != null) {
+            LOG.error(
+                format(
+                    "Job of type '%s' with id '%s' completed with exception",
+                    jobExecution.getType(), jobExecution.getIdentifier()),
+                throwable);
+          }
+
+          jobExecutionRegistry.unregisterJobExecution(jobExecution);
+
+          return voidResult;
+        });
+  }
+
+  public void cancel(JobExecution jobExecution) {
+    Progress progress = jobExecutionRegistry.getJobExecutionProgress(jobExecution);
+    progress.canceling();
   }
 
   private void overwriteJobExecutionUser(JobExecution jobExecution) {
@@ -161,10 +172,9 @@ public class JobExecutor {
     }
   }
 
-  private void runJob(JobExecution jobExecution, Job<?> job) {
+  private void runJob(JobExecution jobExecution, Job<?> job, Progress progress) {
     JobExecutionContext jobExecutionContext =
         jobExecutionContextFactory.createJobExecutionContext(jobExecution);
-    Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
     jobExecutionTemplate.call(job, progress, jobExecutionContext);
   }
 
