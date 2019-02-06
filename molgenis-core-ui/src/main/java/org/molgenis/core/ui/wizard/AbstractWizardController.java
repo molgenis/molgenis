@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 public abstract class AbstractWizardController extends PluginController {
   private static final String VIEW_NAME = "view-wizard";
@@ -94,7 +95,10 @@ public abstract class AbstractWizardController extends PluginController {
     return VIEW_NAME;
   }
 
-  @RequestMapping(value = "/restart")
+  @SuppressWarnings("squid:S3752") // backward compatibility: multiple methods required
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/restart")
   public String restart(HttpServletRequest request, HttpSession session) {
     session.removeAttribute(wizardName);
     return "redirect:" + request.getAttribute(KEY_CONTEXT_URL);
