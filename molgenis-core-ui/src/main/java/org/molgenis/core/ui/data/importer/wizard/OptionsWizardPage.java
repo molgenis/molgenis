@@ -60,6 +60,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     return "Options";
   }
 
+  @SuppressWarnings("squid:S2083")
   @Override
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
