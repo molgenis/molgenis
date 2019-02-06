@@ -64,9 +64,18 @@ public class OptionsWizardPage extends AbstractWizardPage {
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
+
     String dataImportOption = request.getParameter("data-option");
+    if (dataImportOption != null && ImportWizardUtil.toDataAction(dataImportOption) == null) {
+      throw new IllegalArgumentException("unknown data action: " + dataImportOption);
+    }
     importWizard.setDataImportOption(dataImportOption);
+
     String metadataImportOption = request.getParameter("metadata-option");
+    if (metadataImportOption != null
+        && ImportWizardUtil.toMetadataAction(metadataImportOption) == null) {
+      throw new IllegalArgumentException("unknown metadata action: " + metadataImportOption);
+    }
     importWizard.setMetadataImportOption(metadataImportOption);
 
     if (importWizard.getMustChangeEntityName()) {
