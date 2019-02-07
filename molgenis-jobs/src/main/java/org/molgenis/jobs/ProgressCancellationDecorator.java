@@ -10,7 +10,7 @@ import org.molgenis.jobs.model.JobExecution;
 
 class ProgressCancellationDecorator extends ForwardingObject implements Progress {
   private final Progress delegateProgress;
-  private boolean cancelOnNextProgressChange;
+  private volatile boolean cancelOnNextProgressChange;
 
   ProgressCancellationDecorator(Progress delegateProgress) {
     this.delegateProgress = requireNonNull(delegateProgress);
