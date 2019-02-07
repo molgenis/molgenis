@@ -487,12 +487,70 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
       dropForeignKey(entityType, attr);
     }
 
-    updateColumnDataType(entityType, updatedAttr);
+    if (isSingleReferenceType(attr) && isMultipleReferenceType(updatedAttr)) {
+      updateManyToOneToManyToMany(entityType, attr, updatedAttr);
+    } else {
+      updateColumnDataType(entityType, updatedAttr);
+    }
 
     // add foreign key on data type updates such as STRING --> XREF
     if (!isReferenceType(attr) && isSingleReferenceType(updatedAttr)) {
       createForeignKey(entityType, updatedAttr);
     }
+  }
+
+  private void updateManyToOneToManyToMany(
+      EntityType entityType, Attribute attr, Attribute updatedAttr) {
+    if (!isSingleReferenceType(attr)) {
+      throw new IllegalArgumentException();
+    }
+    if (!isMultipleReferenceType(updatedAttr)) {
+      throw new IllegalArgumentException();
+    }
+    if (entityType.isAbstract()) {
+      throw new IllegalArgumentException();
+    }
+    if (attr.isInversedBy()) {
+      throw new IllegalArgumentException();
+    }
+
+    // 1. create junction table
+    createJunctionTable(entityType, updatedAttr);
+
+    // 2. move data from table column to junction table
+    Attribute idAttribute = entityType.getIdAttribute();
+    Attribute refIdAttribute = attr.getRefEntity().getIdAttribute();
+    Fetch fetch =
+        new Fetch()
+            .field(idAttribute.getName())
+            .field(attr.getName(), new Fetch().field(refIdAttribute.getName()));
+
+    PostgreSqlRepository postgreSqlRepository = createPostgreSqlRepository(entityType);
+    postgreSqlRepository.forEachBatched(
+        fetch,
+        entities -> {
+          List<Map<String, Object>> mrefs = createMrefs(attr, updatedAttr, idAttribute, entities);
+          postgreSqlRepository.addMrefs(mrefs, updatedAttr);
+        },
+        BATCH_SIZE);
+
+    // 3. remove table column
+    dropColumn(entityType, attr);
+  }
+
+  private List<Map<String, Object>> createMrefs(
+      Attribute attr, Attribute updatedAttr, Attribute idAttribute, List<Entity> entities) {
+    return entities
+        .stream()
+        .map(
+            entity -> {
+              Entity refEntity = entity.getEntity(attr.getName());
+              return refEntity != null
+                  ? createJunctionTableRowData(0, idAttribute, refEntity, updatedAttr, entity)
+                  : null;
+            })
+        .filter(Objects::nonNull)
+        .collect(toList());
   }
 
   /**
