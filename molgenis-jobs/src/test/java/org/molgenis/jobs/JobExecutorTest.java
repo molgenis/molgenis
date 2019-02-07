@@ -1,7 +1,6 @@
 package org.molgenis.jobs;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -94,50 +93,6 @@ public class JobExecutorTest extends AbstractMockitoTest {
     verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
     verify(jobExecutionTemplate).call(job, progress, jobExecutionContext);
     verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test(expectedExceptions = RuntimeException.class)
-  public void testExecuteScheduledJobRunJobFails() {
-    String scheduledJobId = "MyScheduledJobId";
-
-    EntityType jobExecutionType = mock(EntityType.class);
-    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
-    when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
-
-    ScheduledJob scheduledJob = mock(ScheduledJob.class);
-    when(scheduledJob.getType()).thenReturn(scheduledJobType);
-    when(dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class))
-        .thenReturn(scheduledJob);
-
-    String jobExecutionEntityTypeId = "MyJobExecutionId";
-    EntityType jobExecutionEntityType = mock(EntityType.class);
-    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
-
-    JobExecution jobExecution = mock(JobExecution.class);
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
-    when(entityManager.create(jobExecutionType, POPULATE)).thenReturn(jobExecution);
-
-    Job job = mock(Job.class);
-
-    JobFactory jobFactory = mock(JobFactory.class);
-    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
-    when(jobFactory.createJob(jobExecution)).thenReturn(job);
-
-    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
-    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
-        .thenReturn(jobExecutionContext);
-
-    doThrow(new RuntimeException())
-        .when(jobExecutionTemplate)
-        .call(eq(job), any(Progress.class), eq(jobExecutionContext));
-    try {
-      jobExecutor.executeScheduledJob(scheduledJobId);
-    } finally {
-      verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-      verify(jobExecution).setStatus(Status.FAILED);
-      verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
-    }
   }
 
   @Test(expectedExceptions = UnknownEntityException.class)

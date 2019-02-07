@@ -75,16 +75,13 @@ public class JobExecutor {
     JobExecution jobExecution = createJobExecution(scheduledJob);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 
+    Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
     try {
-      Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
       runJob(jobExecution, molgenisJob, progress);
-      jobExecutionRegistry.unregisterJobExecution(jobExecution);
     } catch (Exception ex) {
-      LOG.error("Error creating job for JobExecution.", ex);
-      jobExecution.setStatus(JobExecution.Status.FAILED);
-      jobExecution.setProgressMessage(ex.getMessage());
-      dataService.update(jobExecution.getEntityType().getId(), jobExecution);
-      throw ex;
+      handleJobException(jobExecution, ex);
+    } finally {
+      jobExecutionRegistry.unregisterJobExecution(jobExecution);
     }
   }
 
@@ -129,17 +126,22 @@ public class JobExecutor {
     return completableFuture.handle(
         (voidResult, throwable) -> {
           if (throwable != null) {
-            LOG.error(
-                format(
-                    "Job of type '%s' with id '%s' completed with exception",
-                    jobExecution.getType(), jobExecution.getIdentifier()),
-                throwable);
+            handleJobException(jobExecution, throwable);
           }
-
           jobExecutionRegistry.unregisterJobExecution(jobExecution);
 
           return voidResult;
         });
+  }
+
+  private void handleJobException(JobExecution jobExecution, Throwable throwable) {
+    if (LOG.isErrorEnabled()) {
+      LOG.error(
+          format(
+              "Job of type '%s' with id '%s' completed with exception",
+              jobExecution.getType(), jobExecution.getIdentifier()),
+          throwable);
+    }
   }
 
   public void cancel(JobExecution jobExecution) {
