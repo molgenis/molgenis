@@ -60,7 +60,8 @@ var Job = React.createClass({
         this.setState({showLog: !this.state.showLog})
     },
     _cancelJobClick: function () {
-        $.post('/plugin/jobs/cancel/' + encodeURIComponent(this.props.job._meta.name) + '/' + encodeURIComponent(this.props.job.identifier))
+        let entityTypeId = this.props.job._meta ? this.props.job._meta.name : this.props.job.__entityTypeId
+        $.post('/plugin/jobs/cancel/' + encodeURIComponent(entityTypeId) + '/' + encodeURIComponent(this.props.job.identifier))
     },
     _getCssClass: function () {
         let cssTable = {
