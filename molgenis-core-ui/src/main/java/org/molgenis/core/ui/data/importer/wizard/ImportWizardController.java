@@ -143,11 +143,12 @@ public class ImportWizardController extends AbstractWizardController {
    *
    * @param url URL from which a file is downloaded
    */
+  @SuppressWarnings("squid:S2083")
   @PostMapping("/importByUrl")
   @ResponseBody
   public ResponseEntity<String> importFileByUrl(
       HttpServletRequest request,
-      @SuppressWarnings("squid:S2083") @RequestParam("url") String url,
+      @RequestParam("url") String url,
       @RequestParam(value = "entityTypeId", required = false) String entityTypeId,
       @RequestParam(value = "packageId", required = false) String packageId,
       @RequestParam(value = "metadataAction", required = false) String metadataAction,
@@ -223,6 +224,7 @@ public class ImportWizardController extends AbstractWizardController {
     return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
   }
 
+  @SuppressWarnings("squid:S2083")
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
