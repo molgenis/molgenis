@@ -15,8 +15,8 @@ $light: #FFFFFF;
 $light-gray: #fafafa;
 $black: #000;
 
-$primary: $red;
-$secondary: $sub-red;
+$primary: $main-green;
+$secondary: $sub-green;
 $success: $sub-green;
 $danger: $red;
 $light: $light;
@@ -28,13 +28,8 @@ $body-bg: $light-gray;
 // Table
 $table-bg: $white;
 
-// Border radius
-$border-radius: 0px;
-$btn-border-radius-sm: 0px;
-$btn-border-radius-lg: 0px;
-
 // Navbar
-$navbar-light-color: $red;
+$navbar-light-color: $main-green;
 $navbar-light-active-color: $black;
 $navbar-light-hover-color: rgba($navbar-light-active-color, .9);
 

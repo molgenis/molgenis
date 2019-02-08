@@ -46,11 +46,12 @@ $font-size-base: 1rem; // 0.875rem !default; // Assumes the browser default, typ
 $headings-font-family: "bebas_neueregular";
 $headings-font-weight: 500;
 
-
 // Set mono font for data components
 .table, .list-group-item {
   font-family: "IBM_Plex_mono";
 }
 
-// Option A: Include all of Bootstrap
-@import "node_modules/bootstrap-4/scss/bootstrap";
+// Border radius
+$border-radius: 0px;
+$btn-border-radius-sm: 0px;
+$btn-border-radius-lg: 0px;
