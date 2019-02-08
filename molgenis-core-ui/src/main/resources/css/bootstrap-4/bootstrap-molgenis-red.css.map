@@ -1,8 +1,8 @@
 {
 	"version": 3,
-	"file": "bootstrap-molgenis-blue.css",
+	"file": "bootstrap-molgenis-red.css",
 	"sources": [
-		"../../../frontend/src/scss/bootstrap-molgenis-blue.scss",
+		"../../../frontend/src/scss/bootstrap-molgenis-red.scss",
 		"../../../frontend/src/scss/_bootstrap-molgenis-base.scss",
 		"../../../frontend/node_modules/bootstrap-4/scss/bootstrap.scss",
 		"../../../frontend/node_modules/bootstrap-4/scss/_functions.scss",
