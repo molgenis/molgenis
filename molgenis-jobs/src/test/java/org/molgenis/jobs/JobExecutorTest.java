@@ -1,7 +1,6 @@
 package org.molgenis.jobs;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -9,11 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
-import static org.testng.Assert.assertEquals;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.molgenis.data.DataService;
@@ -25,19 +22,17 @@ import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.mail.MailSender;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class JobExecutorTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private EntityManager entityManager;
-  @Mock private JobExecutionUpdater jobExecutionUpdater;
-  @Mock private MailSender mailSender;
   @Mock private ExecutorService executorService;
   @Mock private JobFactoryRegistry jobFactoryRegistry;
   @Mock private JobExecutionContextFactory jobExecutionContextFactory;
   @Mock private JobExecutionTemplate jobExecutionTemplate;
+  @Mock private JobExecutionRegistry jobExecutionRegistry;
   private JobExecutor jobExecutor;
 
   @BeforeMethod
@@ -46,17 +41,16 @@ public class JobExecutorTest extends AbstractMockitoTest {
         new JobExecutor(
             dataService,
             entityManager,
-            jobExecutionUpdater,
-            mailSender,
             executorService,
             jobFactoryRegistry,
-            jobExecutionContextFactory);
+            jobExecutionContextFactory,
+            jobExecutionRegistry);
     jobExecutor.setJobExecutionTemplate(jobExecutionTemplate);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testJobExecutor() {
-    new JobExecutor(null, null, null, null, null, null, null);
+    new JobExecutor(null, null, null, null, null, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -91,56 +85,14 @@ public class JobExecutorTest extends AbstractMockitoTest {
     when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
         .thenReturn(jobExecutionContext);
 
+    Progress progress = mock(Progress.class);
+    when(jobExecutionRegistry.registerJobExecution(jobExecution)).thenReturn(progress);
+
     jobExecutor.executeScheduledJob(scheduledJobId);
 
     verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
-    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
-    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test(expectedExceptions = RuntimeException.class)
-  public void testExecuteScheduledJobRunJobFails() {
-    String scheduledJobId = "MyScheduledJobId";
-
-    EntityType jobExecutionType = mock(EntityType.class);
-    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
-    when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
-
-    ScheduledJob scheduledJob = mock(ScheduledJob.class);
-    when(scheduledJob.getType()).thenReturn(scheduledJobType);
-    when(dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class))
-        .thenReturn(scheduledJob);
-
-    String jobExecutionEntityTypeId = "MyJobExecutionId";
-    EntityType jobExecutionEntityType = mock(EntityType.class);
-    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
-
-    JobExecution jobExecution = mock(JobExecution.class);
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
-    when(entityManager.create(jobExecutionType, POPULATE)).thenReturn(jobExecution);
-
-    Job job = mock(Job.class);
-
-    JobFactory jobFactory = mock(JobFactory.class);
-    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
-    when(jobFactory.createJob(jobExecution)).thenReturn(job);
-
-    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
-    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
-        .thenReturn(jobExecutionContext);
-
-    doThrow(new RuntimeException())
-        .when(jobExecutionTemplate)
-        .call(eq(job), any(Progress.class), eq(jobExecutionContext));
-    try {
-      jobExecutor.executeScheduledJob(scheduledJobId);
-    } finally {
-      verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-      verify(jobExecution).setStatus(Status.FAILED);
-      verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
-    }
+    verify(jobExecutionTemplate).call(job, progress, jobExecutionContext);
+    verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
   }
 
   @Test(expectedExceptions = UnknownEntityException.class)
@@ -169,6 +121,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
     when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
         .thenReturn(jobExecutionContext);
 
+    Progress progress = mock(Progress.class);
+    when(jobExecutionRegistry.registerJobExecution(jobExecution)).thenReturn(progress);
     doAnswer(
             (InvocationOnMock invocation) -> {
               ((Runnable) invocation.getArguments()[0]).run();
@@ -179,9 +133,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
     jobExecutor.submit(jobExecution).get();
 
     verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
-    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
-    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
+    verify(jobExecutionTemplate).call(job, progress, jobExecutionContext);
+    verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
   }
 
   @Test(expectedExceptions = RuntimeException.class)
@@ -227,6 +180,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
     when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
         .thenReturn(jobExecutionContext);
 
+    Progress progress = mock(Progress.class);
+    when(jobExecutionRegistry.registerJobExecution(jobExecution)).thenReturn(progress);
     doAnswer(
             (InvocationOnMock invocation) -> {
               ((Runnable) invocation.getArguments()[0]).run();
@@ -237,8 +192,16 @@ public class JobExecutorTest extends AbstractMockitoTest {
     jobExecutor.submit(jobExecution, myExecutorService).get();
 
     verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
-    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
-    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
+    verify(jobExecutionTemplate).call(job, progress, jobExecutionContext);
+    verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
+  }
+
+  @Test
+  public void testCancel() {
+    JobExecution jobExecution = mock(JobExecution.class);
+    Progress progress = mock(Progress.class);
+    when(jobExecutionRegistry.getJobExecutionProgress(jobExecution)).thenReturn(progress);
+    jobExecutor.cancel(jobExecution);
+    verify(progress).canceling();
   }
 }
