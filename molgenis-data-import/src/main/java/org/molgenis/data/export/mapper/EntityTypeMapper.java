@@ -2,6 +2,8 @@ package org.molgenis.data.export.mapper;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_DESCRIPTION;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_LABEL;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_ABSTRACT;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_BACKEND;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_DESCRIPTION;
@@ -10,8 +12,10 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_LABE
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_NAME;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_PACKAGE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_TAGS;
+import static org.springframework.util.StringUtils.capitalize;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +26,13 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.i18n.LanguageService;
 
 public class EntityTypeMapper {
   public static final ImmutableMap<String, String> ENTITIES_ATTRS;
 
   static {
-    ENTITIES_ATTRS =
+    Builder builder =
         ImmutableMap.<String, String>builder()
             .put(EMX_ENTITIES_NAME, EntityTypeMetadata.ID)
             .put(EMX_ENTITIES_PACKAGE, EntityTypeMetadata.PACKAGE)
@@ -36,8 +41,18 @@ public class EntityTypeMapper {
             .put(EMX_ENTITIES_ABSTRACT, EntityTypeMetadata.IS_ABSTRACT)
             .put(EMX_ENTITIES_EXTENDS, EntityTypeMetadata.EXTENDS)
             .put(EMX_ENTITIES_BACKEND, EntityTypeMetadata.BACKEND)
-            .put(EMX_ENTITIES_TAGS, EntityTypeMetadata.TAGS)
-            .build();
+            .put(EMX_ENTITIES_TAGS, EntityTypeMetadata.TAGS);
+    LanguageService.getLanguageCodes()
+        .forEach(
+            languageCode -> {
+              builder.put(
+                  EMX_ATTRIBUTES_LABEL + "-" + languageCode,
+                  EntityTypeMetadata.LABEL + capitalize(languageCode));
+              builder.put(
+                  EMX_ATTRIBUTES_DESCRIPTION + "-" + languageCode,
+                  EntityTypeMetadata.DESCRIPTION + capitalize(languageCode));
+            });
+    ENTITIES_ATTRS = builder.build();
   }
 
   private EntityTypeMapper() {}
@@ -50,7 +65,8 @@ public class EntityTypeMapper {
           row.add(getTags(entityType));
           break;
         case EMX_ENTITIES_EXTENDS:
-          row.add(entityType.getExtends() != null ? entityType.getExtends().getId() : null);
+          EntityType extendz = entityType.getExtends();
+          row.add(extendz != null ? extendz.getId() : null);
           break;
         case EMX_ENTITIES_PACKAGE:
           row.add(getPackageId(entityType));
@@ -80,7 +96,8 @@ public class EntityTypeMapper {
 
   private static String getName(EntityType entityType) {
     String entityName = entityType.getId();
-    String packageName = entityType.getPackage() != null ? entityType.getPackage().getId() : "";
+    Package pack = entityType.getPackage();
+    String packageName = pack != null ? pack.getId() : "";
     if (!packageName.isEmpty() && entityName.startsWith(packageName)) {
       entityName = entityName.substring(packageName.length() + 1);
     }

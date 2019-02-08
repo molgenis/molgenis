@@ -1048,10 +1048,13 @@ public class EmxMetadataParser implements MetadataParser {
   }
 
   void setAttrVisible(int rowIndex, Attribute attr, String emxAttrVisible) {
-    if (emxAttrVisible.equalsIgnoreCase("true") || emxAttrVisible.equalsIgnoreCase("false")) {
+    if (emxAttrVisible.equalsIgnoreCase(TRUE.toString())
+        || emxAttrVisible.equalsIgnoreCase(FALSE.toString())) {
       attr.setVisible(parseBoolean(emxAttrVisible, rowIndex, EMX_ATTRIBUTES_VISIBLE));
     } else {
-      attr.setVisibleExpression(emxAttrVisible);
+      if (!Strings.isNullOrEmpty(emxAttrVisible)) {
+        attr.setVisibleExpression(emxAttrVisible);
+      }
     }
   }
 
@@ -1060,7 +1063,9 @@ public class EmxMetadataParser implements MetadataParser {
         || emxAttrNillable.equalsIgnoreCase(FALSE.toString())) {
       attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
     } else {
-      attr.setNullableExpression(emxAttrNillable);
+      if (!Strings.isNullOrEmpty(emxAttrNillable)) {
+        attr.setNullableExpression(emxAttrNillable);
+      }
     }
   }
 
