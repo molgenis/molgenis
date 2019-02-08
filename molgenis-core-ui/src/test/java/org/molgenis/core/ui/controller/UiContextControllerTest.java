@@ -73,7 +73,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
   @BeforeMethod
   public void beforeMethod() {
     UiContextController uiContextController =
-        new UiContextController(appSettings, cookieWallService);
+        new UiContextController(appSettings, cookieWallService, "mock-version", "mock date-time");
     mockMvc =
         MockMvcBuilders.standaloneSetup(uiContextController)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -105,6 +105,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     when(appSettings.getLogoTopHref()).thenReturn("http:://thisisotherref/");
     when(appSettings.getLogoTopMaxHeight()).thenReturn(22);
     when(appSettings.getMenu()).thenReturn(menu);
+    when(appSettings.getFooter()).thenReturn("<a class=\"foo\">message</a>");
     when(cookieWallService.showCookieWall()).thenReturn(false);
 
     mockMvc
@@ -117,6 +118,9 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(jsonPath("$.helpLink", is(UiContextController.HELP_LINK_JSON)))
         .andExpect(jsonPath("$.authenticated", is(false)))
         .andExpect(jsonPath("$.showCookieWall", is(false)))
-        .andExpect(jsonPath("$.menu.type", is("menu")));
+        .andExpect(jsonPath("$.menu.type", is("menu")))
+        .andExpect(jsonPath("$.additionalMessage", is("<a class=\"foo\">message</a>")))
+        .andExpect(jsonPath("$.version", is("mock-version")))
+        .andExpect(jsonPath("$.buildDate", is("mock date-time")));
   }
 }

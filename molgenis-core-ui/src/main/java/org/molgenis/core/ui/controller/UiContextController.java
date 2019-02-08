@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponses;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,11 +32,16 @@ public class UiContextController extends PluginController {
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
+  private final String molgenisVersion;
+  private final String molgenisBuildDate;
 
-  public UiContextController(AppSettings appSettings, CookieWallService cookieWallService) {
+  public UiContextController(AppSettings appSettings, CookieWallService cookieWallService,
+      @Value("${molgenis.version}") String molgenisVersion, @Value("${molgenis.build.date}") String molgenisBuildDate) {
     super(URI);
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
+    this.molgenisVersion = requireNonNull(molgenisVersion);
+    this.molgenisBuildDate = requireNonNull(molgenisBuildDate);
   }
 
   @ApiOperation(value = "Returns the ui context object", response = ResponseEntity.class)
@@ -69,6 +75,9 @@ public class UiContextController extends PluginController {
         .setHelpLink(HELP_LINK_JSON)
         .setShowCookieWall(showCookieWall)
         .setAuthenticated(authenticated)
+        .setAdditionalMessage(appSettings.getFooter())
+        .setVersion(this.molgenisVersion)
+        .setBuildDate(this.molgenisBuildDate)
         .build();
   }
 }

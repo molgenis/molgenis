@@ -29,6 +29,14 @@ public abstract class UiContextResponse {
 
   public abstract Boolean getShowCookieWall();
 
+  @Nullable
+  @CheckForNull
+  public abstract String getAdditionalMessage();
+
+  public abstract String getVersion();
+
+  public abstract String getBuildDate();
+
   public static Builder builder() {
     return new AutoValue_UiContextResponse.Builder();
   }
@@ -51,6 +59,12 @@ public abstract class UiContextResponse {
     public abstract Builder setAuthenticated(Boolean authenticated);
 
     public abstract Builder setShowCookieWall(Boolean showCookieWall);
+
+    public abstract Builder setAdditionalMessage(String additionalMessage);
+
+    public abstract Builder setVersion(String version);
+
+    public abstract Builder setBuildDate(String buildDate);
 
     public abstract UiContextResponse build();
   }
