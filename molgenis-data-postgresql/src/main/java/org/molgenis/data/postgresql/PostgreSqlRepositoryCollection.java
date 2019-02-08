@@ -520,7 +520,10 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
     }
 
     // 1. add table column
+    boolean previousNillable = updatedAttr.isNillable();
+    updatedAttr.setNillable(true);
     createColumn(entityType, updatedAttr);
+    updatedAttr.setNillable(previousNillable);
 
     // 2. move data from junction table to table column
     Attribute idAttribute = entityType.getIdAttribute();
@@ -582,7 +585,12 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
         },
         BATCH_SIZE);
 
-    // 3. remove junction table
+    // 3. set nillable
+    if (!previousNillable) {
+      updateNillable(entityType, attr, updatedAttr);
+    }
+
+    // 4. remove junction table
     dropJunctionTable(entityType, attr);
   }
 
