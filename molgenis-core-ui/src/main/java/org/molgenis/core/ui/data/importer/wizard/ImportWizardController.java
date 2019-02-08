@@ -147,7 +147,7 @@ public class ImportWizardController extends AbstractWizardController {
   @ResponseBody
   public ResponseEntity<String> importFileByUrl(
       HttpServletRequest request,
-      @RequestParam("url") String url,
+      @SuppressWarnings("squid:S2083") @RequestParam("url") String url,
       @RequestParam(value = "entityTypeId", required = false) String entityTypeId,
       @RequestParam(value = "packageId", required = false) String packageId,
       @RequestParam(value = "metadataAction", required = false) String metadataAction,
@@ -227,7 +227,6 @@ public class ImportWizardController extends AbstractWizardController {
       throws IOException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
 
-    @SuppressWarnings("squid:S2083")
     URL url = new URL(fileLocation);
 
     try (InputStream is = url.openStream()) {
