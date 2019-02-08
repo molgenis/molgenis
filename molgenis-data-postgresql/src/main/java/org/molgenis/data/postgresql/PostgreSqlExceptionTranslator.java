@@ -312,7 +312,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
           new ConstraintViolation(
               format(
                   "The attribute '%s' of entity '%s' contains null values.",
-                  tryGetAttributeName(tableName, columnName),
+                  tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
                   tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
               null);
       return new MolgenisValidationException(singleton(constraintViolation));
