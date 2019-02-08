@@ -36,6 +36,7 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -199,6 +200,26 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
     List<Entity> entities = newArrayList(entity.getEntities(ATTR_XREF));
     assertEquals(entities.size(), 1);
     assertEquals(entities.get(0).getIdValue(), "0");
+  }
+
+  @WithMockUser(username = USERNAME)
+  @Test
+  public void testUpdateEntityTypeMrefXrefChange() {
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    updatedEntityType.getAttribute(ATTR_MREF).setDataType(XREF);
+
+    metaDataService.updateEntityType(updatedEntityType);
+
+    Entity expectedEntity = new DynamicEntity(updatedEntityType);
+    expectedEntity.set(ATTR_MREF, refEntities.get(0));
+
+    Entity entity = dataService.findOneById(ENTITY_TYPE_ID, "0");
+    assertNotNull(entity);
+    Entity refEntity = entity.getEntity(ATTR_MREF);
+    assertEquals(refEntity.getIdValue(), "0");
   }
 
   @SuppressWarnings("deprecation")

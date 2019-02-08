@@ -38,11 +38,13 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUn
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUpdateTrigger;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetDataType;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetNotNull;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlUpdate;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributesReadonly;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isTableAttribute;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
+import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
 import static org.molgenis.data.util.EntityTypeUtils.getEntityTypeFetch;
 import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
@@ -53,7 +55,9 @@ import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 import com.google.common.collect.Iterables;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,6 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+import org.molgenis.data.AttributeValueConversionException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -79,6 +84,7 @@ import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.molgenis.data.util.AttributeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection {
@@ -489,6 +495,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
     if (isSingleReferenceType(attr) && isMultipleReferenceType(updatedAttr)) {
       updateManyToOneToManyToMany(entityType, attr, updatedAttr);
+    } else if (isMultipleReferenceType(attr) && isSingleReferenceType(updatedAttr)) {
+      updateManyToManyToManyToOne(entityType, attr, updatedAttr);
     } else {
       updateColumnDataType(entityType, updatedAttr);
     }
@@ -497,6 +505,85 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
     if (!isReferenceType(attr) && isSingleReferenceType(updatedAttr)) {
       createForeignKey(entityType, updatedAttr);
     }
+  }
+
+  private void updateManyToManyToManyToOne(
+      EntityType entityType, Attribute attr, Attribute updatedAttr) {
+    if (!isMultipleReferenceType(attr)) {
+      throw new IllegalArgumentException();
+    }
+    if (!isSingleReferenceType(updatedAttr)) {
+      throw new IllegalArgumentException();
+    }
+    if (entityType.isAbstract()) {
+      throw new IllegalArgumentException();
+    }
+
+    // 1. add table column
+    createColumn(entityType, updatedAttr);
+
+    // 2. move data from junction table to table column
+    Attribute idAttribute = entityType.getIdAttribute();
+    Attribute refIdAttribute = attr.getRefEntity().getIdAttribute();
+    Fetch fetch =
+        new Fetch()
+            .field(idAttribute.getName())
+            .field(attr.getName(), new Fetch().field(refIdAttribute.getName()));
+
+    String updateSql = getSqlUpdate(entityType, updatedAttr);
+
+    PostgreSqlRepository postgreSqlRepository = createPostgreSqlRepository(entityType);
+    postgreSqlRepository.forEachBatched(
+        fetch,
+        entitiesBatch -> {
+          // validate
+          entitiesBatch.forEach(
+              entity -> {
+                if (Iterables.size(entity.getEntities(attr.getName())) > 1) {
+                  throw new AttributeValueConversionException(
+                      format(
+                          "Entity type '%s' attribute '%s' type '%s' can't be updated to '%s' because one or more entities refer to multiple referenced entities.",
+                          entityType.getLabel(),
+                          attr.getName(),
+                          attr.getDataType(),
+                          updatedAttr.getDataType()));
+                }
+              });
+
+          // update
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
+            if (LOG.isTraceEnabled()) {
+              LOG.trace("SQL: {}", updateSql);
+            }
+          }
+
+          jdbcTemplate.batchUpdate(
+              updateSql,
+              new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                  Entity entity = entitiesBatch.get(i);
+                  Entity refEntity = Iterables.getFirst(entity.getEntities(attr.getName()), null);
+                  Object postgreSqlValue =
+                      refEntity != null
+                          ? getPostgreSqlValue(
+                              refEntity, refEntity.getEntityType().getIdAttribute())
+                          : null;
+                  ps.setObject(1, postgreSqlValue);
+                  ps.setObject(2, getPostgreSqlValue(entity, idAttribute));
+                }
+
+                @Override
+                public int getBatchSize() {
+                  return entitiesBatch.size();
+                }
+              });
+        },
+        BATCH_SIZE);
+
+    // 3. remove junction table
+    dropJunctionTable(entityType, attr);
   }
 
   private void updateManyToOneToManyToMany(
