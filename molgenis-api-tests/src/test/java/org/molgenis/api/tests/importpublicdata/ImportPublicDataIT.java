@@ -51,23 +51,23 @@ public class ImportPublicDataIT {
     LOG.info("Importing Test data");
 
     // Folder to look for test data
-    String uploadFolder = getExpectedEnvVariable("molgenis.test.upload.folder");
+    String uploadFolder = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_FOLDER");
 
     // File to import
-    String uploadFile = getExpectedEnvVariable("molgenis.test.upload.file");
+    String uploadFile = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_FILE");
 
     // Optional package to delete after test
-    uploadTopLevelPackage = getOptionalEnvVariable("molgenis.test.upload.package.to.remove");
+    uploadTopLevelPackage = getOptionalEnvVariable("MOLGENIS_TEST_UPLOAD_PACKAGE_TO_REMOVE");
 
     // Optional comma separated list of entities to delete after test
     String entitiesToRemoveString =
-        getOptionalEnvVariable("molgenis.test.upload.entities.to.remove");
+        getOptionalEnvVariable("MOLGENIS_TEST_UPLOAD_ENTITIES_TO_REMOVE");
     if (!Strings.isNullOrEmpty(entitiesToRemoveString)) {
       entitiesToRemove = Arrays.asList(entitiesToRemoveString.split("\\s*,\\s*"));
     }
 
     // Comma separated list of urls to test
-    String testUrlList = getExpectedEnvVariable("molgenis.test.upload.check.urls");
+    String testUrlList = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_CHECK_URLS");
     testUrls = Arrays.asList(testUrlList.split("\\s*,\\s*"));
 
     String importStatus = "PENDING";
