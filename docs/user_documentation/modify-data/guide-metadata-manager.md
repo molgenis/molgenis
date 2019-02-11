@@ -164,13 +164,13 @@ On select, all the fields that were visible for creating a new EntityType are av
 After you are done changing things, you can hit the save all changes button.
 
 ### Conversion list of data types
-This list describes the allowed conversion of data types in the metadata edit, and also some extra info and motivation.
+This list describes the allowed conversion of data types in the metadata edit.
 
 | Origin Attribute Type | Allowed conversions |
 |-----------------------|---------------------|
 | BOOL                  | STRING, TEXT, INT   |
-| CATEGORICAL           | STRING, INT, LONG, XREF |
-| CATEGORICAL_MREF      | MREF                |
+| CATEGORICAL           | STRING, INT, LONG, XREF, CATEGORICAL_MREF, MREF |
+| CATEGORICAL_MREF      | MREF, XREF, CATEGORICAL                |
 | COMPOUND              | STRING              |
 | DATE                  | STRING, TEXT, DATE_TIME |
 | DATE_TIME             | STRING, TEXT, DATE  |
@@ -182,12 +182,12 @@ This list describes the allowed conversion of data types in the metadata edit, a
 | HYPERLINK             | STRING, TEXT, XREF, CATEGORICAL |
 | INT                   | STRING, TEXT, DECIMAL, LONG, BOOL, ENUM, XREF, CATEGORICAL |
 | LONG                  | STRING, TEXT, INT, DECIMAL, ENUM, XREF, CATEGORICAL |
-| MREF                  | CATEGORICAL_MREF    |
+| MREF                  | CATEGORICAL_MREF, XREF, CATEGORICAL    |
 | ONE_TO_MANY           | NONE                |
 | SCRIPT                | STRING, TEXT        |
 | STRING                | ALL                 |
 | TEXT                  | ALL                 |
-| XREF                  | STRING, INT, LONG, CATEGORICAL |
+| XREF                  | STRING, INT, LONG, CATEGORICAL, MREF, CATEGORICAL_MREF|
 
 ## Deleting existing EntityTypes
 If you want to remove an EntityType because you want to start over or had some experiments that are no longer necessary, you can go and
