@@ -50,7 +50,23 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
             "false",
             "parentId",
             "Elastic",
-            "tag1,tag2");
+            "tag1,tag2",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
     List<Object> actual = EntityTypeMapper.map(entityType);
     assertEquals(actual, expected);
   }
@@ -76,7 +92,95 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
 
     List<Object> expected =
         newArrayList(
-            "ID", "packageId", "Human Readable", null, "false", null, "Elastic", "tag1,tag2");
+            "ID",
+            "packageId",
+            "Human Readable",
+            null,
+            "false",
+            null,
+            "Elastic",
+            "tag1,tag2",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    List<Object> actual = EntityTypeMapper.map(entityType);
+    assertEquals(actual, expected);
+  }
+
+  @Test
+  public void testMapEntityTypeI18N() {
+    EntityType entityType = mock(EntityType.class);
+    Tag tag1 = mock(Tag.class);
+    Tag tag2 = mock(Tag.class);
+    when(tag1.getId()).thenReturn("tag1");
+    when(tag2.getId()).thenReturn("tag2");
+    Package pack = mock(Package.class);
+    when(pack.getId()).thenReturn("packageId");
+
+    when(entityType.getTags()).thenReturn(newArrayList(tag1, tag2));
+    doReturn("Elastic").when(entityType).get(EntityTypeMetadata.BACKEND);
+    doReturn("Human Readable").when(entityType).get(EntityTypeMetadata.LABEL);
+    doReturn("Dutch Label").when(entityType).get("labelNl");
+    doReturn("Dutch description").when(entityType).get("descriptionNl");
+    doReturn("English Label").when(entityType).get("labelEn");
+    doReturn("English description").when(entityType).get("descriptionEn");
+    doReturn("German Label").when(entityType).get("labelDe");
+    doReturn("German description").when(entityType).get("descriptionDe");
+    doReturn("Italian Label").when(entityType).get("labelIt");
+    doReturn("Italian description").when(entityType).get("descriptionIt");
+    doReturn("Portugese Label").when(entityType).get("labelPt");
+    doReturn("Portugese description").when(entityType).get("descriptionPt");
+    doReturn("Spanish Label").when(entityType).get("labelEs");
+    doReturn("Spanish description").when(entityType).get("descriptionEs");
+    doReturn("French Label").when(entityType).get("labelFr");
+    doReturn("French description").when(entityType).get("descriptionFr");
+    doReturn("xx Label").when(entityType).get("labelXx");
+    doReturn("xx description").when(entityType).get("descriptionXx");
+    doReturn(null).when(entityType).get(EntityTypeMetadata.DESCRIPTION);
+    doReturn(false).when(entityType).get(EntityTypeMetadata.IS_ABSTRACT);
+    when(entityType.getExtends()).thenReturn(null);
+    when(entityType.getPackage()).thenReturn(pack);
+    when(entityType.getId()).thenReturn("packageId_ID");
+
+    List<Object> expected =
+        newArrayList(
+            "ID",
+            "packageId",
+            "Human Readable",
+            null,
+            "false",
+            null,
+            "Elastic",
+            "tag1,tag2",
+            "English Label",
+            "English description",
+            "Dutch Label",
+            "Dutch description",
+            "German Label",
+            "German description",
+            "Spanish Label",
+            "Spanish description",
+            "Italian Label",
+            "Italian description",
+            "Portugese Label",
+            "Portugese description",
+            "French Label",
+            "French description",
+            "xx Label",
+            "xx description");
     List<Object> actual = EntityTypeMapper.map(entityType);
     assertEquals(actual, expected);
   }
