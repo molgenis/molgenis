@@ -137,6 +137,21 @@ public class RestTestUtils {
    * <p>Importing is done async in the backend, but this methods waits for importing to be done.
    *
    * @param adminToken to use for login
+   * @param fileName the file to upload
+   * @return String indicating state of completed job
+   */
+  public static String uploadEMXFileWithoutPackage(String adminToken, String fileName) {
+    File file = getResourceFile(fileName);
+
+    return uploadEMXFileWithoutPackage(adminToken, file);
+  }
+
+  /**
+   * Import emx file using add/update.
+   *
+   * <p>Importing is done async in the backend, but this methods waits for importing to be done.
+   *
+   * @param adminToken to use for login
    * @param pathToFileFolder path to folder to look for emx file to import
    * @param fileName name of the file to upload
    * @return String indicating state of completed job

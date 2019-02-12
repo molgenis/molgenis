@@ -52,6 +52,7 @@
       * [Files api](developer_documentation/ref-api-files.md)
       * [REST api V1](developer_documentation/ref-rest.md)
       * [REST api V2](developer_documentation/ref-rest2.md)
+      * [Permissions api](developer_documentation/ref-permissions-api.md)
       * [RSQL operators](developer_documentation/ref-RSQL.md)
       * [Swagger specification](developer_documentation/ref-swagger.md)
     * [R](developer_documentation/ref-R.md)

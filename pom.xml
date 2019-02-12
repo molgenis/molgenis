@@ -968,11 +968,16 @@
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
   </dependencies>
 
   <modules>
     <module>molgenis-amazon-bucket</module>
     <module>molgenis-api</module>
+    <module>molgenis-api-permissions</module>
     <module>molgenis-api-data</module>
     <module>molgenis-api-fair</module>
     <module>molgenis-api-files</module>
