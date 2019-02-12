@@ -106,6 +106,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
+    waitForWorkToBeFinished(indexService, LOG);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -157,6 +158,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
+    waitForWorkToBeFinished(indexService, LOG);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -191,6 +193,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
+    waitForWorkToBeFinished(indexService, LOG);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
