@@ -106,7 +106,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForCopyJobToFinish(progress);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -158,7 +158,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForCopyJobToFinish(progress);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -180,6 +180,18 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     cleanupTargetPackage(targetPackageId);
   }
 
+  private void waitForCopyJobToFinish(TestProgress progress) {
+    int i = 0;
+    while (progress.getProgress() < progress.getProgressMax() && i < 5) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+      i++;
+    }
+  }
+
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
   @Test
@@ -193,7 +205,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForCopyJobToFinish(progress);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
