@@ -152,7 +152,7 @@ pipeline {
                         }
                         container('rancher') {
                             sh "rancher context switch test-molgenis"
-                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
+                            sh "rancher apps upgrade --set image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
                 }
