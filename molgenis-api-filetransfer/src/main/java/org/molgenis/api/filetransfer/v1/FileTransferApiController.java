@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,10 +69,14 @@ class FileTransferApiController {
                 ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
                     .body("Request timeout occurred.")));
 
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     ForkJoinPool.commonPool()
         .submit(
             () -> {
+              Authentication previousAuthentication =
+                  SecurityContextHolder.getContext().getAuthentication();
               try {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 List<FileMeta> fileMetaList = fileUploadService.upload(fileItemIterator);
                 FilesUploadResponse filesUploadResponse =
                     FilesUploadResponse.create(
@@ -81,6 +87,8 @@ class FileTransferApiController {
                 }
               } catch (Exception e) {
                 LOG.error("", e);
+              } finally {
+                SecurityContextHolder.getContext().setAuthentication(previousAuthentication);
               }
             });
 
