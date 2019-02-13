@@ -178,7 +178,7 @@ This list describes the allowed conversion of data types in the metadata edit.
 | EMAIL                 | STRING, TEXT, XREF, CATEGORICAL |
 | ENUM                  | STRING, INT, LONG, TEXT |
 | FILE                  | NONE                |
-| HTML                  | STIRNG, TEXT, SCRIPT |
+| HTML                  | STRING, TEXT, SCRIPT |
 | HYPERLINK             | STRING, TEXT, XREF, CATEGORICAL |
 | INT                   | STRING, TEXT, DECIMAL, LONG, BOOL, ENUM, XREF, CATEGORICAL |
 | LONG                  | STRING, TEXT, INT, DECIMAL, ENUM, XREF, CATEGORICAL |
