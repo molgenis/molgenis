@@ -57,11 +57,13 @@ public class MolgenisWebAppInitializer {
     Dynamic browserDetectionFiler =
         servletContext.addFilter("browserDetectionFilter", BrowserDetectionFilter.class);
     browserDetectionFiler.setAsyncSupported(true);
-    browserDetectionFiler.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
+    browserDetectionFiler.addMappingForUrlPatterns(
+        EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC), false, "*");
 
     Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
     etagFilter.setAsyncSupported(true);
-    etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
+    etagFilter.addMappingForServletNames(
+        EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC), true, "dispatcher");
 
     // enable use of request scoped beans in FrontController
     servletContext.addListener(new RequestContextListener());
