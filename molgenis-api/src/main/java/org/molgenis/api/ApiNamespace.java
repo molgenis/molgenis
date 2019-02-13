@@ -3,5 +3,6 @@ package org.molgenis.api;
 public class ApiNamespace {
   private ApiNamespace() {}
 
-  public static final String URI_API = "/api";
+  @SuppressWarnings("squid:S1075")
+  public static final String API_PATH = "/api";
 }

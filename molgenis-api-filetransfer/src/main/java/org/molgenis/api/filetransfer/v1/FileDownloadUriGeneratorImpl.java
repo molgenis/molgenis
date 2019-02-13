@@ -1,7 +1,5 @@
 package org.molgenis.api.filetransfer.v1;
 
-import static org.molgenis.api.filetransfer.v1.FileTransferApiController.PATH_DOWNLOAD;
-
 import org.molgenis.api.filetransfer.FileDownloadUriGenerator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -11,7 +9,10 @@ public class FileDownloadUriGeneratorImpl implements FileDownloadUriGenerator {
   @Override
   public String generateUri(String fileId) {
     return UriComponentsBuilder.newInstance()
-        .pathSegment(FileTransferApiController.URI_API, PATH_DOWNLOAD, fileId)
+        .pathSegment(
+            FileTransferApiV1Namespace.API_PATH,
+            FileTransferApiV1Namespace.API_DOWNLOAD_PATH,
+            fileId)
         .build()
         .toUriString();
   }

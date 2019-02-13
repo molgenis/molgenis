@@ -2,7 +2,7 @@ package org.molgenis.api.filetransfer.v1;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.api.filetransfer.v1.FileTransferApiController.URI_API;
+import static org.molgenis.api.filetransfer.v1.FileTransferApiV1Namespace.API_PATH;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.molgenis.api.ApiController;
 import org.molgenis.api.filetransfer.FileDownloadService;
 import org.molgenis.api.filetransfer.FileTransferApiNamespace;
 import org.molgenis.api.filetransfer.FileUploadService;
@@ -33,19 +34,16 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
-@RequestMapping(URI_API)
-class FileTransferApiController {
+@RequestMapping(API_PATH)
+class FileTransferApiController extends ApiController {
   private static final Logger LOG = LoggerFactory.getLogger(FileTransferApiController.class);
-
-  private static final String VERSION = "v1";
-  static final String URI_API = FileTransferApiNamespace.URI_API + '/' + VERSION;
-  static final String PATH_DOWNLOAD = "download";
 
   private final FileUploadService fileUploadService;
   private final FileDownloadService fileDownloadService;
 
   FileTransferApiController(
       FileUploadService fileUploadService, FileDownloadService fileDownloadService) {
+    super(FileTransferApiNamespace.API_ID, FileTransferApiV1Namespace.API_VERSION);
     this.fileUploadService = requireNonNull(fileUploadService);
     this.fileDownloadService = requireNonNull(fileDownloadService);
   }
@@ -106,7 +104,7 @@ class FileTransferApiController {
   }
 
   /** Non-blocking file download. */
-  @GetMapping(value = '/' + PATH_DOWNLOAD + "/{fileId}")
+  @GetMapping(value = '/' + FileTransferApiV1Namespace.API_DOWNLOAD_PATH + "/{fileId}")
   public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable("fileId") String fileId) {
     return fileDownloadService.download(fileId);
   }
