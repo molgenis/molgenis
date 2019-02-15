@@ -7,6 +7,7 @@ $sub-green: #00BD55;
 $main-blue: #017FFD;
 $sub-blue: #005EC4;
 $red: #F36969;
+$sub-red: #ffebeb;
 $light-gray: #fafafa;
 $dark: #353535;
 $white: #FFFFFF;
@@ -14,8 +15,8 @@ $light: #FFFFFF;
 $light-gray: #fafafa;
 $black: #000;
 
-$primary: $main-blue;
-$secondary: $sub-blue;
+$primary: $red;
+$secondary: $sub-red;
 $success: $sub-green;
 $danger: $red;
 $light: $light;
@@ -33,7 +34,7 @@ $btn-border-radius-sm: 0px;
 $btn-border-radius-lg: 0px;
 
 // Navbar
-$navbar-light-color: $main-blue;
+$navbar-light-color: $red;
 $navbar-light-active-color: $black;
 $navbar-light-hover-color: rgba($navbar-light-active-color, .9);
 

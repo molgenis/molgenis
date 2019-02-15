@@ -7,6 +7,7 @@ $sub-green: #00BD55;
 $main-blue: #017FFD;
 $sub-blue: #005EC4;
 $red: #F36969;
+$sub-red: #ffebeb;
 $light-gray: #fafafa;
 $dark: #353535;
 $white: #FFFFFF;
@@ -14,8 +15,8 @@ $light: #FFFFFF;
 $light-gray: #fafafa;
 $black: #000;
 
-$primary: $main-blue;
-$secondary: $sub-blue;
+$primary: $main-green;
+$secondary: $sub-green;
 $success: $sub-green;
 $danger: $red;
 $light: $light;
@@ -27,13 +28,8 @@ $body-bg: $light-gray;
 // Table
 $table-bg: $white;
 
-// Border radius
-$border-radius: 0px;
-$btn-border-radius-sm: 0px;
-$btn-border-radius-lg: 0px;
-
 // Navbar
-$navbar-light-color: $main-blue;
+$navbar-light-color: $main-green;
 $navbar-light-active-color: $black;
 $navbar-light-hover-color: rgba($navbar-light-active-color, .9);
 

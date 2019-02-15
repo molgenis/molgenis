@@ -1,0 +1,57 @@
+// Custom.scss
+
+// Fonts
+@font-face {
+  font-family: 'bebas_neueregular';
+  src: url('/fonts/BebasNeue/BebasNeue-Regular.ttf') format('ttf'),
+  url('/fonts/BebasNeue/BebasNeue-Regular.woff2') format('woff2'),
+  url('/fonts/BebasNeue/BebasNeue-Regular.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IBM_Plex_sans';
+  src: url('/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.ttf') format('ttf'),
+  url('/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.woff2') format('woff2'),
+  url('/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IBM_Plex_mono';
+  src: url('/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf') format('ttf'),
+  url('/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2') format('woff2'),
+  url('/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url(/fonts/fontawesome-webfont.674f50d.eot);
+  src: url(/fonts/fontawesome-webfont.674f50d.eot?#iefix&v=4.7.0) format('embedded-opentype'),
+  url(/fonts/fontawesome-webfont.af7ae50.woff2) format('woff2'), url(/fonts/fontawesome-webfont.fee66e7.woff) format('woff'),
+  url(/fonts/fontawesome-webfont.b06871f.ttf) format('truetype'), url(/img/fontawesome-webfont.912ec66.svg#fontawesomeregular) format('svg');
+  font-weight: normal;
+  font-style: normal
+}
+
+// Font, line-height, and color for body text, headings, and more.
+$font-family-sans-serif: "IBM_Plex_sans";
+$font-family-monospace: "IBM_Plex_mono";
+$font-size-base: 1rem; // 0.875rem !default; // Assumes the browser default, typically `16px`
+
+$headings-font-family: "bebas_neueregular";
+$headings-font-weight: 500;
+
+// Set mono font for data components
+.table, .list-group-item {
+  font-family: "IBM_Plex_mono";
+}
+
+// Border radius
+$border-radius: 0px;
+$btn-border-radius-sm: 0px;
+$btn-border-radius-lg: 0px;
