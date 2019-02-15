@@ -387,12 +387,14 @@ public class AttributeValidator {
 
     // CATEGORICAL and XREF can be converted to all the allowed ID attribute types, and to eachother
     // EMAIL and HYPERLINK are excluded, we are unable to validate the format
-    DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL, EnumSet.of(STRING, INT, LONG, XREF));
-    DATA_TYPE_ALLOWED_TRANSITIONS.put(XREF, EnumSet.of(STRING, INT, LONG, CATEGORICAL));
+    DATA_TYPE_ALLOWED_TRANSITIONS.put(
+        CATEGORICAL, EnumSet.of(STRING, INT, LONG, XREF, CATEGORICAL_MREF, MREF));
+    DATA_TYPE_ALLOWED_TRANSITIONS.put(
+        XREF, EnumSet.of(STRING, INT, LONG, CATEGORICAL, CATEGORICAL_MREF, MREF));
 
     // Allow transition between types that already have a junction table
-    DATA_TYPE_ALLOWED_TRANSITIONS.put(MREF, EnumSet.of(CATEGORICAL_MREF));
-    DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.of(MREF));
+    DATA_TYPE_ALLOWED_TRANSITIONS.put(MREF, EnumSet.of(CATEGORICAL_MREF, CATEGORICAL, XREF));
+    DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.of(MREF, CATEGORICAL, XREF));
 
     // SCRIPT is an algorithm, which can not be anything else then STRING or TEXT
     DATA_TYPE_ALLOWED_TRANSITIONS.put(SCRIPT, EnumSet.of(STRING, TEXT));

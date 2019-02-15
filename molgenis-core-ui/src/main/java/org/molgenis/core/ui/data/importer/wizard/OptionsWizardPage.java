@@ -60,16 +60,29 @@ public class OptionsWizardPage extends AbstractWizardPage {
     return "Options";
   }
 
+  @SuppressWarnings("squid:S2083")
   @Override
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
+
     String dataImportOption = request.getParameter("data-option");
+    if (dataImportOption != null && ImportWizardUtil.toDataAction(dataImportOption) == null) {
+      throw new IllegalArgumentException("unknown data action: " + dataImportOption);
+    }
     importWizard.setDataImportOption(dataImportOption);
+
     String metadataImportOption = request.getParameter("metadata-option");
+    if (metadataImportOption != null
+        && ImportWizardUtil.toMetadataAction(metadataImportOption) == null) {
+      throw new IllegalArgumentException("unknown metadata action: " + metadataImportOption);
+    }
     importWizard.setMetadataImportOption(metadataImportOption);
 
     if (importWizard.getMustChangeEntityName()) {
+      // userGivenName will be validated by the NameValidator and can't contain any
+      // characters that have special meaning for the file system
+      @SuppressWarnings("squid:S2083")
       String userGivenName = request.getParameter("name");
       if (StringUtils.isEmpty(userGivenName)) {
         result.addError(new ObjectError("wizard", "Please enter an entity name"));
@@ -98,9 +111,6 @@ public class OptionsWizardPage extends AbstractWizardPage {
                   .createFileRepositoryCollection(tmpFile)
                   .getFileNameExtensions());
 
-      // userGivenName has already been validated by the NameValidator and can't contain any
-      // characters that have special meaning for the file system
-      @SuppressWarnings("squid:S2083")
       File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
       if (!tmpFile.renameTo(file)) {
         LOG.error("Failed to rename '{}' to '{}'", tmpFile.getName(), file.getName());
