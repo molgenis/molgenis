@@ -66,6 +66,7 @@ class JobExecutionRepositoryDecorator extends AbstractRepositoryDecorator<JobExe
     switch (status) {
       case PENDING:
       case RUNNING:
+      case CANCELING:
         isActive = true;
         break;
       case SUCCESS:

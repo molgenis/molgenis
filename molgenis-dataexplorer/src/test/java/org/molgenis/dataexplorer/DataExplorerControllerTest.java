@@ -231,6 +231,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   @Test
   public void testViewEntityDetailsById() throws Exception {
     when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
+    String entityTypeLabel = "MyEntityTypeLabel";
+    when(entityType.getLabel()).thenReturn(entityTypeLabel);
     when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
         .thenReturn(mock(Template.class));
 
@@ -241,6 +243,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     verify(model).addAttribute("entity", entity);
     verify(model).addAttribute("entityType", entityType);
     verify(model).addAttribute("entityTypeId", entityTypeId);
+    verify(model).addAttribute("entityTypeLabel", entityTypeLabel);
     verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
   }
 

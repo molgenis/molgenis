@@ -324,7 +324,7 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-menu</artifactId>
+      <artifactId>molgenis-frontend</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

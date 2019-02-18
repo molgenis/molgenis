@@ -1350,6 +1350,41 @@ public class PostgreSqlQueryGeneratorTest {
             + "(\"data_categories_filter3\".\"data_categories\" = ?  OR \"data_categories_filter4\".\"data_categories\" = ?))");
   }
 
+  @Test
+  public void testGetSqlUpdate() {
+    String idAttributeName = "MyIdAttribute";
+    Attribute idAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(idAttributeName).getMock();
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    String labelAttributeName = "MyLabelAttribute";
+    Attribute labelAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(labelAttributeName).getMock();
+    when(labelAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getAtomicAttributes()).thenReturn(asList(idAttribute, labelAttribute));
+    String sqlUpdate = PostgreSqlQueryGenerator.getSqlUpdate(entityType);
+    String expectedSqlUpdate =
+        "UPDATE \"MyEntityTypeId#55dde9c3\" SET \"MyIdAttribute\" = ?, \"MyLabelAttribute\" = ? WHERE \"MyIdAttribute\"= ?";
+    assertEquals(sqlUpdate, expectedSqlUpdate);
+  }
+
+  @Test
+  public void testGetSqlUpdateAttribute() {
+    String idAttributeName = "MyIdAttribute";
+    Attribute idAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(idAttributeName).getMock();
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    String sqlUpdate = PostgreSqlQueryGenerator.getSqlUpdate(entityType, idAttribute);
+    String expectedSqlUpdate =
+        "UPDATE \"MyEntityTypeId#55dde9c3\" SET \"MyIdAttribute\" = ? WHERE \"MyIdAttribute\"= ?";
+    assertEquals(sqlUpdate, expectedSqlUpdate);
+  }
+
   private Attribute createIdAttribute(String idAttributeName) {
     final String idAttributeIdentifier = idAttributeName + "AttrId";
     Attribute idAttribute =

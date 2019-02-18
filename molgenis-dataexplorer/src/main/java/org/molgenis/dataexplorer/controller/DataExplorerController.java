@@ -398,6 +398,7 @@ public class DataExplorerController extends PluginController {
     model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
     model.addAttribute("entityType", entityType);
     model.addAttribute("entityTypeId", entityTypeId);
+    model.addAttribute("entityTypeLabel", entityType.getLabel());
     model.addAttribute("viewName", getStandaloneReportViewName(entityTypeId));
 
     return "view-standalone-report";

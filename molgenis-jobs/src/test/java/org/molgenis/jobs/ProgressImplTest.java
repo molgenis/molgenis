@@ -2,6 +2,7 @@ package org.molgenis.jobs;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.jobs.model.JobExecutionLogAppender;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.slf4j.Logger;
@@ -121,6 +123,15 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
 
     verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), exceptionMessage + " (Mail not sent: fail!)");
+  }
+
+  @Test
+  public void testCanceling() {
+    JobExecution mockJobExecution = mock(JobExecution.class);
+    ProgressImpl progressImpl = new ProgressImpl(mockJobExecution, updater, mailSender);
+    progressImpl.canceling();
+    verify(mockJobExecution).setStatus(Status.CANCELING);
+    verify(updater).update(mockJobExecution);
   }
 
   @Test

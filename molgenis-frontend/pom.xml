@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.molgenis</groupId>
+    <artifactId>molgenis</artifactId>
+    <version>8.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>molgenis-frontend</artifactId>
+  <packaging>jar</packaging>
+
+  <name>frontend</name>
+  <description>Frontend code for all plugins.</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <registry.url>https://registry.molgenis.org/repository/npm-group/</registry.url>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>download</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="Download archives"/>
+                <get dest="${project.build.directory}/archives">
+                  <url url="${registry.url}/@molgenis/app-manager/-/app-manager-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.2.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/menu/-/menu-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/navigator/-/navigator-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/questionnaires/-/questionnaires-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/searchall/-/searchall-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/security/-/security-0.1.0.tgz"/>
+                  <url url="${registry.url}/@molgenis/settings/-/settings-0.1.0.tgz"/>
+                </get>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unzip</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo message="Unzip archives"/>
+                <untar compression="gzip" dest="${project.build.directory}/classes">
+                  <fileset dir="${project.build.directory}/archives">
+                    <include name="**.tgz"/>
+                  </fileset>
+                  <patternset>
+                    <include name="package/dist/**"/>
+                    <exclude name="**/index.html"/>
+                    <exclude name="**/package.json"/>
+                  </patternset>
+                  <!-- trim package and dist folders -->
+                  <cutdirsmapper dirs="2"/>
+                </untar>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

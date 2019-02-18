@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.JobExecution.Status.RUNNING;
+import static org.molgenis.jobs.model.JobExecutionMetaData.CANCELING;
 import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
 import static org.molgenis.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
 import static org.molgenis.jobs.model.JobExecutionMetaData.LOG;
@@ -92,6 +93,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest {
     when(dataService.query("sys_FileIngestJobExecution")).thenReturn(query);
     when(query.eq(STATUS, RUNNING)).thenReturn(query);
     when(query.eq(STATUS, PENDING)).thenReturn(query);
+    when(query.eq(STATUS, CANCELING)).thenReturn(query);
     when(query.or()).thenReturn(query);
 
     when(query.findAll()).thenReturn(Stream.of(fileIngestJob1, fileIngestJob2, fileIngestJob3));
