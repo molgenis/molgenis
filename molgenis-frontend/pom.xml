@@ -16,10 +16,45 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <registry.url>https://registry.molgenis.org/repository/npm-group/</registry.url>
+
+    <yarnVersion>v1.10.1</yarnVersion>
+    <nodeVersion>v10.15.1</nodeVersion>
   </properties>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install-node-and-yarn</id>
+            <goals>
+              <goal>install-node-and-yarn</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+          <execution>
+            <id>yarn-install</id>
+            <goals>
+              <goal>yarn</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>yarn install</id>
+            <goals>
+              <goal>yarn</goal>
+            </goals>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -37,9 +72,11 @@
                   <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.2.0.tgz"/>
                   <url url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.1.0.tgz"/>
                   <url url="${registry.url}/@molgenis/menu/-/menu-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.1.0.tgz"/>
+                  <url
+                    url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.1.0.tgz"/>
                   <url url="${registry.url}/@molgenis/navigator/-/navigator-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.1.0.tgz"/>
+                  <url
+                    url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.1.0.tgz"/>
                   <url url="${registry.url}/@molgenis/questionnaires/-/questionnaires-0.1.0.tgz"/>
                   <url url="${registry.url}/@molgenis/searchall/-/searchall-0.1.0.tgz"/>
                   <url url="${registry.url}/@molgenis/security/-/security-0.1.0.tgz"/>
