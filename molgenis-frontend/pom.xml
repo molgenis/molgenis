@@ -62,26 +62,22 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.1.0</version>
+        <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-resources</id>
-            <phase>generate-resources</phase>
+            <id>copy</id>
+            <phase>process-resources</phase>
             <goals>
-              <goal>copy-resources</goal>
+              <goal>run</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/js</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>node_modules</directory>
-                  <includes>
-                    <include>@molgenis/**/dist/js/**</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
+              <target>
+                <copy todir="target/classes/js">
+                  <fileset dir="node_modules/@molgenis/**/dist/js/">
+                    <include name="**"/>
+                  </fileset>
+                </copy>
+              </target>
             </configuration>
           </execution>
         </executions>
