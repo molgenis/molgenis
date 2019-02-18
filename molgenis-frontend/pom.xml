@@ -15,10 +15,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
     <registry.url>https://registry.molgenis.org/repository/npm-group/</registry.url>
 
-    <yarnVersion>v1.10.1</yarnVersion>
-    <nodeVersion>v10.15.1</nodeVersion>
+    <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+
+    <yarn.version>v1.10.1</yarn.version>
+    <node.version>v10.15.1</node.version>
+
   </properties>
 
   <build>
@@ -26,13 +30,21 @@
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
+        <version>${frontend-maven-plugin.version}</version>
+        <configuration>
+          <installDirectory>target</installDirectory>
+        </configuration>
         <executions>
           <execution>
             <id>install-node-and-yarn</id>
             <goals>
               <goal>install-node-and-yarn</goal>
             </goals>
-            <phase>generate-resources</phase>
+            <phase>initialize</phase>
+            <configuration>
+              <yarnVersion>${yarn.version}</yarnVersion>
+              <nodeVersion>${node.version}</nodeVersion>
+            </configuration>
           </execution>
           <execution>
             <id>yarn-install</id>
@@ -42,71 +54,34 @@
             <phase>generate-resources</phase>
             <configuration>
               <arguments>install</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>yarn install</id>
-            <goals>
-              <goal>yarn</goal>
-            </goals>
-            <configuration>
-              <arguments>install</arguments>
+              <environmentVariables>
+                <npm_config_registry>${registry.url}</npm_config_registry>
+              </environmentVariables>
             </configuration>
           </execution>
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
         <executions>
           <execution>
-            <id>download</id>
-            <phase>process-resources</phase>
+            <id>copy-resources</id>
+            <phase>generate-resources</phase>
             <goals>
-              <goal>run</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <target>
-                <echo message="Download archives"/>
-                <get dest="${project.build.directory}/archives">
-                  <url url="${registry.url}/@molgenis/app-manager/-/app-manager-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/core-ui/-/core-ui-0.2.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/data-row-edit/-/data-row-edit-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/menu/-/menu-0.1.0.tgz"/>
-                  <url
-                    url="${registry.url}/@molgenis/metadata-manager/-/metadata-manager-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/navigator/-/navigator-0.1.0.tgz"/>
-                  <url
-                    url="${registry.url}/@molgenis/one-click-importer/-/one-click-importer-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/questionnaires/-/questionnaires-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/searchall/-/searchall-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/security/-/security-0.1.0.tgz"/>
-                  <url url="${registry.url}/@molgenis/settings/-/settings-0.1.0.tgz"/>
-                </get>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>unzip</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <echo message="Unzip archives"/>
-                <untar compression="gzip" dest="${project.build.directory}/classes">
-                  <fileset dir="${project.build.directory}/archives">
-                    <include name="**.tgz"/>
-                  </fileset>
-                  <patternset>
-                    <include name="package/dist/**"/>
-                    <exclude name="**/index.html"/>
-                    <exclude name="**/package.json"/>
-                  </patternset>
-                  <!-- trim package and dist folders -->
-                  <cutdirsmapper dirs="2"/>
-                </untar>
-              </target>
+              <outputDirectory>${basedir}/target/classes/js</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>node_modules</directory>
+                  <includes>
+                    <include>@molgenis/**/dist/js/**</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
