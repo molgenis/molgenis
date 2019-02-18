@@ -55,7 +55,6 @@
     - Frontend
       - [App development](developer_documentation/app-development.md)
       - [Frontend development](developer_documentation/frontend-development.md)
-      - [UX Frontend](developer_documentation/frontend.md)
       - [Creating bootstrap themes](developer_documentation/creating-themes.md)
     - Backend  
       - [Security](developer_documentation/security.md)
