@@ -54,15 +54,20 @@ public class MolgenisWebAppInitializer {
       dispatcherServletRegistration.addMapping("/");
       dispatcherServletRegistration.setMultipartConfig(
           new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
+      dispatcherServletRegistration.setAsyncSupported(true);
     }
 
     // add filters
     Dynamic browserDetectionFiler =
         servletContext.addFilter("browserDetectionFilter", BrowserDetectionFilter.class);
-    browserDetectionFiler.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
+    browserDetectionFiler.setAsyncSupported(true);
+    browserDetectionFiler.addMappingForUrlPatterns(
+        EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC), false, "*");
 
     Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
-    etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
+    etagFilter.setAsyncSupported(true);
+    etagFilter.addMappingForServletNames(
+        EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC), true, "dispatcher");
 
     // enable use of request scoped beans in FrontController
     servletContext.addListener(new RequestContextListener());
