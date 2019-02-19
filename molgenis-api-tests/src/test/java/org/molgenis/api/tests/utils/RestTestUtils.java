@@ -153,7 +153,6 @@ public class RestTestUtils {
             .multiPart(file)
             .param("file")
             .param("action", "ADD_UPDATE_EXISTING")
-            .param("packageId", "base")
             .header(X_MOLGENIS_TOKEN, adminToken)
             .post("plugin/importwizard/importFile")
             .then()
@@ -232,7 +231,7 @@ public class RestTestUtils {
     LOG.info("############ " + importJobURL);
     await()
         .pollDelay(500, MILLISECONDS)
-        .atMost(5, MINUTES)
+        .atMost(45, MINUTES)
         .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
     LOG.info("Import completed");
     return pollForStatus(adminToken, importJobURL);

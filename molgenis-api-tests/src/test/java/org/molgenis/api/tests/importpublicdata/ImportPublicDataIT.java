@@ -33,16 +33,16 @@ public class ImportPublicDataIT {
   @BeforeClass
   public void beforeClass() {
     LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
+    String envHost = getExpectedEnvVariable("REST_TEST_HOST");
     RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
     LOG.info("baseURI: " + RestAssured.baseURI);
 
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
+    String envAdminName = getExpectedEnvVariable("REST_TEST_ADMIN_NAME");
     String adminUserName =
         Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
     LOG.info("adminUserName: " + adminUserName);
 
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+    String envAdminPW = getExpectedEnvVariable("REST_TEST_ADMIN_PW");
     String adminPassword =
         Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 
