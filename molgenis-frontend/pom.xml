@@ -28,10 +28,37 @@
   <build>
     <resources>
       <resource>
-        <directory>node_modules/@molgenis</directory>
-        <includes>
-          <include>**/dist/**</include>
-        </includes>
+        <directory>node_modules/@molgenis/app-manager/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/core-ui/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/data-row-edit/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/menu/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/metadata-manager/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/navigator/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/one-click-importer/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/questionnaires/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/searchall/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/security/dist</directory>
+      </resource>
+      <resource>
+        <directory>node_modules/@molgenis/settings/dist</directory>
       </resource>
     </resources>
     <plugins>
@@ -61,7 +88,7 @@
             </goals>
             <phase>generate-resources</phase>
             <configuration>
-              <arguments>install</arguments>
+              <arguments>install --no-lockfile</arguments>
               <environmentVariables>
                 <npm_config_registry>${registry.url}</npm_config_registry>
               </environmentVariables>
