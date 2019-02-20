@@ -67,10 +67,10 @@ pipeline {
                             dir('molgenis-app') {
                                 script {
                                     sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                                    sh "mvn -q -B rpm:rpm -Drpm.version=${TAG}"
+                                    sh "mvn -q -B rpm:rpm -Drpm.version=${env.PREVIEW_VERSION}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
-                                    sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
+                                    sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.PREVIEW_VERSION} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
                                 }
                             }
                         }
