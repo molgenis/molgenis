@@ -26,6 +26,14 @@
   </properties>
 
   <build>
+    <resources>
+      <resource>
+        <directory>node_modules/@molgenis</directory>
+        <includes>
+          <include>**/dist/**</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>com.github.eirslett</groupId>
@@ -57,27 +65,6 @@
               <environmentVariables>
                 <npm_config_registry>${registry.url}</npm_config_registry>
               </environmentVariables>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <copy todir="target/classes/js">
-                  <fileset dir="node_modules/@molgenis/**/dist/js/">
-                    <include name="**"/>
-                  </fileset>
-                </copy>
-              </target>
             </configuration>
           </execution>
         </executions>
