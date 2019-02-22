@@ -150,7 +150,8 @@ public class RestTestUtils {
   /**
    * Import emx file using add/update.
    *
-   * <h>NOTE: This is without the base package, just the data import
+   * <p><h>NOTE: This is without the base package, just the data import
+   *
    * <p>Importing is done async in the backend, but this methods waits for importing to be done.
    *
    * @param adminToken to use for login
@@ -158,7 +159,8 @@ public class RestTestUtils {
    * @param fileName name of the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEMXWithoutPackage(String adminToken, String pathToFileFolder, String fileName) {
+  public static String uploadEMXWithoutPackage(
+      String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 
     return uploadEMXFileWithoutPackage(adminToken, file);
