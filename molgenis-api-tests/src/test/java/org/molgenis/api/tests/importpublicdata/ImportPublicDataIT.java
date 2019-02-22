@@ -72,7 +72,7 @@ public class ImportPublicDataIT {
 
     String importStatus = "PENDING";
     if (uploadFile.endsWith(".xlsx")) {
-      importStatus = RestTestUtils.uploadEMX(adminToken, uploadFolder, uploadFile);
+      importStatus = RestTestUtils.uploadEMXWithoutPackage(adminToken, uploadFolder, uploadFile);
     } else if (uploadFile.endsWith(".vcf")) {
       importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
     } else {
