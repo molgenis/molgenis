@@ -4,9 +4,15 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.api.filetransfer.v1.FileTransferApiV1Namespace.API_PATH;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadException;
@@ -16,28 +22,20 @@ import org.molgenis.api.filetransfer.FileDownloadService;
 import org.molgenis.api.filetransfer.FileTransferApiNamespace;
 import org.molgenis.api.filetransfer.FileUploadService;
 import org.molgenis.api.filetransfer.v1.model.FileUploadResponse;
-import org.molgenis.api.filetransfer.v1.model.FilesUploadResponse;
 import org.molgenis.data.file.model.FileMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+@Api("File transfer")
 @RestController
 @RequestMapping(API_PATH)
 class FileTransferApiController extends ApiController {
-  private static final Logger LOG = LoggerFactory.getLogger(FileTransferApiController.class);
-
   private final FileUploadService fileUploadService;
   private final FileDownloadService fileDownloadService;
 
@@ -49,48 +47,33 @@ class FileTransferApiController extends ApiController {
   }
 
   /** Non-blocking multi-file upload. */
+  @ApiOperation(value = "Uploads files", consumes = "multipart/form-data")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        name = "file",
+        value = "File to upload",
+        required = true,
+        dataType = "java.io.File",
+        paramType = "form")
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "Update succeeded",
+        response = FileUploadResponse.class,
+        responseContainer =
+            "List") // TODO discuss: do not return list but object so it can be extended
+  })
   @PostMapping(value = "/upload", headers = "Content-Type=multipart/form-data")
-  public @ResponseBody DeferredResult<FilesUploadResponse> uploadFiles(HttpServletRequest request)
-      throws IOException, FileUploadException {
+  public @ResponseBody CompletableFuture<List<FileUploadResponse>> uploadFiles(
+      HttpServletRequest request) throws IOException, FileUploadException {
     ServletFileUpload servletFileUpload = new ServletFileUpload();
     FileItemIterator fileItemIterator = servletFileUpload.getItemIterator(request);
+    return fileUploadService.upload(fileItemIterator).thenApply(this::toFileUploadResponses);
+  }
 
-    DeferredResult<FilesUploadResponse> deferredResult = new DeferredResult<>();
-    deferredResult.onError(
-        (Throwable t) ->
-            deferredResult.setErrorResult(
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred: " + t.getMessage())));
-    deferredResult.onTimeout(
-        () ->
-            deferredResult.setErrorResult(
-                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
-                    .body("Request timeout occurred.")));
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    ForkJoinPool.commonPool()
-        .submit(
-            () -> {
-              Authentication previousAuthentication =
-                  SecurityContextHolder.getContext().getAuthentication();
-              try {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                List<FileMeta> fileMetaList = fileUploadService.upload(fileItemIterator);
-                FilesUploadResponse filesUploadResponse =
-                    FilesUploadResponse.create(
-                        fileMetaList.stream().map(this::toFileUploadResponse).collect(toList()));
-                boolean ok = deferredResult.setResult(filesUploadResponse);
-                if (!ok) {
-                  LOG.error("request expired");
-                }
-              } catch (Exception e) {
-                LOG.error("", e);
-              } finally {
-                SecurityContextHolder.getContext().setAuthentication(previousAuthentication);
-              }
-            });
-
-    return deferredResult;
+  private List<FileUploadResponse> toFileUploadResponses(List<FileMeta> fileMetas) {
+    return fileMetas.stream().map(this::toFileUploadResponse).collect(toList());
   }
 
   private FileUploadResponse toFileUploadResponse(FileMeta fileMeta) {

@@ -15,11 +15,14 @@
  */
 package org.molgenis.web.converter;
 
+import static java.util.Collections.singletonList;
+
 import com.google.gson.Gson;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
 /**
@@ -30,6 +33,7 @@ public class MolgenisGsonHttpMessageConverter extends GsonHttpMessageConverter {
 
   public MolgenisGsonHttpMessageConverter(Gson gson) {
     super(gson);
+    setSupportedMediaTypes(singletonList(MediaType.APPLICATION_JSON));
   }
 
   @Override

@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
@@ -40,7 +41,7 @@ class FileUploadServiceImpl implements FileUploadService {
 
   @Transactional
   @Override
-  public List<FileMeta> upload(FileItemIterator fileItemIterator) {
+  public CompletableFuture<List<FileMeta>> upload(FileItemIterator fileItemIterator) {
     List<FileMeta> fileMetaList = new ArrayList<>();
     try {
       while (fileItemIterator.hasNext()) {
@@ -53,7 +54,7 @@ class FileUploadServiceImpl implements FileUploadService {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    return fileMetaList;
+    return CompletableFuture.completedFuture(fileMetaList);
   }
 
   private FileMeta upload(FileItemStream fileItemStream) throws IOException {
@@ -70,23 +71,5 @@ class FileUploadServiceImpl implements FileUploadService {
     dataService.add(FILE_META, fileMeta);
 
     return fileMeta;
-
-    /*
-    long nrBytes;
-    ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream());
-    WritableBlobChannel writableBlobChannel = blobStore.newChannel();
-    try (WritableByteChannel toChannel = writableBlobChannel.getWritableByteChannel()) {
-      nrBytes = ByteStreams.copy(fromChannel, toChannel);
-    }
-
-    FileMeta fileMeta = fileMetaFactory.create(writableBlobChannel.getBlobId());
-    fileMeta.setFilename(fileItemStream.getName());
-    fileMeta.setContentType(fileItemStream.getContentType());
-    fileMeta.setSize(nrBytes);
-    fileMeta.setUrl(fileDownloadUriGenerator.generateUri(fileMeta.getId()));
-    dataService.add(FILE_META, fileMeta);
-
-    return fileMeta;
-    */
   }
 }

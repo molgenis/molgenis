@@ -67,7 +67,7 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-api-filetransfer</artifactId>
+      <artifactId>molgenis-api-files</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
