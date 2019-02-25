@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -634,14 +635,19 @@ class PostgreSqlQueryGenerator {
   }
 
   static String getSqlUpdate(EntityType entityType) {
+    return getSqlUpdate(entityType, null);
+  }
+
+  static String getSqlUpdate(EntityType entityType, @Nullable Attribute attribute) {
     // use (readonly) identifier
     Attribute idAttribute = entityType.getIdAttribute();
 
     // create sql
     StringBuilder sql =
         new StringBuilder("UPDATE ").append(getTableName(entityType)).append(" SET ");
-    getTableAttributes(entityType)
-        .forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
+    Stream<Attribute> attributeStream =
+        attribute != null ? Stream.of(attribute) : getTableAttributes(entityType);
+    attributeStream.forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
 
     if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',') {
       sql.setLength(sql.length() - 2);

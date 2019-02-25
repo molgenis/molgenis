@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.user.UserAccountConstants.MIN_PASSWORD_LENGTH;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;

@@ -25,6 +25,11 @@ public class JsScriptRunner implements ScriptRunner {
   }
 
   @Override
+  public boolean hasFileOutput(Script script) {
+    return false;
+  }
+
+  @Override
   public String runScript(Script script, Map<String, Object> parameters) {
     String jsScript = ScriptUtils.generateScript(script, parameters);
     Object scriptResult = jsScriptExecutor.executeScript(jsScript);

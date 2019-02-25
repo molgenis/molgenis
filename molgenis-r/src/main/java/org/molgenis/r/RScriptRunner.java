@@ -14,6 +14,7 @@ public class RScriptRunner implements ScriptRunner {
   private static final String NAME = "R";
 
   private final RScriptExecutor rScriptExecutor;
+  private static final String PARAM_OUTPUT_FILE = "outputFile";
 
   public RScriptRunner(RScriptExecutor rScriptExecutor) {
     this.rScriptExecutor = requireNonNull(rScriptExecutor);
@@ -25,6 +26,11 @@ public class RScriptRunner implements ScriptRunner {
   }
 
   @Override
+  public boolean hasFileOutput(Script script) {
+    return ScriptUtils.hasScriptVariable(script, PARAM_OUTPUT_FILE);
+  }
+
+  @Override
   public String runScript(Script script, Map<String, Object> parameters) {
     String rScript = ScriptUtils.generateScript(script, parameters);
     String outputFile = getOutputFile(parameters);
@@ -32,7 +38,7 @@ public class RScriptRunner implements ScriptRunner {
   }
 
   private String getOutputFile(Map<String, Object> parameters) {
-    Object outputFile = parameters.get("outputFile");
+    Object outputFile = parameters.get(PARAM_OUTPUT_FILE);
     if (outputFile == null) {
       return null;
     }

@@ -112,7 +112,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener {
           .collect(Collectors.toList());
     } catch (ExecutionException exception) {
       // rethrow unchecked
-      if (exception.getCause() != null && exception.getCause() instanceof RuntimeException) {
+      if (exception.getCause() instanceof RuntimeException) {
         throw (RuntimeException) exception.getCause();
       }
       throw new MolgenisDataException(exception);

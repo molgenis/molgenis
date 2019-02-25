@@ -15,10 +15,13 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.GenericDependencyResolver;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -57,6 +60,8 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
     new GenericDependencyResolver()
         .resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
         .forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+
+    new ApplicationContextProvider().setApplicationContext(applicationContext);
   }
 
   // long method name, because if a method annotated with @BeforeMethod and the same method name
@@ -88,6 +93,11 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
     @Bean
     public DataService dataService() {
       return dataService;
+    }
+
+    @Bean
+    public ConversionService conversionService() {
+      return new DefaultFormattingConversionService();
     }
   }
 }

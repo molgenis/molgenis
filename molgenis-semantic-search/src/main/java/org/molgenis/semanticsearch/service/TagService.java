@@ -13,15 +13,15 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 /**
  * Service that administrates tags on attributes, entities and packages of a particular code system.
  *
- * @param <ObjectType> the type of the tag object, for instance {@link OntologyTerm}
- * @param <CodeSystemType> the type of the code system, for instance {@link Ontology}
+ * @param <O> the type of the tag object, for instance {@link OntologyTerm}
+ * @param <C> the type of the code system, for instance {@link Ontology}
  */
-public interface TagService<ObjectType, CodeSystemType> {
+public interface TagService<O, C> {
   /** Retrieves all tags for an attribute, and groups them by relation */
-  Multimap<Relation, ObjectType> getTagsForAttribute(EntityType entityType, Attribute attribute);
+  Multimap<Relation, O> getTagsForAttribute(EntityType entityType, Attribute attribute);
 
   /** Retrieves all tags for a package */
-  Iterable<SemanticTag<Package, ObjectType, CodeSystemType>> getTagsForPackage(Package p);
+  Iterable<SemanticTag<Package, O, C>> getTagsForPackage(Package p);
 
   /** Retrieves all tags for an entity. */
   Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(
@@ -33,8 +33,7 @@ public interface TagService<ObjectType, CodeSystemType> {
    * @param entityType the entity the tagged attribute sits on
    * @param tag the tag to add
    */
-  void addAttributeTag(
-      EntityType entityType, SemanticTag<Attribute, ObjectType, CodeSystemType> tag);
+  void addAttributeTag(EntityType entityType, SemanticTag<Attribute, O, C> tag);
 
   /**
    * Removes attribute tag
@@ -42,22 +41,21 @@ public interface TagService<ObjectType, CodeSystemType> {
    * @param entityType the entity the tagged attribute sits on
    * @param tag the tag to remove
    */
-  void removeAttributeTag(
-      EntityType entityType, SemanticTag<Attribute, ObjectType, CodeSystemType> tag);
+  void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, O, C> tag);
 
   /**
    * Tags an entity.
    *
    * @param tag the tag to add
    */
-  void addEntityTag(SemanticTag<EntityType, ObjectType, CodeSystemType> tag);
+  void addEntityTag(SemanticTag<EntityType, O, C> tag);
 
   /**
    * Removes an entity tag.
    *
    * @param tag the tag to remove
    */
-  void removeEntityTag(SemanticTag<EntityType, ObjectType, CodeSystemType> tag);
+  void removeEntityTag(SemanticTag<EntityType, O, C> tag);
 
   /**
    * Removes all tags for a given entity

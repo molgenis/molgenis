@@ -33,6 +33,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -79,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -149,6 +151,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
 
   @BeforeClass
   public void beforeClass() {
+    DataConverter.setConversionService(new DefaultFormattingConversionService());
+
     ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
     validationMessages.addBasenames("org.hibernate.validator.ValidationMessages");
     TestAllPropertiesMessageSource messageSource =

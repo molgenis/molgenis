@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface CsvService {
-
-  Character CSV_SEPARATOR = ',';
-
   /**
    * Creates a List with String[] containing the lines of a CSV file Including the header
    *

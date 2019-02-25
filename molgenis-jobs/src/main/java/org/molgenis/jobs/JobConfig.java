@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 
 /** Jobs configuration */
 @Configuration
-@Import(SchedulerConfig.class)
+@Import({SchedulerConfig.class, JobExecutionRegistryImpl.class, ProgressFactoryImpl.class})
 public class JobConfig {
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final RunAsUserTokenFactory runAsUserTokenFactory;

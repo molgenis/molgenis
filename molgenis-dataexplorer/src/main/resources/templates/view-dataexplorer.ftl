@@ -105,7 +105,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            <h4 class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</h4>
+                            <span class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</span>
                         </div>
                         <div class="panel-body">
                             <div class="row">
@@ -128,7 +128,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            <h4 class="panel-title">Data item selection</h4>
+                            <span class="panel-title">Data item selection</span>
                         </div>
                         <div class="panel-body">
                             <div id="feature-selection"></div>

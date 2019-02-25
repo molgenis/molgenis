@@ -6,6 +6,7 @@ import static org.molgenis.jobs.model.JobExecution.MAX_LOG_LENGTH;
 import static org.molgenis.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.jobs.model.JobExecution.TRUNCATION_BANNER;
+import static org.molgenis.jobs.model.JobExecutionMetaData.CANCELING;
 import static org.molgenis.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
 import static org.molgenis.jobs.model.JobExecutionMetaData.LOG;
 import static org.molgenis.jobs.model.JobExecutionMetaData.PENDING;
@@ -78,6 +79,8 @@ public class JobBootstrapper {
         .eq(STATUS, RUNNING)
         .or()
         .eq(STATUS, PENDING)
+        .or()
+        .eq(STATUS, CANCELING)
         .findAll()
         .forEach(this::setFailed);
   }

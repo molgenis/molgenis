@@ -24,6 +24,11 @@ public class JsMagmaScriptRunner implements ScriptRunner {
   }
 
   @Override
+  public boolean hasFileOutput(Script script) {
+    return false;
+  }
+
+  @Override
   public String runScript(Script script, Map<String, Object> parameters) {
     String jsScript = script.getContent();
     Object scriptResult = jsScriptExecutor.executeScript(jsScript, parameters);

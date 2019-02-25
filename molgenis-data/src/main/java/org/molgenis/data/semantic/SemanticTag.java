@@ -3,15 +3,21 @@ package org.molgenis.data.semantic;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.TagMetadata;
 
-public class SemanticTag<SubjectType, ObjectType, CodeSystemType> {
-  private final SubjectType subject;
+/**
+ * @param <S> subject type
+ * @param <O> object type
+ * @param <C> code system type
+ */
+public class SemanticTag<S, O, C> {
+  private final S subject;
   private final Relation relation;
-  private final ObjectType object;
-  private final CodeSystemType codeSystem;
+  private final O object;
+  private final C codeSystem;
   private final String identifier;
 
-  public static <SubjectType> SemanticTag<SubjectType, LabeledResource, LabeledResource> asTag(
-      SubjectType subjectType, Entity tagEntity) {
+  /** @param <S> subject type */
+  public static <S> SemanticTag<S, LabeledResource, LabeledResource> asTag(
+      S subjectType, Entity tagEntity) {
     String identifier = tagEntity.getString(TagMetadata.ID);
     String relationIri = tagEntity.getString(TagMetadata.RELATION_IRI);
     Relation relation = Relation.forIRI(relationIri);
@@ -34,12 +40,7 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType> {
     return new SemanticTag<>(identifier, subjectType, relation, objectResource, codeSystem);
   }
 
-  public SemanticTag(
-      String identifier,
-      SubjectType subject,
-      Relation relation,
-      ObjectType object,
-      CodeSystemType codeSystem) {
+  public SemanticTag(String identifier, S subject, Relation relation, O object, C codeSystem) {
     this.identifier = identifier;
     this.subject = subject;
     this.relation = relation;
@@ -47,7 +48,7 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType> {
     this.codeSystem = codeSystem;
   }
 
-  public SubjectType getSubject() {
+  public S getSubject() {
     return subject;
   }
 
@@ -55,11 +56,11 @@ public class SemanticTag<SubjectType, ObjectType, CodeSystemType> {
     return relation;
   }
 
-  public ObjectType getObject() {
+  public O getObject() {
     return object;
   }
 
-  public CodeSystemType getCodeSystem() {
+  public C getCodeSystem() {
     return codeSystem;
   }
 

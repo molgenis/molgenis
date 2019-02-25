@@ -1,6 +1,5 @@
 package org.molgenis.data.security.aggregation;
 
-import static org.molgenis.data.security.aggregation.AggregateAnonymizer.AGGREGATE_ANONYMIZATION_VALUE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
@@ -26,17 +25,9 @@ public class AggregateAnonymizerImplTest {
             .anonymize(new AggregateResult(matrix, xLabels, yLabels), threshold);
 
     List<List<Long>> expectedMatrix = Lists.newArrayList();
-    expectedMatrix.add(
-        Arrays.asList(
-            11L,
-            AGGREGATE_ANONYMIZATION_VALUE,
-            90L,
-            AGGREGATE_ANONYMIZATION_VALUE,
-            AGGREGATE_ANONYMIZATION_VALUE));
-    expectedMatrix.add(Arrays.asList(null, AGGREGATE_ANONYMIZATION_VALUE, 90L, 100L, 17L));
-    expectedMatrix.add(
-        Arrays.asList(
-            11L, null, 90L, AGGREGATE_ANONYMIZATION_VALUE, AGGREGATE_ANONYMIZATION_VALUE));
+    expectedMatrix.add(Arrays.asList(11L, -1L, 90L, -1L, -1L));
+    expectedMatrix.add(Arrays.asList(null, -1L, 90L, 100L, 17L));
+    expectedMatrix.add(Arrays.asList(11L, null, 90L, -1L, -1L));
 
     assertEquals(
         result, new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold));

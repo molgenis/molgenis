@@ -144,6 +144,7 @@ public class EntityStream implements Stream<Entity> {
     return stream.sorted(comparator);
   }
 
+  @SuppressWarnings("squid:S3864") // "Stream.peek" should not be used
   @Override
   public Stream<Entity> peek(Consumer<? super Entity> action) {
     return stream.peek(action);

@@ -56,41 +56,16 @@ public class BootstrapThemePopulator {
                           == null)
               .collect(Collectors.toList());
 
-      for (Resource bootstrap3Resource : newThemes) {
-        String bootstrap3FileName = bootstrap3Resource.getFilename();
+      newThemes.forEach(
+          nt -> {
+            try {
+              addNewTheme(nt, bootstrap4Themes);
+            } catch (IOException | MolgenisStyleException e) {
+              LOG.error("error adding new bootstrap themes", e);
+            }
+          });
 
-        InputStream bootstrap3Data = null;
-        InputStream bootstrap4Data = null;
-        try {
-          bootstrap3Data = bootstrap3Resource.getInputStream();
-
-          String bootstrap4FileName = null;
-          bootstrap4Data = null;
-          Optional<Resource> bootstrap4Optional =
-              guessMatchingBootstrap4File(bootstrap4Themes, bootstrap3FileName);
-
-          if (bootstrap4Optional.isPresent()) {
-            Resource bootstrap4resource = bootstrap4Optional.get();
-            bootstrap4FileName = bootstrap4resource.getFilename();
-            bootstrap4Data = bootstrap4resource.getInputStream();
-          }
-
-          styleService.addStyle(
-              bootstrap3FileName,
-              bootstrap3FileName,
-              bootstrap3Data,
-              bootstrap4FileName,
-              bootstrap4Data);
-        } finally {
-          if (bootstrap3Data != null) {
-            bootstrap3Data.close();
-          }
-          if (bootstrap4Data != null) {
-            bootstrap4Data.close();
-          }
-        }
-      }
-    } catch (MolgenisStyleException | IOException e) {
+    } catch (IOException e) {
       LOG.error("error populating bootstrap themes", e);
     }
   }
@@ -107,5 +82,45 @@ public class BootstrapThemePopulator {
     return Arrays.stream(bootstrap4Themes)
         .filter(bootstrap4Theme -> bootstrap3ThemeFileName.equals(bootstrap4Theme.getFilename()))
         .findFirst();
+  }
+
+  private void addNewTheme(Resource bootstrap3Resource, Resource[] bootstrap4Themes)
+      throws IOException, MolgenisStyleException {
+    String bootstrap3FileName = bootstrap3Resource.getFilename();
+
+    LOG.debug("Add theme with name {}", bootstrap3FileName);
+
+    InputStream bootstrap3Data = null;
+    InputStream bootstrap4Data = null;
+    try {
+      bootstrap3Data = bootstrap3Resource.getInputStream();
+
+      String bootstrap4FileName = null;
+      Optional<Resource> bootstrap4Optional =
+          guessMatchingBootstrap4File(bootstrap4Themes, bootstrap3FileName);
+
+      if (bootstrap4Optional.isPresent()) {
+        Resource bootstrap4resource = bootstrap4Optional.get();
+        bootstrap4FileName = bootstrap4resource.getFilename();
+        bootstrap4Data = bootstrap4resource.getInputStream();
+        LOG.debug("Adding matching bootstrap 4 theme with name {}", bootstrap4FileName);
+      } else {
+        LOG.debug("No matching bootstrap 4 theme found, falling back to default");
+      }
+
+      styleService.addStyle(
+          bootstrap3FileName,
+          bootstrap3FileName,
+          bootstrap3Data,
+          bootstrap4FileName,
+          bootstrap4Data);
+    } finally {
+      if (bootstrap3Data != null) {
+        bootstrap3Data.close();
+      }
+      if (bootstrap4Data != null) {
+        bootstrap4Data.close();
+      }
+    }
   }
 }

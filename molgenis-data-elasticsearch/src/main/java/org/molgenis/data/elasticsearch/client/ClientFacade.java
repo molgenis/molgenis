@@ -221,10 +221,12 @@ public class ClientFacade implements Closeable {
     }
 
     if (refreshResponse.getFailedShards() > 0) {
-      LOG.error(
-          stream(refreshResponse.getShardFailures())
-              .map(ShardOperationFailedException::toString)
-              .collect(joining("\n")));
+      if (LOG.isErrorEnabled()) {
+        LOG.error(
+            stream(refreshResponse.getShardFailures())
+                .map(ShardOperationFailedException::toString)
+                .collect(joining("\n")));
+      }
       throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
     }
 
@@ -268,10 +270,12 @@ public class ClientFacade implements Closeable {
     }
 
     if (searchResponse.getFailedShards() > 0) {
-      LOG.error(
-          stream(searchResponse.getShardFailures())
-              .map(ShardSearchFailure::toString)
-              .collect(joining("\n")));
+      if (LOG.isErrorEnabled()) {
+        LOG.error(
+            stream(searchResponse.getShardFailures())
+                .map(ShardSearchFailure::toString)
+                .collect(joining("\n")));
+      }
       throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
     }
     if (searchResponse.isTimedOut()) {
@@ -351,10 +355,12 @@ public class ClientFacade implements Closeable {
               "Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
     }
     if (searchResponse.getFailedShards() > 0) {
-      LOG.error(
-          stream(searchResponse.getShardFailures())
-              .map(ShardSearchFailure::toString)
-              .collect(joining("\n")));
+      if (LOG.isErrorEnabled()) {
+        LOG.error(
+            stream(searchResponse.getShardFailures())
+                .map(ShardSearchFailure::toString)
+                .collect(joining("\n")));
+      }
       throw new IndexException(
           format(
               "Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
@@ -460,10 +466,12 @@ public class ClientFacade implements Closeable {
           format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
     }
     if (searchResponse.getFailedShards() > 0) {
-      LOG.error(
-          stream(searchResponse.getShardFailures())
-              .map(ShardSearchFailure::toString)
-              .collect(joining("\n")));
+      if (LOG.isErrorEnabled()) {
+        LOG.error(
+            stream(searchResponse.getShardFailures())
+                .map(ShardSearchFailure::toString)
+                .collect(joining("\n")));
+      }
       throw new IndexException(
           format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
     }
@@ -556,11 +564,13 @@ public class ClientFacade implements Closeable {
     // TODO: Is it good enough if at least one shard succeeds? Shouldn't we at least log something
     // if failures > 0?
     if (indexResponse.getShardInfo().getSuccessful() == 0) {
-      LOG.error(
-          Arrays.stream(indexResponse.getShardInfo().getFailures())
-              // FIXME: logs Object.toString()
-              .map(ReplicationResponse.ShardInfo.Failure::toString)
-              .collect(joining("\n")));
+      if (LOG.isErrorEnabled()) {
+        LOG.error(
+            Arrays.stream(indexResponse.getShardInfo().getFailures())
+                // FIXME: logs Object.toString()
+                .map(ReplicationResponse.ShardInfo.Failure::toString)
+                .collect(joining("\n")));
+      }
       throw new IndexException(
           format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
     }

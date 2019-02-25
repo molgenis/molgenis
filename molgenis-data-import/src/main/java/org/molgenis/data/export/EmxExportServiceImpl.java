@@ -121,7 +121,7 @@ public class EmxExportServiceImpl implements EmxExportService {
         progress.status(progressMessage);
         progress.increment(1);
       }
-      writeAttributes(entityType.getAllAttributes(), writer);
+      writeAttributes(entityType.getOwnAllAttributes(), writer);
       if (!entityType.isAbstract()) {
         downloadData(entityType, writer);
       }

@@ -73,7 +73,7 @@
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
         <#-- Include molgenis-menu css -->
-        <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/js/menu/context.css"/>" type="text/css">
 
     </#if>
 
@@ -113,12 +113,14 @@
                 , loginHref: '/login'
                 , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
             }
+
+            window.cookieWall = ${cookieWall?c}
         </script>
 
         <#-- Include the Vue version of the molgenis menu  -->
         <div id="molgenis-site-menu"></div>
-        <script type=text/javascript src="<@resource_href "/js/menu/menu.umd.js"/>"></script>
 
+        <script type=text/javascript src="<@resource_href "/js/menu/context.umd.js"/>"></script>
     </#if>
 
 <#-- Start application content -->
@@ -190,7 +192,7 @@
                 <#list menu.items as item>
                     <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
-                            <img class="img-responsive" style="max-width:100%;max-height:100%;"
+                            <img class="img-responsive molgenis-navbar-logo" style="height:2em;font-size:16px;"
                                  src="${app_settings.logoNavBarHref?html}"
                                  alt="${app_settings.title?html}">
                         </a>

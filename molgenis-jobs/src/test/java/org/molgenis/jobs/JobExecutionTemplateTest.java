@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Locale;
+import java.util.concurrent.CancellationException;
 import org.mockito.Mock;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.test.AbstractMockitoTest;
@@ -26,6 +27,20 @@ public class JobExecutionTemplateTest extends AbstractMockitoTest {
     new JobExecutionTemplate().call(job, progress, jobExecutionContext);
     verify(progress).start();
     verify(progress).success();
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test(expectedExceptions = JobExecutionException.class)
+  public void testCallCancellation() throws Exception {
+    JobExecutionContext jobExecutionContext =
+        JobExecutionContext.builder().setAuthentication(authentication).setLocale(locale).build();
+    doThrow(new CancellationException()).when(job).call(progress);
+
+    try {
+      new JobExecutionTemplate().call(job, progress, jobExecutionContext);
+    } finally {
+      verify(progress).canceled();
+    }
   }
 
   @SuppressWarnings("deprecation")

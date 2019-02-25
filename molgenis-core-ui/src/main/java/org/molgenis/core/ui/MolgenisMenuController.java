@@ -30,6 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -73,7 +74,8 @@ public class MolgenisMenuController {
    * Forwards to the first plugin of the first menu that the user can read since no menu path is
    * provided.
    */
-  @RequestMapping
+  @SuppressWarnings("squid:S3752") // multiple methods required
+  @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST})
   public String forwardDefaultMenuDefaultPlugin(Model model) {
     Menu menu =
         menuReaderService
@@ -115,7 +117,10 @@ public class MolgenisMenuController {
    *
    * @param menuId ID of the menu or plugin
    */
-  @RequestMapping("/{menuId}")
+  @SuppressWarnings("squid:S3752") // multiple methods required
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/{menuId}")
   public String forwardMenuDefaultPlugin(@Valid @NotNull @PathVariable String menuId, Model model) {
     Menu filteredMenu =
         menuReaderService
@@ -145,7 +150,10 @@ public class MolgenisMenuController {
    * @param menuId ID of the menu parent of the pluginID
    * @param pluginId ID of the plugin
    */
-  @RequestMapping("/{menuId}/{pluginId}/**")
+  @SuppressWarnings("squid:S3752") // multiple methods required
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = "/{menuId}/{pluginId}/**")
   public String forwardMenuPlugin(
       HttpServletRequest request,
       @Valid @NotNull @PathVariable String menuId,
@@ -209,7 +217,10 @@ public class MolgenisMenuController {
 
   /** Controller used to render an empty page if the user has no permissions to view anything. */
   @Controller
-  @RequestMapping(VoidPluginController.URI)
+  @SuppressWarnings("squid:S3752") // multiple methods required
+  @RequestMapping(
+      method = {RequestMethod.GET, RequestMethod.POST},
+      value = VoidPluginController.URI)
   public static class VoidPluginController extends PluginController {
     public static final String ID = "void";
     public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

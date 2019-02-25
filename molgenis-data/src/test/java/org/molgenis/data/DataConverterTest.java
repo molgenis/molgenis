@@ -2,6 +2,8 @@ package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DATE;
@@ -9,21 +11,143 @@ import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Iterator;
+import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DataConverterTest {
+  @BeforeClass
+  public static void setUpBeforeClass() {
+    DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+    conversionService.addConverter(new StringToDateConverter());
+    conversionService.addConverter(new StringToDateTimeConverter());
+    DataConverter.setConversionService(conversionService);
+  }
+
   @Test
-  public void convert() {
-    assertEquals(DataConverter.convert("test", String.class), "test");
-    assertEquals(DataConverter.convert(5L, Number.class).longValue(), 5L);
+  public void testToIntNull() {
+    assertNull(DataConverter.toInt(null));
+  }
+
+  @Test
+  public void testToIntInteger() {
+    assertEquals(DataConverter.toInt(123), Integer.valueOf(123));
+  }
+
+  @Test
+  public void testToIntString() {
+    assertEquals(DataConverter.toInt("123"), Integer.valueOf(123));
+  }
+
+  @Test
+  public void testToLongNull() {
+    assertNull(DataConverter.toLong(null));
+  }
+
+  @Test
+  public void testToLongLong() {
+    assertEquals(DataConverter.toLong(123L), Long.valueOf(123L));
+  }
+
+  @Test
+  public void testToLongString() {
+    assertEquals(DataConverter.toLong("123"), Long.valueOf(123L));
+  }
+
+  @Test
+  public void testToBooleanNull() {
+    assertNull(DataConverter.toBoolean(null));
+  }
+
+  @Test
+  public void testToBooleanBoolean() {
+    assertEquals(DataConverter.toBoolean(Boolean.TRUE), Boolean.TRUE);
+  }
+
+  @Test
+  public void testToBooleanString() {
+    assertEquals(DataConverter.toBoolean("true"), Boolean.TRUE);
+  }
+
+  @Test
+  public void testToDoubleNull() {
+    assertNull(DataConverter.toDouble(null));
+  }
+
+  @SuppressWarnings("ConstantConditions")
+  @Test
+  public void testToDoubleBoolean() {
+    assertEquals(DataConverter.toDouble(1.23), 1.23, 0.01);
+  }
+
+  @SuppressWarnings("ConstantConditions")
+  @Test
+  public void testToDoubleString() {
+    assertEquals(DataConverter.toDouble("1.23"), 1.23, 0.01);
+  }
+
+  @Test
+  public void testToLocalDateNull() {
+    assertNull(DataConverter.toLocalDate(null));
+  }
+
+  @Test
+  public void testToLocalDateLocalDate() {
+    LocalDate localDate = LocalDate.now();
+    assertEquals(DataConverter.toLocalDate(localDate), localDate);
+  }
+
+  @Test
+  public void testToLocalDateString() {
+    assertEquals(DataConverter.toLocalDate("2015-06-04"), LocalDate.parse("2015-06-04"));
+  }
+
+  @Test
+  public void testToInstantNull() {
+    assertNull(DataConverter.toInstant(null));
+  }
+
+  @Test
+  public void testToInstantInstant() {
+    Instant instant = Instant.now();
+    assertEquals(DataConverter.toInstant(instant), instant);
+  }
+
+  @Test
+  public void testToInstantString() {
+    assertEquals(
+        DataConverter.toInstant("1986-08-12T06:12:13Z"), Instant.parse("1986-08-12T06:12:13Z"));
+  }
+
+  @Test
+  public void testToStringNull() {
+    assertNull(DataConverter.toString(null));
+  }
+
+  @Test
+  public void testToStringString() {
+    assertEquals(DataConverter.toString("abc"), "abc");
+  }
+
+  @Test
+  public void testToStringIterable() {
+    assertEquals(DataConverter.toString(asList("a", "b", "c")), "a,b,c");
+  }
+
+  @Test
+  public void testToStringInt() {
+    assertEquals(DataConverter.toString(123), "123");
   }
 
   @Test
@@ -63,40 +187,30 @@ public class DataConverterTest {
   }
 
   @Test
-  public void toListString() {
-    String id0 = "0";
-    String id1 = "1";
-    assertEquals(DataConverter.toList(asList(id0, id1)), asList(id0, id1));
+  public void testToListNull() {
+    assertEquals(DataConverter.toList(null), emptyList());
   }
 
   @Test
-  public void toListEntity() {
-    String id0 = "0";
-    String id1 = "1";
-    Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
-    Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
-    assertEquals(DataConverter.toList(asList(entity0, entity1)), asList(id0, id1));
+  public void testToListIterableString() {
+    String value0 = "0";
+    String value1 = "1";
+    assertEquals(DataConverter.toList(asList(value0, value1)), asList(value0, value1));
   }
 
   @Test
-  public void toIntListInteger() {
-    Integer id0 = 0;
-    Integer id1 = 1;
-    assertEquals(DataConverter.toIntList(asList(id0, id1)), asList(id0, id1));
+  public void testToListString() {
+    String value = "a,b,c";
+    assertEquals(DataConverter.toList(value), asList("a", "b", "c"));
   }
 
   @Test
-  public void toIntListEntity() {
-    Integer id0 = 0;
-    Integer id1 = 1;
-    Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
-    Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
-    assertEquals(DataConverter.toIntList(asList(entity0, entity1)), asList(id0, id1));
+  public void testToListOther() {
+    assertEquals(DataConverter.toList(0L), singletonList("0"));
   }
 
-  @SuppressWarnings("deprecation")
   @Test(
-      expectedExceptions = MolgenisDataException.class,
+      expectedExceptions = AttributeValueConversionException.class,
       expectedExceptionsMessageRegExp =
           "Conversion failure in entity type \\[test\\] attribute \\[id\\]; .*")
   public void testWrapExceptionOnInvalidConversion() {

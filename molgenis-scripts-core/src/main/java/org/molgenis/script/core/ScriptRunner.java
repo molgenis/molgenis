@@ -10,5 +10,8 @@ import java.util.Map;
 public interface ScriptRunner {
   String getName();
 
+  /** @return whether the script outputs a file */
+  boolean hasFileOutput(Script script);
+
   String runScript(Script script, Map<String, Object> parameters);
 }

@@ -111,7 +111,7 @@ public class RestService {
    */
   public Object toEntityValue(Attribute attr, Object paramValue, Object id) {
     // Treat empty strings as null
-    if (paramValue != null && (paramValue instanceof String) && ((String) paramValue).isEmpty()) {
+    if ((paramValue instanceof String) && ((String) paramValue).isEmpty()) {
       paramValue = null;
     }
 

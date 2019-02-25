@@ -2,7 +2,7 @@ package org.molgenis.security.account;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.user.UserAccountConstants.MIN_PASSWORD_LENGTH;
 
 import java.io.IOException;
 import java.util.Collections;

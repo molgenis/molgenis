@@ -15,6 +15,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OneClickImporterNamingServiceImpl implements OneClickImporterNamingService {
+
+  // matches everything that is not 'a-z', 'A-Z', '0-9', '_' or '#'
+  private static final String ILLEGAL_CHARACTER_REGEX = "[^a-zA-Z0-9_#]+";
+
   private DataService dataService;
 
   public OneClickImporterNamingServiceImpl(DataService dataService) {

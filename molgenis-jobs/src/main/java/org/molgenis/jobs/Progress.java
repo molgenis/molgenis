@@ -26,4 +26,6 @@ public interface Progress {
   void setResultUrl(String string);
 
   JobExecution getJobExecution();
+
+  void canceling();
 }

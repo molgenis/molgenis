@@ -569,7 +569,7 @@ public class MappingServiceController extends PluginController {
    * @param packageId ID of the package to put the newly created entity in
    * @return redirect URL to the data explorer displaying the newly generated entity
    */
-  @RequestMapping("/createIntegratedEntity")
+  @PostMapping("/createIntegratedEntity")
   public String createIntegratedEntity(
       @RequestParam String mappingProjectId,
       @RequestParam String targetEntityTypeId,

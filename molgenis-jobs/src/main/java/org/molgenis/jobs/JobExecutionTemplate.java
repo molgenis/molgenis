@@ -2,6 +2,7 @@ package org.molgenis.jobs;
 
 import java.util.Locale;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import org.molgenis.i18n.ErrorCoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,9 @@ class JobExecutionTemplate {
       T result = job.call(progress);
       progress.success();
       return result;
+    } catch (CancellationException e) {
+      progress.canceled();
+      throw new JobExecutionException(e);
     } catch (Exception ex) {
       LOG.warn("Error executing job", ex);
       progress.failed(createFailureMessage(ex), ex);

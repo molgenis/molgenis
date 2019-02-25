@@ -21,9 +21,11 @@ public class MissingValueProcessor extends AbstractCellProcessor {
 
   @Override
   public String process(String value) {
-    return value == null
-        ? missingValue
-        : (emptyIsMissing && value.isEmpty() ? missingValue : value);
+    if (value == null) {
+      return missingValue;
+    } else {
+      return emptyIsMissing && value.isEmpty() ? missingValue : value;
+    }
   }
 
   @Override

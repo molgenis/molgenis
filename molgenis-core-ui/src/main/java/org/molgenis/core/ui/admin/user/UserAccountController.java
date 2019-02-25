@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.core.ui.admin.user.UserAccountController.URI;
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.user.UserAccountConstants.MIN_PASSWORD_LENGTH;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 import io.swagger.annotations.Api;

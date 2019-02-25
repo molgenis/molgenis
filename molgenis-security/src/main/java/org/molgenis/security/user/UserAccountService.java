@@ -4,8 +4,6 @@ import org.molgenis.data.security.auth.User;
 
 /** Manage account of the current user */
 public interface UserAccountService {
-  int MIN_PASSWORD_LENGTH = 6;
-
   /** Returns the currently logged in user */
   User getCurrentUser();
 
