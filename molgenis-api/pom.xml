@@ -15,5 +15,12 @@
   <description>API base module.</description>
 
   <dependencies>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
