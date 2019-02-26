@@ -26,8 +26,8 @@ public class MinioStoreConfig {
   public MinioStoreConfig(
       @Value("${minio.bucket.name:molgenis}") String bucketName,
       @Value("${minio.endpoint:http://127.0.0.1:9000}") String minioEndpoint,
-      @Value("${minio.access.key:molgenis}") String minioAccessKey,
-      @Value("${minio.secret.key:molgenis}") String minioSecretKey,
+      @Value("${minio.access.key:@null}") String minioAccessKey,
+      @Value("${minio.secret.key:@null}") String minioSecretKey,
       @Nullable @Value("${minio.region:@null}") String minioRegion,
       IdGenerator idGenerator) {
     this.bucketName = requireNonNull(bucketName);
