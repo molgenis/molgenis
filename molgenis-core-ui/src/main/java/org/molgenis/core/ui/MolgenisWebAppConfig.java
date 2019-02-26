@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -57,14 +56,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
@@ -80,8 +76,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-
-// import org.molgenis.data.blob.DiskBlobStore;
 
 @Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
@@ -102,8 +96,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private MessageSource messageSource;
 
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
-
-  @Autowired private IdGenerator idGenerator;
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
@@ -188,12 +180,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     converters.add(new ResourceHttpMessageConverter());
     converters.add(new StringHttpMessageConverter());
     converters.add(rdfConverter);
-
-    MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
-        new MappingJackson2HttpMessageConverter(new Jackson2ObjectMapperBuilder().build());
-    mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
-        Collections.singletonList(MediaType.parseMediaType("application/hal+json")));
-    converters.add(mappingJackson2HttpMessageConverter);
   }
 
   @Override
@@ -349,29 +335,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
     return result;
   }
-
-  //  private static final boolean useMinioStore = true;
-  //
-  //  // TODO get rid of code duplication
-  //  // TODO move to own config class and include in platform config
-  //  @Bean
-  //  public BlobStore blobStore() {
-  //    if (useMinioStore) {
-  //      return new MinioBlobStore(idGenerator);
-  //    } else {
-  //      // get molgenis home directory
-  //      Path appDataRoot = AppDataRootProvider.getAppDataRoot();
-  //
-  //      // create molgenis store directory in molgenis data directory if not exists
-  //      String molgenisFileStoreDirStr =
-  //          Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
-  //      File molgenisDataDir = new File(molgenisFileStoreDirStr);
-  //      if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
-  //        throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
-  //      }
-  //      return new DiskBlobStore(Paths.get(molgenisFileStoreDirStr), idGenerator);
-  //    }
-  //  }
 
   // Override in subclass if you need more freemarker variables
   @SuppressWarnings({"unused", "WeakerAccess"})
