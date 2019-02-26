@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-public interface FileService {
+public interface FilesApiService {
 
   /** Asynchronous file upload from HTTP request */
   @Async

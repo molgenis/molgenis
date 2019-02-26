@@ -56,11 +56,11 @@ class MultipartFileUploader implements FileUploader {
     try {
       FileItemIterator fileItemIterator = servletFileUpload.getItemIterator(httpServletRequest);
       if (!fileItemIterator.hasNext()) {
-        throw new RuntimeException("no files to upload"); // TODO code
+        throw new IllegalArgumentException("request contains no files to upload");
       }
       fileMeta = upload(fileItemIterator.next(), httpServletRequest);
       if (fileItemIterator.hasNext()) {
-        throw new RuntimeException(">1 files to upload, skipping other files"); // TODO code
+        throw new IllegalArgumentException("request contains multiple files to upload");
       }
     } catch (FileUploadException e) {
       throw new UncheckedIOException(new IOException(e));
@@ -75,9 +75,19 @@ class MultipartFileUploader implements FileUploader {
     try (ReadableByteChannel fromChannel = newChannel(fileItemStream.openStream())) {
       blobMetadata = blobStore.store(fromChannel);
     } catch (IOException e) {
-      throw new UncheckedIOException(e); // TODO translate exception
+      throw new UncheckedIOException(e);
     }
 
+    FileMeta fileMeta = createFileMeta(fileItemStream, httpServletRequest, blobMetadata);
+    dataService.add(FILE_META, fileMeta);
+
+    return fileMeta;
+  }
+
+  private FileMeta createFileMeta(
+      FileItemStream fileItemStream,
+      HttpServletRequest httpServletRequest,
+      BlobMetadata blobMetadata) {
     String blobMetadataId = blobMetadata.getId();
 
     String uriString =
@@ -91,8 +101,6 @@ class MultipartFileUploader implements FileUploader {
     fileMeta.setContentType(fileItemStream.getContentType());
     fileMeta.setSize(blobMetadata.getSize());
     fileMeta.setUrl(uriString);
-    dataService.add(FILE_META, fileMeta);
-
     return fileMeta;
   }
 }

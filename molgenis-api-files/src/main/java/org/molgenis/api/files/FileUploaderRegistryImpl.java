@@ -11,7 +11,7 @@ import org.springframework.util.MimeType;
 class FileUploaderRegistryImpl implements FileUploaderRegistry {
   private final Map<MimeType, FileUploader> fileUploadServiceMap;
 
-  public FileUploaderRegistryImpl() {
+  FileUploaderRegistryImpl() {
     fileUploadServiceMap = new HashMap<>();
   }
 
@@ -20,7 +20,7 @@ class FileUploaderRegistryImpl implements FileUploaderRegistry {
     MimeType unparameterizedMimeType = toUnparameterizedMimeType(mimeType);
     FileUploader fileUploadService = fileUploadServiceMap.get(unparameterizedMimeType);
     if (fileUploadService == null) {
-      throw new RuntimeException("unsupported content type");
+      throw new UnsupportedMimeTypeException(mimeType);
     }
     return fileUploadService;
   }

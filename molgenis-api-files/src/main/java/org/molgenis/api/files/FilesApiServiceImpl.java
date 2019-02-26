@@ -21,12 +21,12 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Component
-class FileServiceImpl implements FileService {
+class FilesApiServiceImpl implements FilesApiService {
   private final DataService dataService;
   private final BlobStore blobStore;
   private final FileUploaderRegistry fileUploadServiceRegistry;
 
-  FileServiceImpl(
+  FilesApiServiceImpl(
       DataService dataService,
       BlobStore blobStore,
       FileUploaderRegistry fileUploadServiceRegistry) {
