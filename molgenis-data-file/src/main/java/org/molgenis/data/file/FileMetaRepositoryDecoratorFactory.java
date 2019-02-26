@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaMetadata;
 import org.springframework.stereotype.Component;

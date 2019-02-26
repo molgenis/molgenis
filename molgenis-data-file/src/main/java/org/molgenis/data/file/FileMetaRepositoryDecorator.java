@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

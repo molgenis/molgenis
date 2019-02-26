@@ -1,4 +1,4 @@
-package org.molgenis.data.blob;
+package org.molgenis.data.file;
 
 import static java.util.Objects.requireNonNull;
 

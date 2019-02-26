@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.blob.BlobStore;
+import org.molgenis.data.file.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.ContentDisposition;

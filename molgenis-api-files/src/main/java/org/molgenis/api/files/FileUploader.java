@@ -6,9 +6,7 @@ import org.molgenis.data.file.model.FileMeta;
 import org.springframework.util.MimeType;
 
 public interface FileUploader {
-  /**
-   * @return non-empty collection of MIME types that an uploader can handle.
-   */
+  /** @return non-empty collection of MIME types that an uploader can handle. */
   Collection<MimeType> getSupportedMimeTypes();
 
   /**

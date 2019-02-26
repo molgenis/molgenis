@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.blob.BlobStore;
+import org.molgenis.data.file.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

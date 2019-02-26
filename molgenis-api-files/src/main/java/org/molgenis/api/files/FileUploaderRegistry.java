@@ -10,8 +10,6 @@ interface FileUploaderRegistry {
    */
   FileUploader getFileUploadService(MimeType mimeType);
 
-  /**
-   * @throws IllegalArgumentException if a file uploader already was registered for a MIME type.
-   */
+  /** @throws IllegalArgumentException if a file uploader already was registered for a MIME type. */
   void register(FileUploader fileUploadService);
 }

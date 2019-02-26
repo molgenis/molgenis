@@ -1,4 +1,4 @@
-package org.molgenis.data.blob;
+package org.molgenis.data.file;
 
 import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.getResource;
@@ -8,10 +8,11 @@ import com.google.common.collect.Multimap;
 import java.nio.channels.ReadableByteChannel;
 import org.molgenis.data.transaction.TransactionListener;
 
-class TransactionalBlobStoreDecorator extends BlobStoreDecorator implements TransactionListener {
+public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
+    implements TransactionListener {
   private final Multimap<String, String> transactionBlobMap;
 
-  TransactionalBlobStoreDecorator(BlobStore delegateBlobStore) {
+  public TransactionalBlobStoreDecorator(BlobStore delegateBlobStore) {
     super(delegateBlobStore);
     this.transactionBlobMap = ArrayListMultimap.create();
   }

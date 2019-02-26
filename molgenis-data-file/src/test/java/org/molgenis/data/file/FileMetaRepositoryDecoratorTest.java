@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
