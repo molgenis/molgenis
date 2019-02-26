@@ -24,11 +24,11 @@ public class MinioStoreConfig {
   private final IdGenerator idGenerator;
 
   public MinioStoreConfig(
-      @Value("${minio_bucket_name:molgenis}") String bucketName,
-      @Value("${minio_endpoint:http://127.0.0.1:9000}") String minioEndpoint,
-      @Value("${minio_access_key:molgenis}") String minioAccessKey,
-      @Value("${minio_secret_key:molgenis}") String minioSecretKey,
-      @Nullable @Value("${minio_region:@null}") String minioRegion,
+      @Value("${minio.bucket.name:molgenis}") String bucketName,
+      @Value("${minio.endpoint:http://127.0.0.1:9000}") String minioEndpoint,
+      @Value("${minio.access.key:molgenis}") String minioAccessKey,
+      @Value("${minio.secret.key:molgenis}") String minioSecretKey,
+      @Nullable @Value("${minio.region:@null}") String minioRegion,
       IdGenerator idGenerator) {
     this.bucketName = requireNonNull(bucketName);
     this.minioEndpoint = requireNonNull(minioEndpoint);
@@ -53,7 +53,18 @@ public class MinioStoreConfig {
 
   @Bean
   public MinioClientFactory minioClientFactory() {
-    // TODO nice error message for missing props
+    if (bucketName == null || bucketName.isEmpty()) {
+      throw new IllegalArgumentException("Property 'minio.bucket.name' cannot be null or empty");
+    }
+    if (minioEndpoint == null || minioEndpoint.isEmpty()) {
+      throw new IllegalArgumentException("Property 'minio.endpoint' cannot be null or empty");
+    }
+    if (minioAccessKey == null || minioAccessKey.isEmpty()) {
+      throw new IllegalArgumentException("Property 'minio.access.key' cannot be null or empty");
+    }
+    if (minioSecretKey == null || minioSecretKey.isEmpty()) {
+      throw new IllegalArgumentException("Property 'minio.secret.key' cannot be null or empty");
+    }
     return new MinioClientFactory(
         bucketName, minioEndpoint, minioAccessKey, minioSecretKey, minioRegion);
   }
