@@ -1,12 +1,12 @@
-package org.molgenis.api.files.v1.model;
+package org.molgenis.api.files.v1;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_FileCreateResponse.class)
-public abstract class FileCreateResponse {
+@AutoGson(autoValueClass = AutoValue_FileResponse.class)
+public abstract class FileResponse {
   public abstract String getId();
 
   public abstract String getFilename();
@@ -17,10 +17,8 @@ public abstract class FileCreateResponse {
   @Nullable
   public abstract Long getSize();
 
-  public abstract String getUrl();
-
   public static Builder builder() {
-    return new AutoValue_FileCreateResponse.Builder();
+    return new AutoValue_FileResponse.Builder();
   }
 
   @AutoValue.Builder
@@ -33,8 +31,6 @@ public abstract class FileCreateResponse {
 
     public abstract Builder setSize(Long newSize);
 
-    public abstract Builder setUrl(String newUrl);
-
-    public abstract FileCreateResponse build();
+    public abstract FileResponse build();
   }
 }

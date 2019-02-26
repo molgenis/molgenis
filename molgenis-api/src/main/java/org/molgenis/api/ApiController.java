@@ -29,11 +29,11 @@ public abstract class ApiController {
     this.apiVersion = apiVersion;
   }
 
-  String getApiId() {
+  public String getApiId() {
     return apiId;
   }
 
-  int getApiVersion() {
+  public int getApiVersion() {
     return apiVersion;
   }
 }

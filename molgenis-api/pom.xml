@@ -15,9 +15,5 @@
   <description>API base module.</description>
 
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.hateoas</groupId>
-      <artifactId>spring-hateoas</artifactId>
-    </dependency>
   </dependencies>
 </project>

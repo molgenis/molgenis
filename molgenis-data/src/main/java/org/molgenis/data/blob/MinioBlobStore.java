@@ -8,15 +8,13 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import org.molgenis.data.populate.IdGenerator;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
-public class MinioBlobStore implements BlobStore {
+class MinioBlobStore implements BlobStore {
   private final String bucketName;
   private final IdGenerator idGenerator;
   private final MinioClient minioClient;
 
-  public MinioBlobStore(
+  MinioBlobStore(
       @Value("${minio_bucket_name:molgenis}") String bucketName,
       @Value("${minio_endpoint:http://127.0.0.1:9000}") String minioEndpoint,
       @Value("${minio_access_key:molgenis}") String minioAccessKey,
@@ -28,30 +26,27 @@ public class MinioBlobStore implements BlobStore {
       minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey, "eu-central-1");
       minioClient.traceOn(System.out);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // TODO proper exception handling
     }
-  }
-
-  @Override
-  public WritableBlobChannel newChannel() {
-    throw new UnsupportedOperationException();
   }
 
   @Override
   public BlobMetadata store(ReadableByteChannel fromChannel) {
     String blobId = generateBlobId();
-    String contentType = "unknown/content-type";
+
+    // The "octet-stream" subtype is used to indicate that a body contains arbitrary binary data.
+    String contentType = "application/octet-stream";
     try {
       minioClient.putObject(bucketName, blobId, Channels.newInputStream(fromChannel), contentType);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // TODO proper exception handling
     }
 
     ObjectStat objectStat;
     try {
       objectStat = minioClient.statObject(bucketName, blobId);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // TODO proper exception handling
     }
     long size = objectStat.length();
 
@@ -63,7 +58,7 @@ public class MinioBlobStore implements BlobStore {
     try {
       minioClient.removeObject(bucketName, blobId);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // TODO proper exception handling
     }
   }
 
@@ -72,7 +67,7 @@ public class MinioBlobStore implements BlobStore {
     try {
       return Channels.newChannel(minioClient.getObject(bucketName, blobId));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // TODO proper exception handling
     }
   }
 

@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -26,17 +27,19 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<FileMeta> delegateRepository;
 
   @Mock private FileStore fileStore;
+  @Mock private BlobStore blobStore;
 
   private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(delegateRepository, fileStore);
+    fileMetaRepositoryDecorator =
+        new FileMetaRepositoryDecorator(delegateRepository, fileStore, blobStore);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testAppRepositoryDecorator() {
-    new FileMetaRepositoryDecorator(null, null);
+    new FileMetaRepositoryDecorator(null, null, null);
   }
 
   @Test

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,13 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
   private static final Logger LOG = LoggerFactory.getLogger(FileMetaRepositoryDecorator.class);
 
   private final FileStore fileStore;
+  private final BlobStore blobStore;
 
-  public FileMetaRepositoryDecorator(Repository<FileMeta> delegateRepository, FileStore fileStore) {
+  public FileMetaRepositoryDecorator(
+      Repository<FileMeta> delegateRepository, FileStore fileStore, BlobStore blobStore) {
     super(delegateRepository);
     this.fileStore = requireNonNull(fileStore);
+    this.blobStore = requireNonNull(blobStore);
   }
 
   @Override
@@ -60,7 +64,28 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
             }));
   }
 
+  // TODO do not commit this local workaround
   private void deleteFile(FileMeta fileMeta) {
+    if (isBlobStoreFile(fileMeta)) {
+      deleteFileFromBlobStore(fileMeta);
+    } else {
+      deleteFileFromFileStore(fileMeta);
+    }
+  }
+
+  private boolean isBlobStoreFile(FileMeta fileMeta) {
+    return fileMeta.getUrl().endsWith("alt=media");
+  }
+
+  private void deleteFileFromBlobStore(FileMeta fileMeta) {
+    try {
+      blobStore.delete(fileMeta.getId());
+    } catch (UncheckedIOException e) {
+      LOG.warn("Could not delete file '{}' from blob store", fileMeta.getId());
+    }
+  }
+
+  private void deleteFileFromFileStore(FileMeta fileMeta) {
     try {
       fileStore.delete(fileMeta.getId());
     } catch (UncheckedIOException e) {

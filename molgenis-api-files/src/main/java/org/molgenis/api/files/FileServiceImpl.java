@@ -1,4 +1,4 @@
-package org.molgenis.api.filetransfer;
+package org.molgenis.api.files;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
@@ -8,34 +8,53 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import com.google.common.io.ByteStreams;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.concurrent.CompletableFuture;
+import javax.servlet.http.HttpServletRequest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.blob.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Component
-public class FileDownloadServiceImpl implements FileDownloadService {
-  private static final Logger LOG = LoggerFactory.getLogger(FileDownloadServiceImpl.class);
-
+class FileServiceImpl implements FileService {
   private final DataService dataService;
   private final BlobStore blobStore;
+  private final FileUploaderRegistry fileUploadServiceRegistry;
 
-  FileDownloadServiceImpl(DataService dataService, BlobStore blobStore) {
+  FileServiceImpl(
+      DataService dataService,
+      BlobStore blobStore,
+      FileUploaderRegistry fileUploadServiceRegistry) {
     this.dataService = requireNonNull(dataService);
     this.blobStore = requireNonNull(blobStore);
+    this.fileUploadServiceRegistry = requireNonNull(fileUploadServiceRegistry);
   }
 
   @Override
-  public ResponseEntity<StreamingResponseBody> download(String fileId) {
+  public FileMeta getFileMeta(String fileId) {
     FileMeta fileMeta = dataService.findOneById(FILE_META, fileId, FileMeta.class);
     if (fileMeta == null) {
       throw new UnknownEntityException(FILE_META, fileId);
     }
+    return fileMeta;
+  }
+
+  @Override
+  public CompletableFuture<FileMeta> upload(HttpServletRequest httpServletRequest) {
+    MimeType mimeType = MimeTypeUtils.parseMimeType(httpServletRequest.getContentType());
+    FileUploader fileUploadService = fileUploadServiceRegistry.getFileUploadService(mimeType);
+    FileMeta fileMeta = fileUploadService.upload(httpServletRequest);
+    return CompletableFuture.completedFuture(fileMeta);
+  }
+
+  @Override
+  public ResponseEntity<StreamingResponseBody> download(String fileId) {
+    FileMeta fileMeta = getFileMeta(fileId);
 
     ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
     builder.header(CONTENT_TYPE, fileMeta.getContentType());
