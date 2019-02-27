@@ -3,6 +3,8 @@ package org.molgenis.data.file.minio;
 import static java.util.Objects.requireNonNull;
 
 import io.minio.MinioClient;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import javax.annotation.Nullable;
 import org.molgenis.data.file.BlobStore;
 import org.molgenis.data.file.TransactionalBlobStoreDecorator;
@@ -12,7 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.retry.annotation.EnableRetry;
 
+@EnableRetry
 @Import(IdGeneratorImpl.class)
 @Configuration
 public class MinioStoreConfig {
@@ -47,7 +51,12 @@ public class MinioStoreConfig {
 
   @Bean
   public MinioClientFacade minioClientFacade() {
-    MinioClient minioClient = minioClientFactory().createClient();
+    MinioClient minioClient;
+    try {
+      minioClient = minioClientFactory().createClient();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
     return new MinioClientFacade(minioClient, bucketName);
   }
 
@@ -65,7 +74,7 @@ public class MinioStoreConfig {
     if (minioSecretKey == null || minioSecretKey.isEmpty()) {
       throw new IllegalArgumentException("Property 'minio.secret.key' cannot be null or empty");
     }
-    return new MinioClientFactory(
+    return new MinioClientFactoryImpl(
         bucketName, minioEndpoint, minioAccessKey, minioSecretKey, minioRegion);
   }
 }
