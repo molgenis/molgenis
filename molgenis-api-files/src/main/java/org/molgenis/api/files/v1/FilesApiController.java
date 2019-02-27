@@ -5,6 +5,10 @@ import static org.molgenis.api.files.FilesApiNamespace.API_FILES_ID;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+@Api("Files")
 @RestController
 @RequestMapping(FilesApiController.API_FILES_V1_PATH)
 class FilesApiController extends ApiController {
@@ -36,6 +41,10 @@ class FilesApiController extends ApiController {
     this.filesApiService = requireNonNull(filesApiService);
   }
 
+  @ApiOperation("Upload file")
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "Returns the file metadata", response = FileResponse.class)
+  })
   @PostMapping
   @ResponseStatus(CREATED)
   public CompletableFuture<ResponseEntity<FileResponse>> createFile(
@@ -45,13 +54,18 @@ class FilesApiController extends ApiController {
         .thenApply(fileMeta -> this.toFileResponseEntity(fileMeta, httpServletRequest));
   }
 
+  @ApiOperation("Retrieve file metadata")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Returns the file metadata", response = FileResponse.class)
+  })
   @GetMapping(value = "/{fileId}")
   public FileResponse readFile(@PathVariable("fileId") String fileId) {
     FileMeta fileMeta = filesApiService.getFileMeta(fileId);
     return toFileResponse(fileMeta);
   }
 
-  /** Non-blocking file download. */
+  @ApiOperation("Download one file")
+  @ApiResponses({@ApiResponse(code = 200, message = "Downloads the file")})
   @GetMapping(value = "/{fileId}", params = "alt=media")
   public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable("fileId") String fileId) {
     return filesApiService.download(fileId);
