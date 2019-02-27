@@ -12,18 +12,16 @@ MAIL_PASSWORD=xxxx
 echo "########################################"
 echo "POSTINSTALL - MOLGENIS - started"
 echo "########################################"
+echo "[INFO] Stop tomcat before upgrade"
+service tomcat stop
+echo "----------------------------------------"
+echo "[INFO] Remove old installation"
+rm -rf /usr/share/tomcat/webapps/ROOT*
 echo "[INFO] Move the specific version to the ROOT.war"
-echo "[INFO] Deploy MOLGENIS war on tomcat"
+echo "[INFO] Copy MOLGENIS war on tomcat"
 echo "----------------------------------------"
 mv /usr/local/share/molgenis/war/*.war /usr/local/share/molgenis/war/ROOT.war
-DEPLOY_RESULT=$(curl -u "molgenis:molgenis" -T "/usr/local/share/molgenis/war/ROOT.war" "http://localhost:8080/manager/text/deploy?path=/&update=true")
-echo "----------------------------------------"
-if [[ ${DEPLOY_RESULT} == *"OK - Deployed application at context path"* ]]; then
-  echo "[INFO] MOLGENIS is deployed successfully"
-else
-  echo "[ERROR] MOLGENIS has failed to deploy"
-  exit 1
-fi
+cp /usr/local/share/molgenis/war/ROOT.war /usr/share/tomcat/webapps/ROOT.war
 
 echo "--------------------------------------------------"
 echo "[INFO] Determine if there is a molgenis-server.properties"
@@ -49,6 +47,10 @@ if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]; then
 else
   echo "[INFO] molgenis-server.properties already exists"
 fi
+
+echo "----------------------------------------"
+echo "[INFO] Start tomcat"
+service tomcat start
 
 echo "----------------------------------------"
 echo "POSTINSTALL - MOLGENIS - finished"
