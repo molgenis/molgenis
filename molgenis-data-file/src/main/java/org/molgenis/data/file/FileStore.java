@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+/** @deprecated use {@link BlobStore} */
+@Deprecated
 public class FileStore {
   private final String storageDir;
 
