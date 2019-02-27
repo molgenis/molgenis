@@ -16,19 +16,10 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class MolgenisWebAppInitializer {
-  private static final int MB = 1024 * 1024;
-  // the size threshold after which multi-part files will be written to disk.
-  private static final int FILE_SIZE_THRESHOLD = 10 * MB;
   private static final Logger LOG = LoggerFactory.getLogger(MolgenisWebAppInitializer.class);
 
-  @SuppressWarnings("unused")
-  protected void onStartup(ServletContext servletContext, Class<?> appConfig) {
-    // no maximum field size provided? default to 32 Mb
-    onStartup(servletContext, appConfig, 32);
-  }
-
   /** A Molgenis common web application initializer */
-  protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize) {
+  protected void onStartup(ServletContext servletContext, Class<?> appConfig) {
     // Create the 'root' Spring application context
     AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
     rootContext.setAllowBeanDefinitionOverriding(false);

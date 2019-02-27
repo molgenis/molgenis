@@ -40,11 +40,6 @@ public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
   }
 
   @Override
-  public ReadableByteChannel newChannel(String blobId) {
-    return super.newChannel(blobId);
-  }
-
-  @Override
   public void rollbackTransaction(String transactionId) {
     List<String> blobIds = new ArrayList<>(transactionBlobMap.get(transactionId));
     blobIds.forEach(this::delete);

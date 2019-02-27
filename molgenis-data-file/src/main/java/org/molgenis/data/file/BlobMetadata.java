@@ -16,6 +16,7 @@ public abstract class BlobMetadata {
     return new AutoValue_BlobMetadata.Builder();
   }
 
+  @SuppressWarnings("squid:S1610") // Autovalue needs an abstract class
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setId(String newId);
