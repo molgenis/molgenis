@@ -39,12 +39,10 @@ public class FilesApiControllerTest extends AbstractMockitoTest {
     String filename = "MyFilename";
     String contentType = "MyContentType";
     Long size = 123L;
-    String url = "http://my.host.org/123?alt=media";
     when(fileMeta.getId()).thenReturn(fileId);
     when(fileMeta.getFilename()).thenReturn(filename);
     when(fileMeta.getContentType()).thenReturn(contentType);
     when(fileMeta.getSize()).thenReturn(size);
-    when(fileMeta.getUrl()).thenReturn(url);
 
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(filesApiService.upload(httpServletRequest))

@@ -92,8 +92,13 @@ class MultipartFileUploader implements FileUploader {
 
     String uriString =
         ServletUriComponentsBuilder.fromRequestUri(httpServletRequest)
+            .scheme(null)
+            .host(null)
+            .port(null)
+            .userInfo(null)
             .pathSegment(blobMetadataId)
             .queryParam("alt", "media")
+            .build()
             .toUriString();
 
     FileMeta fileMeta = fileMetaFactory.create(blobMetadataId);

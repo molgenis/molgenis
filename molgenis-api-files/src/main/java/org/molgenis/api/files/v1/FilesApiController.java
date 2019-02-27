@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(FilesApiController.API_FILES_V1_PATH)
@@ -39,7 +40,9 @@ class FilesApiController extends ApiController {
   @ResponseStatus(CREATED)
   public CompletableFuture<ResponseEntity<FileResponse>> createFile(
       HttpServletRequest httpServletRequest) {
-    return filesApiService.upload(httpServletRequest).thenApply(this::toFileResponseEntity);
+    return filesApiService
+        .upload(httpServletRequest)
+        .thenApply(fileMeta -> this.toFileResponseEntity(fileMeta, httpServletRequest));
   }
 
   @GetMapping(value = "/{fileId}")
@@ -54,11 +57,19 @@ class FilesApiController extends ApiController {
     return filesApiService.download(fileId);
   }
 
-  private ResponseEntity<FileResponse> toFileResponseEntity(FileMeta fileMeta) {
+  private ResponseEntity<FileResponse> toFileResponseEntity(
+      FileMeta fileMeta, HttpServletRequest httpServletRequest) {
     FileResponse fileResponse = toFileResponse(fileMeta);
 
+    URI uri =
+        ServletUriComponentsBuilder.fromRequestUri(httpServletRequest)
+            .pathSegment(fileMeta.getId())
+            .queryParam("alt", "media")
+            .build()
+            .toUri();
+
     HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create(fileMeta.getUrl()));
+    headers.setLocation(uri);
 
     return new ResponseEntity<>(fileResponse, headers, HttpStatus.CREATED);
   }
