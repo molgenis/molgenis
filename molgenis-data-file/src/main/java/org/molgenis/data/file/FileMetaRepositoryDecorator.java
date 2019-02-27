@@ -63,7 +63,6 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
             }));
   }
 
-  // TODO do not commit this local workaround
   private void deleteFile(FileMeta fileMeta) {
     if (isBlobStoreFile(fileMeta)) {
       deleteFileFromBlobStore(fileMeta);
