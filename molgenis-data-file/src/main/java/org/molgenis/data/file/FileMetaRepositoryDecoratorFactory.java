@@ -12,15 +12,17 @@ import org.springframework.stereotype.Component;
 public class FileMetaRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<FileMeta, FileMetaMetadata> {
   private final FileStore fileStore;
+  private final BlobStore blobStore;
 
   public FileMetaRepositoryDecoratorFactory(
-      FileMetaMetadata fileMetaMetadata, FileStore fileStore) {
+      FileMetaMetadata fileMetaMetadata, FileStore fileStore, BlobStore blobStore) {
     super(fileMetaMetadata);
     this.fileStore = requireNonNull(fileStore);
+    this.blobStore = requireNonNull(blobStore);
   }
 
   @Override
   public Repository<FileMeta> createDecoratedRepository(Repository<FileMeta> repository) {
-    return new FileMetaRepositoryDecorator(repository, fileStore);
+    return new FileMetaRepositoryDecorator(repository, fileStore, blobStore);
   }
 }

@@ -3,6 +3,7 @@ package org.molgenis.bootstrap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 
+import org.molgenis.api.files.FileUploaderRegistrar;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
@@ -37,6 +38,7 @@ public class RegistryBootstrapper {
   private final ImportServiceRegistrar importServiceRegistrar;
   private final ScriptRunnerRegistrar scriptRunnerRegistrar;
   private final JobFactoryRegistrar jobFactoryRegistrar;
+  private final FileUploaderRegistrar fileUploadServiceRegistrar;
 
   public RegistryBootstrapper(
       RepositoryCollectionBootstrapper repoCollectionBootstrapper,
@@ -47,7 +49,8 @@ public class RegistryBootstrapper {
       DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
       ImportServiceRegistrar importServiceRegistrar,
       ScriptRunnerRegistrar scriptRunnerRegistrar,
-      JobFactoryRegistrar jobFactoryRegistrar) {
+      JobFactoryRegistrar jobFactoryRegistrar,
+      FileUploaderRegistrar fileUploadServiceRegistrar) {
     this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
     this.systemEntityTypeRegistrar = requireNonNull(systemEntityTypeRegistrar);
     this.systemPackageRegistrar = requireNonNull(systemPackageRegistrar);
@@ -59,6 +62,7 @@ public class RegistryBootstrapper {
     this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
     this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
     this.jobFactoryRegistrar = requireNonNull(jobFactoryRegistrar);
+    this.fileUploadServiceRegistrar = requireNonNull(fileUploadServiceRegistrar);
   }
 
   public void bootstrap(ContextRefreshedEvent event) {
@@ -97,5 +101,9 @@ public class RegistryBootstrapper {
     LOG.trace("Registering job factories ...");
     jobFactoryRegistrar.register(event);
     LOG.trace("Registered job factories");
+
+    LOG.trace("Registering file uploaders ...");
+    fileUploadServiceRegistrar.register(event);
+    LOG.trace("Registered file uploaders");
   }
 }
