@@ -6,6 +6,8 @@ import static org.springframework.transaction.support.TransactionSynchronization
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.List;
 import org.molgenis.data.transaction.TransactionListener;
 
 public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
@@ -19,7 +21,7 @@ public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
 
   @Override
   public BlobMetadata store(ReadableByteChannel fromChannel) {
-    BlobMetadata blobMetadata = delegate().store(fromChannel);
+    BlobMetadata blobMetadata = super.store(fromChannel);
 
     // store blob identifier in case of a transaction rollback
     String transactionId = (String) getResource(TRANSACTION_ID_RESOURCE_NAME);
@@ -30,7 +32,7 @@ public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
 
   @Override
   public void delete(String blobId) {
-    delegate().delete(blobId);
+    super.delete(blobId);
 
     // delete blob if it was stored in the same transaction
     String transactionId = (String) getResource(TRANSACTION_ID_RESOURCE_NAME);
@@ -39,27 +41,13 @@ public class TransactionalBlobStoreDecorator extends BlobStoreDecorator
 
   @Override
   public ReadableByteChannel newChannel(String blobId) {
-    return delegate().newChannel(blobId);
-  }
-
-  @Override
-  public void transactionStarted(String transactionId) {
-    // no op
-  }
-
-  @Override
-  public void commitTransaction(String transactionId) {
-    // no op
-  }
-
-  @Override
-  public void afterCommitTransaction(String transactionId) {
-    // no op, see doCleanupAfterCompletion
+    return super.newChannel(blobId);
   }
 
   @Override
   public void rollbackTransaction(String transactionId) {
-    transactionBlobMap.get(transactionId).forEach(this::delete);
+    List<String> blobIds = new ArrayList<>(transactionBlobMap.get(transactionId));
+    blobIds.forEach(this::delete);
   }
 
   @Override

@@ -30,7 +30,6 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.freemarker.HasPermissionDirective;

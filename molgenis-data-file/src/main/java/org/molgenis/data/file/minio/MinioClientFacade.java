@@ -35,15 +35,9 @@ class MinioClientFacade {
       throws InvalidBucketNameException, NoSuchAlgorithmException, IOException, InvalidKeyException,
           NoResponseException, XmlPullParserException, ErrorResponseException, InternalException,
           InvalidArgumentException, InsufficientDataException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Putting object '{}' in bucket '{}' ...", objectName, bucketName);
-    }
-
+    LOG.trace("Putting object '{}' in bucket '{}' ...", objectName, bucketName);
     minioClient.putObject(bucketName, objectName, stream, contentType);
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Put object '{}' in bucket '{}'", objectName, bucketName);
-    }
+    LOG.debug("Put object '{}' in bucket '{}'", objectName, bucketName);
   }
 
   /** @see MinioClient#statObject(String, String) */
@@ -51,16 +45,9 @@ class MinioClientFacade {
       throws InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException,
           IOException, InvalidKeyException, NoResponseException, XmlPullParserException,
           ErrorResponseException, InternalException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Retrieving metadata for object '{}' in bucket '{}' ...", objectName, bucketName);
-    }
-
+    LOG.trace("Retrieving metadata for object '{}' in bucket '{}' ...", objectName, bucketName);
     ObjectStat objectStat = minioClient.statObject(bucketName, objectName);
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Retrieved metadata for object '{}' in bucket '{}'", objectName, bucketName);
-    }
-
+    LOG.debug("Retrieved metadata for object '{}' in bucket '{}'", objectName, bucketName);
     return objectStat;
   }
 
@@ -69,15 +56,9 @@ class MinioClientFacade {
       throws InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException,
           IOException, InvalidKeyException, NoResponseException, XmlPullParserException,
           ErrorResponseException, InternalException, InvalidArgumentException {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("Removing object '{}' in bucket '{}' ...", objectName, bucketName);
-    }
-
+    LOG.trace("Removing object '{}' in bucket '{}' ...", objectName, bucketName);
     minioClient.removeObject(bucketName, objectName);
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Removed object '{}' in bucket '{}'", objectName, bucketName);
-    }
+    LOG.debug("Removed object '{}' in bucket '{}'", objectName, bucketName);
   }
 
   /** @see io.minio.MinioClient#getObject(java.lang.String, java.lang.String) */
@@ -85,10 +66,7 @@ class MinioClientFacade {
       throws InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException,
           IOException, InvalidKeyException, NoResponseException, XmlPullParserException,
           ErrorResponseException, InternalException, InvalidArgumentException {
-    if (LOG.isDebugEnabled()) {
-      LOG.trace("Streaming object '{}' in bucket '{}' ...", objectName, bucketName);
-    }
-
+    LOG.trace("Streaming object '{}' in bucket '{}' ...", objectName, bucketName);
     return minioClient.getObject(bucketName, objectName);
   }
 }
