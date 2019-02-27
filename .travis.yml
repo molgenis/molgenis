@@ -13,12 +13,13 @@ env:
     - PGPORT=5433
   # This configures the parallel jobs to run
   matrix:
-    - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433"
+    - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433 -Dminio.access.key=molgenis -Dminio.secret.key=molgenis"
     - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433"
 addons:
   sauce_connect: true
 sudo: required
 before_install:
+  - .ci/install-minio-6.sh
   - .ci/install-postgres-11.sh
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.5.4
