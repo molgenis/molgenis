@@ -15,7 +15,7 @@ import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
+import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  * transaction has its own cache. When the transaction is committed the cache is removed.
  */
 @Component
-public class L1Cache extends DefaultMolgenisTransactionListener {
+public class L1Cache implements TransactionListener {
   private static final Logger LOG = getLogger(L1Cache.class);
   private static final int MAX_CACHE_SIZE = 1000;
   private final ThreadLocal<CombinedEntityCache> caches;
