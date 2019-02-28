@@ -3,7 +3,6 @@ package org.molgenis.core.ui;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
-import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import org.molgenis.core.ui.browserdetection.BrowserDetectionFilter;
@@ -17,19 +16,10 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class MolgenisWebAppInitializer {
-  private static final int MB = 1024 * 1024;
-  // the size threshold after which multi-part files will be written to disk.
-  private static final int FILE_SIZE_THRESHOLD = 10 * MB;
   private static final Logger LOG = LoggerFactory.getLogger(MolgenisWebAppInitializer.class);
 
-  @SuppressWarnings("unused")
-  protected void onStartup(ServletContext servletContext, Class<?> appConfig) {
-    // no maximum field size provided? default to 32 Mb
-    onStartup(servletContext, appConfig, 32);
-  }
-
   /** A Molgenis common web application initializer */
-  protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize) {
+  protected void onStartup(ServletContext servletContext, Class<?> appConfig) {
     // Create the 'root' Spring application context
     AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
     rootContext.setAllowBeanDefinitionOverriding(false);
@@ -50,11 +40,8 @@ public class MolgenisWebAppInitializer {
       LOG.warn(
           "ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
     } else {
-      final long maxSize = (long) maxFileSize * MB;
-      dispatcherServletRegistration.addMapping("/");
-      dispatcherServletRegistration.setMultipartConfig(
-          new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
       dispatcherServletRegistration.setAsyncSupported(true);
+      dispatcherServletRegistration.addMapping("/");
     }
 
     // add filters

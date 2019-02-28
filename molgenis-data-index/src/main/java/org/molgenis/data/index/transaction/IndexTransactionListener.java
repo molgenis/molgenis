@@ -4,11 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
+import org.molgenis.data.transaction.TransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexTransactionListener extends DefaultMolgenisTransactionListener {
+public class IndexTransactionListener implements TransactionListener {
   private static final Logger LOG = LoggerFactory.getLogger(IndexTransactionListener.class);
 
   private IndexJobScheduler indexJobScheduler;

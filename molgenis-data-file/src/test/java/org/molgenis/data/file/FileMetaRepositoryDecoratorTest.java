@@ -26,17 +26,19 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<FileMeta> delegateRepository;
 
   @Mock private FileStore fileStore;
+  @Mock private BlobStore blobStore;
 
   private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(delegateRepository, fileStore);
+    fileMetaRepositoryDecorator =
+        new FileMetaRepositoryDecorator(delegateRepository, fileStore, blobStore);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testAppRepositoryDecorator() {
-    new FileMetaRepositoryDecorator(null, null);
+    new FileMetaRepositoryDecorator(null, null, null);
   }
 
   @Test
@@ -110,9 +112,19 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(fileStore).delete("id1");
   }
 
+  @Test
+  public void testDeleteBlobStore() {
+    FileMeta fileMeta = getMockFileMeta("id");
+    when(fileMeta.getUrl()).thenReturn("/api/files/v1/id?alt=media");
+    fileMetaRepositoryDecorator.delete(fileMeta);
+    verify(delegateRepository).delete(fileMeta);
+    verify(blobStore).delete("id");
+  }
+
   private FileMeta getMockFileMeta(String id) {
     FileMeta fileMeta = mock(FileMeta.class);
     when(fileMeta.getId()).thenReturn(id);
+    when(fileMeta.getUrl()).thenReturn("/files/" + id);
     return fileMeta;
   }
 }
