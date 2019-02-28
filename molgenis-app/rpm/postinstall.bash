@@ -21,7 +21,7 @@ echo "[INFO] Move the specific version to the ROOT.war"
 echo "[INFO] Copy MOLGENIS war on tomcat"
 echo "----------------------------------------"
 mv /usr/local/share/molgenis/war/*.war /usr/local/share/molgenis/war/ROOT.war
-cp /usr/local/share/molgenis/war/ROOT.war /usr/share/tomcat/webapps/ROOT.war
+cp -rp /usr/local/share/molgenis/war/ROOT.war /usr/share/tomcat/webapps/ROOT.war
 
 echo "--------------------------------------------------"
 echo "[INFO] Determine if there is a molgenis-server.properties"
