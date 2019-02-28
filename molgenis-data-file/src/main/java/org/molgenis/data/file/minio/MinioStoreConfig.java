@@ -30,11 +30,11 @@ public class MinioStoreConfig {
   private final TransactionManager transactionManager;
 
   public MinioStoreConfig(
-      @Value("${minio.bucket.name:molgenis}") String bucketName,
-      @Value("${minio.endpoint:http://127.0.0.1:9000}") String minioEndpoint,
-      @Value("${minio.access.key:@null}") String minioAccessKey,
-      @Value("${minio.secret.key:@null}") String minioSecretKey,
-      @Nullable @Value("${minio.region:@null}") String minioRegion,
+      @Value("${MINIO_BUCKET_NAME:molgenis}") String bucketName,
+      @Value("${MINIO_ENDPOINT:http://127.0.0.1:9000}") String minioEndpoint,
+      @Value("${MINIO_ACCESS_KEY:@null}") String minioAccessKey,
+      @Value("${MINIO_SECRET_KEY:@null}") String minioSecretKey,
+      @Nullable @Value("${MINIO_REGION:@null}") String minioRegion,
       IdGenerator idGenerator,
       TransactionManager transactionManager) {
     // No 'beans' of 'TransactionManager' type found error can't be resolved since the
