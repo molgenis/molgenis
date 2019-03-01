@@ -13,7 +13,7 @@ env:
     - PGPORT=5433
   # This configures the parallel jobs to run
   matrix:
-    - COV_FLAG="api"                       SCRIPT="./mvnw -X verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433 -DMINIO_ACCESS_KEY=molgenis -DMINIO_SECRET_KEY=molgenis"
+    - COV_FLAG="api"                       SCRIPT="export MINIO_ACCESS_KEY=molgenis; export MINIO_SECRET_KEY=molgenis; ./mvnw -X verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433;"
     - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433 -Dminio.access.key=molgenis -Dminio.access.secret=molgenis"
 addons:
   sauce_connect: true
