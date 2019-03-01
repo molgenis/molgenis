@@ -9,4 +9,4 @@ export MINIO_SECRET_KEY=molgenis
   -Dmaven.test.redirectTestOutputToFile=true \
   -Dit_db_user=postgres \
   -Dit_db_password=molgenis \
-  -Dit_db_port=5433 \
+  -Dit_db_port=5433
