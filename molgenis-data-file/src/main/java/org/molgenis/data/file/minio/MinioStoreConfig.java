@@ -30,11 +30,11 @@ public class MinioStoreConfig {
   private final TransactionManager transactionManager;
 
   public MinioStoreConfig(
-      @Value("${minio.bucket.name:molgenis}") String bucketName,
-      @Value("${minio.endpoint:http://127.0.0.1:9000}") String minioEndpoint,
-      @Value("${minio.access.key:@null}") String minioAccessKey,
-      @Value("${minio.secret.key:@null}") String minioSecretKey,
-      @Nullable @Value("${minio.region:@null}") String minioRegion,
+      @Value("${MINIO_BUCKET_NAME:molgenis}") String bucketName,
+      @Value("${MINIO_ENDPOINT:http://127.0.0.1:9000}") String minioEndpoint,
+      @Value("${MINIO_ACCESS_KEY:@null}") String minioAccessKey,
+      @Value("${MINIO_SECRET_KEY:@null}") String minioSecretKey,
+      @Nullable @Value("${MINIO_REGION:@null}") String minioRegion,
       IdGenerator idGenerator,
       TransactionManager transactionManager) {
     // No 'beans' of 'TransactionManager' type found error can't be resolved since the
@@ -72,16 +72,16 @@ public class MinioStoreConfig {
   @Bean
   public MinioClientFactory minioClientFactory() {
     if (bucketName == null || bucketName.isEmpty()) {
-      throw new IllegalArgumentException("Property 'minio.bucket.name' cannot be null or empty");
+      throw new IllegalArgumentException("Property 'MINIO_BUCKET_NAME' cannot be null or empty");
     }
     if (minioEndpoint == null || minioEndpoint.isEmpty()) {
-      throw new IllegalArgumentException("Property 'minio.endpoint' cannot be null or empty");
+      throw new IllegalArgumentException("Property 'MINIO_ENDPOINT' cannot be null or empty");
     }
     if (minioAccessKey == null || minioAccessKey.isEmpty()) {
-      throw new IllegalArgumentException("Property 'minio.access.key' cannot be null or empty");
+      throw new IllegalArgumentException("Property 'MINIO_ACCESS_KEY' cannot be null or empty");
     }
     if (minioSecretKey == null || minioSecretKey.isEmpty()) {
-      throw new IllegalArgumentException("Property 'minio.secret.key' cannot be null or empty");
+      throw new IllegalArgumentException("Property 'MINIO_SECRET_KEY' cannot be null or empty");
     }
     return new MinioClientFactoryImpl(
         bucketName, minioEndpoint, minioAccessKey, minioSecretKey, minioRegion);
