@@ -207,19 +207,21 @@ public class RScriptExecutor {
   private URI getOpenCpuUri() {
     try {
       URI uri;
-      if(openCpuSettings.getPort() == null) {
-        uri = new URIBuilder()
-            .setScheme(openCpuSettings.getScheme())
-            .setHost(openCpuSettings.getHost())
-            .setPath(openCpuSettings.getRootPath())
-            .build();
+      if (openCpuSettings.getPort() == null) {
+        uri =
+            new URIBuilder()
+                .setScheme(openCpuSettings.getScheme())
+                .setHost(openCpuSettings.getHost())
+                .setPath(openCpuSettings.getRootPath())
+                .build();
       } else {
-        uri = new URIBuilder()
-            .setScheme(openCpuSettings.getScheme())
-            .setHost(openCpuSettings.getHost())
-            .setPort(openCpuSettings.getPort())
-            .setPath(openCpuSettings.getRootPath())
-            .build();
+        uri =
+            new URIBuilder()
+                .setScheme(openCpuSettings.getScheme())
+                .setHost(openCpuSettings.getHost())
+                .setPort(openCpuSettings.getPort())
+                .setPath(openCpuSettings.getRootPath())
+                .build();
       }
       return uri;
     } catch (URISyntaxException e) {
