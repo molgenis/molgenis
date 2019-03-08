@@ -5,7 +5,7 @@ public interface OpenCpuSettings {
 
   String getHost();
 
-  int getPort();
+  Integer getPort();
 
   String getRootPath();
 }
