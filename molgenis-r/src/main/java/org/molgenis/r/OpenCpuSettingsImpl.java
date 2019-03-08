@@ -63,7 +63,7 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
       addAttribute(PORT)
           .setDataType(INT)
           .setDefaultValue(defaultPort)
-          .setNillable(false)
+          .setNillable(true)
           .setLabel("URI port")
           .setDescription("Open CPU URI port (e.g. 8004).");
       addAttribute(ROOT_PATH)
@@ -86,7 +86,7 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
   }
 
   @Override
-  public int getPort() {
+  public Integer getPort() {
     return getInt(PORT);
   }
 
