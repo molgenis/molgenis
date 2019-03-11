@@ -78,6 +78,11 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
   @Timed(value = "bootstrap", description = "Timing information for the bootstrapping event.")
   @Override
   public void onApplicationEvent(ContextRefreshedEvent event) {
+    // bootstrap only for root context, not for child contexts
+    if (event.getApplicationContext().getParent() != null) {
+      return;
+    }
+
     LOG.info("Bootstrapping application ...");
     bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 

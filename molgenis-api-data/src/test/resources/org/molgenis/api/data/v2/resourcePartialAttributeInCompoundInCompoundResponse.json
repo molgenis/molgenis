@@ -1,0 +1,68 @@
+{
+  "_meta": {
+    "href": "/v2/entity",
+    "hrefCollection": "/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/v2/entity/meta/compound",
+        "fieldType": "COMPOUND",
+        "name": "compound",
+        "label": "compound",
+        "attributes": [
+          {
+            "href": "/v2/entity/meta/compound_attrcompound",
+            "fieldType": "COMPOUND",
+            "name": "compound_attrcompound",
+            "label": "compound_attrcompound",
+            "attributes": [
+              {
+                "href": "/v2/entity/meta/compound_attrcompound_attr0",
+                "fieldType": "STRING",
+                "name": "compound_attrcompound_attr0",
+                "label": "compound_attrcompound_attr0",
+                "attributes": [],
+                "maxLength": 255,
+                "auto": false,
+                "nillable": false,
+                "readOnly": false,
+                "labelAttribute": false,
+                "unique": false,
+                "visible": true,
+                "lookupAttribute": false,
+                "isAggregatable": false
+              }
+            ],
+            "auto": false,
+            "nillable": true,
+            "readOnly": false,
+            "labelAttribute": false,
+            "unique": false,
+            "visible": true,
+            "lookupAttribute": false,
+            "isAggregatable": false
+          }
+        ],
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "nl"
+  },
+  "_href": "/v2/entity/0",
+  "compound_attrcompound_attr0": "compoundAttrCompoundAttr0Str"
+}

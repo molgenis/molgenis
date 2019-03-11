@@ -31,8 +31,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import org.molgenis.api.tests.utils.RestTestUtils;
-import org.molgenis.data.rest.EntityCollectionRequest;
-import org.molgenis.data.rest.EntityTypeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -168,7 +166,7 @@ public class RestControllerV1APIIT {
             .all()
             .header(X_MOLGENIS_TOKEN, testUserToken)
             .contentType(APPLICATION_JSON)
-            .body(new EntityTypeRequest())
+            .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/meta?_method=GET")
             .then()
@@ -201,7 +199,7 @@ public class RestControllerV1APIIT {
             .all()
             .header(X_MOLGENIS_TOKEN, testUserToken)
             .contentType(APPLICATION_JSON)
-            .body(new EntityTypeRequest())
+            .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/meta/value?_method=GET")
             .then()
@@ -234,7 +232,7 @@ public class RestControllerV1APIIT {
             .all()
             .header(X_MOLGENIS_TOKEN, testUserToken)
             .contentType(APPLICATION_JSON)
-            .body(new EntityTypeRequest())
+            .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=GET")
             .then()
@@ -267,7 +265,7 @@ public class RestControllerV1APIIT {
             .all()
             .header(X_MOLGENIS_TOKEN, testUserToken)
             .contentType(APPLICATION_JSON)
-            .body(new EntityCollectionRequest())
+            .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestAPIV1/1/xxref_value?_method=GET")
             .then()
@@ -300,7 +298,7 @@ public class RestControllerV1APIIT {
             .all()
             .header(X_MOLGENIS_TOKEN, testUserToken)
             .contentType(APPLICATION_JSON)
-            .body(new EntityCollectionRequest())
+            .body("{}")
             .when()
             .post(API_V1 + "V1_API_Items?_method=GET")
             .then()

@@ -91,11 +91,6 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-data-rest</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-data-security</artifactId>
       <version>${project.version}</version>
     </dependency>

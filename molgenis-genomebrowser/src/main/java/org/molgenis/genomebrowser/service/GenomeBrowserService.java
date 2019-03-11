@@ -36,8 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Service
 @RequestMapping(URI)
 public class GenomeBrowserService {
-  public static final String API = "/api";
-  public static final String URI = API + "/genomebrowser";
+  public static final String URI = "/genomebrowser";
 
   private final DataService dataService;
   private final UserPermissionEvaluator userPermissionEvaluator;

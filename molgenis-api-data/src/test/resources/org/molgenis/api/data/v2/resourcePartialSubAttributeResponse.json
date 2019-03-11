@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "href": "/v2/entity",
+    "hrefCollection": "/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/v2/entity/meta/xref",
+        "fieldType": "XREF",
+        "name": "xref",
+        "label": "xref",
+        "attributes": [],
+        "refEntity": {
+          "href": "/v2/refEntity",
+          "hrefCollection": "/v2/refEntity",
+          "name": "refEntity",
+          "label": "refEntity",
+          "attributes": [
+            {
+              "href": "/v2/refEntity/meta/value-nl",
+              "fieldType": "STRING",
+              "name": "value-nl",
+              "label": "value-nl",
+              "attributes": [],
+              "maxLength": 255,
+              "auto": false,
+              "nillable": false,
+              "readOnly": false,
+              "labelAttribute": true,
+              "unique": false,
+              "visible": true,
+              "lookupAttribute": false,
+              "isAggregatable": false
+            }
+          ],
+          "labelAttribute": "value-nl",
+          "idAttribute": "id",
+          "lookupAttributes": [
+            "id"
+          ],
+          "isAbstract": false,
+          "writable": false,
+          "languageCode": "nl"
+        },
+        "auto": false,
+        "nillable": false,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "nl"
+  },
+  "_href": "/v2/entity/0",
+  "xref": {
+    "_href": "/v2/refEntity/ref0",
+    "value-nl": "label0 in het Nederlands"
+  }
+}
