@@ -6,7 +6,6 @@ import static org.molgenis.data.security.auth.GroupService.AUTHORITY_MANAGER;
 import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
-import static org.molgenis.metrics.MetricsController.ROLE_METRICS;
 import static org.molgenis.security.core.SidUtils.getRoleName;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
@@ -33,6 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
   private static final Logger LOG = LoggerFactory.getLogger(UsersRolesPopulatorImpl.class);
+
+  // TODO remove once it is possible for a module to register users and roles with this populator
+  private static final String ROLE_METRICS = "ROLE_METRICS";
 
   private static final String USERNAME_ADMIN = "admin";
 
