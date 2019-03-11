@@ -2,9 +2,7 @@ package org.molgenis.data.listeners;
 
 import org.molgenis.data.Entity;
 
-/**
- * Entity listeners can be added to repositories to listen to changes in entities with a given id.
- */
+/** Entity listeners can be added to repositories to listen to changes in data with a given id. */
 public interface EntityListener {
   /**
    * Returns the entity type id

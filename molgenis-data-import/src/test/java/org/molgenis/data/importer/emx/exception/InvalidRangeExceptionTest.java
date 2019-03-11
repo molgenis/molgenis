@@ -26,14 +26,14 @@ public class InvalidRangeExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {
-        "en",
-        "Invalid value 'one' for column 'rangeMax' for attribute 'attributeName' of entity 'entityId', should be a long(sheet: 'entities', row 8)"
-      },
-      {
-        "nl",
-        "Incorrecte waarde 'one' voor kolom 'rangeMax' voor attribuut 'attributeName' van entiteit 'entityId', waarde moet van type long zijn. (werkblad: 'entities', rij 8)"
-      }
+        new Object[] {
+            "en",
+            "Invalid value 'one' for column 'rangeMax' for attribute 'attributeName' of entity 'entityId', should be a long(sheet: 'entities', row 8)"
+        },
+        {
+            "nl",
+            "Incorrecte waarde 'one' voor kolom 'rangeMax' voor attribuut 'attributeName' van entiteit 'entityId', waarde moet van type long zijn. (werkblad: 'entities', rij 8)"
+        }
     };
   }
 }

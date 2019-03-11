@@ -239,7 +239,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
   public void testFindAttributes() {
     EntityType sourceEntityType = entityTypeFactory.create("sourceEntityType");
 
-    // Mock the id's of the attribute entities that should be searched
+    // Mock the id's of the attribute data that should be searched
     List<String> attributeIdentifiers = asList("1", "2");
     when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType))
         .thenReturn(attributeIdentifiers);

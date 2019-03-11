@@ -142,7 +142,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
   MolgenisValidationException translateReadonlyViolation(PSQLException pSqlException) {
     Matcher matcher =
         Pattern.compile(
-                "Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
+            "Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
             .matcher(pSqlException.getServerErrorMessage().getMessage());
     boolean matches = matcher.matches();
     if (!matches) {
@@ -173,7 +173,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     String detail = serverErrorMessage.getDetail();
     Matcher matcher =
         Pattern.compile(
-                "constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
+            "constraint (.+) on table \"?([^\"]+)\"? depends on table \"?([^\"]+)\"?\n?")
             .matcher(detail);
 
     Map<String, Set<String>> entityTypeDependencyMap = new LinkedHashMap<>();
@@ -372,7 +372,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     Matcher messageMatcher =
         Pattern.compile(
-                "update or delete on table \"(.*)\" violates foreign key constraint \"(.*)\" on table \"(.*)\"")
+            "update or delete on table \"(.*)\" violates foreign key constraint \"(.*)\" on table \"(.*)\"")
             .matcher(serverErrorMessage.getMessage());
     if (!messageMatcher.matches()) {
       LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);

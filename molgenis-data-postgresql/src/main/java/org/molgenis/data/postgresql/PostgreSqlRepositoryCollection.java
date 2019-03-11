@@ -140,11 +140,11 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
   @Override
   public Iterable<String> getEntityTypeIds() {
     return dataService
-            .query(ENTITY_TYPE_META_DATA, EntityType.class)
-            .eq(BACKEND, POSTGRESQL)
-            .fetch(getEntityTypeFetch())
-            .findAll()
-            .map(EntityType::getId)
+        .query(ENTITY_TYPE_META_DATA, EntityType.class)
+        .eq(BACKEND, POSTGRESQL)
+        .fetch(getEntityTypeFetch())
+        .findAll()
+        .map(EntityType::getId)
         ::iterator;
   }
 
@@ -571,7 +571,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
                   Object postgreSqlValue =
                       refEntity != null
                           ? getPostgreSqlValue(
-                              refEntity, refEntity.getEntityType().getIdAttribute())
+                          refEntity, refEntity.getEntityType().getIdAttribute())
                           : null;
                   ps.setObject(1, postgreSqlValue);
                   ps.setObject(2, getPostgreSqlValue(entity, idAttribute));

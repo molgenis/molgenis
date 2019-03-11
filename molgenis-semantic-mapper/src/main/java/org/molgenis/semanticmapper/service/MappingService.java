@@ -51,7 +51,7 @@ public interface MappingService {
    * @param packageId the id of the destination Package, ignored when mapping to existing EntityType
    * @param label label of the target EntityType, ignored when mapping to existing EntityType
    * @param progress progress of the mapping
-   * @return the total amount of entities mapped
+   * @return the total amount of data mapped
    */
   @Timed(
       value = "service.mapper",

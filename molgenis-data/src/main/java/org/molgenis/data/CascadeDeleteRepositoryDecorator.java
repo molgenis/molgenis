@@ -88,7 +88,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
   }
 
   /**
-   * Guarantee that referenced entities for attributes with cascade delete are loaded, e.g. in case
+   * Guarantee that referenced data for attributes with cascade delete are loaded, e.g. in case
    * entity is a lazy or partial entity.
    */
   private void prepareCascadeDeletes(Entity entity) {
@@ -109,7 +109,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
       refEntityStream = stream(entities);
     }
 
-    // delete one-by-one and first check if exists because entities might not exist due to earlier
+    // delete one-by-one and first check if exists because data might not exist due to earlier
     // deletes
     String refEntityTypeName = attribute.getRefEntity().getId();
     refEntityStream.forEach(

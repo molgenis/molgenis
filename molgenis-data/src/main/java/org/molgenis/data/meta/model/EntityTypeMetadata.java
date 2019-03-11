@@ -96,7 +96,7 @@ public class EntityTypeMetadata extends SystemEntityType {
         .setDataType(INT)
         .setLabel("Indexing depth")
         .setDescription(
-            "1 = index attributes and referenced entities (default) 2 = index attributes, referenced entities and entities referenced by referenced entities")
+            "1 = index attributes and referenced data (default) 2 = index attributes, referenced data and data referenced by referenced data")
         .setNillable(false)
         .setDefaultValue(String.valueOf(1))
         .setRangeMin(1L);

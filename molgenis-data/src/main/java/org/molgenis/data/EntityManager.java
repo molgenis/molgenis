@@ -9,8 +9,8 @@ import org.molgenis.data.meta.model.EntityType;
  */
 public interface EntityManager {
   /**
-   * Creation mode that defines whether or not to populate entities with auto generated ando/or
-   * default values.
+   * Creation mode that defines whether or not to populate data with auto generated ando/or default
+   * values.
    */
   enum CreationMode {
     POPULATE,
@@ -53,13 +53,13 @@ public interface EntityManager {
    *
    * @param entityType entity meta data
    * @param ids entity identifiers
-   * @return entities
+   * @return data
    */
   Iterable<Entity> getReferences(EntityType entityType, Iterable<?> ids);
 
   /**
-   * Resolve entities referenced by a given entity based on provided fetch information. Given entity
-   * is modified by setting references.
+   * Resolve data referenced by a given entity based on provided fetch information. Given entity is
+   * modified by setting references.
    *
    * @param entityType entity meta data
    * @param entity entity
@@ -69,13 +69,13 @@ public interface EntityManager {
   Entity resolveReferences(EntityType entityType, Entity entity, Fetch fetch);
 
   /**
-   * Resolve entities referenced by a given list of entities based on provided fetch information.
-   * Given entities are modified by setting references.
+   * Resolve data referenced by a given list of data based on provided fetch information. Given data
+   * are modified by setting references.
    *
    * @param entityType entity meta data
-   * @param entities entities
+   * @param entities data
    * @param fetch entity data fetch
-   * @return entities with resolved references
+   * @return data with resolved references
    */
   Stream<Entity> resolveReferences(EntityType entityType, Stream<Entity> entities, Fetch fetch);
 }

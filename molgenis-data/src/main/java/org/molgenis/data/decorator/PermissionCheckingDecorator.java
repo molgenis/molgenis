@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Decorator that checks if actions on this repository are allowed using a PermissionChecker.
  *
- * @param <E> the class of the entities in the repository
+ * @param <E> the class of the data in the repository
  */
 public class PermissionCheckingDecorator<E extends Entity> extends AbstractRepositoryDecorator<E> {
   private static final int BATCH_SIZE = 1000;

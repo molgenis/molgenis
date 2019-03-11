@@ -12,7 +12,7 @@ import java.util.List;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
-/** Base EntityType for 'questionnaire' entities */
+/** Base EntityType for 'questionnaire' data */
 @Component
 public class QuestionnaireMetaData extends SystemEntityType {
   private static final String SIMPLE_NAME = "Questionnaire";

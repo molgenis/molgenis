@@ -91,27 +91,27 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
         .thenReturn(asList(entityType2, entityType1, entityType0));
 
     doAnswer(
-            invocation -> {
-              Stream<Entity> entityStream = (Stream<Entity>) invocation.getArguments()[1];
-              try {
-                //noinspection ResultOfMethodCallIgnored
-                entityStream.collect(toList());
-              } catch (IllegalStateException ignored) {
-              }
-              return null;
-            })
+        invocation -> {
+          Stream<Entity> entityStream = (Stream<Entity>) invocation.getArguments()[1];
+          try {
+            //noinspection ResultOfMethodCallIgnored
+            entityStream.collect(toList());
+          } catch (IllegalStateException ignored) {
+          }
+          return null;
+        })
         .when(dataService)
         .add(anyString(), any(Stream.class));
     doAnswer(
-            invocation -> {
-              Stream<Entity> entityStream = (Stream<Entity>) invocation.getArguments()[1];
-              try {
-                //noinspection ResultOfMethodCallIgnored
-                entityStream.collect(toList());
-              } catch (IllegalStateException ignored) {
-              }
-              return null;
-            })
+        invocation -> {
+          Stream<Entity> entityStream = (Stream<Entity>) invocation.getArguments()[1];
+          try {
+            //noinspection ResultOfMethodCallIgnored
+            entityStream.collect(toList());
+          } catch (IllegalStateException ignored) {
+          }
+          return null;
+        })
         .when(dataService)
         .update(anyString(), any(Stream.class));
   }
@@ -275,10 +275,10 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
     Query<EntityType> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(query);
     when(query
-            .in(
-                EntityTypeMetadata.ID,
-                Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))
-            .findAll())
+        .in(
+            EntityTypeMetadata.ID,
+            Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))
+        .findAll())
         .thenReturn(Stream.of(existingEntityType2, existingEntityType1, existingEntityType0));
 
     PersistResult persistResult =
@@ -319,10 +319,10 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
     Query<EntityType> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(query);
     when(query
-            .in(
-                EntityTypeMetadata.ID,
-                Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))
-            .findAll())
+        .in(
+            EntityTypeMetadata.ID,
+            Sets.newHashSet(entityType2.getId(), entityType1.getId(), entityType0.getId()))
+        .findAll())
         .thenReturn(Stream.of(existingEntityType2, existingEntityType1, existingEntityType0));
 
     PersistResult persistResult =

@@ -1,0 +1,121 @@
+{
+  "_meta": {
+    "href": "/v2/entity",
+    "hrefCollection": "/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/v2/entity/meta/xref",
+        "fieldType": "XREF",
+        "name": "xref",
+        "label": "xref",
+        "attributes": [],
+        "refEntity": {
+          "href": "/v2/refEntity",
+          "hrefCollection": "/v2/refEntity",
+          "name": "refEntity",
+          "label": "refEntity",
+          "attributes": [
+            {
+              "href": "/v2/refEntity/meta/id",
+              "fieldType": "STRING",
+              "name": "id",
+              "label": "id",
+              "attributes": [],
+              "maxLength": 255,
+              "auto": false,
+              "nillable": false,
+              "readOnly": true,
+              "labelAttribute": false,
+              "unique": true,
+              "visible": false,
+              "lookupAttribute": true,
+              "isAggregatable": false
+            },
+            {
+              "href": "/v2/refEntity/meta/ref",
+              "fieldType": "XREF",
+              "name": "ref",
+              "label": "ref",
+              "attributes": [],
+              "refEntity": {
+                "href": "/v2/refRefEntity",
+                "hrefCollection": "/v2/refRefEntity",
+                "name": "refRefEntity",
+                "label": "refRefEntity",
+                "attributes": [
+                  {
+                    "href": "/v2/refRefEntity/meta/value-nl",
+                    "fieldType": "STRING",
+                    "name": "value-nl",
+                    "label": "value-nl",
+                    "attributes": [],
+                    "maxLength": 255,
+                    "auto": false,
+                    "nillable": false,
+                    "readOnly": false,
+                    "labelAttribute": true,
+                    "unique": false,
+                    "visible": true,
+                    "lookupAttribute": false,
+                    "isAggregatable": false
+                  }
+                ],
+                "labelAttribute": "value-nl",
+                "idAttribute": "id",
+                "lookupAttributes": [
+                  "id"
+                ],
+                "isAbstract": false,
+                "writable": false,
+                "languageCode": "nl"
+              },
+              "auto": false,
+              "nillable": true,
+              "readOnly": false,
+              "labelAttribute": false,
+              "unique": false,
+              "visible": true,
+              "lookupAttribute": false,
+              "isAggregatable": false
+            }
+          ],
+          "labelAttribute": "value-nl",
+          "idAttribute": "id",
+          "lookupAttributes": [
+            "id"
+          ],
+          "isAbstract": false,
+          "writable": false,
+          "languageCode": "nl"
+        },
+        "auto": false,
+        "nillable": false,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "nl"
+  },
+  "_href": "/v2/entity/0",
+  "xref": {
+    "_href": "/v2/refEntity/ref0",
+    "id": "ref0",
+    "ref": {
+      "_href": "/v2/refRefEntity/refRef0",
+      "value-nl": "value in het Nederlands"
+    }
+  }
+}

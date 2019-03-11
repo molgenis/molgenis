@@ -36,8 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Service
 @RequestMapping(URI)
 public class GenomeBrowserService {
-  public static final String API = "/api";
-  public static final String URI = API + "/genomebrowser";
+  public static final String URI = "/genomebrowser";
 
   private final DataService dataService;
   private final UserPermissionEvaluator userPermissionEvaluator;
@@ -62,7 +61,7 @@ public class GenomeBrowserService {
         : Collections.emptyMap();
   }
 
-  /** Get readable genome entities */
+  /** Get readable genome data */
   public List<String> getTracksString(Map<String, GenomeBrowserTrack> entityTracks) {
     List<String> results = new ArrayList<>();
     if (hasPermission()) {
@@ -124,8 +123,8 @@ public class GenomeBrowserService {
             .getMolgenisReferenceTracks()
             .forEach(referenceTrack -> result.put(referenceTrack.getId(), referenceTrack));
       } else { // Mode == ALL
-        // TODO Improve performance by rewriting to query that returns all genomic entities instead
-        // of retrieving all entities and determining which one is genomic
+        // TODO Improve performance by rewriting to query that returns all genomic data instead
+        // of retrieving all data and determining which one is genomic
         List<GenomeBrowserAttributes> defaultGenomeBrowserAttributes =
             getDefaultGenomeBrowserAttributes().collect(Collectors.toList());
         for (EntityType entityType :

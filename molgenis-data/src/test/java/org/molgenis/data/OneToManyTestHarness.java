@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Generates entities to use in tests with a OneToMany relation in the form of Authors and Books, or
+ * Generates data to use in tests with a OneToMany relation in the form of Authors and Books, or
  * Persons with self reference.
  */
 @Component
@@ -146,7 +146,7 @@ public class OneToManyTestHarness {
     }
   }
 
-  /** Create Author and Book test entities and set the Books.author fields. */
+  /** Create Author and Book test data and set the Books.author fields. */
   private AuthorsAndBooks createTestEntitiesSetBooksField(
       AbstractSystemEntityFactory authorFactory,
       AbstractSystemEntityFactory bookFactory,
@@ -193,7 +193,7 @@ public class OneToManyTestHarness {
     return newArrayList(book1, book2, book3);
   }
 
-  /** Create Person entities and set the Person.children field. */
+  /** Create Person data and set the Person.children field. */
   private List<Entity> createPersonEntities(AbstractSystemEntityFactory personFactory) {
     Entity person1 = personFactory.create();
     person1.set(PersonMetaData1.ID, PERSON_1);
@@ -214,7 +214,7 @@ public class OneToManyTestHarness {
     return newArrayList(person1, person2, person3);
   }
 
-  /** Simple container for Author and Book entities so they can be requested as one. */
+  /** Simple container for Author and Book data so they can be requested as one. */
   public static class AuthorsAndBooks {
     private final List<Entity> books;
     private final List<Entity> authors;

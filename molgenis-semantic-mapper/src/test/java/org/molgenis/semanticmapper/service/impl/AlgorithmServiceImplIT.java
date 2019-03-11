@@ -245,7 +245,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetXrefScript() throws ParseException {
-    // xref entities
+    // xref data
     EntityType entityTypeXref = entityTypeFactory.create("xrefEntity1");
     entityTypeXref.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
     entityTypeXref.addAttribute(attrMetaFactory.create().setName("field1"));
@@ -353,7 +353,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     String sourceEntityAttrName = "mref-source";
     String targetEntityAttrName = "mref-target";
 
-    // ref entities
+    // ref data
     EntityType refEntityType = entityTypeFactory.create(refEntityName);
     refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
     refEntityType.addAttribute(
@@ -405,7 +405,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     String sourceEntityAttrName = "mref-source";
     String targetEntityAttrName = "mref-target";
 
-    // ref entities
+    // ref data
     EntityType refEntityType = entityTypeFactory.create(refEntityName);
     refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
     refEntityType.addAttribute(

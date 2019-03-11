@@ -75,8 +75,7 @@ public class GroupService {
   }
 
   /**
-   * Creates {@link Group}, {@link Role} and {@link Package} entities and adds them to the
-   * dataService.
+   * Creates {@link Group}, {@link Role} and {@link Package} entities and adds them to the dataService.
    *
    * @param groupValue details of the group that should be created
    */

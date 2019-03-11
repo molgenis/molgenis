@@ -244,7 +244,7 @@ public class EntityType extends StaticEntity implements Labeled {
   }
 
   /**
-   * The name of the repostory collection/backend where the entities of this type are stored
+   * The name of the repostory collection/backend where the data of this type are stored
    *
    * @return backend name
    */

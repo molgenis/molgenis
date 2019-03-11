@@ -31,7 +31,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * Entity manager responsible for creating entities, entity references and resolving references of
+ * Entity manager responsible for creating data, entity references and resolving references of
  * reference attributes.
  */
 @Component
@@ -178,7 +178,7 @@ public class EntityManagerImpl implements EntityManager {
       refEntityAttrsMap.put(refEntityName, attr);
     }
 
-    // batch retrieve referred entities and replace entity references with actual entities
+    // batch retrieve referred data and replace entity references with actual data
     for (Entry<String, Collection<Object>> entry : lazyRefEntityIdsMap.asMap().entrySet()) {
       String refEntityName = entry.getKey();
 
@@ -188,7 +188,7 @@ public class EntityManagerImpl implements EntityManager {
       Set<Attribute> attrs = refEntityAttrsMap.get(refEntityName);
       Fetch subFetch = createSubFetch(fetch, attrs);
 
-      // retrieve referenced entities
+      // retrieve referenced data
       Stream<Entity> refEntities =
           dataService.findAll(refEntityName, entry.getValue().stream(), subFetch);
 
@@ -210,7 +210,7 @@ public class EntityManagerImpl implements EntityManager {
         } else if (isMultipleReferenceType(attr)) {
           String attrName = attr.getName();
           for (Entity entity : entities) {
-            // replace lazy entities with real entities
+            // replace lazy data with real data
             Iterable<Entity> lazyRefEntities = entity.getEntities(attrName);
             List<Entity> mrefEntities =
                 stream(lazyRefEntities.spliterator(), true)

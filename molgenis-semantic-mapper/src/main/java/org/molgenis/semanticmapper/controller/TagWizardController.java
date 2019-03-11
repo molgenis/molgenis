@@ -102,7 +102,7 @@ public class TagWizardController extends PluginController {
     }
 
     if (StringUtils.isEmpty(target)) {
-      throw new IllegalStateException("There are no entities available!");
+      throw new IllegalStateException("There are no data available!");
     }
 
     List<Ontology> ontologies = ontologyService.getOntologies();

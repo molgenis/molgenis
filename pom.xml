@@ -966,6 +966,10 @@
   <modules>
     <module>molgenis-amazon-bucket</module>
     <module>molgenis-api</module>
+    <module>molgenis-api-data</module>
+    <module>molgenis-api-fair</module>
+    <module>molgenis-api-identities</module>
+    <module>molgenis-api-metrics</module>
     <module>molgenis-api-tests</module>
     <module>molgenis-app</module>
     <module>molgenis-app-manager</module>
@@ -985,19 +989,18 @@
     <module>molgenis-data-platform</module>
     <module>molgenis-data-plugin</module>
     <module>molgenis-data-postgresql</module>
-    <module>molgenis-data-rest</module>
     <module>molgenis-data-row-edit</module>
     <module>molgenis-data-security</module>
     <module>molgenis-data-validation</module>
     <module>molgenis-data-vcf</module>
     <module>molgenis-data</module>
     <module>molgenis-dataexplorer</module>
-    <module>molgenis-fair</module>
     <module>molgenis-file-ingester</module>
     <module>molgenis-genomebrowser</module>
     <module>molgenis-jobs</module>
     <module>molgenis-js</module>
     <module>molgenis-metadata-manager</module>
+    <module>molgenis-metrics</module>
     <module>molgenis-navigator</module>
     <module>molgenis-one-click-importer</module>
     <module>molgenis-ontology-core</module>
@@ -1023,7 +1026,6 @@
     <module>molgenis-web</module>
     <module>molgenis-i18n</module>
     <module>molgenis-beacon</module>
-    <module>molgenis-metrics</module>
     <module>molgenis-frontend</module>
   </modules>
 </project>

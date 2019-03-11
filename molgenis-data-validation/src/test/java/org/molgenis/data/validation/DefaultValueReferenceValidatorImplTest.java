@@ -167,12 +167,12 @@ public class DefaultValueReferenceValidatorImplTest {
 
   private void initializeDataServiceMock(Stream<Attribute> attributeStream) {
     when(dataService
-            .query(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)
-            .eq(REF_ENTITY_TYPE, "entityTypeId")
-            .and()
-            .not()
-            .eq(DEFAULT_VALUE, null)
-            .findAll())
+        .query(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)
+        .eq(REF_ENTITY_TYPE, "entityTypeId")
+        .and()
+        .not()
+        .eq(DEFAULT_VALUE, null)
+        .findAll())
         .thenReturn(attributeStream);
   }
 }

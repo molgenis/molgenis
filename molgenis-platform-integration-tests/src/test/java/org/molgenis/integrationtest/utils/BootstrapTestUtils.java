@@ -90,9 +90,9 @@ public class BootstrapTestUtils {
           LOG.trace("Registered job factories");
 
           // Settings to database instead of using TestAppSettings
-          LOG.trace("Populating settings entities ...");
+          LOG.trace("Populating settings data ...");
           settingsPopulator.initialize(event);
-          LOG.trace("Populated settings entities");
+          LOG.trace("Populated settings data");
 
           event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
           return (Void) null;

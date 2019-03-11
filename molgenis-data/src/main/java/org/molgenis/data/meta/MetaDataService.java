@@ -63,7 +63,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
 
   /**
    * Returns whether a {@link Repository} exists for the given entity name. Always returns false for
-   * abstract entities.
+   * abstract data.
    *
    * @return true if non-abstract entity type exists for the given entity name
    */
@@ -213,7 +213,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
 
   /**
    * Add or update a collection of entity type and entity type attributes. Resolves the dependencies
-   * between them so that the entities and their metadata get added in proper order.
+   * between them so that the data and their metadata get added in proper order.
    *
    * <p>Adds ONE_TO_MANY attributes in a two-pass algorithm.
    *
@@ -244,10 +244,10 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
   void deleteAttributeById(Object id);
 
   /**
-   * Check the integration of an entity type with existing entities Check only if the existing
+   * Check the integration of an entity type with existing data Check only if the existing
    * attributes are the same as the new attributes
    *
-   * @param repositoryCollection the new entities
+   * @param repositoryCollection the new data
    */
   Map<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 

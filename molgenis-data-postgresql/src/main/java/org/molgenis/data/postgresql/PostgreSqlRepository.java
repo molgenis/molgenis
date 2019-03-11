@@ -601,8 +601,8 @@ class PostgreSqlRepository extends AbstractRepository {
     if (nrUpdatedEntities < entitiesBatch.size()) {
       Set<Object> existingEntityIds =
           findAll(
-                  entitiesBatch.stream().map(Entity::getIdValue),
-                  new Fetch().field(idAttr.getName()))
+              entitiesBatch.stream().map(Entity::getIdValue),
+              new Fetch().field(idAttr.getName()))
               .map(Entity::getIdValue)
               .collect(toSet());
       Object nonExistingEntityId =

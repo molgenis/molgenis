@@ -23,7 +23,7 @@ public class JobPackage extends SystemPackage {
   @Override
   protected void init() {
     setLabel("Jobs");
-    setDescription("Package containing al job related entities");
+    setDescription("Package containing al job related data");
     setParent(rootSystemPackage);
   }
 

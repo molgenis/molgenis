@@ -21,7 +21,7 @@ public interface EntityReferenceCreator {
    *
    * @param entityType entity meta data
    * @param ids entity identifiers
-   * @return entities
+   * @return data
    */
   Iterable<Entity> getReferences(EntityType entityType, Iterable<?> ids);
 }

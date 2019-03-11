@@ -42,7 +42,7 @@ public class PackageMetadata extends SystemEntityType {
   public void init() {
     setId(PACKAGE);
     setLabel(SIMPLE_NAME);
-    setDescription("Grouping of related entities");
+    setDescription("Grouping of related data");
 
     setIndexingDepth(2);
 

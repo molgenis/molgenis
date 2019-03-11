@@ -18,7 +18,7 @@ import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Base class for application and plugin settings entities. Settings are read/written from/to data
+ * Base class for application and plugin settings data. Settings are read/written from/to data
  * source. TODO: Bring this class up to date with 2.0, see http://www.molgenis.org/ticket/4787
  */
 public abstract class DefaultSettingsEntity extends StaticEntity implements Entity {

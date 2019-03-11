@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * AuthorMetaData2 and BookMetaData2 define two entities with a OneToMany relation with a required
- * XREF.
+ * AuthorMetaData2 and BookMetaData2 define two data with a OneToMany relation with a required XREF.
  */
 @Component
 public class BookMetaData2 extends SystemEntityType {

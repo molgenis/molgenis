@@ -5,7 +5,7 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Gives information about the current transaction's changes to entities. An entity or repository is
+ * Gives information about the current transaction's changes to data. An entity or repository is
  * considered dirty if it has been modified during this transaction. If no transaction is currently
  * running, everything is clean.
  */
@@ -21,7 +21,7 @@ public interface TransactionInformation {
   /**
    * Finds out if an entire repository has been dirtied in the current transaction. Even if this
    * method returns false, {@link #isEntityDirty(EntityKey)} can still return true for one or more
-   * entities
+   * data
    *
    * @param entityType of the repository
    * @return indication if the entire repository has been dirtied

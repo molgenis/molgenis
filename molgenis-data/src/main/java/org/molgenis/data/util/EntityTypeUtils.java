@@ -24,7 +24,7 @@ public class EntityTypeUtils {
   private EntityTypeUtils() {}
 
   /**
-   * Returns whether the attribute type references single entities (e.g. is 'XREF').
+   * Returns whether the attribute type references single data (e.g. is 'XREF').
    *
    * @param attr attribute
    * @return true if an attribute references a single entity
@@ -60,10 +60,10 @@ public class EntityTypeUtils {
   }
 
   /**
-   * Returns whether the attribute type references multiple entities (e.g. is 'MREF').
+   * Returns whether the attribute type references multiple data (e.g. is 'MREF').
    *
    * @param attr attribute
-   * @return true if an attribute references multiple entities
+   * @return true if an attribute references multiple data
    */
   public static boolean isMultipleReferenceType(Attribute attr) {
     AttributeType attrType = attr.getDataType();
@@ -96,20 +96,20 @@ public class EntityTypeUtils {
   }
 
   /**
-   * Returns whether the attribute references other entities (e.g. is 'XREF' or 'MREF').
+   * Returns whether the attribute references other data (e.g. is 'XREF' or 'MREF').
    *
    * @param attr attribute
-   * @return true if the attribute references other entities
+   * @return true if the attribute references other data
    */
   public static boolean isReferenceType(Attribute attr) {
     return isReferenceType(attr.getDataType());
   }
 
   /**
-   * Returns whether the attribute type references other entities (e.g. is 'XREF' or 'MREF').
+   * Returns whether the attribute type references other data (e.g. is 'XREF' or 'MREF').
    *
    * @param attrType attribute type
-   * @return true if the attribute type references other entities
+   * @return true if the attribute type references other data
    */
   public static boolean isReferenceType(AttributeType attrType) {
     switch (attrType) {

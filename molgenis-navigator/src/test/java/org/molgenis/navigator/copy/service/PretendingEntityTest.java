@@ -155,7 +155,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
 
   @Test(
       expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
+      expectedExceptionsMessageRegExp = "Can't return typed pretending data")
   public void testTypedReferenceIsNotFileMeta() {
     Entity entity = mock(Entity.class);
 
@@ -165,7 +165,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
 
   @Test(
       expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
+      expectedExceptionsMessageRegExp = "Can't return typed pretending data")
   public void testTypedMultiReferenceNotFileMeta() {
     Entity entity = mock(Entity.class);
 

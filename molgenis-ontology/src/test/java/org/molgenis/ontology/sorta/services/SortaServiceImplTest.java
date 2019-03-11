@@ -191,14 +191,14 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
     OntologyTermSynonym ontologyTermSynonym2 = ontologyTermSynonymFactory.create();
     ontologyTermSynonym2.setOntologyTermSynonym("ot_3");
 
-    // Mock ontologyTermDynamicAnnotation entities
+    // Mock ontologyTermDynamicAnnotation data
     OntologyTermDynamicAnnotation ontologyTermDynamicAnnotation_3_1 =
         ontologyTermDynamicAnnotationFactory.create();
     ontologyTermDynamicAnnotation_3_1.setName("OMIM");
     ontologyTermDynamicAnnotation_3_1.setValue("123456");
     ontologyTermDynamicAnnotation_3_1.setLabel("OMIM:123456");
 
-    // Mock ontologyTerm entity based on the previous entities defined
+    // Mock ontologyTerm entity based on the previous data defined
     OntologyTerm ontologyTermEntity_3 = ontologyTermFactory.create();
     ontologyTermEntity_3.setId("3");
     ontologyTermEntity_3.setOntology(ontology);
@@ -283,7 +283,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
     OntologyTermSynonym ontologyTermSynonym_4_3 = ontologyTermSynonymFactory.create();
     ontologyTermSynonym_4_3.setOntologyTermSynonym("Exophthalmos");
 
-    // Mock ontologyTerm entity based on the previous entities defined
+    // Mock ontologyTerm entity based on the previous data defined
     OntologyTerm ontologyTermEntity_4 = ontologyTermFactory.create();
     ontologyTermEntity_4.setId("4");
     ontologyTermEntity_4.setOntology(ontology);

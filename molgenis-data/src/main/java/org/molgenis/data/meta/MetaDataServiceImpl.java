@@ -186,8 +186,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
     if (LOG.isInfoEnabled()) {
       LOG.info(
-          "Removed entities [{}]",
-          entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+          "Removed data [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
     }
   }
 
@@ -318,7 +317,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   private void upsertEntityTypesSkipMappedByAttributes(
       List<EntityType> resolvedEntityType, Map<String, EntityType> existingEntityTypeMap) {
-    // 1st pass: create entities and attributes except for mappedBy attributes
+    // 1st pass: create data and attributes except for mappedBy attributes
     resolvedEntityType.forEach(
         entityType -> {
           EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());

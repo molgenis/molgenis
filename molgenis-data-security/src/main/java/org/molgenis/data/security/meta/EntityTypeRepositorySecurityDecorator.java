@@ -161,7 +161,7 @@ public class EntityTypeRepositorySecurityDecorator
       boolean checkPackage = isPackageUpdated(action, newEntityType);
       if (checkPackage
           && !userPermissionEvaluator.hasPermission(
-              new PackageIdentity(pack.getId()), PackagePermission.ADD_ENTITY_TYPE)) {
+          new PackageIdentity(pack.getId()), PackagePermission.ADD_ENTITY_TYPE)) {
         throw new PackagePermissionDeniedException(PackagePermission.ADD_ENTITY_TYPE, pack);
       }
     } else {

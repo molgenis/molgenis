@@ -25,7 +25,7 @@ public class TestPackage extends SystemPackage {
   @Override
   protected void init() {
     setLabel("Test");
-    setDescription("Package containing test related entities");
+    setDescription("Package containing test related data");
     setParent(rootSystemPackage);
   }
 }

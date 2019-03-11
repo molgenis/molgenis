@@ -15,6 +15,6 @@ public class RootSystemPackage extends SystemPackage {
   @Override
   protected void init() {
     setLabel("System");
-    setDescription("Package containing all system entities");
+    setDescription("Package containing all system data");
   }
 }

@@ -10,7 +10,7 @@ import org.molgenis.data.DataService;
 import org.springframework.stereotype.Component;
 
 /**
- * Populates {@link ScriptType} repository with script type entities based on existing {@link
+ * Populates {@link ScriptType} repository with script type data based on existing {@link
  * ScriptRunner script runners.}
  */
 @Component

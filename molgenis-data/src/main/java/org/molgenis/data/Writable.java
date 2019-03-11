@@ -8,7 +8,7 @@ public interface Writable extends Closeable {
   /** Add one entity */
   void add(Entity entity);
 
-  /** Stream add multiple entities */
+  /** Stream add multiple data */
   Integer add(Stream<? extends Entity> entities);
 
   void flush();

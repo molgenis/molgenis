@@ -70,7 +70,7 @@ public class FileIngester {
     progress.status("Ingestion of url '" + url + "' done.");
     Integer count = report.getNrImportedEntitiesMap().get(entityTypeId);
     count = count != null ? count : 0;
-    progress.progress(2, "Successfully imported " + count + " " + entityTypeId + " entities.");
+    progress.progress(2, "Successfully imported " + count + " " + entityTypeId + " data.");
 
     FileMeta fileMeta = createFileMeta(jobExecutionID, file);
 

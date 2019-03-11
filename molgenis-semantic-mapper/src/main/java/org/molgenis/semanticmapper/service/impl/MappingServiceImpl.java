@@ -311,7 +311,7 @@ public class MappingServiceImpl implements MappingService {
           throw new MolgenisDataException(
               format(
                   "In the mapping target, attribute %s of type %s has reference entity %s while in the target repository attribute %s of type %s has reference entity %s. "
-                      + "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository",
+                      + "Please make sure the reference data of your mapping target are pointing towards the same reference data as your target repository",
                   mappingTargetAttributeName,
                   mappingTargetAttributeType,
                   mappingTargetRefEntityName,
@@ -346,7 +346,7 @@ public class MappingServiceImpl implements MappingService {
                 processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities, depth),
             MAPPING_BATCH_SIZE);
 
-    progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
+    progress.status(format("Mapped %s [%s] data.", counter, sourceMapping.getLabel()));
     return counter.get();
   }
 

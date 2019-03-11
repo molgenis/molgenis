@@ -105,7 +105,7 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
     File tmpFile = File.createTempFile("download", ".csv");
     FileOutputStream fos = new FileOutputStream(tmpFile);
     dataExplorerDownloadHandler.writeToCsv(dataRequest, fos, ',');
-    assertEquals(readCsv(tmpFile), expected.get(entityTypeId), "entities should get exported");
+    assertEquals(readCsv(tmpFile), expected.get(entityTypeId), "data should get exported");
     assertTrue(tmpFile.delete());
     verifyNoMoreInteractions(refEntity1, refEntity2, attribute1, attribute2);
   }
@@ -220,7 +220,7 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
     File tmpFile = File.createTempFile("download", ".xlsx");
     FileOutputStream fos = new FileOutputStream(tmpFile);
     dataExplorerDownloadHandler.writeToExcel(dataRequest, fos);
-    assertEquals(readExcel(tmpFile), expected, "entities should get exported");
+    assertEquals(readExcel(tmpFile), expected, "data should get exported");
     assertTrue(tmpFile.delete());
     verifyNoMoreInteractions(refEntity1, refEntity2, attribute1, attribute2);
   }

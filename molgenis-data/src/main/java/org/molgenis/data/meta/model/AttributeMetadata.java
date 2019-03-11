@@ -139,7 +139,7 @@ public class AttributeMetadata extends SystemEntityType {
     addAttribute(IS_CASCADE_DELETE)
         .setDataType(BOOL)
         .setLabel("Cascade delete")
-        .setDescription("Delete corresponding referenced entities on delete")
+        .setDescription("Delete corresponding referenced data on delete")
         .setValidationExpression(getCascadeDeleteValidationExpression());
     addAttribute(MAPPED_BY)
         .setDataType(XREF)

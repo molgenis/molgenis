@@ -85,7 +85,7 @@ public class EntityTypeDependencyResolver {
    */
   private static Function<EntityTypeNode, Set<EntityTypeNode>> getDependencies() {
     return entityTypeNode -> {
-      // get referenced entities excluding entities of mappedBy attributes
+      // get referenced data excluding data of mappedBy attributes
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
           stream(entityType.getOwnAllAttributes())
@@ -116,7 +116,7 @@ public class EntityTypeDependencyResolver {
     }
 
     if (!entityTypeNode.isSkip()) {
-      // get referenced entities excluding entities of mappedBy attributes
+      // get referenced data excluding data of mappedBy attributes
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
           stream(entityType.getOwnAllAttributes())

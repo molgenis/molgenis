@@ -65,7 +65,7 @@ public class AttributeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
     verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.UPDATE));
   }
 
@@ -81,7 +81,7 @@ public class AttributeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
     verify(attributeValidator, times(1)).validate(any(Attribute.class), ValidationMode.UPDATE);
   }
 
@@ -113,7 +113,7 @@ public class AttributeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
     verify(attributeValidator, times(2)).validate(any(Attribute.class), eq(ValidationMode.ADD));
   }
 
@@ -129,7 +129,7 @@ public class AttributeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Attribute>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
     verify(attributeValidator, times(1)).validate(any(Attribute.class), ValidationMode.ADD);
   }
 }

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * AuthorMetaData4 and BookMetaData4 define two entities having a nullable OneToMany relation with a
+ * AuthorMetaData4 and BookMetaData4 define two data having a nullable OneToMany relation with a
  * descending order.
  */
 @Component

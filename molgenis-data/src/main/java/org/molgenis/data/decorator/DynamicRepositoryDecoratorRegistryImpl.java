@@ -107,7 +107,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
   }
 
   /**
-   * Collects the JSON parameters of one or more DecoratorParameters entities in a map, with the
+   * Collects the JSON parameters of one or more DecoratorParameters data in a map, with the
    * decorator's ID as the key and the JSON object as another key/value Map.
    */
   Map<String, Map<String, Object>> getParameterMap(DecoratorConfiguration configuration) {

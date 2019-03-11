@@ -162,7 +162,7 @@ public class DataExplorerController extends PluginController {
     if (!(entityExists && hasEntityPermission) && selectedEntityName != null) {
       message.append("Entity does not exist or you do not have permission on this entity");
       if (!SecurityUtils.currentUserIsAuthenticated()) {
-        message.append(", log in to view more entities");
+        message.append(", log in to view more data");
       } else {
         message.append(", please specify the fully qualified entity name");
       }

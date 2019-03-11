@@ -11,9 +11,8 @@ import javax.annotation.Nullable;
 import org.molgenis.data.meta.model.Attribute;
 
 /**
- * {@link Fetch} that defines which entity attributes to retrieve. For attributes referring to
- * entities a Fetch can be supplied that defines which entity attributes to retrieve for the
- * referred entity.
+ * {@link Fetch} that defines which entity attributes to retrieve. For attributes referring to data
+ * a Fetch can be supplied that defines which entity attributes to retrieve for the referred entity.
  *
  * <p>A null Fetch means that all attributes should be retrieved.
  */

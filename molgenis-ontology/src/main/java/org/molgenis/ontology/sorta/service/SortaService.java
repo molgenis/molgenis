@@ -4,9 +4,9 @@ import org.molgenis.data.Entity;
 
 public interface SortaService {
   /**
-   * Get all ontology entities in generic type
+   * Get all ontology data in generic type
    *
-   * @return list of untyped ontology entities
+   * @return list of untyped ontology data
    */
   Iterable<Entity> getAllOntologyEntities();
 
@@ -25,11 +25,11 @@ public interface SortaService {
   Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
 
   /**
-   * Find a list of relevant ontologyterm typed entities using lexical matching (elasticsearch +
-   * ngram) in generic type based on given ontologyIri and a set of query inputs (name, synonym,
-   * ontology database id, e.g. hpo, omim)
+   * Find a list of relevant ontologyterm typed data using lexical matching (elasticsearch + ngram)
+   * in generic type based on given ontologyIri and a set of query inputs (name, synonym, ontology
+   * database id, e.g. hpo, omim)
    *
-   * @return a list of ontologyterm entities in generic type
+   * @return a list of ontologyterm data in generic type
    */
   Iterable<Entity> findOntologyTermEntities(String ontologyIri, Entity inputEntity);
 }

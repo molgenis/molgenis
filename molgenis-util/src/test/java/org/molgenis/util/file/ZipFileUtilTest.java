@@ -46,7 +46,7 @@ public class ZipFileUtilTest {
         ImmutableMap.of(
             tempDirPath.resolve("attributes.csv"),
             "4cc30a6b867ce0689f19bdaadcd30dd9",
-            tempDirPath.resolve("entities.csv"),
+            tempDirPath.resolve("data.csv"),
             "8a306d69b8654f54f1e9175ce68b5a6f",
             tempDirPath.resolve("it_csv_hospital.csv"),
             "87824a0ec5312a81e4f9fd8ad51b666b",

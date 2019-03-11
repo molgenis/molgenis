@@ -22,7 +22,7 @@ public class MetaPackage extends SystemPackage {
   @Override
   protected void init() {
     setLabel("Meta");
-    setDescription("Package containing all meta data entities");
+    setDescription("Package containing all meta data data");
     setParent(rootSystemPackage);
   }
 }

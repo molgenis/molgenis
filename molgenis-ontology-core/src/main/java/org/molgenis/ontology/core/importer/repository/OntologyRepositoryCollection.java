@@ -256,7 +256,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
    * Creates {@link OntologyTermDynamicAnnotationMetadata} {@link Entity}s for the databaseIds of an
    * ontology term.
    *
-   * @param term the term to create annotation entities for
+   * @param term the term to create annotation data for
    * @return List of created {@link Entity}s.
    */
   private List<OntologyTermDynamicAnnotation> createDynamicAnnotations(OWLClass term) {

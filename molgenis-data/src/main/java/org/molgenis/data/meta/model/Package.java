@@ -165,9 +165,9 @@ public class Package extends StaticEntity {
   }
 
   /**
-   * Gets the entities in this package. Does not return entities referred to by sub-packages
+   * Gets the data in this package. Does not return data referred to by sub-packages
    *
-   * @return package entities
+   * @return package data
    */
   public Iterable<EntityType> getEntityTypes() {
     return getEntities(ENTITY_TYPES, EntityType.class);

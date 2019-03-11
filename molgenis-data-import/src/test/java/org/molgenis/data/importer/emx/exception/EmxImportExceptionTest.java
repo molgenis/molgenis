@@ -27,10 +27,10 @@ public class EmxImportExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {
-        "en", "Import failed: panic: stuff went wrong here! (sheet: 'entities', row 29)"
-      },
-      {"nl", "Inladen gefaald: panic: stuff went wrong here! (werkblad: 'entities', rij 29)"}
+        new Object[] {
+            "en", "Import failed: panic: stuff went wrong here! (sheet: 'entities', row 29)"
+        },
+        {"nl", "Inladen gefaald: panic: stuff went wrong here! (werkblad: 'entities', rij 29)"}
     };
   }
 }

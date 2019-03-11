@@ -30,10 +30,10 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Decorator for the entity meta data repository: - filters requested entities based on the
- * permissions of the current user. - applies updates to the repository collection for entity meta
- * data adds/deletes - adds and removes attribute columns to the repository collection for entity
- * meta data updates
+ * Decorator for the entity meta data repository: - filters requested data based on the permissions
+ * of the current user. - applies updates to the repository collection for entity meta data
+ * adds/deletes - adds and removes attribute columns to the repository collection for entity meta
+ * data updates
  *
  * <p>TODO replace permission based entity filtering with generic row-level security once available
  */
@@ -110,7 +110,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
   }
 
   private void addEntityType(EntityType entityType) {
-    // add row to entities table
+    // add row to data table
     delegate().add(entityType);
     if (!entityType.isAbstract() && !MetaDataService.isMetaEntityType(entityType)) {
       RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
@@ -225,7 +225,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
     // delete rows from attributes table
     deleteEntityAttributes(entityType);
 
-    // delete row from entities table
+    // delete row from data table
     delegate().delete(entityType);
   }
 

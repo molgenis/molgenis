@@ -35,8 +35,8 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   }
 
   /**
-   * Upserts a batch of entities into this repository. Entities that are already present are
-   * updated, new entities are added.
+   * Upserts a batch of data into this repository. Entities that are already present are updated,
+   * new data are added.
    *
    * @param entities List of Entities to upsert
    */
@@ -52,9 +52,9 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   }
 
   /**
-   * Executes a function for each batch of entities.
+   * Executes a function for each batch of data.
    *
-   * @param consumer function to call for each batch of entities
+   * @param consumer function to call for each batch of data
    * @param batchSize size of the batches to feed to the consumer
    */
   default void forEachBatched(Consumer<List<E>> consumer, int batchSize) {
@@ -62,10 +62,10 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   }
 
   /**
-   * Executes a function for each batch of entities.
+   * Executes a function for each batch of data.
    *
    * @param fetch fetch defining which attributes to retrieve
-   * @param consumer function to call for each batch of entities
+   * @param consumer function to call for each batch of data
    * @param batchSize size of the batches to feed to the consumer
    */
   void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize);
@@ -99,9 +99,9 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   EntityType getEntityType();
 
   /**
-   * Returns the number of entities in this repository
+   * Returns the number of data in this repository
    *
-   * @return the number of entities in this repository
+   * @return the number of data in this repository
    */
   long count();
 
@@ -113,14 +113,14 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   Query<E> query();
 
   /**
-   * return number of entities matched by query
+   * return number of data matched by query
    *
    * @param q query
    */
   long count(Query<E> q);
 
   /**
-   * Find entities that match a query. Returns empty stream if no matches.
+   * Find data that match a query. Returns empty stream if no matches.
    *
    * @param q query
    * @return (empty) Stream, never null
@@ -158,19 +158,19 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   E findOneById(Object id, Fetch fetch);
 
   /**
-   * Finds all entities with the given IDs. Returns empty stream if no matches.
+   * Finds all data with the given IDs. Returns empty stream if no matches.
    *
    * @param ids entity ids
-   * @return (empty) Stream where the order of entities matches the order of ids, never null
+   * @return (empty) Stream where the order of data matches the order of ids, never null
    */
   Stream<E> findAll(Stream<Object> ids);
 
   /**
-   * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
+   * Finds all data with the given IDs, with a fetch. Returns empty stream if no matches.
    *
    * @param ids entity ids
    * @param fetch fetch defining which attributes to retrieve
-   * @return (empty) Stream where the order of entities matches the order of ids, never null
+   * @return (empty) Stream where the order of data matches the order of ids, never null
    * @throws MolgenisDataAccessException if access to an entity one of the given IDs is not allowed
    */
   Stream<E> findAll(Stream<Object> ids, Fetch fetch);
@@ -189,7 +189,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   void update(E entity);
 
   /**
-   * Updates the given entities
+   * Updates the given data
    *
    * @param entities entity stream
    */
@@ -203,7 +203,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   void delete(E entity);
 
   /**
-   * Delete entities from repository
+   * Delete data from repository
    *
    * @param entities entity stream
    */
@@ -219,13 +219,13 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   void deleteById(Object id);
 
   /**
-   * Delete entities by id
+   * Delete data by id
    *
    * @param ids entity ids
    */
   void deleteAll(Stream<Object> ids);
 
-  /** Delete all entities */
+  /** Delete all data */
   void deleteAll();
 
   /**
@@ -236,10 +236,10 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
   void add(E entity);
 
   /**
-   * Add entities to repository
+   * Add data to repository
    *
    * @param entities entity stream
-   * @return number of added entities
+   * @return number of added data
    */
   Integer add(Stream<E> entities);
 }

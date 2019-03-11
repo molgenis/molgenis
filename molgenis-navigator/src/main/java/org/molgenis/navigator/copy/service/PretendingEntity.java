@@ -11,7 +11,7 @@ import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * When copying rows from one repository to another, the metadata of these entities will not fit the
+ * When copying rows from one repository to another, the metadata of these data will not fit the
  * copied repository and its references because the metadatas will have different IDs. The
  * PretendingEntity acts like it's the newly copied entity by returning the metadata of the copied
  * repository instead of the original.
@@ -52,7 +52,7 @@ class PretendingEntity extends AbstractEntityDecorator {
     if (clazz.equals(FileMeta.class)) {
       return entity != null ? (E) new FileMeta(newPretendingEntity(entity)) : null;
     } else {
-      throw new UnsupportedOperationException("Can't return typed pretending entities");
+      throw new UnsupportedOperationException("Can't return typed pretending data");
     }
   }
 
@@ -77,7 +77,7 @@ class PretendingEntity extends AbstractEntityDecorator {
           .map(e -> (E) new FileMeta(e))
           .collect(toList());
     } else {
-      throw new UnsupportedOperationException("Can't return typed pretending entities");
+      throw new UnsupportedOperationException("Can't return typed pretending data");
     }
   }
 

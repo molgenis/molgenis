@@ -21,7 +21,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 
 /**
- * Class for entities not defined in pre-existing Java classes
+ * Class for data not defined in pre-existing Java classes
  *
  * @see StaticEntity
  */
@@ -65,7 +65,7 @@ public class DynamicEntity implements Entity {
 
   @Override
   public Object getIdValue() {
-    // abstract entities might not have an id attribute
+    // abstract data might not have an id attribute
     Attribute idAttr = entityType.getIdAttribute();
     return idAttr != null ? get(idAttr.getName()) : null;
   }
@@ -82,7 +82,7 @@ public class DynamicEntity implements Entity {
 
   @Override
   public Object getLabelValue() {
-    // abstract entities might not have an label attribute
+    // abstract data might not have an label attribute
     Attribute labelAttr = entityType.getLabelAttribute();
     return labelAttr != null ? get(labelAttr.getName()) : null;
   }

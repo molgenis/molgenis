@@ -988,7 +988,7 @@ public class EmxImportServiceIT extends ImportServiceIT {
   @Autowired private PackageFactory packageFactory;
 
   private void populateUserPermissions() {
-    // users cannot create entities and packages without a parent package, therefor the root package
+    // users cannot create data and packages without a parent package, therefor the root package
     // needs to exist already.
     runAsSystem(() -> dataService.getMeta().addPackage(packageFactory.create("it", "")));
 

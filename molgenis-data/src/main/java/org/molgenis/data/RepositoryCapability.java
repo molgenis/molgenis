@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 public enum RepositoryCapability {
-  /** Repository entities can be updated/added/deleted */
+  /** Repository data can be updated/added/deleted */
   WRITABLE,
 
   /** Queries can be executed against the repository */
@@ -17,7 +17,7 @@ public enum RepositoryCapability {
   INDEXABLE,
 
   /**
-   * Repository can validate references to entities persisted in other repositories in the same
+   * Repository can validate references to data persisted in other repositories in the same
    * repository collection.
    */
   VALIDATE_REFERENCE_CONSTRAINT,

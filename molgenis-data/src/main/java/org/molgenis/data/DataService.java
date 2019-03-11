@@ -80,39 +80,39 @@ public interface DataService extends Iterable<Repository<Entity>> {
   EntityType getEntityType(String entityTypeId);
 
   /**
-   * Returns the number of entities of the given type.
+   * Returns the number of data of the given type.
    *
    * @param entityTypeId entity name
-   * @return number of entities
+   * @return number of data
    */
   long count(String entityTypeId);
 
   /**
-   * return number of entities matched by query
+   * return number of data matched by query
    *
    * @throws MolgenisDataException if the repository of the entity isn't a Queryable
    */
   long count(String entityTypeId, Query<Entity> q);
 
   /**
-   * Find all entities of the given type. Returns empty Stream if no matches.
+   * Find all data of the given type. Returns empty Stream if no matches.
    *
    * @throws MolgenisDataException if the repository of the entity isn't a Queryable
    */
   Stream<Entity> findAll(String entityTypeId);
 
-  /** type-safe find all entities */
+  /** type-safe find all data */
   <E extends Entity> Stream<E> findAll(String entityTypeId, Class<E> clazz);
 
   /**
-   * Find entities that match a query. Returns empty stream if no matches.
+   * Find data that match a query. Returns empty stream if no matches.
    *
    * <p>throws MolgenisDataException if the repository of the entity isn't a Queryable
    */
   Stream<Entity> findAll(String entityTypeId, Query<Entity> q);
 
   /**
-   * Type-safe find entities that match a query
+   * Type-safe find data that match a query
    *
    * @param q query
    * @param clazz entity class
@@ -120,40 +120,40 @@ public interface DataService extends Iterable<Repository<Entity>> {
   <E extends Entity> Stream<E> findAll(String entityTypeId, Query<E> q, Class<E> clazz);
 
   /**
-   * Finds all entities with the given IDs. Returns empty stream if no matches.
+   * Finds all data with the given IDs. Returns empty stream if no matches.
    *
    * @param ids entity ids
-   * @return (empty) Stream where the order of entities matches the order of ids, never null
+   * @return (empty) Stream where the order of data matches the order of ids, never null
    */
   Stream<Entity> findAll(String entityTypeId, Stream<Object> ids);
 
   /**
-   * Finds all entities with the given IDs, type-safely. Returns empty stream if no matches.
+   * Finds all data with the given IDs, type-safely. Returns empty stream if no matches.
    *
    * @param entityTypeId entity name (case insensitive)
-   * @return (empty) Stream where the order of entities matches the order of ids, never null
+   * @return (empty) Stream where the order of data matches the order of ids, never null
    */
   <E extends Entity> Stream<E> findAll(String entityTypeId, Stream<Object> ids, Class<E> clazz);
 
   /**
-   * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
+   * Finds all data with the given IDs, with a fetch. Returns empty stream if no matches.
    *
    * @param entityTypeId entity name (case insensitive)
    * @param ids entity ids
    * @param fetch fetch defining which attributes to retrieve
-   * @return (empty) Stream where the order of entities matches the order of ids, never null
+   * @return (empty) Stream where the order of data matches the order of ids, never null
    */
   Stream<Entity> findAll(String entityTypeId, Stream<Object> ids, Fetch fetch);
 
   /**
-   * Finds all entities with the given IDs, type-safely and with a fetch. Returns empty stream if no
+   * Finds all data with the given IDs, type-safely and with a fetch. Returns empty stream if no
    * matches.
    *
    * @param ids entity ids
    * @param fetch fetch defining which attributes to retrieve
    * @param clazz typed entity class
-   * @return (empty) Stream of entities of the give type where the order of entities matches the
-   *     order of ids, never null
+   * @return (empty) Stream of data of the give type where the order of data matches the order of
+   *     ids, never null
    */
   <E extends Entity> Stream<E> findAll(
       String entityTypeId, Stream<Object> ids, Fetch fetch, Class<E> clazz);
@@ -225,9 +225,9 @@ public interface DataService extends Iterable<Repository<Entity>> {
   void add(String entityTypeId, Entity entity);
 
   /**
-   * Adds entities to it's repository
+   * Adds data to it's repository
    *
-   * @param entities entities
+   * @param entities data
    */
   <E extends Entity> void add(String entityTypeId, Stream<E> entities);
 
@@ -239,9 +239,9 @@ public interface DataService extends Iterable<Repository<Entity>> {
   void update(String entityTypeId, Entity entity);
 
   /**
-   * Updates entities
+   * Updates data
    *
-   * @param entities entities
+   * @param entities data
    */
   <E extends Entity> void update(String entityTypeId, Stream<E> entities);
 
@@ -253,9 +253,9 @@ public interface DataService extends Iterable<Repository<Entity>> {
   void delete(String entityTypeId, Entity entity);
 
   /**
-   * Delete entities from it's repository
+   * Delete data from it's repository
    *
-   * @param entities entities
+   * @param entities data
    */
   <E extends Entity> void delete(String entityTypeId, Stream<E> entities);
 
@@ -267,13 +267,13 @@ public interface DataService extends Iterable<Repository<Entity>> {
   void deleteById(String entityTypeId, Object id);
 
   /**
-   * Deletes entities by id
+   * Deletes data by id
    *
    * @param ids entity ids
    */
   void deleteAll(String entityTypeId, Stream<Object> ids);
 
-  /** Deletes all entities */
+  /** Deletes all data */
   void deleteAll(String entityTypeId);
 
   /**

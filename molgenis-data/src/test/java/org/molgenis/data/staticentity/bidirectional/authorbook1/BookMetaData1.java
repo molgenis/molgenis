@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * AuthorMetaData1 and BookMetaData1 define two entities with a OneToMany relation with a nullable
- * XREF.
+ * AuthorMetaData1 and BookMetaData1 define two data with a OneToMany relation with a nullable XREF.
  */
 @Component
 public class BookMetaData1 extends SystemEntityType {

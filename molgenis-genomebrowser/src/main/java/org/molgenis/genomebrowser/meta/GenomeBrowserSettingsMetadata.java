@@ -105,7 +105,7 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
         .setEnumOptions(Arrays.asList(ALL, CONFIGURED, NONE))
         .setNillable(false)
         .setDescription(
-            "Setting to determine if all suitable molgenis entities should be shown as reference track in the genomebrowser, only those configured, or none");
+            "Setting to determine if all suitable molgenis data should be shown as reference track in the genomebrowser, only those configured, or none");
     addAttribute(MOLGENIS_REFERENCE_TRACKS)
         .setLabel("Reference tracks")
         .setDataType(MREF)

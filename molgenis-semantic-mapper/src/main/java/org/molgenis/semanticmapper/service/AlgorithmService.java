@@ -11,7 +11,7 @@ import org.molgenis.semanticmapper.service.impl.AlgorithmEvaluation;
 
 public interface AlgorithmService {
   /**
-   * Applies an algorithm to the given attribute of given source entities.
+   * Applies an algorithm to the given attribute of given source data.
    *
    * @return algorithm evaluation for each source entity
    */

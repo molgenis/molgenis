@@ -36,7 +36,7 @@ public class EntityListenersService {
   }
 
   /**
-   * Update all registered listeners of the entities
+   * Update all registered listeners of the data
    *
    * @return Stream<Entity>
    */

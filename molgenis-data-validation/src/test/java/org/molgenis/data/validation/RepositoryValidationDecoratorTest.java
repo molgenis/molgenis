@@ -154,7 +154,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueStringAttr,
                 uniqueXrefAttr));
 
-    // ref entities
+    // ref data
     String refEntity0Id = "idref0";
     refEntity0 = mock(Entity.class);
     when(refEntity0.getEntityType()).thenReturn(refEntityType);
@@ -221,7 +221,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void add() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -252,7 +252,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.getCapabilities())
         .thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -300,7 +300,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -334,7 +334,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void addEntityAttributesValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -369,7 +369,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void addRequiredValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -405,7 +405,7 @@ public class RepositoryValidationDecoratorTest {
   public void addRequiredValueWithExpression() {
     when(xrefAttr.getExpression()).thenReturn("expr");
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -434,7 +434,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void addRequiredMrefValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -470,7 +470,7 @@ public class RepositoryValidationDecoratorTest {
   public void addReferenceXrefSelfReferenceToPreviouslyAddedEntity() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -508,7 +508,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -551,7 +551,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -587,7 +587,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -644,7 +644,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -702,7 +702,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -754,7 +754,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -789,7 +789,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void addStream() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -824,7 +824,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void addStreamEntityAttributesValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -886,7 +886,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void addStreamRequiredValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -930,7 +930,7 @@ public class RepositoryValidationDecoratorTest {
   public void addStreamRequiredValueWithExpression() {
     when(xrefAttr.getExpression()).thenReturn("expr");
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -966,7 +966,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void addStreamRequiredMrefValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1010,7 +1010,7 @@ public class RepositoryValidationDecoratorTest {
   public void addStreamReferenceXrefSelfReferenceToPreviouslyAddedEntity() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1049,7 +1049,7 @@ public class RepositoryValidationDecoratorTest {
   public void addStreamReferenceXrefSelfReferenceToSelf() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1114,7 +1114,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1185,7 +1185,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1248,7 +1248,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1333,7 +1333,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1399,7 +1399,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1436,7 +1436,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void addStreamUniqueStringValueExistsInSourceValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1520,7 +1520,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1561,7 +1561,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void update() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1589,7 +1589,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void updateEntityAttributesValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getIdValue()).thenReturn("id1");
     when(entity0.getEntityType()).thenReturn(entityType);
@@ -1623,7 +1623,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void updateRequiredValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1659,7 +1659,7 @@ public class RepositoryValidationDecoratorTest {
   public void updateRequiredValueWithExpression() {
     when(xrefAttr.getExpression()).thenReturn("expr");
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1688,7 +1688,7 @@ public class RepositoryValidationDecoratorTest {
 
   @Test
   public void updateRequiredMrefValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1724,7 +1724,7 @@ public class RepositoryValidationDecoratorTest {
   public void updateReferenceXrefSelfReferenceToPreviouslyAddedEntity() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1761,7 +1761,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1804,7 +1804,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity1 = mock(Entity.class);
     when(entity1.getEntityType()).thenReturn(entityType);
 
@@ -1840,7 +1840,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1897,7 +1897,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -1955,7 +1955,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2007,7 +2007,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2061,7 +2061,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyStringAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2141,7 +2141,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyXrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2215,7 +2215,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyXrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2295,7 +2295,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyMrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2372,7 +2372,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyMrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2447,7 +2447,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyMrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2510,7 +2510,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void updateStream() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2545,7 +2545,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void updateStreamEntityAttributesValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2607,7 +2607,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void updateStreamRequiredValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2651,7 +2651,7 @@ public class RepositoryValidationDecoratorTest {
   public void updateStreamRequiredValueWithExpression() {
     when(xrefAttr.getExpression()).thenReturn("expr");
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2687,7 +2687,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void updateStreamRequiredMrefValueValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2731,7 +2731,7 @@ public class RepositoryValidationDecoratorTest {
   public void updateStreamReferenceXrefSelfReferenceToPreviouslyAddedEntity() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2770,7 +2770,7 @@ public class RepositoryValidationDecoratorTest {
   public void updateStreamReferenceXrefSelfReferenceToSelf() {
     when(xrefAttr.getRefEntity()).thenReturn(entityType);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2835,7 +2835,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2906,7 +2906,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -2969,7 +2969,7 @@ public class RepositoryValidationDecoratorTest {
     when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
     when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3054,7 +3054,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3120,7 +3120,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3157,7 +3157,7 @@ public class RepositoryValidationDecoratorTest {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void updateStreamUniqueStringValueExistsInSourceValidationError() {
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3241,7 +3241,7 @@ public class RepositoryValidationDecoratorTest {
     when(delegateRepository.findAll(new QueryImpl<>().fetch(new Fetch().field(attrIdName))))
         .thenReturn(Stream.of(entityInBackend0));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3303,7 +3303,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyStringAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3391,7 +3391,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyXrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3472,7 +3472,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyXrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3560,7 +3560,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyMrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 
@@ -3643,7 +3643,7 @@ public class RepositoryValidationDecoratorTest {
                 uniqueXrefAttr,
                 readonlyMrefAttr));
 
-    // entities
+    // data
     Entity entity0 = mock(Entity.class);
     when(entity0.getEntityType()).thenReturn(entityType);
 

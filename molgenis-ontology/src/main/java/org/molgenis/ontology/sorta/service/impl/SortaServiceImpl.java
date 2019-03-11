@@ -107,7 +107,7 @@ public class SortaServiceImpl implements SortaService {
       throw new IllegalArgumentException(
           "Ontology IRI " + ontologyIri + " does not exist in the database!");
 
-    // a list to store most relevant entities
+    // a list to store most relevant data
     List<Entity> relevantEntities = new ArrayList<>();
     // query rules for ontology anntations, e.g. OMIM:124343
     List<QueryRule> rulesForOtherFields = new ArrayList<>();

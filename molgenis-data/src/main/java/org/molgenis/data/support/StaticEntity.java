@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 
-/** Base class for entities defined in pre-existing Java classes */
+/** Base class for data defined in pre-existing Java classes */
 public abstract class StaticEntity implements Entity {
   private Entity entity;
 

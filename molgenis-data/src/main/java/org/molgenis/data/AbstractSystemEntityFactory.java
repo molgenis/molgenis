@@ -24,8 +24,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
   private final EntityPopulator entityPopulator;
 
   /**
-   * Constructs a new entity factory that creates entities of the given type, meta data type and id
-   * type
+   * Constructs a new entity factory that creates data of the given type, meta data type and id type
    *
    * @param entityClass entity type
    * @param systemEntityType entity meta data type

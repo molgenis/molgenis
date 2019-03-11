@@ -332,8 +332,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   /**
-   * New entities in the source should be added to the target when a new mapping to the same target
-   * is performed.
+   * New data in the source should be added to the target when a new mapping to the same target is
+   * performed.
    */
   @Test
   @SuppressWarnings("unchecked")
@@ -396,12 +396,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     Mockito.verify(progress).status("Applying mappings to repository [HopEntity]");
     Mockito.verify(progress).status("Mapping source [Genes]...");
     Mockito.verify(progress).increment(1);
-    Mockito.verify(progress).status("Mapped 4 [Genes] entities.");
+    Mockito.verify(progress).status("Mapped 4 [Genes] data.");
     Mockito.verify(progress).status("Done applying mappings to repository [HopEntity]");
     Mockito.verifyNoMoreInteractions(progress);
   }
 
-  /** Applying a mapping multiple times to the same target should update the existing entities. */
+  /** Applying a mapping multiple times to the same target should update the existing data. */
   @SuppressWarnings("unchecked")
   @Test
   public void testApplyMappingsUpdate() {
@@ -464,7 +464,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     Mockito.verify(progress).status("Applying mappings to repository [HopEntity]");
     Mockito.verify(progress).status("Mapping source [Genes]...");
     Mockito.verify(progress).increment(1);
-    Mockito.verify(progress).status("Mapped 4 [Genes] entities.");
+    Mockito.verify(progress).status("Mapped 4 [Genes] data.");
     Mockito.verify(progress).status("Done applying mappings to repository [HopEntity]");
     Mockito.verifyZeroInteractions(permissionSystemService);
   }
@@ -511,7 +511,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     Mockito.verify(targetRepo, Mockito.times(3)).add(ArgumentMatchers.any(Stream.class));
     Mockito.verify(progress, Mockito.times(3)).increment(1);
     Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
-    Mockito.verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
+    Mockito.verify(progress).status("Mapped 3 [sourceMappingLabel] data.");
     Mockito.verifyNoMoreInteractions(progress);
   }
 
@@ -553,7 +553,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(ArgumentMatchers.any(List.class));
     Mockito.verify(progress, Mockito.times(2)).increment(1);
     Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
-    Mockito.verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
+    Mockito.verify(progress).status("Mapped 4 [sourceMappingLabel] data.");
     Mockito.verifyNoMoreInteractions(progress);
   }
 
@@ -639,7 +639,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       expectedExceptionsMessageRegExp =
           "In the mapping target, attribute COUNTRY of type XREF has "
               + "reference entity mapping_target_ref while in the target repository attribute COUNTRY of type XREF has reference entity target_repository_ref. "
-              + "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository")
+              + "Please make sure the reference data of your mapping target are pointing towards the same reference data as your target repository")
   public void testIncompatibleMetaDataDifferentRefEntity() {
     String targetRepositoryName = "target_repository";
     String targetRepositoryRefEntityName = "target_repository_ref";

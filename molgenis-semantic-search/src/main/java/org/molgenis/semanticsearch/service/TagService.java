@@ -11,7 +11,7 @@ import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
 /**
- * Service that administrates tags on attributes, entities and packages of a particular code system.
+ * Service that administrates tags on attributes, data and packages of a particular code system.
  *
  * @param <O> the type of the tag object, for instance {@link OntologyTerm}
  * @param <C> the type of the code system, for instance {@link Ontology}

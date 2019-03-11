@@ -47,7 +47,7 @@
     var timeoutId, isValidating;
 
     /**
-     * Validate algorithm on source entities, render UI component that displays
+     * Validate algorithm on source data, render UI component that displays
      * the number of total/success/errors and corresponding error messages.
      * Stops after a max. number of validation errors.
      */

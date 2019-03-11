@@ -157,7 +157,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
 
     repo.update(entityType1);
 
-    // verify that attributes got added and deleted in concrete extending entities
+    // verify that attributes got added and deleted in concrete extending data
     verify(backend2).addAttribute(currentEntityType2, attributeAdded);
     verify(backend2).deleteAttribute(currentEntityType2, attributeRemoved);
     verify(backend3).addAttribute(currentEntityType3, attributeAdded);

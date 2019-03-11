@@ -47,7 +47,7 @@ $.when($,
     }
 
     /**
-     * Retrieves the collectionID and biobankID of all entities remaining after filtering
+     * Retrieves the collectionID and biobankID of all data remaining after filtering
      * Sends request to server, which posts to the negotiator
      */
     function sendNegotiatorRequest (request) {

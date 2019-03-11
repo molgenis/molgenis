@@ -6,7 +6,6 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -58,6 +57,7 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.jobs.JobExecutionUriUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
@@ -146,7 +146,7 @@ public class MappingServiceController extends PluginController {
   }
 
   /**
-   * Initializes the model with all mapping projects and all entities to the model.
+   * Initializes the model with all mapping projects and all data to the model.
    *
    * @param model the model to initialized
    * @return view name of the mapping projects list
@@ -661,7 +661,7 @@ public class MappingServiceController extends PluginController {
 
     jobExecutor.submit(mappingJobExecution);
 
-    return ok(concatEntityHref(mappingJobExecution));
+    return ok(JobExecutionUriUtils.getUriPath(mappingJobExecution));
   }
 
   /**
@@ -966,7 +966,7 @@ public class MappingServiceController extends PluginController {
   }
 
   /**
-   * Tests an algoritm by computing it for all entities in the source repository.
+   * Tests an algoritm by computing it for all data in the source repository.
    *
    * @param mappingServiceRequest the {@link MappingServiceRequest} sent by the client
    * @return Map with the results and size of the source
@@ -1016,7 +1016,7 @@ public class MappingServiceController extends PluginController {
   }
 
   /**
-   * Lists the entities that may be added as new sources to this mapping project's selected target
+   * Lists the data that may be added as new sources to this mapping project's selected target
    *
    * @param target the selected target
    */

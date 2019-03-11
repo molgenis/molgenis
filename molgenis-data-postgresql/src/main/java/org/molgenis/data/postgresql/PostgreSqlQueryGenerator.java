@@ -125,9 +125,9 @@ class PostgreSqlQueryGenerator {
         + getColumnName(attr)
         + " IN ("
         + attr.getEnumOptions()
-            .stream()
-            .map(enumOption -> '\'' + enumOption + '\'')
-            .collect(joining(","))
+        .stream()
+        .map(enumOption -> '\'' + enumOption + '\'')
+        .collect(joining(","))
         + "))";
   }
 
@@ -1016,7 +1016,7 @@ class PostgreSqlQueryGenerator {
             case LESS_EQUAL:
               predicate.append(" <=");
               break;
-              // $CASES-OMITTED$
+            // $CASES-OMITTED$
             default:
               throw new RuntimeException(format("Unexpected query operator [%s]", operator));
           }

@@ -12,7 +12,7 @@ public interface Query<E extends Entity> extends Iterable<E> {
   Repository<E> getRepository();
 
   /**
-   * Count entities matching query
+   * Count data matching query
    *
    * @return count or Exception of not bound to repository
    */

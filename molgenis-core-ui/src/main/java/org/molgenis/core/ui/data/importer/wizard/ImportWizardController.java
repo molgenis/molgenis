@@ -32,7 +32,6 @@ import org.molgenis.data.importer.ImportRunService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
-import org.molgenis.data.rest.util.Href;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -46,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping(URI)
@@ -219,8 +219,7 @@ public class ImportWizardController extends AbstractWizardController {
 
   private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun)
       throws URISyntaxException {
-    String href =
-        Href.concatEntityHref("/api/v2", importRun.getEntityType().getId(), importRun.getIdValue());
+    String href = getUriPath(importRun);
     return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
   }
 
@@ -323,5 +322,15 @@ public class ImportWizardController extends AbstractWizardController {
   /** Added for testability */
   void setExecutorService(ExecutorService executorService) {
     this.asyncImportJobs = executorService;
+  }
+
+  public static String getUriPath(ImportRun importRun) {
+    return ServletUriComponentsBuilder.fromCurrentRequestUri()
+        .encode()
+        .replacePath(null)
+        .pathSegment(
+            "api", "v2", importRun.getEntityType().getId(), importRun.getIdValue().toString())
+        .build()
+        .getPath();
   }
 }

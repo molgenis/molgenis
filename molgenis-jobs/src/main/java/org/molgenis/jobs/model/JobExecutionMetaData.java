@@ -28,9 +28,9 @@ public class JobExecutionMetaData extends SystemEntityType {
   public static final String SUBMISSION_DATE = "submissionDate";
   public static final String START_DATE = "startDate";
   public static final String END_DATE = "endDate";
-  public static final String PROGRESS_INT = "progressInt"; // Number of processed entities
+  public static final String PROGRESS_INT = "progressInt"; // Number of processed data
   public static final String PROGRESS_MESSAGE = "progressMessage";
-  public static final String PROGRESS_MAX = "progressMax"; // Max number of entities to process
+  public static final String PROGRESS_MAX = "progressMax"; // Max number of data to process
   public static final String LOG = "log";
   public static final String RESULT_URL = "resultUrl";
   public static final String SUCCESS_EMAIL = "successEmail";

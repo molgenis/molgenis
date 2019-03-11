@@ -10,8 +10,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Decorator for the attribute repository: - filters requested entities based on the entity
- * permissions of the current user. - applies attribute metadata updates to the backend
+ * Decorator for the attribute repository: - filters requested data based on the entity permissions
+ * of the current user. - applies attribute metadata updates to the backend
  *
  * <p>TODO replace permission based entity filtering with generic row-level security once available
  */

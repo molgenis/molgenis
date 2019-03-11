@@ -60,12 +60,9 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -92,11 +89,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private MessageSource messageSource;
 
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
-
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/**").allowedMethods("*");
-  }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -320,11 +312,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   // Override in subclass if you need more freemarker variables
   @SuppressWarnings({"unused", "WeakerAccess"})
   protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables) {}
-
-  @Bean
-  public MultipartResolver multipartResolver() {
-    return new StandardServletMultipartResolver();
-  }
 
   @Bean
   public MenuReaderService menuReaderService() {

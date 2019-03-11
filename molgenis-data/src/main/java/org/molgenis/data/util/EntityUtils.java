@@ -39,7 +39,7 @@ public class EntityUtils {
     // Reference types cannot be processed because we lack an entityManager in this route.
     if (EntityTypeUtils.isReferenceType(attr)) {
       throw new MolgenisDataException(
-          "getTypedValue(String, AttributeMetadata) can't be used for attributes referencing entities");
+          "getTypedValue(String, AttributeMetadata) can't be used for attributes referencing data");
     }
     return getTypedValue(valueStr, attr, null);
   }
@@ -403,7 +403,7 @@ public class EntityUtils {
   }
 
   /**
-   * Returns true if entity equals another entity. For referenced entities compares the referenced
+   * Returns true if entity equals another entity. For referenced data compares the referenced
    * entity ids.
    *
    * @return true if entity equals another entity
@@ -548,7 +548,7 @@ public class EntityUtils {
 
   /**
    * Returns whether an entity attribute value is <tt>null</tt> or empty for attributes referencing
-   * multiple entities.
+   * multiple data.
    */
   public static boolean isNullValue(Entity entity, Attribute attribute) {
     boolean isNullValue;

@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * AuthorMetaData3 and BookMetaData3 define two entities having a nullable OneToMany relation with
- * an ascending order.
+ * AuthorMetaData3 and BookMetaData3 define two data having a nullable OneToMany relation with an
+ * ascending order.
  */
 @Component
 public class AuthorMetaData3 extends SystemEntityType {

@@ -56,7 +56,7 @@ public class EntityTypeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
   }
 
   @Test(expectedExceptions = MolgenisValidationException.class)
@@ -71,7 +71,7 @@ public class EntityTypeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
   }
 
   @Test
@@ -98,7 +98,7 @@ public class EntityTypeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
   }
 
   @Test(expectedExceptions = MolgenisValidationException.class)
@@ -113,6 +113,6 @@ public class EntityTypeRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<EntityType>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(captor.capture());
-    captor.getValue().count(); // process all entities in stream
+    captor.getValue().count(); // process all data in stream
   }
 }

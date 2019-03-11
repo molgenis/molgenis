@@ -577,8 +577,8 @@ public class EmxMetadataParser implements MetadataParser {
     for (Attribute attr : entitiesRepo.getEntityType().getAtomicAttributes()) {
       if (!EMX_ENTITIES_ALLOWED_ATTRS.contains(attr.getName().toLowerCase())
           && !(isI18n(attr.getName())
-              && (attr.getName().startsWith(EMX_ENTITIES_DESCRIPTION)
-                  || attr.getName().startsWith(EMX_ENTITIES_LABEL)))) {
+          && (attr.getName().startsWith(EMX_ENTITIES_DESCRIPTION)
+          || attr.getName().startsWith(EMX_ENTITIES_LABEL)))) {
         throw new InvalidEmxAttributeException(attr.getName(), EMX_ENTITIES);
       }
     }
@@ -1105,8 +1105,8 @@ public class EmxMetadataParser implements MetadataParser {
   void checkAttrSheetHeaders(Attribute attr) {
     if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName())
         && !(isI18n(attr.getName())
-            && (attr.getName().startsWith(EMX_ATTRIBUTES_LABEL)
-                || attr.getName().startsWith(EMX_ATTRIBUTES_DESCRIPTION)))) {
+        && (attr.getName().startsWith(EMX_ATTRIBUTES_LABEL)
+        || attr.getName().startsWith(EMX_ATTRIBUTES_DESCRIPTION)))) {
       // check if casing mismatch
       SUPPORTED_ATTRIBUTE_ATTRIBUTES.forEach(
           emxAttrMetaAttr -> {

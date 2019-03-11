@@ -144,7 +144,7 @@ public class JsMagmaScriptEvaluator {
    *
    * @param entity The entity to be flattened, should start with non null entity
    * @param depth Represents the number of reference levels being added to the JavaScript object
-   * @return A JavaScript object in Tree form, containing entities and there references
+   * @return A JavaScript object in Tree form, containing data and there references
    */
   private Object toScriptEngineValueMap(Entity entity, int depth) {
     if (entity != null) {

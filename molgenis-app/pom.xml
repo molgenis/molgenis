@@ -122,6 +122,31 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-data</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-fair</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-identities</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-metrics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-app-manager</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -177,6 +202,11 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-metrics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-python</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -188,11 +218,6 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-searchall</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-data-rest</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -292,11 +317,6 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-fair</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-util</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -362,11 +382,6 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-security-ui</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-metrics</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

@@ -125,7 +125,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
           "EntityType \\[entity\\] does not contain any attributes. "
-              + "Did you use the correct package\\+entity name combination in both the entities as well as the attributes sheet\\?")
+              + "Did you use the correct package\\+entity name combination in both the data as well as the attributes sheet\\?")
   public void testValidateOwnAttributesNoAttributes() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getAllAttributes()).thenReturn(emptyList());
