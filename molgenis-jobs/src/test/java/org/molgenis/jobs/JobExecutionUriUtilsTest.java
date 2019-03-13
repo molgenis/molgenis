@@ -26,6 +26,8 @@ public class JobExecutionUriUtilsTest {
     JobExecution jobExecution = mock(JobExecution.class);
     when(jobExecution.getEntityType()).thenReturn(entityType);
     when(jobExecution.getIdValue()).thenReturn("MyJobExecutionId");
-    assertEquals(JobExecutionUriUtils.getUriPath(jobExecution), "/api/v2/MyJobExecutionEntityType/MyJobExecutionId");
+    assertEquals(
+        JobExecutionUriUtils.getUriPath(jobExecution),
+        "/api/v2/MyJobExecutionEntityType/MyJobExecutionId");
   }
 }
