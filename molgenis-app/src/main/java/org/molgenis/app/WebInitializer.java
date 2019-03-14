@@ -38,6 +38,7 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
     registration.setAsyncSupported(true);
   }
 
+  @SuppressWarnings("squid:S1168") // method must return null
   @Override
   protected Class<?>[] getRootConfigClasses() {
     return null;
