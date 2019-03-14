@@ -43,7 +43,7 @@ public class ApiInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
   @Override
   protected Class<?>[] getServletConfigClasses() {
-    return new Class[] {ApiConfig.class};
+    return new Class<?>[] {ApiConfig.class};
   }
 
   @Override
