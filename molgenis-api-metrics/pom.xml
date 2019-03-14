@@ -18,6 +18,7 @@
         <configuration>
           <apiSources>
             <apiSource>
+              <basePath>/api</basePath>
               <info>
                 <title>${project.name}</title>
                 <version>${project.version}</version>
@@ -25,7 +26,7 @@
               </info>
               <springmvc>true</springmvc>
               <locations>
-                <location>org.molgenis.metrics</location>
+                <location>org.molgenis.api.metrics</location>
               </locations>
               <swaggerDirectory>${project.build.directory}/generated-resources/swagger
               </swaggerDirectory>
