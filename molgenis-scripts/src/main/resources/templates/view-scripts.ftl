@@ -6,7 +6,11 @@
 <#assign version = 2>
 
 <script type="text/javascript">
-    window.BaseURL = '${baseUrl}'
+    window.__INITIAL_STATE__ = {
+        baseUrl: '${baseUrl}',
+        lng: '${lng}',
+        fallbackLng: '${fallbackLng}'
+    }
 </script>
 
 <@header css js version/>
