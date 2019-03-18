@@ -36,7 +36,7 @@ public class AttributeTypeServiceImpl implements AttributeTypeService {
 
       // If the newly found type is not narrower than the current type, do not update
       // e.g. a long does not fit into an integer
-      if (isBroader(enrichedTypeGuess, currentGuess)) {
+      if (enrichedTypeGuess != null && isBroader(enrichedTypeGuess, currentGuess)) {
         currentGuess = enrichedTypeGuess;
       }
 
