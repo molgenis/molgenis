@@ -7,6 +7,7 @@ import static org.molgenis.data.security.auth.UserMetadata.USER;
 import java.util.List;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,12 @@ public class UserManagerServiceImpl implements UserManagerService {
   @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
   @Transactional
   public void setActivationUser(String userId, Boolean active) {
-    User mu = this.dataService.findOneById(USER, userId, User.class);
-    mu.setActive(active);
-    this.dataService.update(USER, mu);
+    User user = dataService.findOneById(USER, userId, User.class);
+    if (user == null) {
+      throw new UnknownEntityException(USER, userId);
+    }
+    user.setActive(active);
+    this.dataService.update(USER, user);
   }
 
   private List<UserViewData> parseToMolgenisUserViewData(Stream<User> users) {
