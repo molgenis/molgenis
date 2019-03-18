@@ -50,6 +50,13 @@ public class FilesServiceImplTest extends AbstractMockitoTest {
     assertEquals(filesApiServiceImpl.getFileMeta(fileId), fileMeta);
   }
 
+  @Test
+  public void testDeleteFile() {
+    String fileId = "MyFileId";
+    filesApiServiceImpl.delete(fileId);
+    verify(dataService).deleteById("sys_FileMeta", fileId);
+  }
+
   @Test(expectedExceptions = UnknownEntityException.class)
   public void testGetFileMetaUnknown() {
     String fileId = "MyFileId";

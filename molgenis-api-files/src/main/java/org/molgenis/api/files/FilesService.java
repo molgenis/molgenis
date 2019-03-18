@@ -26,4 +26,11 @@ public interface FilesService {
    * @throws org.molgenis.data.UnknownEntityException if fileId is unknown
    */
   FileMeta getFileMeta(String fileId);
+
+  /**
+   * Delete file and file metadata
+   *
+   * @throws org.molgenis.data.UnknownEntityException if fileId is unknown
+   */
+  void delete(String fileId);
 }

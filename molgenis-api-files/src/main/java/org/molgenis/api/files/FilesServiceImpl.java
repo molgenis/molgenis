@@ -47,6 +47,12 @@ class FilesServiceImpl implements FilesService {
     return fileMeta;
   }
 
+  @Override
+  public void delete(String fileId) {
+    // FileMetaRepositoryDecorator is responsible for deleting both data and metadata
+    dataService.deleteById(FILE_META, fileId);
+  }
+
   @Transactional
   @Override
   public CompletableFuture<FileMeta> upload(HttpServletRequest httpServletRequest) {
