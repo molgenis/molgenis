@@ -117,9 +117,7 @@ public class FileStore {
     FileUtils.copyInputStreamToFile(inputStream, getFileUnchecked(fileName));
   }
 
-  /**
-   * http://cwe.mitre.org/data/definitions/22.html
-   */
+  /** http://cwe.mitre.org/data/definitions/22.html */
   private void validatePathname(String pathname) {
     File file = new File(storageDir, pathname);
 
