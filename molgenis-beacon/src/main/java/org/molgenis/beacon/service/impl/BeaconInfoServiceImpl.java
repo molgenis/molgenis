@@ -9,6 +9,7 @@ import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,6 +30,10 @@ public class BeaconInfoServiceImpl implements BeaconInfoService {
 
   @Override
   public BeaconResponse info(String beaconId) {
-    return dataService.findOneById(BEACON, beaconId, Beacon.class).toBeaconResponse();
+    Beacon beacon = dataService.findOneById(BEACON, beaconId, Beacon.class);
+    if (beacon == null) {
+      throw new UnknownEntityException(BEACON, beaconId);
+    }
+    return beacon.toBeaconResponse();
   }
 }
