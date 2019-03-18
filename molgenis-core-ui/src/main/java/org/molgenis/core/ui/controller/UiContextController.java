@@ -35,8 +35,11 @@ public class UiContextController extends PluginController {
   private final String molgenisVersion;
   private final String molgenisBuildDate;
 
-  public UiContextController(AppSettings appSettings, CookieWallService cookieWallService,
-      @Value("${molgenis.version}") String molgenisVersion, @Value("${molgenis.build.date}") String molgenisBuildDate) {
+  public UiContextController(
+      AppSettings appSettings,
+      CookieWallService cookieWallService,
+      @Value("${molgenis.version}") String molgenisVersion,
+      @Value("${molgenis.build.date}") String molgenisBuildDate) {
     super(URI);
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
