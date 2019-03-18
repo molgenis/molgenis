@@ -34,6 +34,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
@@ -225,6 +226,9 @@ public class RestService {
         Attribute idAttribute = entityType.getIdAttribute();
         Object idValue = this.toEntityValue(idAttribute, entityId, null);
         Entity oldEntity = dataService.findOneById(entityType.getId(), idValue);
+        if (oldEntity == null) {
+          throw new UnknownEntityException(entityType.getId(), idValue);
+        }
 
         if (paramValue instanceof String) {
           FileMeta entity = (FileMeta) oldEntity.getEntity(attr.getName());

@@ -103,7 +103,7 @@ public class AttributeTypeServiceImpl implements AttributeTypeService {
    * value is longer dan 255 characters, the type should be TEXT
    */
   private AttributeType getEnrichedType(AttributeType guess, Object value) {
-    if (value == null) {
+    if (guess == null || value == null) {
       return guess;
     }
 

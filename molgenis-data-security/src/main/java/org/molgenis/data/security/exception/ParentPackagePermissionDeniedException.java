@@ -17,6 +17,7 @@ public class ParentPackagePermissionDeniedException extends PermissionDeniedExce
     this.pack = requireNonNull(pack);
   }
 
+  @SuppressWarnings("squid:S2259")
   @Override
   public String getMessage() {
     return String.format(

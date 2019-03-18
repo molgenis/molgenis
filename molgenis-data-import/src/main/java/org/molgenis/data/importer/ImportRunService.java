@@ -17,6 +17,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.i18n.ContextMessageSource;
 import org.slf4j.Logger;
@@ -63,6 +66,9 @@ public class ImportRunService {
 
   void finishImportRun(String importRunId, String message, String importedEntities) {
     ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
+    if (importRun == null) {
+      throw new UnknownEntityException(IMPORT_RUN, importRunId);
+    }
     try {
       importRun.setStatus(ImportStatus.FINISHED.toString());
       importRun.setEndDate(now());
@@ -78,7 +84,12 @@ public class ImportRunService {
   private void createAndSendStatusMail(ImportRun importRun) {
     try {
       SimpleMailMessage mailMessage = new SimpleMailMessage();
-      mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
+      String username = importRun.getUsername();
+      User user = userService.getUser(username);
+      if (user == null) {
+        throw new UnknownUserException(username);
+      }
+      mailMessage.setTo(user.getEmail());
       mailMessage.setSubject(createMailTitle(importRun));
       mailMessage.setText(createEnglishMailText(importRun, ZoneId.systemDefault()));
       mailSender.send(mailMessage);

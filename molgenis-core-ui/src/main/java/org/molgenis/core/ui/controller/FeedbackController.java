@@ -69,8 +69,10 @@ public class FeedbackController extends AbstractStaticContentController {
     model.addAttribute("adminEmails", userService.getSuEmailAddresses());
     if (SecurityUtils.currentUserIsAuthenticated()) {
       User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
-      model.addAttribute("userName", getFormattedName(currentUser));
-      model.addAttribute("userEmail", currentUser.getEmail());
+      if (currentUser != null) {
+        model.addAttribute("userName", getFormattedName(currentUser));
+        model.addAttribute("userEmail", currentUser.getEmail());
+      }
     }
     model.addAttribute("isRecaptchaEnabled", appSettings.getRecaptchaIsEnabled());
     model.addAttribute("recaptchaPublicKey", appSettings.getRecaptchaPublicKey());

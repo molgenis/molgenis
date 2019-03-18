@@ -271,14 +271,14 @@ public class EntityTypeValidator {
    * @throws MolgenisValidationException if the entity extends from a non-abstract entity
    */
   static void validateExtends(EntityType entityType) {
-    if (entityType.getExtends() != null) {
-      EntityType extendedEntityType = entityType.getExtends();
-      if (!extendedEntityType.isAbstract()) {
+    EntityType entityTypeExtends = entityType.getExtends();
+    if (entityTypeExtends != null) {
+      if (!entityTypeExtends.isAbstract()) {
         throw new MolgenisValidationException(
             new ConstraintViolation(
                 format(
                     "EntityType [%s] is not abstract; EntityType [%s] can't extend it",
-                    entityType.getExtends().getId(), entityType.getId())));
+                    entityTypeExtends.getId(), entityType.getId())));
       }
     }
   }
