@@ -13,11 +13,15 @@
 
   <properties>
     <owasp-check-format>HTML</owasp-check-format>
-    <dockerfile-maven-version>1.4.10</dockerfile-maven-version>
+
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
     <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
+
+    <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
+    <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
+    <rpm-maven-plugin.version>2.2.0</rpm-maven-plugin.version>
   </properties>
 
   <build>
@@ -33,7 +37,7 @@
       <plugin>
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
-        <version>${dockerfile-maven-version}</version>
+        <version>${dockerfile-maven-plugin.version}</version>
         <configuration>
           <repository>${dockerfile.repository}</repository>
           <tag>${dockerfile.tag}</tag>
@@ -41,6 +45,57 @@
             <WAR_FILE>${dockerfile.warfile}</WAR_FILE>
           </buildArgs>
           <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+        </configuration>
+      </plugin>
+      <!-- create an RPM artifact of MOLGENIS -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <version>${rpm-maven-plugin.version}</version>
+        <configuration>
+          <license>Apache License 2.0</license>
+          <group>Application/Collectors</group>
+          <packager>MOLGENIS</packager>
+          <name>molgenis</name>
+          <prefix>/usr/local</prefix>
+          <changelogFile>CHANGELOG.md</changelogFile>
+          <defineStatements>
+            <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+          </defineStatements>
+          <needarch>false</needarch>
+          <targetOS>linux</targetOS>
+          <mappings>
+            <mapping>
+              <directory>/usr/local/share/molgenis/war</directory>
+              <filemode>700</filemode>
+              <username>molgenis</username>
+              <groupname>molgenis</groupname>
+              <sources>
+                <source>
+                  <location>target/${project.artifactId}-${project.version}.war</location>
+                </source>
+              </sources>
+            </mapping>
+            <mapping>
+              <directory>/usr/local/share/molgenis/templates</directory>
+              <filemode>700</filemode>
+              <username>molgenis</username>
+              <groupname>molgenis</groupname>
+              <sources>
+                <source>
+                  <location>rpm/templates/molgenis-server.properties</location>
+                </source>
+              </sources>
+            </mapping>
+          </mappings>
+          <preinstallScriptlet>
+            <scriptFile>rpm/preinstall.bash</scriptFile>
+            <fileEncoding>utf-8</fileEncoding>
+          </preinstallScriptlet>
+          <postinstallScriptlet>
+            <scriptFile>rpm/postinstall.bash</scriptFile>
+            <fileEncoding>utf-8</fileEncoding>
+          </postinstallScriptlet>
         </configuration>
       </plugin>
     </plugins>
@@ -54,7 +109,7 @@
         <plugin>
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
-          <version>3.1.2</version>
+          <version>${dependency-check-maven.version}</version>
           <configuration>
             <suppressionFile>owasp-check-suppressions.xml</suppressionFile>
             <format>${owasp-check-format}</format>
@@ -324,7 +379,7 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-menu</artifactId>
+      <artifactId>molgenis-frontend</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

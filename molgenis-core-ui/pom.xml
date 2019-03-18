@@ -13,11 +13,6 @@
 
   <build>
     <plugins>
-      <!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-      </plugin>
       <plugin>
         <groupId>com.github.kongchen</groupId>
         <artifactId>swagger-maven-plugin</artifactId>
@@ -52,68 +47,6 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>skip-js-compile</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <excludeDefaultDirectories>true</excludeDefaultDirectories>
-              <filesets>
-                <fileset>
-                  <directory>target</directory>
-                  <includes>
-                    <include>classes/*</include>
-                  </includes>
-                  <excludes>
-                    <exclude>classes/js</exclude>
-                    <exclude>classes/css</exclude>
-                    <exclude>classes/index.html</exclude>
-                  </excludes>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-      <properties>
-        <webpack.production>true</webpack.production>
-      </properties>
-    </profile>
-
-    <profile>
-      <id>production</id>
-      <properties>
-        <!-- This disables the development build. -->
-        <webpack.production>true</webpack.production>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.eirslett</groupId>
-            <artifactId>frontend-maven-plugin</artifactId>
-            <version>${frontend-maven-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>webpack production build</id>
-                <goals>
-                  <goal>webpack</goal>
-                </goals>
-                <configuration>
-                  <outputdir>target/classes/js/dist</outputdir>
-                  <arguments>-p --config webpack.production.config.js</arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <dependencies>
     <dependency>

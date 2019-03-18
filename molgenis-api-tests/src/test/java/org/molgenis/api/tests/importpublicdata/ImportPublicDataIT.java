@@ -33,16 +33,16 @@ public class ImportPublicDataIT {
   @BeforeClass
   public void beforeClass() {
     LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
+    String envHost = getExpectedEnvVariable("REST_TEST_HOST");
     RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
     LOG.info("baseURI: " + RestAssured.baseURI);
 
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
+    String envAdminName = getExpectedEnvVariable("REST_TEST_ADMIN_NAME");
     String adminUserName =
         Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
     LOG.info("adminUserName: " + adminUserName);
 
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
+    String envAdminPW = getExpectedEnvVariable("REST_TEST_ADMIN_PW");
     String adminPassword =
         Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 
@@ -51,28 +51,28 @@ public class ImportPublicDataIT {
     LOG.info("Importing Test data");
 
     // Folder to look for test data
-    String uploadFolder = getExpectedEnvVariable("molgenis.test.upload.folder");
+    String uploadFolder = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_FOLDER");
 
     // File to import
-    String uploadFile = getExpectedEnvVariable("molgenis.test.upload.file");
+    String uploadFile = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_FILE");
 
     // Optional package to delete after test
-    uploadTopLevelPackage = getOptionalEnvVariable("molgenis.test.upload.package.to.remove");
+    uploadTopLevelPackage = getOptionalEnvVariable("MOLGENIS_TEST_UPLOAD_PACKAGE_TO_REMOVE");
 
     // Optional comma separated list of entities to delete after test
     String entitiesToRemoveString =
-        getOptionalEnvVariable("molgenis.test.upload.entities.to.remove");
+        getOptionalEnvVariable("MOLGENIS_TEST_UPLOAD_ENTITIES_TO_REMOVE");
     if (!Strings.isNullOrEmpty(entitiesToRemoveString)) {
       entitiesToRemove = Arrays.asList(entitiesToRemoveString.split("\\s*,\\s*"));
     }
 
     // Comma separated list of urls to test
-    String testUrlList = getExpectedEnvVariable("molgenis.test.upload.check.urls");
+    String testUrlList = getExpectedEnvVariable("MOLGENIS_TEST_UPLOAD_CHECK_URLS");
     testUrls = Arrays.asList(testUrlList.split("\\s*,\\s*"));
 
     String importStatus = "PENDING";
     if (uploadFile.endsWith(".xlsx")) {
-      importStatus = RestTestUtils.uploadEMX(adminToken, uploadFolder, uploadFile);
+      importStatus = RestTestUtils.uploadEMXWithoutPackage(adminToken, uploadFolder, uploadFile);
     } else if (uploadFile.endsWith(".vcf")) {
       importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
     } else {

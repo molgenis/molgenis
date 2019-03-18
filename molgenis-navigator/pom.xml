@@ -10,59 +10,6 @@
   <name>navigator</name>
   <description>Plugin module for navigating metadata.</description>
 
-  <profiles>
-    <profile>
-      <id>skip-js-compile</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <configuration>
-              <excludeDefaultDirectories>true</excludeDefaultDirectories>
-              <filesets>
-                <fileset>
-                  <directory>target</directory>
-                  <includes>
-                    <include>classes/*</include>
-                  </includes>
-                  <excludes>
-                    <exclude>classes/js</exclude>
-                    <exclude>classes/css</exclude>
-                    <exclude>classes/index.html</exclude>
-                  </excludes>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <executions>
-          <!-- This is a hack to get Jenkins to publish Karma test results when running a
-          Maven project: we run 0 surefire tests, so Jenkins publishes the report of the Karma tests. -->
-          <execution>
-            <id>dummySureFire</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>

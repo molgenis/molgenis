@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.awaitility.Awaitility.await;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
@@ -17,6 +18,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -106,6 +109,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
+    await().atMost(2, TimeUnit.SECONDS).until(copyJobFinished(progress));
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -157,6 +161,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(singletonList(id), targetPackageId, progress);
+    await().atMost(2, TimeUnit.SECONDS).until(copyJobFinished(progress));
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
@@ -178,6 +183,10 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     cleanupTargetPackage(targetPackageId);
   }
 
+  private Callable<Boolean> copyJobFinished(TestProgress progress) {
+    return () -> progress.getProgress() == progress.getProgressMax();
+  }
+
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
   @Test
@@ -191,6 +200,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     TestProgress progress = new TestProgress();
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
+    await().atMost(2, TimeUnit.SECONDS).until(copyJobFinished(progress));
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
