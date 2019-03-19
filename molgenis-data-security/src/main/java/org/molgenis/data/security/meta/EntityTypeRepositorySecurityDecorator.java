@@ -7,6 +7,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -184,14 +185,18 @@ public class EntityTypeRepositorySecurityDecorator
       EntityType currentEntityType =
           dataService.findOneById(
               EntityTypeMetadata.ENTITY_TYPE_META_DATA, newEntityType.getId(), EntityType.class);
-      if (currentEntityType.getPackage() == null) {
-        updated = newEntityType.getPackage() != null;
+      if (currentEntityType == null) {
+        throw new UnknownEntityTypeException(newEntityType.getId());
+      }
+      Package currentEntityTypePackage = currentEntityType.getPackage();
+      Package newEntityTypePackage = newEntityType.getPackage();
+      if (currentEntityTypePackage == null) {
+        updated = newEntityTypePackage != null;
       } else {
-        if (newEntityType.getPackage() == null) {
+        if (newEntityTypePackage == null) {
           updated = true;
         } else {
-          updated =
-              !currentEntityType.getPackage().getId().equals(newEntityType.getPackage().getId());
+          updated = !currentEntityTypePackage.getId().equals(newEntityTypePackage.getId());
         }
       }
     }

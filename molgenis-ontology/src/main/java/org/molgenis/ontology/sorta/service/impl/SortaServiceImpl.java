@@ -271,11 +271,13 @@ public class SortaServiceImpl implements SortaService {
       if (StringUtils.isNotEmpty(queryString) && isAttrNameValidForLexicalMatch(inputAttrName)) {
         Entity topMatchedSynonymEntity =
             findSynonymWithHighestNgramScore(ontologyIri, queryString, ontologyTerm);
-        if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE)) {
-          maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
-        }
-        if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE)) {
-          maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
+        if (topMatchedSynonymEntity != null) {
+          if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE)) {
+            maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
+          }
+          if (maxNgramIDFScore < topMatchedSynonymEntity.getDouble(COMBINED_SCORE)) {
+            maxNgramIDFScore = topMatchedSynonymEntity.getDouble(COMBINED_SCORE);
+          }
         }
       }
     }

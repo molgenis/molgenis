@@ -31,8 +31,9 @@ class RelationTransformer {
       return;
     }
 
-    if (entityType.getPackage() != null) {
-      String packageId = entityType.getPackage().getId();
+    Package entityTypePackage = entityType.getPackage();
+    if (entityTypePackage != null) {
+      String packageId = entityTypePackage.getId();
       if (newPackages.containsKey(packageId)) {
         entityType.setPackage(newPackages.get(packageId));
       }
@@ -51,8 +52,9 @@ class RelationTransformer {
       return;
     }
 
-    if (entityType.getExtends() != null) {
-      String extendsId = entityType.getExtends().getId();
+    EntityType entityTypeExtends = entityType.getExtends();
+    if (entityTypeExtends != null) {
+      String extendsId = entityTypeExtends.getId();
       if (newEntityTypes.containsKey(extendsId)) {
         entityType.setExtends(newEntityTypes.get(extendsId));
       }
@@ -104,6 +106,7 @@ class RelationTransformer {
         .forEach(attr -> transformMappedBy(attr, newAttributes));
   }
 
+  @SuppressWarnings("squid:S2259")
   private static void transformMappedBy(Attribute attribute, Map<String, Attribute> newAttributes) {
     if (attribute.isMappedBy()) {
       @SuppressWarnings("ConstantConditions")

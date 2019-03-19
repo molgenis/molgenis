@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.GroupIdentity;
 import org.springframework.security.acls.model.MutableAclService;
 
@@ -51,6 +52,10 @@ public class GroupRepositoryDecorator extends AbstractRepositoryDecorator<Group>
 
   private void deleteGroup(Object id) {
     Group group = dataService.findOneById(GroupMetadata.GROUP, id, Group.class);
+    if (group == null) {
+      throw new UnknownEntityException(GroupMetadata.GROUP, id);
+    }
+
     Iterable<Role> roles = group.getRoles();
     roles.forEach(this::removeMembers);
     dataService.delete(RoleMetadata.ROLE, stream(roles));

@@ -60,8 +60,9 @@ public class SearchAllService {
             .setLabel(entityType.getLabel(lang))
             .setDescription(entityType.getDescription(lang));
 
-    if (entityType.getPackage() != null) {
-      builder.setPackageId(entityType.getPackage().getId());
+    Package entityTypePackage = entityType.getPackage();
+    if (entityTypePackage != null) {
+      builder.setPackageId(entityTypePackage.getId());
     }
 
     builder

@@ -26,6 +26,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
@@ -359,5 +360,10 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<GroupIdentity> identityValues = identityCaptor.getAllValues();
     assertEquals(identityValues.get(0), new GroupIdentity("name"));
     assertEquals(identityValues.get(1), new GroupIdentity("name2"));
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testDeleteGroupUnknown() {
+    groupRepositoryDecorator.deleteById("unknownGroupId");
   }
 }

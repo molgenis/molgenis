@@ -15,10 +15,11 @@ import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.impl.BeaconInfoServiceImpl;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class BeaconInfoServiceTest {
+public class BeaconInfoServiceImplTest {
   private BeaconInfoService beaconInfoService;
 
   @Mock private DataService dataService;
@@ -58,5 +59,10 @@ public class BeaconInfoServiceTest {
     when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
 
     assertEquals(beaconInfoService.info("beacon"), beaconResponse);
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testInfoUnknownBeacon() {
+    beaconInfoService.info("unknownBeacon");
   }
 }

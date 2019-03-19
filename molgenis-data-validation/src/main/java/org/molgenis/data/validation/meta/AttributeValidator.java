@@ -47,6 +47,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Sort;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -92,6 +93,9 @@ public class AttributeValidator {
       case UPDATE_SKIP_ENTITY_VALIDATION:
         Attribute currentAttr =
             dataService.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), Attribute.class);
+        if (currentAttr == null) {
+          throw new UnknownEntityException(ATTRIBUTE_META_DATA, attr.getIdentifier());
+        }
         validateUpdate(attr, currentAttr);
         break;
       default:
@@ -100,11 +104,12 @@ public class AttributeValidator {
   }
 
   private static void validateParent(Attribute attr) {
-    if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND) {
+    Attribute attributeParent = attr.getParent();
+    if (attributeParent != null && attributeParent.getDataType() != COMPOUND) {
       throw new MolgenisDataException(
           format(
               "Parent attribute [%s] of attribute [%s] is not of type compound",
-              attr.getParent().getName(), attr.getName()));
+              attributeParent.getName(), attr.getName()));
     }
   }
 
