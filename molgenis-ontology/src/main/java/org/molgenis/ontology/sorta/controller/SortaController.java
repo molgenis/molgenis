@@ -203,7 +203,7 @@ public class SortaController extends PluginController {
       try {
         User currentUser = userAccountService.getCurrentUser();
         if (currentUser.isSuperuser()
-            || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
+            || Objects.equal(sortaJobExecution.getUser().orElse(null), currentUser.getUsername())) {
           runAsSystem(
               () -> {
                 Double thresholdValue = Double.parseDouble(threshold);
@@ -259,7 +259,7 @@ public class SortaController extends PluginController {
     if (sortaJobExecution != null) {
       User currentUser = userAccountService.getCurrentUser();
       if (currentUser.isSuperuser()
-          || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
+          || Objects.equal(sortaJobExecution.getUser().orElse(null), currentUser.getUsername())) {
         runAsSystem(
             () -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
         tryDeleteRepository(sortaJobExecution.getResultEntityName());

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.Attribute;
@@ -48,6 +49,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
   private Entity findAttributeEntity(EntityType entityType, String attributeName) {
     Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId());
+    if (entityTypeEntity == null) {
+      throw new UnknownEntityTypeException(entityType.getId());
+    }
     Optional<Entity> result =
         stream(entityTypeEntity.getEntities(ATTRIBUTES))
             .filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME)))
@@ -64,6 +68,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
       EntityType entityType, SemanticTag<Attribute, LabeledResource, LabeledResource> removeTag) {
     Attribute attribute = removeTag.getSubject();
     Entity attributeEntity = findAttributeEntity(entityType, attribute.getName());
+    if (attributeEntity == null) {
+      throw new UnknownAttributeException(entityType, attribute.getName());
+    }
     List<Entity> tags = new ArrayList<>();
     for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS)) {
       SemanticTag<Attribute, LabeledResource, LabeledResource> tag =
@@ -112,6 +119,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
   public void addAttributeTag(
       EntityType entityType, SemanticTag<Attribute, LabeledResource, LabeledResource> tag) {
     Entity entity = findAttributeEntity(entityType, tag.getSubject().getName());
+    if (entity == null) {
+      throw new UnknownAttributeException(entityType, tag.getSubject().getName());
+    }
     List<Entity> tags = new ArrayList<>();
     for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS)) {
       tags.add(tagEntity);
