@@ -22,9 +22,9 @@
 
       <div class="form-group">
         <div class="col-8 offset-md-2">
-          <div class="btn-group float-right">
+          <div class="float-right">
             <a id="cancelBtn" href="${context_url?html}" class="btn btn-secondary">Close</a>
-            <button id="submitBtn" type="submit" class="btn btn-secondary">Save</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary">Save</button>
           </div>
         </div>
       </div>
