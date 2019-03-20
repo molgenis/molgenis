@@ -47,7 +47,7 @@ request.send(file)
 ```
 
 #### cURL
-curl --data-binary @my.file /api/files/v1
+curl -H 'Content-Type: application/octet-stream' --data-binary @my.file /api/files/v1
 
 ## Download file
 
