@@ -339,7 +339,7 @@ public class EntityTypeValidator {
           new ConstraintViolation(
               format(
                   "Adding entity [%s] to system package [%s] is not allowed",
-                  entityType.getId(), entityType.getPackage().getId())));
+                  entityType.getId(), pack.getId())));
     }
   }
 }

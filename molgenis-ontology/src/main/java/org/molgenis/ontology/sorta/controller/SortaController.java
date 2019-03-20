@@ -367,6 +367,7 @@ public class SortaController extends PluginController {
       HttpServletRequest httpServletRequest)
       throws IOException {
     if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
+    validateJobName(jobName);
     try (ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"))) {
       return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
     }
@@ -381,6 +382,7 @@ public class SortaController extends PluginController {
       HttpServletRequest httpServletRequest)
       throws IOException {
     if (isEmpty(ontologyIri) || file == null) return init(model);
+    validateJobName(jobName);
     try (InputStream inputStream = file.getInputStream()) {
       return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
     }
@@ -642,5 +644,11 @@ public class SortaController extends PluginController {
 
   private String getSortaServiceMenuUrl() {
     return menuReaderService.findMenuItemPath(ID);
+  }
+
+  private void validateJobName(String jobName) {
+    if (!jobName.matches("\\w+")) {
+      throw new IllegalArgumentException("Job name contains characters other than [a-zA-Z_0-9]");
+    }
   }
 }
