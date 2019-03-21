@@ -61,6 +61,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
@@ -108,7 +109,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     threadPoolTaskExecutor.setCorePoolSize(5);
     threadPoolTaskExecutor.setMaxPoolSize(10);
     threadPoolTaskExecutor.setQueueCapacity(25);
-    return threadPoolTaskExecutor;
+    threadPoolTaskExecutor.initialize();
+    return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor);
   }
 
   @Override
