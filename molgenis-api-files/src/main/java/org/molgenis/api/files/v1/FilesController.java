@@ -3,6 +3,7 @@ package org.molgenis.api.files.v1;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_ID;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_PATH;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import io.swagger.annotations.Api;
@@ -48,6 +49,14 @@ class FilesController extends ApiController {
     return filesService
         .upload(httpServletRequest)
         .thenApply(fileMeta -> this.toFileResponseEntity(fileMeta, httpServletRequest));
+  }
+
+  @PostMapping(consumes = {"application/x-www-form-urlencoded", "multipart/form-data"})
+  @ResponseStatus(BAD_REQUEST)
+  public CompletableFuture<ResponseEntity<FileResponse>> createFileFromForm(
+      HttpServletRequest httpServletRequest) {
+    throw new UnsupportedOperationException(
+        "Media type '" + httpServletRequest.getContentType() + "' not supported");
   }
 
   @ApiOperation("Retrieve file metadata (see documentation)")

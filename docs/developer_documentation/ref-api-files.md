@@ -14,11 +14,12 @@ POST /api/files/v1
 #### Request Headers
 | Name                | Description                                                 | Required | Default value              |
 |---------------------|-------------------------------------------------------------|----------|----------------------------|
-| Content-Type        | A standard MIME type describing the format of the file      | No       | application/octet-stream   |
+| Content-Type *      | A standard MIME type describing the format of the file      | No       | application/octet-stream   |
 | Content-Length      | File size in bytes                                          | No       |                            |
 | x-molgenis-filename | Filename                                                    | No       | unknown                    |
 | x-molgenis-token    | Authentication token                                        | No       | session cookie if supplied |
 
+* All media types with the exception of `application/x-www-form-urlencoded` and `multipart/form-data` are allowed. See the JavaScript example for how to upload a file from a form file input.
 ### Response
 | Status code         | Description
 |---------------------|-----------------------------------------------------------------------------------|
