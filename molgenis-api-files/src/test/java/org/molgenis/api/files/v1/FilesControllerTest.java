@@ -62,7 +62,9 @@ public class FilesControllerTest extends AbstractMockitoTest {
     assertNotNull(fileResponseResponseEntity.getHeaders().getLocation());
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = "Media type 'multipart/form-data' not supported")
+  @Test(
+      expectedExceptions = UnsupportedOperationException.class,
+      expectedExceptionsMessageRegExp = "Media type 'multipart/form-data' not supported")
   public void testCreateFileFromForm() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(httpServletRequest.getContentType()).thenReturn("multipart/form-data");
