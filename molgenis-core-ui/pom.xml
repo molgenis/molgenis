@@ -29,6 +29,7 @@
                 <location>org.molgenis.core.ui.admin.user</location>
                 <location>org.molgenis.core.ui.admin.usermanager</location>
                 <location>org.molgenis.core.ui.admin.permission</location>
+                <location>org.molgenis.core.ui.controller</location>
               </locations>
               <swaggerDirectory>${project.build.directory}/generated-resources/swagger
               </swaggerDirectory>
@@ -236,6 +237,11 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

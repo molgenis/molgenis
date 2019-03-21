@@ -186,6 +186,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers("/plugin/void/**")
         .permitAll()
+        .antMatchers("/plugin/app-ui-context")
+        .permitAll()
         .antMatchers("/api/**")
         .permitAll()
         .antMatchers("/webjars/**")
