@@ -136,7 +136,7 @@
         },
         {
           "type": "plugin",
-          "id": "settingsmanager",
+          "id": "settings",
           "label": "Settings"
         },
         {
