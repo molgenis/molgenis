@@ -53,17 +53,21 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -92,6 +96,22 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private MessageSource messageSource;
 
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
+
+  @Override
+  public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+    configurer.setDefaultTimeout(60L * 1000L);
+    configurer.setTaskExecutor(asyncTaskExecutor());
+  }
+
+  @Bean
+  public AsyncTaskExecutor asyncTaskExecutor() {
+    ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+    threadPoolTaskExecutor.setCorePoolSize(5);
+    threadPoolTaskExecutor.setMaxPoolSize(10);
+    threadPoolTaskExecutor.setQueueCapacity(25);
+    threadPoolTaskExecutor.initialize();
+    return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor);
+  }
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {

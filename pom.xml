@@ -106,6 +106,7 @@
     <poi.version>4.0.1</poi.version>
     <jaxb-api.version>2.2.11</jaxb-api.version>
     <vcf-io.version>1.0.3</vcf-io.version>
+    <minio.version>6.0.2</minio.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -932,6 +933,12 @@
         <artifactId>jaxb-api</artifactId>
         <version>${jaxb-api.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>io.minio</groupId>
+        <artifactId>minio</artifactId>
+        <version>${minio.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -966,6 +973,7 @@
   <modules>
     <module>molgenis-amazon-bucket</module>
     <module>molgenis-api</module>
+    <module>molgenis-api-files</module>
     <module>molgenis-api-tests</module>
     <module>molgenis-app</module>
     <module>molgenis-app-manager</module>

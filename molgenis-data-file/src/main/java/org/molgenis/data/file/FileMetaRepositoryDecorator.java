@@ -16,10 +16,13 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
   private static final Logger LOG = LoggerFactory.getLogger(FileMetaRepositoryDecorator.class);
 
   private final FileStore fileStore;
+  private final BlobStore blobStore;
 
-  public FileMetaRepositoryDecorator(Repository<FileMeta> delegateRepository, FileStore fileStore) {
+  public FileMetaRepositoryDecorator(
+      Repository<FileMeta> delegateRepository, FileStore fileStore, BlobStore blobStore) {
     super(delegateRepository);
     this.fileStore = requireNonNull(fileStore);
+    this.blobStore = requireNonNull(blobStore);
   }
 
   @Override
@@ -61,6 +64,26 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
   }
 
   private void deleteFile(FileMeta fileMeta) {
+    if (isBlobStoreFile(fileMeta)) {
+      deleteFileFromBlobStore(fileMeta);
+    } else {
+      deleteFileFromFileStore(fileMeta);
+    }
+  }
+
+  private boolean isBlobStoreFile(FileMeta fileMeta) {
+    return fileMeta.getUrl().endsWith("alt=media");
+  }
+
+  private void deleteFileFromBlobStore(FileMeta fileMeta) {
+    try {
+      blobStore.delete(fileMeta.getId());
+    } catch (UncheckedIOException e) {
+      LOG.warn("Could not delete file '{}' from blob store", fileMeta.getId());
+    }
+  }
+
+  private void deleteFileFromFileStore(FileMeta fileMeta) {
     try {
       fileStore.delete(fileMeta.getId());
     } catch (UncheckedIOException e) {

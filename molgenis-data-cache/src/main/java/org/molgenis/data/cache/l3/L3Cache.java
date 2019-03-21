@@ -21,8 +21,8 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 /** In-memory Query cache containing Queries and resulting ids from cacheable repositories */
 @Service
-public class L3Cache extends DefaultMolgenisTransactionListener {
+public class L3Cache implements TransactionListener {
   private static final Logger LOG = getLogger(L3Cache.class);
   private static final int MAX_CACHE_SIZE_PER_QUERY = 1000;
 
