@@ -4,21 +4,22 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Api("UI Context")
 @Controller
 @RequestMapping(UiContextController.URI)
 public class UiContextController extends PluginController {
@@ -63,14 +64,12 @@ public class UiContextController extends PluginController {
             ? new JsonParser().parse(appSettings.getMenu()).getAsJsonObject()
             : new JsonObject();
 
-    boolean authenticated =
-        !(SecurityContextHolder.getContext().getAuthentication()
-            instanceof AnonymousAuthenticationToken);
-
+    boolean authenticated = SecurityUtils.currentUserIsAuthenticated();
     boolean showCookieWall = cookieWallService.showCookieWall();
 
     return UiContextResponse.builder()
         .setMenu(menu)
+        .setCssHref(appSettings.getCssHref())
         .setNavBarLogo(appSettings.getLogoNavBarHref())
         .setLogoTop(appSettings.getLogoTopHref())
         .setLogoTopMaxHeight(appSettings.getLogoTopMaxHeight())

@@ -106,6 +106,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     when(appSettings.getLogoTopMaxHeight()).thenReturn(22);
     when(appSettings.getMenu()).thenReturn(menu);
     when(appSettings.getFooter()).thenReturn("<a class=\"foo\">message</a>");
+    when(appSettings.getCssHref()).thenReturn("cssHref");
     when(cookieWallService.showCookieWall()).thenReturn(false);
 
     mockMvc
@@ -121,6 +122,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(jsonPath("$.menu.type", is("menu")))
         .andExpect(jsonPath("$.additionalMessage", is("<a class=\"foo\">message</a>")))
         .andExpect(jsonPath("$.version", is("mock-version")))
-        .andExpect(jsonPath("$.buildDate", is("mock date-time")));
+        .andExpect(jsonPath("$.buildDate", is("mock date-time")))
+        .andExpect(jsonPath("$.cssHref", is("cssHref")));
   }
 }

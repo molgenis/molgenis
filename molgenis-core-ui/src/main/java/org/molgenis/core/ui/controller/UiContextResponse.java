@@ -37,6 +37,10 @@ public abstract class UiContextResponse {
 
   public abstract String getBuildDate();
 
+  @Nullable
+  @CheckForNull
+  public abstract String getCssHref();
+
   public static Builder builder() {
     return new AutoValue_UiContextResponse.Builder();
   }
@@ -65,6 +69,8 @@ public abstract class UiContextResponse {
     public abstract Builder setVersion(String version);
 
     public abstract Builder setBuildDate(String buildDate);
+
+    public abstract Builder setCssHref(String cssHref);
 
     public abstract UiContextResponse build();
   }
