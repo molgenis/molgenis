@@ -1,6 +1,7 @@
 package org.molgenis.api.files.v1;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -102,5 +103,12 @@ public class FilesControllerTest extends AbstractMockitoTest {
     ResponseEntity<StreamingResponseBody> responseEntity = mock(ResponseEntity.class);
     when(filesApiService.download(fileId)).thenReturn(responseEntity);
     assertEquals(filesApiController.downloadFile(fileId), responseEntity);
+  }
+
+  @Test
+  public void testDeleteFile() {
+    String fileId = "MyFileId";
+    filesApiController.deleteFile(fileId);
+    verify(filesApiService).delete(fileId);
   }
 }

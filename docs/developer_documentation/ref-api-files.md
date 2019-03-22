@@ -98,6 +98,6 @@ DELETE /api/files/v1/myFileId
 ### Response
 | Status code         | Description
 |---------------------|-----------------------------------------------------------------------------------|
-| 200 OK              | File and filemeta deleted.                                                        |
+| 204 No Content      | File and filemeta deleted.                                                        |
 | 403 Forbidden       | If the authenticated user does not have WRITE permissions on the file metadata    |
 | 404 Not Found       | If the file identifier is unknown                                                 |

@@ -5,6 +5,7 @@ import static org.molgenis.api.files.FilesApiNamespace.API_FILES_ID;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_PATH;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -74,6 +75,7 @@ class FilesController extends ApiController {
 
   @ApiOperation("Delete file (see documentation)")
   @DeleteMapping(value = "/{fileId}")
+  @ResponseStatus(NO_CONTENT)
   public void deleteFile(@PathVariable("fileId") String fileId) {
     filesService.delete(fileId);
   }
