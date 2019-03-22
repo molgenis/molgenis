@@ -21,7 +21,7 @@ POST /api/files/v1
 
 * All media types with the exception of `application/x-www-form-urlencoded` and `multipart/form-data` are allowed. See the JavaScript example for how to upload a file from a form file input.
 ### Response
-| Status code         | Description
+| Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 | 201 Created         | File uploaded and file metadata created.                                          |
 | 403 Forbidden       | If the authenticated user does not have WRITE permissions on file metadata.       |
