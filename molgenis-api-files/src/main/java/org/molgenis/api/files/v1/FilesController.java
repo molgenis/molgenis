@@ -3,6 +3,10 @@ package org.molgenis.api.files.v1;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_ID;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_PATH;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
+import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
+import static org.molgenis.data.security.EntityTypePermission.DELETE_DATA;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -15,6 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.files.FilesService;
 import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +44,12 @@ class FilesController extends ApiController {
   static final String API_FILES_V1_PATH = API_FILES_PATH + "/v" + API_FILES_V1_VERSION;
 
   private final FilesService filesService;
+  private final UserPermissionEvaluator userPermissionEvaluator;
 
-  FilesController(FilesService filesService) {
+  FilesController(FilesService filesService, UserPermissionEvaluator userPermissionEvaluator) {
     super(API_FILES_ID, API_FILES_V1_VERSION);
     this.filesService = requireNonNull(filesService);
+    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
   @ApiOperation("Upload file (see documentation)")
@@ -47,6 +57,8 @@ class FilesController extends ApiController {
   @ResponseStatus(CREATED)
   public CompletableFuture<ResponseEntity<FileResponse>> createFile(
       HttpServletRequest httpServletRequest) {
+    validateCreatePermission();
+
     return filesService
         .upload(httpServletRequest)
         .thenApply(fileMeta -> this.toFileResponseEntity(fileMeta, httpServletRequest));
@@ -63,6 +75,8 @@ class FilesController extends ApiController {
   @ApiOperation("Retrieve file metadata (see documentation)")
   @GetMapping(value = "/{fileId}")
   public FileResponse readFile(@PathVariable("fileId") String fileId) {
+    validateReadPermission();
+
     FileMeta fileMeta = filesService.getFileMeta(fileId);
     return toFileResponse(fileMeta);
   }
@@ -70,6 +84,8 @@ class FilesController extends ApiController {
   @ApiOperation("Download file (see documentation)")
   @GetMapping(value = "/{fileId}", params = "alt=media")
   public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable("fileId") String fileId) {
+    validateReadPermission();
+
     return filesService.download(fileId);
   }
 
@@ -77,6 +93,8 @@ class FilesController extends ApiController {
   @DeleteMapping(value = "/{fileId}")
   @ResponseStatus(NO_CONTENT)
   public void deleteFile(@PathVariable("fileId") String fileId) {
+    validateDeletePermission();
+
     filesService.delete(fileId);
   }
 
@@ -104,5 +122,26 @@ class FilesController extends ApiController {
         .setContentType(fileMeta.getContentType())
         .setSize(fileMeta.getSize())
         .build();
+  }
+
+  private void validateCreatePermission() {
+    validatePermission(ADD_DATA);
+  }
+
+  private void validateReadPermission() {
+    validatePermission(READ_DATA);
+  }
+
+  private void validateDeletePermission() {
+    validatePermission(DELETE_DATA);
+  }
+
+  private void validatePermission(EntityTypePermission entityTypePermission) {
+    boolean hasPermission =
+        userPermissionEvaluator.hasPermission(
+            new EntityTypeIdentity(FILE_META), entityTypePermission);
+    if (!hasPermission) {
+      throw new EntityTypePermissionDeniedException(entityTypePermission, FILE_META);
+    }
   }
 }
