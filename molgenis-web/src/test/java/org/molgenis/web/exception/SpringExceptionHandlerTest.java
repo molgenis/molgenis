@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 import static org.testng.Assert.assertEquals;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.testng.annotations.BeforeClass;
@@ -49,6 +51,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   @Mock private HandlerMethod handlerMethod;
   @Mock private HttpServletRequest httpServletRequest;
   @Mock private NoHandlerFoundException noHandlerFoundException;
+  @Mock private MaxUploadSizeExceededException maxUploadSizeExceededException;
   @Mock private AsyncRequestTimeoutException asyncRequestTimeoutException;
   @Mock private BindException bindException;
   @Mock private MissingServletRequestPartException missingServletRequestPartException;
@@ -104,10 +107,22 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
     when(noHandlerFoundException.getLocalizedMessage()).thenReturn("localized message");
     when(httpServletRequest.getMethod()).thenReturn("OPTIONS");
     assertEquals(
-        handler.handleSpringException(noHandlerFoundException, httpServletRequest),
+        handler.handleSpringExceptionNotFound(noHandlerFoundException, httpServletRequest),
         new ResponseEntity<>(
             new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
             NOT_FOUND));
+  }
+
+  @Test
+  public void testHandleMaxUploadSizeExceededException() {
+    when(maxUploadSizeExceededException.getLocalizedMessage()).thenReturn("localized message");
+    when(httpServletRequest.getMethod()).thenReturn("OPTIONS");
+    assertEquals(
+        handler.handleMaxUploadSizeExceededException(
+            maxUploadSizeExceededException, httpServletRequest),
+        new ResponseEntity<>(
+            new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
+            PAYLOAD_TOO_LARGE));
   }
 
   @Test
