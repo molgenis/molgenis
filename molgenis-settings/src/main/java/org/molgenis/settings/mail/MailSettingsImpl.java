@@ -148,7 +148,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
           .setDefaultValue("true")
           .setNillable(true)
           .setDescription("Is authentication required for SMTP server.");
-      addAttribute(AUTH_REQUIRED)
+      addAttribute(FROM_ADDRESS)
           .setDataType(STRING)
           .setDefaultValue(DEFAULT_REPLY_EMAIL_ADDRESS)
           .setNillable(true)
