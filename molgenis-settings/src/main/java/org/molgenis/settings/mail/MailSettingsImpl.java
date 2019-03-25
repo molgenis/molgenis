@@ -3,6 +3,7 @@ package org.molgenis.settings.mail;
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.settings.PropertyType.KEY;
 import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
@@ -23,6 +24,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.settings.DefaultSettingsEntity;
 import org.molgenis.settings.DefaultSettingsEntityType;
+import org.molgenis.util.mail.JavaMailSenderFactory;
 import org.molgenis.util.mail.MailSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -32,6 +34,8 @@ import org.springframework.stereotype.Component;
 public class MailSettingsImpl extends DefaultSettingsEntity implements MailSettings {
   private static final long serialVersionUID = 1L;
   private static final String ID = "MailSettings";
+
+  public static final String DEFAULT_REPLY_EMAIL_ADDRESS = "molgenis+admin@gmail.c om";
 
   public MailSettingsImpl(Entity entity) {
     super(ID);
@@ -67,14 +71,17 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
     @Value("${mail.password:#{null}}")
     private String mailPassword;
 
-    @Value("${mail.java.auth:true}")
+    @Value("${mail.smtp.auth:true}")
     private String mailJavaAuth;
 
-    @Value("${mail.java.starttls.enable:true}")
+    @Value("${mail.smtp.starttls.enable:true}")
     private String mailJavaStartTlsEnable;
 
-    @Value("${mail.java.quitwait:false}")
+    @Value("${mail.smtp.quitwait:false}")
     private String mailJavaQuitWait;
+
+    @Value("${mail.from:" + DEFAULT_REPLY_EMAIL_ADDRESS + "}")
+    private String mailJavaFromAddress;
 
     public static final String HOST = "host";
     public static final String PORT = "port";
@@ -85,6 +92,10 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
     public static final String PASSWORD = "password";
 
     public static final String DEFAULT_ENCODING = "defaultEncoding";
+    public static final String START_TLS_ENABLED = "startTlsEnabled";
+    public static final String WAIT_QUIT= "waitQuit";
+    public static final String AUTH_REQUIRED = "auth";
+    public static final String FROM_ADDRESS = "fromAddress";
     public static final String JAVA_MAIL_PROPS = "props";
     public static final String TEST_CONNECTION = "testConnection";
     private JavaMailPropertyType mailSenderPropertyType;
@@ -123,6 +134,26 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
           .setDefaultValue("UTF-8")
           .setNillable(false)
           .setDescription("Default MimeMessage encoding.");
+      addAttribute(START_TLS_ENABLED)
+          .setDataType(BOOL)
+          .setDefaultValue("true")
+          .setNillable(true)
+          .setDescription("Do you need TLS with for SMTP server.");
+      addAttribute(WAIT_QUIT)
+          .setDataType(BOOL)
+          .setDefaultValue("false")
+          .setNillable(true)
+          .setDescription("Do you quit when you wait?.");
+      addAttribute(AUTH_REQUIRED)
+          .setDataType(BOOL)
+          .setDefaultValue("true")
+          .setNillable(true)
+          .setDescription("Is authentication required for SMTP server.");
+      addAttribute(AUTH_REQUIRED)
+          .setDataType(STRING)
+          .setDefaultValue(DEFAULT_REPLY_EMAIL_ADDRESS)
+          .setNillable(true)
+          .setDescription("The default from address for SMTP server.");
       Attribute refAttr = mailSenderPropertyType.getAttribute(MAIL_SETTINGS_REF);
       addAttribute(JAVA_MAIL_PROPS)
           .setDataType(AttributeType.ONE_TO_MANY)
@@ -197,5 +228,25 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   @Override
   public boolean isTestConnection() {
     return getBoolean(Meta.TEST_CONNECTION);
+  }
+
+  @Override
+  public String isStartTlsEnabled() {
+    return getString(Meta.START_TLS_ENABLED);
+  }
+
+  @Override
+  public String isQuitWait() {
+    return getString(Meta.WAIT_QUIT);
+  }
+
+  @Override
+  public String isAuthenticationRequired() {
+    return getString(Meta.AUTH_REQUIRED);
+  }
+
+  @Override
+  public String getFromAddress() {
+    return getString(Meta.FROM_ADDRESS);
   }
 }

@@ -38,7 +38,7 @@ You should configure an email server to interact with your users for things like
 You can find the mail settings in the Admin menu, under Settings.
 At the top of the page, type "Mail settings" into the selection box.
 
-For backwards compatability, the default settings are filled with the values provided in `molgenis-server.properties` 
+For backwards compatibility, the default settings are filled with the values provided in `molgenis-server.properties` 
 under the keys `mail.username` and `mail.password`, but the values provided here will override those settings.
 
 For basic configuration, you only need to provide the username and password fields with a valid Gmail username and password.
@@ -52,14 +52,39 @@ By default, the following low-level JavaMail properties, needed to interact with
 ```
 mail.smtp.starttls.enable=true
 mail.smtp.quitwait=false
-mail.smtp.auth=true
 ```
+
 You may override these properties or add additional properties and override these defaults by adding entities to the 
 ```JavaMailProperty``` repository in the Data Explorer. Each key may be provided at most once.
 For a list of valid keys, check https://javamail.java.net/nonav/docs/api/
 
 > E.g. Add an entity with key ```mail.debug``` and value ```true``` if you'd like to debug the mail dialog with the server.
 
+#### Mail server without authentication
+When you want to setup a mail server without authentication you need to add the following properties:
+```properties
+mail.smtp.auth=false
+mail.from=noreply@domain.ext
+```
+
+You can add them by entering them in the mail property table. Or override them in the environment or molgenis-server.properties.
+
+*Environment:*
+
+```bash
+#!/bin/bash
+
+export mail.smtp.auth=false
+export mail.from=noreply@domain.ext 
+```
+
+*molgenis-server.properties:*
+```properties
+mail.smtp.auth=false
+mail.from=noreply@domain.ext 
+```
+
+You need to add the ```mail.from``` property otherwise the server resolves to ```root@localhost```.
 
 ## Authentication settings
 When you are a superuser in MOLGENIS, you can configure three authentication methods: 

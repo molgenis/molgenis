@@ -16,7 +16,17 @@ public interface MailSettings {
 
   Charset getDefaultEncoding();
 
+  boolean isTestConnection();
+
+  String isStartTlsEnabled();
+
+  String isQuitWait();
+
+  String isAuthenticationRequired();
+
+  String getFromAddress();
+
   Properties getJavaMailProperties();
 
-  boolean isTestConnection();
+
 }

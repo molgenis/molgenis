@@ -13,16 +13,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class JavaMailSenderFactory implements MailSenderFactory {
   private static final Logger LOG = LoggerFactory.getLogger(JavaMailSenderFactory.class);
+
   private static Properties defaultProperties = new Properties();
 
-  static {
-    try {
-      defaultProperties.load(
-          JavaMailSenderFactory.class.getResourceAsStream("mail-default.properties"));
-    } catch (IOException e) {
-      throw new IllegalStateException("Default mail-default.properties not found!");
-    }
-  }
+  private static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+  private static final String MAIL_SMTP_QUITWAIT = "mail.smtp.quitwait";
+  private static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+  private static final String MAIL_SMTP_FROM_ADDRESS = "mail.from";
 
   @Override
   public JavaMailSenderImpl createMailSender(MailSettings mailSettings) {
@@ -35,6 +32,10 @@ public class JavaMailSenderFactory implements MailSenderFactory {
     mailSender.setPassword(mailSettings.getPassword());
     mailSender.setDefaultEncoding(mailSettings.getDefaultEncoding().name());
     Properties properties = new Properties(defaultProperties);
+    defaultProperties.setProperty(MAIL_SMTP_STARTTLS_ENABLE, mailSettings.isStartTlsEnabled());
+    defaultProperties.setProperty(MAIL_SMTP_QUITWAIT, mailSettings.isQuitWait());
+    defaultProperties.setProperty(MAIL_SMTP_AUTH, mailSettings.isAuthenticationRequired());
+    defaultProperties.setProperty(MAIL_SMTP_FROM_ADDRESS, mailSettings.getFromAddress());
     properties.putAll(mailSettings.getJavaMailProperties());
     LOG.debug("Mail properties: {}; defaults: {}", properties, defaultProperties);
     mailSender.setJavaMailProperties(properties);
