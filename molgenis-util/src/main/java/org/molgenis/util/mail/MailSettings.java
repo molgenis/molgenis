@@ -27,6 +27,4 @@ public interface MailSettings {
   String getFromAddress();
 
   Properties getJavaMailProperties();
-
-
 }

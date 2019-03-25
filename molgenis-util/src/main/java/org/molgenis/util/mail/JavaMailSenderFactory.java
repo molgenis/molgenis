@@ -2,7 +2,6 @@ package org.molgenis.util.mail;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;

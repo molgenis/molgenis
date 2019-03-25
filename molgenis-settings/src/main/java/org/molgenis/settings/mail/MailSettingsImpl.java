@@ -24,7 +24,6 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.settings.DefaultSettingsEntity;
 import org.molgenis.settings.DefaultSettingsEntityType;
-import org.molgenis.util.mail.JavaMailSenderFactory;
 import org.molgenis.util.mail.MailSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -93,7 +92,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 
     public static final String DEFAULT_ENCODING = "defaultEncoding";
     public static final String START_TLS_ENABLED = "startTlsEnabled";
-    public static final String WAIT_QUIT= "waitQuit";
+    public static final String WAIT_QUIT = "waitQuit";
     public static final String AUTH_REQUIRED = "auth";
     public static final String FROM_ADDRESS = "fromAddress";
     public static final String JAVA_MAIL_PROPS = "props";
