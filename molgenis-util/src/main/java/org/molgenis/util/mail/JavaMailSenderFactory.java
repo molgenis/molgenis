@@ -15,10 +15,10 @@ public class JavaMailSenderFactory implements MailSenderFactory {
 
   private static Properties defaultProperties = new Properties();
 
-  private static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
-  private static final String MAIL_SMTP_QUITWAIT = "mail.smtp.quitwait";
-  private static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
-  private static final String MAIL_SMTP_FROM_ADDRESS = "mail.from";
+  public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+  public static final String MAIL_SMTP_QUITWAIT = "mail.smtp.quitwait";
+  public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+  public static final String MAIL_SMTP_FROM_ADDRESS = "mail.from";
 
   @Override
   public JavaMailSenderImpl createMailSender(MailSettings mailSettings) {

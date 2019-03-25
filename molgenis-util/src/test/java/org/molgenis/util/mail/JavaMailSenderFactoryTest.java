@@ -22,6 +22,10 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
     when(mailSettings.getUsername()).thenReturn("username");
     when(mailSettings.getPassword()).thenReturn("password");
     when(mailSettings.getDefaultEncoding()).thenReturn(UTF_8);
+    when(mailSettings.isStartTlsEnabled()).thenReturn("true");
+    when(mailSettings.isQuitWait()).thenReturn("false");
+    when(mailSettings.isAuthenticationRequired()).thenReturn("true");
+    when(mailSettings.getFromAddress()).thenReturn("molgenis@gmail.com");
     when(mailSettings.getJavaMailProperties()).thenReturn(new Properties());
     javaMailSenderFactory = new JavaMailSenderFactory();
   }
@@ -36,9 +40,10 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
     assertEquals(actual.getPassword(), "password");
     assertEquals(actual.getDefaultEncoding(), "UTF-8");
     final Properties actualProperties = actual.getJavaMailProperties();
-    assertEquals(actualProperties.getProperty("mail.smtp.starttls.enable"), "true");
-    assertEquals(actualProperties.getProperty("mail.smtp.quitwait"), "false");
-    assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
+    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_STARTTLS_ENABLE), "true");
+    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_QUITWAIT), "false");
+    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_AUTH), "true");
+    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_FROM_ADDRESS), "molgenis@gmail.com");
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/6516

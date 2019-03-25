@@ -34,7 +34,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   private static final long serialVersionUID = 1L;
   private static final String ID = "MailSettings";
 
-  public static final String DEFAULT_REPLY_EMAIL_ADDRESS = "molgenis+admin@gmail.c om";
+  public static final String DEFAULT_REPLY_EMAIL_ADDRESS = "molgenis+admin@gmail.com";
 
   public MailSettingsImpl(Entity entity) {
     super(ID);
