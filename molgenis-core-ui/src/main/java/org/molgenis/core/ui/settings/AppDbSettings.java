@@ -170,7 +170,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
               String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
           .setLabel("Google analytics account privacy friendly")
           .setDescription(
-              "Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+              "Confirm that you have configured your Google Analytics account as described here: https://autoriteitpersoonsgegevens.nl/sites/default/files/atoms/files/138._handleiding_privacyvriendelijk_instellen_google_analytics_aug_2018.pdf");
       addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS)
           .setParent(trackingAttr)
           .setDataType(STRING)
