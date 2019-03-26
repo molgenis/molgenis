@@ -69,7 +69,6 @@ import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -111,11 +110,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     threadPoolTaskExecutor.setQueueCapacity(25);
     threadPoolTaskExecutor.initialize();
     return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor);
-  }
-
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/**").allowedMethods("*");
   }
 
   @Override
