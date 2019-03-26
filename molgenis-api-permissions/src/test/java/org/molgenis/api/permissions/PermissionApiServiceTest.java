@@ -26,11 +26,11 @@ import java.util.Set;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.inheritance.InheritedPermissionFactory;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
-import org.molgenis.api.permissions.model.request.IdentityPermissionsRequest;
+import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.ClassPermissionsResponse;
-import org.molgenis.api.permissions.model.response.IdentityPermissionsResponse;
+import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
+import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -232,13 +232,13 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
 
     PermissionResponse permission1 = PermissionResponse.create(null, "user1", "COUNT", null);
     PermissionResponse permission2 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
-    IdentityPermissionsResponse identityPermissions1 =
-        IdentityPermissionsResponse.create(
+    ObjectPermissionsResponse identityPermissions1 =
+        ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission1, permission2));
-    ClassPermissionsResponse classPermissions1 =
-        ClassPermissionsResponse.create(
+    TypePermissionsResponse classPermissions1 =
+        TypePermissionsResponse.create(
             "entity-typeId", "TypeLabel", Collections.singletonList(identityPermissions1));
-    Set<ClassPermissionsResponse> expected = Sets.newHashSet(classPermissions1);
+    Set<TypePermissionsResponse> expected = Sets.newHashSet(classPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
         .thenReturn(
             Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
@@ -288,10 +288,10 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
 
     PermissionResponse permission1 = PermissionResponse.create(null, "user1", "COUNT", null);
     PermissionResponse permission2 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
-    IdentityPermissionsResponse identityPermissions1 =
-        IdentityPermissionsResponse.create(
+    ObjectPermissionsResponse identityPermissions1 =
+        ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission1, permission2));
-    Set<IdentityPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
+    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities(
             "entity-typeId", Sets.newHashSet(sid1, sid2), 20, 60))
         .thenReturn(
@@ -339,10 +339,10 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
 
     PermissionResponse permission1 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
     PermissionResponse permission2 = PermissionResponse.create(null, "user1", "COUNT", null);
-    IdentityPermissionsResponse identityPermissions1 =
-        IdentityPermissionsResponse.create(
+    ObjectPermissionsResponse identityPermissions1 =
+        ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<IdentityPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
+    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
         .thenReturn(
             Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
@@ -389,10 +389,10 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
 
     PermissionResponse permission1 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
     PermissionResponse permission2 = PermissionResponse.create(null, "user1", "COUNT", null);
-    IdentityPermissionsResponse identityPermissions1 =
-        IdentityPermissionsResponse.create(
+    ObjectPermissionsResponse identityPermissions1 =
+        ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<IdentityPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
+    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(
             Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
@@ -506,8 +506,8 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
         .when(mutableAclService)
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
     PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
-    IdentityPermissionsRequest identityPermissions =
-        IdentityPermissionsRequest.create("identifier", Collections.singletonList(permission));
+    ObjectPermissionsRequest identityPermissions =
+        ObjectPermissionsRequest.create("identifier", Collections.singletonList(permission));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
     when(objectIdentity.getType()).thenReturn("entity-typeId");

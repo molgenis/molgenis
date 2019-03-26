@@ -9,12 +9,12 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class ClassPermissionsRequest {
-  public abstract String getClassId();
+  public abstract String getTypeId();
 
-  public abstract List<IdentityPermissionsRequest> getRowPermissions();
+  public abstract List<ObjectPermissionsRequest> getObjects();
 
   public static ClassPermissionsRequest create(
-      String classId, List<IdentityPermissionsRequest> permissions) {
-    return new AutoValue_ClassPermissionsRequest(classId, permissions);
+      String typeId, List<ObjectPermissionsRequest> objects) {
+    return new AutoValue_ClassPermissionsRequest(typeId, objects);
   }
 }

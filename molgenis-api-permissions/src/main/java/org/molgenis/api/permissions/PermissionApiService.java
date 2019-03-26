@@ -17,6 +17,7 @@ import static org.molgenis.api.permissions.SidConversionUtils.getSid;
 import static org.molgenis.api.permissions.SidConversionUtils.getUser;
 import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.Serializable;
@@ -41,12 +42,12 @@ import org.molgenis.api.permissions.exceptions.UnknownAceException;
 import org.molgenis.api.permissions.exceptions.UpdatePermissionDeniedException;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
-import org.molgenis.api.permissions.model.request.IdentityPermissionsRequest;
+import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.ClassPermissionsResponse;
-import org.molgenis.api.permissions.model.response.IdentityPermissionsResponse;
 import org.molgenis.api.permissions.model.response.InheritedPermission;
+import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
+import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
@@ -155,16 +156,26 @@ public class PermissionApiService {
     } else {
       aclMap = mutableAclService.readAclsById(objectIdentities);
     }
-    List<IdentityPermissionsResponse> permissions =
+    List<ObjectPermissionsResponse> permissions =
         getPermissions(aclMap, objectIdentities, sids, isReturnInheritedPermissions);
-    return permissions.isEmpty() ? Collections.emptyList() : permissions.get(0).getPermissions();
+    List<PermissionResponse> result = permissions.get(0).getPermissions();
+    Collections.sort(
+        result,
+        (Comparator<PermissionResponse>)
+            (a, b) ->
+                getRoleOrUser(a.getUser(), a.getRole())
+                    .compareTo(getRoleOrUser(b.getUser(), b.getRole())));
+    return permissions.isEmpty() ? Collections.emptyList() : result;
   }
 
-  public List<ClassPermissionsResponse> getAllPermissions(
-      Set<Sid> sids, boolean isReturnInherited) {
+  private <T> Comparable getRoleOrUser(String user, String role) {
+    return Strings.isNullOrEmpty(user) ? role : user;
+  }
+
+  public List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
     checkPermissionsOnSid(sids);
 
-    List<ClassPermissionsResponse> result = new LinkedList<>();
+    List<TypePermissionsResponse> result = new LinkedList<>();
     for (String typeId : getClasses()) {
       String entityTypeId = getEntityTypeIdFromClass(typeId);
       if (dataService.hasEntityType(entityTypeId)) {
@@ -174,17 +185,17 @@ public class PermissionApiService {
         } else {
           sidsToQuery = sids;
         }
-        LinkedList<IdentityPermissionsResponse> permissions =
+        LinkedList<ObjectPermissionsResponse> permissions =
             Lists.newLinkedList(getPermissionsForType(typeId, sidsToQuery, isReturnInherited));
         if (!permissions.isEmpty()) {
-          result.add(ClassPermissionsResponse.create(typeId, getLabel(entityTypeId), permissions));
+          result.add(TypePermissionsResponse.create(typeId, getLabel(entityTypeId), permissions));
         }
       }
     }
     return result;
   }
 
-  public Collection<IdentityPermissionsResponse> getPagedPermissionsForType(
+  public Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkReadPermission(typeId, sids);
 
@@ -198,7 +209,7 @@ public class PermissionApiService {
     return getPermissions(aclMap, objectIdentities, sids, false);
   }
 
-  public Collection<IdentityPermissionsResponse> getPermissionsForType(
+  public Collection<ObjectPermissionsResponse> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkReadPermission(typeId, sids);
     List<ObjectIdentity> objectIdentities;
@@ -262,9 +273,9 @@ public class PermissionApiService {
 
   @Transactional
   public void createPermissions(
-      List<IdentityPermissionsRequest> identityPermissionsRequests, String typeId) {
-    for (IdentityPermissionsRequest request : identityPermissionsRequests) {
-      createPermission(request.getPermissions(), typeId, request.getIdentifier());
+      List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId) {
+    for (ObjectPermissionsRequest request : objectPermissionsRequests) {
+      createPermission(request.getPermissions(), typeId, request.getObjectId());
     }
   }
 
@@ -304,9 +315,9 @@ public class PermissionApiService {
 
   @Transactional
   public void updatePermissions(
-      @NotEmpty List<IdentityPermissionsRequest> identityPermissionsRequests, String typeId) {
-    for (IdentityPermissionsRequest permissions : identityPermissionsRequests) {
-      updatePermission(permissions.getPermissions(), typeId, permissions.getIdentifier());
+      @NotEmpty List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId) {
+    for (ObjectPermissionsRequest permissions : objectPermissionsRequests) {
+      updatePermission(permissions.getPermissions(), typeId, permissions.getObjectId());
     }
   }
 
@@ -434,12 +445,12 @@ public class PermissionApiService {
     return result;
   }
 
-  private List<IdentityPermissionsResponse> getPermissions(
+  private List<ObjectPermissionsResponse> getPermissions(
       Map<ObjectIdentity, Acl> acls,
       List<ObjectIdentity> objectIdentities,
       Set<Sid> sids,
       boolean isReturnInheritedPermissions) {
-    List<IdentityPermissionsResponse> result = new LinkedList<>();
+    List<ObjectPermissionsResponse> result = new LinkedList<>();
     objectIdentities.forEach(
         objectIdentity ->
             getPermissionForObjectIdentity(
@@ -450,15 +461,15 @@ public class PermissionApiService {
   private void getPermissionForObjectIdentity(
       Map<ObjectIdentity, Acl> acls,
       Set<Sid> sids,
-      List<IdentityPermissionsResponse> result,
+      List<ObjectPermissionsResponse> result,
       ObjectIdentity objectIdentity,
       boolean isReturnInheritedPermissions) {
     Acl acl = acls.get(objectIdentity);
 
-    Map<String, IdentityPermissionsResponse> resultMap = new HashMap<>();
+    Map<String, ObjectPermissionsResponse> resultMap = new HashMap<>();
     getPermissionsOnAceForSids(sids, acl, resultMap, isReturnInheritedPermissions);
-    Collection<IdentityPermissionsResponse> identityPermissionResponses = resultMap.values();
-    for (IdentityPermissionsResponse identityPermission : identityPermissionResponses) {
+    Collection<ObjectPermissionsResponse> identityPermissionResponses = resultMap.values();
+    for (ObjectPermissionsResponse identityPermission : identityPermissionResponses) {
       if (!identityPermission.getPermissions().isEmpty()) {
         result.add(identityPermission);
       }
@@ -468,7 +479,7 @@ public class PermissionApiService {
   private void getPermissionsOnAceForSids(
       Set<Sid> sids,
       Acl acl,
-      Map<String, IdentityPermissionsResponse> result,
+      Map<String, ObjectPermissionsResponse> result,
       boolean isReturnInheritedPermissions) {
     String identifier = acl.getObjectIdentity().getIdentifier().toString();
     List<PermissionResponse> permissionResponses =
@@ -476,7 +487,7 @@ public class PermissionApiService {
 
     result.put(
         identifier,
-        IdentityPermissionsResponse.create(
+        ObjectPermissionsResponse.create(
             identifier,
             getLabel(getEntityTypeIdFromClass(acl.getObjectIdentity().getType()), identifier),
             permissionResponses));

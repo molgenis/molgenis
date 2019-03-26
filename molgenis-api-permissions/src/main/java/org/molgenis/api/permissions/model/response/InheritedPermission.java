@@ -14,16 +14,16 @@ public abstract class InheritedPermission {
   public abstract String getRole();
 
   @Nullable
-  public abstract String getIdentifier();
+  public abstract String getObjectId();
 
   @Nullable
   public abstract String getLabel();
 
   @Nullable
-  public abstract String getClassLabel();
+  public abstract String getTypeLabel();
 
   @Nullable
-  public abstract String getClassId();
+  public abstract String getTypeId();
 
   @Nullable
   public abstract String getPermission();
@@ -33,17 +33,17 @@ public abstract class InheritedPermission {
 
   public static InheritedPermission create(
       String role,
-      String classId,
-      String classLabel,
+      String typeId,
+      String typeLabel,
       String identifier,
       String label,
       String permission,
       List<InheritedPermission> inheritedPermissions) {
     return builder()
         .setRole(role)
-        .setClassId(classId)
-        .setClassLabel(classLabel)
-        .setIdentifier(identifier)
+        .setTypeId(typeId)
+        .setTypeLabel(typeLabel)
+        .setObjectId(identifier)
         .setLabel(label)
         .setPermission(permission)
         .setInheritedPermissions(inheritedPermissions)
@@ -59,11 +59,11 @@ public abstract class InheritedPermission {
 
     public abstract Builder setRole(String role);
 
-    public abstract Builder setClassId(String classId);
+    public abstract Builder setTypeId(String classId);
 
-    public abstract Builder setClassLabel(String classLabel);
+    public abstract Builder setTypeLabel(String classLabel);
 
-    public abstract Builder setIdentifier(String identifier);
+    public abstract Builder setObjectId(String identifier);
 
     public abstract Builder setLabel(String label);
 

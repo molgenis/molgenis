@@ -24,15 +24,15 @@ import org.molgenis.api.ApiController;
 import org.molgenis.api.permissions.exceptions.PageWithoutPageSizeException;
 import org.molgenis.api.permissions.exceptions.UnsupportedPermissionQueryException;
 import org.molgenis.api.permissions.model.request.DeletePermissionRequest;
-import org.molgenis.api.permissions.model.request.SetIdentityPermissionRequest;
+import org.molgenis.api.permissions.model.request.SetObjectPermissionRequest;
 import org.molgenis.api.permissions.model.request.SetTypePermissionsRequest;
-import org.molgenis.api.permissions.model.response.ClassPermissionsResponse;
-import org.molgenis.api.permissions.model.response.GetClassPermissionsResponse;
-import org.molgenis.api.permissions.model.response.GetIdentityPermissionResponse;
+import org.molgenis.api.permissions.model.response.GetObjectPermissionResponse;
 import org.molgenis.api.permissions.model.response.GetPermissionsResponse;
-import org.molgenis.api.permissions.model.response.IdentityPermissionsResponse;
+import org.molgenis.api.permissions.model.response.GetTypePermissionsResponse;
+import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PagedPermissionResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
+import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.security.acl.ObjectIdentityService;
@@ -56,13 +56,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class PermissionsApiController extends ApiController {
 
   private static final String PERMISSION_API_IDENTIFIER = "permissions";
-  static final String CLASSES_ENDPOINT = "classes";
-  static final String ACL_ENDPOINT = "acls";
-  static final String ACE_ENDPOINT = "aces";
   private static final int VERSION = 1;
   public static final String BASE_URI = "/api/" + PERMISSION_API_IDENTIFIER + "/v" + VERSION;
   static final Integer DEFAULT_PAGE = 1;
   static final Integer DEFAULT_PAGESIZE = 10000;
+
+  public static final String TYPE = "type";
+  public static final String TYPES = TYPE + "s";
+  public static final String TYPE_ID = TYPE + "Id";
+
+  public static final String OBJECT = "object";
+  public static final String OBJECTS = OBJECT + "s";
+  public static final String OBJECT_ID = OBJECT + "Id";
+
+  public static final String PERMISSIONS = "permissions";
+  public static final String ENTITIES = "permissions";
+
+  public static final String ENTITY_PREFIX = "entity-";
 
   private final PermissionApiService permissionApiService;
   private final RSQLParser rsqlParser;
@@ -78,49 +88,50 @@ public class PermissionsApiController extends ApiController {
     this.objectIdentityService = requireNonNull(objectIdentityService);
   }
 
-  @PostMapping(value = ACL_ENDPOINT + "/{typeId}/{identifier}")
-  @ApiOperation(value = "Create an acl for a entity", response = ResponseEntity.class)
-  public ResponseEntity createClass(
-      HttpServletRequest request,
-      @PathVariable("typeId") String typeId,
-      @PathVariable("identifier") String identifier)
-      throws URISyntaxException {
-    permissionApiService.createAcl(typeId, identifier);
-    return ResponseEntity.created(new URI(request.getRequestURI())).build();
-  }
-
-  @PostMapping(value = CLASSES_ENDPOINT + "/{typeId}")
+  @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
   @ApiOperation(
       value = "Create a ACL class, typically this is done to row level secure an entity",
       response = ResponseEntity.class)
-  public ResponseEntity enableRLS(HttpServletRequest request, @PathVariable("typeId") String typeId)
+  public ResponseEntity enableRLS(
+      HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
       throws URISyntaxException {
     permissionApiService.addClass(typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
-  @GetMapping(value = CLASSES_ENDPOINT)
+  @GetMapping(value = TYPES)
   @ApiOperation(value = "Get a list of acl classes in the system", response = ResponseEntity.class)
   public List<String> getRlsEntities() {
     return permissionApiService.getClasses();
   }
 
-  @GetMapping(value = CLASSES_ENDPOINT + "/permissions/{typeId}")
+  @GetMapping(value = TYPES + "/permissions/{" + TYPE_ID + "}")
   @ApiOperation(
       value = "Get a list of permissions that can be used on a acl class",
       response = List.class)
-  public Set<String> getSuitablePermissions(@PathVariable("typeId") String typeId) {
+  public Set<String> getSuitablePermissions(@PathVariable(value = TYPE_ID) String typeId) {
     return permissionApiService.getSuitablePermissionsForType(typeId);
   }
 
-  @GetMapping(value = ACL_ENDPOINT + "/{typeId}")
+  @PostMapping(value = OBJECTS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
+  @ApiOperation(value = "Create an acl for a entity", response = ResponseEntity.class)
+  public ResponseEntity createClass(
+      HttpServletRequest request,
+      @PathVariable(TYPE_ID) String typeId,
+      @PathVariable(OBJECT_ID) String identifier)
+      throws URISyntaxException {
+    permissionApiService.createAcl(typeId, identifier);
+    return ResponseEntity.created(new URI(request.getRequestURI())).build();
+  }
+
+  @GetMapping(value = OBJECTS + "/{" + TYPE_ID + "}")
   @ApiOperation(
       value =
           "Get a list ace's for a entity. Typically this is a row in a row level secured entity.",
       response = List.class)
   public PagedPermissionResponse getAcls(
       HttpServletRequest request,
-      @PathVariable("typeId") String typeId,
+      @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
     validateQueryParams(page, pageSize, false);
@@ -135,27 +146,26 @@ public class PermissionsApiController extends ApiController {
     return getPermissionResponse("", page, pageSize, totalItems, data);
   }
 
-  @GetMapping(value = ACE_ENDPOINT + "/{typeId}/{identifier}")
+  @GetMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(value = "Gets permissions on a single acl", response = ResponseEntity.class)
-  public GetIdentityPermissionResponse getPermissionsForObject(
-      @PathVariable("typeId") String typeId,
-      @PathVariable("identifier") String identifier,
+  public GetObjectPermissionResponse getPermissionsForObject(
+      @PathVariable(TYPE_ID) String typeId,
+      @PathVariable(OBJECT_ID) String identifier,
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
     List<PermissionResponse> permissionResponses =
         permissionApiService.getPermission(typeId, identifier, sids, inheritance);
-    return GetIdentityPermissionResponse.create(permissionResponses);
+    return GetObjectPermissionResponse.create(permissionResponses);
   }
 
-  @GetMapping(value = ACE_ENDPOINT + "/{typeId}")
+  @GetMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}")
   @ApiOperation(
       value = "Gets all permissions for all acls of a certain class",
       response = ResponseEntity.class)
   public PagedPermissionResponse getPermissionsForClass(
-      HttpServletRequest request,
-      @PathVariable(value = "typeId") String typeId,
+      @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
@@ -164,7 +174,7 @@ public class PermissionsApiController extends ApiController {
     validateQueryParams(page, pageSize, inheritance);
     Set<Sid> sids = getSidsFromQuery(queryString);
 
-    ArrayList<IdentityPermissionsResponse> permissions;
+    ArrayList<ObjectPermissionsResponse> permissions;
     PagedPermissionResponse response;
     if (page != null) {
       permissions =
@@ -177,17 +187,16 @@ public class PermissionsApiController extends ApiController {
               page,
               pageSize,
               totalItems,
-              GetClassPermissionsResponse.create(permissions));
+              GetTypePermissionsResponse.create(permissions));
     } else {
       permissions =
           Lists.newArrayList(permissionApiService.getPermissionsForType(typeId, sids, inheritance));
-      response =
-          getPermissionResponse(queryString, GetClassPermissionsResponse.create(permissions));
+      response = getPermissionResponse(queryString, GetTypePermissionsResponse.create(permissions));
     }
     return response;
   }
 
-  @GetMapping(value = ACE_ENDPOINT)
+  @GetMapping(value = PERMISSIONS)
   @ApiOperation(
       value = "Gets all permissions for one or more users or roles",
       response = ResponseEntity.class)
@@ -196,69 +205,149 @@ public class PermissionsApiController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
-    List<ClassPermissionsResponse> permissions =
+    List<TypePermissionsResponse> permissions =
         permissionApiService.getAllPermissions(sids, inheritance);
     return GetPermissionsResponse.create(permissions);
   }
 
-  @PatchMapping(value = ACE_ENDPOINT + "/{typeId}/{identifier}")
+  @PatchMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(
       value = "Update a permission on a single acl for one or more users or roles",
       response = ResponseEntity.class)
   public ResponseEntity setPermission(
-      @PathVariable String typeId,
-      @PathVariable String identifier,
-      @RequestBody SetIdentityPermissionRequest request) {
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestBody SetObjectPermissionRequest request) {
     permissionApiService.updatePermission(request.getPermissions(), typeId, identifier);
     return ResponseEntity.noContent().build();
   }
 
-  @PatchMapping(value = ACE_ENDPOINT + "/{typeId}")
+  @PatchMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}")
   @ApiOperation(
       value = "Update a list of permissions on acls belonging to a certain acl class",
       response = ResponseEntity.class)
   public ResponseEntity setClassPermissions(
-      @PathVariable(value = "typeId") String typeId,
+      @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest request) {
-    permissionApiService.updatePermissions(request.getRows(), typeId);
+    permissionApiService.updatePermissions(request.getObjects(), typeId);
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping(value = ACE_ENDPOINT + "/{typeId}")
+  @PostMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}")
   @ApiOperation(value = "Create a list of permissions on an acl for a single user or role")
   public ResponseEntity<Object> createPermissions(
       HttpServletRequest request,
-      @PathVariable String typeId,
+      @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest setTypePermissionsRequest)
       throws URISyntaxException {
-    permissionApiService.createPermissions(setTypePermissionsRequest.getRows(), typeId);
+    permissionApiService.createPermissions(setTypePermissionsRequest.getObjects(), typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
-  @PostMapping(value = ACE_ENDPOINT + "/{typeId}/{identifier}")
+  @PostMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(value = "Create a permission on acls for a single user or role")
   public ResponseEntity<Object> createPermission(
       HttpServletRequest request,
-      @PathVariable String typeId,
-      @PathVariable String identifier,
-      @RequestBody SetIdentityPermissionRequest setIdentityPermissionRequest)
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
       throws URISyntaxException {
     permissionApiService.createPermission(
         setIdentityPermissionRequest.getPermissions(), typeId, identifier);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
-  @DeleteMapping(value = ACE_ENDPOINT + "/{typeId}/{identifier}")
+  @DeleteMapping(value = PERMISSIONS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(
       value = "Delete a permission on an acl for a single user or role",
       response = ResponseEntity.class)
   public ResponseEntity deletePermission(
-      @PathVariable String typeId,
-      @PathVariable String identifier,
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
     Sid sid = getSid(request.getUser(), request.getRole());
     permissionApiService.deletePermission(sid, typeId, identifier);
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
+  @ApiOperation(value = "Gets permissions on a single acl", response = ResponseEntity.class)
+  public GetObjectPermissionResponse getPermissionsForObjectEntities(
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestParam(value = "q", required = false) String queryString,
+      @RequestParam(value = "inheritance", defaultValue = "false", required = false)
+          boolean inheritance) {
+    return getPermissionsForObject(ENTITY_PREFIX + typeId, identifier, queryString, inheritance);
+  }
+
+  @GetMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}")
+  @ApiOperation(
+      value = "Gets all permissions for all acls of a certain class",
+      response = ResponseEntity.class)
+  public PagedPermissionResponse getPermissionsForClassEntities(
+      @PathVariable(value = TYPE_ID) String typeId,
+      @RequestParam(value = "q", required = false) String queryString,
+      @RequestParam(value = "page", required = false) Integer page,
+      @RequestParam(value = "pageSize", required = false) Integer pageSize,
+      @RequestParam(value = "inheritance", defaultValue = "false", required = false)
+          boolean inheritance) {
+
+    return getPermissionsForClass(ENTITY_PREFIX + typeId, queryString, page, pageSize, inheritance);
+  }
+
+  @PatchMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
+  @ApiOperation(
+      value = "Update a permission on a single acl for one or more users or roles",
+      response = ResponseEntity.class)
+  public ResponseEntity setPermissionEntities(
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestBody SetObjectPermissionRequest request) {
+    return setPermission(ENTITY_PREFIX + typeId, identifier, request);
+  }
+
+  @PatchMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}")
+  @ApiOperation(
+      value = "Update a list of permissions on acls belonging to a certain acl class",
+      response = ResponseEntity.class)
+  public ResponseEntity setClassPermissionsEntities(
+      @PathVariable(value = TYPE_ID) String typeId,
+      @RequestBody SetTypePermissionsRequest request) {
+    return setClassPermissions(ENTITY_PREFIX + typeId, request);
+  }
+
+  @PostMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}")
+  @ApiOperation(value = "Create a list of permissions on an acl for a single user or role")
+  public ResponseEntity<Object> createPermissionsEntities(
+      HttpServletRequest request,
+      @PathVariable(value = TYPE_ID) String typeId,
+      @RequestBody SetTypePermissionsRequest setTypePermissionsRequest)
+      throws URISyntaxException {
+    return createPermissions(request, ENTITY_PREFIX + typeId, setTypePermissionsRequest);
+  }
+
+  @PostMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
+  @ApiOperation(value = "Create a permission on acls for a single user or role")
+  public ResponseEntity<Object> createPermissionEntities(
+      HttpServletRequest request,
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
+      throws URISyntaxException {
+    return createPermission(
+        request, ENTITY_PREFIX + typeId, identifier, setIdentityPermissionRequest);
+  }
+
+  @DeleteMapping(value = PERMISSIONS + "/" + ENTITIES + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
+  @ApiOperation(
+      value = "Delete a permission on an acl for a single user or role",
+      response = ResponseEntity.class)
+  public ResponseEntity deletePermissionEntities(
+      @PathVariable(value = TYPE_ID) String typeId,
+      @PathVariable(value = OBJECT_ID) String identifier,
+      @RequestBody DeletePermissionRequest request) {
+    return deletePermission(ENTITY_PREFIX + typeId, identifier, request);
   }
 
   private Set<Sid> getSidsFromQuery(String queryString) {

@@ -12,9 +12,9 @@ import org.molgenis.util.AutoGson;
 public abstract class SetTypePermissionsRequest {
 
   @NotEmpty
-  public abstract List<IdentityPermissionsRequest> getRows();
+  public abstract List<ObjectPermissionsRequest> getObjects();
 
-  public static SetTypePermissionsRequest create(List<IdentityPermissionsRequest> permissions) {
-    return new AutoValue_SetTypePermissionsRequest(permissions);
+  public static SetTypePermissionsRequest create(List<ObjectPermissionsRequest> objects) {
+    return new AutoValue_SetTypePermissionsRequest(objects);
   }
 }

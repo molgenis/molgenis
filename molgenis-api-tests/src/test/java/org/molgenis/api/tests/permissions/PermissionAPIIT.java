@@ -2,6 +2,9 @@ package org.molgenis.api.tests.permissions;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.molgenis.api.permissions.PermissionsApiController.OBJECTS;
+import static org.molgenis.api.permissions.PermissionsApiController.PERMISSIONS;
+import static org.molgenis.api.permissions.PermissionsApiController.TYPES;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
@@ -14,6 +17,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEMXFileWithoutPackage;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -21,6 +25,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.util.Arrays;
+import java.util.List;
 import org.molgenis.api.permissions.PermissionsApiController;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.api.tests.utils.RestTestUtils.Permission;
@@ -103,23 +108,24 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
         .then()
         .statusCode(201)
         .log()
         .all();
 
     String response1 =
-        "{permissions=[{permission=READ, user="
+        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
             + testUserName
-            + "}, {permission=WRITEMETA, user=admin}]}";
+            + "}]}";
 
     Response actual =
         given()
             .log()
             .all()
             .header(X_MOLGENIS_TOKEN, adminToken)
-            .get(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+            .get(
+                PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
             .contentType(ContentType.JSON)
@@ -135,28 +141,29 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(update)
-        .patch(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+        .patch(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
         .then()
         .statusCode(204)
         .log()
         .all();
 
     String response2 =
-        "{permissions=[{permission=READ, user="
+        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
             + testUserName
-            + "}, {permission=WRITEMETA, user=admin}]}";
+            + "}]}";
     Response actual2 =
         given()
             .log()
             .all()
             .header(X_MOLGENIS_TOKEN, adminToken)
-            .get(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+            .get(
+                PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
             .contentType(ContentType.JSON)
             .extract()
             .response();
-    JsonPath path2 = actual.getBody().jsonPath();
+    JsonPath path2 = actual2.getBody().jsonPath();
     assertEquals(path2.get().toString(), response2);
 
     String delete = "{user:" + testUserName + "}";
@@ -166,7 +173,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
-        .delete(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+        .delete(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
         .then()
         .statusCode(204)
         .log()
@@ -177,7 +184,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity1")
+        .get(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
         .then()
         .statusCode(200)
         .log()
@@ -189,11 +196,11 @@ public class PermissionAPIIT {
   @Test
   public void testSetPermissions2() {
     String create =
-        "{rows:[{identifier:perm1_entity2,permissions:[{user:"
+        "{objects:[{objectId:perm1_entity2,permissions:[{user:"
             + testUserName
             + ",permission:READMETA},{user:"
             + testUserName2
-            + ",permission:READMETA}]},{identifier:perm2_entity3,permissions:[{user:"
+            + ",permission:READMETA}]},{objectId:perm2_entity3,permissions:[{user:"
             + testUserName
             + ",permission:READMETA}]}]}";
     given()
@@ -202,18 +209,18 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/aces/entityType")
+        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType")
         .then()
         .statusCode(201)
         .log()
         .all();
 
     String request =
-        "{rows:[{identifier:perm1_entity2,permissions:[{user:"
+        "{objects:[{objectId:perm1_entity2,permissions:[{user:"
             + testUserName
             + ",permission:WRITE},{user:"
             + testUserName2
-            + ",permission:READ}]},{identifier:perm2_entity3,permissions:[{user:"
+            + ",permission:READ}]},{objectId:perm2_entity3,permissions:[{user:"
             + testUserName
             + ",permission:WRITEMETA}]}]}";
     given()
@@ -222,28 +229,28 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(request)
-        .patch(PermissionsApiController.BASE_URI + "/aces/entityType")
+        .patch(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType")
         .then()
         .statusCode(204)
         .log()
         .all();
 
     String response1 =
-        "{identityPermissions=[{identifier=perm1_entity2, permissions=[{permission=WRITE, user="
+        "{objects=[{permissions=[{permission=WRITE, user="
             + testUserName
             + "}, {permission=READ, user="
             + testUserName2
-            + "}], label=entity2}, {identifier=perm2_entity3, permissions=[{permission=WRITEMETA, user="
+            + "}], label=entity2, objectId=perm1_entity2}, {permissions=[{permission=WRITEMETA, user="
             + testUserName
-            + "}], label=entity3}, {identifier=sys_sec_Role, permissions=[{permission=READ, user="
-            + testUserName
-            + "}, {permission=READ, user="
-            + testUserName2
-            + "}], label=Role}, {identifier=sys_sec_RoleMembership, permissions=[{permission=READ, user="
+            + "}], label=entity3, objectId=perm2_entity3}, {permissions=[{permission=READ, user="
             + testUserName
             + "}, {permission=READ, user="
             + testUserName2
-            + "}], label=Role Membership}]}";
+            + "}], label=Role, objectId=sys_sec_Role}, {permissions=[{permission=READ, user="
+            + testUserName
+            + "}, {permission=READ, user="
+            + testUserName2
+            + "}], label=Role Membership, objectId=sys_sec_RoleMembership}]}";
 
     Response actual =
         given()
@@ -252,7 +259,9 @@ public class PermissionAPIIT {
             .header(X_MOLGENIS_TOKEN, adminToken)
             .get(
                 PermissionsApiController.BASE_URI
-                    + "/aces/entityType?q=user=in=("
+                    + "/"
+                    + PERMISSIONS
+                    + "/entityType?q=user=in=("
                     + testUserName
                     + ","
                     + testUserName2
@@ -272,7 +281,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .post(PermissionsApiController.BASE_URI + "/acls/entity-perm2_entity5/1")
+        .post(PermissionsApiController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/1")
         .then()
         .statusCode(201)
         .log()
@@ -282,7 +291,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .post(PermissionsApiController.BASE_URI + "/acls/entity-perm2_entity5/2")
+        .post(PermissionsApiController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/2")
         .then()
         .statusCode(201)
         .log()
@@ -292,7 +301,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/acls/entity-perm2_entity5")
+        .get(PermissionsApiController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5")
         .then()
         .statusCode(200)
         .log()
@@ -306,24 +315,29 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .post(PermissionsApiController.BASE_URI + "/classes/entity-perm2_entity4")
+        .post(PermissionsApiController.BASE_URI + "/" + TYPES + "/entity-perm2_entity4")
         .then()
         .statusCode(201)
         .log()
         .all();
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/classes/")
-        .then()
-        .statusCode(200)
-        .log()
-        .all()
-        .body(
-            equalTo(
-                "[\"package\",\"entity-sys_job_ResourceDownloadJobExecution\",\"entity-sys_FileMeta\",\"entity-sys_ImportRun\",\"entity-sys_job_OneClickImportJobExecution\",\"entity-sys_job_ResourceDeleteJobExecution\",\"entity-sys_job_ResourceCopyJobExecution\",\"entityType\",\"plugin\",\"entity-perm2_entity4\"]"));
+    Response actual =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, adminToken)
+            .get(PermissionsApiController.BASE_URI + "/" + TYPES + "/")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .response();
+    JsonPath path = actual.getBody().jsonPath();
+    String expected =
+        "package,entity-sys_job_ResourceDownloadJobExecution,entity-sys_FileMeta,entity-sys_ImportRun,entity-sys_job_OneClickImportJobExecution,entity-sys_job_ResourceDeleteJobExecution,entity-sys_job_ResourceCopyJobExecution,entityType,plugin,entity-perm2_entity4,group";
+    List<String> expectedList = Arrays.asList(expected.split(","));
+    assertTrue(path.getList("").containsAll(expectedList));
+    assertEquals(path.getList("").size(), expectedList.size());
   }
 
   @Test
@@ -332,7 +346,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/classes/permissions/entity-sys_FileMeta/")
+        .get(PermissionsApiController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta/")
         .then()
         .statusCode(200)
         .log()
@@ -354,7 +368,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity2")
+        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity2")
         .then()
         .statusCode(201)
         .log()
@@ -368,7 +382,9 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, testUserToken)
         .get(
             PermissionsApiController.BASE_URI
-                + "/aces/entityType/perm1_entity2?q=user=="
+                + "/"
+                + PERMISSIONS
+                + "/entityType/perm1_entity2?q=user=="
                 + testUserName)
         .then()
         .statusCode(200)
@@ -383,7 +399,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
-        .delete(PermissionsApiController.BASE_URI + "/aces/entityType/perm1_entity2")
+        .delete(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity2")
         .then()
         .statusCode(204)
         .log()

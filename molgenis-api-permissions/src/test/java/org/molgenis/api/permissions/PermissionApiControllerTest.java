@@ -3,12 +3,12 @@ package org.molgenis.api.permissions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.api.permissions.PermissionsApiController.ACE_ENDPOINT;
-import static org.molgenis.api.permissions.PermissionsApiController.ACL_ENDPOINT;
 import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI;
-import static org.molgenis.api.permissions.PermissionsApiController.CLASSES_ENDPOINT;
 import static org.molgenis.api.permissions.PermissionsApiController.DEFAULT_PAGE;
 import static org.molgenis.api.permissions.PermissionsApiController.DEFAULT_PAGESIZE;
+import static org.molgenis.api.permissions.PermissionsApiController.OBJECTS;
+import static org.molgenis.api.permissions.PermissionsApiController.PERMISSIONS;
+import static org.molgenis.api.permissions.PermissionsApiController.TYPES;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -23,11 +23,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.mockito.Mock;
-import org.molgenis.api.permissions.model.request.IdentityPermissionsRequest;
+import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.ClassPermissionsResponse;
-import org.molgenis.api.permissions.model.response.IdentityPermissionsResponse;
+import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
+import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +78,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
   @Test
   public void testCreateAcl() throws Exception {
     mockMvc
-        .perform(post(BASE_URI + "/" + ACL_ENDPOINT + "/typeId/identifier"))
+        .perform(post(BASE_URI + "/" + OBJECTS + "/typeId/identifier"))
         .andExpect(status().isCreated());
 
     verify(permissionApiService).createAcl("typeId", "identifier");
@@ -86,7 +86,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
 
   @Test
   public void testGetClasses() throws Exception {
-    mockMvc.perform(get(BASE_URI + "/" + CLASSES_ENDPOINT)).andExpect(status().isOk());
+    mockMvc.perform(get(BASE_URI + "/" + TYPES)).andExpect(status().isOk());
 
     verify(permissionApiService).getClasses();
   }
@@ -94,7 +94,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
   @Test
   public void testGetPermissionsForType() throws Exception {
     mockMvc
-        .perform(get(BASE_URI + "/" + CLASSES_ENDPOINT + "/permissions/typeId?q=user==test"))
+        .perform(get(BASE_URI + "/" + TYPES + "/permissions/typeId?q=user==test"))
         .andExpect(status().isOk());
 
     verify(permissionApiService).getSuitablePermissionsForType("typeId");
@@ -108,13 +108,13 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
 
     MvcResult result =
         mockMvc
-            .perform(get(BASE_URI + "/" + ACL_ENDPOINT + "/typeId?q=user=in=(test,test2)"))
+            .perform(get(BASE_URI + "/" + OBJECTS + "/typeId?q=user=in=(test,test2)"))
             .andExpect(status().isOk())
             .andReturn();
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10000,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/v1/acls/typeId?page=1&pageSize=10000\"},\"data\":[\"test1\",\"test2\"]}");
+        "{\"page\":{\"size\":10000,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/v1/objects/typeId?page=1&pageSize=10000\"},\"data\":[\"test1\",\"test2\"]}");
   }
 
   @Test
@@ -133,7 +133,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
                 get(
                     BASE_URI
                         + "/"
-                        + ACE_ENDPOINT
+                        + PERMISSIONS
                         + "/typeId/identifier?q=user==user1,role==role1&inheritance=true"))
             .andExpect(status().isOk())
             .andReturn();
@@ -149,9 +149,9 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
         Arrays.asList(
             PermissionResponse.create(null, "user1", "READ", null),
             PermissionResponse.create(null, "role1", "WRITE", null));
-    Collection<IdentityPermissionsResponse> identityPermission =
+    Collection<ObjectPermissionsResponse> identityPermission =
         Collections.singletonList(
-            IdentityPermissionsResponse.create("identifier", "label", permissionResponses));
+            ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
     when(permissionApiService.getPermissionsForType(
             "typeId", Sets.newHashSet(user1, role1, role2), false))
         .thenReturn(identityPermission);
@@ -159,13 +159,15 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
     MvcResult result =
         mockMvc
             .perform(
-                get(BASE_URI + "/" + ACE_ENDPOINT + "/typeId?q=user==user1,role=in=(role1,role2)"))
+                get(BASE_URI + "/" + PERMISSIONS + "/typeId?q=user==user1,role=in=(role1,role2)"))
             .andExpect(status().isOk())
             .andReturn();
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/v1/aces/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"identityPermissions\":[{\"identifier\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
   }
 
   @Test
@@ -174,9 +176,9 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
         Arrays.asList(
             PermissionResponse.create(null, "role2", "READ", null),
             PermissionResponse.create(null, "role1", "WRITE", null));
-    Collection<IdentityPermissionsResponse> identityPermission =
+    Collection<ObjectPermissionsResponse> identityPermission =
         Collections.singletonList(
-            IdentityPermissionsResponse.create("identifier", "label", permissionResponses));
+            ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
     when(permissionApiService.getPagedPermissionsForType(
             "typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
         .thenReturn(identityPermission);
@@ -190,14 +192,18 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
                 get(
                     BASE_URI
                         + "/"
-                        + ACE_ENDPOINT
+                        + PERMISSIONS
                         + "/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10"))
             .andExpect(status().isOk())
             .andReturn();
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":0,\"totalPages\":0,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/aces/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/aces/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\"},\"data\":{\"identityPermissions\":[]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":0,\"totalPages\":0,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\"},\"data\":{\"objects\":[]}}");
   }
 
   @Test
@@ -206,25 +212,25 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
         Arrays.asList(
             PermissionResponse.create(null, "user1", "READ", null),
             PermissionResponse.create(null, "user2", "WRITE", null));
-    List<IdentityPermissionsResponse> identityPermission =
+    List<ObjectPermissionsResponse> identityPermission =
         Collections.singletonList(
-            IdentityPermissionsResponse.create("identifier", "label", permissionResponses));
-    List<ClassPermissionsResponse> classPermissionResponses =
+            ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
+    List<TypePermissionsResponse> classPermissionResponses =
         Collections.singletonList(
-            ClassPermissionsResponse.create("classId", "label", identityPermission));
+            TypePermissionsResponse.create("typeId", "label", identityPermission));
 
     when(permissionApiService.getAllPermissions(Sets.newHashSet(user1), false))
         .thenReturn(classPermissionResponses);
 
     MvcResult result =
         mockMvc
-            .perform(get(BASE_URI + "/" + ACE_ENDPOINT + "?q=user==user1&includeInheritance=false"))
+            .perform(get(BASE_URI + "/" + PERMISSIONS + "?q=user==user1&includeInheritance=false"))
             .andExpect(status().isOk())
             .andReturn();
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"classPermissions\":[{\"classId\":\"classId\",\"label\":\"label\",\"rowPermissions\":[{\"identifier\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"user2\",\"permission\":\"WRITE\"}]}]}]}");
+        "{\"types\":[{\"typeId\":\"typeId\",\"label\":\"label\",\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"user2\",\"permission\":\"WRITE\"}]}]}]}");
   }
 
   @Test
@@ -241,7 +247,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}";
     mockMvc
         .perform(
-            patch(BASE_URI + "/" + ACE_ENDPOINT + "/typeId/identifier")
+            patch(BASE_URI + "/" + PERMISSIONS + "/typeId/identifier")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(requestJson))
         .andExpect(status().isNoContent());
@@ -257,8 +263,8 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
   public void testUpdatePermissionsForType() throws Exception {
     String requestJson =
         "{"
-            + "rows:[{"
-            + "identifier:rij1,"
+            + "objects:[{"
+            + "objectId:rij1,"
             + "permissions:["
             + "{"
             + "role:IT_VIEWER,"
@@ -270,7 +276,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}"
             + "]},"
             + "{"
-            + "identifier:rij2,"
+            + "objectId:rij2,"
             + "permissions:["
             + "{"
             + "role:IT_VIEWER,"
@@ -281,19 +287,19 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}";
     mockMvc
         .perform(
-            patch(BASE_URI + "/" + ACE_ENDPOINT + "/typeId")
+            patch(BASE_URI + "/" + PERMISSIONS + "/typeId")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(requestJson))
         .andExpect(status().isNoContent());
 
-    IdentityPermissionsRequest permission1 =
-        IdentityPermissionsRequest.create(
+    ObjectPermissionsRequest permission1 =
+        ObjectPermissionsRequest.create(
             "rij1",
             Arrays.asList(
                 PermissionRequest.create("IT_VIEWER", null, "WRITE"),
                 PermissionRequest.create("IT_MANAGER", null, "READ")));
-    IdentityPermissionsRequest permission2 =
-        IdentityPermissionsRequest.create(
+    ObjectPermissionsRequest permission2 =
+        ObjectPermissionsRequest.create(
             "rij2",
             Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
 
@@ -305,8 +311,8 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
   public void testCreatePermissionsForType() throws Exception {
     String requestJson =
         "{"
-            + "rows:[{"
-            + "identifier:rij1,"
+            + "objects:[{"
+            + "objectId:rij1,"
             + "permissions:["
             + "{"
             + "role:IT_VIEWER,"
@@ -318,7 +324,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}"
             + "]},"
             + "{"
-            + "identifier:rij2,"
+            + "objectId:rij2,"
             + "permissions:["
             + "{"
             + "role:IT_VIEWER,"
@@ -329,19 +335,19 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}";
     mockMvc
         .perform(
-            post(BASE_URI + "/" + ACE_ENDPOINT + "/typeId")
+            post(BASE_URI + "/" + PERMISSIONS + "/typeId")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(requestJson))
         .andExpect(status().isCreated());
 
-    IdentityPermissionsRequest permission1 =
-        IdentityPermissionsRequest.create(
+    ObjectPermissionsRequest permission1 =
+        ObjectPermissionsRequest.create(
             "rij1",
             Arrays.asList(
                 PermissionRequest.create("IT_VIEWER", null, "WRITE"),
                 PermissionRequest.create("IT_MANAGER", null, "READ")));
-    IdentityPermissionsRequest permission2 =
-        IdentityPermissionsRequest.create(
+    ObjectPermissionsRequest permission2 =
+        ObjectPermissionsRequest.create(
             "rij2",
             Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
 
@@ -363,7 +369,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             + "}";
     mockMvc
         .perform(
-            post(BASE_URI + "/" + ACE_ENDPOINT + "/typeId/identifier")
+            post(BASE_URI + "/" + PERMISSIONS + "/typeId/identifier")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(requestJson))
         .andExpect(status().isCreated());
@@ -380,7 +386,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
     String requestJson = "{" + "user:user1" + "}";
     mockMvc
         .perform(
-            MockMvcRequestBuilders.delete(BASE_URI + "/" + ACE_ENDPOINT + "/typeId/identifier")
+            MockMvcRequestBuilders.delete(BASE_URI + "/" + PERMISSIONS + "/typeId/identifier")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(requestJson))
         .andExpect(status().isNoContent());
