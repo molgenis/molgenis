@@ -21,7 +21,7 @@ POST /api/files/v1
 
 * All media types with the exception of `application/x-www-form-urlencoded` and `multipart/form-data` are allowed. See the JavaScript example for how to upload a file from a form file input.
 ### Response
-| Status code         | Description
+| Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 | 201 Created         | File uploaded and file metadata created.                                          |
 | 403 Forbidden       | If the authenticated user does not have WRITE permissions on file metadata.       |
@@ -98,6 +98,6 @@ DELETE /api/files/v1/myFileId
 ### Response
 | Status code         | Description
 |---------------------|-----------------------------------------------------------------------------------|
-| 200 OK              | File and filemeta deleted.                                                        |
+| 204 No Content      | File and filemeta deleted.                                                        |
 | 403 Forbidden       | If the authenticated user does not have WRITE permissions on the file metadata    |
 | 404 Not Found       | If the file identifier is unknown                                                 |
