@@ -134,17 +134,17 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
           .setNillable(false)
           .setDescription("Default MimeMessage encoding.");
       addAttribute(START_TLS_ENABLED)
-          .setDataType(BOOL)
+          .setDataType(STRING)
           .setDefaultValue("true")
           .setNillable(true)
           .setDescription("Do you need TLS with for SMTP server.");
       addAttribute(WAIT_QUIT)
-          .setDataType(BOOL)
+          .setDataType(STRING)
           .setDefaultValue("false")
           .setNillable(true)
           .setDescription("Do you quit when you wait?.");
       addAttribute(AUTH_REQUIRED)
-          .setDataType(BOOL)
+          .setDataType(STRING)
           .setDefaultValue("true")
           .setNillable(true)
           .setDescription("Is authentication required for SMTP server.");
