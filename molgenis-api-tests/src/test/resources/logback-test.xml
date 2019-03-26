@@ -8,8 +8,8 @@
     </filter>
   </appender>
   <appender name="jobExecutionLogAppender" class="org.molgenis.jobs.model.JobExecutionLogAppender"/>
-  <logger name="org.molgenis" level="INFO"/>
-  <root level="WARN">
+  <logger name="org.molgenis" level="DEBUG"/>
+  <root level="DEBUG">
     <appender-ref ref="STDOUT"/>
   </root>
   <logger name="org.molgenis.jobs.model.JobExecution" level="ALL">
