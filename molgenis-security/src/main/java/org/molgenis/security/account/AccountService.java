@@ -1,6 +1,8 @@
 package org.molgenis.security.account;
 
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.account.exception.EmailAlreadyExistsException;
+import org.molgenis.security.account.exception.UsernameAlreadyExistsException;
 
 public interface AccountService {
   void createUser(User user, String baseActivationUri)

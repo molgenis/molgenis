@@ -15,10 +15,14 @@ import java.net.URI;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.security.account.exception.AdminEmailMissingException;
+import org.molgenis.security.account.exception.EmailAlreadyExistsException;
+import org.molgenis.security.account.exception.InvalidUsernameCharacterException;
+import org.molgenis.security.account.exception.MissingEmailException;
+import org.molgenis.security.account.exception.UsernameAlreadyExistsException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -62,18 +66,25 @@ public class AccountServiceImpl implements AccountService {
   @Override
   @RunAsSystem
   @Transactional
-  public void createUser(User user, String baseActivationUri)
-      throws UsernameAlreadyExistsException, EmailAlreadyExistsException {
+  public void createUser(User user, String baseActivationUri) {
     // Check if username already exists
     if (userService.getUser(user.getUsername()) != null) {
-      throw new UsernameAlreadyExistsException(
-          "Username '" + user.getUsername() + "' already exists.");
+      throw new UsernameAlreadyExistsException(user.getUsername());
     }
 
     // Check if email already exists
     if (userService.getUserByEmail(user.getEmail()) != null) {
-      throw new EmailAlreadyExistsException(
-          "Email '" + user.getEmail() + "' is already registered.");
+      throw new EmailAlreadyExistsException(user.getEmail());
+    }
+
+    // Check if username starts or ends with spaces
+    String username = user.getUsername();
+    if (user.getUsername().startsWith(" ")) {
+      throw new InvalidUsernameCharacterException(username, 0, username.charAt(0));
+    }
+    if (user.getUsername().endsWith(" ")) {
+      throw new InvalidUsernameCharacterException(
+          username, username.length(), username.charAt(username.length() - 1));
     }
 
     // collect activation info
@@ -82,12 +93,11 @@ public class AccountServiceImpl implements AccountService {
     if (authenticationSettings.getSignUpModeration()) {
       activationEmailAddresses = userService.getSuEmailAddresses();
       if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())
-        throw new MolgenisDataException("Administrator account is missing required email address");
+        throw new AdminEmailMissingException();
     } else {
       String activationEmailAddress = user.getEmail();
       if (activationEmailAddress == null || activationEmailAddress.isEmpty())
-        throw new MolgenisDataException(
-            "User '" + user.getUsername() + "' is missing required email address");
+        throw new MissingEmailException(user.getUsername());
       activationEmailAddresses = singletonList(activationEmailAddress);
     }
 

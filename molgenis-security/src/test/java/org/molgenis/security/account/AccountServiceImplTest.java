@@ -25,6 +25,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.security.account.exception.EmailAlreadyExistsException;
+import org.molgenis.security.account.exception.InvalidUsernameCharacterException;
+import org.molgenis.security.account.exception.UsernameAlreadyExistsException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.settings.AppSettings;
@@ -47,6 +50,8 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
   @Autowired private DataService dataService;
 
   @Autowired private MailSender mailSender;
+
+  @Autowired private UserService userService;
 
   @Mock private User user;
 
@@ -74,6 +79,35 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     when(user.isActive()).thenReturn(true);
 
     reset(mailSender);
+  }
+
+  @Test(expectedExceptions = InvalidUsernameCharacterException.class)
+  public void activateUserNameEndsWithSpace() {
+    when(user.getUsername()).thenReturn("jansenj ");
+    when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
+    accountService.createUser(user, "");
+  }
+
+  @Test(expectedExceptions = InvalidUsernameCharacterException.class)
+  public void activateUserNameStartsWithSpace() {
+    when(user.getUsername()).thenReturn(" jansenj");
+    accountService.createUser(user, "");
+  }
+
+  @Test(expectedExceptions = EmailAlreadyExistsException.class)
+  public void duplicateEmail() {
+    when(user.getUsername()).thenReturn("jansenj");
+    when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
+    when(userService.getUserByEmail("jan.jansen@activation.nl")).thenReturn(user);
+    accountService.createUser(user, "");
+  }
+
+  @Test(expectedExceptions = UsernameAlreadyExistsException.class)
+  public void duplicateUsername() {
+    when(user.getUsername()).thenReturn("jansenj");
+    when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
+    when(userService.getUser(user.getUsername())).thenReturn(user);
+    accountService.createUser(user, "");
   }
 
   @Test

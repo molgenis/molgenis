@@ -142,7 +142,7 @@ public class AccountController {
       }
       if (appSettings.getRecaptchaIsEnabled()
           && !reCaptchaService.validate(registerRequest.getRecaptcha())) {
-        throw new CaptchaException("invalid captcha answer");
+        throw new CaptchaException();
       }
       User user = toUser(registerRequest);
       String activationUri;
@@ -207,23 +207,6 @@ public class AccountController {
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e) {
-    LOG.debug("", e);
-    return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-  }
-
-  @ExceptionHandler(UsernameAlreadyExistsException.class)
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ErrorMessageResponse handleUsernameAlreadyExistsException(
-      UsernameAlreadyExistsException e) {
-    LOG.debug("", e);
-    return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-  }
-
-  @ExceptionHandler(EmailAlreadyExistsException.class)
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ErrorMessageResponse handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
     LOG.debug("", e);
     return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
   }

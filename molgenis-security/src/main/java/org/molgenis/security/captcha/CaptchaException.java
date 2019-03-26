@@ -1,11 +1,16 @@
 package org.molgenis.security.captcha;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
-@Deprecated
-public class CaptchaException extends Exception {
-  private static final long serialVersionUID = 1L;
+import org.molgenis.i18n.CodedRuntimeException;
 
-  public CaptchaException(String message) {
-    super(message);
+public class CaptchaException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "SEC06";
+
+  public CaptchaException() {
+    super(ERROR_CODE);
+  }
+
+  @Override
+  protected Object[] getLocalizedMessageArguments() {
+    return new Object[0];
   }
 }
