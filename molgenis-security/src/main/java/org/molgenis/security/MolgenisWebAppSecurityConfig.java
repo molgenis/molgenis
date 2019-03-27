@@ -50,7 +50,6 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthor
 import org.springframework.security.access.intercept.RunAsImplAuthenticationProvider;
 import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -59,7 +58,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -146,9 +144,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .and()
         .addHeaderWriter(cacheControlHeaderWriter);
 
-    http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
-
-    http.authenticationProvider(anonymousAuthenticationProvider());
+    http.anonymous()
+        .key(ANONYMOUS_AUTHENTICATION_KEY)
+        .principal(SecurityUtils.ANONYMOUS_USERNAME)
+        .authorities(SecurityUtils.AUTHORITY_ANONYMOUS);
 
     http.authenticationProvider(tokenAuthenticationProvider());
 
@@ -301,19 +300,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
           expressionInterceptUrlRegistry);
 
   protected abstract RoleHierarchy roleHierarchy();
-
-  @Bean
-  public AnonymousAuthenticationFilter anonymousAuthFilter() {
-    return new AnonymousAuthenticationFilter(
-        ANONYMOUS_AUTHENTICATION_KEY,
-        SecurityUtils.ANONYMOUS_USERNAME,
-        AuthorityUtils.createAuthorityList(SecurityUtils.AUTHORITY_ANONYMOUS));
-  }
-
-  @Bean
-  public AnonymousAuthenticationProvider anonymousAuthenticationProvider() {
-    return new AnonymousAuthenticationProvider(ANONYMOUS_AUTHENTICATION_KEY);
-  }
 
   @Bean
   public TokenService tokenService() {
