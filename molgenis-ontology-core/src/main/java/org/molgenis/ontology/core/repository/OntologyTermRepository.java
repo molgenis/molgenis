@@ -1,5 +1,6 @@
 package org.molgenis.ontology.core.repository;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
@@ -11,7 +12,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -140,7 +140,7 @@ public class OntologyTermRepository {
           Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
     }
 
-    return Collections.emptyList();
+    return emptyList();
   }
 
   /**
@@ -195,7 +195,9 @@ public class OntologyTermRepository {
             ONTOLOGY_TERM, new QueryImpl<>().eq(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()));
 
     Iterable<Entity> ontologyTermNodePathEntities =
-        ontologyTermEntity.getEntities(OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH);
+        ontologyTermEntity != null
+            ? ontologyTermEntity.getEntities(OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH)
+            : emptyList();
 
     return ontologyTermNodePathEntities
         .iterator()

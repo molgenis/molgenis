@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+/** @deprecated use {@link BlobStore} */
+@Deprecated
 public class FileStore {
   private final String storageDir;
 
@@ -23,6 +25,8 @@ public class FileStore {
   }
 
   public boolean createDirectory(String dirName) {
+    validatePathname(dirName);
+
     return new File(storageDir + separator + dirName).mkdirs();
   }
 
@@ -31,6 +35,8 @@ public class FileStore {
   }
 
   public File store(InputStream is, String fileName) throws IOException {
+    validatePathname(fileName);
+
     File file = new File(storageDir + separator + fileName);
     try (FileOutputStream fos = new FileOutputStream(file)) {
       IOUtils.copy(is, fos);
@@ -52,6 +58,9 @@ public class FileStore {
    * @throws IOException
    */
   public void move(String sourceDir, String targetDir) throws IOException {
+    validatePathname(sourceDir);
+    validatePathname(targetDir);
+
     Files.move(
         Paths.get(getStorageDir() + File.separator + sourceDir),
         Paths.get(getStorageDir() + File.separator + targetDir));
@@ -64,6 +73,8 @@ public class FileStore {
    * @throws IOException if the given filename does not refer to a file
    */
   public File getFile(String fileName) throws IOException {
+    validatePathname(fileName);
+
     String pathname = storageDir + separator + fileName;
 
     File file = new File(pathname);
@@ -83,11 +94,15 @@ public class FileStore {
    * @see #getFile(String)
    */
   public File getFileUnchecked(String fileName) {
+    validatePathname(fileName);
+
     return new File(storageDir + separator + fileName);
   }
 
   /** @throws UncheckedIOException if the file with given name could not be deleted */
   public void delete(String fileName) {
+    validatePathname(fileName);
+
     Path path = Paths.get(storageDir + separator + fileName);
     try {
       Files.delete(path);
@@ -102,5 +117,20 @@ public class FileStore {
 
   public void writeToFile(InputStream inputStream, String fileName) throws IOException {
     FileUtils.copyInputStreamToFile(inputStream, getFileUnchecked(fileName));
+  }
+
+  /** http://cwe.mitre.org/data/definitions/22.html */
+  private void validatePathname(String pathname) {
+    File file = new File(storageDir, pathname);
+
+    String canonicalPath;
+    try {
+      canonicalPath = file.getCanonicalPath();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    if (!canonicalPath.startsWith(storageDir)) {
+      throw new UncheckedIOException(new IOException("File path traversal not allowed"));
+    }
   }
 }

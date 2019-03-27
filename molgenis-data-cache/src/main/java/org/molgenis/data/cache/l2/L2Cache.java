@@ -28,8 +28,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 
 /** In-memory cache of entities read from cacheable repositories. */
 @Service
-public class L2Cache extends DefaultMolgenisTransactionListener {
+public class L2Cache implements TransactionListener {
   private static final Logger LOG = LoggerFactory.getLogger(L2Cache.class);
   private static final int MAX_CACHE_SIZE_PER_ENTITY = 1000;
   /** maps entity id to the loading cache with Object key and Optional dehydrated entity value */
@@ -140,6 +140,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener {
    *     id of the repository is used to look up the existing cache
    * @return the LoadingCache for the repository
    */
+  @SuppressWarnings("squid:S2201") // ignore return values
   private LoadingCache<Object, Optional<Map<String, Object>>> getEntityCache(
       Repository<Entity> repository) {
     String id = repository.getEntityType().getId();

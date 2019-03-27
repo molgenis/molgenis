@@ -16,6 +16,7 @@ import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -58,7 +59,7 @@ public class AppManagerController extends PluginController {
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/activate/{id}")
   public void activateApp(@PathVariable(value = "id") String id) {
-    App app = dataService.findOneById(AppMetadata.APP, id, App.class);
+    App app = getApp(id);
     app.setActive(true);
     dataService.update(AppMetadata.APP, app);
   }
@@ -66,7 +67,7 @@ public class AppManagerController extends PluginController {
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/deactivate/{id}")
   public void deactivateApp(@PathVariable(value = "id") String id) {
-    App app = dataService.findOneById(AppMetadata.APP, id, App.class);
+    App app = getApp(id);
     app.setActive(false);
     dataService.update(AppMetadata.APP, app);
   }
@@ -93,5 +94,13 @@ public class AppManagerController extends PluginController {
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
+  }
+
+  private App getApp(String id) {
+    App app = dataService.findOneById(AppMetadata.APP, id, App.class);
+    if (app == null) {
+      throw new UnknownEntityException(AppMetadata.APP, id);
+    }
+    return app;
   }
 }

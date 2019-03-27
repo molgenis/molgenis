@@ -7,6 +7,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
+import java.util.LinkedHashMap;
 import javax.servlet.Filter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.TokenFactory;
@@ -65,14 +66,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -118,6 +123,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
     DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter =
         new DelegatingRequestMatcherHeaderWriter(matcher, new CacheControlHeadersWriter());
+
+    http.exceptionHandling().authenticationEntryPoint(delegatingEntryPoint());
+
+    HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+    requestCache.setRequestMatcher(createWebRequestMatcher());
+    http.requestCache().requestCache(requestCache);
 
     http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
 
@@ -186,6 +197,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers("/plugin/void/**")
         .permitAll()
+        .antMatchers("/plugin/app-ui-context")
+        .permitAll()
         .antMatchers("/api/**")
         .permitAll()
         .antMatchers("/webjars/**")
@@ -250,6 +263,21 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .and()
         .csrf()
         .disable();
+  }
+
+  @Bean
+  public AuthenticationEntryPoint delegatingEntryPoint() {
+    AuthenticationEntryPoint pluginEntryPoint =
+        new LoginUrlAuthenticationEntryPoint(MolgenisLoginController.URI);
+
+    LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> entryPoints = new LinkedHashMap<>();
+    entryPoints.put(createWebRequestMatcher(), pluginEntryPoint);
+
+    DelegatingAuthenticationEntryPoint delegatingEntryPoint =
+        new DelegatingAuthenticationEntryPoint(entryPoints);
+    delegatingEntryPoint.setDefaultEntryPoint(new Http403ForbiddenEntryPoint());
+
+    return delegatingEntryPoint;
   }
 
   @Override
@@ -428,5 +456,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public LocaleResolver localeResolver() {
     return httpLocaleResolver;
+  }
+
+  private RequestMatcher createWebRequestMatcher() {
+    return new OrRequestMatcher(
+        new AntPathRequestMatcher("/"),
+        new AntPathRequestMatcher("/plugin/**"),
+        new AntPathRequestMatcher("/menu/**"));
   }
 }

@@ -22,24 +22,6 @@ securityDefinitions:
     in: header
     name: x-molgenis-token
 paths:
-  /api/searchall/search:
-    get:
-      tags:
-        - Search All
-      description: Searches for a search term in all data and metadata
-      parameters:
-        - in: query
-          name: term
-          type: string
-          description: search term
-          required: true
-      produces:
-        - application/json
-      responses:
-        200:
-          description: Returns search results
-          schema:
-            $ref: "#/definitions/SearchAllResult"
   /plugin/one-click-importer/upload:
     post:
       tags:

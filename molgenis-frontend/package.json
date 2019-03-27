@@ -12,7 +12,7 @@
     "@molgenis/questionnaires": "0.1.0",
     "@molgenis/searchall": "0.1.0",
     "@molgenis/security": "0.1.0",
-    "@molgenis/settings": "0.1.0",
+    "@molgenis/settings": "0.1.1",
     "@molgenis/scripts": "canary"
   }
 }

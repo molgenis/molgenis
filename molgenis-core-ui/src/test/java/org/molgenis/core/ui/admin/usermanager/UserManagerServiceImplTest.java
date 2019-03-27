@@ -3,7 +3,9 @@ package org.molgenis.core.ui.admin.usermanager;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -11,8 +13,8 @@ import java.util.Collection;
 import java.util.stream.Stream;
 import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,9 +112,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
     User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
     when(user1.getIdValue()).thenReturn(molgenisUserId1);
     when(user1.getUsername()).thenReturn(molgenisUserName1);
-    when(dataService.findOneById(UserMetadata.USER, molgenisUserId0, User.class)).thenReturn(user0);
-    when(dataService.findOneById(UserMetadata.USER, molgenisUserId1, User.class)).thenReturn(user1);
-    when(dataService.findAll(UserMetadata.USER, User.class)).thenReturn(Stream.of(user0, user1));
+    when(dataService.findOneById(USER, molgenisUserId0, User.class)).thenReturn(user0);
+    when(dataService.findOneById(USER, molgenisUserId1, User.class)).thenReturn(user1);
+    when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user0, user1));
     this.setSecurityContextSuperUser();
     assertEquals(
         userManagerService.getAllUsers(),
@@ -123,6 +125,25 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
   public void getAllMolgenisUsersNonSu() {
     this.setSecurityContextNonSuperUserWrite();
     this.userManagerService.getAllUsers();
+  }
+
+  @Test
+  public void testSetActivationUser() {
+    this.setSecurityContextSuperUser();
+
+    String userId = "MyUserId";
+    User user = mock(User.class);
+    when(dataService.findOneById(USER, userId, User.class)).thenReturn(user);
+    userManagerService.setActivationUser(userId, true);
+    verify(user).setActive(true);
+    verify(dataService).update(USER, user);
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testSetActivationUserUnknown() {
+    this.setSecurityContextSuperUser();
+
+    userManagerService.setActivationUser("unknownUserId", true);
   }
 
   private void setSecurityContextSuperUser() {

@@ -271,15 +271,13 @@ public class EntityTypeValidator {
    * @throws MolgenisValidationException if the entity extends from a non-abstract entity
    */
   static void validateExtends(EntityType entityType) {
-    if (entityType.getExtends() != null) {
-      EntityType extendedEntityType = entityType.getExtends();
-      if (!extendedEntityType.isAbstract()) {
-        throw new MolgenisValidationException(
-            new ConstraintViolation(
-                format(
-                    "EntityType [%s] is not abstract; EntityType [%s] can't extend it",
-                    entityType.getExtends().getId(), entityType.getId())));
-      }
+    EntityType entityTypeExtends = entityType.getExtends();
+    if (entityTypeExtends != null && !entityTypeExtends.isAbstract()) {
+      throw new MolgenisValidationException(
+          new ConstraintViolation(
+              format(
+                  "EntityType [%s] is not abstract; EntityType [%s] can't extend it",
+                  entityTypeExtends.getId(), entityType.getId())));
     }
   }
 
@@ -341,7 +339,7 @@ public class EntityTypeValidator {
           new ConstraintViolation(
               format(
                   "Adding entity [%s] to system package [%s] is not allowed",
-                  entityType.getId(), entityType.getPackage().getId())));
+                  entityType.getId(), pack.getId())));
     }
   }
 }

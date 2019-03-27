@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -67,6 +68,14 @@ public class FileStoreTest {
   @Test
   public void testGetFileUnchecked() throws IOException {
     String fileName = "bytes.bin";
+    File file = fileStore.store(new ByteArrayInputStream(new byte[] {1, 2, 3}), fileName);
+    Assert.assertEquals(
+        fileStore.getFileUnchecked(fileName).getAbsolutePath(), file.getAbsolutePath());
+  }
+
+  @Test(expectedExceptions = UncheckedIOException.class)
+  public void testGetFileUncheckedDirectoryTraversal() throws IOException {
+    String fileName = "../../bytes.bin";
     File file = fileStore.store(new ByteArrayInputStream(new byte[] {1, 2, 3}), fileName);
     Assert.assertEquals(
         fileStore.getFileUnchecked(fileName).getAbsolutePath(), file.getAbsolutePath());

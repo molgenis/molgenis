@@ -19,8 +19,13 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-data-rest</artifactId>
+      <artifactId>molgenis-data-security</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <!-- third party dependencies-->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
     </dependency>
     <dependency>
       <groupId>org.everit.json</groupId>
@@ -39,6 +44,12 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-web</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

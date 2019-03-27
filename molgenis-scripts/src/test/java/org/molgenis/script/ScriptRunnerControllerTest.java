@@ -16,6 +16,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,6 +34,9 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
 
   @BeforeMethod
   public void setUp() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
     gson = new Gson();
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("sys_job_test");

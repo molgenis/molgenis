@@ -81,6 +81,7 @@ class IndexDependencyModel {
     return result.build();
   }
 
+  @SuppressWarnings("squid:S2259") // getExtends() doesn't return null here
   private boolean extendsFrom(EntityType candidateEntityType, String entityTypeId) {
     return candidateEntityType.getExtends() != null
         && entityTypeId.equals(candidateEntityType.getExtends().getId());

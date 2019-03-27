@@ -101,6 +101,7 @@ public class JobBootstrapper {
   }
 
   private boolean isJobExecution(EntityType entityType) {
-    return entityType.getExtends() != null && entityType.getExtends().getId().equals(JOB_EXECUTION);
+    EntityType entityTypeExtends = entityType.getExtends();
+    return entityTypeExtends != null && entityTypeExtends.getId().equals(JOB_EXECUTION);
   }
 }

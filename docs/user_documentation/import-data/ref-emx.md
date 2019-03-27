@@ -207,16 +207,6 @@ is used to group attributes into a compound attribute. Put here the name of the 
 #### expression
 is used to create computed attributes.
 
-**Computed string example: "xref as label attribute" (config attributes table)**
-  1. Create a new target attribute into the "myEntity" entity, that will become the new computed attribute (in the example: "myLabel")
-  2. Add in the expression column of the new attribute "myLabel": "the name of attribute to convert from" (in example: expression -> "myXref")
-
-| name    | entity	  | label	       | dataType	| idAttribute	| refEntity	  | nillable	| visible	| labelAttribute	| expression |
-|---------|----------|--------------|----------|-------------|-------------|----------|---------|----------------|------------|
-| id      | myEntity | Id	          | int	     | TRUE	       |             |FALSE		   | FALSE	  | FALSE          |            |
-| myXref	 | myEntity | Other Entity	| xref	    | FALSE	      | otherEntity |TRUE      | TRUE    | FALSE	         |            |
-| myLabel | myEntity | Label	       | string	  | FALSE	      |             |TRUE		    | FALSE	  | TRUE           | myXref     |
-
 **Computed object example: "computed myXref" (config attributes table)**
 
   1. Create a two new target attributes (attr1, attr2) in a new entity (newEntity).
