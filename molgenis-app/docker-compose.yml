@@ -16,10 +16,13 @@ services:
         - db_user=molgenis
         - db_password=molgenis
         - admin.password=admin
+        - MINIO_BUCKET_NAME=molgenis
+        - MINIO_ENDPOINT=http://minio:9000
+        - MINIO_ACCESS_KEY=molgenis
+        - MINIO_SECRET_KEY=molgenis
         - "CATALINA_OPTS=-Xmx1g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
-
     postgres:
-      image: postgres:9.6-alpine
+      image: postgres:11-alpine
       environment:
           - POSTGRES_USER=molgenis
           - POSTGRES_PASSWORD=molgenis
@@ -44,3 +47,17 @@ services:
         image: molgenis/opencpu:latest
         ports:
           - 8004:8004
+
+    minio:
+        image: minio/minio:RELEASE.2019-03-20T22-38-47Z
+        volumes:
+          - data:/data
+        ports:
+          - 9000:9000
+        environment:
+          MINIO_ACCESS_KEY: molgenis
+          MINIO_SECRET_KEY: molgenis
+        command: server /data
+
+volumes:
+  data:
