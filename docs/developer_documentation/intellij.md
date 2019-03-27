@@ -204,6 +204,10 @@ This'll build and deploy molgenis to tomcat and open it in the browser.
 Whenever you tab from molgenis to the browser, all modified resources will be copied to the deployed exploded war.
 A browser reload should display the changes.
 
+Note: In some cases intelij might not pick up all changes in the file system made during the
+ build process. This may result in an error referencing a missing jar file. This can be fixed by 
+ selecting the 'Synchronize molgenis' option from the project action menu.
+
 ## Security
 See also the [MOLGENIS Security settings](./security.md)
 
