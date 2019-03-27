@@ -4,17 +4,17 @@ The Scripts plugin allows you to create, edit and delete the available scripts.
 **
 
 # Create a script
-You open the script editor by clicking the "New script" button.
+You open the script editor by clicking the add button ![image](../../images/new.png).
 
 * Name: The name uniquely identifies the script
 * Type: The script type determines how the script is executed.
 	* R scripts are executed in R
 	* Python scripts are executed in Python
 	* Magma JavaScript and JavaScript scripts are executed in a JavaScript context
-* Script: The actual script content goes here.
+* Content: The actual script content goes here.
 * Result file extension: Allows you to render output in your script. For instance, if you set this to `png`, the script will be provided with a parameter `outputFile`. You can write your png image to this file. When the script is done, the contents of the file will be served as a result of the script invocation request.
-* Generate security token: Allows you to use `${molgenisToken}` in the script for authentication.
- 
+* Parameters Your script may define parameters that it needs in order to run. **All parameters are of type String**. Multiple scripts can share the same parameter, here you just specify the parameter names.
+
 # Passing parameters
 
 If your Type is R, JavaScript or Python, the Script Content is interpreted as a [Freemarker](http://freemarker.apache.org) template. The parameters are provided as Freemarker variables. You can render them in the script by typing `${parameter}`, but the full Freemarker syntax is at your disposal, so for instance `<#if><#else><#/if>` constructs are also available.
@@ -78,7 +78,7 @@ molgenis.get("MolgenisUser")
 ```
 
 # Running a script
-You can run your script by pressing the "Run" button.
+You can run your script by pressing the ![image](../../images/execute.png) execute button.
 If the script has parameters, you'll be presented with a popup form to specify them.
 
 You can also run the script through an HTTP request.
@@ -108,6 +108,7 @@ Go to the Script plugin and create a new script.
 * Type: We're creating an R script, so pick `R`.
 * Generate security token: No, since the data is publicly available and lives on a different server anyways.
 * Result file extension: R can plot postscript, pdf, png and jpeg. Let's pick `png`.
+* Parameters: In the example we plotted one specific ASE, let's make the snp ID a parameter. Select `snp_id`. If it's not yet available you can add it by pushing the **+** button to the right of the select box.
 
 * Content:
 
@@ -151,11 +152,11 @@ Note how we use the `snp_id` parameter a second time, to render the plot title.
 Save the script.
 
 ## Call the script
-Push the "Run" button.
+Push the ![image](../../images/execute.png) execute button.
 
 In the popup, specify the value for `snp_id`, for example `rs2287988`.
 
-Click on "Run".
+Push Run.
 
 ![image](../../images/rs2287988.png)
 
