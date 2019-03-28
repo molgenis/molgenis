@@ -86,6 +86,8 @@ mail.from=noreply@domain.ext
 
 You need to add the ```mail.from``` property otherwise the server resolves to ```root@localhost```.
 
+> note When you start the server clean it will populate the database with the environment variables. After that the database is your configuration truth.
+
 ## Authentication settings
 When you are a superuser in MOLGENIS, you can configure three authentication methods: 
  * Username/password signin *(default)*
