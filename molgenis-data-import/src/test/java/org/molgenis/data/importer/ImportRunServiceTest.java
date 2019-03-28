@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.test.AbstractMockitoTest;
@@ -119,5 +120,26 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
     verify(importRun).setMessage(persistedMessage);
     verify(importRun).setStatus("FAILED");
     verify(importRun).setEndDate(any());
+  }
+
+  @Test
+  public void testFinishImportRun() {
+    String importRunId = "MyImportRunId";
+    String message = "message";
+    String importedEntities = "importedEntities";
+    ImportRun importRun = mock(ImportRun.class);
+    when(dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class)).thenReturn(importRun);
+    importRunService.finishImportRun(importRunId, message, importedEntities);
+
+    verify(importRun).setStatus(ImportStatus.FINISHED.toString());
+    verify(importRun).setEndDate(any());
+    verify(importRun).setMessage(message);
+    verify(importRun).setImportedEntities(importedEntities);
+    verify(dataService).update(IMPORT_RUN, importRun);
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testFinishImportRunUnknown() {
+    importRunService.finishImportRun("unknownImportRunId", "message", "importedEntities");
   }
 }

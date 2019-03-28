@@ -19,6 +19,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.commons.io.FilenameUtils;
@@ -117,6 +118,9 @@ public class CsvIterator implements CloseableIterator<Entity> {
   @Override
   public Entity next() {
     Entity entity = get();
+    if (entity == null) {
+      throw new NoSuchElementException();
+    }
     getNext = true;
     return entity;
   }

@@ -114,6 +114,7 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   /** package-private for testability */
+  @SuppressWarnings("squid:S2259") // Null pointers should not be dereferenced
   void setCellValue(Cell cell, Object value) {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));

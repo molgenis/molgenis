@@ -6,13 +6,13 @@ package org.molgenis.data.transaction;
  * <p>A TransactionListener must bootstrap itself by the TransactionManager
  */
 public interface TransactionListener {
-  void transactionStarted(String transactionId);
+  default void transactionStarted(String transactionId) {}
 
-  void commitTransaction(String transactionId);
+  default void commitTransaction(String transactionId) {}
 
-  void afterCommitTransaction(String transactionId);
+  default void afterCommitTransaction(String transactionId) {}
 
-  void rollbackTransaction(String transactionId);
+  default void rollbackTransaction(String transactionId) {}
 
-  void doCleanupAfterCompletion(String transactionId);
+  default void doCleanupAfterCompletion(String transactionId) {}
 }

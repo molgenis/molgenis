@@ -2,7 +2,6 @@ package org.molgenis.script;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -13,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.jobs.JobsController;
+import org.molgenis.jobs.JobExecutionUriUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.script.core.UnknownScriptException;
@@ -89,7 +89,8 @@ public class ScriptRunnerController {
     scriptJobExecution.setParameters(gson.toJson(parameters));
 
     jobExecutor.submit(scriptJobExecution);
-    return ok(concatEntityHref(scriptJobExecution));
+
+    return ok(JobExecutionUriUtils.getUriPath(scriptJobExecution));
   }
 
   /**

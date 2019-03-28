@@ -1,6 +1,7 @@
 package org.molgenis.data.security.meta;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.DELETE;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.READ;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
@@ -202,10 +204,14 @@ public class PackageRepositorySecurityDecorator
       updated = true;
     } else {
       Package currentPackage = delegate().findOneById(pack.getId());
-      if (currentPackage.getParent() == null) {
+      if (currentPackage == null) {
+        throw new UnknownEntityException(PACKAGE, pack.getId());
+      }
+      Package currentPackageParent = currentPackage.getParent();
+      if (currentPackageParent == null) {
         updated = pack.getParent() != null;
       } else {
-        updated = !currentPackage.getParent().equals(pack.getParent());
+        updated = !currentPackageParent.equals(pack.getParent());
       }
     }
     return updated;

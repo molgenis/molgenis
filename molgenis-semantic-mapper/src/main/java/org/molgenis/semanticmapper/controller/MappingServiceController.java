@@ -6,7 +6,6 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -58,6 +57,7 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.jobs.JobExecutionUriUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
@@ -661,7 +661,7 @@ public class MappingServiceController extends PluginController {
 
     jobExecutor.submit(mappingJobExecution);
 
-    return ok(concatEntityHref(mappingJobExecution));
+    return ok(JobExecutionUriUtils.getUriPath(mappingJobExecution));
   }
 
   /**

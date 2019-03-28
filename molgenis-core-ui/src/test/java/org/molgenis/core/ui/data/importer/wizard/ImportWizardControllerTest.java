@@ -33,11 +33,14 @@ import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.testng.annotations.BeforeMethod;
@@ -65,6 +68,9 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 
   @BeforeMethod
   private void setUpBeforeMethod() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
     importWizardController =
         new ImportWizardController(
             uploadWizardPage,

@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.beacon.controller.BeaconController;
-import org.molgenis.data.rest.v2.RestControllerV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -100,7 +99,7 @@ public class BeaconAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beaconOrganisations))
-        .post(RestControllerV2.BASE_URI + "/" + SYS_BEACONS_BEACON_ORGANIZATION)
+        .post("/api/v2/" + SYS_BEACONS_BEACON_ORGANIZATION)
         .then()
         .log()
         .all()
@@ -120,7 +119,7 @@ public class BeaconAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beaconDatasets))
-        .post(RestControllerV2.BASE_URI + "/" + SYS_BEACONS_BEACON_DATASET)
+        .post("/api/v2/" + SYS_BEACONS_BEACON_DATASET)
         .then()
         .log()
         .all()
@@ -140,7 +139,7 @@ public class BeaconAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beacons))
-        .post(RestControllerV2.BASE_URI + "/" + SYS_BEACON)
+        .post("/api/v2/" + SYS_BEACON)
         .then()
         .log()
         .all()

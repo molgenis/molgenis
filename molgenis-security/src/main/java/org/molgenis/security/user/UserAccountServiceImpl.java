@@ -1,5 +1,6 @@
 package org.molgenis.security.user;
 
+import java.util.Objects;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -26,7 +27,7 @@ public class UserAccountServiceImpl implements UserAccountService {
   @Transactional
   public void updateCurrentUser(User updatedCurrentUser) {
     String currentUsername = SecurityUtils.getCurrentUsername();
-    if (!currentUsername.equals(updatedCurrentUser.getUsername())) {
+    if (!Objects.equals(currentUsername, updatedCurrentUser.getUsername())) {
       throw new RuntimeException("Updated user differs from the current user");
     }
 

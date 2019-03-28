@@ -23,15 +23,14 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.postgresql.PostgreSqlNameGenerator;
-import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
+import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /** Tracks PostgreSQL table names. */
 @Component
-public class EntityTypeRegistryImpl extends DefaultMolgenisTransactionListener
-    implements EntityTypeRegistry {
+public class EntityTypeRegistryImpl implements EntityTypeRegistry, TransactionListener {
   /**
    * Maps table name to {@link EntityTypeDescription} for the table name. Junction table names are
    * mapped to the EntityTypeDescription of the entity type with the reference attribute.

@@ -45,7 +45,7 @@ public abstract class MenuItem implements MenuNode {
 
   /** @return the URL of this menu item, which is the combination of its ID and its parameters. */
   public String getUrl() {
-    return Optional.ofNullable(getParams()).map(it -> getId() + "/" + it).orElse(getId());
+    return Optional.ofNullable(getParams()).map(params -> getId() + "?" + params).orElse(getId());
   }
 
   public static MenuItem create(String id, String label) {

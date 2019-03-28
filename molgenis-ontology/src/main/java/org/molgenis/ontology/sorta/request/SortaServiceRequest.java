@@ -1,6 +1,6 @@
 package org.molgenis.ontology.sorta.request;
 
-import org.molgenis.data.rest.EntityPager;
+import org.molgenis.ontology.sorta.controller.EntityPager;
 
 public class SortaServiceRequest {
   private final String sortaJobExecutionId;
