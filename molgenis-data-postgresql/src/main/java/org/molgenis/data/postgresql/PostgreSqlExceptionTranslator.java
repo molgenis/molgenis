@@ -85,6 +85,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       sqlException = sqlException.getNextException();
     }
     if (!(sqlException instanceof PSQLException)) {
+      LOG.error("", sqlException);
       throw new RuntimeException(
           format("Unexpected exception class [%s]", sqlException.getClass().getSimpleName()));
     }
