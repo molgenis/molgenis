@@ -60,6 +60,9 @@
       <resource>
         <directory>node_modules/@molgenis/settings/dist</directory>
       </resource>
+      <resource>
+        <directory>node_modules/@molgenis/scripts/dist</directory>
+      </resource>
     </resources>
     <plugins>
       <plugin>
