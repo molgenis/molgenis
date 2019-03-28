@@ -56,7 +56,14 @@ mail.smtp.quitwait=false
 
 You may override these properties or add additional properties and override these defaults by adding entities to the 
 ```JavaMailProperty``` repository in the Data Explorer. Each key may be provided at most once.
-For a list of valid keys, check https://javamail.java.net/nonav/docs/api/
+For a list of valid keys, check https://javamail.java.net/nonav/docs/api/ and per protocol:
+
+- **IMAP**
+  https://javaee.github.io/javamail/docs/api/com/sun/mail/imap/package-summary.html                                                                              
+- **POP3**  
+  https://javaee.github.io/javamail/docs/api/com/sun/mail/pop3/package-summary.html
+- **SMTP** *this is what we use*
+  https://javaee.github.io/javamail/docs/api/com/sun/mail/smtp/package-summary.html
 
 > E.g. Add an entity with key ```mail.debug``` and value ```true``` if you'd like to debug the mail dialog with the server.
 
