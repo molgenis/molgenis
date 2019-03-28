@@ -4,26 +4,26 @@ import static java.lang.Math.ceil;
 
 import java.net.URI;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.api.permissions.model.response.LinksResponse;
-import org.molgenis.api.permissions.model.response.PageResponse;
-import org.molgenis.api.permissions.model.response.PagedPermissionResponse;
+import org.molgenis.api.model.response.LinksResponse;
+import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.api.model.response.PagedApiResponse;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 public class PermissionResponseUtils {
 
   private PermissionResponseUtils() {}
 
-  public static PagedPermissionResponse getPermissionResponse(
+  public static PagedApiResponse getPermissionResponse(
       String query, int page, int pageSize, int totalItems, Object data) {
     PageResponse pageResponse =
         PageResponse.create(pageSize, totalItems, getTotalPages(pageSize, totalItems), page);
     LinksResponse linksResponse = getLinks(query, page, pageSize, totalItems);
-    return PagedPermissionResponse.create(pageResponse, linksResponse, data);
+    return PagedApiResponse.create(pageResponse, linksResponse, data);
   }
 
-  public static PagedPermissionResponse getPermissionResponse(String query, Object data) {
+  public static PagedApiResponse getPermissionResponse(String query, Object data) {
     LinksResponse linksResponse = getLinks(query, null, null, null);
-    return PagedPermissionResponse.create(null, linksResponse, data);
+    return PagedApiResponse.create(null, linksResponse, data);
   }
 
   private static LinksResponse getLinks(

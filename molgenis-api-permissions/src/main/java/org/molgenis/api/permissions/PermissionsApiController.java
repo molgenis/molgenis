@@ -21,6 +21,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.ApiController;
+import org.molgenis.api.model.response.PagedApiResponse;
 import org.molgenis.api.permissions.exceptions.PageWithoutPageSizeException;
 import org.molgenis.api.permissions.exceptions.UnsupportedPermissionQueryException;
 import org.molgenis.api.permissions.model.request.DeletePermissionRequest;
@@ -30,7 +31,6 @@ import org.molgenis.api.permissions.model.response.GetObjectPermissionResponse;
 import org.molgenis.api.permissions.model.response.GetPermissionsResponse;
 import org.molgenis.api.permissions.model.response.GetTypePermissionsResponse;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.PagedPermissionResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
@@ -129,7 +129,7 @@ public class PermissionsApiController extends ApiController {
       value =
           "Get a list ace's for a entity. Typically this is a row in a row level secured entity.",
       response = List.class)
-  public PagedPermissionResponse getAcls(
+  public PagedApiResponse getAcls(
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "page", required = false) Integer page,
@@ -164,7 +164,7 @@ public class PermissionsApiController extends ApiController {
   @ApiOperation(
       value = "Gets all permissions for all acls of a certain class",
       response = ResponseEntity.class)
-  public PagedPermissionResponse getPermissionsForClass(
+  public PagedApiResponse getPermissionsForClass(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "page", required = false) Integer page,
@@ -175,7 +175,7 @@ public class PermissionsApiController extends ApiController {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
     ArrayList<ObjectPermissionsResponse> permissions;
-    PagedPermissionResponse response;
+    PagedApiResponse response;
     if (page != null) {
       permissions =
           Lists.newArrayList(
@@ -285,7 +285,7 @@ public class PermissionsApiController extends ApiController {
   @ApiOperation(
       value = "Gets all permissions for all acls of a certain class",
       response = ResponseEntity.class)
-  public PagedPermissionResponse getPermissionsForClassEntities(
+  public PagedApiResponse getPermissionsForClassEntities(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "page", required = false) Integer page,

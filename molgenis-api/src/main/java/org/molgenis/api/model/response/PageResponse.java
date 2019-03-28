@@ -1,4 +1,4 @@
-package org.molgenis.api.permissions.model.response;
+package org.molgenis.api.model.response;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.util.AutoGson;

@@ -1,9 +1,8 @@
-package org.molgenis.api.permissions.model.response;
+package org.molgenis.api.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.net.URI;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -14,7 +13,6 @@ public abstract class LinksResponse {
   @Nullable
   public abstract URI getPrevious();
 
-  @NotEmpty
   public abstract URI getSelf();
 
   @Nullable
