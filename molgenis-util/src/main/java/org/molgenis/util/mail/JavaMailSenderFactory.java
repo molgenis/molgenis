@@ -2,7 +2,6 @@ package org.molgenis.util.mail;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
@@ -13,16 +12,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class JavaMailSenderFactory implements MailSenderFactory {
   private static final Logger LOG = LoggerFactory.getLogger(JavaMailSenderFactory.class);
+
   private static Properties defaultProperties = new Properties();
 
-  static {
-    try {
-      defaultProperties.load(
-          JavaMailSenderFactory.class.getResourceAsStream("mail-default.properties"));
-    } catch (IOException e) {
-      throw new IllegalStateException("Default mail-default.properties not found!");
-    }
-  }
+  public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+  public static final String MAIL_SMTP_QUITWAIT = "mail.smtp.quitwait";
+  public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+  public static final String MAIL_SMTP_FROM_ADDRESS = "mail.from";
 
   @Override
   public JavaMailSenderImpl createMailSender(MailSettings mailSettings) {
@@ -35,6 +31,10 @@ public class JavaMailSenderFactory implements MailSenderFactory {
     mailSender.setPassword(mailSettings.getPassword());
     mailSender.setDefaultEncoding(mailSettings.getDefaultEncoding().name());
     Properties properties = new Properties(defaultProperties);
+    defaultProperties.setProperty(MAIL_SMTP_STARTTLS_ENABLE, mailSettings.isStartTlsEnabled());
+    defaultProperties.setProperty(MAIL_SMTP_QUITWAIT, mailSettings.isQuitWait());
+    defaultProperties.setProperty(MAIL_SMTP_AUTH, mailSettings.isAuthenticationRequired());
+    defaultProperties.setProperty(MAIL_SMTP_FROM_ADDRESS, mailSettings.getFromAddress());
     properties.putAll(mailSettings.getJavaMailProperties());
     LOG.debug("Mail properties: {}; defaults: {}", properties, defaultProperties);
     mailSender.setJavaMailProperties(properties);
