@@ -49,7 +49,6 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   @DependsOn(value = "org.molgenis.settings.mail.JavaMailPropertyType")
   @Component
   public static class Meta extends DefaultSettingsEntityType {
-    @SuppressWarnings("unused")
     public static final String MAIL_SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + ID;
     /**
      * For conversion: Pick up defaults from molgenis-server.properties file where these settings
@@ -135,22 +134,22 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
           .setDescription("Default MimeMessage encoding.");
       addAttribute(START_TLS_ENABLED)
           .setDataType(STRING)
-          .setDefaultValue("true")
+          .setDefaultValue(mailJavaStartTlsEnable)
           .setNillable(true)
           .setDescription("Do you need TLS with for SMTP server.");
       addAttribute(WAIT_QUIT)
           .setDataType(STRING)
-          .setDefaultValue("false")
+          .setDefaultValue(mailJavaQuitWait)
           .setNillable(true)
           .setDescription("Do you quit when you wait?.");
       addAttribute(AUTH_REQUIRED)
           .setDataType(STRING)
-          .setDefaultValue("true")
+          .setDefaultValue(mailJavaAuth)
           .setNillable(true)
           .setDescription("Is authentication required for SMTP server.");
       addAttribute(FROM_ADDRESS)
           .setDataType(STRING)
-          .setDefaultValue(DEFAULT_REPLY_EMAIL_ADDRESS)
+          .setDefaultValue(mailJavaFromAddress)
           .setNillable(true)
           .setDescription("The default from address for SMTP server.");
       Attribute refAttr = mailSenderPropertyType.getAttribute(MAIL_SETTINGS_REF);
