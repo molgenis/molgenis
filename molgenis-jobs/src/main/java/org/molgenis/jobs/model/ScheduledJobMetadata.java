@@ -55,7 +55,7 @@ public class ScheduledJobMetadata extends SystemEntityType {
             "Cron expression. A cron expression is a string comprised of 6 or 7 fields separated by white space. "
                 + "These fields are: Seconds, Minutes, Hours, Day of month, Month, Day of week, and optionally Year. "
                 + "An example input is 0 0 12 * * ? for a job that fires at noon every day. "
-                + "See http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html")
+                + "See http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-06.html")
         .setValidationExpression(
             buildValidationExpressionString(CRON_EXPRESSION, RegexUtils.JAVA_SCRIPT_CRON_REGEX));
     addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
