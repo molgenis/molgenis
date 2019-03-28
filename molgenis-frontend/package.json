@@ -4,14 +4,14 @@
   "dependencies": {
     "@molgenis/app-manager": "0.1.0",
     "@molgenis/core-ui": "canary",
-    "@molgenis/data-row-edit": "0.1.0",
+    "@molgenis/data-row-edit": "canary",
     "@molgenis/menu": "0.1.0",
-    "@molgenis/metadata-manager": "0.1.0",
+    "@molgenis/metadata-manager": "canary",
     "@molgenis/navigator": "0.1.0",
     "@molgenis/one-click-importer": "0.1.0",
     "@molgenis/questionnaires": "0.1.0",
-    "@molgenis/searchall": "0.1.0",
-    "@molgenis/security": "0.1.0",
+    "@molgenis/searchall": "canary",
+    "@molgenis/security": "canary",
     "@molgenis/settings": "0.1.1",
     "@molgenis/scripts": "canary"
   }
