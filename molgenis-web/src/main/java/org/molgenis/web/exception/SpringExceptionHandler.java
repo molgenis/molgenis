@@ -2,6 +2,7 @@ package org.molgenis.web.exception;
 
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -35,8 +37,19 @@ public class SpringExceptionHandler {
 
   @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
   @ExceptionHandler(NoHandlerFoundException.class)
-  public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest) {
+  public final Object handleSpringExceptionNotFound(
+      Exception ex, HttpServletRequest httpServletRequest) {
     return handleException(ex, httpServletRequest, NOT_FOUND, null);
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public final Object handleMaxUploadSizeExceededException(
+      Exception ex, HttpServletRequest httpServletRequest) {
+    Exception cause = ex;
+    while (cause.getCause() instanceof Exception) {
+      cause = (Exception) cause.getCause();
+    }
+    return handleException(cause, httpServletRequest, PAYLOAD_TOO_LARGE, null);
   }
 
   @ExceptionHandler({
