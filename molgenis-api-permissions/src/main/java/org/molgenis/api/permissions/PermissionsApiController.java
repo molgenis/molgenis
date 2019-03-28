@@ -70,7 +70,7 @@ public class PermissionsApiController extends ApiController {
   public static final String OBJECT_ID = OBJECT + "Id";
 
   public static final String PERMISSIONS = "permissions";
-  public static final String ENTITIES = "permissions";
+  public static final String ENTITIES = "entities";
 
   public static final String ENTITY_PREFIX = "entity-";
 

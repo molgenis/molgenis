@@ -192,6 +192,69 @@ public class PermissionAPIIT {
         .body(equalTo(response3));
   }
 
+  @Test
+  public void testSetPermissionsInhertited() {
+    /*
+     * Create READ permission for test user
+     * Get permission to check if it was created succesfully
+     * Update permission to WRITE for test user
+     * Get permission to check if it was updated succesfully
+     * Delete permission for test user
+     * Get permission to check if it was deleted succesfully
+     **/
+    String create = "{permissions:[{permission:READ,user:" + testUserName + "}]}";
+    given()
+        .log()
+        .all()
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .contentType(APPLICATION_JSON)
+        .body(create)
+        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/package/perm1")
+        .then()
+        .statusCode(201)
+        .log()
+        .all();
+
+    String response =
+        "{\"permissions\":[{\"user\":\"admin\",\"permission\":\"WRITEMETA\"},{\"user\":\""
+            + testUserName
+            + "\",\"inheritedPermissions\":[{\"objectId\":\"perm1\",\"label\":\"perm1\",\"typeLabel\":\"Package\",\"typeId\":\"package\",\"permission\":\"READ\",\"inheritedPermissions\":[]}]}]}";
+    given()
+        .log()
+        .all()
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .get(
+            PermissionsApiController.BASE_URI
+                + "/"
+                + PERMISSIONS
+                + "/entityType/perm1_entity1?inheritance=true")
+        .then()
+        .statusCode(200)
+        .log()
+        .all()
+        .body(equalTo(response));
+    String response2 =
+        "{\"permissions\":[{\"user\":\""
+            + testUserName
+            + "\",\"inheritedPermissions\":[{\"objectId\":\"perm1\",\"label\":\"perm1\",\"typeLabel\":\"Package\",\"typeId\":\"package\",\"permission\":\"READ\",\"inheritedPermissions\":[]}]}]}";
+    given()
+        .log()
+        .all()
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .get(
+            PermissionsApiController.BASE_URI
+                + "/"
+                + PERMISSIONS
+                + "/entityType/perm1_entity1?q=user=="
+                + testUserName
+                + "&inheritance=true")
+        .then()
+        .statusCode(200)
+        .log()
+        .all()
+        .body(equalTo(response2));
+  }
+
   // patch for type (multiple at once) - get for type - delete as admin
   @Test
   public void testSetPermissions2() {
@@ -334,7 +397,7 @@ public class PermissionAPIIT {
             .response();
     JsonPath path = actual.getBody().jsonPath();
     String expected =
-        "package,entity-sys_job_ResourceDownloadJobExecution,entity-sys_FileMeta,entity-sys_ImportRun,entity-sys_job_OneClickImportJobExecution,entity-sys_job_ResourceDeleteJobExecution,entity-sys_job_ResourceCopyJobExecution,entityType,plugin,entity-perm2_entity4,group";
+        "package,entity-sys_job_ResourceDownloadJobExecution,entity-sys_FileMeta,entity-sys_ImportRun,entity-sys_job_OneClickImportJobExecution,entity-sys_job_ResourceDeleteJobExecution,entity-sys_job_ResourceCopyJobExecution,entityType,plugin,entity-perm2_entity4";
     List<String> expectedList = Arrays.asList(expected.split(","));
     assertTrue(path.getList("").containsAll(expectedList));
     assertEquals(path.getList("").size(), expectedList.size());

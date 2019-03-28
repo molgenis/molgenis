@@ -6,6 +6,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI;
 import static org.molgenis.api.permissions.PermissionsApiController.DEFAULT_PAGE;
 import static org.molgenis.api.permissions.PermissionsApiController.DEFAULT_PAGESIZE;
+import static org.molgenis.api.permissions.PermissionsApiController.ENTITIES;
 import static org.molgenis.api.permissions.PermissionsApiController.OBJECTS;
 import static org.molgenis.api.permissions.PermissionsApiController.PERMISSIONS;
 import static org.molgenis.api.permissions.PermissionsApiController.TYPES;
@@ -392,5 +393,273 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
         .andExpect(status().isNoContent());
 
     verify(permissionApiService).deletePermission(user1, "typeId", "identifier");
+  }
+
+  @Test
+  public void testGetAcePermissionEntities() throws Exception {
+    List<PermissionResponse> permissionResponses =
+        Arrays.asList(
+            PermissionResponse.create(null, "user1", "READ", null),
+            PermissionResponse.create(null, "role1", "WRITE", null));
+    when(permissionApiService.getPermission(
+            "entity-typeId", "identifier", Sets.newHashSet(user1, role1), true))
+        .thenReturn(permissionResponses);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get(
+                    BASE_URI
+                        + "/"
+                        + PERMISSIONS
+                        + "/"
+                        + ENTITIES
+                        + "/typeId/identifier?q=user==user1,role==role1&inheritance=true"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertEquals(
+        result.getResponse().getContentAsString(),
+        "{\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}");
+  }
+
+  @Test
+  public void testGetAcePermissionsEntities() throws Exception {
+    List<PermissionResponse> permissionResponses =
+        Arrays.asList(
+            PermissionResponse.create(null, "user1", "READ", null),
+            PermissionResponse.create(null, "role1", "WRITE", null));
+    Collection<ObjectPermissionsResponse> identityPermission =
+        Collections.singletonList(
+            ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
+    when(permissionApiService.getPermissionsForType(
+            "entity-typeId", Sets.newHashSet(user1, role1, role2), false))
+        .thenReturn(identityPermission);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get(
+                    BASE_URI
+                        + "/"
+                        + PERMISSIONS
+                        + "/"
+                        + ENTITIES
+                        + "/typeId?q=user==user1,role=in=(role1,role2)"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertEquals(
+        result.getResponse().getContentAsString(),
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/"
+            + ENTITIES
+            + "/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
+  }
+
+  @Test
+  public void testGetAcePermissionsPagedEntities() throws Exception {
+    List<PermissionResponse> permissionResponses =
+        Arrays.asList(
+            PermissionResponse.create(null, "role2", "READ", null),
+            PermissionResponse.create(null, "role1", "WRITE", null));
+    Collection<ObjectPermissionsResponse> identityPermission =
+        Collections.singletonList(
+            ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
+    when(permissionApiService.getPagedPermissionsForType(
+            "entity-typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
+        .thenReturn(identityPermission);
+    when(objectIdentityService.getNrOfObjectIdentities(
+            "entity-typeId", Sets.newHashSet(user1, user2, role1, role2)))
+        .thenReturn(80);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get(
+                    BASE_URI
+                        + "/"
+                        + PERMISSIONS
+                        + "/"
+                        + ENTITIES
+                        + "/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertEquals(
+        result.getResponse().getContentAsString(),
+        "{\"page\":{\"size\":10,\"totalElements\":0,\"totalPages\":0,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/"
+            + ENTITIES
+            + "/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/"
+            + PERMISSIONS
+            + "/"
+            + ENTITIES
+            + "/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\"},\"data\":{\"objects\":[]}}");
+  }
+
+  @Test
+  public void testUpdatePermissionEntities() throws Exception {
+    String requestJson =
+        "{"
+            + "permissions:[{"
+            + "permission:READ,"
+            + "user:test2"
+            + "},{"
+            + "permission:WRITE,"
+            + "user:test"
+            + "}]"
+            + "}";
+    mockMvc
+        .perform(
+            patch(BASE_URI + "/" + PERMISSIONS + "/" + ENTITIES + "/typeId/identifier")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(requestJson))
+        .andExpect(status().isNoContent());
+
+    PermissionRequest permissionRequest1 = PermissionRequest.create(null, "test2", "READ");
+    PermissionRequest permissionRequest2 = PermissionRequest.create(null, "test", "WRITE");
+    verify(permissionApiService)
+        .updatePermission(
+            Arrays.asList(permissionRequest1, permissionRequest2), "entity-typeId", "identifier");
+  }
+
+  @Test
+  public void testUpdatePermissionsForTypeEntities() throws Exception {
+    String requestJson =
+        "{"
+            + "objects:[{"
+            + "objectId:rij1,"
+            + "permissions:["
+            + "{"
+            + "role:IT_VIEWER,"
+            + "permission:WRITE"
+            + "},"
+            + "{"
+            + "role:IT_MANAGER,"
+            + "permission:READ"
+            + "}"
+            + "]},"
+            + "{"
+            + "objectId:rij2,"
+            + "permissions:["
+            + "{"
+            + "role:IT_VIEWER,"
+            + "permission:WRITE"
+            + "}"
+            + "]}"
+            + "]"
+            + "}";
+    mockMvc
+        .perform(
+            patch(BASE_URI + "/" + PERMISSIONS + "/" + ENTITIES + "/typeId")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(requestJson))
+        .andExpect(status().isNoContent());
+
+    ObjectPermissionsRequest permission1 =
+        ObjectPermissionsRequest.create(
+            "rij1",
+            Arrays.asList(
+                PermissionRequest.create("IT_VIEWER", null, "WRITE"),
+                PermissionRequest.create("IT_MANAGER", null, "READ")));
+    ObjectPermissionsRequest permission2 =
+        ObjectPermissionsRequest.create(
+            "rij2",
+            Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
+
+    verify(permissionApiService)
+        .updatePermissions(Arrays.asList(permission1, permission2), "entity-typeId");
+  }
+
+  @Test
+  public void testCreatePermissionsForTypeEntities() throws Exception {
+    String requestJson =
+        "{"
+            + "objects:[{"
+            + "objectId:rij1,"
+            + "permissions:["
+            + "{"
+            + "role:IT_VIEWER,"
+            + "permission:WRITE"
+            + "},"
+            + "{"
+            + "role:IT_MANAGER,"
+            + "permission:READ"
+            + "}"
+            + "]},"
+            + "{"
+            + "objectId:rij2,"
+            + "permissions:["
+            + "{"
+            + "role:IT_VIEWER,"
+            + "permission:WRITE"
+            + "}"
+            + "]}"
+            + "]"
+            + "}";
+    mockMvc
+        .perform(
+            post(BASE_URI + "/" + PERMISSIONS + "/" + ENTITIES + "/typeId")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(requestJson))
+        .andExpect(status().isCreated());
+
+    ObjectPermissionsRequest permission1 =
+        ObjectPermissionsRequest.create(
+            "rij1",
+            Arrays.asList(
+                PermissionRequest.create("IT_VIEWER", null, "WRITE"),
+                PermissionRequest.create("IT_MANAGER", null, "READ")));
+    ObjectPermissionsRequest permission2 =
+        ObjectPermissionsRequest.create(
+            "rij2",
+            Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
+
+    verify(permissionApiService)
+        .createPermissions(Arrays.asList(permission1, permission2), "entity-typeId");
+  }
+
+  @Test
+  public void testCreatePermissionEntities() throws Exception {
+    String requestJson =
+        "{"
+            + "permissions:[{"
+            + "permission:READ,"
+            + "user:test2"
+            + "},{"
+            + "permission:WRITE,"
+            + "user:test"
+            + "}]"
+            + "}";
+    mockMvc
+        .perform(
+            post(BASE_URI + "/" + PERMISSIONS + "/" + ENTITIES + "/typeId/identifier")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(requestJson))
+        .andExpect(status().isCreated());
+
+    List<PermissionRequest> permissionRequests =
+        Arrays.asList(
+            PermissionRequest.create(null, "test2", "READ"),
+            PermissionRequest.create(null, "test", "WRITE"));
+    verify(permissionApiService)
+        .createPermission(permissionRequests, "entity-typeId", "identifier");
+  }
+
+  @Test
+  public void testDeletePermissionEntities() throws Exception {
+    String requestJson = "{" + "user:user1" + "}";
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete(
+                    BASE_URI + "/" + PERMISSIONS + "/" + ENTITIES + "/typeId/identifier")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(requestJson))
+        .andExpect(status().isNoContent());
+
+    verify(permissionApiService).deletePermission(user1, "entity-typeId", "identifier");
   }
 }

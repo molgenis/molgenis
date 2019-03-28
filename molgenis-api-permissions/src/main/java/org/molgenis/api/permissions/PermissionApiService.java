@@ -545,9 +545,7 @@ public class PermissionApiService {
     InheritedPermissionsResult inheritedPermissionsResult =
         inheritanceResolver.getInheritedPermissions(acl, sid);
     if (inheritanceResolver.isNotEmpty(inheritedPermissionsResult)) {
-      return inheritanceResolver
-          .getInheritedPermissionFactory()
-          .convertToInheritedPermissions(inheritedPermissionsResult);
+      return inheritanceResolver.convertToInheritedPermissions(inheritedPermissionsResult);
     }
     return Collections.emptyList();
   }

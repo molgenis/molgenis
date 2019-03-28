@@ -24,7 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.mockito.Mock;
-import org.molgenis.api.permissions.inheritance.InheritedPermissionFactory;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
@@ -189,8 +188,6 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   public void testGetAllPermissions() {
 
     when(aclClassService.getAclClassTypes()).thenReturn(Collections.singletonList("entity-typeId"));
-
-    InheritedPermissionFactory inheritedPermissionFactory = mock(InheritedPermissionFactory.class);
 
     doReturn(true).when(dataService).hasEntityType("typeId");
     setSuAuthentication(true);
@@ -412,7 +409,6 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     setSuAuthentication(false);
     EntityType entityType = mock(EntityType.class);
     Attribute attribute = mock(Attribute.class);
-
     when(entityType.getIdAttribute()).thenReturn(attribute);
     when(attribute.getDataType()).thenReturn(AttributeType.STRING);
     when(dataService.getEntityType("typeId")).thenReturn(entityType);
@@ -435,6 +431,45 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
+    verify(mutableAclService).updateAcl(acl);
+  }
+
+  @Test
+  public void testCreatePermissions() {
+    setSuAuthentication(true);
+    Sid sid = mock(Sid.class);
+    MutableAcl acl = mock(MutableAcl.class);
+    when(acl.getOwner()).thenReturn(sid);
+    Sid sid2 = mock(Sid.class);
+    MutableAcl acl2 = mock(MutableAcl.class);
+    when(acl2.getOwner()).thenReturn(sid2);
+
+    doReturn(acl)
+        .when(mutableAclService)
+        .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
+    doReturn(acl2)
+        .when(mutableAclService)
+        .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier2"));
+    PermissionRequest permission1 = PermissionRequest.create("role", null, "WRITE");
+    ObjectPermissionsRequest objectPermissionsRequest1 =
+        ObjectPermissionsRequest.create("identifier", Collections.singletonList(permission1));
+    PermissionRequest permission2 = PermissionRequest.create(null, "user1", "READ");
+    ObjectPermissionsRequest objectPermissionsRequest2 =
+        ObjectPermissionsRequest.create("identifier2", Collections.singletonList(permission2));
+
+    EntityType entityType = mock(EntityType.class);
+    Attribute attribute = mock(Attribute.class);
+    when(entityType.getIdAttribute()).thenReturn(attribute);
+    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(dataService.getEntityType("typeId")).thenReturn(entityType);
+
+    permissionApiService.createPermissions(
+        Arrays.asList(objectPermissionsRequest1, objectPermissionsRequest2), "entity-typeId");
+
+    Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
+    Sid expectedSid2 = new PrincipalSid("user1");
+    verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
+    verify(acl2).insertAce(0, PermissionSet.READ, expectedSid2, true);
     verify(mutableAclService).updateAcl(acl);
   }
 
