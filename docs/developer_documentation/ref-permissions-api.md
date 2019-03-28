@@ -31,17 +31,17 @@ There are two kinds of inheritance in the permission system:
 - The access control list for a resource can have a parent, in that case permissions on the parent also grant permissions on the child ACL's. In the current MOLGENIS system this is the case for entity types and packages, both inherit permissions from the package in which they reside..
 
 ## Managing row level security
-### Getting all resource classes in the system
+### Getting all resource types in the system
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/classes
+GET https://molgenis.mydomain.example/api/permissions/v1/types
 ```
 #####Parameters
 URL: none
 Query: none
 
 #####Response
-List of ACL classes available in the system.
+List of ACL types available in the system.
 #####Example 
 Response:
 ```
@@ -62,7 +62,7 @@ Response:
 ### Getting all suitable permissions for a resource type
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/classes/permissions/{typeId}")
+GET https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
 ```
 #####Parameters
 URL: TypeId as described in the [parameters section](##Parameters)
@@ -73,7 +73,7 @@ A list of permissions that can be used for this resource type.
 
 #####Example 
 Request:
-```https://molgenis.mydomain.example/api/permissions/v1/classes/permissions/entityType```
+```https://molgenis.mydomain.example/api/permissions/v1/types/entityType```
 Response:
 ```[
        "READMETA",
@@ -91,7 +91,7 @@ You can use the endpoint in the next section 'Creating a new access control list
 
 #####Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/classes/{typeId}")
+POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
 ```
 ##########Parameters
 URL: 'typeId' as described in the [parameters section](##Parameters)
@@ -103,13 +103,13 @@ URL: 'typeId' as described in the [parameters section](##Parameters)
 Enable row level security on entity 'hospital_neurology_patients'.
 
 Request:
-```https://molgenis.mydomain.example/api/permissions/v1/classes/entity-hospital_neurology_patients```
+```https://molgenis.mydomain.example/api/permissions/v1/types/entity-hospital_neurology_patients```
 
 
 ### Creating a new access control list for a resource
 #####Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/acls/{typeId}/{identifier}")
+POST https://molgenis.mydomain.example/api/permissions/v1/objects/{typeId}/{objectId}")
 ```
 #####Parameters
 URL: 
@@ -123,12 +123,12 @@ URL:
 Add an ACL for 'Patient1' in entity 'hospital_neurology_patients'.
 
 Request:
-```POST https://molgenis.mydomain.example/api/permissions/v1/classes/entity-hospital_neurology_patients/Patient1```
+```POST https://molgenis.mydomain.example/api/permissions/v1/types/entity-hospital_neurology_patients/Patient1```
 
 ### Getting all acls for a class
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/acls/{typeId}
+GET https://molgenis.mydomain.example/api/permissions/v1/objects/{typeId}
 ```
 #####Parameters
 URL:
@@ -142,7 +142,7 @@ List of ACLs for a class in the system.
 #####Example 
 Request:
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/acls/plugin?page=2&pageSize=2
+GET https://molgenis.mydomain.example/api/permissions/v1/objects/plugin?page=2&pageSize=2
 ```
 Response:
 ```
@@ -154,9 +154,9 @@ Response:
         "number": 2
     },
     "links": {
-        "previous": "/api/permissions/v1/acls/plugin?page=1&pageSize=2",
-        "self": "/api/permissions/v1/acls/plugin?page=2&pageSize=2",
-        "next": "/api/permissions/v1/acls/plugin?page=3&pageSize=2"
+        "previous": "/api/permissions/v1/objects/plugin?page=1&pageSize=2",
+        "self": "/api/permissions/v1/objects/plugin?page=2&pageSize=2",
+        "next": "/api/permissions/v1/objects/plugin?page=3&pageSize=2"
     },
     "data": [
         "background",
@@ -170,7 +170,7 @@ Response:
 ### Getting permissions for one or more users and/or roles for a resource
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}/{identifier}")
+GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
 ```
 #####Parameters
 URL: 
@@ -187,7 +187,7 @@ The user and role of a permission can be absent if permission is only derived fr
 #####Example
 Request:
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/aces/package/hospital_neurology?inheritance=true
+GET https://molgenis.mydomain.example/api/permissions/v1/package/hospital_neurology?inheritance=true
 ```
 Response:
 ```
@@ -234,7 +234,7 @@ The neurologist and the nurse inherit their READ permissions from the their "NEU
 ### Getting permissions for one or more users and/or roles for a resource type
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}")
+GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}")
 ```
 #####Parameters
 URL: 
@@ -255,7 +255,7 @@ The page object is only returned if the request contained paging parameters
 
 #####Example
 Request:
-```https://molgenis.mydomain.example/api/permissions/v1/aces/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10```
+```https://molgenis.mydomain.example/api/permissions/v1/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10```
 Response:
 ```
 {
@@ -266,7 +266,7 @@ Response:
         "number": 1
     },
     "links": {
-        "self": "/api/permissions/v1/aces/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10"
+        "self": "/api/permissions/v1/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10"
     },
     "data": {
         "identityPermissions": [
@@ -300,7 +300,7 @@ Response:
 ### Getting all permissions for one or more users and/or roles
 #####Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/aces
+GET https://molgenis.mydomain.example/api/permissions/v1
 ```
 #####Parameters
 URL: none
@@ -316,7 +316,7 @@ The user and role of a permission can be absent if permission is only derived fr
 
 #####Example 
 Request:
-```https://molgenis.mydomain.example/api/permissions/v1/aces?q=user==Cardiologist&includeInheritance=true```
+```https://molgenis.mydomain.example/api/permissions/v1?q=user==Cardiologist&includeInheritance=true```
 Response:
 ```
 {
@@ -406,7 +406,7 @@ Response:
 ### Creating permissions for one or more users and/or roles for a resource
 #####Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}/{identifier}")
+POST https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
 ```
 #####Request
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
@@ -416,7 +416,7 @@ The endpoint expects a list of permissions, each permission should contain a 'pe
 
 #####Example request
 URL:
-https://molgenis.mydomain.example/api/permissions/v1/aces/entityType/hospital_cardiology_patients
+https://molgenis.mydomain.example/api/permissions/v1/entityType/hospital_cardiology_patients
 Body:
 ```{
    	permissions:[{
@@ -431,7 +431,7 @@ Body:
 
 ### Create permissions for one or more users and/or roles for resources of a certain type
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}")
+POST https://molgenis.mydomain.example/api/permissions/v1/{typeId}")
 ``` 
 
 #####Request
@@ -441,7 +441,7 @@ The endpoint expects a list of resources, each of which should contrain the iden
 201 CREATED
 
 #####Example
-URL: https://molgenis.mydomain.example/api/permissions/v1/aces/entity-hospital_neurology_patients
+URL: https://molgenis.mydomain.example/api/permissions/v1/entity-hospital_neurology_patients
 Body:
 ```
 {
@@ -472,7 +472,7 @@ Body:
 ### Update permissions for one or more users and/or roles for a resource type
 #####Endpoint
 ```
-PATCH https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}/{identifier}")
+PATCH https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
 ```
 Request: 
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
@@ -482,7 +482,7 @@ The endpoint expects a list of permissions, each permission should contain a 'pe
 
 #####Example 
 Request:
-URL: https://molgenis.mydomain.example/api/permissions/v1/aces/entityType/hospital_cardiology_patients
+URL: https://molgenis.mydomain.example/api/permissions/v1/entityType/hospital_cardiology_patients
 Body:
 ```{
    	permissions:[{
@@ -497,7 +497,7 @@ Body:
 
 ### Update permissions for one or more users and/or roles for resources of a certain type
 ```
-PATCH https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}")
+PATCH https://molgenis.mydomain.example/api/permissions/v1/{typeId}")
 ``` 
 
 #####Request
@@ -507,7 +507,7 @@ The endpoint expects a list of resources, each of which should contrain the iden
 200 OK
 
 #####Example
-URL: https://molgenis.mydomain.example/api/permissions/v1/aces/entity-hospital_neurology_patients
+URL: https://molgenis.mydomain.example/api/permissions/v1/entity-hospital_neurology_patients
 Body:
 ```
 {
@@ -539,7 +539,7 @@ Body:
 
 #####Endpoint
 ```
-DELETE https://molgenis.mydomain.example/api/permissions/v1/aces/{typeId}/{identifier}")
+DELETE https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
 ```
 
 #####Parameters
@@ -557,7 +557,7 @@ Request:
 
 URL 
 ```
-https://molgenis.mydomain.example/api/permissions/v1/aces/entityType/hospital_cardiology_patients
+https://molgenis.mydomain.example/api/permissions/v1/entityType/hospital_cardiology_patients
 ```
 
 Body 

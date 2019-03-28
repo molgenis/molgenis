@@ -3,7 +3,6 @@ package org.molgenis.api.tests.permissions;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.permissions.PermissionsApiController.OBJECTS;
-import static org.molgenis.api.permissions.PermissionsApiController.PERMISSIONS;
 import static org.molgenis.api.permissions.PermissionsApiController.TYPES;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
@@ -108,7 +107,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+        .post(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
         .then()
         .statusCode(201)
         .log()
@@ -124,8 +123,7 @@ public class PermissionAPIIT {
             .log()
             .all()
             .header(X_MOLGENIS_TOKEN, adminToken)
-            .get(
-                PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+            .get(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
             .contentType(ContentType.JSON)
@@ -141,7 +139,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(update)
-        .patch(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+        .patch(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
         .then()
         .statusCode(204)
         .log()
@@ -156,8 +154,7 @@ public class PermissionAPIIT {
             .log()
             .all()
             .header(X_MOLGENIS_TOKEN, adminToken)
-            .get(
-                PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+            .get(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
             .contentType(ContentType.JSON)
@@ -173,7 +170,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
-        .delete(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+        .delete(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
         .then()
         .statusCode(204)
         .log()
@@ -184,7 +181,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity1")
+        .get(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1")
         .then()
         .statusCode(200)
         .log()
@@ -209,7 +206,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/package/perm1")
+        .post(PermissionsApiController.BASE_URI + "/package/perm1")
         .then()
         .statusCode(201)
         .log()
@@ -223,11 +220,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(
-            PermissionsApiController.BASE_URI
-                + "/"
-                + PERMISSIONS
-                + "/entityType/perm1_entity1?inheritance=true")
+        .get(PermissionsApiController.BASE_URI + "/entityType/perm1_entity1?inheritance=true")
         .then()
         .statusCode(200)
         .log()
@@ -243,8 +236,6 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .get(
             PermissionsApiController.BASE_URI
-                + "/"
-                + PERMISSIONS
                 + "/entityType/perm1_entity1?q=user=="
                 + testUserName
                 + "&inheritance=true")
@@ -272,7 +263,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType")
+        .post(PermissionsApiController.BASE_URI + "/entityType")
         .then()
         .statusCode(201)
         .log()
@@ -292,7 +283,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(request)
-        .patch(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType")
+        .patch(PermissionsApiController.BASE_URI + "/entityType")
         .then()
         .statusCode(204)
         .log()
@@ -322,8 +313,6 @@ public class PermissionAPIIT {
             .header(X_MOLGENIS_TOKEN, adminToken)
             .get(
                 PermissionsApiController.BASE_URI
-                    + "/"
-                    + PERMISSIONS
                     + "/entityType?q=user=in=("
                     + testUserName
                     + ","
@@ -409,7 +398,7 @@ public class PermissionAPIIT {
         .log()
         .all()
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsApiController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta/")
+        .get(PermissionsApiController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta")
         .then()
         .statusCode(200)
         .log()
@@ -431,7 +420,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
-        .post(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity2")
+        .post(PermissionsApiController.BASE_URI + "/entityType/perm1_entity2")
         .then()
         .statusCode(201)
         .log()
@@ -444,11 +433,7 @@ public class PermissionAPIIT {
         .all()
         .header(X_MOLGENIS_TOKEN, testUserToken)
         .get(
-            PermissionsApiController.BASE_URI
-                + "/"
-                + PERMISSIONS
-                + "/entityType/perm1_entity2?q=user=="
-                + testUserName)
+            PermissionsApiController.BASE_URI + "/entityType/perm1_entity2?q=user==" + testUserName)
         .then()
         .statusCode(200)
         .log()
@@ -462,7 +447,7 @@ public class PermissionAPIIT {
         .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
-        .delete(PermissionsApiController.BASE_URI + "/" + PERMISSIONS + "/entityType/perm1_entity2")
+        .delete(PermissionsApiController.BASE_URI + "/entityType/perm1_entity2")
         .then()
         .statusCode(204)
         .log()
