@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
@@ -350,6 +351,7 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
     when(entityType.toString()).thenReturn("entityType");
 
     Entity entity = mock(Entity.class);
+    when(entity.getIdValue()).thenReturn("MyEntityId");
     when(entity.getLabelValue()).thenReturn("lbl-entity");
     when(entity.getString("attr0")).thenReturn(null);
     when(entity.getString("attr1")).thenReturn(null);
@@ -369,6 +371,25 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
             new ConstraintViolation(
                 "Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2"));
     assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
+  }
+
+  @Test
+  public void testValidateIdValueNull() {
+    Entity entity = mock(Entity.class);
+    when(entity.getLabelValue()).thenReturn("My entity");
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("MyEntityTypeId");
+    Attribute idAttribute = mock(Attribute.class);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(idAttribute.getLabel()).thenReturn("id");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    Set<ConstraintViolation> constraintViolations =
+        entityAttributesValidator.validate(entity, entityType);
+    assertEquals(
+        constraintViolations,
+        singleton(
+            new ConstraintViolation(
+                "Invalid [string] value [null] for attribute [id] of entity [My entity] with type [MyEntityTypeId].")));
   }
 
   @Test

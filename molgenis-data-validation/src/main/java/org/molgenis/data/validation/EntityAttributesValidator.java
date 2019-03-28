@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.molgenis.data.Entity;
@@ -53,6 +54,9 @@ public class EntityAttributesValidator {
         .filter(this::isValidationAttribute)
         .forEach(attr -> validateAttribute(entity, meta, attr).ifPresent(violations::add));
 
+    if (entity.getIdValue() == null) {
+      violations.add(createConstraintViolation(entity, meta.getIdAttribute(), meta, null));
+    }
     return violations;
   }
 
@@ -414,7 +418,7 @@ public class EntityAttributesValidator {
   }
 
   private ConstraintViolation createConstraintViolation(
-      Entity entity, Attribute attribute, EntityType entityType, String message) {
+      Entity entity, Attribute attribute, EntityType entityType, @Nullable String message) {
     Object value = getDataValuesForType(entity, attribute);
     String dataValue = value != null ? value.toString() : null;
     String fullMessage =
@@ -425,7 +429,9 @@ public class EntityAttributesValidator {
             attribute.getLabel(),
             entity.getLabelValue(),
             entityType.getId());
-    fullMessage += " " + message;
+    if (message != null) {
+      fullMessage += " " + message;
+    }
 
     return new ConstraintViolation(fullMessage);
   }
