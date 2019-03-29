@@ -1,4 +1,4 @@
-FROM molgenis/tomcat:tomcat-release-2019-03-11_12-31-59
+FROM molgenis/tomcat:tomcat-release-2019-03-28_15-25-46
 
 # MOLGENIS war-file
 ARG WAR_FILE
