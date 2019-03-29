@@ -2,7 +2,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI;
+import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI; // NOSONAR
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 import java.io.File;
@@ -33,6 +33,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.validation.UriValidator;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +123,6 @@ public class ImportWizardController extends AbstractWizardController {
     this.fileStore = fileStore;
     this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
     this.importRunService = importRunService;
-    this.dataService = dataService;
     this.asyncImportJobs = executorService;
   }
 
@@ -225,10 +225,10 @@ public class ImportWizardController extends AbstractWizardController {
 
   @SuppressWarnings("squid:S2083")
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
-      throws IOException {
+      throws IOException, URISyntaxException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
 
-    URL url = new URL(fileLocation);
+    URL url = UriValidator.getSafeUri(fileLocation).toURL();
 
     try (InputStream is = url.openStream()) {
       return fileStore.store(is, getFilename(filename, entityTypeId));
