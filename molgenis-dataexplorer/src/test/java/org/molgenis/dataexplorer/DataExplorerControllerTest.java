@@ -34,8 +34,8 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -247,10 +247,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataAccessException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
+  @Test(expectedExceptions = UnknownEntityTypeException.class)
   public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception {
     when(dataService.getEntityType(entityTypeId)).thenReturn(null);
     controller.viewEntityDetailsById(entityTypeId, entityId, model);

@@ -4,7 +4,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI; // NOSONAR
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -63,6 +64,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 @Controller
 @RequestMapping(URI)
 public class DataExplorerController extends PluginController {
+
   private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
 
   public static final String ID = "dataexplorer";
@@ -71,6 +73,7 @@ public class DataExplorerController extends PluginController {
   public static final String MOD_ENTITIESREPORT = "entitiesreport";
   public static final String MOD_DATA = "data";
   public static final String NAVIGATOR = "navigator";
+  public static final String VIEW_NAME = "viewName";
 
   @Autowired private DataExplorerSettings dataExplorerSettings;
 
@@ -183,7 +186,6 @@ public class DataExplorerController extends PluginController {
         model.addAttribute("genomeTracks", genomeBrowserService.getTracksString(entityTracks));
         // if multiple tracks are available we assume chrom and pos attribute are the same
         if (!entityTracks.isEmpty()) {
-          // FIXME: how to do this cleaner
           GenomeBrowserTrack track = entityTracks.entrySet().iterator().next().getValue();
           model.addAttribute("pos_attr", track.getGenomeBrowserAttrs().getPos());
           model.addAttribute("chrom_attr", track.getGenomeBrowserAttrs().getChrom());
@@ -204,7 +206,7 @@ public class DataExplorerController extends PluginController {
             "NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
 
         model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
-        model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
+        model.addAttribute(VIEW_NAME, dataExplorerSettings.getEntityReport(entityTypeId));
         break;
       default:
         break;
@@ -311,6 +313,8 @@ public class DataExplorerController extends PluginController {
     // Workaround because binding with @RequestBody is not possible:
     // http://stackoverflow.com/a/9970672
     dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
+    // Replace pattern-breaking characters, to fix sonac vulnerability S5145
+    dataRequestStr = dataRequestStr.replaceAll("[\n|\r|\t]", "_");
     LOG.info("Download request: [{}]", dataRequestStr);
     DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
@@ -363,7 +367,7 @@ public class DataExplorerController extends PluginController {
 
     model.addAttribute("entity", dataService.getRepository(entityTypeId).findOneById(id));
     model.addAttribute("entityType", entityType);
-    model.addAttribute("viewName", getEntityReportViewName(entityTypeId));
+    model.addAttribute(VIEW_NAME, getEntityReportViewName(entityTypeId));
 
     // Used to create a URL to a standalone report
     model.addAttribute("showStandaloneReportUrl", dataExplorerSettings.getModStandaloneReports());
@@ -384,14 +388,12 @@ public class DataExplorerController extends PluginController {
   public String viewEntityDetailsById(
       @PathVariable(value = "entityTypeId") String entityTypeId,
       @PathVariable(value = "entityId") String entityId,
-      Model model)
-      throws Exception {
+      Model model) {
     EntityType entityType;
     if (dataService.hasEntityType(entityTypeId)) {
       entityType = dataService.getEntityType(entityTypeId);
     } else {
-      throw new MolgenisDataAccessException(
-          "EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
+      throw new UnknownEntityTypeException(entityTypeId);
     }
     Object id = getTypedValue(entityId, entityType.getIdAttribute());
 
@@ -399,7 +401,7 @@ public class DataExplorerController extends PluginController {
     model.addAttribute("entityType", entityType);
     model.addAttribute("entityTypeId", entityTypeId);
     model.addAttribute("entityTypeLabel", entityType.getLabel());
-    model.addAttribute("viewName", getStandaloneReportViewName(entityTypeId));
+    model.addAttribute(VIEW_NAME, getStandaloneReportViewName(entityTypeId));
 
     return "view-standalone-report";
   }

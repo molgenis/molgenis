@@ -66,18 +66,9 @@ public class OptionsWizardPage extends AbstractWizardPage {
     ImportWizardUtil.validateImportWizard(wizard);
     ImportWizard importWizard = (ImportWizard) wizard;
 
-    String dataImportOption = request.getParameter("data-option");
-    if (dataImportOption != null && ImportWizardUtil.toDataAction(dataImportOption) == null) {
-      throw new IllegalArgumentException("unknown data action: " + dataImportOption);
-    }
-    importWizard.setDataImportOption(dataImportOption);
+    String dataImportOption = setImportOption(request, importWizard);
 
-    String metadataImportOption = request.getParameter("metadata-option");
-    if (metadataImportOption != null
-        && ImportWizardUtil.toMetadataAction(metadataImportOption) == null) {
-      throw new IllegalArgumentException("unknown metadata action: " + metadataImportOption);
-    }
-    importWizard.setMetadataImportOption(metadataImportOption);
+    setMetadataImportOption(request, importWizard);
 
     if (importWizard.getMustChangeEntityName()) {
       // userGivenName will be validated by the NameValidator and can't contain any
@@ -101,19 +92,21 @@ public class OptionsWizardPage extends AbstractWizardPage {
       }
 
       File tmpFile = importWizard.getFile();
-      String fileName = tmpFile.getName();
+      String tmpFilename = tmpFile.getName();
 
-      // FIXME: can this be done a bit cleaner?
       String extension =
           FileExtensionUtils.findExtensionFromPossibilities(
-              fileName,
+              tmpFilename,
               fileRepositoryCollectionFactory
                   .createFileRepositoryCollection(tmpFile)
                   .getFileNameExtensions());
 
       File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
       if (!tmpFile.renameTo(file)) {
-        LOG.error("Failed to rename '{}' to '{}'", tmpFile.getName(), file.getName());
+        // Replace pattern-breaking characters, to fix sonac vulnerability S5145
+        String filename =
+            file.getName() == null ? file.getName().replaceAll("[\n|\r|\t]", "_") : null;
+        LOG.error("Failed to rename '{}' to '{}'", tmpFilename, filename);
       }
       importWizard.setFile(file);
     }
@@ -125,6 +118,24 @@ public class OptionsWizardPage extends AbstractWizardPage {
     }
 
     return null;
+  }
+
+  private String setImportOption(HttpServletRequest request, ImportWizard importWizard) {
+    String dataImportOption = request.getParameter("data-option");
+    if (dataImportOption != null && ImportWizardUtil.toDataAction(dataImportOption) == null) {
+      throw new IllegalArgumentException("unknown data action: " + dataImportOption);
+    }
+    importWizard.setDataImportOption(dataImportOption);
+    return dataImportOption;
+  }
+
+  private void setMetadataImportOption(HttpServletRequest request, ImportWizard importWizard) {
+    String metadataImportOption = request.getParameter("metadata-option");
+    if (metadataImportOption != null
+        && ImportWizardUtil.toMetadataAction(metadataImportOption) == null) {
+      throw new IllegalArgumentException("unknown metadata action: " + metadataImportOption);
+    }
+    importWizard.setMetadataImportOption(metadataImportOption);
   }
 
   private String validateInput(File file, ImportWizard wizard) {
