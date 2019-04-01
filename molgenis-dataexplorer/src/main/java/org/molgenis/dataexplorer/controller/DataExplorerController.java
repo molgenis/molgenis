@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -387,14 +388,12 @@ public class DataExplorerController extends PluginController {
   public String viewEntityDetailsById(
       @PathVariable(value = "entityTypeId") String entityTypeId,
       @PathVariable(value = "entityId") String entityId,
-      Model model)
-      throws Exception {
+      Model model) {
     EntityType entityType;
     if (dataService.hasEntityType(entityTypeId)) {
       entityType = dataService.getEntityType(entityTypeId);
     } else {
-      throw new MolgenisDataAccessException(
-          "EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
+      throw new UnknownEntityTypeException(entityTypeId);
     }
     Object id = getTypedValue(entityId, entityType.getIdAttribute());
 
