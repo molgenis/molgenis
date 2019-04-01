@@ -75,7 +75,8 @@ public class UserMetadata extends SystemEntityType {
         .setLabel("Username")
         .setUnique(true)
         .setNillable(false)
-        .setReadOnly(true);
+        .setReadOnly(true)
+        .setValidationExpression("$('" + USERNAME + "').matches(/^[\\S].+[\\S]$/).value()");
     addAttribute(PASSWORD)
         .setLabel("Password")
         .setDescription("This is the hashed password, enter a new plaintext password to update.")
