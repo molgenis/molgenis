@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.constraints.NotEmpty;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.api.permissions.exceptions.AclClassAlreadyExistsException;
 import org.molgenis.api.permissions.exceptions.AclNotFoundException;
 import org.molgenis.api.permissions.exceptions.DuplicatePermissionException;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
@@ -329,7 +330,11 @@ public class PermissionApiService {
   public void addClass(String typeId) {
     if (SecurityUtils.currentUserIsSuOrSystem()) {
       EntityType entityType = dataService.getEntityType(getEntityTypeIdFromClass(typeId));
-      mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
+      if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
+        mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
+      } else {
+        throw new AclClassAlreadyExistsException(typeId);
+      }
     }
   }
 
