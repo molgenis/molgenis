@@ -1,7 +1,6 @@
 package org.molgenis.security.account;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -9,12 +8,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
-import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.data.security.auth.UserMetadata.ACTIVATIONCODE;
 import static org.molgenis.data.security.auth.UserMetadata.ACTIVE;
-import static org.molgenis.data.security.auth.UserMetadata.EMAIL;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
-import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import java.net.URISyntaxException;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -130,6 +125,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
   @Test
   public void createUser()
       throws URISyntaxException, UsernameAlreadyExistsException, EmailAlreadyExistsException {
+
     when(idGenerator.generateId(SECURE_RANDOM)).thenReturn("3541db68-435b-416b-8c2c-cf2edf6ba435");
 
     accountService.createUser(user, "http://molgenis.org/activate");
@@ -157,96 +153,12 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
           "An error occurred. Please contact the administrator. You are not signed up!")
   public void createUserMailSendFailed()
       throws UsernameAlreadyExistsException, EmailAlreadyExistsException {
+
     when(idGenerator.generateId(SECURE_RANDOM)).thenReturn("3541db68-435b-416b-8c2c-cf2edf6ba435");
     doThrow(new MailSendException("mail send failed"))
         .when(mailSender)
         .send(any(SimpleMailMessage.class));
     accountService.createUser(user, "http://molgenis.org/activate");
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void resetPassword() {
-    when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("newPassword");
-
-    Query<User> q = mock(Query.class);
-    when(q.eq(EMAIL, "user@molgenis.org")).thenReturn(q);
-    when(q.findOne()).thenReturn(user);
-    when(dataService.query(USER, User.class)).thenReturn(q);
-
-    accountService.resetPassword("user@molgenis.org");
-
-    verify(dataService).update(USER, user);
-    verify(user).setPassword("newPassword");
-    when(user.getPassword()).thenReturn("newPassword");
-
-    SimpleMailMessage expected = new SimpleMailMessage();
-    expected.setTo("jan.jansen@activation.nl");
-    expected.setSubject("Your new password request");
-    expected.setText(
-        "Somebody, probably you, requested a new password for Molgenis title.\n"
-            + "The new password is: newPassword\n"
-            + "Note: we strongly recommend you reset your password after log-in!");
-    verify(mailSender).send(expected);
-  }
-
-  @Test(expectedExceptions = MolgenisUserException.class)
-  public void resetPassword_invalidEmailAddress() {
-    User user = mock(User.class);
-    when(user.getPassword()).thenReturn("password");
-
-    @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class);
-    when(q.eq(EMAIL, "invalid-user@molgenis.org")).thenReturn(q);
-    when(q.findOne()).thenReturn(null);
-    when(dataService.query(USER, User.class)).thenReturn(q);
-
-    accountService.resetPassword("invalid-user@molgenis.org");
-  }
-
-  @Test(expectedExceptions = DisabledException.class)
-  public void testResetPasswordInactiveUser() {
-    when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("newPassword");
-
-    User user = mock(User.class);
-
-    @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class, RETURNS_SELF);
-    when(dataService.query(USER, User.class)).thenReturn(q);
-    when(q.eq(EMAIL, "user@molgenis.org").findOne()).thenReturn(user);
-
-    accountService.resetPassword("user@molgenis.org");
-  }
-
-  @Test
-  public void changePassword() {
-    User user = when(mock(User.class).isActive()).thenReturn(true).getMock();
-    when(user.getUsername()).thenReturn("test");
-    when(user.getPassword()).thenReturn("oldpass");
-
-    @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class);
-    when(q.eq(USERNAME, "test")).thenReturn(q);
-    when(q.findOne()).thenReturn(user);
-    when(dataService.query(USER, User.class)).thenReturn(q);
-
-    accountService.changePassword("test", "newpass");
-
-    verify(dataService).update(USER, user);
-    verify(user).setPassword("newpass");
-  }
-
-  @Test(expectedExceptions = DisabledException.class)
-  public void changePasswordInactiveUser() {
-    User user = mock(User.class);
-
-    @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class);
-    when(q.eq(USERNAME, "test")).thenReturn(q);
-    when(q.findOne()).thenReturn(user);
-    when(dataService.query(USER, User.class)).thenReturn(q);
-
-    accountService.changePassword("test", "newpass");
   }
 
   @Configuration

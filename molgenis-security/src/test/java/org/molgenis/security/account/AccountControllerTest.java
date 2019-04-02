@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -58,6 +57,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   @Autowired private AuthenticationSettings authenticationSettings;
 
   @Autowired private AppSettings appSettings;
+
+  @Autowired private PasswordResetter passwordResetter;
 
   private MockMvc mockMvc;
 
@@ -282,7 +283,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isNoContent());
-    verify(accountService).resetPassword("admin@molgenis.org");
+    verify(passwordResetter).resetPassword("admin@molgenis.org");
   }
 
   @Test
@@ -308,10 +309,10 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
       return new AccountController(
           accountService(),
           reCaptchaV3Service(),
-          redirectStrategy(),
           authenticationSettings(),
           molgenisUserFactory(),
-          appSettings());
+          appSettings(),
+          passwordResetter());
     }
 
     @Bean
@@ -322,11 +323,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     @Bean
     public ReCaptchaService reCaptchaV3Service() {
       return mock(ReCaptchaService.class);
-    }
-
-    @Bean
-    public RedirectStrategy redirectStrategy() {
-      return mock(RedirectStrategy.class);
     }
 
     @Bean
@@ -360,6 +356,11 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     @Bean
     public AppSettings appSettings() {
       return mock(AppSettings.class);
+    }
+
+    @Bean
+    public PasswordResetter passwordResetter() {
+      return mock(PasswordResetter.class);
     }
   }
 }

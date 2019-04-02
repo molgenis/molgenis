@@ -5,6 +5,8 @@ import org.molgenis.data.security.auth.GroupFactory;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.MembershipInvitationFactory;
 import org.molgenis.data.security.auth.MembershipInvitationMetadata;
+import org.molgenis.data.security.auth.PasswordResetTokenFactory;
+import org.molgenis.data.security.auth.PasswordResetTokenMetadata;
 import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.RoleMembershipFactory;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
@@ -32,6 +34,8 @@ import org.springframework.context.annotation.Import;
   TokenFactory.class,
   UserMetadata.class,
   UserFactory.class,
+  PasswordResetTokenMetadata.class,
+  PasswordResetTokenFactory.class,
   SecurityPackage.class
 })
 public class SecurityTestConfig {}
