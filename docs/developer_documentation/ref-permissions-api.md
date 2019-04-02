@@ -66,14 +66,13 @@ GET https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
 ```
 ##### Parameters
 URL: TypeId as described in the [parameters section](##Parameters)
-Query:[Query for user or role](##Query for user or role)
 
 ##### Response
 A list of permissions that can be used for this resource type.
 
 ##### Example 
 Request:
-```https://molgenis.mydomain.example/api/permissions/v1/types/entityType```
+```https://molgenis.mydomain.example/api/permissions/v1/types/permissions/entityType```
 Response:
 ```[
        "READMETA",
