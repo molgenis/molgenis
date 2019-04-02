@@ -22,9 +22,16 @@ The user for which to get/create/update the permission. This should be the usern
 The role for which to get/create/update the permission. This should be the rolename as stated in the 'sys_sec_Role' table in the MOLGENIS database;
 
 The user/role query for this API's GET operations should be provided in the [RSQL syntax](developer_documentation/ref-RSQL.md)
+Examples:
 
-Query for user or role(##Query for user or role)
-
+Query for user 'Cardiologist' or users with role "CARDIOLOGY"
+```
+q=user==Cardiologist,role==CARDIOLOGY
+```
+Query for users 'Cardiologist' or 'Neurologist'
+```
+q=user=in=(Cardiologist,Neurologist)
+```
 ### Permission inheritance
 There are two kinds of inheritance in the permission system:
 - Users inherit permissions from their roles, and roles from their parentroles.
