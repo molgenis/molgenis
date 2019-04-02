@@ -32,7 +32,7 @@ public abstract class PermissionResponse {
         .build();
   }
 
-  public static Builder builder() {
+  private static Builder builder() {
     return new AutoValue_PermissionResponse.Builder();
   }
 

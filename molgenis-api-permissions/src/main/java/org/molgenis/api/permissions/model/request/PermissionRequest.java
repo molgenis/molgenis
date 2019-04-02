@@ -21,7 +21,7 @@ public abstract class PermissionRequest {
     return builder().setRole(role).setUser(user).setPermission(permission).build();
   }
 
-  public static Builder builder() {
+  private static Builder builder() {
     return new AutoValue_PermissionRequest.Builder();
   }
 

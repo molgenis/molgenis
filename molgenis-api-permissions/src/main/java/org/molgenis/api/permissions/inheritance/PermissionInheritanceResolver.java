@@ -170,19 +170,21 @@ public class PermissionInheritanceResolver {
   }
 
   public boolean isNotEmpty(InheritedPermissionsResult result) {
-    return !(result.getRequestedAclParentRolesPermissions().isEmpty()
-            || result.getRequestedAclParentRolesPermissions() == null)
+    return !(result.getRequestedAclParentRolesPermissions() == null
+            || result.getRequestedAclParentRolesPermissions().isEmpty())
         || (result.getParentAclPermission() != null && isNotEmpty(result.getParentAclPermission()));
   }
 
-  public boolean isNotEmpty(InheritedUserPermissionsResult result) {
+  private boolean isNotEmpty(InheritedUserPermissionsResult result) {
     return StringUtils.isNotEmpty(result.getOwnPermission())
-        || !result.getInheritedUserPermissionsResult().isEmpty();
+        || !(result.getInheritedUserPermissionsResult() == null
+            || result.getInheritedUserPermissionsResult().isEmpty());
   }
 
-  public boolean isNotEmpty(InheritedAclPermissionsResult result) {
+  private boolean isNotEmpty(InheritedAclPermissionsResult result) {
     return StringUtils.isNotEmpty(result.getOwnPermission())
-        || !result.getParentRolePermissions().isEmpty()
+        || !(result.getParentRolePermissions() == null
+            || result.getParentRolePermissions().isEmpty())
         || (result.getParentAclPermissions() != null
             && isNotEmpty(result.getParentAclPermissions()));
   }
@@ -199,8 +201,8 @@ public class PermissionInheritanceResolver {
   private List<InheritedPermission> convertToInheritedPermissions(
       List<InheritedUserPermissionsResult> parentRolePermissions,
       InheritedAclPermissionsResult parentAclPermission) {
-    List<InheritedPermission> inheritedPermissions = new ArrayList<>();
-    inheritedPermissions.addAll(convertInheritedRolePermissions(parentRolePermissions));
+    List<InheritedPermission> inheritedPermissions =
+        new ArrayList<>(convertInheritedRolePermissions(parentRolePermissions));
     if (parentAclPermission != null) {
       inheritedPermissions.add(convertInheritedAclPermissions(parentAclPermission));
     }
@@ -234,8 +236,12 @@ public class PermissionInheritanceResolver {
     for (InheritedUserPermissionsResult parentRolePermission : requestedAclParentRolesPermissions) {
       String ownPermission = parentRolePermission.getOwnPermission();
       Sid sid = parentRolePermission.getSid();
-      List<InheritedPermission> inheritedPermissions =
-          convertInheritedRolePermissions(parentRolePermission.getInheritedUserPermissionsResult());
+      List<InheritedPermission> inheritedPermissions = null;
+      if (parentRolePermission.getInheritedUserPermissionsResult() != null) {
+        inheritedPermissions =
+            convertInheritedRolePermissions(
+                parentRolePermission.getInheritedUserPermissionsResult());
+      }
       results.add(
           InheritedPermission.create(
               getRole(sid), null, null, null, null, ownPermission, inheritedPermissions));

@@ -18,7 +18,7 @@ public abstract class GetTypePermissionsResponse {
     return builder().setObjects(objects).build();
   }
 
-  public static Builder builder() {
+  private static Builder builder() {
     return new AutoValue_GetTypePermissionsResponse.Builder();
   }
 

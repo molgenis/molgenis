@@ -50,7 +50,7 @@ public abstract class InheritedPermission {
         .build();
   }
 
-  public static Builder builder() {
+  private static Builder builder() {
     return new AutoValue_InheritedPermission.Builder();
   }
 

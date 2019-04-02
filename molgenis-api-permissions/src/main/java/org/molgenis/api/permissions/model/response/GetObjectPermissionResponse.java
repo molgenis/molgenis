@@ -18,7 +18,7 @@ public abstract class GetObjectPermissionResponse {
     return builder().setPermissions(permissionResponses).build();
   }
 
-  public static Builder builder() {
+  private static Builder builder() {
     return new AutoValue_GetObjectPermissionResponse.Builder();
   }
 

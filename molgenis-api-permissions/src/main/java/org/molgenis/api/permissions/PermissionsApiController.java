@@ -61,13 +61,13 @@ public class PermissionsApiController extends ApiController {
   static final Integer DEFAULT_PAGE = 1;
   static final Integer DEFAULT_PAGESIZE = 10000;
 
-  public static final String TYPE = "type";
+  private static final String TYPE = "type";
   public static final String TYPES = TYPE + "s";
-  public static final String TYPE_ID = TYPE + "Id";
+  private static final String TYPE_ID = TYPE + "Id";
 
-  public static final String OBJECT = "object";
+  private static final String OBJECT = "object";
   public static final String OBJECTS = OBJECT + "s";
-  public static final String OBJECT_ID = OBJECT + "Id";
+  private static final String OBJECT_ID = OBJECT + "Id";
 
   private final PermissionApiService permissionApiService;
   private final RSQLParser rsqlParser;

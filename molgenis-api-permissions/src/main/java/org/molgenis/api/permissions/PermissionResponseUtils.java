@@ -9,7 +9,7 @@ import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.model.response.PagedApiResponse;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-public class PermissionResponseUtils {
+class PermissionResponseUtils {
 
   private PermissionResponseUtils() {}
 
@@ -63,18 +63,18 @@ public class PermissionResponseUtils {
   private static String getQueryString(String query, Integer page, Integer pageSize) {
     StringBuilder queryStringBuffer = new StringBuilder();
     if (StringUtils.isNotEmpty(query)) {
-      queryStringBuffer.append("q=" + query);
+      queryStringBuffer.append("q=").append(query);
     }
     if (page != null) {
       if (StringUtils.isNotEmpty(query)) {
         queryStringBuffer.append("&");
       }
-      queryStringBuffer.append("page=" + page + "&pageSize=" + pageSize);
+      queryStringBuffer.append("page=").append(page).append("&pageSize=").append(pageSize);
     }
     return queryStringBuffer.toString();
   }
 
   private static int getTotalPages(int pageSize, int totalItems) {
-    return (int) ceil(Double.valueOf(totalItems) / Double.valueOf(pageSize));
+    return (int) ceil((double) totalItems / (double) pageSize);
   }
 }

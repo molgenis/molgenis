@@ -11,7 +11,6 @@ import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITE;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.paramValueToPermissionSet;
-import static org.molgenis.api.permissions.SidConversionUtils.getName;
 import static org.molgenis.api.permissions.SidConversionUtils.getRole;
 import static org.molgenis.api.permissions.SidConversionUtils.getSid;
 import static org.molgenis.api.permissions.SidConversionUtils.getUser;
@@ -159,12 +158,7 @@ public class PermissionApiService {
     List<ObjectPermissionsResponse> permissions =
         getPermissions(aclMap, objectIdentities, sids, isReturnInheritedPermissions);
     List<PermissionResponse> result = permissions.get(0).getPermissions();
-    Collections.sort(
-        result,
-        (Comparator<PermissionResponse>)
-            (a, b) ->
-                getRoleOrUser(a.getUser(), a.getRole())
-                    .compareTo(getRoleOrUser(b.getUser(), b.getRole())));
+    result.sort(Comparator.comparing(a -> getRoleOrUser(a.getUser(), a.getRole())));
     return permissions.isEmpty() ? Collections.emptyList() : result;
   }
 
@@ -229,7 +223,7 @@ public class PermissionApiService {
     return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
   }
 
-  private Set<Sid> getInheritedSids(Set<Sid> sids) {
+  private LinkedHashSet getInheritedSids(Set<Sid> sids) {
     LinkedList<Sid> result = new LinkedList<>();
     result.addAll(sids);
     result.addAll(getRoles(sids));
@@ -575,9 +569,9 @@ public class PermissionApiService {
     return dataService.getRepository(entityTypeId).getEntityType().getLabel();
   }
 
-  private List<Sid> getSortedSidList(Set<Sid> sids) {
-    LinkedList result = new LinkedList<>(sids);
-    result.sort((Comparator<Sid>) (a, b) -> getName(a).compareTo(getName(b)));
+  private LinkedList getSortedSidList(Set<Sid> sids) {
+    LinkedList<Sid> result = new LinkedList<>(sids);
+    result.sort(Comparator.comparing(SidConversionUtils::getName));
     return result;
   }
 }
