@@ -38,6 +38,9 @@
             </#if>
         </div>
     </div>
+  <#if !(authenticated!false)>
+    <#include "/login-modal.ftl">
+  </#if>
 <#else>
     <#-- VUE -->
     <div id="molgenis-footer"></div>
@@ -53,12 +56,6 @@
 
     <#-- Include the Vue version of the molgenis footer  -->
     <script type=text/javascript src="<@resource_href "/js/bootstrap-4/footer/molgenis-footer.js"/>"></script>
-</#if>
-
-
-<#if authenticated?? && authenticated>
-<#else>
-    <#include "/login-modal.ftl">
 </#if>
 </body>
     <#if app_settings.trackingCodeFooter?has_content>
