@@ -143,7 +143,7 @@ public class ImportWizardController extends AbstractWizardController {
    *
    * @param url URL from which a file is downloaded
    */
-  @SuppressWarnings({"squid:S2083", "squid:S2083"})
+  @SuppressWarnings({"squid:S2083"})
   @PostMapping("/importByUrl")
   @ResponseBody
   public ResponseEntity<String> importFileByUrl(
