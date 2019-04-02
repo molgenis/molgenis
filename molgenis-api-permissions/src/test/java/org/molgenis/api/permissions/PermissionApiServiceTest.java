@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
+import org.molgenis.api.permissions.inheritance.UserRoleInheritanceResolver;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
@@ -40,8 +41,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.acl.AclClassService;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
@@ -70,7 +69,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   @Mock ObjectIdentityService objectIdentityService;
   @Mock DataService dataService;
   @Mock MutableAclClassService mutableAclClassService;
-  @Mock UserService userService;
+  @Mock UserRoleInheritanceResolver userRoleInheritanceResolver;
   private PermissionApiService permissionApiService;
 
   @BeforeMethod
@@ -84,7 +83,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
             objectIdentityService,
             dataService,
             mutableAclClassService,
-            userService);
+            userRoleInheritanceResolver);
   }
 
   @Test
@@ -393,11 +392,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(
             Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    User user1 = mock(User.class);
-    when(user1.getUsername()).thenReturn("user1");
-    User user2 = mock(User.class);
-    when(user2.getUsername()).thenReturn("user2");
-    when(userService.getUsers()).thenReturn(Arrays.asList(user1, user2));
+    when(userRoleInheritanceResolver.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
 
     assertEquals(
         permissionApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), true),

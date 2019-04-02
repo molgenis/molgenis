@@ -4,7 +4,6 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static org.molgenis.api.permissions.PermissionSetUtils.COUNT;
 import static org.molgenis.api.permissions.PermissionSetUtils.READ;
 import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
@@ -40,6 +39,7 @@ import org.molgenis.api.permissions.exceptions.SidPermissionException;
 import org.molgenis.api.permissions.exceptions.UnknownAceException;
 import org.molgenis.api.permissions.exceptions.UpdatePermissionDeniedException;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
+import org.molgenis.api.permissions.inheritance.UserRoleInheritanceResolver;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
@@ -61,14 +61,12 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.GroupMetadata;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.acl.AclClassService;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
@@ -89,7 +87,7 @@ public class PermissionApiService {
   private final ObjectIdentityService objectIdentityService;
   private final DataService dataService;
   private final MutableAclClassService mutableAclClassService;
-  private final UserService userService;
+  private final UserRoleInheritanceResolver userRoleInheritanceResolver;
 
   public PermissionApiService(
       MutableAclService mutableAclService,
@@ -98,14 +96,14 @@ public class PermissionApiService {
       ObjectIdentityService objectIdentityService,
       DataService dataService,
       MutableAclClassService mutableAclClassService,
-      UserService userService) {
+      UserRoleInheritanceResolver userRoleInheritanceResolver) {
     this.mutableAclService = requireNonNull(mutableAclService);
     this.aclClassService = requireNonNull(aclClassService);
     this.inheritanceResolver = requireNonNull(inheritanceResolver);
     this.objectIdentityService = requireNonNull(objectIdentityService);
     this.dataService = requireNonNull(dataService);
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
-    this.userService = requireNonNull(userService);
+    this.userRoleInheritanceResolver = requireNonNull(userRoleInheritanceResolver);
   }
 
   public List<String> getClasses() {
@@ -226,7 +224,7 @@ public class PermissionApiService {
   private LinkedHashSet getInheritedSids(Set<Sid> sids) {
     LinkedList<Sid> result = new LinkedList<>();
     result.addAll(sids);
-    result.addAll(getRoles(sids));
+    result.addAll(userRoleInheritanceResolver.getRoles(sids));
     return new LinkedHashSet(result);
   }
 
@@ -384,33 +382,13 @@ public class PermissionApiService {
     // User are allowed to query for their own permissions including permissions from roles they
     // have.
     Sid currentUser = createSecurityContextSid();
-    Set<Sid> roles = getRoles(currentUser);
+    Set<Sid> roles = userRoleInheritanceResolver.getRoles(currentUser);
     for (Sid sid : sids) {
       if (!roles.contains(sid) && !(currentUser.equals(sid))) {
         result.add(sid);
       }
     }
     return result;
-  }
-
-  private Set<Sid> getRoles(Sid sid) {
-    Set<Sid> roles = new LinkedHashSet<>();
-    resolveRoles(sid, roles);
-    return roles;
-  }
-
-  private List<Sid> getRoles(Set<Sid> sids) {
-    List<Sid> roles = new LinkedList<>();
-    sids.forEach(sid -> roles.addAll(getRoles(sid)));
-    return roles;
-  }
-
-  private void resolveRoles(Sid sid, Set<Sid> roles) {
-    List<Sid> inheritedRoles = inheritanceResolver.getRoles(sid);
-    roles.addAll(inheritedRoles);
-    for (Sid role : inheritedRoles) {
-      resolveRoles(role, roles);
-    }
   }
 
   private String getEntityTypeIdFromClass(String typeId) {
@@ -496,7 +474,7 @@ public class PermissionApiService {
         getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
       }
     } else {
-      for (Sid sid : getAllAvailableSids()) {
+      for (Sid sid : userRoleInheritanceResolver.getAllAvailableSids()) {
         getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
       }
     }
@@ -525,14 +503,6 @@ public class PermissionApiService {
           PermissionResponse.create(
               getRole(sid), getUser(sid), ownPermission, deduplicatedInheritedPermissions));
     }
-  }
-
-  private Set<Sid> getAllAvailableSids() {
-    return userService
-        .getUsers()
-        .stream()
-        .map(user -> new PrincipalSid(user.getUsername()))
-        .collect(toSet());
   }
 
   private List<InheritedPermission> getInheritedPermissions(Acl acl, Sid sid) {
