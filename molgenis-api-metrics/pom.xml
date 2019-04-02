@@ -3,7 +3,11 @@
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
+<<<<<<< HEAD
     <version>8.0.5-SNAPSHOT</version>
+=======
+    <version>8.1.0-SNAPSHOT</version>
+>>>>>>> a13bd5b670... chore(pom.xml): bumped version to 8.1.0-SNAPSHOT
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
