@@ -11,12 +11,15 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.molgenis.data.DataService;
@@ -182,11 +185,19 @@ public class EmxExportServiceImpl implements EmxExportService {
     writer.writeRows(entities.stream().map(DataRowMapper::mapDataRow), entityType.getId());
   }
 
-  private void writeEntityTypes(Iterable<EntityType> entityTypes, XlsxWriter writer) {
+  // package private for test
+  void writeEntityTypes(Collection<EntityType> entityTypes, XlsxWriter writer) {
+    LinkedList<EntityType> sortedEntityTypes = sortEntityTypesAbstractFirst(entityTypes);
     if (!writer.hasSheet(EMX_ENTITIES)) {
       writer.createSheet(EMX_ENTITIES, newArrayList(ENTITIES_ATTRS.keySet()));
     }
-    writer.writeRows(Streams.stream(entityTypes).map(EntityTypeMapper::map), EMX_ENTITIES);
+    writer.writeRows(sortedEntityTypes.stream().map(EntityTypeMapper::map), EMX_ENTITIES);
+  }
+
+  private LinkedList<EntityType> sortEntityTypesAbstractFirst(Collection<EntityType> entityTypes) {
+    LinkedList<EntityType> sortedEntityTypes = Lists.newLinkedList(entityTypes);
+    sortedEntityTypes.sort(Comparator.comparing(EntityType::isAbstract).reversed());
+    return sortedEntityTypes;
   }
 
   private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer) {
