@@ -223,11 +223,12 @@ public class ImportWizardController extends AbstractWizardController {
     return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
   }
 
-  @SuppressWarnings("squid:S2083")
+  @SuppressWarnings({"squid:S2083", "squid:S5144"})
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException, URISyntaxException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
 
+    // Fix vulnerability reported by sonar: squid:S5144
     URL url = UriValidator.getSafeUri(fileLocation).toURL();
 
     try (InputStream is = url.openStream()) {
