@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -41,28 +40,15 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
           RestAuthenticationToken authToken = new RestAuthenticationToken(token);
           Authentication authentication = authenticationProvider.authenticate(authToken);
           if (authentication.isAuthenticated()) {
-            SecurityContext originalSecurityContext = SecurityContextHolder.getContext();
-            try {
-              SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-              securityContext.setAuthentication(authentication);
-              SecurityContextHolder.setContext(securityContext);
-
-              chain.doFilter(request, response);
-            } finally {
-              SecurityContextHolder.setContext(originalSecurityContext);
-            }
-          } else {
-            chain.doFilter(request, response);
+            // Log user in
+            SecurityContextHolder.getContext().setAuthentication(authentication);
           }
         } catch (AuthenticationException e) {
           // Cannot authenticate the user based on the token, act as if it wasn't there
-          chain.doFilter(request, response);
         }
-      } else {
-        chain.doFilter(request, response);
       }
-    } else {
-      chain.doFilter(request, response);
     }
+
+    chain.doFilter(request, response);
   }
 }

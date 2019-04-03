@@ -8,14 +8,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.export.mapper.PackageMapper.PACKAGE_ATTRS;
-import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,34 +88,6 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
 
     assertEquals(packages, expectedPackages);
     assertEquals(entityTypes, expectedEntityTypes);
-  }
-
-  @Test
-  public void writeEntityTypesTest() {
-    EntityType entityType1 = mock(EntityType.class);
-    EntityType entityType2 = mock(EntityType.class);
-    EntityType entityType3 = mock(EntityType.class);
-    EntityType entityType4 = mock(EntityType.class);
-    when(entityType1.isAbstract()).thenReturn(false);
-    when(entityType2.isAbstract()).thenReturn(false);
-    when(entityType3.isAbstract()).thenReturn(true);
-    when(entityType4.isAbstract()).thenReturn(false);
-    when(entityType3.getId()).thenReturn("3");
-
-    LinkedList<EntityType> entityTypes = new LinkedList<>();
-    entityTypes.add(entityType1);
-    entityTypes.add(entityType2);
-    entityTypes.add(entityType3);
-    entityTypes.add(entityType4);
-    XlsxWriter xlsxWriter = mock(XlsxWriter.class);
-    service.writeEntityTypes(entityTypes, xlsxWriter);
-
-    ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(xlsxWriter).writeRows(argumentCaptor.capture(), eq(EMX_ENTITIES));
-    Stream<List> argument = argumentCaptor.getValue();
-    List<Object> actual = argument.collect(Collectors.toList()).get(0);
-    // Check that the abstract entityType comes first in the stream to the writer
-    assertEquals(actual.get(0), "3");
   }
 
   @Test
