@@ -19,6 +19,8 @@
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
     <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
 
+    <rpm.release.version>${project.version}</rpm.release.version>
+
     <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
     <rpm-maven-plugin.version>2.2.0</rpm-maven-plugin.version>
@@ -59,6 +61,7 @@
           <name>molgenis</name>
           <prefix>/usr/local</prefix>
           <changelogFile>CHANGELOG.md</changelogFile>
+          <version>${rpm.release.version}</version>
           <defineStatements>
             <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
           </defineStatements>
@@ -72,7 +75,7 @@
               <groupname>molgenis</groupname>
               <sources>
                 <source>
-                  <location>target/${project.artifactId}-${project.version}.war</location>
+                  <location>target/${project.artifactId}-${rpm.release.version}.war</location>
                 </source>
               </sources>
             </mapping>

@@ -67,7 +67,7 @@ pipeline {
                             dir('molgenis-app') {
                                 script {
                                     sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                                    sh "mvn -q -B rpm:rpm -Drpm.version=${env.PREVIEW_VERSION}"
+                                    sh "mvn -q -B rpm:rpm -Drpm.release.version=${env.PREVIEW_VERSION}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                     sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.PREVIEW_VERSION} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
@@ -108,7 +108,7 @@ pipeline {
                                     sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                                     sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=dev -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                                     env.RPM_TAG = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true)
-                                    sh "mvn -q -B rpm:rpm -Drpm.version=${RPM_TAG}"
+                                    sh "mvn -q -B rpm:rpm -Drpm.release.version=${RPM_TAG}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                     sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
@@ -175,7 +175,11 @@ pipeline {
                             dir('molgenis-app') {
                                 script {
                                     sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
-                                    sh "mvn -q -B rpm:rpm -Drpm.version=${TAG}"
+                                    // need to run install phase first
+                                    // the rpm:rpm goal is bound to the package phase
+                                    // which implies that the next snapshot version is installed
+                                    // the artifact is build and the rpm plugin refers to the artifact build in the release:prepare goal
+                                    sh "mvn -q -B install -DskipTests -T4 && mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                     sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
@@ -225,7 +229,7 @@ pipeline {
                                 sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-stable"
                                 sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=stable"
                                 // Build RPM to push to registry
-                                sh "cd target/checkout/molgenis-app && mvn -q -B rpm:rpm -Drpm.version=${TAG}"
+                                sh "cd target/checkout/molgenis-app && mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
                                 // make sure you have no linebreaks in RPM variable
                                 env.RPM = sh(script: 'cd target/checkout/molgenis-app && ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                 sh "cd target/checkout/molgenis-app && mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_RELEASES} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
