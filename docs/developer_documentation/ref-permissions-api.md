@@ -69,7 +69,7 @@ Response:
 ### Getting all suitable permissions for a resource type
 ##### Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
+GET https://molgenis.mydomain.example/api/permissions/v1/types/permissions/{typeId}
 ```
 ##### Parameters
 URL: TypeId as described in the [parameters section](##Parameters)
@@ -433,7 +433,7 @@ Response:
 ### Creating permissions for one or more users and/or roles for a resource
 ##### Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
+POST https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}
 ```
 ##### Request
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
