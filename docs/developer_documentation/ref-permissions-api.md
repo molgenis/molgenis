@@ -17,9 +17,9 @@ This maps to the 'identifier' in Spring security's ObjectIdentity.
 
 ## Query for user or role
 - user
-The user for which to get/create/update the permission. This should be the username as stated in the 'sys_sec_User' table in the MOLGENIS database;
+The user for which to get/create/update the permission. This should be the username as stated in the 'sys_sec_User' table in the MOLGENIS database.
 - role
-The role for which to get/create/update the permission. This should be the rolename as stated in the 'sys_sec_Role' table in the MOLGENIS database;
+The role for which to get/create/update the permission. This should be the rolename as stated in the 'sys_sec_Role' table in the MOLGENIS database.
 
 The user/role query for this API's GET operations should be provided in the [RSQL syntax](developer_documentation/ref-RSQL.md)
 Examples:
@@ -97,7 +97,7 @@ You can use the endpoint in the next section 'Creating a new access control list
 
 ##### Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
+POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}
 ```
 ##### Parameters
 URL: 'typeId' as described in the [parameters section](##Parameters)
@@ -115,7 +115,7 @@ Request:
 ### Creating a new access control list for a resource
 ##### Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/v1/objects/{typeId}/{objectId}")
+POST https://molgenis.mydomain.example/api/permissions/v1/objects/{typeId}/{objectId}
 ```
 ##### Parameters
 URL: 
@@ -176,7 +176,7 @@ Response:
 ### Getting permissions for one or more users and/or roles for a resource
 ##### Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
+GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}
 ```
 ##### Parameters
 URL: 
@@ -240,7 +240,7 @@ The neurologist and the nurse inherit their READ permissions from the their "NEU
 ### Getting permissions for one or more users and/or roles for a resource type
 ##### Endpoint
 ```
-GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}")
+GET https://molgenis.mydomain.example/api/permissions/v1/{typeId}
 ```
 ##### Parameters
 URL: 
@@ -545,7 +545,7 @@ Body:
 
 ##### Endpoint
 ```
-DELETE https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}")
+DELETE https://molgenis.mydomain.example/api/permissions/v1/{typeId}/{objectId}
 ```
 
 ##### Parameters
