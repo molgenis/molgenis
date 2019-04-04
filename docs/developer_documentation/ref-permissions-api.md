@@ -7,7 +7,7 @@ The MOLGENIS permission is based on [Spring Security](https://spring.io/projects
 These parameters are used by the endpoint in this API:
 - 'typeId': This is the type of resource for which the permission is granted. 
 This maps to the 'type' in Spring security's [ObjectIdentity](https://docs.spring.io/spring-security/site/docs/4.2.11.RELEASE/apidocs/org/springframework/security/acls/model/ObjectIdentity.html).
-In MOLGENIS #####Examples of these types are 'entityType', 'package', 'plugin', and also row leve secured entities, in which case the type is the entityType identifier perfixed with "-entity" 
+In MOLGENIS examples of these types are 'entityType', 'package', 'plugin', and also row leve secured entities, in which case the type is the entityType identifier perfixed with "-entity" 
 - 'identifier': This is the identifier of the actual resource within the resource type for which the permission is granted. 
 This maps to the 'identifier' in Spring security's ObjectIdentity.
 - 'inheritance': a boolean indicating if inherited permissions should be returned or only the permission that are actually set for the roles and users requested. This parameter is only used in the the GET permission requests. Setting this to true will return a tree with all inherited permissions for the requested users and roles. This field cannot be combined with paging.
@@ -35,7 +35,7 @@ q=user=in=(Cardiologist,Neurologist)
 ### Permission inheritance
 There are two kinds of inheritance in the permission system:
 - Users inherit permissions from their roles, and roles from their parentroles.
-- The access control list for a resource can have a parent, in that case permissions on the parent also grant permissions on the child ACL's. In the current MOLGENIS system this is the case for entity types and packages, both inherit permissions from the package in which they reside..
+- The access control list (ACL) for a resource can have a parent, in that case permissions on the parent also grant permissions on the child ACL's. In the current MOLGENIS system this is the case for entity types and packages, both inherit permissions from the package in which they reside..
 
 ## Managing row level security
 ### Getting all resource types in the system
@@ -99,13 +99,13 @@ You can use the endpoint in the next section 'Creating a new access control list
 ```
 POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}")
 ```
-########## Parameters
+##### Parameters
 URL: 'typeId' as described in the [parameters section](##Parameters)
 
-########## Response
+##### Response
 201 CREATED
 
-########## Example
+##### Example
 Enable row level security on entity 'hospital_neurology_patients'.
 
 Request:
