@@ -7,7 +7,7 @@ The MOLGENIS permission is based on [Spring Security](https://spring.io/projects
 These parameters are used by the endpoint in this API:
 - 'typeId': This is the type of resource for which the permission is granted. 
 This maps to the 'type' in Spring security's [ObjectIdentity](https://docs.spring.io/spring-security/site/docs/4.2.11.RELEASE/apidocs/org/springframework/security/acls/model/ObjectIdentity.html).
-In MOLGENIS examples of these types are 'entityType', 'package', 'plugin', and also row leve secured entities, in which case the type is the entityType identifier perfixed with "-entity" 
+In MOLGENIS examples of these types are 'entityType', 'package', 'plugin', and also row level secured entities, in which case the type is the entityType identifier perfixed with "-entity" 
 - 'identifier': This is the identifier of the actual resource within the resource type for which the permission is granted. 
 This maps to the 'identifier' in Spring security's ObjectIdentity.
 - 'inheritance': a boolean indicating if inherited permissions should be returned or only the permission that are actually set for the roles and users requested. This parameter is only used in the the GET permission requests. Setting this to true will return a tree with all inherited permissions for the requested users and roles. This field cannot be combined with paging.

@@ -78,7 +78,7 @@
                 {name: 'files', url: '${baseUrl}/swagger/api-files-swagger.json'},
                 {name: 'core-ui', url: '${baseUrl}/swagger/core-ui-swagger.json'},
                 {name: 'beacon', url: '${baseUrl}/swagger/beacon-swagger.json'},
-              {name: 'permissions-api', url: '${baseUrl}/swagger/api-permissions-swagger.json'},
+              {name: 'permissions', url: '${baseUrl}/swagger/api-permissions-swagger.json'},
                 {name: 'identities', url: '${baseUrl}/swagger/api-identities-swagger.json'},
                 {name: 'metrics', url: '${baseUrl}/swagger/api-metrics-swagger.json'}],
             dom_id: '#swagger-ui',
