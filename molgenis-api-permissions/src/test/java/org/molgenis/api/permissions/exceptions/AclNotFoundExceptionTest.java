@@ -31,8 +31,7 @@ public class AclNotFoundExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "No ACL information could be found for type 'type'."},
-      {"nl", "Geen ACL informatie gevonden voor type 'type'."}
+      new Object[] {"en", "No ACL information could be found for type 'type'."}
     };
   }
 }

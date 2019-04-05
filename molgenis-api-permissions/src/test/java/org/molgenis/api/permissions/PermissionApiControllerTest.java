@@ -27,6 +27,8 @@ import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.molgenis.api.permissions.rsql.PermissionsQuery;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,6 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -46,11 +47,12 @@ import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class PermissionApiControllerTest extends AbstractTestNGSpringContextTests {
+public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @Mock private PermissionApiService permissionApiService;
   @Mock private ObjectIdentityService objectIdentityService;
+  @Mock private SidConversionTools sidConversionTools;
   private MockMvc mockMvc;
   private PrincipalSid user1;
   private PrincipalSid user2;
@@ -62,7 +64,8 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
     initMocks(this);
     RSQLParser rsqlParser = new RSQLParser();
     PermissionsApiController controller =
-        new PermissionsApiController(permissionApiService, rsqlParser, objectIdentityService);
+        new PermissionsApiController(
+            permissionApiService, rsqlParser, objectIdentityService, sidConversionTools);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -126,6 +129,13 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             "typeId", "identifier", Sets.newHashSet(user1, role1), true))
         .thenReturn(permissionResponses);
 
+    PermissionsQuery permissionsQuery = new PermissionsQuery();
+    permissionsQuery.setUsers(Collections.singletonList("user1"));
+    permissionsQuery.setRoles(Collections.singletonList("role1"));
+    when(sidConversionTools.getSids(permissionsQuery))
+        .thenReturn(
+            Arrays.asList(new PrincipalSid("user1"), new GrantedAuthoritySid("ROLE_role1")));
+
     MvcResult result =
         mockMvc
             .perform(
@@ -150,6 +160,16 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
     when(permissionApiService.getPermissionsForType(
             "typeId", Sets.newHashSet(user1, role1, role2), false))
         .thenReturn(identityPermission);
+
+    PermissionsQuery permissionsQuery = new PermissionsQuery();
+    permissionsQuery.setUsers(Collections.singletonList("user1"));
+    permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
+    when(sidConversionTools.getSids(permissionsQuery))
+        .thenReturn(
+            Arrays.asList(
+                new PrincipalSid("user1"),
+                new GrantedAuthoritySid("ROLE_role1"),
+                new GrantedAuthoritySid("ROLE_role2")));
 
     MvcResult result =
         mockMvc
@@ -179,6 +199,12 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
             "typeId", Sets.newHashSet(user1, user2, role1, role2)))
         .thenReturn(80);
 
+    PermissionsQuery permissionsQuery = new PermissionsQuery();
+    permissionsQuery.setUsers(Collections.singletonList("test"));
+    permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
+    when(sidConversionTools.getSids(permissionsQuery))
+        .thenReturn(Arrays.asList(user1, user2, role1, role2));
+
     MvcResult result =
         mockMvc
             .perform(
@@ -188,9 +214,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":0,\"totalPages\":0,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/"
-            + "typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/"
-            + "typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\"},\"data\":{\"objects\":[]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"role2\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
   }
 
   @Test
@@ -208,6 +232,10 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
 
     when(permissionApiService.getAllPermissions(Sets.newHashSet(user1), false))
         .thenReturn(classPermissionResponses);
+    PermissionsQuery permissionsQuery = new PermissionsQuery();
+    permissionsQuery.setUsers(Collections.singletonList("user1"));
+    when(sidConversionTools.getSids(permissionsQuery))
+        .thenReturn(Collections.singletonList(new PrincipalSid("user1")));
 
     MvcResult result =
         mockMvc
@@ -365,6 +393,7 @@ public class PermissionApiControllerTest extends AbstractTestNGSpringContextTest
 
   @Test
   public void testDeletePermission() throws Exception {
+    when(sidConversionTools.getSid("user1", null)).thenReturn(user1);
     String requestJson = "{" + "user:user1" + "}";
     mockMvc
         .perform(

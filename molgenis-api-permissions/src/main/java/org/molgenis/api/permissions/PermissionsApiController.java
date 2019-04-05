@@ -3,8 +3,6 @@ package org.molgenis.api.permissions;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.PermissionResponseUtils.getPermissionResponse;
 import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI; // NOSONAR
-import static org.molgenis.api.permissions.SidConversionUtils.getSid;
-import static org.molgenis.api.permissions.SidConversionUtils.getSids;
 
 import com.google.common.collect.Lists;
 import cz.jirutka.rsql.parser.RSQLParser;
@@ -72,26 +70,38 @@ public class PermissionsApiController extends ApiController {
   private final PermissionApiService permissionApiService;
   private final RSQLParser rsqlParser;
   private final ObjectIdentityService objectIdentityService;
+  private final SidConversionTools sidConversionTools;
 
   public PermissionsApiController(
       PermissionApiService permissionApiService,
       RSQLParser rsqlParser,
-      ObjectIdentityService objectIdentityService) {
+      ObjectIdentityService objectIdentityService,
+      SidConversionTools sidConversionTools) {
     super(PERMISSION_API_IDENTIFIER, VERSION);
     this.permissionApiService = requireNonNull(permissionApiService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
+    this.sidConversionTools = requireNonNull(sidConversionTools);
   }
 
   @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Create a ACL class, typically this is done to row level secure an entity",
+      value = "Create an ACL class this enables row level secure an entity",
       response = ResponseEntity.class)
   public ResponseEntity enableRLS(
       HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
       throws URISyntaxException {
     permissionApiService.addClass(typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
+  }
+
+  @DeleteMapping(value = TYPES + "/{" + TYPE_ID + "}")
+  @ApiOperation(
+      value = "Delete an ACL class this removes row level security from an entity",
+      response = ResponseEntity.class)
+  public ResponseEntity disableRLS(@PathVariable(value = TYPE_ID) String typeId) {
+    permissionApiService.deleteClass(typeId);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping(value = TYPES)
@@ -149,6 +159,7 @@ public class PermissionsApiController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
+
     List<PermissionResponse> permissionResponses =
         permissionApiService.getPermission(typeId, identifier, sids, inheritance);
     return GetObjectPermissionResponse.create(permissionResponses);
@@ -259,7 +270,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
-    Sid sid = getSid(request.getUser(), request.getRole());
+    Sid sid = sidConversionTools.getSid(request.getUser(), request.getRole());
     permissionApiService.deletePermission(sid, typeId, identifier);
     return ResponseEntity.noContent().build();
   }
@@ -269,7 +280,7 @@ public class PermissionsApiController extends ApiController {
     if (StringUtils.isNotEmpty(queryString)) {
       Node node = rsqlParser.parse(queryString);
       PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
-      sids = new LinkedHashSet<>(getSids(permissionsQuery));
+      sids = new LinkedHashSet<>(sidConversionTools.getSids(permissionsQuery));
     }
     return sids;
   }

@@ -30,9 +30,6 @@ public class ReadPermissionDeniedExceptionTest extends ExceptionMessageTest {
   @DataProvider(name = "languageMessageProvider")
   @Override
   public Object[][] languageMessageProvider() {
-    return new Object[][] {
-      new Object[] {"en", "No read permission on type 'type'."},
-      {"nl", "Geen lees permissie op type 'type'."}
-    };
+    return new Object[][] {new Object[] {"en", "No read permission on type 'type'."}};
   }
 }

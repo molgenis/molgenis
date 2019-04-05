@@ -30,9 +30,6 @@ public class AclClassAlreadyExistsExceptionTest extends ExceptionMessageTest {
   @DataProvider(name = "languageMessageProvider")
   @Override
   public Object[][] languageMessageProvider() {
-    return new Object[][] {
-      new Object[] {"en", "Acl class 'type' already exists."},
-      {"nl", "Acl class 'type' bestaat al."}
-    };
+    return new Object[][] {new Object[] {"en", "A type with id 'type' already exists."}};
   }
 }

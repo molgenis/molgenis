@@ -22,8 +22,7 @@ public class UnsupportedPermissionQueryOperatorExceptionTest extends ExceptionMe
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "'and' rsql operator is not supported for this API."},
-      {"nl", "'and' rsql operatie is niet ondersteund voor deze API."}
+      new Object[] {"en", "'and' rsql operator is not supported for this API."}
     };
   }
 }

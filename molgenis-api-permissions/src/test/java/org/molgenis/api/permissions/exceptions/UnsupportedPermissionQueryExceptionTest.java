@@ -22,8 +22,7 @@ public class UnsupportedPermissionQueryExceptionTest extends ExceptionMessageTes
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "Combination of \"includeInheritance\" and paging is not supported."},
-      {"nl", "Niet ondersteunde combinatie van \"includeInheritance\" en paginering."}
+      new Object[] {"en", "Combination of \"includeInheritance\" and paging is not supported."}
     };
   }
 }

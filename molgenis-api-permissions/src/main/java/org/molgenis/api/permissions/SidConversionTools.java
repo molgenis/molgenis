@@ -1,7 +1,11 @@
-package org.molgenis.api.permissions.inheritance;
+package org.molgenis.api.permissions;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.SidUtils.getRoleName;
 
 import java.util.ArrayList;
@@ -11,8 +15,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.molgenis.api.permissions.SidConversionUtils;
 import org.molgenis.api.permissions.exceptions.InsufficientInheritancePermissionsException;
+import org.molgenis.api.permissions.exceptions.MissingUserOrRoleException;
+import org.molgenis.api.permissions.exceptions.UserAndRoleException;
+import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -22,6 +28,7 @@ import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.exception.UnknownRoleException;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.SidUtils;
@@ -32,19 +39,92 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserRoleInheritanceResolver {
+public class SidConversionTools {
 
-  private UserPermissionEvaluator userPermissionEvaluator;
-  private DataService dataService;
-  private UserService userService;
+  private final UserService userService;
+  private final DataService dataService;
+  private final UserPermissionEvaluator userPermissionEvaluator;
 
-  public UserRoleInheritanceResolver(
-      UserPermissionEvaluator userPermissionEvaluator,
+  SidConversionTools(
+      UserService userService,
       DataService dataService,
-      UserService userService) {
-    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
-    this.dataService = requireNonNull(dataService);
+      UserPermissionEvaluator userPermissionEvaluator) {
     this.userService = requireNonNull(userService);
+    this.dataService = requireNonNull(dataService);
+    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+  }
+
+  public List<Sid> getSids(PermissionsQuery permissionsQuery) {
+    return getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles());
+  }
+
+  public Sid getSid(String user, String role) {
+    if (isNullOrEmpty(user) && isNullOrEmpty(role)) {
+      throw new MissingUserOrRoleException();
+    } else if (!isNullOrEmpty(user) && !isNullOrEmpty(role)) {
+      throw new UserAndRoleException();
+    } else if (!isNullOrEmpty(user)) {
+      checkUserExists(user);
+      return createUserSid(user);
+    }
+    checkRoleExists(role);
+    return createRoleSid(role);
+  }
+
+  private void checkRoleExists(String role) {
+    if (dataService
+            .query(RoleMetadata.ROLE, Role.class)
+            .eq(RoleMetadata.NAME, ROLE_PREFIX + role.toUpperCase())
+            .findOne()
+        == null) {
+      throw new UnknownRoleException(role);
+    }
+  }
+
+  private void checkUserExists(String user) {
+    if (userService.getUser(user) == null) {
+      throw new UnknownUserException(user);
+    }
+  }
+
+  private List<Sid> getSids(List<String> users, List<String> roles) {
+    List<Sid> results = new ArrayList<>();
+    for (String user : users) {
+      checkUserExists(user);
+      results.add(createUserSid(user));
+    }
+    for (String role : roles) {
+      checkRoleExists(role);
+      results.add(createRoleSid(role));
+    }
+    return results;
+  }
+
+  public static String getUser(Sid sid) {
+    if (sid instanceof PrincipalSid) {
+      return ((PrincipalSid) sid).getPrincipal();
+    }
+    return null;
+  }
+
+  public static String getRole(Sid sid) {
+    if (sid instanceof GrantedAuthoritySid) {
+      String role = ((GrantedAuthoritySid) sid).getGrantedAuthority();
+      return SidUtils.getRoleName(role);
+    }
+    return null;
+  }
+
+  public static String getName(Sid sid) {
+    String name = getRole(sid);
+    if (name == null) {
+      name = getUser(sid);
+    }
+    if (name == null) {
+      throw new IllegalStateException(
+          "Sid should always be either a GrantedAuthoritySid or a PrincipalSid");
+    }
+    return name;
   }
 
   public List<Sid> getRolesForSid(Sid sid) {
@@ -79,7 +159,7 @@ public class UserRoleInheritanceResolver {
   }
 
   private List<Sid> getRolesForUser(Sid sid) {
-    String username = SidConversionUtils.getUser(sid);
+    String username = SidConversionTools.getUser(sid);
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(RoleMembershipMetadata.ROLE_MEMBERSHIP),
         EntityTypePermission.READ_DATA)) {
@@ -120,10 +200,21 @@ public class UserRoleInheritanceResolver {
   }
 
   public Set<Sid> getAllAvailableSids() {
-    return userService
-        .getUsers()
-        .stream()
-        .map(user -> new PrincipalSid(user.getUsername()))
-        .collect(toSet());
+    Set sids =
+        userService
+            .getUsers()
+            .stream()
+            .map(user -> new PrincipalSid(user.getUsername()))
+            .collect(toSet());
+
+    Set roles =
+        dataService
+            .findAll(RoleMetadata.ROLE)
+            .map(role -> new GrantedAuthoritySid(ROLE_PREFIX + role.getString(RoleMetadata.NAME)))
+            .collect(toSet());
+
+    sids.addAll(roles);
+
+    return sids;
   }
 }

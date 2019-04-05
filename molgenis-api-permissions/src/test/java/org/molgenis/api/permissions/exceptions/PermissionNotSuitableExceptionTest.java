@@ -31,8 +31,7 @@ public class PermissionNotSuitableExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "The permission 'permission' cannot be used for type 'type'."},
-      {"nl", "De permissie 'permission' kan niet toegepast worden op type 'type'."}
+      new Object[] {"en", "The permission 'permission' cannot be used for type 'type'."}
     };
   }
 }

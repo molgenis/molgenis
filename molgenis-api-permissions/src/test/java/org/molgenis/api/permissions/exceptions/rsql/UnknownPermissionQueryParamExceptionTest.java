@@ -31,8 +31,7 @@ public class UnknownPermissionQueryParamExceptionTest extends ExceptionMessageTe
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "Unknown field 'type' in query, only 'user' and 'role' are supported."},
-      {"nl", "Onbekend veld 'type' in verzoek, alleen 'user' en 'role' worden ondersteund."}
+      new Object[] {"en", "Unknown field 'type' in query, only 'user' and 'role' are supported."}
     };
   }
 }

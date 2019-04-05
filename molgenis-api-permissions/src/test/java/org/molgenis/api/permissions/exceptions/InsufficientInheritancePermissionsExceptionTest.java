@@ -27,10 +27,6 @@ public class InsufficientInheritancePermissionsExceptionTest extends ExceptionMe
       new Object[] {
         "en",
         "Read permissions on 'sys_sec_Role' and 'sys_sec_RoleMembership' are required to be able to show inherited permissions."
-      },
-      {
-        "nl",
-        "Lees rechten op 'sys_sec_Role' en 'sys_sec_RoleMembership' zijn nodig om overge�rfde permissies te kunnen bekijken."
       }
     };
   }

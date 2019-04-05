@@ -22,7 +22,7 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
     ExceptionMessageTest.assertExceptionMessageEquals(
-        new UpdatePermissionDeniedException(objectIdentity), lang, message);
+        new InsufficientPermissionDeniedException(objectIdentity, "superuser"), lang, message);
   }
 
   @Test
@@ -30,16 +30,19 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     ObjectIdentity objectIdentity = Mockito.mock(ObjectIdentity.class);
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
-    UpdatePermissionDeniedException ex = new UpdatePermissionDeniedException(objectIdentity);
-    assertEquals(ex.getMessage(), "objectIdentity type:type, objectIdentity identifier:identifier");
+    InsufficientPermissionDeniedException ex =
+        new InsufficientPermissionDeniedException(objectIdentity, "superuser");
+    assertEquals(ex.getMessage(), "type:type, identifier:identifier, role:superuser");
   }
 
   @DataProvider(name = "languageMessageProvider")
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "No write permission on row with id 'type' of type 'identifier'."},
-      {"nl", "Geen schrijf permissie op de rij met id 'type' voor type 'identifier'."}
+      new Object[] {
+        "en",
+        "User has to be superuser for this operation on row with id 'type' of type 'identifier'."
+      }
     };
   }
 }

@@ -1,7 +1,7 @@
 package org.molgenis.api.permissions.exceptions;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.permissions.SidConversionUtils.getName;
+import static org.molgenis.api.permissions.SidConversionTools.getName;
 
 import org.molgenis.i18n.CodedRuntimeException;
 import org.springframework.security.acls.model.Sid;

@@ -21,9 +21,6 @@ public class PageWithoutPageSizeExceptionTest extends ExceptionMessageTest {
   @DataProvider(name = "languageMessageProvider")
   @Override
   public Object[][] languageMessageProvider() {
-    return new Object[][] {
-      new Object[] {"en", "Please provide both page and pageSize."},
-      {"nl", "Geeft alstublieft zowel page als pageSize op."}
-    };
+    return new Object[][] {new Object[] {"en", "Please provide both page and pageSize."}};
   }
 }

@@ -34,10 +34,6 @@ public class SidPermissionExceptionTest extends ExceptionMessageTest {
       new Object[] {
         "en",
         "No permission to read permissions for user(s) and/or role(s) 'user1,user2,roleA,roleB'."
-      },
-      {
-        "nl",
-        "Geen permissie om permissies voor gebruiker(s) en/of rol(len) 'user1,user2,roleA,roleB' te lezen."
       }
     };
   }

@@ -38,8 +38,7 @@ public class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en", "'role1' already has a permission on the resource with id 'id' of type 'type'."
-      },
-      {"nl", "'role1' heeft al een permissie op de bron met id 'id' van type 'type'."}
+      }
     };
   }
 }

@@ -92,8 +92,9 @@ Response:
 
 ### Creating a new resource type in the system (Row level securing an entity)
 
-Warning: this will not create ACL's for already existing resources of this type.
-You can use the endpoint in the next section 'Creating a new access control list for a resource' to create ACL's for these resources.
+This will create a new type in the system and add access control lists for all existing rows.
+This enables row level security.
+Please keep in mind that all existing rows will get the current user as owner.
 
 ##### Endpoint
 ```
@@ -103,7 +104,7 @@ POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}
 URL: 'typeId' as described in the [parameters section](##Parameters)
 
 ##### Response
-201 CREATED
+201 Created
 
 ##### Example
 Enable row level security on entity 'hospital_neurology_patients'.
@@ -111,6 +112,26 @@ Enable row level security on entity 'hospital_neurology_patients'.
 Request:
 ```https://molgenis.mydomain.example/api/permissions/v1/types/entity-hospital_neurology_patients```
 
+### Deleting a resource type from the system (Removing row level security from an entity)
+
+This will delete a type, the access control lists for all rows will remain in the system.
+This disables row level security.
+
+##### Endpoint
+```
+POST https://molgenis.mydomain.example/api/permissions/v1/types/{typeId}
+```
+##### Parameters
+URL: 'typeId' as described in the [parameters section](##Parameters)
+
+##### Response
+204 No content
+
+##### Example
+Enable row level security on entity 'hospital_neurology_patients'.
+
+Request:
+```https://molgenis.mydomain.example/api/permissions/v1/types/entity-hospital_neurology_patients```
 
 ### Creating a new access control list for a resource
 ##### Endpoint
@@ -131,7 +152,7 @@ Add an ACL for 'Patient1' in entity 'hospital_neurology_patients'.
 Request:
 ```POST https://molgenis.mydomain.example/api/permissions/v1/types/entity-hospital_neurology_patients/Patient1```
 
-### Getting all acls for a class
+### Getting all objects of a type
 ##### Endpoint
 ```
 GET https://molgenis.mydomain.example/api/permissions/v1/objects/{typeId}
@@ -144,7 +165,7 @@ Query:
 - Optional: 'pageSize' as described in the [parameters section](##Parameters)
 
 ##### Response
-List of ACLs for a class in the system.
+List of ACLs for a type in the system.
 ##### Example 
 Request:
 ```
@@ -225,8 +246,8 @@ Response:
                    {
                        "identifier": "hospital",
                        "label": "hospital",
-                       "classLabel": "Package",
-                       "classId": "package",
+                       "typeLabel": "Package",
+                       "typeId": "package",
                        "permission": "READ",
                        "inheritedPermissions": []
                    }
@@ -314,8 +335,8 @@ Query:
 [Query for user or role](##Query for user or role)
 
 ##### Response
-A list of permissions on resources per resource class.
-For every resource type a object is returned containing the classId, a label for the classId, a label for the resource type and a list of permissions per resource.
+A list of permissions on resources per resource type.
+For every resource type a object is returned containing the typeId, a label for the typeId, a label for the resource type and a list of permissions per resource.
 These lists of permissions contain object containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance).
 The user and role of a permission can be absent if permission is only derived from inherited permissions.
 
@@ -326,11 +347,11 @@ Request:
 Response:
 ```
 {
-    "classPermissions": [
+    "types": [
         {
-            "classId": "package",
+            "typeId": "package",
             "label": "Package",
-            "rowPermissions": [
+            "objects": [
                 {
                     "identifier": "hospital_cardiology",
                     "label": "hospital_cardiology",
@@ -344,9 +365,9 @@ Response:
             ]
         },
         {
-            "classId": "entityType",
+            "typeId": "entityType",
             "label": "Entity type",
-            "rowPermissions": [
+            "objects": [
                 {
                     "identifier": "hospital_cardiology_results",
                     "label": "results",
@@ -358,8 +379,8 @@ Response:
                                 {
                                     "identifier": "hospital_cardiology",
                                     "label": "hospital_cardiology",
-                                    "classLabel": "Package",
-                                    "classId": "package",
+                                    "typeLabel": "Package",
+                                    "typeId": "package",
                                     "inheritedPermissions": [
                                         {
                                             "role": "CARDIOLOGY",
@@ -375,9 +396,9 @@ Response:
             ]
         },
         {
-            "classId": "plugin",
+            "typeId": "plugin",
             "label": "Plugin",
-            "rowPermissions": [
+            "objects": [
                 {
                     "identifier": "dataexplorer",
                     "label": "dataexplorer",
@@ -451,7 +472,7 @@ URL: https://molgenis.mydomain.example/api/permissions/v1/entity-hospital_neurol
 Body:
 ```
 {
-	rows:[{
+	objects:[{
 			identifier:Patient1,
 			permissions:[
 			{
@@ -517,7 +538,7 @@ URL: https://molgenis.mydomain.example/api/permissions/v1/entity-hospital_neurol
 Body:
 ```
 {
-	rows:[{
+	objects:[{
 			identifier:Patient1,
 			permissions:[
 			{

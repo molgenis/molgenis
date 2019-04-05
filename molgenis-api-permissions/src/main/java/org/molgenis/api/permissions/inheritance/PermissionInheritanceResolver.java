@@ -2,12 +2,13 @@ package org.molgenis.api.permissions.inheritance;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.PermissionApiService.ENTITY_PREFIX;
-import static org.molgenis.api.permissions.SidConversionUtils.getRole;
+import static org.molgenis.api.permissions.SidConversionTools.getRole;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.permissions.PermissionSetUtils;
+import org.molgenis.api.permissions.SidConversionTools;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.inheritance.model.InheritedAclPermissionsResult;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
@@ -34,12 +35,12 @@ import org.springframework.stereotype.Component;
 public class PermissionInheritanceResolver {
 
   private final DataService dataService;
-  private final UserRoleInheritanceResolver userRoleInheritanceResolver;
+  private final SidConversionTools sidConversionTools;
 
   public PermissionInheritanceResolver(
-      DataService dataService, UserRoleInheritanceResolver userRoleInheritanceResolver) {
+      DataService dataService, SidConversionTools sidConversionTools) {
     this.dataService = requireNonNull(dataService);
-    this.userRoleInheritanceResolver = requireNonNull(userRoleInheritanceResolver);
+    this.sidConversionTools = requireNonNull(sidConversionTools);
   }
 
   public InheritedPermissionsResult getInheritedPermissions(Acl acl, Sid sid) {
@@ -51,7 +52,7 @@ public class PermissionInheritanceResolver {
   }
 
   private List<InheritedUserPermissionsResult> getPermissionsForRoles(Acl acl, Sid sid) {
-    List<Sid> roles = userRoleInheritanceResolver.getRolesForSid(sid);
+    List<Sid> roles = sidConversionTools.getRolesForSid(sid);
     List<InheritedUserPermissionsResult> inheritedUserPermissionsResults = new ArrayList<>();
     for (Sid role : roles) {
       String ownPermission = getPermissionsForAcl(acl, role);
