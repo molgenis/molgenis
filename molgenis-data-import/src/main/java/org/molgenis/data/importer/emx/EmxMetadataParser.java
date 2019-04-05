@@ -31,6 +31,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.util.AttributeUtils.isIdAttributeTypeAllowed;
+import static org.molgenis.data.util.EntityTypeUtils.isDateType;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isStringType;
 
@@ -153,6 +154,7 @@ public class EmxMetadataParser implements MetadataParser {
   public static final String EMX_ATTRIBUTES_UNIQUE = "unique";
   public static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
   public static final String EMX_ATTRIBUTES_TAGS = "tags";
+  public static final String EMX_ATTRIBUTES_AUTO = "auto";
 
   // Column names in the tag sheet
   private static final String EMX_TAG_IDENTIFIER = "identifier";
@@ -218,7 +220,8 @@ public class EmxMetadataParser implements MetadataParser {
           EMX_ATTRIBUTES_EXPRESSION,
           EMX_ATTRIBUTES_VALIDATION_EXPRESSION,
           EMX_ATTRIBUTES_DEFAULT_VALUE,
-          EMX_ATTRIBUTES_TAGS);
+          EMX_ATTRIBUTES_TAGS,
+          EMX_ATTRIBUTES_AUTO);
 
   public static final String AUTO = "auto";
 
@@ -881,6 +884,11 @@ public class EmxMetadataParser implements MetadataParser {
     String validationExpression = emxAttrEntity.getString(EMX_ATTRIBUTES_VALIDATION_EXPRESSION);
     String defaultValue = emxAttrEntity.getString(EMX_ATTRIBUTES_DEFAULT_VALUE);
     Object emxAttrTags = emxAttrEntity.get(EMX_ENTITIES_TAGS);
+    String emxAuto = emxAttrEntity.getString(EMX_ATTRIBUTES_AUTO);
+
+    if (emxAuto != null) {
+      attr.setAuto(parseBoolean(emxAuto, rowIndex, EMX_ATTRIBUTES_AUTO));
+    }
 
     List<String> tagIdentifiers = toList(emxAttrTags);
     if (tagIdentifiers != null && !tagIdentifiers.isEmpty()) {
@@ -893,7 +901,6 @@ public class EmxMetadataParser implements MetadataParser {
     if (emxIdAttrValue != null) {
       setIdAttr(rowIndex, emxAttr, attr, emxIdAttrValue);
     }
-
     validateAutoAttrValue(rowIndex, attr, emxEntityName);
     if (emxAttrVisible != null) {
       setAttrVisible(rowIndex, attr, emxAttrVisible);
@@ -903,6 +910,7 @@ public class EmxMetadataParser implements MetadataParser {
     if (emxReadOnly != null)
       attr.setReadOnly(parseBoolean(emxReadOnly, rowIndex, EMX_ATTRIBUTES_READ_ONLY));
     if (emxUnique != null) attr.setUnique(parseBoolean(emxUnique, rowIndex, EMX_ATTRIBUTES_UNIQUE));
+
     if (expression != null) attr.setExpression(expression);
     if (validationExpression != null) attr.setValidationExpression(validationExpression);
     if (defaultValue != null) attr.setDefaultValue(defaultValue);
@@ -942,14 +950,18 @@ public class EmxMetadataParser implements MetadataParser {
   void setIdAttr(int rowIndex, EmxAttribute emxAttr, Attribute attr, String emxIdAttrValue) {
     validateEmxIdAttrValue(rowIndex, attr, emxIdAttrValue);
 
-    attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
-    if (!attr.isAuto())
-      emxAttr.setIdAttr(parseBoolean(emxIdAttrValue, rowIndex, EMX_ATTRIBUTES_ID_ATTRIBUTE));
-    else emxAttr.setIdAttr(true); // If it is auto, set idAttr to true
+    boolean isAutoIdAttribute = emxIdAttrValue.equalsIgnoreCase(AUTO);
+    if (isAutoIdAttribute) {
+      attr.setAuto(true);
+      emxAttr.setIdAttr(true);
+    } else {
+      boolean isIdAttr = parseBoolean(emxIdAttrValue, rowIndex, EMX_ATTRIBUTES_ID_ATTRIBUTE);
+      emxAttr.setIdAttr(isIdAttr);
+    }
   }
 
   void validateAutoAttrValue(int rowIndex, Attribute attr, String emxEntityName) {
-    if (attr.isAuto() && !isStringType(attr)) {
+    if (attr.isAuto() && !(isStringType(attr) || isDateType(attr.getDataType()))) {
       throw new InvalidDataTypeException(
           "auto", "string", attr, emxEntityName, EMX_ATTRIBUTES, rowIndex);
     }

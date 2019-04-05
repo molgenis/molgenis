@@ -221,6 +221,33 @@ public class EmxMetadataParserTest extends AbstractMockitoTest {
         0, "entityTypeId", "attributeName", "partOfAttribute", emxAttr);
   }
 
+  @Test
+  public void setIdAttrAuto() {
+    EmxAttribute emxAttr = mock(EmxAttribute.class);
+    Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    emxMetadataParser.setIdAttr(0, emxAttr, attr, "auto");
+    verify(attr).setAuto(true);
+    verify(emxAttr).setIdAttr(true);
+  }
+
+  @Test
+  public void setIdAttrTrue() {
+    EmxAttribute emxAttr = mock(EmxAttribute.class);
+    Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    emxMetadataParser.setIdAttr(0, emxAttr, attr, "true");
+    verify(attr, times(0)).setAuto(true);
+    verify(emxAttr).setIdAttr(true);
+  }
+
+  @Test
+  public void setIdAttrFalse() {
+    EmxAttribute emxAttr = mock(EmxAttribute.class);
+    Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    emxMetadataParser.setIdAttr(0, emxAttr, attr, "false");
+    verify(attr, times(0)).setAuto(true);
+    verify(emxAttr, times(0)).setIdAttr(true);
+  }
+
   @Test(expectedExceptions = InvalidValueException.class)
   public void setIdAttrInvalid() {
     initMetaFactories();

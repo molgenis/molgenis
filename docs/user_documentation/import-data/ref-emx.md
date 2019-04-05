@@ -152,6 +152,10 @@ Whether the column may be left empty. Default: false
 #### idAttribute 
 Whether this field is the unique key for the entity. Default: false. Use 'AUTO' for auto generated (string) identifiers.
 
+#### auto
+Whether the value for this field is automatically generated. Default: false.
+Can be set to true when idAttribute is true or data type is one of [string, data, datetime].
+
 #### description 
 Free text documentation describing the attribute
 

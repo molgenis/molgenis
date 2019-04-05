@@ -1,8 +1,8 @@
 package org.molgenis.data.export.mapper;
 
 import static java.util.stream.Collectors.joining;
-import static org.molgenis.data.importer.emx.EmxMetadataParser.AUTO;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_AGGREGATEABLE;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_AUTO;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_DATA_TYPE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_DEFAULT_VALUE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_DESCRIPTION;
@@ -68,7 +68,8 @@ public class AttributeMapper {
             .put(EMX_ATTRIBUTES_EXPRESSION, AttributeMetadata.EXPRESSION)
             .put(EMX_ATTRIBUTES_VALIDATION_EXPRESSION, AttributeMetadata.VALIDATION_EXPRESSION)
             .put(EMX_ATTRIBUTES_DEFAULT_VALUE, AttributeMetadata.DEFAULT_VALUE)
-            .put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS);
+            .put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS)
+            .put(EMX_ATTRIBUTES_AUTO, AttributeMetadata.IS_AUTO);
     LanguageService.getLanguageCodes()
         .forEach(
             languageCode -> {
@@ -168,10 +169,6 @@ public class AttributeMapper {
   }
 
   private static Object getIdAttrValue(Attribute attr) {
-    Object isId = String.valueOf(attr.isIdAttribute());
-    if (attr.isAuto()) {
-      isId = AUTO;
-    }
-    return isId;
+    return String.valueOf(attr.isIdAttribute());
   }
 }
