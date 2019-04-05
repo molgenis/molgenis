@@ -6,7 +6,7 @@ info:
   version: "v1 and v2"
 host: ${host}
 schemes:
-  - https
+  - ${scheme}
 basePath: /
 consumes:
   - application/json
