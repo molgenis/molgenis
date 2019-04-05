@@ -209,6 +209,17 @@
                         </#list>
                         </select>
                     </div>
+                    <#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
+                    <div class="form-group">
+                        <label>Copy algorithms from source</label>
+                        <select name="algorithmSource" id="algorithm-source-entity-select" class="form-control" placeholder="Select source entity">
+                            <option></option>
+                        <#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+                            <option value="${source.name?html}">${source.name?html}</option>
+                        </#list>
+                        </select>
+                    </div>
+                    </#if>
                     <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
                     <input type="hidden" name="target" value="${selectedTarget}">
                 </form>

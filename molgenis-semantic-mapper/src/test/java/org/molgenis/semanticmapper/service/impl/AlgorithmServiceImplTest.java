@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.service.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
@@ -8,8 +9,11 @@ import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.Lists;
+import java.util.Collections;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -19,6 +23,8 @@ import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
+import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -133,6 +139,26 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3))
         .thenReturn(new ScriptException("algorithm is not defined"));
     algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3);
+  }
+
+  @Test
+  public void testCopyAlgorithms() {
+    EntityMapping sourceEntityMapping = mock(EntityMapping.class);
+    AttributeMapping attributeMapping = mock(AttributeMapping.class);
+    when(attributeMapping.getIdentifier()).thenReturn("MyIdentifier");
+    when(attributeMapping.getAlgorithmState()).thenReturn(AlgorithmState.CURATED);
+    when(sourceEntityMapping.getAttributeMappings())
+        .thenReturn(Collections.singletonList(attributeMapping));
+    EntityMapping targetEntityMapping = mock(EntityMapping.class);
+
+    algorithmServiceImpl.copyAlgorithms(sourceEntityMapping, targetEntityMapping);
+
+    ArgumentCaptor<AttributeMapping> attributeMappingCaptor =
+        ArgumentCaptor.forClass(AttributeMapping.class);
+    verify(targetEntityMapping).addAttributeMapping(attributeMappingCaptor.capture());
+    AttributeMapping attributeMappingCopy = attributeMappingCaptor.getValue();
+    assertNull(attributeMappingCopy.getIdentifier());
+    assertEquals(attributeMappingCopy.getAlgorithmState(), AlgorithmState.DISCUSS);
   }
 
   private void testApplyConvertException(String algorithmResult, AttributeType attributeType) {
