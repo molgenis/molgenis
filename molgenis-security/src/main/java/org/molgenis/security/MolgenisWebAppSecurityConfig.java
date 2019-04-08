@@ -73,6 +73,9 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.NullSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -122,6 +125,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter =
         new DelegatingRequestMatcherHeaderWriter(matcher, new CacheControlHeadersWriter());
 
+    http.securityContext().securityContextRepository(securityContextRepository());
+
     http.exceptionHandling().authenticationEntryPoint(delegatingEntryPoint());
 
     HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
@@ -129,7 +134,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     http.requestCache().requestCache(requestCache);
 
     http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
-
     // add default header options but use custom cache control header writer
     http.cors()
         .and()
@@ -310,6 +314,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public AuthenticationProvider tokenAuthenticationProvider() {
     return new TokenAuthenticationProvider(tokenService(), userDetailsChecker());
+  }
+
+  @Bean
+  public SecurityContextRepository securityContextRepository() {
+    return new TokenAwareSecurityContextRepository(
+        new HttpSessionSecurityContextRepository(), new NullSecurityContextRepository());
   }
 
   @Bean
