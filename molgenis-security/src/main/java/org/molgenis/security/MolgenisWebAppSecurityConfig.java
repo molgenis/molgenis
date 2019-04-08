@@ -319,7 +319,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public SecurityContextRepository securityContextRepository() {
     return new TokenAwareSecurityContextRepository(
-        new HttpSessionSecurityContextRepository(), new NullSecurityContextRepository());
+        new NullSecurityContextRepository(), new HttpSessionSecurityContextRepository());
   }
 
   @Bean
