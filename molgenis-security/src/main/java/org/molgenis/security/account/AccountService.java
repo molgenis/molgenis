@@ -8,8 +8,4 @@ public interface AccountService {
 
   /** Activate a registered user */
   void activateUser(String activationCode);
-
-  void changePassword(String username, String newPassword);
-
-  void resetPassword(String userEmail);
 }

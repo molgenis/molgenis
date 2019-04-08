@@ -4,12 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountConstants.MIN_PASSWORD_LENGTH;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import javax.naming.NoPermissionException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.molgenis.core.util.CountryCodes;
@@ -27,9 +25,6 @@ import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -40,6 +35,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
@@ -65,24 +61,24 @@ public class AccountController {
 
   private final AccountService accountService;
   private final ReCaptchaService reCaptchaService;
-  private final RedirectStrategy redirectStrategy;
   private final AuthenticationSettings authenticationSettings;
   private final UserFactory userFactory;
   private final AppSettings appSettings;
+  private final PasswordResetter passwordResetter;
 
   public AccountController(
       AccountService accountService,
       ReCaptchaService reCaptchaV3Service,
-      RedirectStrategy redirectStrategy,
       AuthenticationSettings authenticationSettings,
       UserFactory userFactory,
-      AppSettings appSettings) {
+      AppSettings appSettings,
+      PasswordResetter passwordResetter) {
     this.accountService = requireNonNull(accountService);
     this.reCaptchaService = requireNonNull(reCaptchaV3Service);
-    this.redirectStrategy = requireNonNull(redirectStrategy);
     this.authenticationSettings = requireNonNull(authenticationSettings);
     this.userFactory = requireNonNull(userFactory);
     this.appSettings = requireNonNull(appSettings);
+    this.passwordResetter = requireNonNull(passwordResetter);
   }
 
   @GetMapping("/login")
@@ -106,28 +102,37 @@ public class AccountController {
   }
 
   @GetMapping(CHANGE_PASSWORD_RELATIVE_URI)
-  public ModelAndView getChangePasswordForm() {
-    ModelAndView model = new ModelAndView("view-change-password");
-    model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
-    return model;
+  public String getPasswordResetChangeForm(Model model) {
+    model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
+    model.addAttribute("changePasswordEndpoint", CHANGE_PASSWORD_URI);
+    return "view-change-password";
+  }
+
+  @GetMapping(value = CHANGE_PASSWORD_RELATIVE_URI, params = "token")
+  public String getPasswordResetChangeFormToken(
+      @RequestParam("username") String username, @RequestParam("token") String token, Model model) {
+    passwordResetter.validatePasswordResetToken(username, token);
+
+    model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
+    model.addAttribute(
+        "changePasswordEndpoint",
+        CHANGE_PASSWORD_URI + "?username=" + username + "&token=" + token);
+    return "view-change-password";
   }
 
   @PostMapping(CHANGE_PASSWORD_RELATIVE_URI)
-  public void changePassword(
-      @Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
-    try {
-      // Change password of current user
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      if (authentication != null) {
-        accountService.changePassword(authentication.getName(), form.getPassword1());
-      }
+  public String changePassword(@Valid ChangePasswordForm form) {
+    passwordResetter.changePasswordAuthenticatedUser(form.getPassword1());
+    return "redirect:/";
+  }
 
-      // Redirect to homepage
-      redirectStrategy.sendRedirect(request, response, "/");
-    } catch (Exception e) {
-      LOG.error("Error changing password", e);
-    }
+  @PostMapping(value = CHANGE_PASSWORD_RELATIVE_URI, params = "token")
+  public String changePasswordToken(
+      @RequestParam("username") String username,
+      @RequestParam("token") String token,
+      @Valid ChangePasswordForm changePasswordForm) {
+    passwordResetter.changePassword(username, token, changePasswordForm.getPassword1());
+    return "redirect:/login";
   }
 
   // Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
@@ -188,7 +193,7 @@ public class AccountController {
       headers = "Content-Type=application/x-www-form-urlencoded")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void resetPassword(@Valid @ModelAttribute PasswordResetRequest passwordResetRequest) {
-    accountService.resetPassword(passwordResetRequest.getEmail());
+    passwordResetter.resetPassword(passwordResetRequest.getEmail());
   }
 
   @ExceptionHandler(MolgenisDataAccessException.class)
