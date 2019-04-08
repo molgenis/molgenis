@@ -11,8 +11,8 @@ import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITE;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.paramValueToPermissionSet;
-import static org.molgenis.api.permissions.SidConversionTools.getRole;
-import static org.molgenis.api.permissions.SidConversionTools.getUser;
+import static org.molgenis.api.permissions.UserRoleTools.getRole;
+import static org.molgenis.api.permissions.UserRoleTools.getUser;
 import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
 import com.google.common.base.Strings;
@@ -91,7 +91,7 @@ public class PermissionApiService {
   private final ObjectIdentityService objectIdentityService;
   private final DataService dataService;
   private final MutableAclClassService mutableAclClassService;
-  private final SidConversionTools sidConversionTools;
+  private final UserRoleTools userRoleTools;
 
   public PermissionApiService(
       MutableAclService mutableAclService,
@@ -100,14 +100,14 @@ public class PermissionApiService {
       ObjectIdentityService objectIdentityService,
       DataService dataService,
       MutableAclClassService mutableAclClassService,
-      SidConversionTools sidConversionTools) {
+      UserRoleTools userRoleTools) {
     this.mutableAclService = requireNonNull(mutableAclService);
     this.aclClassService = requireNonNull(aclClassService);
     this.inheritanceResolver = requireNonNull(inheritanceResolver);
     this.objectIdentityService = requireNonNull(objectIdentityService);
     this.dataService = requireNonNull(dataService);
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
-    this.sidConversionTools = requireNonNull(sidConversionTools);
+    this.userRoleTools = requireNonNull(userRoleTools);
   }
 
   public List<String> getClasses() {
@@ -241,7 +241,7 @@ public class PermissionApiService {
   private LinkedHashSet getInheritedSids(Set<Sid> sids) {
     LinkedList<Sid> result = new LinkedList<>();
     result.addAll(sids);
-    result.addAll(sidConversionTools.getRoles(sids));
+    result.addAll(userRoleTools.getRoles(sids));
     return new LinkedHashSet(result);
   }
 
@@ -283,8 +283,7 @@ public class PermissionApiService {
         if (!getSuitablePermissionsForType(typeId).contains(permissionRequest.getPermission())) {
           throw new PermissionNotSuitableException(permissionRequest.getPermission(), typeId);
         }
-        Sid sid =
-            sidConversionTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
+        Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
         if (getPermissionResponses(acl, false, singleton(sid)).isEmpty()) {
           acl.insertAce(
               acl.getEntries().size(),
@@ -323,8 +322,7 @@ public class PermissionApiService {
           if (!getSuitablePermissionsForType(typeId).contains(permissionRequest.getPermission())) {
             throw new PermissionNotSuitableException(permissionRequest.getPermission(), typeId);
           }
-          Sid sid =
-              sidConversionTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
+          Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
           List<PermissionResponse> current =
               getPermission(typeId, identifier, Collections.singleton(sid), false);
           if (current.isEmpty()) {
@@ -422,8 +420,7 @@ public class PermissionApiService {
   private void checkPermissionsOnSid(Set<Sid> sids) {
     List<Sid> forbiddenSids = getForbiddenSids(sids);
     if (!SecurityUtils.currentUserIsSuOrSystem() && !forbiddenSids.isEmpty()) {
-      List<String> sidNames =
-          forbiddenSids.stream().map(SidConversionTools::getName).collect(toList());
+      List<String> sidNames = forbiddenSids.stream().map(UserRoleTools::getName).collect(toList());
       throw new SidPermissionException(StringUtils.join(sidNames, ","));
     }
   }
@@ -450,7 +447,7 @@ public class PermissionApiService {
     // User are allowed to query for their own permissions including permissions from roles they
     // have.
     Sid currentUser = createSecurityContextSid();
-    Set<Sid> roles = sidConversionTools.getRoles(currentUser);
+    Set<Sid> roles = userRoleTools.getRoles(currentUser);
     for (Sid sid : sids) {
       if (!roles.contains(sid) && !(currentUser.equals(sid))) {
         result.add(sid);
@@ -542,7 +539,7 @@ public class PermissionApiService {
         getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
       }
     } else {
-      for (Sid sid : sidConversionTools.getAllAvailableSids()) {
+      for (Sid sid : userRoleTools.getAllAvailableSids()) {
         getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
       }
     }
@@ -609,7 +606,7 @@ public class PermissionApiService {
 
   private LinkedList getSortedSidList(Set<Sid> sids) {
     LinkedList<Sid> result = new LinkedList<>(sids);
-    result.sort(Comparator.comparing(SidConversionTools::getName));
+    result.sort(Comparator.comparing(UserRoleTools::getName));
     return result;
   }
 }

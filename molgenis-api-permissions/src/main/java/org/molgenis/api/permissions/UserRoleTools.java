@@ -39,13 +39,13 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SidConversionTools {
+public class UserRoleTools {
 
   private final UserService userService;
   private final DataService dataService;
   private final UserPermissionEvaluator userPermissionEvaluator;
 
-  SidConversionTools(
+  UserRoleTools(
       UserService userService,
       DataService dataService,
       UserPermissionEvaluator userPermissionEvaluator) {
@@ -159,7 +159,7 @@ public class SidConversionTools {
   }
 
   private List<Sid> getRolesForUser(Sid sid) {
-    String username = SidConversionTools.getUser(sid);
+    String username = UserRoleTools.getUser(sid);
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(RoleMembershipMetadata.ROLE_MEMBERSHIP),
         EntityTypePermission.READ_DATA)) {

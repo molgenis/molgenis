@@ -38,13 +38,12 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
   @Mock DataService dataService;
   @Mock UserService userService;
 
-  private SidConversionTools sidConversionTools;
+  private UserRoleTools userRoleTools;
 
   @BeforeMethod
   private void setUp() {
 
-    this.sidConversionTools =
-        new SidConversionTools(userService, dataService, userPermissionEvaluator);
+    this.userRoleTools = new UserRoleTools(userService, dataService, userPermissionEvaluator);
   }
 
   @Test
@@ -58,7 +57,7 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery =
         new PermissionsQuery(Collections.singletonList("user"), Collections.singletonList("role"));
     assertTrue(
-        sidConversionTools
+        userRoleTools
             .getSids(permissionsQuery)
             .containsAll(
                 Arrays.asList(new PrincipalSid("user"), new GrantedAuthoritySid("ROLE_role"))));
@@ -67,7 +66,7 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
   @Test
   public void testGetSid() {
     when(userService.getUser("user")).thenReturn(mock(User.class));
-    assertEquals(sidConversionTools.getSid("user", null), new PrincipalSid("user"));
+    assertEquals(userRoleTools.getSid("user", null), new PrincipalSid("user"));
   }
 
   @Test
@@ -77,27 +76,27 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
     when(query.eq(RoleMetadata.NAME, "ROLE_ROLE")).thenReturn(query);
     when(query.findOne()).thenReturn(mock(Role.class));
 
-    assertEquals(sidConversionTools.getSid(null, "role"), new GrantedAuthoritySid("ROLE_role"));
+    assertEquals(userRoleTools.getSid(null, "role"), new GrantedAuthoritySid("ROLE_role"));
   }
 
   @Test
   public void testGetUser() {
-    assertEquals(SidConversionTools.getUser(new PrincipalSid("test")), "test");
+    assertEquals(UserRoleTools.getUser(new PrincipalSid("test")), "test");
   }
 
   @Test
   public void testGetRole() {
-    assertEquals(SidConversionTools.getRole(new GrantedAuthoritySid("ROLE_test")), "test");
+    assertEquals(UserRoleTools.getRole(new GrantedAuthoritySid("ROLE_test")), "test");
   }
 
   @Test
   public void testGetNameRole() {
-    assertEquals(SidConversionTools.getName(new GrantedAuthoritySid("ROLE_test")), "test");
+    assertEquals(UserRoleTools.getName(new GrantedAuthoritySid("ROLE_test")), "test");
   }
 
   @Test
   public void testGetName() {
-    assertEquals(SidConversionTools.getName(new PrincipalSid("test")), "test");
+    assertEquals(UserRoleTools.getName(new PrincipalSid("test")), "test");
   }
 
   @Test
@@ -135,9 +134,9 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
 
     List<Sid> expected =
         Arrays.asList(new GrantedAuthoritySid("ROLE_role1"), new GrantedAuthoritySid("ROLE_role2"));
-    SidConversionTools sidConversionTools =
-        new SidConversionTools(userService, dataService, userPermissionEvaluator);
-    assertEquals(sidConversionTools.getRolesForSid(user), expected);
+    UserRoleTools userRoleTools =
+        new UserRoleTools(userService, dataService, userPermissionEvaluator);
+    assertEquals(userRoleTools.getRolesForSid(user), expected);
   }
 
   @Test
@@ -202,6 +201,6 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
         .hasPermission(new EntityTypeIdentity(RoleMetadata.ROLE), EntityTypePermission.READ_DATA);
 
     Set<Sid> expected = Sets.newHashSet(role1Sid, role2Sid, role3Sid);
-    assertEquals(sidConversionTools.getRoles(user), expected);
+    assertEquals(userRoleTools.getRoles(user), expected);
   }
 }

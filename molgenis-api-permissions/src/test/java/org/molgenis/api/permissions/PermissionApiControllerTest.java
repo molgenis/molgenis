@@ -52,7 +52,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
 
   @Mock private PermissionApiService permissionApiService;
   @Mock private ObjectIdentityService objectIdentityService;
-  @Mock private SidConversionTools sidConversionTools;
+  @Mock private UserRoleTools userRoleTools;
   private MockMvc mockMvc;
   private PrincipalSid user1;
   private PrincipalSid user2;
@@ -65,7 +65,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
     RSQLParser rsqlParser = new RSQLParser();
     PermissionsApiController controller =
         new PermissionsApiController(
-            permissionApiService, rsqlParser, objectIdentityService, sidConversionTools);
+            permissionApiService, rsqlParser, objectIdentityService, userRoleTools);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -132,7 +132,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Collections.singletonList("role1"));
-    when(sidConversionTools.getSids(permissionsQuery))
+    when(userRoleTools.getSids(permissionsQuery))
         .thenReturn(
             Arrays.asList(new PrincipalSid("user1"), new GrantedAuthoritySid("ROLE_role1")));
 
@@ -164,7 +164,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
-    when(sidConversionTools.getSids(permissionsQuery))
+    when(userRoleTools.getSids(permissionsQuery))
         .thenReturn(
             Arrays.asList(
                 new PrincipalSid("user1"),
@@ -202,7 +202,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("test"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
-    when(sidConversionTools.getSids(permissionsQuery))
+    when(userRoleTools.getSids(permissionsQuery))
         .thenReturn(Arrays.asList(user1, user2, role1, role2));
 
     MvcResult result =
@@ -234,7 +234,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
         .thenReturn(classPermissionResponses);
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
-    when(sidConversionTools.getSids(permissionsQuery))
+    when(userRoleTools.getSids(permissionsQuery))
         .thenReturn(Collections.singletonList(new PrincipalSid("user1")));
 
     MvcResult result =
@@ -393,7 +393,7 @@ public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testDeletePermission() throws Exception {
-    when(sidConversionTools.getSid("user1", null)).thenReturn(user1);
+    when(userRoleTools.getSid("user1", null)).thenReturn(user1);
     String requestJson = "{" + "user:user1" + "}";
     mockMvc
         .perform(

@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.PermissionTestUtils;
-import org.molgenis.api.permissions.SidConversionTools;
+import org.molgenis.api.permissions.UserRoleTools;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.api.permissions.model.response.InheritedPermission;
@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTest {
 
   @Mock DataService dataService;
-  @Mock SidConversionTools sidConversionTools;
+  @Mock UserRoleTools userRoleTools;
 
   @Test
   public void testGetInheritedPermissions() {
@@ -48,14 +48,14 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
     Acl entityAcl =
         PermissionTestUtils.getSinglePermissionAcl(role2Sid, 8, "entityAcl", packageAcl);
 
-    doReturn(Arrays.asList(role1Sid, role2Sid)).when(sidConversionTools).getRolesForSid(user);
-    doReturn(Arrays.asList(role3Sid)).when(sidConversionTools).getRolesForSid(role1Sid);
+    doReturn(Arrays.asList(role1Sid, role2Sid)).when(userRoleTools).getRolesForSid(user);
+    doReturn(Arrays.asList(role3Sid)).when(userRoleTools).getRolesForSid(role1Sid);
 
     InheritedPermissionsResult expected =
         getInheritedPermissionsResult(
             entityAcl, packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getInheritedPermissions(entityAcl, user), expected);
   }
 
@@ -94,7 +94,7 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
     doReturn(packageRepo).when(dataService).getRepository("sys_md_Package");
 
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     List<InheritedPermission> actual = resolver.convertToInheritedPermissions(input);
 
     // expected
@@ -134,42 +134,42 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
   @Test
   public void testGetEntityTypeIdFromClassPlugin() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("plugin"), "sys_Plugin");
   }
 
   @Test
   public void testGetEntityTypeIdFromClassET() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("entityType"), "sys_md_EntityType");
   }
 
   @Test
   public void testGetEntityTypeIdFromClassGroup() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("group"), "sys_sec_Group");
   }
 
   @Test
   public void testGetEntityTypeIdFromClassPack() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("package"), "sys_md_Package");
   }
 
   @Test
   public void testGetEntityTypeIdFromClassEntity() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("entity-test"), "test");
   }
 
   @Test(expectedExceptions = InvalidTypeIdException.class)
   public void testGetEntityTypeIdFromClassError() {
     PermissionInheritanceResolver resolver =
-        new PermissionInheritanceResolver(dataService, sidConversionTools);
+        new PermissionInheritanceResolver(dataService, userRoleTools);
     assertEquals(resolver.getEntityTypeIdFromClass("error"), "");
   }
 }

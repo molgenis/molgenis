@@ -73,7 +73,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   @Mock ObjectIdentityService objectIdentityService;
   @Mock DataService dataService;
   @Mock MutableAclClassService mutableAclClassService;
-  @Mock SidConversionTools sidConversionTools;
+  @Mock UserRoleTools userRoleTools;
   private PermissionApiService permissionApiService;
 
   @BeforeMethod
@@ -87,7 +87,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
             objectIdentityService,
             dataService,
             mutableAclClassService,
-            sidConversionTools);
+            userRoleTools);
   }
 
   @Test
@@ -417,7 +417,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(
             Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    when(sidConversionTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
+    when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
 
     assertEquals(
         permissionApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), true),
@@ -460,7 +460,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    when(sidConversionTools.getSid(null, "role")).thenReturn(expectedSid);
+    when(userRoleTools.getSid(null, "role")).thenReturn(expectedSid);
 
     permissionApiService.createPermission(
         Collections.singletonList(permission), "entity-typeId", "identifier");
@@ -507,9 +507,9 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    doReturn(expectedSid).when(sidConversionTools).getSid(null, "role");
+    doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
     Sid expectedSid2 = new PrincipalSid("user1");
-    doReturn(expectedSid2).when(sidConversionTools).getSid("user1", null);
+    doReturn(expectedSid2).when(userRoleTools).getSid("user1", null);
 
     permissionApiService.createPermissions(
         Arrays.asList(objectPermissionsRequest1, objectPermissionsRequest2), "entity-typeId");
@@ -570,7 +570,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    doReturn(expectedSid).when(sidConversionTools).getSid(null, "role");
+    doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
     permissionApiService.updatePermission(
         Collections.singletonList(permission), "entity-typeId", "identifier");
@@ -632,7 +632,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    doReturn(expectedSid).when(sidConversionTools).getSid(null, "role");
+    doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
     permissionApiService.updatePermissions(
         Collections.singletonList(identityPermissions), "entity-typeId");

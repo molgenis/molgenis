@@ -70,18 +70,18 @@ public class PermissionsApiController extends ApiController {
   private final PermissionApiService permissionApiService;
   private final RSQLParser rsqlParser;
   private final ObjectIdentityService objectIdentityService;
-  private final SidConversionTools sidConversionTools;
+  private final UserRoleTools userRoleTools;
 
   public PermissionsApiController(
       PermissionApiService permissionApiService,
       RSQLParser rsqlParser,
       ObjectIdentityService objectIdentityService,
-      SidConversionTools sidConversionTools) {
+      UserRoleTools userRoleTools) {
     super(PERMISSION_API_IDENTIFIER, VERSION);
     this.permissionApiService = requireNonNull(permissionApiService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
-    this.sidConversionTools = requireNonNull(sidConversionTools);
+    this.userRoleTools = requireNonNull(userRoleTools);
   }
 
   @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
@@ -270,7 +270,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
-    Sid sid = sidConversionTools.getSid(request.getUser(), request.getRole());
+    Sid sid = userRoleTools.getSid(request.getUser(), request.getRole());
     permissionApiService.deletePermission(sid, typeId, identifier);
     return ResponseEntity.noContent().build();
   }
@@ -280,7 +280,7 @@ public class PermissionsApiController extends ApiController {
     if (StringUtils.isNotEmpty(queryString)) {
       Node node = rsqlParser.parse(queryString);
       PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
-      sids = new LinkedHashSet<>(sidConversionTools.getSids(permissionsQuery));
+      sids = new LinkedHashSet<>(userRoleTools.getSids(permissionsQuery));
     }
     return sids;
   }
