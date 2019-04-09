@@ -86,7 +86,7 @@ public class PermissionsApiController extends ApiController {
 
   @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Create an ACL class this enables row level secure an entity",
+      value = "Create a type this enables row level secure an entity",
       response = ResponseEntity.class)
   public ResponseEntity enableRLS(
       HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
@@ -97,7 +97,7 @@ public class PermissionsApiController extends ApiController {
 
   @DeleteMapping(value = TYPES + "/{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Delete an ACL class this removes row level security from an entity",
+      value = "Delete a type this removes row level security from an entity",
       response = ResponseEntity.class)
   public ResponseEntity disableRLS(@PathVariable(value = TYPE_ID) String typeId) {
     permissionApiService.deleteClass(typeId);
@@ -105,14 +105,14 @@ public class PermissionsApiController extends ApiController {
   }
 
   @GetMapping(value = TYPES)
-  @ApiOperation(value = "Get a list of acl classes in the system", response = ResponseEntity.class)
+  @ApiOperation(value = "Get a list of ACL types in the system", response = ResponseEntity.class)
   public List<String> getRlsEntities() {
     return permissionApiService.getClasses();
   }
 
   @GetMapping(value = TYPES + "/permissions/{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Get a list of permissions that can be used on a acl class",
+      value = "Get a list of permissions that can be used on a type",
       response = List.class)
   public Set<String> getSuitablePermissions(@PathVariable(value = TYPE_ID) String typeId) {
     return permissionApiService.getSuitablePermissionsForType(typeId);
@@ -132,7 +132,7 @@ public class PermissionsApiController extends ApiController {
   @GetMapping(value = OBJECTS + "/{" + TYPE_ID + "}")
   @ApiOperation(
       value =
-          "Get a list ace's for a entity. Typically this is a row in a row level secured entity.",
+          "Get a list object's for a type. Typically this is a row in a row level secured entity.",
       response = List.class)
   public PagedApiResponse getAcls(
       @PathVariable(value = TYPE_ID) String typeId,
@@ -151,7 +151,7 @@ public class PermissionsApiController extends ApiController {
   }
 
   @GetMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
-  @ApiOperation(value = "Gets permissions on a single acl", response = ResponseEntity.class)
+  @ApiOperation(value = "Gets permissions on a single object", response = ResponseEntity.class)
   public GetObjectPermissionResponse getPermissionsForObject(
       @PathVariable(TYPE_ID) String typeId,
       @PathVariable(OBJECT_ID) String identifier,
@@ -167,7 +167,7 @@ public class PermissionsApiController extends ApiController {
 
   @GetMapping(value = "{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Gets all permissions for all acls of a certain class",
+      value = "Gets all permissions for all objects of a certain type",
       response = ResponseEntity.class)
   public PagedApiResponse getPermissionsForClass(
       @PathVariable(value = TYPE_ID) String typeId,
@@ -217,7 +217,7 @@ public class PermissionsApiController extends ApiController {
 
   @PatchMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(
-      value = "Update a permission on a single acl for one or more users or roles",
+      value = "Update a permission on a single object for one or more users or roles",
       response = ResponseEntity.class)
   public ResponseEntity setPermission(
       @PathVariable(value = TYPE_ID) String typeId,
@@ -229,7 +229,7 @@ public class PermissionsApiController extends ApiController {
 
   @PatchMapping(value = "{" + TYPE_ID + "}")
   @ApiOperation(
-      value = "Update a list of permissions on acls belonging to a certain acl class",
+      value = "Update a list of permissions on objects of a certain type",
       response = ResponseEntity.class)
   public ResponseEntity setClassPermissions(
       @PathVariable(value = TYPE_ID) String typeId,
@@ -239,7 +239,7 @@ public class PermissionsApiController extends ApiController {
   }
 
   @PostMapping(value = "{" + TYPE_ID + "}")
-  @ApiOperation(value = "Create a list of permissions on an acl for a single user or role")
+  @ApiOperation(value = "Create a list of permissions on an type for a single user or role")
   public ResponseEntity<Object> createPermissions(
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
@@ -250,7 +250,7 @@ public class PermissionsApiController extends ApiController {
   }
 
   @PostMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
-  @ApiOperation(value = "Create a permission on acls for a single user or role")
+  @ApiOperation(value = "Create a permission on an object for a single user or role")
   public ResponseEntity<Object> createPermission(
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
@@ -264,7 +264,7 @@ public class PermissionsApiController extends ApiController {
 
   @DeleteMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(
-      value = "Delete a permission on an acl for a single user or role",
+      value = "Delete a permission on an object for a single user or role",
       response = ResponseEntity.class)
   public ResponseEntity deletePermission(
       @PathVariable(value = TYPE_ID) String typeId,
