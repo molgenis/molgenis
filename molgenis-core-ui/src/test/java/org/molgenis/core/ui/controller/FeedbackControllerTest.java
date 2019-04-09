@@ -38,12 +38,14 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -65,6 +67,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private UserFactory userFactory;
 
   private MockMvc mockMvcFeedback;
+  private SecurityContext previousContext;
 
   @BeforeMethod
   public void beforeMethod() {
@@ -76,7 +79,16 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
             .build();
     Authentication authentication = new TestingAuthenticationToken("userName", null);
     authentication.setAuthenticated(true);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
+  }
+
+  @AfterClass
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test

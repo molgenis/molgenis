@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,23 +27,25 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = {Config.class})
 public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests {
   private static final String USERNAME_USER = "username";
-  private static Authentication AUTHENTICATION_PREVIOUS;
   private Authentication authentication;
   @Autowired private UserAccountServiceImpl userAccountServiceImpl;
   @Autowired private UserService userService;
   @Autowired private PasswordEncoder passwordEncoder;
+  private SecurityContext previousContext;
 
   @AfterClass
-  public static void tearDownAfterClass() {
-    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @BeforeClass
   public void setUpBeforeClass() {
-    AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
   }
 
   @Test

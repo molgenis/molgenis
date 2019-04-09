@@ -27,9 +27,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -39,7 +39,8 @@ import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {Config.class})
 public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests {
-  private static Authentication AUTHENTICATION_PREVIOUS;
+
+  private SecurityContext previousContext;
 
   @Configuration
   @EnableWebSecurity
@@ -87,12 +88,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
   @BeforeClass
   public void setUpBeforeClass() {
-    AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    SecurityContextHolder.setContext(testContext);
   }
 
   @AfterClass
-  public static void tearDownAfterClass() {
-    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
