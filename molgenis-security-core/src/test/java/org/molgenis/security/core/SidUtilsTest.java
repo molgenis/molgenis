@@ -7,24 +7,27 @@ import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SidUtilsTest {
-  private Authentication authenticationPrevious;
+
+  private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    authenticationPrevious = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    SecurityContextHolder.setContext(testContext);
   }
 
   @AfterMethod
   public void tearDownAfterMethod() {
-    SecurityContextHolder.getContext().setAuthentication(authenticationPrevious);
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test

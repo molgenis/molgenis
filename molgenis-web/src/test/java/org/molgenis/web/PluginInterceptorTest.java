@@ -14,9 +14,11 @@ import org.molgenis.web.menu.MenuReaderService;
 import org.molgenis.web.menu.model.Menu;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,15 +26,25 @@ public class PluginInterceptorTest {
   private MenuReaderService menuReaderService;
   private UserPermissionEvaluator permissionService;
   private Authentication authentication;
+  private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUp() {
     menuReaderService = mock(MenuReaderService.class);
     when(menuReaderService.getMenu()).thenReturn(Optional.of(mock(Menu.class)));
     permissionService = mock(UserPermissionEvaluator.class);
+
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn("username");
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
+  }
+
+  @AfterMethod
+  public void tearDownAfterMethod() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
