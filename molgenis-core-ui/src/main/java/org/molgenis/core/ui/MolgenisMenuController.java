@@ -151,9 +151,7 @@ public class MolgenisMenuController {
    * @param pluginId ID of the plugin
    */
   @SuppressWarnings("squid:S3752") // multiple methods required
-  @RequestMapping(
-      method = {RequestMethod.GET, RequestMethod.POST},
-      value = "/{menuId}/{pluginId}/**")
+  @RequestMapping("/{menuId}/{pluginId}/**")
   public String forwardMenuPlugin(
       HttpServletRequest request,
       @Valid @NotNull @PathVariable String menuId,
