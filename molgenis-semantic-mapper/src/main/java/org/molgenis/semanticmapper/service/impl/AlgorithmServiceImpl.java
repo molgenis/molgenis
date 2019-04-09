@@ -38,6 +38,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
+import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticsearch.explain.bean.EntityTypeSearchResults;
@@ -75,6 +76,20 @@ public class AlgorithmServiceImpl implements AlgorithmService {
       EntityType sourceEntityType) {
     return algorithmGeneratorService.generate(
         targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+  }
+
+  @Override
+  public void copyAlgorithms(EntityMapping sourceEntityMapping, EntityMapping targetEntityMapping) {
+    sourceEntityMapping
+        .getAttributeMappings()
+        .forEach(attributeMapping -> copyAlgorithm(attributeMapping, targetEntityMapping));
+  }
+
+  private void copyAlgorithm(AttributeMapping attributeMapping, EntityMapping targetEntityMapping) {
+    AttributeMapping attributeMappingCopy = AttributeMapping.createCopy(attributeMapping);
+    attributeMappingCopy.setIdentifier(null);
+    attributeMappingCopy.setAlgorithmState(AlgorithmState.DISCUSS);
+    targetEntityMapping.addAttributeMapping(attributeMappingCopy);
   }
 
   @Override
