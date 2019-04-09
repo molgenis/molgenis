@@ -50,7 +50,7 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
   public void testGetSids() {
     Query<Role> query = mock(Query.class);
     when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
-    when(query.eq(RoleMetadata.NAME, "ROLE_ROLE")).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, "ROLE")).thenReturn(query);
     when(query.findOne()).thenReturn(mock(Role.class));
 
     when(userService.getUser("user")).thenReturn(mock(User.class));
@@ -73,7 +73,7 @@ public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
   public void testGetSidRole() {
     Query<Role> query = mock(Query.class);
     when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
-    when(query.eq(RoleMetadata.NAME, "ROLE_ROLE")).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, "ROLE")).thenReturn(query);
     when(query.findOne()).thenReturn(mock(Role.class));
 
     assertEquals(userRoleTools.getSid(null, "role"), new GrantedAuthoritySid("ROLE_role"));

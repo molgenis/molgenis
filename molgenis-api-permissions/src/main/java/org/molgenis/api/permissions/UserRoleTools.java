@@ -74,7 +74,7 @@ public class UserRoleTools {
   private void checkRoleExists(String role) {
     if (dataService
             .query(RoleMetadata.ROLE, Role.class)
-            .eq(RoleMetadata.NAME, ROLE_PREFIX + role.toUpperCase())
+            .eq(RoleMetadata.NAME, role.toUpperCase())
             .findOne()
         == null) {
       throw new UnknownRoleException(role);
