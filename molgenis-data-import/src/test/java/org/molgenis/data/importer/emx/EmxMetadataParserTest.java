@@ -29,6 +29,7 @@ import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -839,6 +840,30 @@ public class EmxMetadataParserTest extends AbstractMockitoTest {
     verify(tag).setRelationIri("relation iri");
     verify(tag).setRelationLabel("relation");
     verify(tag).setCodeSystem("code");
+  }
+
+  @Test
+  public void testToTags() {
+    Tag tag1 = mock(Tag.class);
+    Tag tag2 = mock(Tag.class);
+    EntityTypeFactory entityTypeFactory = mock(EntityTypeFactory.class);
+    IntermediateParseResults intermediateParseResults =
+        new IntermediateParseResults(entityTypeFactory);
+    intermediateParseResults.addTag("tag2", tag2);
+    when(dataService.findOneById(TAG, "tag1", Tag.class)).thenReturn(tag1);
+    assertEquals(
+        emxMetadataParser.toTags(intermediateParseResults, Arrays.asList("tag1", "tag2")),
+        Arrays.asList(tag1, tag2));
+  }
+
+  @Test(expectedExceptions = UnknownTagException.class)
+  public void testToTagsUnknownTag() {
+    Tag tag2 = mock(Tag.class);
+    EntityTypeFactory entityTypeFactory = mock(EntityTypeFactory.class);
+    IntermediateParseResults intermediateParseResults =
+        new IntermediateParseResults(entityTypeFactory);
+    intermediateParseResults.addTag("tag2", tag2);
+    emxMetadataParser.toTags(intermediateParseResults, Arrays.asList("tag1", "tag2"));
   }
 
   private void initMetaFactories() {

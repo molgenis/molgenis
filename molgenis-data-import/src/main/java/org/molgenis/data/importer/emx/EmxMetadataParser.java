@@ -526,16 +526,18 @@ public class EmxMetadataParser implements MetadataParser {
     return intermediateResults;
   }
 
-  /** Convert tag identifiers to tags */
-  private static List<Tag> toTags(
-      IntermediateParseResults intermediateResults, List<String> tagIdentifiers) {
+  /** Convert tag identifiers to tags Package private for unit test */
+  List<Tag> toTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers) {
     if (tagIdentifiers.isEmpty()) {
       return emptyList();
     }
 
     List<Tag> tags = new ArrayList<>(tagIdentifiers.size());
     for (String tagIdentifier : tagIdentifiers) {
-      Tag tag = intermediateResults.getTag(tagIdentifier);
+      Tag tag =
+          intermediateResults.hasTag(tagIdentifier)
+              ? intermediateResults.getTag(tagIdentifier)
+              : dataService.findOneById(TAG, tagIdentifier, Tag.class);
       if (tag == null) {
         throw new UnknownTagException(tagIdentifier);
       }
