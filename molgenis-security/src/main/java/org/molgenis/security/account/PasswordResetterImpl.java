@@ -8,6 +8,7 @@ import org.molgenis.data.security.user.InvalidEmailAddressException;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
 import org.springframework.mail.MailSender;
@@ -66,17 +67,16 @@ class PasswordResetterImpl implements PasswordResetter {
   }
 
   @Transactional
-  @RunAsSystem
   @Override
   public void changePasswordAuthenticatedUser(String password) {
     String username = SecurityUtils.getCurrentUsername();
     if (username == null) {
       throw new AuthenticationCredentialsNotFoundException("not authenticated");
     }
-
     User user = getUser(username);
     user.setPassword(password);
-    userService.update(user);
+    user.setChangePassword(false);
+    RunAsSystemAspect.runAsSystem(() -> userService.update(user));
   }
 
   private User getUser(String username) {
