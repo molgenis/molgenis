@@ -71,7 +71,7 @@ By default this is true for users with the role "Manager" or "Editor" and superu
 Only entities that follow the naming scheme "PACKAGE_ENITYNAME" as identifier can be downloaded.
 Also the identifier cannot be longer that 31 characters due to sheet name length limitations in some older spreadsheet programs.
 
-Tags on your metadata will not be downloaded, these need to be added to the file manually before it can be uploaded into MOLGENIS via the import plugin.
+Tags on your metadata will not be downloaded, these need to be added to either the MOLGENIS database or the file before it can be imported via the import plugin.
 
 ![Navigator_screen](../../images/navigator/navigator-download.png?raw=true, "navigator/screen")
 
