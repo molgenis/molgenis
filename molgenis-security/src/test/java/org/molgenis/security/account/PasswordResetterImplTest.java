@@ -143,6 +143,7 @@ public class PasswordResetterImplTest extends AbstractMockitoTest {
     User user = mock(User.class);
     when(userService.getUser(username)).thenReturn(user);
     passwordResetServiceImpl.changePasswordAuthenticatedUser(password);
+    verify(user).setChangePassword(false);
     verify(userService).update(user);
   }
 
