@@ -53,4 +53,10 @@ public interface AlgorithmService {
       EntityType targetEntityType,
       List<Attribute> sourceAttributes,
       EntityType sourceEntityType);
+
+  /**
+   * Copies all algorithms from a source entity type to a target entity type. Sets the algorithm
+   * state of each attribute mapping copy to 'discuss'.
+   */
+  void copyAlgorithms(EntityMapping sourceEntityMapping, EntityMapping targetEntityMapping);
 }

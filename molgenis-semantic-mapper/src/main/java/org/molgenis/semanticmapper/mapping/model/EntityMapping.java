@@ -95,6 +95,15 @@ public class EntityMapping {
         .map(AttributeMapping::getTargetAttributeName);
   }
 
+  public void addAttributeMapping(AttributeMapping attributeMapping) {
+    String targetAttributeName = attributeMapping.getTargetAttributeName();
+    if (attributeMappings.containsKey(targetAttributeName)) {
+      throw new IllegalStateException(
+          "AttributeMapping already exists for target attribute " + targetAttributeName);
+    }
+    attributeMappings.put(targetAttributeName, attributeMapping);
+  }
+
   /**
    * Adds a new empty attribute mapping to a target attribute
    *

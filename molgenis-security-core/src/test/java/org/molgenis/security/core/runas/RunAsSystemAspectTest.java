@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -19,16 +20,19 @@ import org.testng.annotations.Test;
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @ContextConfiguration(classes = RunAsSystemAspectTest.Config.class)
 public class RunAsSystemAspectTest extends AbstractTestNGSpringContextTests {
-  private static Authentication AUTHENTICATION_PREVIOUS;
+
+  private SecurityContext previousContext;
 
   @BeforeClass
   public void setUpBeforeClass() {
-    AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    SecurityContextHolder.setContext(testContext);
   }
 
   @AfterClass
-  public static void tearDownAfterClass() {
-    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test

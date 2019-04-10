@@ -16,6 +16,7 @@ import java.util.Collections;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.testng.annotations.AfterClass;
@@ -24,15 +25,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class SecurityUtilsTest {
-  private static Authentication AUTHENTICATION_PREVIOUS;
   private Authentication authentication;
   private UserDetails userDetails;
+  private SecurityContext previousContext;
 
   @BeforeClass
   public void setUpBeforeClass() {
-    AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     authentication = mock(Authentication.class);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
   }
 
   @SuppressWarnings("unchecked")
@@ -55,8 +58,8 @@ public class SecurityUtilsTest {
   }
 
   @AfterClass
-  public static void tearDownAfterClass() {
-    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
