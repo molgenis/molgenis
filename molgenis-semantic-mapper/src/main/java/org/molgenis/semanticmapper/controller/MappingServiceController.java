@@ -515,7 +515,7 @@ public class MappingServiceController extends PluginController {
             searchTerms);
 
     // If no relevant attributes are found, return all source attributes
-    if (attributeSearchResults.getHits().iterator().hasNext()) {
+    if (!attributeSearchResults.getHits().iterator().hasNext()) {
       return stream(entityMapping.getSourceEntityType().getAtomicAttributes())
           .filter(attribute -> attribute.getDataType() != COMPOUND)
           .map(ExplainedAttributeDto::create)
