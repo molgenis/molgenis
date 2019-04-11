@@ -60,8 +60,10 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -75,6 +77,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   @Mock MutableAclClassService mutableAclClassService;
   @Mock UserRoleTools userRoleTools;
   private PermissionApiService permissionApiService;
+  private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUp() {
@@ -88,6 +91,15 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
             dataService,
             mutableAclClassService,
             userRoleTools);
+
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    SecurityContextHolder.setContext(testContext);
+  }
+
+  @AfterMethod
+  public void cleanUp() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
