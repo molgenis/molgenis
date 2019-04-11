@@ -46,11 +46,9 @@ public class ScheduledScriptConfig {
       @Override
       public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution) {
         final String name = scriptJobExecution.getName();
-        final String parameterString = scriptJobExecution.getParameters();
         return progress -> {
-          Map<String, Object> params = new HashMap<>();
-          params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
-          params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
+          Map<String, Object> params = getParameterMap(scriptJobExecution);
+
           ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
           if (scriptResult.getOutputFile() != null) {
             scriptJobExecution.setResultUrl(
@@ -61,6 +59,16 @@ public class ScheduledScriptConfig {
         };
       }
     };
+  }
+
+  Map<String, Object> getParameterMap(ScriptJobExecution scriptJobExecution) {
+    Map<String, Object> params = new HashMap<>();
+    final String parameterString = scriptJobExecution.getParameters();
+    if (!parameterString.isEmpty()) {
+      params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
+    }
+    params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
+    return params;
   }
 
   @Lazy
