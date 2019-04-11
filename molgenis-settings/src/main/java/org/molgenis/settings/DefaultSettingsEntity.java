@@ -2,31 +2,25 @@ package org.molgenis.settings;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ResourceBundle;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.StaticEntity;
 import org.molgenis.data.util.EntityUtils;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Base class for application and plugin settings entities. Settings are read/written from/to data
  * source. TODO: Bring this class up to date with 2.0, see http://www.molgenis.org/ticket/4787
  */
-public abstract class DefaultSettingsEntity extends StaticEntity implements Entity {
+public abstract class DefaultSettingsEntity implements Entity {
   private final String entityId;
   private final String entityTypeId;
   private DataService dataService;
-  private EntityListenersService entityListenersService;
-  private Entity cachedEntity;
 
   public DefaultSettingsEntity(String entityId) {
     this.entityId = requireNonNull(entityId);
@@ -38,13 +32,8 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
     this.dataService = requireNonNull(dataService);
   }
 
-  @Autowired
-  public void setEntityListenersService(EntityListenersService entityListenersService) {
-    this.entityListenersService = requireNonNull(entityListenersService);
-  }
-
   public EntityType getEntityType() {
-    return RunAsSystemAspect.runAsSystem(() -> dataService.getEntityType(entityTypeId));
+    return runAsSystem(() -> dataService.getEntityType(entityTypeId));
   }
 
   @Override
@@ -59,7 +48,7 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 
   @Override
   public void setIdValue(Object id) {
-    getEntity().setIdValue(id);
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -136,54 +125,9 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
 
   @Override
   public void set(Entity values) {
-    cachedEntity = values;
-  }
-
-  /**
-   * Adds a listener for this settings entity that fires on entity updates
-   *
-   * @param settingsEntityListener listener for this settings entity
-   */
-  public void addListener(SettingsEntityListener settingsEntityListener) {
-    RunAsSystemAspect.runAsSystem(
-        () ->
-            entityListenersService.addEntityListener(
-                entityTypeId,
-                new EntityListener() {
-                  @Override
-                  public void postUpdate(Entity entity) {
-                    settingsEntityListener.postUpdate(entity);
-                  }
-
-                  @Override
-                  public Object getEntityId() {
-                    return getEntityType().getId();
-                  }
-                }));
-  }
-
-  /**
-   * Removes a listener for this settings entity that fires on entity updates
-   *
-   * @param settingsEntityListener listener for this settings entity
-   */
-  public void removeListener(SettingsEntityListener settingsEntityListener) {
-    RunAsSystemAspect.runAsSystem(
-        () ->
-            entityListenersService.removeEntityListener(
-                entityTypeId,
-                new EntityListener() {
-
-                  @Override
-                  public void postUpdate(Entity entity) {
-                    settingsEntityListener.postUpdate(entity);
-                  }
-
-                  @Override
-                  public Object getEntityId() {
-                    return getEntityType().getId();
-                  }
-                }));
+    Entity entity = getEntity();
+    entity.set(values);
+    updateEntity(entity);
   }
 
   @Override
@@ -198,46 +142,16 @@ public abstract class DefaultSettingsEntity extends StaticEntity implements Enti
     return EntityUtils.hashCode(this);
   }
 
-  private Entity getEntity() {
-    if (cachedEntity == null) {
-      cachedEntity =
-          RunAsSystemAspect.runAsSystem(
-              () -> {
-                Entity entity = dataService.findOneById(entityTypeId, entityId);
-
-                // refresh cache on settings update
-                entityListenersService.addEntityListener(
-                    entityTypeId,
-                    new EntityListener() {
-                      @Override
-                      public void postUpdate(Entity entity) {
-                        cachedEntity = entity;
-                      }
-
-                      @Override
-                      public Object getEntityId() {
-                        return entityId;
-                      }
-                    });
-                return entity;
-              });
-    }
-    return cachedEntity;
-  }
-
-  private void updateEntity(Entity entity) {
-    RunAsSystemAspect.runAsSystem(
-        () -> {
-          dataService.update(entityTypeId, entity);
-          ResourceBundle.clearCache();
-
-          // cache refresh is handled via entity listener
-          return null;
-        });
-  }
-
   @Override
   public String toString() {
     return getEntity().toString();
+  }
+
+  private Entity getEntity() {
+    return runAsSystem(() -> dataService.findOneById(entityTypeId, entityId));
+  }
+
+  private void updateEntity(Entity entity) {
+    runAsSystem(() -> dataService.update(entityTypeId, entity));
   }
 }
