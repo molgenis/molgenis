@@ -46,7 +46,7 @@ public class ScheduledScriptConfigTest extends AbstractMockitoTest {
   @Test
   public void testGetParameterMapEmptyString() {
     ScriptJobExecution scriptJobExecution = mock(ScriptJobExecution.class);
-    when(scriptJobExecution.getParameters()).thenReturn("");
+    when(scriptJobExecution.getParameters()).thenReturn(null);
     when(scriptJobExecution.getIdValue()).thenReturn("scriptJobExecutionIdentifier");
 
     Map<String, Object> actual = scheduledJobConfig.getParameterMap(scriptJobExecution);

@@ -41,7 +41,7 @@ public class ScriptJobExecutionMetadata extends SystemEntityType {
     addAttribute(PARAMETERS)
         .setDataType(TEXT)
         .setLabel("Parameter values")
-        .setNillable(false)
+        .setNillable(true)
         .setDefaultValue("");
   }
 }
