@@ -185,7 +185,7 @@
             <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
                 <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
                 <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
-                                 style="max-height: ${app_settings.logoTopMaxHeight}px"></a>
+                                 style="max-height: ${app_settings.logoTopMaxHeight}px;max-width: 90%;"></a>
             </header>
             </#if>
             <div class="navbar-header">
