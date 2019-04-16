@@ -1,19 +1,19 @@
 package org.molgenis.api.permissions;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.api.permissions.PermissionSetUtils.COUNT;
 import static org.molgenis.api.permissions.PermissionSetUtils.READ;
 import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITE;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
@@ -31,7 +31,6 @@ import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
-import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -49,6 +48,7 @@ import org.molgenis.security.acl.AclClassService;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -67,8 +67,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
-
+public class PermissionsApiServiceTest extends AbstractMockitoTest {
   @Mock MutableAclService mutableAclService;
   @Mock AclClassService aclClassService;
   @Mock PermissionInheritanceResolver inheritanceResolver;
@@ -80,8 +79,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
   private SecurityContext previousContext;
 
   @BeforeMethod
-  public void setUp() {
-    initMocks(this);
+  public void setUpBeforeMethod() {
     permissionsApiService =
         new PermissionsApiService(
             mutableAclService,
@@ -98,7 +96,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @AfterMethod
-  public void cleanUp() {
+  public void tearDown() {
     SecurityContextHolder.setContext(previousContext);
   }
 
@@ -110,7 +108,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     doReturn(true).when(dataService).hasEntityType("test1");
     doReturn(false).when(dataService).hasEntityType("test2");
 
-    assertEquals(permissionsApiService.getClasses(), Collections.singletonList("entity-test1"));
+    assertEquals(permissionsApiService.getClasses(), singletonList("entity-test1"));
   }
 
   @Test
@@ -189,7 +187,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
@@ -202,7 +200,8 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
 
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
@@ -225,7 +224,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     Entity entity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
-    when(aclClassService.getAclClassTypes()).thenReturn(Collections.singletonList("entity-typeId"));
+    when(aclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
     setSuAuthentication(true);
@@ -251,13 +250,14 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
     when(entityType.getLabel()).thenReturn("TypeLabel");
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(repo.getEntityType()).thenReturn(entityType);
     when(dataService.getRepository("typeId")).thenReturn(repo);
@@ -269,11 +269,10 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
             "identifier", "label", Arrays.asList(permission1, permission2));
     TypePermissionsResponse classPermissions1 =
         TypePermissionsResponse.create(
-            "entity-typeId", "TypeLabel", Collections.singletonList(identityPermissions1));
+            "entity-typeId", "TypeLabel", singletonList(identityPermissions1));
     Set<TypePermissionsResponse> expected = Sets.newHashSet(classPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
-        .thenReturn(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
+        .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
     Set<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
@@ -310,12 +309,13 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
@@ -327,8 +327,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities(
             "entity-typeId", Sets.newHashSet(sid1, sid2), 20, 60))
-        .thenReturn(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
+        .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
     Set<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
@@ -360,13 +359,14 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
@@ -377,8 +377,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
             "identifier", "label", Arrays.asList(permission2, permission1));
     Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
-        .thenReturn(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
+        .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
     Set<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
@@ -412,12 +411,13 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier"))))
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier"))))
         .thenReturn(aclMap);
 
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
@@ -428,8 +428,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
             "identifier", "label", Arrays.asList(permission2, permission1));
     Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
-        .thenReturn(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
+        .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
     when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
 
     assertEquals(
@@ -476,7 +475,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     when(userRoleTools.getSid(null, "role")).thenReturn(expectedSid);
 
     permissionsApiService.createPermission(
-        Collections.singletonList(permission), "entity-typeId", "identifier");
+        singletonList(permission), "entity-typeId", "identifier");
 
     verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
     verify(mutableAclService).updateAcl(acl);
@@ -510,10 +509,10 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier2"));
     PermissionRequest permission1 = PermissionRequest.create("role", null, "WRITE");
     ObjectPermissionsRequest objectPermissionsRequest1 =
-        ObjectPermissionsRequest.create("identifier", Collections.singletonList(permission1));
+        ObjectPermissionsRequest.create("identifier", singletonList(permission1));
     PermissionRequest permission2 = PermissionRequest.create(null, "user1", "READ");
     ObjectPermissionsRequest objectPermissionsRequest2 =
-        ObjectPermissionsRequest.create("identifier2", Collections.singletonList(permission2));
+        ObjectPermissionsRequest.create("identifier2", singletonList(permission2));
 
     when(entityType.getIdAttribute()).thenReturn(attribute);
     when(attribute.getDataType()).thenReturn(AttributeType.STRING);
@@ -563,14 +562,14 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
     when(ace1.getSid()).thenReturn(sid);
     when(ace1.getPermission()).thenReturn(PermissionSet.COUNT);
-    when(acl.getEntries()).thenReturn(Arrays.asList(ace1));
+    when(acl.getEntries()).thenReturn(singletonList(ace1));
 
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            Arrays.asList(sid)))
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(sid)))
         .thenReturn(aclMap);
 
     when(entityType.getIdAttribute()).thenReturn(attribute);
@@ -578,7 +577,8 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
@@ -586,7 +586,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
     permissionsApiService.updatePermission(
-        Collections.singletonList(permission), "entity-typeId", "identifier");
+        singletonList(permission), "entity-typeId", "identifier");
 
     verify(acl).deleteAce(0);
     verify(acl).insertAce(1, PermissionSet.WRITE, expectedSid, true);
@@ -615,7 +615,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
     PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
     ObjectPermissionsRequest identityPermissions =
-        ObjectPermissionsRequest.create("identifier", Collections.singletonList(permission));
+        ObjectPermissionsRequest.create("identifier", singletonList(permission));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
     when(objectIdentity.getType()).thenReturn("entity-typeId");
@@ -625,14 +625,14 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
     when(ace1.getSid()).thenReturn(sid);
     when(ace1.getPermission()).thenReturn(PermissionSet.COUNT);
-    when(acl.getEntries()).thenReturn(Arrays.asList(ace1));
+    when(acl.getEntries()).thenReturn(singletonList(ace1));
 
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
     when(mutableAclService.readAclsById(
-            Collections.singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            Arrays.asList(sid)))
+            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
+            singletonList(sid)))
         .thenReturn(aclMap);
 
     when(entityType.getIdAttribute()).thenReturn(attribute);
@@ -640,15 +640,15 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
     when(entity.getLabelValue()).thenReturn("label");
-    Repository repo = mock(Repository.class);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repo = mock(Repository.class);
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
-    permissionsApiService.updatePermissions(
-        Collections.singletonList(identityPermissions), "entity-typeId");
+    permissionsApiService.updatePermissions(singletonList(identityPermissions), "entity-typeId");
 
     verify(acl).deleteAce(0);
     verify(acl).insertAce(1, PermissionSet.WRITE, expectedSid, true);
@@ -672,9 +672,9 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     when(acl.getOwner()).thenReturn(sid);
     AccessControlEntry ace = mock(AccessControlEntry.class);
     when(ace.getSid()).thenReturn(sid);
-    when(acl.getEntries()).thenReturn(Collections.singletonList(ace));
+    when(acl.getEntries()).thenReturn(singletonList(ace));
     when(mutableAclService.readAclById(
-            new ObjectIdentityImpl("entity-typeId", "identifier"), Collections.singletonList(sid)))
+            new ObjectIdentityImpl("entity-typeId", "identifier"), singletonList(sid)))
         .thenReturn(acl);
 
     permissionsApiService.deletePermission(sid, "entity-typeId", "identifier");
@@ -716,6 +716,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
   }
 
+  @SuppressWarnings("unchecked")
   private void setSuAuthentication(boolean withDetails) {
     Authentication authentication = mock(Authentication.class);
     if (withDetails) {
@@ -727,7 +728,7 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     GrantedAuthority authoritySu = mock(GrantedAuthority.class);
     when(authoritySu.getAuthority()).thenReturn(AUTHORITY_SU);
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
-        .thenReturn(Collections.singletonList(authoritySu));
+        .thenReturn(singletonList(authoritySu));
   }
 
   private void resetMocks() {

@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 
 public class PermissionRsqlVisitorTest {
 
-  PermissionRsqlVisitor visitor;
+  private PermissionRsqlVisitor visitor;
 
   @BeforeMethod
   public void setUp() {

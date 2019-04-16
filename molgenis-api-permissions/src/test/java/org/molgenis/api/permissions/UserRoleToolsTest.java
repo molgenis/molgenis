@@ -48,6 +48,7 @@ public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetSids() {
+    @SuppressWarnings("unchecked")
     Query<Role> query = mock(Query.class);
     when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
     when(query.eq(RoleMetadata.NAME, "ROLE")).thenReturn(query);
@@ -71,6 +72,7 @@ public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetSidRole() {
+    @SuppressWarnings("unchecked")
     Query<Role> query = mock(Query.class);
     when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
     when(query.eq(RoleMetadata.NAME, "ROLE")).thenReturn(query);
@@ -105,8 +107,8 @@ public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
     when(molgenisUser.getId()).thenReturn("user");
     when(userService.getUser("user")).thenReturn(molgenisUser);
 
-    Sid user = mock(PrincipalSid.class);
-    when(((PrincipalSid) user).getPrincipal()).thenReturn("user");
+    PrincipalSid user = mock(PrincipalSid.class);
+    when(user.getPrincipal()).thenReturn("user");
     Role role1 = mock(Role.class);
     when(role1.getName()).thenReturn("role1");
     Role role2 = mock(Role.class);
@@ -144,8 +146,8 @@ public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
     User molgenisUser = mock(User.class);
     when(molgenisUser.getId()).thenReturn("user");
     when(userService.getUser("user")).thenReturn(molgenisUser);
-    Sid user = mock(PrincipalSid.class);
-    when(((PrincipalSid) user).getPrincipal()).thenReturn("user");
+    PrincipalSid user = mock(PrincipalSid.class);
+    when(user.getPrincipal()).thenReturn("user");
     Role role3 = mock(Role.class);
     when(role3.getName()).thenReturn("role3");
     when(role3.getIncludes()).thenReturn(Collections.emptyList());

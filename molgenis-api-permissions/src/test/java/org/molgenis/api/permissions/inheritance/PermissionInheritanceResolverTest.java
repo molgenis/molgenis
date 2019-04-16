@@ -1,5 +1,6 @@
 package org.molgenis.api.permissions.inheritance;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,7 +50,7 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
         PermissionTestUtils.getSinglePermissionAcl(role2Sid, 8, "entityAcl", packageAcl);
 
     doReturn(Arrays.asList(role1Sid, role2Sid)).when(userRoleTools).getRolesForSid(user);
-    doReturn(Arrays.asList(role3Sid)).when(userRoleTools).getRolesForSid(role1Sid);
+    doReturn(singletonList(role3Sid)).when(userRoleTools).getRolesForSid(role1Sid);
 
     InheritedPermissionsResult expected =
         getInheritedPermissionsResult(
@@ -80,6 +81,7 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
         getInheritedPermissionsResult(
             entityAcl, packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
     DataService dataService = mock(DataService.class);
+    @SuppressWarnings("unchecked")
     Repository<Entity> packageRepo = mock(Repository.class);
 
     EntityType entityType = mock(EntityType.class);
@@ -103,25 +105,13 @@ public class PermissionInheritanceResolverTest extends AbstractMolgenisSpringTes
             "role3", null, null, null, null, "WRITEMETA", Collections.emptyList());
     InheritedPermission role1Permission =
         InheritedPermission.create(
-            "role1", null, null, null, null, null, Collections.singletonList(role3Permission));
+            "role1", null, null, null, null, null, singletonList(role3Permission));
     InheritedPermission parentPermission =
         InheritedPermission.create(
-            null,
-            "package",
-            "Package",
-            "parent",
-            "Parent",
-            null,
-            Collections.singletonList(role1Permission));
+            null, "package", "Package", "parent", "Parent", null, singletonList(role1Permission));
     InheritedPermission packPermission =
         InheritedPermission.create(
-            null,
-            "package",
-            "Package",
-            "pack",
-            "Pack",
-            "READ",
-            Collections.singletonList(parentPermission));
+            null, "package", "Package", "pack", "Pack", "READ", singletonList(parentPermission));
     InheritedPermission role2Permission =
         InheritedPermission.create(
             "role2", null, null, null, null, "WRITE", Collections.emptyList());
