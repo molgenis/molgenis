@@ -18,7 +18,6 @@ public abstract class InheritedAclPermissionsResult {
         acl, ownPermission, parentRolePermissions, parentAclPermissions);
   }
 
-  @Nullable
   public abstract Acl getAcl();
 
   @Nullable
