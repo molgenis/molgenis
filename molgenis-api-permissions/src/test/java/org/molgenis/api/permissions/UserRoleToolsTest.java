@@ -3,7 +3,8 @@ package org.molgenis.api.permissions;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
-import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -26,14 +26,14 @@ import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
-
+public class UserRoleToolsTest extends AbstractMockitoTest {
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   @Mock DataService dataService;
   @Mock UserService userService;
@@ -41,8 +41,7 @@ public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
   private UserRoleTools userRoleTools;
 
   @BeforeMethod
-  private void setUp() {
-
+  private void setUpBeforeMethod() {
     this.userRoleTools = new UserRoleTools(userService, dataService, userPermissionEvaluator);
   }
 
