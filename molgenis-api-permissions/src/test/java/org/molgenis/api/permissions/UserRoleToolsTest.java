@@ -32,7 +32,7 @@ import org.springframework.security.acls.model.Sid;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class SidConversionUtilsTest extends AbstractMolgenisSpringTest {
+public class UserRoleToolsTest extends AbstractMolgenisSpringTest {
 
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   @Mock DataService dataService;
