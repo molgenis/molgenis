@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.security.exception.PermissionDeniedException;
 import org.springframework.security.acls.model.ObjectIdentity;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InsufficientPermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "PRM09";
   private final String requiredRole;

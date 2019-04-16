@@ -37,7 +37,7 @@ public class PermissionInheritanceResolver {
   private final DataService dataService;
   private final UserRoleTools userRoleTools;
 
-  public PermissionInheritanceResolver(DataService dataService, UserRoleTools userRoleTools) {
+  PermissionInheritanceResolver(DataService dataService, UserRoleTools userRoleTools) {
     this.dataService = requireNonNull(dataService);
     this.userRoleTools = requireNonNull(userRoleTools);
   }

@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.security.exception.PermissionDeniedException;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ReadPermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "PRM07";
 

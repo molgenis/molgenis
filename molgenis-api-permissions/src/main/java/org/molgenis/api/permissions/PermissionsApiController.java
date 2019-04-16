@@ -2,7 +2,7 @@ package org.molgenis.api.permissions;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.PermissionResponseUtils.getPermissionResponse;
-import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI;
+import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI; // NOSONAR
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

@@ -54,7 +54,7 @@ public class UserRoleTools {
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
-  public List<Sid> getSids(PermissionsQuery permissionsQuery) {
+  List<Sid> getSids(PermissionsQuery permissionsQuery) {
     return getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles());
   }
 
@@ -179,13 +179,13 @@ public class UserRoleTools {
     }
   }
 
-  public Set<Sid> getRoles(Sid sid) {
+  Set<Sid> getRoles(Sid sid) {
     Set<Sid> roles = new LinkedHashSet<>();
     resolveRoles(sid, roles);
     return roles;
   }
 
-  public List<Sid> getRoles(Set<Sid> sids) {
+  List<Sid> getRoles(Set<Sid> sids) {
     List<Sid> roles = new LinkedList<>();
     sids.forEach(sid -> roles.addAll(getRoles(sid)));
     return roles;
@@ -199,15 +199,15 @@ public class UserRoleTools {
     }
   }
 
-  public Set<Sid> getAllAvailableSids() {
-    Set sids =
+  Set<Sid> getAllAvailableSids() {
+    Set<Sid> sids =
         userService
             .getUsers()
             .stream()
             .map(user -> new PrincipalSid(user.getUsername()))
             .collect(toSet());
 
-    Set roles =
+    Set<Sid> roles =
         dataService
             .findAll(RoleMetadata.ROLE)
             .map(role -> new GrantedAuthoritySid(ROLE_PREFIX + role.getString(RoleMetadata.NAME)))

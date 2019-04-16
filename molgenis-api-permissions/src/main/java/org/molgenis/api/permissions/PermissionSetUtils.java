@@ -11,8 +11,8 @@ import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.AccessControlEntry;
 
 public class PermissionSetUtils {
-  public static final String READMETA = "READMETA";
-  public static final String COUNT = "COUNT";
+  static final String READMETA = "READMETA";
+  static final String COUNT = "COUNT";
   public static final String READ = "READ";
   public static final String WRITE = "WRITE";
   public static final String WRITEMETA = "WRITEMETA";
@@ -37,7 +37,7 @@ public class PermissionSetUtils {
     }
   }
 
-  public static PermissionSet paramValueToPermissionSet(String paramValue) {
+  static PermissionSet paramValueToPermissionSet(String paramValue) {
     switch (paramValue.toUpperCase()) {
       case READMETA:
         return PermissionSet.READMETA;

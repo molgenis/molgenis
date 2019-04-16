@@ -13,7 +13,7 @@ class PermissionResponseUtils {
 
   private PermissionResponseUtils() {}
 
-  public static PagedApiResponse getPermissionResponse(
+  static PagedApiResponse getPermissionResponse(
       String query, int page, int pageSize, int totalItems, Object data) {
     PageResponse pageResponse =
         PageResponse.create(pageSize, totalItems, getTotalPages(pageSize, totalItems), page);
@@ -21,7 +21,7 @@ class PermissionResponseUtils {
     return PagedApiResponse.create(pageResponse, linksResponse, data);
   }
 
-  public static PagedApiResponse getPermissionResponse(String query, Object data) {
+  static PagedApiResponse getPermissionResponse(String query, Object data) {
     LinksResponse linksResponse = getLinks(query, null, null, null);
     return PagedApiResponse.create(null, linksResponse, data);
   }

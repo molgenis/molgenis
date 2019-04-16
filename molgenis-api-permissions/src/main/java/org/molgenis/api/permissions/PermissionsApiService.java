@@ -3,6 +3,7 @@ package org.molgenis.api.permissions;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.api.permissions.PermissionSetUtils.COUNT;
@@ -19,9 +20,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -93,7 +94,7 @@ public class PermissionsApiService {
   private final MutableAclClassService mutableAclClassService;
   private final UserRoleTools userRoleTools;
 
-  public PermissionsApiService(
+  PermissionsApiService(
       MutableAclService mutableAclService,
       AclClassService aclClassService,
       PermissionInheritanceResolver inheritanceResolver,
@@ -118,7 +119,7 @@ public class PermissionsApiService {
         .collect(toList());
   }
 
-  public List<String> getAcls(String typeId, int page, int pageSize) {
+  List<String> getAcls(String typeId, int page, int pageSize) {
     checkEntityTypeExists(typeId);
     checkReadPermission(typeId, Collections.emptySet());
     return objectIdentityService
@@ -128,7 +129,7 @@ public class PermissionsApiService {
         .collect(toList());
   }
 
-  public Set<String> getSuitablePermissionsForType(String typeId) {
+  Set<String> getSuitablePermissionsForType(String typeId) {
     checkEntityTypeExists(typeId);
     Set<String> permissions;
     switch (typeId) {
@@ -165,7 +166,7 @@ public class PermissionsApiService {
     List<PermissionResponse> result;
     if (permissions.size() == 1) {
       result = permissions.get(0).getPermissions();
-      result.sort(Comparator.comparing(a -> getRoleOrUser(a.getUser(), a.getRole())));
+      result.sort(comparing(a -> getRoleOrUser(a.getUser(), a.getRole())));
     } else if (permissions.isEmpty()) {
       result = emptyList();
     } else {
@@ -175,11 +176,11 @@ public class PermissionsApiService {
     return result;
   }
 
-  private Comparable getRoleOrUser(String user, String role) {
+  private String getRoleOrUser(String user, String role) {
     return Strings.isNullOrEmpty(user) ? role : user;
   }
 
-  public List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
+  List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
     checkPermissionsOnSid(sids);
 
     List<TypePermissionsResponse> result = new LinkedList<>();
@@ -202,7 +203,7 @@ public class PermissionsApiService {
     return result;
   }
 
-  public Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
+  Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkEntityTypeExists(typeId);
     checkReadPermission(typeId, sids);
@@ -217,7 +218,7 @@ public class PermissionsApiService {
     return getPermissions(aclMap, objectIdentities, sids, false);
   }
 
-  public Collection<ObjectPermissionsResponse> getPermissionsForType(
+  Collection<ObjectPermissionsResponse> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkEntityTypeExists(typeId);
     checkReadPermission(typeId, sids);
@@ -238,11 +239,11 @@ public class PermissionsApiService {
     return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
   }
 
-  private LinkedHashSet getInheritedSids(Set<Sid> sids) {
+  private LinkedHashSet<Sid> getInheritedSids(Set<Sid> sids) {
     LinkedList<Sid> result = new LinkedList<>();
     result.addAll(sids);
     result.addAll(userRoleTools.getRoles(sids));
-    return new LinkedHashSet(result);
+    return new LinkedHashSet<>(result);
   }
 
   @Transactional
@@ -604,9 +605,9 @@ public class PermissionsApiService {
     return dataService.getRepository(entityTypeId).getEntityType().getLabel();
   }
 
-  private LinkedList getSortedSidList(Set<Sid> sids) {
-    LinkedList<Sid> result = new LinkedList<>(sids);
-    result.sort(Comparator.comparing(UserRoleTools::getName));
+  private List<Sid> getSortedSidList(Set<Sid> sids) {
+    List<Sid> result = new ArrayList<>(sids);
+    result.sort(comparing(UserRoleTools::getName));
     return result;
   }
 }
