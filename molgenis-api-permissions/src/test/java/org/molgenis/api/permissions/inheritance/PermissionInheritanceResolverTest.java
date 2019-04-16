@@ -59,8 +59,7 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     doReturn(singletonList(role3Sid)).when(userRoleTools).getRolesForSid(role1Sid);
 
     InheritedPermissionsResult expected =
-        getInheritedPermissionsResult(
-            entityAcl, packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
+        getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
 
     assertEquals(resolver.getInheritedPermissions(entityAcl, user), expected);
   }
@@ -80,11 +79,9 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     when(packageObjectIdentity.getIdentifier()).thenReturn("pack");
     when(packageObjectIdentity.getType()).thenReturn("package");
     when(packageAcl.getObjectIdentity()).thenReturn(packageObjectIdentity);
-    Acl entityAcl = mock(Acl.class);
 
     InheritedPermissionsResult input =
-        getInheritedPermissionsResult(
-            entityAcl, packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
+        getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
     @SuppressWarnings("unchecked")
     Repository<Entity> packageRepo = mock(Repository.class);
 
