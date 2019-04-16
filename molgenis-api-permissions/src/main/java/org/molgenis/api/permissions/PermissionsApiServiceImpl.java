@@ -113,11 +113,11 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
   }
 
   @Override
-  public List<String> getClasses() {
+  public List<String> getTypes() {
     return aclClassService
         .getAclClassTypes()
         .stream()
-        .filter(type -> dataService.hasEntityType(getEntityTypeIdFromClass(type)))
+        .filter(type -> dataService.hasEntityType(getEntityTypeIdFromType(type)))
         .collect(toList());
   }
 
@@ -190,8 +190,8 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
     checkPermissionsOnSid(sids);
 
     List<TypePermissionsResponse> result = new LinkedList<>();
-    for (String typeId : getClasses()) {
-      String entityTypeId = getEntityTypeIdFromClass(typeId);
+    for (String typeId : getTypes()) {
+      String entityTypeId = getEntityTypeIdFromType(typeId);
       if (dataService.hasEntityType(entityTypeId)) {
         Set<Sid> sidsToQuery;
         if (isReturnInherited) {
@@ -268,14 +268,14 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
 
   private void checkEntityExists(String typeId, String identifier) {
     checkEntityTypeExists(typeId);
-    String entityTypeId = getEntityTypeIdFromClass(typeId);
+    String entityTypeId = getEntityTypeIdFromType(typeId);
     if (dataService.findOneById(entityTypeId, identifier) == null) {
       throw new UnknownEntityException(entityTypeId, identifier);
     }
   }
 
   private void checkEntityTypeExists(String typeId) {
-    String entityTypeId = getEntityTypeIdFromClass(typeId);
+    String entityTypeId = getEntityTypeIdFromType(typeId);
     if (!dataService.hasEntityType(entityTypeId)) {
       throw new InvalidTypeIdException(typeId);
     }
@@ -384,10 +384,10 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
 
   @Override
   @Transactional
-  public void addClass(String typeId) {
+  public void addType(String typeId) {
     checkEntityTypeExists(typeId);
     if (SecurityUtils.currentUserIsSuOrSystem()) {
-      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromClass(typeId));
+      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromType(typeId));
       if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
         mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
         // Create ACL's for existing rows
@@ -414,7 +414,7 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
 
   @Override
   @Transactional
-  public void deleteClass(String typeId) {
+  public void deleteType(String typeId) {
     checkEntityTypeExists(typeId);
     mutableAclClassService.deleteAclClass(typeId);
   }
@@ -473,7 +473,7 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
     return result;
   }
 
-  private String getEntityTypeIdFromClass(String typeId) {
+  private String getEntityTypeIdFromType(String typeId) {
     String result;
     switch (typeId) {
       case PackageIdentity.PACKAGE:
@@ -543,7 +543,7 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
         identifier,
         ObjectPermissionsResponse.create(
             identifier,
-            getLabel(getEntityTypeIdFromClass(acl.getObjectIdentity().getType()), identifier),
+            getLabel(getEntityTypeIdFromType(acl.getObjectIdentity().getType()), identifier),
             permissionResponses));
   }
 
@@ -602,7 +602,7 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
 
   private Serializable getTypedValue(String untypedId, String classId) {
     if (classId.startsWith(ENTITY_PREFIX)) {
-      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromClass(classId));
+      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromType(classId));
       return (Serializable) EntityUtils.getTypedValue(untypedId, entityType.getIdAttribute(), null);
     } else {
       return untypedId;

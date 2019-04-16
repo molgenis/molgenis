@@ -108,7 +108,7 @@ public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
     doReturn(true).when(dataService).hasEntityType("test1");
     doReturn(false).when(dataService).hasEntityType("test2");
 
-    assertEquals(permissionsApiService.getClasses(), singletonList("entity-test1"));
+    assertEquals(permissionsApiService.getTypes(), singletonList("entity-test1"));
   }
 
   @Test
@@ -683,7 +683,7 @@ public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddClass() {
+  public void testAddType() {
     setSuAuthentication(false);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
 
@@ -702,7 +702,7 @@ public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
     when(entity2.getEntityType()).thenReturn(entityType);
     when(dataService.findAll("typeId")).thenReturn(Stream.of(entity1, entity2));
 
-    permissionsApiService.addClass("entity-typeId");
+    permissionsApiService.addType("entity-typeId");
 
     verify(mutableAclClassService).createAclClass("entity-typeId", String.class);
     verify(mutableAclService).createAcl(new EntityIdentity("typeId", "1"));
@@ -710,9 +710,9 @@ public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteClass() {
+  public void testDeleteType() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    permissionsApiService.deleteClass("entity-typeId");
+    permissionsApiService.deleteType("entity-typeId");
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
   }
 

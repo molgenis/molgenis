@@ -91,7 +91,7 @@ public class PermissionsApiController extends ApiController {
   public ResponseEntity enableRLS(
       HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
       throws URISyntaxException {
-    permissionsApiService.addClass(typeId);
+    permissionsApiService.addType(typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -100,14 +100,14 @@ public class PermissionsApiController extends ApiController {
       value = "Delete a type this removes row level security from an entity",
       response = ResponseEntity.class)
   public ResponseEntity disableRLS(@PathVariable(value = TYPE_ID) String typeId) {
-    permissionsApiService.deleteClass(typeId);
+    permissionsApiService.deleteType(typeId);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping(value = TYPES)
   @ApiOperation(value = "Get a list of ACL types in the system", response = ResponseEntity.class)
   public List<String> getRlsEntities() {
-    return permissionsApiService.getClasses();
+    return permissionsApiService.getTypes();
   }
 
   @GetMapping(value = TYPES + "/permissions/{" + TYPE_ID + "}")
@@ -119,8 +119,8 @@ public class PermissionsApiController extends ApiController {
   }
 
   @PostMapping(value = OBJECTS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
-  @ApiOperation(value = "Create an acl for a entity", response = ResponseEntity.class)
-  public ResponseEntity createClass(
+  @ApiOperation(value = "Create a type for a entity", response = ResponseEntity.class)
+  public ResponseEntity createType(
       HttpServletRequest request,
       @PathVariable(TYPE_ID) String typeId,
       @PathVariable(OBJECT_ID) String identifier)
@@ -169,7 +169,7 @@ public class PermissionsApiController extends ApiController {
   @ApiOperation(
       value = "Gets all permissions for all objects of a certain type",
       response = ResponseEntity.class)
-  public PagedApiResponse getPermissionsForClass(
+  public PagedApiResponse getPermissionsForType(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "page", required = false) Integer page,
@@ -232,7 +232,7 @@ public class PermissionsApiController extends ApiController {
   @ApiOperation(
       value = "Update a list of permissions on objects of a certain type",
       response = ResponseEntity.class)
-  public ResponseEntity setClassPermissions(
+  public ResponseEntity setTypePermissions(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest request) {
     permissionsApiService.updatePermissions(request.getObjects(), typeId);

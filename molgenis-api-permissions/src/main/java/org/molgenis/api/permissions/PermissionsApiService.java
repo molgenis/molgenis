@@ -13,7 +13,7 @@ import org.springframework.security.acls.model.Sid;
 
 public interface PermissionsApiService {
 
-  List<String> getClasses();
+  List<String> getTypes();
 
   List<PermissionResponse> getPermission(
       String typeId, String identifier, Set<Sid> sids, boolean isReturnInheritedPermissions);
@@ -33,9 +33,9 @@ public interface PermissionsApiService {
 
   void deletePermission(Sid sid, String typeId, String identifier);
 
-  void addClass(String typeId);
+  void addType(String typeId);
 
-  void deleteClass(String typeId);
+  void deleteType(String typeId);
 
   Collection<ObjectPermissionsResponse> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited);

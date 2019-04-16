@@ -87,10 +87,10 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetClasses() throws Exception {
+  public void testGetTypes() throws Exception {
     mockMvc.perform(get(BASE_URI + "/" + TYPES)).andExpect(status().isOk());
 
-    verify(permissionsApiService).getClasses();
+    verify(permissionsApiService).getTypes();
   }
 
   @Test
