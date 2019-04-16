@@ -384,7 +384,8 @@ public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
     sids.add(sid1);
     sids.add(sid2);
 
-    assertEquals(permissionsApiService.getPermissionsForType("entity-typeId", sids, true), expected);
+    assertEquals(
+        permissionsApiService.getPermissionsForType("entity-typeId", sids, true), expected);
   }
 
   @Test

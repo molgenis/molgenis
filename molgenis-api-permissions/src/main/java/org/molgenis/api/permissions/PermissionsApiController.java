@@ -195,7 +195,8 @@ public class PermissionsApiController extends ApiController {
               GetTypePermissionsResponse.create(permissions));
     } else {
       permissions =
-          Lists.newArrayList(permissionsApiService.getPermissionsForType(typeId, sids, inheritance));
+          Lists.newArrayList(
+              permissionsApiService.getPermissionsForType(typeId, sids, inheritance));
       response = getPermissionResponse(queryString, GetTypePermissionsResponse.create(permissions));
     }
     return response;
