@@ -10,7 +10,7 @@ public class PermissionsApiI18nConfig {
   private static final String NAMESPACE = "api-permissions";
 
   @Bean
-  public PropertiesMessageSource securityApiMessageSource() {
+  public PropertiesMessageSource permissionsApiMessageSource() {
     return new PropertiesMessageSource(NAMESPACE);
   }
 }
