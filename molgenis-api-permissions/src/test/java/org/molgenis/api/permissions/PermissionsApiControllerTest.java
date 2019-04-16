@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class PermissionApiControllerTest extends AbstractMolgenisSpringTest {
+public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @Mock private PermissionApiService permissionApiService;
