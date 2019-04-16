@@ -57,7 +57,7 @@ public class PermissionsApiController extends ApiController {
   private static final int VERSION = 1;
   public static final String BASE_URI = "/api/" + PERMISSION_API_IDENTIFIER + "/v" + VERSION;
   static final Integer DEFAULT_PAGE = 1;
-  static final Integer DEFAULT_PAGESIZE = 10000;
+  static final Integer DEFAULT_PAGESIZE = 100;
 
   private static final String TYPE = "type";
   public static final String TYPES = TYPE + "s";
