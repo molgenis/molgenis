@@ -67,7 +67,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
+public class PermissionsApiServiceTest extends AbstractMolgenisSpringTest {
 
   @Mock MutableAclService mutableAclService;
   @Mock AclClassService aclClassService;
@@ -76,14 +76,14 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   @Mock DataService dataService;
   @Mock MutableAclClassService mutableAclClassService;
   @Mock UserRoleTools userRoleTools;
-  private PermissionApiService permissionApiService;
+  private PermissionsApiService permissionsApiService;
   private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUp() {
     initMocks(this);
-    permissionApiService =
-        new PermissionApiService(
+    permissionsApiService =
+        new PermissionsApiService(
             mutableAclService,
             aclClassService,
             inheritanceResolver,
@@ -110,7 +110,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     doReturn(true).when(dataService).hasEntityType("test1");
     doReturn(false).when(dataService).hasEntityType("test2");
 
-    assertEquals(permissionApiService.getClasses(), Collections.singletonList("entity-test1"));
+    assertEquals(permissionsApiService.getClasses(), Collections.singletonList("entity-test1"));
   }
 
   @Test
@@ -125,14 +125,14 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
                 new ObjectIdentityImpl("classId", "test2")));
     doReturn(true).when(dataService).hasEntityType("type");
     assertEquals(
-        permissionApiService.getAcls("entity-type", 1, 10), Arrays.asList("test1", "test2"));
+        permissionsApiService.getAcls("entity-type", 1, 10), Arrays.asList("test1", "test2"));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypeEntityType() {
     when(dataService.hasEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(true);
     assertEquals(
-        permissionApiService.getSuitablePermissionsForType(EntityTypeIdentity.ENTITY_TYPE),
+        permissionsApiService.getSuitablePermissionsForType(EntityTypeIdentity.ENTITY_TYPE),
         Sets.newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
   }
 
@@ -141,7 +141,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.hasEntityType(PackageMetadata.PACKAGE)).thenReturn(true);
 
     assertEquals(
-        permissionApiService.getSuitablePermissionsForType(PackageIdentity.PACKAGE),
+        permissionsApiService.getSuitablePermissionsForType(PackageIdentity.PACKAGE),
         Sets.newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
   }
 
@@ -150,7 +150,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.hasEntityType(PluginMetadata.PLUGIN)).thenReturn(true);
 
     assertEquals(
-        permissionApiService.getSuitablePermissionsForType(PluginIdentity.PLUGIN),
+        permissionsApiService.getSuitablePermissionsForType(PluginIdentity.PLUGIN),
         Sets.newHashSet(READ));
   }
 
@@ -159,7 +159,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.hasEntityType("row_level_secured_entity")).thenReturn(true);
 
     assertEquals(
-        permissionApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"),
+        permissionsApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"),
         Sets.newHashSet(READ, WRITE));
   }
 
@@ -216,7 +216,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     sids.add(sid2);
     assertEquals(
         Sets.newHashSet(
-            permissionApiService.getPermission("entity-typeId", "identifier", sids, true)),
+            permissionsApiService.getPermission("entity-typeId", "identifier", sids, true)),
         expected);
   }
 
@@ -279,7 +279,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     sids.add(sid1);
     sids.add(sid2);
 
-    assertEquals(Sets.newHashSet(permissionApiService.getAllPermissions(sids, true)), expected);
+    assertEquals(Sets.newHashSet(permissionsApiService.getAllPermissions(sids, true)), expected);
   }
 
   @Test
@@ -333,7 +333,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     sids.add(sid1);
     sids.add(sid2);
     assertEquals(
-        permissionApiService.getPagedPermissionsForType("entity-typeId", sids, 4, 20), expected);
+        permissionsApiService.getPagedPermissionsForType("entity-typeId", sids, 4, 20), expected);
   }
 
   @Test
@@ -384,7 +384,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     sids.add(sid1);
     sids.add(sid2);
 
-    assertEquals(permissionApiService.getPermissionsForType("entity-typeId", sids, true), expected);
+    assertEquals(permissionsApiService.getPermissionsForType("entity-typeId", sids, true), expected);
   }
 
   @Test
@@ -432,7 +432,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
 
     assertEquals(
-        permissionApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), true),
+        permissionsApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), true),
         expected);
   }
 
@@ -447,7 +447,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(entityType.getIdAttribute()).thenReturn(attribute);
     when(attribute.getDataType()).thenReturn(AttributeType.STRING);
     when(dataService.getEntityType("typeId")).thenReturn(entityType);
-    permissionApiService.createAcl("entity-typeId", "identifier");
+    permissionsApiService.createAcl("entity-typeId", "identifier");
     verify(mutableAclService).createAcl(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 
@@ -474,7 +474,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     when(userRoleTools.getSid(null, "role")).thenReturn(expectedSid);
 
-    permissionApiService.createPermission(
+    permissionsApiService.createPermission(
         Collections.singletonList(permission), "entity-typeId", "identifier");
 
     verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
@@ -523,7 +523,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     Sid expectedSid2 = new PrincipalSid("user1");
     doReturn(expectedSid2).when(userRoleTools).getSid("user1", null);
 
-    permissionApiService.createPermissions(
+    permissionsApiService.createPermissions(
         Arrays.asList(objectPermissionsRequest1, objectPermissionsRequest2), "entity-typeId");
 
     verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
@@ -584,7 +584,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
-    permissionApiService.updatePermission(
+    permissionsApiService.updatePermission(
         Collections.singletonList(permission), "entity-typeId", "identifier");
 
     verify(acl).deleteAce(0);
@@ -646,7 +646,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
 
-    permissionApiService.updatePermissions(
+    permissionsApiService.updatePermissions(
         Collections.singletonList(identityPermissions), "entity-typeId");
 
     verify(acl).deleteAce(0);
@@ -676,7 +676,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
             new ObjectIdentityImpl("entity-typeId", "identifier"), Collections.singletonList(sid)))
         .thenReturn(acl);
 
-    permissionApiService.deletePermission(sid, "entity-typeId", "identifier");
+    permissionsApiService.deletePermission(sid, "entity-typeId", "identifier");
     verify(acl).deleteAce(0);
     verify(mutableAclService).updateAcl(acl);
   }
@@ -701,7 +701,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
     when(entity2.getEntityType()).thenReturn(entityType);
     when(dataService.findAll("typeId")).thenReturn(Stream.of(entity1, entity2));
 
-    permissionApiService.addClass("entity-typeId");
+    permissionsApiService.addClass("entity-typeId");
 
     verify(mutableAclClassService).createAclClass("entity-typeId", String.class);
     verify(mutableAclService).createAcl(new EntityIdentity("typeId", "1"));
@@ -711,7 +711,7 @@ public class PermissionApiServiceTest extends AbstractMolgenisSpringTest {
   @Test
   public void testDeleteClass() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    permissionApiService.deleteClass("entity-typeId");
+    permissionsApiService.deleteClass("entity-typeId");
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
   }
 

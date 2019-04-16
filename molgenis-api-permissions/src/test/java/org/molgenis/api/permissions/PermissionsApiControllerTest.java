@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @Mock private PermissionApiService permissionApiService;
+  @Mock private PermissionsApiService permissionsApiService;
   @Mock private ObjectIdentityService objectIdentityService;
   @Mock private UserRoleTools userRoleTools;
   private MockMvc mockMvc;
@@ -65,7 +65,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
     RSQLParser rsqlParser = new RSQLParser();
     PermissionsApiController controller =
         new PermissionsApiController(
-            permissionApiService, rsqlParser, objectIdentityService, userRoleTools);
+            permissionsApiService, rsqlParser, objectIdentityService, userRoleTools);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -83,14 +83,14 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
         .perform(post(BASE_URI + "/" + OBJECTS + "/typeId/identifier"))
         .andExpect(status().isCreated());
 
-    verify(permissionApiService).createAcl("typeId", "identifier");
+    verify(permissionsApiService).createAcl("typeId", "identifier");
   }
 
   @Test
   public void testGetClasses() throws Exception {
     mockMvc.perform(get(BASE_URI + "/" + TYPES)).andExpect(status().isOk());
 
-    verify(permissionApiService).getClasses();
+    verify(permissionsApiService).getClasses();
   }
 
   @Test
@@ -99,12 +99,12 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
         .perform(get(BASE_URI + "/" + TYPES + "/permissions/typeId?q=user==test"))
         .andExpect(status().isOk());
 
-    verify(permissionApiService).getSuitablePermissionsForType("typeId");
+    verify(permissionsApiService).getSuitablePermissionsForType("typeId");
   }
 
   @Test
   public void testGetAclsForType() throws Exception {
-    when(permissionApiService.getAcls("typeId", DEFAULT_PAGE, DEFAULT_PAGESIZE))
+    when(permissionsApiService.getAcls("typeId", DEFAULT_PAGE, DEFAULT_PAGESIZE))
         .thenReturn(Arrays.asList("test1", "test2"));
     when(objectIdentityService.getNrOfObjectIdentities("typeId")).thenReturn(80);
 
@@ -125,7 +125,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
         Arrays.asList(
             PermissionResponse.create(null, "user1", "READ", null),
             PermissionResponse.create(null, "role1", "WRITE", null));
-    when(permissionApiService.getPermission(
+    when(permissionsApiService.getPermission(
             "typeId", "identifier", Sets.newHashSet(user1, role1), true))
         .thenReturn(permissionResponses);
 
@@ -157,7 +157,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
     Collection<ObjectPermissionsResponse> identityPermission =
         Collections.singletonList(
             ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
-    when(permissionApiService.getPermissionsForType(
+    when(permissionsApiService.getPermissionsForType(
             "typeId", Sets.newHashSet(user1, role1, role2), false))
         .thenReturn(identityPermission);
 
@@ -192,7 +192,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
     Collection<ObjectPermissionsResponse> identityPermission =
         Collections.singletonList(
             ObjectPermissionsResponse.create("identifier", "label", permissionResponses));
-    when(permissionApiService.getPagedPermissionsForType(
+    when(permissionsApiService.getPagedPermissionsForType(
             "typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
         .thenReturn(identityPermission);
     when(objectIdentityService.getNrOfObjectIdentities(
@@ -230,7 +230,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
         Collections.singletonList(
             TypePermissionsResponse.create("typeId", "label", identityPermission));
 
-    when(permissionApiService.getAllPermissions(Sets.newHashSet(user1), false))
+    when(permissionsApiService.getAllPermissions(Sets.newHashSet(user1), false))
         .thenReturn(classPermissionResponses);
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
@@ -269,7 +269,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
 
     PermissionRequest permissionRequest1 = PermissionRequest.create(null, "test2", "READ");
     PermissionRequest permissionRequest2 = PermissionRequest.create(null, "test", "WRITE");
-    verify(permissionApiService)
+    verify(permissionsApiService)
         .updatePermission(
             Arrays.asList(permissionRequest1, permissionRequest2), "typeId", "identifier");
   }
@@ -316,7 +316,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
             "rij2",
             Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
 
-    verify(permissionApiService)
+    verify(permissionsApiService)
         .updatePermissions(Arrays.asList(permission1, permission2), "typeId");
   }
 
@@ -361,7 +361,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
             "rij2",
             Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
 
-    verify(permissionApiService)
+    verify(permissionsApiService)
         .createPermissions(Arrays.asList(permission1, permission2), "typeId");
   }
 
@@ -388,7 +388,7 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
         Arrays.asList(
             PermissionRequest.create(null, "test2", "READ"),
             PermissionRequest.create(null, "test", "WRITE"));
-    verify(permissionApiService).createPermission(permissionRequests, "typeId", "identifier");
+    verify(permissionsApiService).createPermission(permissionRequests, "typeId", "identifier");
   }
 
   @Test
@@ -402,6 +402,6 @@ public class PermissionsApiControllerTest extends AbstractMolgenisSpringTest {
                 .content(requestJson))
         .andExpect(status().isNoContent());
 
-    verify(permissionApiService).deletePermission(user1, "typeId", "identifier");
+    verify(permissionsApiService).deletePermission(user1, "typeId", "identifier");
   }
 }

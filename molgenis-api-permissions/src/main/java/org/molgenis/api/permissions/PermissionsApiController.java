@@ -67,18 +67,18 @@ public class PermissionsApiController extends ApiController {
   public static final String OBJECTS = OBJECT + "s";
   private static final String OBJECT_ID = OBJECT + "Id";
 
-  private final PermissionApiService permissionApiService;
+  private final PermissionsApiService permissionsApiService;
   private final RSQLParser rsqlParser;
   private final ObjectIdentityService objectIdentityService;
   private final UserRoleTools userRoleTools;
 
   public PermissionsApiController(
-      PermissionApiService permissionApiService,
+      PermissionsApiService permissionsApiService,
       RSQLParser rsqlParser,
       ObjectIdentityService objectIdentityService,
       UserRoleTools userRoleTools) {
     super(PERMISSION_API_IDENTIFIER, VERSION);
-    this.permissionApiService = requireNonNull(permissionApiService);
+    this.permissionsApiService = requireNonNull(permissionsApiService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
     this.userRoleTools = requireNonNull(userRoleTools);
@@ -91,7 +91,7 @@ public class PermissionsApiController extends ApiController {
   public ResponseEntity enableRLS(
       HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
       throws URISyntaxException {
-    permissionApiService.addClass(typeId);
+    permissionsApiService.addClass(typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -100,14 +100,14 @@ public class PermissionsApiController extends ApiController {
       value = "Delete a type this removes row level security from an entity",
       response = ResponseEntity.class)
   public ResponseEntity disableRLS(@PathVariable(value = TYPE_ID) String typeId) {
-    permissionApiService.deleteClass(typeId);
+    permissionsApiService.deleteClass(typeId);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping(value = TYPES)
   @ApiOperation(value = "Get a list of ACL types in the system", response = ResponseEntity.class)
   public List<String> getRlsEntities() {
-    return permissionApiService.getClasses();
+    return permissionsApiService.getClasses();
   }
 
   @GetMapping(value = TYPES + "/permissions/{" + TYPE_ID + "}")
@@ -115,7 +115,7 @@ public class PermissionsApiController extends ApiController {
       value = "Get a list of permissions that can be used on a type",
       response = List.class)
   public Set<String> getSuitablePermissions(@PathVariable(value = TYPE_ID) String typeId) {
-    return permissionApiService.getSuitablePermissionsForType(typeId);
+    return permissionsApiService.getSuitablePermissionsForType(typeId);
   }
 
   @PostMapping(value = OBJECTS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
@@ -125,7 +125,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(TYPE_ID) String typeId,
       @PathVariable(OBJECT_ID) String identifier)
       throws URISyntaxException {
-    permissionApiService.createAcl(typeId, identifier);
+    permissionsApiService.createAcl(typeId, identifier);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -144,7 +144,7 @@ public class PermissionsApiController extends ApiController {
       pageSize = DEFAULT_PAGESIZE;
     }
 
-    List<String> data = permissionApiService.getAcls(typeId, page, pageSize);
+    List<String> data = permissionsApiService.getAcls(typeId, page, pageSize);
 
     int totalItems = objectIdentityService.getNrOfObjectIdentities(typeId);
     return getPermissionResponse("", page, pageSize, totalItems, data);
@@ -161,7 +161,7 @@ public class PermissionsApiController extends ApiController {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
     List<PermissionResponse> permissionResponses =
-        permissionApiService.getPermission(typeId, identifier, sids, inheritance);
+        permissionsApiService.getPermission(typeId, identifier, sids, inheritance);
     return GetObjectPermissionResponse.create(permissionResponses);
   }
 
@@ -184,7 +184,7 @@ public class PermissionsApiController extends ApiController {
     if (page != null) {
       permissions =
           Lists.newArrayList(
-              permissionApiService.getPagedPermissionsForType(typeId, sids, page, pageSize));
+              permissionsApiService.getPagedPermissionsForType(typeId, sids, page, pageSize));
       Integer totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
       response =
           getPermissionResponse(
@@ -195,7 +195,7 @@ public class PermissionsApiController extends ApiController {
               GetTypePermissionsResponse.create(permissions));
     } else {
       permissions =
-          Lists.newArrayList(permissionApiService.getPermissionsForType(typeId, sids, inheritance));
+          Lists.newArrayList(permissionsApiService.getPermissionsForType(typeId, sids, inheritance));
       response = getPermissionResponse(queryString, GetTypePermissionsResponse.create(permissions));
     }
     return response;
@@ -211,7 +211,7 @@ public class PermissionsApiController extends ApiController {
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
     List<TypePermissionsResponse> permissions =
-        permissionApiService.getAllPermissions(sids, inheritance);
+        permissionsApiService.getAllPermissions(sids, inheritance);
     return GetPermissionsResponse.create(permissions);
   }
 
@@ -223,7 +223,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest request) {
-    permissionApiService.updatePermission(request.getPermissions(), typeId, identifier);
+    permissionsApiService.updatePermission(request.getPermissions(), typeId, identifier);
     return ResponseEntity.noContent().build();
   }
 
@@ -234,7 +234,7 @@ public class PermissionsApiController extends ApiController {
   public ResponseEntity setClassPermissions(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest request) {
-    permissionApiService.updatePermissions(request.getObjects(), typeId);
+    permissionsApiService.updatePermissions(request.getObjects(), typeId);
     return ResponseEntity.noContent().build();
   }
 
@@ -245,7 +245,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest setTypePermissionsRequest)
       throws URISyntaxException {
-    permissionApiService.createPermissions(setTypePermissionsRequest.getObjects(), typeId);
+    permissionsApiService.createPermissions(setTypePermissionsRequest.getObjects(), typeId);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -257,7 +257,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
       throws URISyntaxException {
-    permissionApiService.createPermission(
+    permissionsApiService.createPermission(
         setIdentityPermissionRequest.getPermissions(), typeId, identifier);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
@@ -271,7 +271,7 @@ public class PermissionsApiController extends ApiController {
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
     Sid sid = userRoleTools.getSid(request.getUser(), request.getRole());
-    permissionApiService.deletePermission(sid, typeId, identifier);
+    permissionsApiService.deletePermission(sid, typeId, identifier);
     return ResponseEntity.noContent().build();
   }
 
