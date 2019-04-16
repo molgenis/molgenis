@@ -2,8 +2,9 @@ package org.molgenis.api.permissions;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.PermissionResponseUtils.getPermissionResponse;
-import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI; // NOSONAR
+import static org.molgenis.api.permissions.PermissionsApiController.BASE_URI;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
@@ -17,7 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.model.response.PagedApiResponse;
 import org.molgenis.api.permissions.exceptions.PageWithoutPageSizeException;
@@ -277,7 +277,7 @@ public class PermissionsApiController extends ApiController {
 
   private Set<Sid> getSidsFromQuery(String queryString) {
     Set<Sid> sids = Collections.emptySet();
-    if (StringUtils.isNotEmpty(queryString)) {
+    if (!Strings.isNullOrEmpty(queryString)) {
       Node node = rsqlParser.parse(queryString);
       PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
       sids = new LinkedHashSet<>(userRoleTools.getSids(permissionsQuery));
