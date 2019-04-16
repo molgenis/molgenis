@@ -30,7 +30,7 @@
             ga('molgenisTracker.send', 'pageview');
         </#if>
         <#if cookieWall>
-        }});
+        }})();
         </#if>
 </script>
 </#if>
