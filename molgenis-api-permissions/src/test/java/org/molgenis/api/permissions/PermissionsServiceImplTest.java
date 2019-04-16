@@ -67,7 +67,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
+public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Mock MutableAclService mutableAclService;
   @Mock AclClassService aclClassService;
   @Mock PermissionInheritanceResolver inheritanceResolver;
@@ -75,13 +75,13 @@ public class PermissionsApiServiceImplTest extends AbstractMockitoTest {
   @Mock DataService dataService;
   @Mock MutableAclClassService mutableAclClassService;
   @Mock UserRoleTools userRoleTools;
-  private PermissionsApiServiceImpl permissionsApiService;
+  private PermissionsServiceImpl permissionsApiService;
   private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     permissionsApiService =
-        new PermissionsApiServiceImpl(
+        new PermissionsServiceImpl(
             mutableAclService,
             aclClassService,
             inheritanceResolver,

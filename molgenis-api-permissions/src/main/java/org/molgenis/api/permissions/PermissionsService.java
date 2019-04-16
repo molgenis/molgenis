@@ -11,7 +11,7 @@ import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.springframework.security.acls.model.Sid;
 
-public interface PermissionsApiService {
+public interface PermissionsService {
 
   List<String> getTypes();
 

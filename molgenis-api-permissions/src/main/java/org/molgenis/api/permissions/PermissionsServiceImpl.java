@@ -82,10 +82,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PermissionsApiServiceImpl implements PermissionsApiService {
+public class PermissionsServiceImpl implements PermissionsService {
 
   public static final String ENTITY_PREFIX = "entity-";
-  private static final Logger LOG = LoggerFactory.getLogger(PermissionsApiServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PermissionsServiceImpl.class);
 
   private final MutableAclService mutableAclService;
   private final AclClassService aclClassService;
@@ -95,7 +95,7 @@ public class PermissionsApiServiceImpl implements PermissionsApiService {
   private final MutableAclClassService mutableAclClassService;
   private final UserRoleTools userRoleTools;
 
-  PermissionsApiServiceImpl(
+  PermissionsServiceImpl(
       MutableAclService mutableAclService,
       AclClassService aclClassService,
       PermissionInheritanceResolver inheritanceResolver,
