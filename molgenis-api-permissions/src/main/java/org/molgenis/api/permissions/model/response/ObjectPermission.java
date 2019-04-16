@@ -9,7 +9,7 @@ import org.molgenis.util.AutoGson;
 @AutoGson(autoValueClass = AutoValue_PermissionResponse.class)
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class PermissionResponse {
+public abstract class ObjectPermission {
   @Nullable
   public abstract String getRole();
 
@@ -22,7 +22,7 @@ public abstract class PermissionResponse {
   @Nullable
   public abstract Set<InheritedPermission> getInheritedPermissions();
 
-  public static PermissionResponse create(
+  public static ObjectPermission create(
       String role, String user, String permission, Set<InheritedPermission> inheritedPermissions) {
     return builder()
         .setRole(role)
@@ -47,6 +47,6 @@ public abstract class PermissionResponse {
 
     public abstract Builder setInheritedPermissions(Set<InheritedPermission> permissions);
 
-    public abstract PermissionResponse build();
+    public abstract ObjectPermission build();
   }
 }

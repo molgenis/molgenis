@@ -45,8 +45,8 @@ import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.InheritedPermission;
+import org.molgenis.api.permissions.model.response.ObjectPermission;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -152,7 +152,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   }
 
   @Override
-  public List<PermissionResponse> getPermission(
+  public List<ObjectPermission> getPermission(
       String typeId, String identifier, Set<Sid> sids, boolean isReturnInheritedPermissions) {
     checkEntityExists(typeId, identifier);
     checkReadPermission(typeId, sids);
@@ -168,7 +168,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
     List<ObjectPermissionsResponse> permissions =
         getPermissions(aclMap, objectIdentities, sids, isReturnInheritedPermissions);
-    List<PermissionResponse> result;
+    List<ObjectPermission> result;
     if (permissions.size() == 1) {
       result = permissions.get(0).getPermissions();
       result.sort(comparing(a -> getRoleOrUser(a.getUser(), a.getRole())));
@@ -336,7 +336,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             throw new PermissionNotSuitableException(permissionRequest.getPermission(), typeId);
           }
           Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
-          List<PermissionResponse> current =
+          List<ObjectPermission> current =
               getPermission(typeId, identifier, Collections.singleton(sid), false);
           if (current.isEmpty()) {
             throw new UnknownAceException(typeId, identifier, sid, "update");
@@ -536,7 +536,7 @@ public class PermissionsServiceImpl implements PermissionsService {
       Map<String, ObjectPermissionsResponse> result,
       boolean isReturnInheritedPermissions) {
     String identifier = acl.getObjectIdentity().getIdentifier().toString();
-    List<PermissionResponse> permissionResponses =
+    List<ObjectPermission> objectPermissionRespons =
         getPermissionResponses(acl, isReturnInheritedPermissions, sids);
 
     result.put(
@@ -544,12 +544,12 @@ public class PermissionsServiceImpl implements PermissionsService {
         ObjectPermissionsResponse.create(
             identifier,
             getLabel(getEntityTypeIdFromType(acl.getObjectIdentity().getType()), identifier),
-            permissionResponses));
+            objectPermissionRespons));
   }
 
-  private List<PermissionResponse> getPermissionResponses(
+  private List<ObjectPermission> getPermissionResponses(
       Acl acl, boolean isReturnInheritedPermissions, Set<Sid> sids) {
-    List<PermissionResponse> result = new LinkedList<>();
+    List<ObjectPermission> result = new LinkedList<>();
 
     if (!sids.isEmpty()) {
       for (Sid sid : sids) {
@@ -564,7 +564,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   }
 
   private void getPermissionResponsesForSingleSid(
-      Acl acl, boolean isReturnInheritedPermissions, List<PermissionResponse> result, Sid sid) {
+      Acl acl, boolean isReturnInheritedPermissions, List<ObjectPermission> result, Sid sid) {
     String ownPermission = null;
     for (AccessControlEntry ace : acl.getEntries()) {
       if (sid.equals(ace.getSid())) {
@@ -582,7 +582,7 @@ public class PermissionsServiceImpl implements PermissionsService {
         deduplicatedInheritedPermissions = null;
       }
       result.add(
-          PermissionResponse.create(
+          ObjectPermission.create(
               getRole(sid), getUser(sid), ownPermission, deduplicatedInheritedPermissions));
     }
   }

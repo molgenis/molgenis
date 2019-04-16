@@ -15,10 +15,10 @@ public abstract class ObjectPermissionsResponse {
   @Nullable
   public abstract String getLabel();
 
-  public abstract List<PermissionResponse> getPermissions();
+  public abstract List<ObjectPermission> getPermissions();
 
   public static ObjectPermissionsResponse create(
-      String identifier, String label, List<PermissionResponse> permissionResponses) {
-    return new AutoValue_ObjectPermissionsResponse(identifier, label, permissionResponses);
+      String identifier, String label, List<ObjectPermission> objectPermissionRespons) {
+    return new AutoValue_ObjectPermissionsResponse(identifier, label, objectPermissionRespons);
   }
 }

@@ -12,10 +12,10 @@ import org.molgenis.util.AutoGson;
 public abstract class GetObjectPermissionResponse {
 
   @NotEmpty
-  public abstract List<PermissionResponse> getPermissions();
+  public abstract List<ObjectPermission> getPermissions();
 
-  public static GetObjectPermissionResponse create(List<PermissionResponse> permissionResponses) {
-    return builder().setPermissions(permissionResponses).build();
+  public static GetObjectPermissionResponse create(List<ObjectPermission> objectPermissionRespons) {
+    return builder().setPermissions(objectPermissionRespons).build();
   }
 
   private static Builder builder() {
@@ -24,7 +24,7 @@ public abstract class GetObjectPermissionResponse {
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setPermissions(List<PermissionResponse> permissionResponses);
+    public abstract Builder setPermissions(List<ObjectPermission> objectPermissionRespons);
 
     public abstract GetObjectPermissionResponse build();
   }

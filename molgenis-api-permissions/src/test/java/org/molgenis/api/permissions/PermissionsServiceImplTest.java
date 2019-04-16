@@ -28,8 +28,8 @@ import org.mockito.Mock;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
+import org.molgenis.api.permissions.model.response.ObjectPermission;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -206,9 +206,9 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(dataService.getRepository("typeId")).thenReturn(repo);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
 
-    PermissionResponse permission1 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
-    PermissionResponse permission2 = PermissionResponse.create(null, "user1", "COUNT", null);
-    Set<PermissionResponse> expected = Sets.newHashSet(permission1, permission2);
+    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
+    Set<ObjectPermission> expected = Sets.newHashSet(permission1, permission2);
 
     Set<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
@@ -262,8 +262,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(repo.getEntityType()).thenReturn(entityType);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    PermissionResponse permission1 = PermissionResponse.create(null, "user1", "COUNT", null);
-    PermissionResponse permission2 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
+    ObjectPermission permission1 = ObjectPermission.create(null, "user1", "COUNT", null);
+    ObjectPermission permission2 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission1, permission2));
@@ -319,8 +319,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    PermissionResponse permission1 = PermissionResponse.create(null, "user1", "COUNT", null);
-    PermissionResponse permission2 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
+    ObjectPermission permission1 = ObjectPermission.create(null, "user1", "COUNT", null);
+    ObjectPermission permission2 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission1, permission2));
@@ -370,8 +370,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    PermissionResponse permission1 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
-    PermissionResponse permission2 = PermissionResponse.create(null, "user1", "COUNT", null);
+    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));
@@ -421,8 +421,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(repo.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    PermissionResponse permission1 = PermissionResponse.create(null, "user2", "WRITEMETA", null);
-    PermissionResponse permission2 = PermissionResponse.create(null, "user1", "COUNT", null);
+    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));

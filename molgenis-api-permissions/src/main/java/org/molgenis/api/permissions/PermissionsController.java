@@ -28,8 +28,8 @@ import org.molgenis.api.permissions.model.request.SetTypePermissionsRequest;
 import org.molgenis.api.permissions.model.response.GetObjectPermissionResponse;
 import org.molgenis.api.permissions.model.response.GetPermissionsResponse;
 import org.molgenis.api.permissions.model.response.GetTypePermissionsResponse;
+import org.molgenis.api.permissions.model.response.ObjectPermission;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
@@ -160,9 +160,9 @@ public class PermissionsController extends ApiController {
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
-    List<PermissionResponse> permissionResponses =
+    List<ObjectPermission> objectPermissionRespons =
         permissionsService.getPermission(typeId, identifier, sids, inheritance);
-    return GetObjectPermissionResponse.create(permissionResponses);
+    return GetObjectPermissionResponse.create(objectPermissionRespons);
   }
 
   @GetMapping(value = "{" + TYPE_ID + "}")
