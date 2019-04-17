@@ -7,7 +7,7 @@ The Files API allows you do upload/download files.
 
 ### Request
 ```
-POST /api/files/v1
+POST /api/files
 ...binary data in the body...
 ```
 
@@ -40,7 +40,7 @@ Filemeta as returned by the 'Retrieve file metadata' endpoint.
 ```javascript
 var file = document.getElementById('my-file-input').files[0]
 var request = new XMLHttpRequest()
-request.open('post', '/api/files/v1', true)
+request.open('post', '/api/files', true)
 request.setRequestHeader("Content-Type", file.type)
 request.setRequestHeader("Content-Length", file.size)
 request.setRequestHeader("x-molgenis-filename", file.name)
@@ -48,13 +48,13 @@ request.send(file)
 ```
 
 #### cURL
-curl -H 'Content-Type: application/octet-stream' --data-binary @my.file /api/files/v1
+curl -H 'Content-Type: application/octet-stream' --data-binary @my.file /api/files
 
 ## Download file
 
 ### Request
 ```
-GET /api/files/v1/myFileId?alt=media
+GET /api/files/myFileId?alt=media
 ```
 
 ### Response
@@ -68,7 +68,7 @@ GET /api/files/v1/myFileId?alt=media
 
 ### Request
 ```
-GET /api/files/v1/myFileId
+GET /api/files/myFileId
 ```
 
 ### Response
@@ -92,7 +92,7 @@ Example:
 
 ### Request
 ```
-DELETE /api/files/v1/myFileId
+DELETE /api/files/myFileId
 ```
 
 ### Response
