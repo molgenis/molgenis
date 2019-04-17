@@ -496,6 +496,12 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
     assertFalse(vcfImporterService.canImport(new File("file.xls"), source));
   }
 
+  @Test
+  public void getMetadataAction() {
+    RepositoryCollection source = mock(RepositoryCollection.class);
+    assertEquals(vcfImporterService.getMetadataAction(source), MetadataAction.ADD);
+  }
+
   private static ArgumentMatcher<EntityType> eqName(EntityType expectedEntityType) {
     return item -> item != null && item.getId().equals(expectedEntityType.getId());
   }
