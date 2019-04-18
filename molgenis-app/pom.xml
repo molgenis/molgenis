@@ -127,6 +127,11 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-batch</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api-data</artifactId>
       <version>${project.version}</version>
     </dependency>
