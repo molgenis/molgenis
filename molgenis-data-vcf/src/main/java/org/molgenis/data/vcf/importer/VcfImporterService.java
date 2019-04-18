@@ -270,4 +270,9 @@ public class VcfImporterService implements ImportService {
       String defaultPackage) {
     return metaDataService.determineImportableEntities(repositoryCollection);
   }
+
+  @Override
+  public MetadataAction getMetadataAction(RepositoryCollection source) {
+    return MetadataAction.ADD;
+  }
 }

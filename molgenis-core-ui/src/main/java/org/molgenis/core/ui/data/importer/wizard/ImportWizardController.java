@@ -259,7 +259,6 @@ public class ImportWizardController extends AbstractWizardController {
     // no action specified? default is ADD just like the importerPlugin
     ImportRun importRun;
     String fileExtension = getExtension(file.getName());
-    MetadataAction metadataAction = getMetadataAction(metadataActionStr);
     DataAction dataAction = getDataAction(actionStr);
     if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName()))) {
       throw new MolgenisDataException(
@@ -268,6 +267,8 @@ public class ImportWizardController extends AbstractWizardController {
     ImportService importService = importServiceFactory.getImportService(file.getName());
     RepositoryCollection repositoryCollection =
         fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+    MetadataAction metadataAction =
+        getMetadataAction(metadataActionStr, importService, repositoryCollection);
 
     importRun =
         importRunService.addImportRun(
@@ -287,10 +288,13 @@ public class ImportWizardController extends AbstractWizardController {
     return importRun;
   }
 
-  private MetadataAction getMetadataAction(@Nullable @CheckForNull String action) {
+  private MetadataAction getMetadataAction(
+      @Nullable @CheckForNull String action,
+      ImportService importService,
+      RepositoryCollection repositoryCollection) {
     MetadataAction metadataAction;
     if (action == null) {
-      metadataAction = MetadataAction.ADD;
+      metadataAction = importService.getMetadataAction(repositoryCollection);
     } else {
       try {
         metadataAction = MetadataAction.valueOf(action.toUpperCase());

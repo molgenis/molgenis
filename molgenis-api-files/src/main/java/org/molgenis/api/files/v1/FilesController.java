@@ -2,7 +2,6 @@ package org.molgenis.api.files.v1;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.files.FilesApiNamespace.API_FILES_ID;
-import static org.molgenis.api.files.FilesApiNamespace.API_FILES_PATH;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
 import static org.molgenis.data.security.EntityTypePermission.DELETE_DATA;
@@ -17,6 +16,7 @@ import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.api.ApiController;
+import org.molgenis.api.files.FilesApiNamespace;
 import org.molgenis.api.files.FilesService;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -38,16 +38,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Api("Files")
 @RestController
-@RequestMapping(FilesController.API_FILES_V1_PATH)
+@RequestMapping(FilesApiNamespace.API_FILES_PATH)
 class FilesController extends ApiController {
-  private static final int API_FILES_V1_VERSION = 1;
-  static final String API_FILES_V1_PATH = API_FILES_PATH + "/v" + API_FILES_V1_VERSION;
-
   private final FilesService filesService;
   private final UserPermissionEvaluator userPermissionEvaluator;
 
   FilesController(FilesService filesService, UserPermissionEvaluator userPermissionEvaluator) {
-    super(API_FILES_ID, API_FILES_V1_VERSION);
+    super(API_FILES_ID, 1);
     this.filesService = requireNonNull(filesService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
