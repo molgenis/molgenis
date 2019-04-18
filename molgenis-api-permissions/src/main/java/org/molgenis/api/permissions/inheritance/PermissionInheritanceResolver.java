@@ -1,7 +1,7 @@
 package org.molgenis.api.permissions.inheritance;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.permissions.PermissionsServiceImpl.ENTITY_PREFIX;
+import static org.molgenis.api.permissions.IdentityTools.ENTITY_PREFIX;
 import static org.molgenis.api.permissions.UserRoleTools.getRole;
 
 import java.util.ArrayList;

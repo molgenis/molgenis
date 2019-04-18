@@ -71,17 +71,20 @@ public class PermissionsController extends ApiController {
   private final RSQLParser rsqlParser;
   private final ObjectIdentityService objectIdentityService;
   private final UserRoleTools userRoleTools;
+  private final IdentityTools identityTools;
 
   public PermissionsController(
       PermissionsService permissionsService,
       RSQLParser rsqlParser,
       ObjectIdentityService objectIdentityService,
-      UserRoleTools userRoleTools) {
+      UserRoleTools userRoleTools,
+      IdentityTools identityTools) {
     super(PERMISSION_API_IDENTIFIER, VERSION);
     this.permissionsService = requireNonNull(permissionsService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
     this.userRoleTools = requireNonNull(userRoleTools);
+    this.identityTools = requireNonNull(identityTools);
   }
 
   @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
@@ -125,7 +128,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(TYPE_ID) String typeId,
       @PathVariable(OBJECT_ID) String identifier)
       throws URISyntaxException {
-    permissionsService.createAcl(typeId, identifier);
+    permissionsService.createAcl(identityTools.getObjectIdentity(typeId, identifier));
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -161,7 +164,8 @@ public class PermissionsController extends ApiController {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
     List<ObjectPermission> objectPermissionRespons =
-        permissionsService.getPermission(typeId, identifier, sids, inheritance);
+        permissionsService.getPermission(
+            identityTools.getObjectIdentity(typeId, identifier), sids, inheritance);
     return GetObjectPermissionResponse.create(objectPermissionRespons);
   }
 
@@ -223,7 +227,8 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest request) {
-    permissionsService.updatePermission(request.getPermissions(), typeId, identifier);
+    permissionsService.updatePermission(
+        request.getPermissions(), identityTools.getObjectIdentity(typeId, identifier));
     return ResponseEntity.noContent().build();
   }
 
@@ -258,7 +263,8 @@ public class PermissionsController extends ApiController {
       @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
       throws URISyntaxException {
     permissionsService.createPermission(
-        setIdentityPermissionRequest.getPermissions(), typeId, identifier);
+        setIdentityPermissionRequest.getPermissions(),
+        identityTools.getObjectIdentity(typeId, identifier));
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -271,7 +277,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
     Sid sid = userRoleTools.getSid(request.getUser(), request.getRole());
-    permissionsService.deletePermission(sid, typeId, identifier);
+    permissionsService.deletePermission(sid, identityTools.getObjectIdentity(typeId, identifier));
     return ResponseEntity.noContent().build();
   }
 

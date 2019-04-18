@@ -9,6 +9,7 @@ import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.ObjectPermission;
 import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 public interface PermissionsService {
@@ -16,22 +17,20 @@ public interface PermissionsService {
   List<String> getTypes();
 
   List<ObjectPermission> getPermission(
-      String typeId, String identifier, Set<Sid> sids, boolean isReturnInheritedPermissions);
+      ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions);
 
-  void createAcl(String typeId, String identifier);
+  void createAcl(ObjectIdentity objectIdentity);
 
-  void createPermission(
-      List<PermissionRequest> permissionRequests, String typeId, String identifier);
+  void createPermission(List<PermissionRequest> permissionRequests, ObjectIdentity objectIdentity);
 
   void createPermissions(List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId);
 
-  void updatePermission(
-      List<PermissionRequest> permissionRequests, String typeId, String identifier);
+  void updatePermission(List<PermissionRequest> permissionRequests, ObjectIdentity objectIdentity);
 
   void updatePermissions(
       @NotEmpty List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId);
 
-  void deletePermission(Sid sid, String typeId, String identifier);
+  void deletePermission(Sid sid, ObjectIdentity objectIdentity);
 
   void addType(String typeId);
 

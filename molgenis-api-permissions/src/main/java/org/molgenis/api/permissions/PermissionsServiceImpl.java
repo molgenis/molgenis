@@ -14,12 +14,10 @@ import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.paramValueToPermissionSet;
 import static org.molgenis.api.permissions.UserRoleTools.getRole;
 import static org.molgenis.api.permissions.UserRoleTools.getUser;
-import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,15 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.constraints.NotEmpty;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.permissions.exceptions.AclClassAlreadyExistsException;
-import org.molgenis.api.permissions.exceptions.AclNotFoundException;
 import org.molgenis.api.permissions.exceptions.DuplicatePermissionException;
 import org.molgenis.api.permissions.exceptions.InsufficientPermissionDeniedException;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.exceptions.PermissionNotSuitableException;
-import org.molgenis.api.permissions.exceptions.ReadPermissionDeniedException;
-import org.molgenis.api.permissions.exceptions.SidPermissionException;
 import org.molgenis.api.permissions.exceptions.UnknownAceException;
 import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
@@ -52,39 +46,28 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.GroupMetadata;
-import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.acl.AclClassService;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 public class PermissionsServiceImpl implements PermissionsService {
 
-  public static final String ENTITY_PREFIX = "entity-";
   private static final Logger LOG = LoggerFactory.getLogger(PermissionsServiceImpl.class);
 
   private final MutableAclService mutableAclService;
@@ -94,6 +77,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   private final DataService dataService;
   private final MutableAclClassService mutableAclClassService;
   private final UserRoleTools userRoleTools;
+  private final IdentityTools identityTools;
 
   PermissionsServiceImpl(
       MutableAclService mutableAclService,
@@ -102,7 +86,8 @@ public class PermissionsServiceImpl implements PermissionsService {
       ObjectIdentityService objectIdentityService,
       DataService dataService,
       MutableAclClassService mutableAclClassService,
-      UserRoleTools userRoleTools) {
+      UserRoleTools userRoleTools,
+      IdentityTools identityTools) {
     this.mutableAclService = requireNonNull(mutableAclService);
     this.aclClassService = requireNonNull(aclClassService);
     this.inheritanceResolver = requireNonNull(inheritanceResolver);
@@ -110,21 +95,17 @@ public class PermissionsServiceImpl implements PermissionsService {
     this.dataService = requireNonNull(dataService);
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
     this.userRoleTools = requireNonNull(userRoleTools);
+    this.identityTools = requireNonNull(identityTools);
   }
 
   @Override
   public List<String> getTypes() {
-    return aclClassService
-        .getAclClassTypes()
-        .stream()
-        .filter(type -> dataService.hasEntityType(getEntityTypeIdFromType(type)))
-        .collect(toList());
+    return new ArrayList(aclClassService.getAclClassTypes());
   }
 
   @Override
   public List<String> getAcls(String typeId, int page, int pageSize) {
     checkEntityTypeExists(typeId);
-    checkReadPermission(typeId, Collections.emptySet());
     return objectIdentityService
         .getObjectIdentities(typeId, pageSize, (page - 1) * pageSize)
         .stream()
@@ -153,16 +134,12 @@ public class PermissionsServiceImpl implements PermissionsService {
 
   @Override
   public List<ObjectPermission> getPermission(
-      String typeId, String identifier, Set<Sid> sids, boolean isReturnInheritedPermissions) {
-    checkEntityExists(typeId, identifier);
-    checkReadPermission(typeId, sids);
-
-    List<ObjectIdentity> objectIdentities =
-        Collections.singletonList(getObjectIdentity(typeId, identifier));
-
+      ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
+    checkEntityExists(objectIdentity);
+    List<ObjectIdentity> objectIdentities = Collections.singletonList(objectIdentity);
     Map<ObjectIdentity, Acl> aclMap;
     if (!sids.isEmpty()) {
-      aclMap = mutableAclService.readAclsById(objectIdentities, getSortedSidList(sids));
+      aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
     } else {
       aclMap = mutableAclService.readAclsById(objectIdentities);
     }
@@ -187,15 +164,13 @@ public class PermissionsServiceImpl implements PermissionsService {
 
   @Override
   public List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
-    checkPermissionsOnSid(sids);
-
     List<TypePermissionsResponse> result = new LinkedList<>();
     for (String typeId : getTypes()) {
-      String entityTypeId = getEntityTypeIdFromType(typeId);
+      String entityTypeId = identityTools.getEntityTypeIdFromType(typeId);
       if (dataService.hasEntityType(entityTypeId)) {
         Set<Sid> sidsToQuery;
         if (isReturnInherited) {
-          sidsToQuery = getInheritedSids(sids);
+          sidsToQuery = userRoleTools.getInheritedSids(sids);
         } else {
           sidsToQuery = sids;
         }
@@ -213,14 +188,13 @@ public class PermissionsServiceImpl implements PermissionsService {
   public Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkEntityTypeExists(typeId);
-    checkReadPermission(typeId, sids);
 
     List<ObjectIdentity> objectIdentities =
         objectIdentityService.getObjectIdentities(typeId, sids, pageSize, (page - 1) * pageSize);
 
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     if (!objectIdentities.isEmpty()) {
-      aclMap = mutableAclService.readAclsById(objectIdentities, getSortedSidList(sids));
+      aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
     }
     return getPermissions(aclMap, objectIdentities, sids, false);
   }
@@ -229,36 +203,28 @@ public class PermissionsServiceImpl implements PermissionsService {
   public Collection<ObjectPermissionsResponse> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkEntityTypeExists(typeId);
-    checkReadPermission(typeId, sids);
     List<ObjectIdentity> objectIdentities;
     if (sids.isEmpty()) {
       objectIdentities = objectIdentityService.getObjectIdentities(typeId);
     } else {
-      objectIdentities = objectIdentityService.getObjectIdentities(typeId, getInheritedSids(sids));
+      objectIdentities =
+          objectIdentityService.getObjectIdentities(typeId, userRoleTools.getInheritedSids(sids));
     }
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     if (!objectIdentities.isEmpty()) {
       if (sids.isEmpty()) {
         aclMap = mutableAclService.readAclsById(objectIdentities);
       } else {
-        aclMap = mutableAclService.readAclsById(objectIdentities, getSortedSidList(sids));
+        aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
       }
     }
     return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
   }
 
-  private LinkedHashSet<Sid> getInheritedSids(Set<Sid> sids) {
-    LinkedList<Sid> result = new LinkedList<>();
-    result.addAll(sids);
-    result.addAll(userRoleTools.getRoles(sids));
-    return new LinkedHashSet<>(result);
-  }
-
   @Override
   @Transactional
-  public void createAcl(String typeId, String identifier) {
-    checkEntityExists(typeId, identifier);
-    ObjectIdentity objectIdentity = getObjectIdentity(typeId, identifier);
+  public void createAcl(ObjectIdentity objectIdentity) {
+    checkEntityExists(objectIdentity);
     if (SecurityUtils.currentUserIsSuOrSystem()) {
       mutableAclService.createAcl(objectIdentity);
     } else {
@@ -266,49 +232,29 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
   }
 
-  private void checkEntityExists(String typeId, String identifier) {
-    checkEntityTypeExists(typeId);
-    String entityTypeId = getEntityTypeIdFromType(typeId);
-    if (dataService.findOneById(entityTypeId, identifier) == null) {
-      throw new UnknownEntityException(entityTypeId, identifier);
-    }
-  }
-
-  private void checkEntityTypeExists(String typeId) {
-    String entityTypeId = getEntityTypeIdFromType(typeId);
-    if (!dataService.hasEntityType(entityTypeId)) {
-      throw new InvalidTypeIdException(typeId);
-    }
-  }
-
   @Override
   @Transactional
   public void createPermission(
-      List<PermissionRequest> permissionRequests, String typeId, String identifier) {
-    checkEntityExists(typeId, identifier);
-    MutableAcl acl =
-        (MutableAcl) mutableAclService.readAclById(getObjectIdentity(typeId, identifier));
-
-    if (isSuOrOwner(acl)) {
-      for (PermissionRequest permissionRequest : permissionRequests) {
-        if (!getSuitablePermissionsForType(typeId).contains(permissionRequest.getPermission())) {
-          throw new PermissionNotSuitableException(permissionRequest.getPermission(), typeId);
-        }
-        Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
-        if (getPermissionResponses(acl, false, singleton(sid)).isEmpty()) {
-          acl.insertAce(
-              acl.getEntries().size(),
-              paramValueToPermissionSet(permissionRequest.getPermission()),
-              sid,
-              true);
-          mutableAclService.updateAcl(acl);
-        } else {
-          throw new DuplicatePermissionException(typeId, identifier, sid);
-        }
+      List<PermissionRequest> permissionRequests, ObjectIdentity objectIdentity) {
+    checkEntityExists(objectIdentity);
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
+    for (PermissionRequest permissionRequest : permissionRequests) {
+      if (!getSuitablePermissionsForType(objectIdentity.getType())
+          .contains(permissionRequest.getPermission())) {
+        throw new PermissionNotSuitableException(
+            permissionRequest.getPermission(), objectIdentity.getType());
       }
-    } else {
-      throw new InsufficientPermissionDeniedException(
-          acl.getObjectIdentity(), "superuser or owner");
+      Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
+      if (getPermissionResponses(acl, false, singleton(sid)).isEmpty()) {
+        acl.insertAce(
+            acl.getEntries().size(),
+            paramValueToPermissionSet(permissionRequest.getPermission()),
+            sid,
+            true);
+        mutableAclService.updateAcl(acl);
+      } else {
+        throw new DuplicatePermissionException(objectIdentity, sid);
+      }
     }
   }
 
@@ -317,44 +263,37 @@ public class PermissionsServiceImpl implements PermissionsService {
   public void createPermissions(
       List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId) {
     for (ObjectPermissionsRequest request : objectPermissionsRequests) {
-      createPermission(request.getPermissions(), typeId, request.getObjectId());
+      createPermission(
+          request.getPermissions(), identityTools.getObjectIdentity(typeId, request.getObjectId()));
     }
   }
 
   @Override
   @Transactional
   public void updatePermission(
-      List<PermissionRequest> permissionRequests, String typeId, String identifier) {
-    checkEntityExists(typeId, identifier);
-    try {
-      MutableAcl acl =
-          (MutableAcl) mutableAclService.readAclById(getObjectIdentity(typeId, identifier));
+      List<PermissionRequest> permissionRequests, ObjectIdentity objectIdentity) {
+    checkEntityExists(objectIdentity);
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
 
-      if (isSuOrOwner(acl)) {
-        for (PermissionRequest permissionRequest : permissionRequests) {
-          if (!getSuitablePermissionsForType(typeId).contains(permissionRequest.getPermission())) {
-            throw new PermissionNotSuitableException(permissionRequest.getPermission(), typeId);
-          }
-          Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
-          List<ObjectPermission> current =
-              getPermission(typeId, identifier, Collections.singleton(sid), false);
-          if (current.isEmpty()) {
-            throw new UnknownAceException(typeId, identifier, sid, "update");
-          }
-          deleteAce(sid, acl);
-          acl.insertAce(
-              acl.getEntries().size(),
-              paramValueToPermissionSet(permissionRequest.getPermission()),
-              sid,
-              true);
-          mutableAclService.updateAcl(acl);
-        }
-      } else {
-        throw new InsufficientPermissionDeniedException(
-            acl.getObjectIdentity(), "superuser or owner");
+    for (PermissionRequest permissionRequest : permissionRequests) {
+      if (!getSuitablePermissionsForType(objectIdentity.getType())
+          .contains(permissionRequest.getPermission())) {
+        throw new PermissionNotSuitableException(
+            permissionRequest.getPermission(), objectIdentity.getType());
       }
-    } catch (NotFoundException e) {
-      throw new AclNotFoundException(typeId);
+      Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
+      List<ObjectPermission> current =
+          getPermission(objectIdentity, Collections.singleton(sid), false);
+      if (current.isEmpty()) {
+        throw new UnknownAceException(objectIdentity, sid, "update");
+      }
+      deleteAce(sid, acl);
+      acl.insertAce(
+          acl.getEntries().size(),
+          paramValueToPermissionSet(permissionRequest.getPermission()),
+          sid,
+          true);
+      mutableAclService.updateAcl(acl);
     }
   }
 
@@ -364,20 +303,19 @@ public class PermissionsServiceImpl implements PermissionsService {
       @NotEmpty List<ObjectPermissionsRequest> objectPermissionsRequests, String typeId) {
     checkEntityTypeExists(typeId);
     for (ObjectPermissionsRequest permissions : objectPermissionsRequests) {
-      updatePermission(permissions.getPermissions(), typeId, permissions.getObjectId());
+      updatePermission(
+          permissions.getPermissions(),
+          identityTools.getObjectIdentity(typeId, permissions.getObjectId()));
     }
   }
 
   @Override
   @Transactional
-  public void deletePermission(Sid sid, String typeId, String identifier) {
-    checkEntityExists(typeId, identifier);
-    MutableAcl acl =
-        (MutableAcl)
-            mutableAclService.readAclById(
-                getObjectIdentity(typeId, identifier), singletonList(sid));
+  public void deletePermission(Sid sid, ObjectIdentity objectIdentity) {
+    checkEntityExists(objectIdentity);
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
     if (acl == null) {
-      throw new UnknownAceException(typeId, identifier, sid, "delete");
+      throw new UnknownAceException(objectIdentity, sid, "delete");
     }
     deleteAce(sid, acl);
   }
@@ -386,29 +324,26 @@ public class PermissionsServiceImpl implements PermissionsService {
   @Transactional
   public void addType(String typeId) {
     checkEntityTypeExists(typeId);
-    if (SecurityUtils.currentUserIsSuOrSystem()) {
-      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromType(typeId));
-      if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
-        mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
-        // Create ACL's for existing rows
-        dataService
-            .findAll(entityType.getId())
-            .forEach(
-                entity -> {
-                  try {
-                    mutableAclService.createAcl(new EntityIdentity(entity));
-                  } catch (AlreadyExistsException e) {
-                    LOG.warn(
-                        "Acl for entity '{}' of type '{}' already exists",
-                        entity.getIdValue(),
-                        entityType.getIdValue());
-                  }
-                });
-      } else {
-        throw new AclClassAlreadyExistsException(typeId);
-      }
+    EntityType entityType =
+        dataService.getEntityType(identityTools.getEntityTypeIdFromType(typeId));
+    if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
+      mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
+      // Create ACL's for existing rows
+      dataService
+          .findAll(entityType.getId())
+          .forEach(
+              entity -> {
+                try {
+                  mutableAclService.createAcl(new EntityIdentity(entity));
+                } catch (AlreadyExistsException e) {
+                  LOG.warn(
+                      "Acl for entity '{}' of type '{}' already exists",
+                      entity.getIdValue(),
+                      entityType.getIdValue());
+                }
+              });
     } else {
-      throw new InsufficientPermissionDeniedException("type", typeId, "superuser");
+      throw new AclClassAlreadyExistsException(typeId);
     }
   }
 
@@ -420,83 +355,14 @@ public class PermissionsServiceImpl implements PermissionsService {
   }
 
   private void deleteAce(Sid sid, MutableAcl acl) {
-    if (isSuOrOwner(acl)) {
-      int nrEntries = acl.getEntries().size();
-      for (int i = nrEntries - 1; i >= 0; i--) {
-        AccessControlEntry accessControlEntry = acl.getEntries().get(i);
-        if (accessControlEntry.getSid().equals(sid)) {
-          acl.deleteAce(i);
-          mutableAclService.updateAcl(acl);
-        }
-      }
-    } else {
-      throw new InsufficientPermissionDeniedException(acl.getObjectIdentity(), "su or owner");
-    }
-  }
-
-  private void checkPermissionsOnSid(Set<Sid> sids) {
-    List<Sid> forbiddenSids = getForbiddenSids(sids);
-    if (!SecurityUtils.currentUserIsSuOrSystem() && !forbiddenSids.isEmpty()) {
-      List<String> sidNames = forbiddenSids.stream().map(UserRoleTools::getName).collect(toList());
-      throw new SidPermissionException(StringUtils.join(sidNames, ","));
-    }
-  }
-
-  private void checkReadPermission(String typeId, Set<Sid> sids) {
-    if (!isSuOrSelf(sids)) {
-      throw new ReadPermissionDeniedException(typeId);
-    }
-  }
-
-  private boolean isSuOrOwner(Acl acl) {
-    Sid sid = createSecurityContextSid();
-    boolean isOwner = acl.getOwner().equals(sid);
-    return SecurityUtils.currentUserIsSuOrSystem() || isOwner;
-  }
-
-  private boolean isSuOrSelf(Set<Sid> sids) {
-    return (SecurityUtils.currentUserIsSuOrSystem())
-        || !(sids.isEmpty() || !getForbiddenSids(sids).isEmpty());
-  }
-
-  private List<Sid> getForbiddenSids(Set<Sid> sids) {
-    List<Sid> result = new LinkedList<>();
-    // User are allowed to query for their own permissions including permissions from roles they
-    // have.
-    Sid currentUser = createSecurityContextSid();
-    Set<Sid> roles = userRoleTools.getRoles(currentUser);
-    for (Sid sid : sids) {
-      if (!roles.contains(sid) && !(currentUser.equals(sid))) {
-        result.add(sid);
+    int nrEntries = acl.getEntries().size();
+    for (int i = nrEntries - 1; i >= 0; i--) {
+      AccessControlEntry accessControlEntry = acl.getEntries().get(i);
+      if (accessControlEntry.getSid().equals(sid)) {
+        acl.deleteAce(i);
+        mutableAclService.updateAcl(acl);
       }
     }
-    return result;
-  }
-
-  private String getEntityTypeIdFromType(String typeId) {
-    String result;
-    switch (typeId) {
-      case PackageIdentity.PACKAGE:
-        result = PackageMetadata.PACKAGE;
-        break;
-      case EntityTypeIdentity.ENTITY_TYPE:
-        result = EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-        break;
-      case PluginIdentity.PLUGIN:
-        result = PluginMetadata.PLUGIN;
-        break;
-      case GroupIdentity.GROUP:
-        result = GroupMetadata.GROUP;
-        break;
-      default:
-        if (typeId.startsWith(ENTITY_PREFIX)) {
-          result = typeId.substring(7);
-        } else {
-          throw new InvalidTypeIdException(typeId);
-        }
-        break;
-    }
-    return result;
   }
 
   private List<ObjectPermissionsResponse> getPermissions(
@@ -543,7 +409,9 @@ public class PermissionsServiceImpl implements PermissionsService {
         identifier,
         ObjectPermissionsResponse.create(
             identifier,
-            getLabel(getEntityTypeIdFromType(acl.getObjectIdentity().getType()), identifier),
+            getLabel(
+                identityTools.getEntityTypeIdFromType(acl.getObjectIdentity().getType()),
+                identifier),
             objectPermissionRespons));
   }
 
@@ -596,19 +464,6 @@ public class PermissionsServiceImpl implements PermissionsService {
     return Collections.emptyList();
   }
 
-  private ObjectIdentity getObjectIdentity(String classId, String objectIdentifier) {
-    return new ObjectIdentityImpl(classId, getTypedValue(objectIdentifier, classId));
-  }
-
-  private Serializable getTypedValue(String untypedId, String classId) {
-    if (classId.startsWith(ENTITY_PREFIX)) {
-      EntityType entityType = dataService.getEntityType(getEntityTypeIdFromType(classId));
-      return (Serializable) EntityUtils.getTypedValue(untypedId, entityType.getIdAttribute(), null);
-    } else {
-      return untypedId;
-    }
-  }
-
   private String getLabel(String entityTypeId, String identifier) {
     Entity entity = dataService.getRepository(entityTypeId).findOneById(identifier);
     if (entity == null) {
@@ -621,9 +476,18 @@ public class PermissionsServiceImpl implements PermissionsService {
     return dataService.getRepository(entityTypeId).getEntityType().getLabel();
   }
 
-  private List<Sid> getSortedSidList(Set<Sid> sids) {
-    List<Sid> result = new ArrayList<>(sids);
-    result.sort(comparing(UserRoleTools::getName));
-    return result;
+  private void checkEntityExists(ObjectIdentity objectIdentity) {
+    checkEntityTypeExists(objectIdentity.getType());
+    String entityTypeId = identityTools.getEntityTypeIdFromType(objectIdentity.getType());
+    if (dataService.findOneById(entityTypeId, objectIdentity.getIdentifier()) == null) {
+      throw new UnknownEntityException(entityTypeId, objectIdentity.getIdentifier());
+    }
+  }
+
+  private void checkEntityTypeExists(String typeId) {
+    String entityTypeId = identityTools.getEntityTypeIdFromType(typeId);
+    if (!dataService.hasEntityType(entityTypeId)) {
+      throw new InvalidTypeIdException(typeId);
+    }
   }
 }

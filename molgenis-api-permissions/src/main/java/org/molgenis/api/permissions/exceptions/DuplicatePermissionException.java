@@ -4,29 +4,30 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.UserRoleTools.getName;
 
 import org.molgenis.i18n.CodedRuntimeException;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 public class DuplicatePermissionException extends CodedRuntimeException {
   private static final String ERROR_CODE = "PRM12";
-  private final String typeId;
-  private final String identifier;
+  private final ObjectIdentity objectIdentity;
   private final Sid sid;
 
-  public DuplicatePermissionException(String typeId, String identifier, Sid sid) {
+  public DuplicatePermissionException(ObjectIdentity objectIdentity, Sid sid) {
     super(ERROR_CODE);
 
-    this.typeId = requireNonNull(typeId);
-    this.identifier = requireNonNull(identifier);
+    this.objectIdentity = requireNonNull(objectIdentity);
     this.sid = requireNonNull(sid);
   }
 
   @Override
   public String getMessage() {
-    return String.format("typeId:%s, identifier:%s, sid:%s", typeId, identifier, sid);
+    return String.format(
+        "typeId:%s, identifier:%s, sid:%s",
+        objectIdentity.getType(), objectIdentity.getIdentifier(), sid);
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {getName(sid), identifier, typeId};
+    return new Object[] {getName(sid), objectIdentity.getIdentifier(), objectIdentity.getType()};
   }
 }

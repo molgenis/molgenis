@@ -1,6 +1,7 @@
 package org.molgenis.api.permissions;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
@@ -199,6 +200,13 @@ public class UserRoleTools {
     }
   }
 
+  LinkedHashSet<Sid> getInheritedSids(Set<Sid> sids) {
+    LinkedList<Sid> result = new LinkedList<>();
+    result.addAll(sids);
+    result.addAll(getRoles(sids));
+    return new LinkedHashSet<>(result);
+  }
+
   Set<Sid> getAllAvailableSids() {
     Set<Sid> sids =
         userService
@@ -216,5 +224,11 @@ public class UserRoleTools {
     sids.addAll(roles);
 
     return sids;
+  }
+
+  List<Sid> sortSids(Set<Sid> sids) {
+    List<Sid> result = new ArrayList<>(sids);
+    result.sort(comparing(UserRoleTools::getName));
+    return result;
   }
 }
