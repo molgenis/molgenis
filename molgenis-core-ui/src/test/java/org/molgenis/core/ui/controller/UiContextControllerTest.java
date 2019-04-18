@@ -113,7 +113,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     when(cookieWallService.showCookieWall()).thenReturn(false);
 
     mockMvc
-        .perform(get("/plugin/app-ui-context"))
+        .perform(get("/app-ui-context"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.navBarLogo", is(appSettings.getLogoNavBarHref())))
         .andExpect(jsonPath("$.logoTop", is(appSettings.getLogoTopHref())))
