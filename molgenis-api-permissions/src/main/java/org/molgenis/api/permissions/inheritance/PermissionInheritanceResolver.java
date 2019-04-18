@@ -2,10 +2,11 @@ package org.molgenis.api.permissions.inheritance;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.permissions.IdentityTools.ENTITY_PREFIX;
-import static org.molgenis.api.permissions.UserRoleTools.getRole;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.permissions.PermissionSetUtils;
 import org.molgenis.api.permissions.UserRoleTools;
@@ -13,7 +14,7 @@ import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.inheritance.model.InheritedAclPermissionsResult;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.api.permissions.inheritance.model.InheritedUserPermissionsResult;
-import org.molgenis.api.permissions.model.response.InheritedPermission;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
@@ -116,7 +117,7 @@ public class PermissionInheritanceResolver {
             && isNotEmpty(result.getParentAclPermissions()));
   }
 
-  public List<InheritedPermission> convertToInheritedPermissions(
+  public Set<LabelledPermission> convertToInheritedPermissions(
       InheritedPermissionsResult inheritedPermissionsResult) {
     List<InheritedUserPermissionsResult> parentRolePermissions =
         inheritedPermissionsResult.getRequestedAclParentRolesPermissions();
@@ -125,27 +126,27 @@ public class PermissionInheritanceResolver {
     return convertToInheritedPermissions(parentRolePermissions, parentAclPermissions);
   }
 
-  private List<InheritedPermission> convertToInheritedPermissions(
+  private Set<LabelledPermission> convertToInheritedPermissions(
       List<InheritedUserPermissionsResult> parentRolePermissions,
       InheritedAclPermissionsResult parentAclPermission) {
-    List<InheritedPermission> inheritedPermissions =
-        new ArrayList<>(convertInheritedRolePermissions(parentRolePermissions));
+    Set<LabelledPermission> labelledPermissions =
+        new HashSet<>(convertInheritedRolePermissions(parentRolePermissions));
     if (parentAclPermission != null) {
-      inheritedPermissions.add(convertInheritedAclPermissions(parentAclPermission));
+      labelledPermissions.add(convertInheritedAclPermissions(parentAclPermission));
     }
-    return inheritedPermissions;
+    return labelledPermissions;
   }
 
-  private InheritedPermission convertInheritedAclPermissions(
+  private LabelledPermission convertInheritedAclPermissions(
       InheritedAclPermissionsResult parentAclPermission) {
     Acl acl = parentAclPermission.getAcl();
     ObjectIdentity objectIdentity = acl.getObjectIdentity();
     String ownPermission = parentAclPermission.getOwnPermission();
-    List<InheritedPermission> inheritedPermissions =
+    Set<LabelledPermission> labelledPermissions =
         convertToInheritedPermissions(
             parentAclPermission.getParentRolePermissions(),
             parentAclPermission.getParentAclPermissions());
-    return InheritedPermission.create(
+    return LabelledPermission.create(
         null,
         objectIdentity.getType(),
         getLabel(getEntityTypeIdFromClass(objectIdentity.getType())),
@@ -154,24 +155,24 @@ public class PermissionInheritanceResolver {
             getEntityTypeIdFromClass(objectIdentity.getType()),
             objectIdentity.getIdentifier().toString()),
         ownPermission,
-        inheritedPermissions);
+        labelledPermissions);
   }
 
-  private List<InheritedPermission> convertInheritedRolePermissions(
+  private Set<LabelledPermission> convertInheritedRolePermissions(
       List<InheritedUserPermissionsResult> requestedAclParentRolesPermissions) {
-    List<InheritedPermission> results = new ArrayList<>();
+    Set<LabelledPermission> results = new HashSet<>();
     for (InheritedUserPermissionsResult parentRolePermission : requestedAclParentRolesPermissions) {
       String ownPermission = parentRolePermission.getOwnPermission();
       Sid sid = parentRolePermission.getSid();
-      List<InheritedPermission> inheritedPermissions = null;
+      Set<LabelledPermission> labelledPermissions = null;
       if (parentRolePermission.getInheritedUserPermissionsResult() != null) {
-        inheritedPermissions =
+        labelledPermissions =
             convertInheritedRolePermissions(
                 parentRolePermission.getInheritedUserPermissionsResult());
       }
       results.add(
-          InheritedPermission.create(
-              getRole(sid), null, null, null, null, ownPermission, inheritedPermissions));
+          LabelledPermission.create(
+              sid, null, null, null, null, ownPermission, labelledPermissions));
     }
     return results;
   }

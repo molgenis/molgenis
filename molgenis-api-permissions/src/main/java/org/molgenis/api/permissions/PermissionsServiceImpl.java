@@ -1,6 +1,5 @@
 package org.molgenis.api.permissions;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
@@ -12,10 +11,7 @@ import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITE;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.paramValueToPermissionSet;
-import static org.molgenis.api.permissions.UserRoleTools.getRole;
-import static org.molgenis.api.permissions.UserRoleTools.getUser;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -37,10 +33,8 @@ import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.InheritedPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
+import org.molgenis.api.permissions.model.service.ObjectPermission;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
@@ -131,7 +125,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   }
 
   @Override
-  public List<ObjectPermission> getPermission(
+  public List<LabelledPermission> getPermission(
       ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
     checkEntityExists(objectIdentity);
     List<ObjectIdentity> objectIdentities = Collections.singletonList(objectIdentity);
@@ -141,28 +135,15 @@ public class PermissionsServiceImpl implements PermissionsService {
     } else {
       aclMap = mutableAclService.readAclsById(objectIdentities);
     }
-    List<ObjectPermissionsResponse> permissions =
+    List<ObjectPermission> permissions =
         getPermissions(aclMap, objectIdentities, sids, isReturnInheritedPermissions);
-    List<ObjectPermission> result;
-    if (permissions.size() == 1) {
-      result = permissions.get(0).getPermissions();
-      result.sort(comparing(a -> getRoleOrUser(a.getUser(), a.getRole())));
-    } else if (permissions.isEmpty()) {
-      result = emptyList();
-    } else {
-      throw new IllegalStateException(
-          "Multiple results originating from a single object identity should not be possible");
-    }
-    return result;
-  }
-
-  private String getRoleOrUser(String user, String role) {
-    return Strings.isNullOrEmpty(user) ? role : user;
+    permissions.sort(comparing(a -> a.getSid().toString()));
+    return getLabelledPermissions(permissions);
   }
 
   @Override
-  public List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
-    List<TypePermissionsResponse> result = new LinkedList<>();
+  public List<LabelledPermission> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
+    List<LabelledPermission> result = new LinkedList<>();
     for (String typeId : getTypes()) {
       String entityTypeId = identityTools.getEntityTypeIdFromType(typeId);
       if (dataService.hasEntityType(entityTypeId)) {
@@ -172,10 +153,10 @@ public class PermissionsServiceImpl implements PermissionsService {
         } else {
           sidsToQuery = sids;
         }
-        LinkedList<ObjectPermissionsResponse> permissions =
+        LinkedList<LabelledPermission> permissions =
             Lists.newLinkedList(getPermissionsForType(typeId, sidsToQuery, isReturnInherited));
         if (!permissions.isEmpty()) {
-          result.add(TypePermissionsResponse.create(typeId, getLabel(entityTypeId), permissions));
+          result.addAll(permissions);
         }
       }
     }
@@ -183,7 +164,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   }
 
   @Override
-  public Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
+  public Collection<LabelledPermission> getPagedPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkEntityTypeExists(typeId);
 
@@ -194,11 +175,12 @@ public class PermissionsServiceImpl implements PermissionsService {
     if (!objectIdentities.isEmpty()) {
       aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
     }
-    return getPermissions(aclMap, objectIdentities, sids, false);
+    List<ObjectPermission> permissions = getPermissions(aclMap, objectIdentities, sids, false);
+    return getLabelledPermissions(permissions);
   }
 
   @Override
-  public Collection<ObjectPermissionsResponse> getPermissionsForType(
+  public Collection<LabelledPermission> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkEntityTypeExists(typeId);
     List<ObjectIdentity> objectIdentities;
@@ -216,7 +198,9 @@ public class PermissionsServiceImpl implements PermissionsService {
         aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
       }
     }
-    return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
+    List<ObjectPermission> permissions =
+        getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
+    return getLabelledPermissions(permissions);
   }
 
   @Override
@@ -276,7 +260,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             permissionRequest.getPermission(), objectIdentity.getType());
       }
       Sid sid = userRoleTools.getSid(permissionRequest.getUser(), permissionRequest.getRole());
-      List<ObjectPermission> current =
+      List<LabelledPermission> current =
           getPermission(objectIdentity, Collections.singleton(sid), false);
       if (current.isEmpty()) {
         throw new UnknownAceException(objectIdentity, sid, "update");
@@ -359,12 +343,12 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
   }
 
-  private List<ObjectPermissionsResponse> getPermissions(
+  private List<ObjectPermission> getPermissions(
       Map<ObjectIdentity, Acl> acls,
       List<ObjectIdentity> objectIdentities,
       Set<Sid> sids,
       boolean isReturnInheritedPermissions) {
-    List<ObjectPermissionsResponse> result = new LinkedList<>();
+    List<ObjectPermission> result = new LinkedList<>();
     objectIdentities.forEach(
         objectIdentity ->
             getPermissionForObjectIdentity(
@@ -375,17 +359,17 @@ public class PermissionsServiceImpl implements PermissionsService {
   private void getPermissionForObjectIdentity(
       Map<ObjectIdentity, Acl> acls,
       Set<Sid> sids,
-      List<ObjectPermissionsResponse> result,
+      List<ObjectPermission> result,
       ObjectIdentity objectIdentity,
       boolean isReturnInheritedPermissions) {
     Acl acl = acls.get(objectIdentity);
 
-    Map<String, ObjectPermissionsResponse> resultMap = new HashMap<>();
+    Map<String, List<ObjectPermission>> resultMap = new HashMap<>();
     getPermissionsOnAceForSids(sids, acl, resultMap, isReturnInheritedPermissions);
-    Collection<ObjectPermissionsResponse> identityPermissionResponses = resultMap.values();
-    for (ObjectPermissionsResponse identityPermission : identityPermissionResponses) {
-      if (!identityPermission.getPermissions().isEmpty()) {
-        result.add(identityPermission);
+    Collection<List<ObjectPermission>> identityPermissionResponses = resultMap.values();
+    for (List<ObjectPermission> identityPermissions : identityPermissionResponses) {
+      if (!identityPermissions.isEmpty()) {
+        result.addAll(identityPermissions);
       }
     }
   }
@@ -393,20 +377,13 @@ public class PermissionsServiceImpl implements PermissionsService {
   private void getPermissionsOnAceForSids(
       Set<Sid> sids,
       Acl acl,
-      Map<String, ObjectPermissionsResponse> result,
+      Map<String, List<ObjectPermission>> result,
       boolean isReturnInheritedPermissions) {
-    String identifier = acl.getObjectIdentity().getIdentifier().toString();
-    List<ObjectPermission> objectPermissionRespons =
+    ObjectIdentity objectIdentity = acl.getObjectIdentity();
+    List<ObjectPermission> objectPermissionResponses =
         getPermissionResponses(acl, isReturnInheritedPermissions, sids);
 
-    result.put(
-        identifier,
-        ObjectPermissionsResponse.create(
-            identifier,
-            getLabel(
-                identityTools.getEntityTypeIdFromType(acl.getObjectIdentity().getType()),
-                identifier),
-            objectPermissionRespons));
+    result.put(objectIdentity.getIdentifier().toString(), objectPermissionResponses);
   }
 
   private List<ObjectPermission> getPermissionResponses(
@@ -433,29 +410,54 @@ public class PermissionsServiceImpl implements PermissionsService {
         ownPermission = PermissionSetUtils.getPermissionStringValue(ace);
       }
     }
-    List<InheritedPermission> inheritedPermissions = new LinkedList<>();
+    List<LabelledPermission> labelledPermissions = new LinkedList<>();
     if (isReturnInheritedPermissions) {
-      inheritedPermissions.addAll(getInheritedPermissions(acl, sid));
+      labelledPermissions.addAll(getInheritedPermissions(acl, sid));
     }
-    if (ownPermission != null || !inheritedPermissions.isEmpty()) {
-      LinkedHashSet<InheritedPermission> deduplicatedInheritedPermissions =
-          new LinkedHashSet<>(inheritedPermissions);
-      if (deduplicatedInheritedPermissions.isEmpty()) {
-        deduplicatedInheritedPermissions = null;
+    if (ownPermission != null || !labelledPermissions.isEmpty()) {
+      LinkedHashSet<LabelledPermission> deduplicatedLabelledPermissions =
+          new LinkedHashSet<>(labelledPermissions);
+      if (deduplicatedLabelledPermissions.isEmpty()) {
+        deduplicatedLabelledPermissions = null;
       }
       result.add(
           ObjectPermission.create(
-              getRole(sid), getUser(sid), ownPermission, deduplicatedInheritedPermissions));
+              acl.getObjectIdentity(), sid, ownPermission, deduplicatedLabelledPermissions));
     }
   }
 
-  private List<InheritedPermission> getInheritedPermissions(Acl acl, Sid sid) {
+  private Set<LabelledPermission> getInheritedPermissions(Acl acl, Sid sid) {
     InheritedPermissionsResult inheritedPermissionsResult =
         inheritanceResolver.getInheritedPermissions(acl, sid);
     if (inheritanceResolver.isNotEmpty(inheritedPermissionsResult)) {
       return inheritanceResolver.convertToInheritedPermissions(inheritedPermissionsResult);
     }
-    return Collections.emptyList();
+    return Collections.emptySet();
+  }
+
+  private List<LabelledPermission> getLabelledPermissions(List<ObjectPermission> permissions) {
+    List<LabelledPermission> labelledPermissions = new ArrayList<>();
+    for (ObjectPermission objectPermission : permissions) {
+      labelledPermissions.add(getLabelledPermission(objectPermission));
+    }
+    return labelledPermissions;
+  }
+
+  private LabelledPermission getLabelledPermission(ObjectPermission objectPermission) {
+    ObjectIdentity objectIdentity = objectPermission.getObjectIdentity();
+    String type = objectIdentity.getType();
+    String entityTypeId = identityTools.getEntityTypeIdFromType(type);
+    String typeLabel = getLabel(entityTypeId);
+    String identifier = objectIdentity.getIdentifier().toString();
+    String identifierLabel = getLabel(entityTypeId, identifier);
+    return LabelledPermission.create(
+        objectPermission.getSid(),
+        type,
+        typeLabel,
+        identifier,
+        identifierLabel,
+        objectPermission.getPermission(),
+        objectPermission.getInheritedPermissions());
   }
 
   private String getLabel(String entityTypeId, String identifier) {

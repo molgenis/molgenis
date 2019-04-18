@@ -1,5 +1,6 @@
 package org.molgenis.api.permissions.inheritance;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -10,12 +11,13 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.PermissionTestUtils;
 import org.molgenis.api.permissions.UserRoleTools;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.inheritance.model.InheritedPermissionsResult;
-import org.molgenis.api.permissions.model.response.InheritedPermission;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -96,26 +98,26 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     doReturn(parent).when(packageRepo).findOneById("parent");
     doReturn(packageRepo).when(dataService).getRepository("sys_md_Package");
 
-    List<InheritedPermission> actual = resolver.convertToInheritedPermissions(input);
+    Set<LabelledPermission> actual = resolver.convertToInheritedPermissions(input);
 
     // expected
-    InheritedPermission role3Permission =
-        InheritedPermission.create(
-            "role3", null, null, null, null, "WRITEMETA", Collections.emptyList());
-    InheritedPermission role1Permission =
-        InheritedPermission.create(
-            "role1", null, null, null, null, null, singletonList(role3Permission));
-    InheritedPermission parentPermission =
-        InheritedPermission.create(
-            null, "package", "Package", "parent", "Parent", null, singletonList(role1Permission));
-    InheritedPermission packPermission =
-        InheritedPermission.create(
-            null, "package", "Package", "pack", "Pack", "READ", singletonList(parentPermission));
-    InheritedPermission role2Permission =
-        InheritedPermission.create(
-            "role2", null, null, null, null, "WRITE", Collections.emptyList());
+    LabelledPermission role3Permission =
+        LabelledPermission.create(
+            role3Sid, null, null, null, null, "WRITEMETA", Collections.emptySet());
+    LabelledPermission role1Permission =
+        LabelledPermission.create(
+            role3Sid, null, null, null, null, null, singleton(role3Permission));
+    LabelledPermission parentPermission =
+        LabelledPermission.create(
+            null, "package", "Package", "parent", "Parent", null, singleton(role1Permission));
+    LabelledPermission packPermission =
+        LabelledPermission.create(
+            null, "package", "Package", "pack", "Pack", "READ", singleton(parentPermission));
+    LabelledPermission role2Permission =
+        LabelledPermission.create(
+            role2Sid, null, null, null, null, "WRITE", Collections.emptySet());
 
-    List<InheritedPermission> expected = Arrays.asList(role2Permission, packPermission);
+    List<LabelledPermission> expected = Arrays.asList(role2Permission, packPermission);
 
     assertEquals(actual, expected);
   }

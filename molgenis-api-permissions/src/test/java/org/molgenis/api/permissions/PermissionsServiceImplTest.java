@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -30,8 +31,6 @@ import org.molgenis.api.permissions.inheritance.PermissionInheritanceResolver;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.response.ObjectPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -59,7 +58,6 @@ import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.core.context.SecurityContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -73,7 +71,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Mock UserRoleTools userRoleTools;
   @Mock IdentityTools identityTools;
   private PermissionsServiceImpl permissionsApiService;
-  private SecurityContext previousContext;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
@@ -161,7 +158,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -181,19 +177,15 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-
     Entity entity = mock(Entity.class);
-    when(entity.getLabelValue()).thenReturn("label");
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
 
-    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
-    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
+    ObjectPermission permission1 =
+        ObjectPermission.create(objectIdentity, null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 =
+        ObjectPermission.create(objectIdentity, null, "user1", "COUNT", null);
     Set<ObjectPermission> expected = newHashSet(permission1, permission2);
     when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
@@ -222,7 +214,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -247,23 +238,11 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             new ArrayList<>(sids)))
         .thenReturn(aclMap);
 
-    when(entityType.getLabel()).thenReturn("TypeLabel");
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(repo.getEntityType()).thenReturn(entityType);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
-
-    ObjectPermission permission1 = ObjectPermission.create(null, "user1", "COUNT", null);
-    ObjectPermission permission2 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
-    ObjectPermissionsResponse identityPermissions1 =
-        ObjectPermissionsResponse.create(
-            "identifier", "label", Arrays.asList(permission1, permission2));
-    TypePermissionsResponse classPermissions1 =
-        TypePermissionsResponse.create(
-            "entity-typeId", "TypeLabel", singletonList(identityPermissions1));
-    Set<TypePermissionsResponse> expected = newHashSet(classPermissions1);
+    ObjectPermission permission1 =
+        ObjectPermission.create(objectIdentity, null, "user1", "COUNT", null);
+    ObjectPermission permission2 =
+        ObjectPermission.create(objectIdentity, null, "user2", "WRITEMETA", null);
+    List<ObjectPermission> expected = Arrays.asList(permission1, permission2);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
@@ -284,7 +263,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -304,18 +282,11 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
-
-    ObjectPermission permission1 = ObjectPermission.create(null, "user1", "COUNT", null);
-    ObjectPermission permission2 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
-    ObjectPermissionsResponse identityPermissions1 =
-        ObjectPermissionsResponse.create(
-            "identifier", "label", Arrays.asList(permission1, permission2));
-    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
+    ObjectPermission permission1 =
+        ObjectPermission.create(objectIdentity, null, "user1", "COUNT", null);
+    ObjectPermission permission2 =
+        ObjectPermission.create(objectIdentity, null, "user2", "WRITEMETA", null);
+    List<ObjectPermission> expected = Arrays.asList(permission1, permission2);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2), 20, 60))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
@@ -335,7 +306,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = new PrincipalSid("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -356,18 +326,12 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
         .thenReturn(aclMap);
 
     Entity entity = mock(Entity.class);
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
-    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
-    ObjectPermissionsResponse identityPermissions1 =
-        ObjectPermissionsResponse.create(
-            "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
+    ObjectPermission permission1 =
+        ObjectPermission.create(objectIdentity, null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 =
+        ObjectPermission.create(objectIdentity, null, "user1", "COUNT", null);
+    List<ObjectPermission> expected = Arrays.asList(permission2, permission1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
     when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
@@ -388,7 +352,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = new PrincipalSid("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -408,18 +371,12 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
         .thenReturn(aclMap);
 
     Entity entity = mock(Entity.class);
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
 
-    ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
-    ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
-    ObjectPermissionsResponse identityPermissions1 =
-        ObjectPermissionsResponse.create(
-            "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
+    ObjectPermission permission1 =
+        ObjectPermission.create(objectIdentity, null, "user2", "WRITEMETA", null);
+    ObjectPermission permission2 =
+        ObjectPermission.create(objectIdentity, null, "user1", "COUNT", null);
+    List<ObjectPermission> expected = Arrays.asList(permission2, permission1);
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
     when(userRoleTools.getAllAvailableSids()).thenReturn(newHashSet(sid1, sid2));
@@ -514,7 +471,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
     doReturn(acl)
         .when(mutableAclService)
@@ -523,7 +479,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
 
     doReturn(true).when(dataService).hasEntityType("typeId");
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
@@ -539,12 +494,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
             singletonList(sid)))
         .thenReturn(aclMap);
-
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
@@ -584,12 +533,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
 
     when(mutableAclService.readAclsById(singletonList(objectIdentity), singletonList(sid)))
         .thenReturn(aclMap);
-
-    when(entity.getLabelValue()).thenReturn("label");
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.findOneById("identifier")).thenReturn(entity);
-    when(dataService.getRepository("typeId")).thenReturn(repo);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");

@@ -27,10 +27,7 @@ import org.molgenis.api.permissions.model.request.SetObjectPermissionRequest;
 import org.molgenis.api.permissions.model.request.SetTypePermissionsRequest;
 import org.molgenis.api.permissions.model.response.GetObjectPermissionResponse;
 import org.molgenis.api.permissions.model.response.GetPermissionsResponse;
-import org.molgenis.api.permissions.model.response.GetTypePermissionsResponse;
-import org.molgenis.api.permissions.model.response.ObjectPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.security.acl.ObjectIdentityService;
@@ -162,10 +159,10 @@ public class PermissionsController extends ApiController {
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
-    List<ObjectPermission> objectPermissionRespons =
+    List<LabelledPermission> objectPermissionResponse =
         permissionsService.getPermission(
             identityTools.getObjectIdentity(typeId, identifier), sids, inheritance);
-    return GetObjectPermissionResponse.create(objectPermissionRespons);
+    return null; // FIXME GetObjectPermissionResponse.create(objectPermissionResponse);
   }
 
   @GetMapping(value = "{" + TYPE_ID + "}")
@@ -182,26 +179,22 @@ public class PermissionsController extends ApiController {
     validateQueryParams(page, pageSize, inheritance);
     Set<Sid> sids = getSidsFromQuery(queryString);
 
-    ArrayList<ObjectPermissionsResponse> permissions;
     PagedApiResponse response;
+    ArrayList<LabelledPermission> permissions;
     if (page != null) {
       permissions =
           Lists.newArrayList(
               permissionsService.getPagedPermissionsForType(typeId, sids, page, pageSize));
       Integer totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
-      response =
-          getPermissionResponse(
-              queryString,
-              page,
-              pageSize,
-              totalItems,
-              GetTypePermissionsResponse.create(permissions));
+      // FIXME  response = getPermissionResponse(queryString, page, pageSize, totalItems,
+      // GetTypePermissionsResponse.create(permissions));
     } else {
       permissions =
           Lists.newArrayList(permissionsService.getPermissionsForType(typeId, sids, inheritance));
-      response = getPermissionResponse(queryString, GetTypePermissionsResponse.create(permissions));
+      // FIXME response = getPermissionResponse(queryString,
+      // GetTypePermissionsResponse.create(permissions));
     }
-    return response;
+    return null; // FIXME return response;
   }
 
   @GetMapping()
@@ -213,9 +206,8 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
-    List<TypePermissionsResponse> permissions =
-        permissionsService.getAllPermissions(sids, inheritance);
-    return GetPermissionsResponse.create(permissions);
+    List<LabelledPermission> permissions = permissionsService.getAllPermissions(sids, inheritance);
+    return null; // FIXME return GetPermissionsResponse.create(permissions);
   }
 
   @PatchMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")

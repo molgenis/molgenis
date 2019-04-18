@@ -18,15 +18,12 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.Sets;
 import cz.jirutka.rsql.parser.RSQLParser;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.ObjectPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.security.acl.ObjectIdentityService;
@@ -37,6 +34,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -128,13 +126,16 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetAcePermission() throws Exception {
-    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
-    List<ObjectPermission> objectPermissionRespons =
+    Sid sid1 = new GrantedAuthoritySid("role1");
+    Sid sid2 = new GrantedAuthoritySid("role2");
+    List<LabelledPermission> objectPermissionResponses =
         Arrays.asList(
-            ObjectPermission.create(null, "user1", "READ", null),
-            ObjectPermission.create(null, "role1", "WRITE", null));
+            LabelledPermission.create(
+                sid1, "typeId", "typeLabel", "identifier", "label", "READ", null),
+            LabelledPermission.create(
+                sid2, "typeId", "typeLabel", "identifier", "label", "WRITE", null));
     when(permissionsService.getPermission(objectIdentity, Sets.newHashSet(user1, role1), true))
-        .thenReturn(objectPermissionRespons);
+        .thenReturn(objectPermissionResponses);
 
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
@@ -157,16 +158,17 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetAcePermissions() throws Exception {
-    List<ObjectPermission> objectPermissionRespons =
+    Sid sid1 = new GrantedAuthoritySid("role1");
+    Sid sid2 = new GrantedAuthoritySid("role2");
+    List<LabelledPermission> objectPermissionResponses =
         Arrays.asList(
-            ObjectPermission.create(null, "user1", "READ", null),
-            ObjectPermission.create(null, "role1", "WRITE", null));
-    Collection<ObjectPermissionsResponse> identityPermission =
-        Collections.singletonList(
-            ObjectPermissionsResponse.create("identifier", "label", objectPermissionRespons));
+            LabelledPermission.create(
+                sid1, "typeId", "typeLabel", "identifier", "label", "READ", null),
+            LabelledPermission.create(
+                sid2, "typeId", "typeLabel", "identifier", "label", "WRITE", null));
     when(permissionsService.getPermissionsForType(
             "typeId", Sets.newHashSet(user1, role1, role2), false))
-        .thenReturn(identityPermission);
+        .thenReturn(objectPermissionResponses);
 
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
@@ -192,16 +194,17 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetAcePermissionsPaged() throws Exception {
-    List<ObjectPermission> objectPermissionRespons =
+    Sid sid1 = new GrantedAuthoritySid("role1");
+    Sid sid2 = new GrantedAuthoritySid("role2");
+    List<LabelledPermission> objectPermissionResponses =
         Arrays.asList(
-            ObjectPermission.create(null, "role2", "READ", null),
-            ObjectPermission.create(null, "role1", "WRITE", null));
-    Collection<ObjectPermissionsResponse> identityPermission =
-        Collections.singletonList(
-            ObjectPermissionsResponse.create("identifier", "label", objectPermissionRespons));
+            LabelledPermission.create(
+                sid1, "typeId", "typeLabel", "identifier", "label", "READ", null),
+            LabelledPermission.create(
+                sid2, "typeId", "typeLabel", "identifier", "label", "WRITE", null));
     when(permissionsService.getPagedPermissionsForType(
             "typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
-        .thenReturn(identityPermission);
+        .thenReturn(objectPermissionResponses);
     when(objectIdentityService.getNrOfObjectIdentities(
             "typeId", Sets.newHashSet(user1, user2, role1, role2)))
         .thenReturn(80);
@@ -226,19 +229,16 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetAllPermissionsForUser() throws Exception {
-    List<ObjectPermission> objectPermissionRespons =
+    Sid sid1 = new GrantedAuthoritySid("role1");
+    Sid sid2 = new GrantedAuthoritySid("role2");
+    List<LabelledPermission> objectPermissionResponses =
         Arrays.asList(
-            ObjectPermission.create(null, "user1", "READ", null),
-            ObjectPermission.create(null, "user2", "WRITE", null));
-    List<ObjectPermissionsResponse> identityPermission =
-        Collections.singletonList(
-            ObjectPermissionsResponse.create("identifier", "label", objectPermissionRespons));
-    List<TypePermissionsResponse> classPermissionResponses =
-        Collections.singletonList(
-            TypePermissionsResponse.create("typeId", "label", identityPermission));
-
+            LabelledPermission.create(
+                sid1, "typeId", "typeLabel", "identifier", "label", "READ", null),
+            LabelledPermission.create(
+                sid2, "typeId", "typeLabel", "identifier", "label", "WRITE", null));
     when(permissionsService.getAllPermissions(Sets.newHashSet(user1), false))
-        .thenReturn(classPermissionResponses);
+        .thenReturn(objectPermissionResponses);
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     when(userRoleTools.getSids(permissionsQuery))

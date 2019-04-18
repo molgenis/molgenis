@@ -18,9 +18,7 @@ import org.molgenis.api.permissions.exceptions.ReadPermissionDeniedException;
 import org.molgenis.api.permissions.exceptions.SidPermissionException;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
-import org.molgenis.api.permissions.model.response.ObjectPermission;
-import org.molgenis.api.permissions.model.response.ObjectPermissionsResponse;
-import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
+import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.model.MutableAcl;
@@ -60,7 +58,7 @@ public class PermissionServiceDecorator implements PermissionsService {
   }
 
   @Override
-  public List<ObjectPermission> getPermission(
+  public List<LabelledPermission> getPermission(
       ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
     checkReadPermission(objectIdentity.getType(), sids);
     return permissionsService.getPermission(objectIdentity, sids, isReturnInheritedPermissions);
@@ -139,21 +137,21 @@ public class PermissionServiceDecorator implements PermissionsService {
   }
 
   @Override
-  public Collection<ObjectPermissionsResponse> getPermissionsForType(
+  public Collection<LabelledPermission> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkReadPermission(typeId, sids);
     return permissionsService.getPermissionsForType(typeId, sids, isReturnInherited);
   }
 
   @Override
-  public Collection<ObjectPermissionsResponse> getPagedPermissionsForType(
+  public Collection<LabelledPermission> getPagedPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkReadPermission(typeId, sids);
     return permissionsService.getPagedPermissionsForType(typeId, sids, page, pageSize);
   }
 
   @Override
-  public List<TypePermissionsResponse> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
+  public List<LabelledPermission> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
     checkPermissionsOnSid(sids);
     return permissionsService.getAllPermissions(sids, isReturnInherited);
   }

@@ -1,11 +1,11 @@
-package org.molgenis.api.permissions.model.response;
+package org.molgenis.api.permissions.model.service;
 
 import com.google.auto.value.AutoValue;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.molgenis.api.permissions.model.service.LabelledPermission;
 import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ObjectPermission.class)
@@ -16,24 +16,19 @@ public abstract class ObjectPermission {
   public abstract ObjectIdentity getObjectIdentity();
 
   @Nullable
-  public abstract String getRole();
-
-  @Nullable
-  public abstract String getUser();
+  public abstract Sid getSid();
 
   @Nullable
   public abstract String getPermission();
 
   @Nullable
-  public abstract Set<LabelledPermission> getLabelledPermissions();
+  public abstract Set<LabelledPermission> getInheritedPermissions();
 
   public static ObjectPermission create(
       ObjectIdentity objectIdentity,
-      String role,
-      String user,
+      Sid sid,
       String permission,
-      Set<LabelledPermission> labelledPermissions) {
-    return new AutoValue_ObjectPermission(
-        objectIdentity, role, user, permission, labelledPermissions);
+      Set<LabelledPermission> inheritedPermissions) {
+    return new AutoValue_ObjectPermission(objectIdentity, sid, permission, inheritedPermissions);
   }
 }

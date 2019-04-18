@@ -2,7 +2,6 @@ package org.molgenis.api.permissions.model.service;
 
 import com.google.auto.value.AutoValue;
 import java.util.Set;
-import org.molgenis.api.permissions.model.response.InheritedPermission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.Sid;
@@ -18,13 +17,13 @@ public abstract class Permission {
 
   public abstract LabelledObjectIdentity getLabelledObjectIdentity();
 
-  public abstract Set<InheritedPermission> getInheritedPermissions();
+  public abstract Set<LabelledPermission> getLabelledPermissions();
 
   public static Permission create(
       Sid sid,
       PermissionSet permissionSet,
       LabelledObjectIdentity objectIdentity,
-      Set<InheritedPermission> inheritedPermissions) {
-    return new AutoValue_Permission(sid, permissionSet, objectIdentity, inheritedPermissions);
+      Set<LabelledPermission> labelledPermissions) {
+    return new AutoValue_Permission(sid, permissionSet, objectIdentity, labelledPermissions);
   }
 }
