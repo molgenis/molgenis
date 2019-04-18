@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -53,11 +54,13 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   @Mock private PermissionsService permissionsService;
   @Mock private ObjectIdentityService objectIdentityService;
   @Mock private UserRoleTools userRoleTools;
+  @Mock private IdentityTools identityTools;
   private MockMvc mockMvc;
   private PrincipalSid user1;
   private PrincipalSid user2;
   private GrantedAuthoritySid role1;
   private GrantedAuthoritySid role2;
+  private ObjectIdentityImpl objectIdentity;
 
   @BeforeMethod
   private void beforeMethod() {
@@ -65,7 +68,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     RSQLParser rsqlParser = new RSQLParser();
     PermissionsController controller =
         new PermissionsController(
-            permissionsService, rsqlParser, objectIdentityService, userRoleTools);
+            permissionsService, rsqlParser, objectIdentityService, userRoleTools, identityTools);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -75,15 +78,19 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     user2 = new PrincipalSid("user2");
     role1 = new GrantedAuthoritySid("ROLE_role1");
     role2 = new GrantedAuthoritySid("ROLE_role2");
+
+    objectIdentity = new ObjectIdentityImpl("typeId", "identifier");
   }
 
   @Test
   public void testCreateAcl() throws Exception {
+
+    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     mockMvc
         .perform(post(BASE_URI + "/" + OBJECTS + "/typeId/identifier"))
         .andExpect(status().isCreated());
 
-    verify(permissionsService).createAcl("typeId", "identifier");
+    verify(permissionsService).createAcl(objectIdentity);
   }
 
   @Test
@@ -116,17 +123,17 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10000,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/v1/objects/typeId?page=1&pageSize=10000\"},\"data\":[\"test1\",\"test2\"]}");
+        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[\"test1\",\"test2\"]}");
   }
 
   @Test
   public void testGetAcePermission() throws Exception {
+    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     List<ObjectPermission> objectPermissionRespons =
         Arrays.asList(
             ObjectPermission.create(null, "user1", "READ", null),
             ObjectPermission.create(null, "role1", "WRITE", null));
-    when(permissionsService.getPermission(
-            "typeId", "identifier", Sets.newHashSet(user1, role1), true))
+    when(permissionsService.getPermission(objectIdentity, Sets.newHashSet(user1, role1), true))
         .thenReturn(objectPermissionRespons);
 
     PermissionsQuery permissionsQuery = new PermissionsQuery();
@@ -179,7 +186,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/v1/"
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/"
             + "typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
   }
 
@@ -214,7 +221,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/v1/typeId?q=user==test,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"role2\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"role2\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
   }
 
   @Test
@@ -250,6 +257,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testUpdatePermission() throws Exception {
+    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     String requestJson =
         "{"
             + "permissions:[{"
@@ -270,8 +278,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     PermissionRequest permissionRequest1 = PermissionRequest.create(null, "test2", "READ");
     PermissionRequest permissionRequest2 = PermissionRequest.create(null, "test", "WRITE");
     verify(permissionsService)
-        .updatePermission(
-            Arrays.asList(permissionRequest1, permissionRequest2), "typeId", "identifier");
+        .updatePermission(Arrays.asList(permissionRequest1, permissionRequest2), objectIdentity);
   }
 
   @Test
@@ -365,6 +372,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testCreatePermission() throws Exception {
+    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     String requestJson =
         "{"
             + "permissions:[{"
@@ -386,11 +394,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
         Arrays.asList(
             PermissionRequest.create(null, "test2", "READ"),
             PermissionRequest.create(null, "test", "WRITE"));
-    verify(permissionsService).createPermission(permissionRequests, "typeId", "identifier");
+    verify(permissionsService).createPermission(permissionRequests, objectIdentity);
   }
 
   @Test
   public void testDeletePermission() throws Exception {
+    when(identityTools.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     when(userRoleTools.getSid("user1", null)).thenReturn(user1);
     String requestJson = "{" + "user:user1" + "}";
     mockMvc
@@ -400,6 +409,6 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
                 .content(requestJson))
         .andExpect(status().isNoContent());
 
-    verify(permissionsService).deletePermission(user1, "typeId", "identifier");
+    verify(permissionsService).deletePermission(user1, objectIdentity);
   }
 }

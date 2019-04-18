@@ -30,7 +30,6 @@ import java.util.Set;
 import javax.validation.constraints.NotEmpty;
 import org.molgenis.api.permissions.exceptions.AclClassAlreadyExistsException;
 import org.molgenis.api.permissions.exceptions.DuplicatePermissionException;
-import org.molgenis.api.permissions.exceptions.InsufficientPermissionDeniedException;
 import org.molgenis.api.permissions.exceptions.InvalidTypeIdException;
 import org.molgenis.api.permissions.exceptions.PermissionNotSuitableException;
 import org.molgenis.api.permissions.exceptions.UnknownAceException;
@@ -54,7 +53,6 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.security.acl.AclClassService;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.acls.model.AccessControlEntry;
@@ -225,11 +223,7 @@ public class PermissionsServiceImpl implements PermissionsService {
   @Transactional
   public void createAcl(ObjectIdentity objectIdentity) {
     checkEntityExists(objectIdentity);
-    if (SecurityUtils.currentUserIsSuOrSystem()) {
-      mutableAclService.createAcl(objectIdentity);
-    } else {
-      throw new InsufficientPermissionDeniedException(objectIdentity, "superuser or owner");
-    }
+    mutableAclService.createAcl(objectIdentity);
   }
 
   @Override

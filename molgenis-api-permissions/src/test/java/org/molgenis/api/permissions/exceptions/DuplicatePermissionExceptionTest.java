@@ -5,21 +5,26 @@ import static org.testng.Assert.assertEquals;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
+
+  private ObjectIdentityImpl objectIdentity;
+
   @BeforeMethod
   public void setUp() {
     messageSource.addMolgenisNamespaces("api-permissions");
+    objectIdentity = new ObjectIdentityImpl("type", "id");
   }
 
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
-        new DuplicatePermissionException("type", "id", new GrantedAuthoritySid("ROLE_role1")),
+        new DuplicatePermissionException(objectIdentity, new GrantedAuthoritySid("ROLE_role1")),
         lang,
         message);
   }
@@ -27,7 +32,7 @@ public class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
   @Test
   public void testGetMessage() {
     CodedRuntimeException ex =
-        new DuplicatePermissionException("type", "id", new GrantedAuthoritySid("ROLE_role1"));
+        new DuplicatePermissionException(objectIdentity, new GrantedAuthoritySid("ROLE_role1"));
     assertEquals(
         ex.getMessage(), "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1]");
   }

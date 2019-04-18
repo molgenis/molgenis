@@ -2,6 +2,7 @@ package org.molgenis.api.permissions.exceptions;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Collections;
 import org.mockito.Mockito;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -22,7 +23,10 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
     ExceptionMessageTest.assertExceptionMessageEquals(
-        new InsufficientPermissionDeniedException(objectIdentity, "superuser"), lang, message);
+        new InsufficientPermissionDeniedException(
+            objectIdentity, Collections.singletonList("superuser")),
+        lang,
+        message);
   }
 
   @Test
@@ -31,8 +35,9 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
     InsufficientPermissionDeniedException ex =
-        new InsufficientPermissionDeniedException(objectIdentity, "superuser");
-    assertEquals(ex.getMessage(), "type:type, identifier:identifier, role:superuser");
+        new InsufficientPermissionDeniedException(
+            objectIdentity, Collections.singletonList("superuser"));
+    assertEquals(ex.getMessage(), "type:type, identifier:identifier, roles:[superuser]");
   }
 
   @DataProvider(name = "languageMessageProvider")
@@ -41,7 +46,7 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en",
-        "User has to be superuser for this operation on row with id 'type' of type 'identifier'."
+        "User has to be one of the following: 'superuser' for this operation on row with id 'identifier' of type 'type'."
       }
     };
   }

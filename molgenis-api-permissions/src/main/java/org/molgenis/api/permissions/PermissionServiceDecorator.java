@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -73,7 +74,8 @@ public class PermissionServiceDecorator implements PermissionsService {
 
   private void checkSuOrSystem(String type, String identifier) {
     if (!SecurityUtils.currentUserIsSuOrSystem()) {
-      throw new InsufficientPermissionDeniedException(type, identifier, "superuser");
+      throw new InsufficientPermissionDeniedException(
+          type, identifier, Collections.singletonList("superuser"));
     }
   }
 
@@ -125,7 +127,8 @@ public class PermissionServiceDecorator implements PermissionsService {
     if (SecurityUtils.currentUserIsSuOrSystem()) {
       permissionsService.addType(typeId);
     } else {
-      throw new InsufficientPermissionDeniedException("type", typeId, "superuser");
+      throw new InsufficientPermissionDeniedException(
+          "type", typeId, Collections.singletonList("superuser"));
     }
   }
 
@@ -186,7 +189,7 @@ public class PermissionServiceDecorator implements PermissionsService {
     boolean isOwner = acl.getOwner().equals(sid);
     if (!SecurityUtils.currentUserIsSuOrSystem() && !isOwner) {
       throw new InsufficientPermissionDeniedException(
-          acl.getObjectIdentity(), "superuser or owner");
+          acl.getObjectIdentity(), Arrays.asList("superuser", "owner"));
     }
   }
 

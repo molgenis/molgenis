@@ -1,5 +1,7 @@
 package org.molgenis.api.permissions;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -12,15 +14,14 @@ import static org.molgenis.api.permissions.PermissionSetUtils.READ;
 import static org.molgenis.api.permissions.PermissionSetUtils.READMETA;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITE;
 import static org.molgenis.api.permissions.PermissionSetUtils.WRITEMETA;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -58,12 +59,7 @@ import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -75,6 +71,7 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Mock DataService dataService;
   @Mock MutableAclClassService mutableAclClassService;
   @Mock UserRoleTools userRoleTools;
+  @Mock IdentityTools identityTools;
   private PermissionsServiceImpl permissionsApiService;
   private SecurityContext previousContext;
 
@@ -88,16 +85,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             objectIdentityService,
             dataService,
             mutableAclClassService,
-            userRoleTools);
-
-    previousContext = SecurityContextHolder.getContext();
-    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
-    SecurityContextHolder.setContext(testContext);
-  }
-
-  @AfterMethod
-  public void tearDown() {
-    SecurityContextHolder.setContext(previousContext);
+            userRoleTools,
+            identityTools);
   }
 
   @Test
@@ -105,16 +94,12 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     resetMocks();
     when(aclClassService.getAclClassTypes())
         .thenReturn(Arrays.asList("entity-test1", "entity-test2"));
-    doReturn(true).when(dataService).hasEntityType("test1");
-    doReturn(false).when(dataService).hasEntityType("test2");
-
-    assertEquals(permissionsApiService.getTypes(), singletonList("entity-test1"));
+    assertEquals(permissionsApiService.getTypes(), Arrays.asList("entity-test1", "entity-test2"));
   }
 
   @Test
   public void testGetAcls() {
     resetMocks();
-    setSuAuthentication(false);
 
     when(objectIdentityService.getObjectIdentities("entity-type", 10, 0))
         .thenReturn(
@@ -122,6 +107,7 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
                 new ObjectIdentityImpl("classId", "test1"),
                 new ObjectIdentityImpl("classId", "test2")));
     doReturn(true).when(dataService).hasEntityType("type");
+    when(identityTools.getEntityTypeIdFromType("entity-type")).thenReturn("type");
     assertEquals(
         permissionsApiService.getAcls("entity-type", 1, 10), Arrays.asList("test1", "test2"));
   }
@@ -129,42 +115,46 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetSuitablePermissionsForTypeEntityType() {
     when(dataService.hasEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(true);
+    when(identityTools.getEntityTypeIdFromType(EntityTypeIdentity.ENTITY_TYPE))
+        .thenReturn(EntityTypeMetadata.ENTITY_TYPE_META_DATA);
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType(EntityTypeIdentity.ENTITY_TYPE),
-        Sets.newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
+        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypePackage() {
     when(dataService.hasEntityType(PackageMetadata.PACKAGE)).thenReturn(true);
-
+    when(identityTools.getEntityTypeIdFromType(PackageIdentity.PACKAGE))
+        .thenReturn(PackageMetadata.PACKAGE);
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType(PackageIdentity.PACKAGE),
-        Sets.newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
+        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypePlugin() {
     when(dataService.hasEntityType(PluginMetadata.PLUGIN)).thenReturn(true);
-
+    when(identityTools.getEntityTypeIdFromType(PluginIdentity.PLUGIN))
+        .thenReturn(PluginMetadata.PLUGIN);
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType(PluginIdentity.PLUGIN),
-        Sets.newHashSet(READ));
+        newHashSet(READ));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypeEntity() {
     when(dataService.hasEntityType("row_level_secured_entity")).thenReturn(true);
-
+    when(identityTools.getEntityTypeIdFromType("entity-row_level_secured_entity"))
+        .thenReturn("row_level_secured_entity");
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"),
-        Sets.newHashSet(READ, WRITE));
+        newHashSet(READ, WRITE));
   }
 
   @Test
   public void testGetPermission() {
     doReturn(true).when(dataService).hasEntityType("typeId");
-    setSuAuthentication(false);
     PrincipalSid sid1 = mock(PrincipalSid.class);
     when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
@@ -194,10 +184,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     Attribute attribute = mock(Attribute.class);
 
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
     @SuppressWarnings("unchecked")
@@ -208,14 +194,17 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
 
     ObjectPermission permission1 = ObjectPermission.create(null, "user2", "WRITEMETA", null);
     ObjectPermission permission2 = ObjectPermission.create(null, "user1", "COUNT", null);
-    Set<ObjectPermission> expected = Sets.newHashSet(permission1, permission2);
-
-    Set<Sid> sids = new LinkedHashSet<>();
+    Set<ObjectPermission> expected = newHashSet(permission1, permission2);
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
+
     assertEquals(
-        Sets.newHashSet(
-            permissionsApiService.getPermission("entity-typeId", "identifier", sids, true)),
+        newHashSet(
+            permissionsApiService.getPermission(
+                new ObjectIdentityImpl("entity-typeId", "identifier"), sids, true)),
         expected);
   }
 
@@ -227,7 +216,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(aclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
-    setSuAuthentication(true);
     PrincipalSid sid1 = mock(PrincipalSid.class);
     when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
@@ -249,9 +237,14 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
+    LinkedHashSet<Sid> sids = new LinkedHashSet<>();
+    sids.add(sid1);
+    sids.add(sid2);
+    when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
     when(mutableAclService.readAclsById(
             singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            Arrays.asList(sid1, sid2)))
+            new ArrayList<>(sids)))
         .thenReturn(aclMap);
 
     when(entityType.getLabel()).thenReturn("TypeLabel");
@@ -270,15 +263,14 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     TypePermissionsResponse classPermissions1 =
         TypePermissionsResponse.create(
             "entity-typeId", "TypeLabel", singletonList(identityPermissions1));
-    Set<TypePermissionsResponse> expected = Sets.newHashSet(classPermissions1);
-    when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
+    Set<TypePermissionsResponse> expected = newHashSet(classPermissions1);
+    when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
-    Set<Sid> sids = new LinkedHashSet<>();
-    sids.add(sid1);
-    sids.add(sid2);
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
 
-    assertEquals(Sets.newHashSet(permissionsApiService.getAllPermissions(sids, true)), expected);
+    assertEquals(newHashSet(permissionsApiService.getAllPermissions(sids, true)), expected);
   }
 
   @Test
@@ -286,7 +278,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Entity entity = mock(Entity.class);
 
     doReturn(true).when(dataService).hasEntityType("typeId");
-    setSuAuthentication(false);
     PrincipalSid sid1 = mock(PrincipalSid.class);
     when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
@@ -324,13 +315,15 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission1, permission2));
-    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
-    when(objectIdentityService.getObjectIdentities(
-            "entity-typeId", Sets.newHashSet(sid1, sid2), 20, 60))
+    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
+    when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2), 20, 60))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    Set<Sid> sids = new LinkedHashSet<>();
+
+    LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     assertEquals(
         permissionsApiService.getPagedPermissionsForType("entity-typeId", sids, 4, 20), expected);
   }
@@ -338,7 +331,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetPermissionsForType() {
     doReturn(true).when(dataService).hasEntityType("typeId");
-    setSuAuthentication(false);
     PrincipalSid sid1 = new PrincipalSid("user1");
     PrincipalSid sid2 = new PrincipalSid("user2");
     MutableAcl acl = mock(MutableAcl.class);
@@ -375,13 +367,15 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
-    when(objectIdentityService.getObjectIdentities("entity-typeId", Sets.newHashSet(sid1, sid2)))
+    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
+    when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-
-    Set<Sid> sids = new LinkedHashSet<>();
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
+    when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
 
     assertEquals(
         permissionsApiService.getPermissionsForType("entity-typeId", sids, true), expected);
@@ -390,7 +384,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetPermissionsForTypeWithoutUserQuery() {
     doReturn(true).when(dataService).hasEntityType("typeId");
-    setSuAuthentication(false);
     PrincipalSid sid1 = new PrincipalSid("user1");
     PrincipalSid sid2 = new PrincipalSid("user2");
     MutableAcl acl = mock(MutableAcl.class);
@@ -426,10 +419,11 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     ObjectPermissionsResponse identityPermissions1 =
         ObjectPermissionsResponse.create(
             "identifier", "label", Arrays.asList(permission2, permission1));
-    Set<ObjectPermissionsResponse> expected = Sets.newHashSet(identityPermissions1);
+    Set<ObjectPermissionsResponse> expected = newHashSet(identityPermissions1);
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
+    when(userRoleTools.getAllAvailableSids()).thenReturn(newHashSet(sid1, sid2));
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
 
     assertEquals(
         permissionsApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), true),
@@ -438,16 +432,11 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testCreateAcl() {
-    setSuAuthentication(false);
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-    permissionsApiService.createAcl("entity-typeId", "identifier");
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    permissionsApiService.createAcl(new ObjectIdentityImpl("entity-typeId", "identifier"));
     verify(mutableAclService).createAcl(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 
@@ -456,16 +445,9 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
-    setSuAuthentication(true);
     Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
-    when(acl.getOwner()).thenReturn(sid);
     when(mutableAclService.readAclById(new ObjectIdentityImpl("entity-typeId", "identifier")))
         .thenReturn(acl);
     PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
@@ -474,8 +456,9 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     when(userRoleTools.getSid(null, "role")).thenReturn(expectedSid);
 
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     permissionsApiService.createPermission(
-        singletonList(permission), "entity-typeId", "identifier");
+        singletonList(permission), new ObjectIdentityImpl("entity-typeId", "identifier"));
 
     verify(acl).insertAce(0, PermissionSet.WRITE, expectedSid, true);
     verify(mutableAclService).updateAcl(acl);
@@ -487,19 +470,10 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     doReturn(entity).when(dataService).findOneById("typeId", "identifier");
     doReturn(entity).when(dataService).findOneById("typeId", "identifier2");
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
-    setSuAuthentication(true);
     Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
-    when(acl.getOwner()).thenReturn(sid);
-    Sid sid2 = mock(Sid.class);
     MutableAcl acl2 = mock(MutableAcl.class);
-    when(acl2.getOwner()).thenReturn(sid2);
 
     doReturn(acl)
         .when(mutableAclService)
@@ -514,15 +488,17 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     ObjectPermissionsRequest objectPermissionsRequest2 =
         ObjectPermissionsRequest.create("identifier2", singletonList(permission2));
 
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
     Sid expectedSid2 = new PrincipalSid("user1");
     doReturn(expectedSid2).when(userRoleTools).getSid("user1", null);
-
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    doReturn(new ObjectIdentityImpl("entity-typeId", "identifier"))
+        .when(identityTools)
+        .getObjectIdentity("entity-typeId", "identifier");
+    doReturn(new ObjectIdentityImpl("entity-typeId", "identifier2"))
+        .when(identityTools)
+        .getObjectIdentity("entity-typeId", "identifier2");
     permissionsApiService.createPermissions(
         Arrays.asList(objectPermissionsRequest1, objectPermissionsRequest2), "entity-typeId");
 
@@ -535,16 +511,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   public void testSetPermission() {
     Entity entity = mock(Entity.class);
     doReturn(entity).when(dataService).findOneById("typeId", "identifier");
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-
-    setSuAuthentication(true);
     Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
-    when(acl.getOwner()).thenReturn(sid);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(objectIdentity.getType()).thenReturn("entity-typeId");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
@@ -572,10 +540,6 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
             singletonList(sid)))
         .thenReturn(aclMap);
 
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-
     when(entity.getLabelValue()).thenReturn("label");
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
@@ -584,9 +548,11 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
 
     permissionsApiService.updatePermission(
-        singletonList(permission), "entity-typeId", "identifier");
+        singletonList(permission), new ObjectIdentityImpl("entity-typeId", "identifier"));
 
     verify(acl).deleteAce(0);
     verify(acl).insertAce(1, PermissionSet.WRITE, expectedSid, true);
@@ -597,30 +563,16 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   public void testSetPermissions() {
     Entity entity = mock(Entity.class);
     doReturn(entity).when(dataService).findOneById("typeId", "identifier");
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
-
-    setSuAuthentication(true);
     Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
-    when(acl.getOwner()).thenReturn(sid);
-    ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
+    ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
-    doReturn(acl)
-        .when(mutableAclService)
-        .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
+    doReturn(acl).when(mutableAclService).readAclById(objectIdentity);
     PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
     ObjectPermissionsRequest identityPermissions =
         ObjectPermissionsRequest.create("identifier", singletonList(permission));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
-    when(objectIdentity.getType()).thenReturn("entity-typeId");
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
-    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
     when(ace1.getSid()).thenReturn(sid);
@@ -630,14 +582,8 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
     aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
 
-    when(mutableAclService.readAclsById(
-            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            singletonList(sid)))
+    when(mutableAclService.readAclsById(singletonList(objectIdentity), singletonList(sid)))
         .thenReturn(aclMap);
-
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
 
     when(entity.getLabelValue()).thenReturn("label");
     @SuppressWarnings("unchecked")
@@ -647,7 +593,9 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     doReturn(expectedSid).when(userRoleTools).getSid(null, "role");
-
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    when(identityTools.getObjectIdentity("entity-typeId", "identifier")).thenReturn(objectIdentity);
+    when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
     permissionsApiService.updatePermissions(singletonList(identityPermissions), "entity-typeId");
 
     verify(acl).deleteAce(0);
@@ -660,31 +608,24 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    EntityType entityType = mock(EntityType.class);
-    Attribute attribute = mock(Attribute.class);
-    when(entityType.getIdAttribute()).thenReturn(attribute);
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-    when(dataService.getEntityType("typeId")).thenReturn(entityType);
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
 
-    setSuAuthentication(true);
     Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
-    when(acl.getOwner()).thenReturn(sid);
     AccessControlEntry ace = mock(AccessControlEntry.class);
     when(ace.getSid()).thenReturn(sid);
     when(acl.getEntries()).thenReturn(singletonList(ace));
-    when(mutableAclService.readAclById(
-            new ObjectIdentityImpl("entity-typeId", "identifier"), singletonList(sid)))
-        .thenReturn(acl);
+    ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
 
-    permissionsApiService.deletePermission(sid, "entity-typeId", "identifier");
+    when(mutableAclService.readAclById(objectIdentity, singletonList(sid))).thenReturn(acl);
+
+    permissionsApiService.deletePermission(sid, objectIdentity);
     verify(acl).deleteAce(0);
     verify(mutableAclService).updateAcl(acl);
   }
 
   @Test
   public void testAddType() {
-    setSuAuthentication(false);
     when(dataService.hasEntityType("typeId")).thenReturn(true);
 
     EntityType entityType = mock(EntityType.class);
@@ -701,7 +642,7 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
     when(entity2.getIdValue()).thenReturn("2");
     when(entity2.getEntityType()).thenReturn(entityType);
     when(dataService.findAll("typeId")).thenReturn(Stream.of(entity1, entity2));
-
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     permissionsApiService.addType("entity-typeId");
 
     verify(mutableAclClassService).createAclClass("entity-typeId", String.class);
@@ -712,23 +653,9 @@ public class PermissionsServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testDeleteType() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
+    when(identityTools.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     permissionsApiService.deleteType("entity-typeId");
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
-  }
-
-  @SuppressWarnings("unchecked")
-  private void setSuAuthentication(boolean withDetails) {
-    Authentication authentication = mock(Authentication.class);
-    if (withDetails) {
-      UserDetails userDetails = mock(UserDetails.class);
-      when(userDetails.getUsername()).thenReturn("admin");
-      when(authentication.getPrincipal()).thenReturn(userDetails);
-    }
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    GrantedAuthority authoritySu = mock(GrantedAuthority.class);
-    when(authoritySu.getAuthority()).thenReturn(AUTHORITY_SU);
-    when((Collection<GrantedAuthority>) authentication.getAuthorities())
-        .thenReturn(singletonList(authoritySu));
   }
 
   private void resetMocks() {

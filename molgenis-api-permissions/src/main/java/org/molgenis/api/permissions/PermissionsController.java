@@ -54,8 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PermissionsController extends ApiController {
 
   private static final String PERMISSION_API_IDENTIFIER = "permissions";
-  private static final int VERSION = 1;
-  public static final String BASE_URI = "/api/" + PERMISSION_API_IDENTIFIER + "/v" + VERSION;
+  public static final String BASE_URI = "/api/" + PERMISSION_API_IDENTIFIER;
   static final Integer DEFAULT_PAGE = 1;
   static final Integer DEFAULT_PAGESIZE = 100;
 
@@ -79,7 +78,7 @@ public class PermissionsController extends ApiController {
       ObjectIdentityService objectIdentityService,
       UserRoleTools userRoleTools,
       IdentityTools identityTools) {
-    super(PERMISSION_API_IDENTIFIER, VERSION);
+    super(PERMISSION_API_IDENTIFIER, 1);
     this.permissionsService = requireNonNull(permissionsService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
