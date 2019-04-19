@@ -31,7 +31,7 @@ echo "--------------------------------------------------"
 echo "[INFO] Determine if there is a molgenis-server.properties"
 if [[ -z ${INTERACTIVE} ]]
 then
-  "[WARN] Set interactive mode default to true"
+  echo "[WARN] Set interactive mode default to true"
   INTERACTIVE=true
 fi
 if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]
