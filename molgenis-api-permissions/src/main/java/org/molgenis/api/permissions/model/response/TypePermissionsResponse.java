@@ -1,8 +1,7 @@
 package org.molgenis.api.permissions.model.response;
 
 import com.google.auto.value.AutoValue;
-import java.util.List;
-import javax.annotation.Nullable;
+import java.util.Set;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -10,15 +9,14 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class TypePermissionsResponse {
-  public abstract String getTypeId();
+  public abstract String getId();
 
-  @Nullable
   public abstract String getLabel();
 
-  public abstract List<ObjectPermission> getObjects();
+  public abstract Set<ObjectPermissionResponse> getObjects();
 
   public static TypePermissionsResponse create(
-      String typeId, String label, List<ObjectPermission> objects) {
-    return new AutoValue_TypePermissionsResponse(typeId, label, objects);
+      String id, String label, Set<ObjectPermissionResponse> objects) {
+    return new AutoValue_TypePermissionsResponse(id, label, objects);
   }
 }

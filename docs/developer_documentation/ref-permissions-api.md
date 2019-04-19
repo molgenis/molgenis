@@ -222,34 +222,34 @@ Response:
        "permissions": [
            {
                "user": "Neurologist",
-               "inheritedPermissions": [
+               "labelledPermissions": [
                    {
                        "role": "NEUROLOGY",
                        "permission": "READ",
-                       "inheritedPermissions": []
+                       "labelledPermissions": []
                    }
                ]
            },
            {
                "user": "NeuroNurse",
-               "inheritedPermissions": [
+               "labelledPermissions": [
                    {
                        "role": "NEUROLOGY",
                        "permission": "READ",
-                       "inheritedPermissions": []
+                       "labelledPermissions": []
                    }
                ]
            },
            {
                "user": "Reception",
-               "inheritedPermissions": [
+               "labelledPermissions": [
                    {
                        "identifier": "hospital",
                        "label": "hospital",
                        "typeLabel": "Package",
                        "typeId": "package",
                        "permission": "READ",
-                       "inheritedPermissions": []
+                       "labelledPermissions": []
                    }
                ]
            }
@@ -375,17 +375,17 @@ Response:
                         {
                             "user": "Cardiologist",
                             "permission": "WRITE",
-                            "inheritedPermissions": [
+                            "labelledPermissions": [
                                 {
                                     "identifier": "hospital_cardiology",
                                     "label": "hospital_cardiology",
                                     "typeLabel": "Package",
                                     "typeId": "package",
-                                    "inheritedPermissions": [
+                                    "labelledPermissions": [
                                         {
                                             "role": "CARDIOLOGY",
                                             "permission": "READ",
-                                            "inheritedPermissions": []
+                                            "labelledPermissions": []
                                         }
                                     ]
                                 }
@@ -406,7 +406,7 @@ Response:
                         {
                             "role": "CARDIOLOGY",
                             "permission": "READ",
-                            "inheritedPermissions": []
+                            "labelledPermissions": []
                         }
                     ]
                 },
@@ -417,7 +417,7 @@ Response:
                         {
                             "role": "CARDIOLOGY",
                             "permission": "READ",
-                            "inheritedPermissions": []
+                            "labelledPermissions": []
                         }
                     ]
                 }

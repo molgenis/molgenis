@@ -1,5 +1,6 @@
 package org.molgenis.api.permissions.exceptions;
 
+import org.molgenis.data.security.exception.InsufficientInheritancePermissionsException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;

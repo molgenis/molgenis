@@ -2,6 +2,7 @@ package org.molgenis.api.permissions.exceptions;
 
 import static org.testng.Assert.assertEquals;
 
+import org.molgenis.data.security.exception.SidPermissionException;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;

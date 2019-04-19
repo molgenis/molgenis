@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import org.mockito.Mockito;
+import org.molgenis.data.security.exception.InsufficientPermissionDeniedException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.testng.annotations.BeforeMethod;
