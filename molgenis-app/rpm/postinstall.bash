@@ -1,6 +1,5 @@
 #!/bin/bash
 
-INTERACTIVE=true
 MOLGENIS_HOME=/home/molgenis/
 
 DB_USER=molgenis
@@ -30,8 +29,15 @@ cp -rp /usr/local/share/molgenis/war/ROOT.war /usr/share/tomcat/webapps/ROOT.war
 
 echo "--------------------------------------------------"
 echo "[INFO] Determine if there is a molgenis-server.properties"
-if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]; then
-  if [[ ${INTERACTIVE} -eq "true" ]]; then
+if [[ -z ${INTERACTIVE} ]]
+then
+  "[WARN] Set interactive mode default to true"
+  INTERACTIVE=true
+fi
+if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]
+then
+  if [[ ${INTERACTIVE} -eq "true" ]]
+  then
     echo "[INFO] Configure [ molgenis-server.properties ]"
     echo "*****************************************"
     read -p "Enter database user: " DB_USER
@@ -47,7 +53,8 @@ if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]; then
   else
     "[INFO] Running in non-interactive mode"
     "[INFO] Generate a [ molgenis-server.properties ] file"
-    sed -e "s|__DB_USER__|${DB_USER}|" \
+  fi
+  sed -e "s|__DB_USER__|${DB_USER}|" \
       -e "s|__DB_PASSWORD__|${DB_PASSWORD}|" \
       -e "s|__ADMIN_PASSWORD__|${ADMIN_PASSWORD}|" \
       -e "s|__MAIL_USER__|${MAIL_USER}|" \
@@ -58,7 +65,6 @@ if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]; then
       -e "s|__MINIO_SECRET_KEY__|${MINIO_SECRET_KEY}|" \
       -e "s|__MINIO_REGION__|${MINIO_REGION}|" \
       /usr/local/share/molgenis/templates/molgenis-server.properties > ${MOLGENIS_HOME}/molgenis-server.properties
-  fi
 else
   echo "[INFO] molgenis-server.properties already exists"
 fi
