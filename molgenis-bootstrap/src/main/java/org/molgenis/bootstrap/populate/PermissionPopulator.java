@@ -5,7 +5,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import org.molgenis.security.core.PermissionService;
+import java.util.Collections;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.ObjectPermissions;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.context.ApplicationContext;
@@ -51,6 +54,12 @@ public class PermissionPopulator {
   }
 
   private void populate(ObjectIdentity objectIdentity, Collection<Pair<PermissionSet, Sid>> pairs) {
-    pairs.forEach(pair -> permissionService.grant(objectIdentity, pair.getA(), pair.getB()));
+    pairs.forEach(
+        pair ->
+            permissionService.createPermission(
+                ObjectPermissions.create(
+                    objectIdentity,
+                    Collections.singleton(
+                        Permission.create(pair.getB(), pair.getA().name(), null)))));
   }
 }

@@ -33,8 +33,6 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
-import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.PermissionServiceImpl;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -156,8 +154,9 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
   }
 
   @Bean
-  public PermissionService permissionService() {
-    return new RunAsSystemPermissionService(new PermissionServiceImpl(mutableAclService));
+  public RunAsSystemPermissionService permissionService() {
+    // FIXME return new RunAsSystemPermissionService(new PermissionServiceImpl(mutableAclService));
+    return null;
   }
 
   @Bean

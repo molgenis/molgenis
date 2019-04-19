@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.springframework.security.acls.model.MutableAclService;

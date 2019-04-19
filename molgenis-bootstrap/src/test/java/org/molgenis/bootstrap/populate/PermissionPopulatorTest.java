@@ -9,7 +9,7 @@ import com.google.common.collect.Multimap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.mockito.Mock;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;

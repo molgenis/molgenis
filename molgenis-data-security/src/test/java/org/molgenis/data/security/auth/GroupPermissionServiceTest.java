@@ -4,11 +4,14 @@ import static org.mockito.Mockito.verify;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 
+import java.util.Collections;
 import org.mockito.Mock;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.ObjectPermissions;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.GroupValueFactoryTest;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
@@ -34,9 +37,19 @@ public class GroupPermissionServiceTest extends AbstractMockitoTest {
     groupPermissionService.grantDefaultPermissions(groupValue);
 
     verify(permissionService)
-        .grant(new PackageIdentity("bbmri_eric"), WRITEMETA, createRoleSid("BBMRI_ERIC_MANAGER"));
+        .createPermission(
+            ObjectPermissions.create(
+                new PackageIdentity("bbmri_eric"),
+                Collections.singleton(
+                    Permission.create(
+                        createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA.name(), null))));
     verify(aclService).createAcl(new GroupIdentity("bbmri-eric"));
     verify(permissionService)
-        .grant(new GroupIdentity("bbmri-eric"), WRITEMETA, createRoleSid("BBMRI_ERIC_MANAGER"));
+        .createPermission(
+            ObjectPermissions.create(
+                new GroupIdentity("bbmri-eric"),
+                Collections.singleton(
+                    Permission.create(
+                        createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA.name(), null))));
   }
 }
