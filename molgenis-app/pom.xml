@@ -70,7 +70,7 @@
           <mappings>
             <mapping>
               <directory>/usr/local/share/molgenis/war</directory>
-              <filemode>700</filemode>
+              <filemode>755</filemode>
               <username>molgenis</username>
               <groupname>molgenis</groupname>
               <sources>

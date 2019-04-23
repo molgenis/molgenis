@@ -147,7 +147,7 @@ Defines the data type (default: string)
 Used in combination with xref, mref, categorical, categorical_mref or one_to_many. Should refer to an entity.
 
 #### nillable 
-Whether the column may be left empty. Default: false
+Whether the column may be left empty. Default: true
 
 #### idAttribute 
 Whether this field is the unique key for the entity. Default: false. Use 'AUTO' for auto generated (string) identifiers.

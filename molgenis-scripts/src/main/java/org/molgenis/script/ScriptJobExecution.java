@@ -4,6 +4,7 @@ import static org.molgenis.script.ScriptJobExecutionMetadata.NAME;
 import static org.molgenis.script.ScriptJobExecutionMetadata.PARAMETERS;
 import static org.molgenis.script.ScriptJobExecutionMetadata.SCRIPT_JOB_TYPE;
 
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
@@ -32,6 +33,7 @@ public class ScriptJobExecution extends JobExecution {
     return getString(NAME);
   }
 
+  @Nullable
   public String getParameters() {
     return getString(PARAMETERS);
   }
