@@ -17,6 +17,7 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.exception.WebAppSecurityConfigException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.oidc.DataServiceClientRegistrationRepository;
 import org.molgenis.security.oidc.MappedOidcUserService;
@@ -89,7 +90,9 @@ import org.springframework.web.servlet.LocaleResolver;
 
 @Import(DataServiceClientRegistrationRepository.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
+
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
+  private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
 
   @Autowired private DataService dataService;
 
@@ -200,7 +203,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers("/plugin/void/**")
         .permitAll()
-        .antMatchers("/plugin/app-ui-context")
+        .antMatchers("/app-ui-context/**")
         .permitAll()
         .antMatchers("/api/**")
         .permitAll()
@@ -248,15 +251,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .addLogoutHandler(
             (req, res, auth) -> {
               if (req.getSession(false) != null
-                  && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null) {
-                req.setAttribute("continueWithUnsupportedBrowser", true);
+                  && req.getSession().getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                req.setAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER, true);
               }
             })
         .logoutSuccessHandler(
             (req, res, auth) -> {
               StringBuilder logoutSuccessUrl = new StringBuilder("/");
-              if (req.getAttribute("continueWithUnsupportedBrowser") != null) {
-                logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+              if (req.getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                logoutSuccessUrl.append("?" + CONTINUE_WITH_UNSUPPORTED_BROWSER + "=true");
               }
               SimpleUrlLogoutSuccessHandler logoutSuccessHandler =
                   new SimpleUrlLogoutSuccessHandler();
@@ -404,7 +407,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
       authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
       auth.authenticationProvider(authenticationProvider);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WebAppSecurityConfigException(e);
     }
   }
 
