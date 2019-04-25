@@ -11,29 +11,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step35UpdateAclSystemSid extends MolgenisUpgrade {
-  private static final Logger LOG = LoggerFactory.getLogger(Step35UpdateAclSystemSid.class);
+public class Step36EnableDataRowEdit extends MolgenisUpgrade {
+  private static final Logger LOG = LoggerFactory.getLogger(Step36EnableDataRowEdit.class);
 
   private final DataSource dataSource;
 
-  public Step35UpdateAclSystemSid(DataSource dataSource) {
-    super(34, 35);
+  public Step36EnableDataRowEdit(DataSource dataSource) {
+    super(35, 36);
     this.dataSource = requireNonNull(dataSource);
   }
 
   @Override
   public void upgrade() {
-    LOG.debug("Updating acl_sid 'principal SYSTEM' to non-principal 'ROLE_SYSTEM' ...");
+    LOG.debug("Setting sys_set_dataexplorer.use_vue_data_row_edit to true' ...");
     try {
-      updateAclSystemSid();
+      enableDataRowEdit();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    LOG.info("Updated acl_sid 'principal SYSTEM' to non-principal 'ROLE_SYSTEM'");
+    LOG.info("sys_set_dataexplorer.use_vue_data_row_edit has been set to true");
   }
 
-  private void updateAclSystemSid() throws IOException {
-    String sql = ResourceUtils.getString("step35-aclSystemSid.sql");
+  private void enableDataRowEdit() throws IOException {
+    String sql = ResourceUtils.getString("step36-enableDataRowEdit.sql");
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     jdbcTemplate.execute(sql);
   }
