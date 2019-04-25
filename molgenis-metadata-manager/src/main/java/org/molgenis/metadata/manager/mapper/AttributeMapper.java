@@ -3,6 +3,7 @@ package org.molgenis.metadata.manager.mapper;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
@@ -11,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import org.molgenis.data.meta.AttributeType;
@@ -53,11 +55,30 @@ public class AttributeMapper {
 
   Iterable<Attribute> toAttributes(
       List<EditorAttribute> editorAttributes, EditorEntityType editorEntityType) {
+    removeCompoundOrphans(editorAttributes);
     Map<String, Attribute> attributeMap =
         IntStream.range(0, editorAttributes.size())
             .mapToObj(i -> toAttribute(i, editorAttributes.get(i), editorEntityType))
             .collect(toLinkedMap(Attribute::getIdentifier, Function.identity()));
     return injectAttributeParents(attributeMap, editorAttributes);
+  }
+
+  /** Recursively removes attributes that have parents that were deleted. */
+  static void removeCompoundOrphans(List<EditorAttribute> editorAttributes) {
+    Set<String> ids = editorAttributes.stream().map(EditorAttribute::getId).collect(toSet());
+    List<EditorAttribute> attrsToDelete =
+        editorAttributes
+            .stream()
+            .filter(attr -> attr.getParent() != null)
+            .filter(attr -> !ids.contains(attr.getParent().getId()))
+            .collect(toList());
+
+    if (attrsToDelete.isEmpty()) {
+      return;
+    }
+
+    editorAttributes.removeAll(attrsToDelete);
+    removeCompoundOrphans(editorAttributes);
   }
 
   private Iterable<Attribute> injectAttributeParents(
