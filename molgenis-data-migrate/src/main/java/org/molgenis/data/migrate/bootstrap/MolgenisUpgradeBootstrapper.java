@@ -9,6 +9,7 @@ import org.molgenis.data.migrate.version.Step33UpdateForeignKeyDeferred;
 import org.molgenis.data.migrate.version.Step34AddRoleMetrics;
 import org.molgenis.data.migrate.version.Step35UpdateAclSystemSid;
 import org.molgenis.data.migrate.version.Step36EnableDataRowEdit;
+import org.molgenis.data.migrate.version.Step37AddSettingsPluginToMenu;
 import org.springframework.stereotype.Component;
 
 /** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
@@ -27,6 +28,7 @@ public class MolgenisUpgradeBootstrapper {
     upgradeService.addUpgrade(new Step34AddRoleMetrics(dataSource));
     upgradeService.addUpgrade(new Step35UpdateAclSystemSid(dataSource));
     upgradeService.addUpgrade(new Step36EnableDataRowEdit(dataSource));
+    upgradeService.addUpgrade(new Step37AddSettingsPluginToMenu(dataSource));
 
     upgradeService.upgrade();
   }
