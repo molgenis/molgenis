@@ -616,8 +616,15 @@ public class EntityType extends StaticEntity implements Labeled {
 
   public void removeAttribute(Attribute attr) {
     Map<String, Attribute> cachedOwnAttributes = getCachedOwnAttrs();
-    cachedOwnAttributes.remove(attr.getName());
+    removeAttributeRecursive(attr, cachedOwnAttributes);
     set(ATTRIBUTES, cachedOwnAttributes.values());
+  }
+
+  private void removeAttributeRecursive(Attribute attr, Map<String, Attribute> attributes) {
+    if (attr.getDataType() == COMPOUND) {
+      attr.getChildren().forEach(child -> removeAttributeRecursive(child, attributes));
+    }
+    attributes.remove(attr.getName());
   }
 
   /**

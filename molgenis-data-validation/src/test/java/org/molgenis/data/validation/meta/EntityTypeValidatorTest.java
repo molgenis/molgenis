@@ -5,6 +5,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -142,6 +143,23 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
     when(idAttr.getName()).thenReturn("id");
     when(labelAttr.getName()).thenReturn("id");
+
+    EntityTypeValidator.validateOwnAttributes(entityType);
+  }
+
+  @Test(
+      expectedExceptions = MolgenisValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Attribute \\[label\\] of EntityType \\[entity\\] has a non-existing parent attribute \\[non-existing-parent\\]")
+  public void testValidateOwnAttributesNonExistingParent() {
+    when(entityType.getId()).thenReturn("entity");
+    when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
+    when(idAttr.getName()).thenReturn("id");
+    when(labelAttr.getName()).thenReturn("label");
+    Attribute parent = mock(Attribute.class);
+    when(parent.getIdentifier()).thenReturn("non-existing-parent");
+    when(parent.getName()).thenReturn("non-existing-parent");
+    when(labelAttr.getParent()).thenReturn(parent);
 
     EntityTypeValidator.validateOwnAttributes(entityType);
   }

@@ -2,6 +2,7 @@ package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -420,5 +422,40 @@ public class AttributeMapperTest {
             defaultValue,
             sequenceNumber);
     assertEquals(editorAttributes, of(expectedEditorAttribute));
+  }
+
+  @Test
+  public void testRemoveCompoundOrphans() {
+    EditorAttributeIdentifier removedParentId = mock(EditorAttributeIdentifier.class);
+    EditorAttribute attrOther = mock(EditorAttribute.class);
+
+    EditorAttribute attrA = mock(EditorAttribute.class);
+    EditorAttributeIdentifier attrAid = mock(EditorAttributeIdentifier.class);
+    when(attrAid.getId()).thenReturn("A");
+    when(attrA.getId()).thenReturn("A");
+
+    EditorAttribute attrAA = mock(EditorAttribute.class);
+    EditorAttributeIdentifier attrAAid = mock(EditorAttributeIdentifier.class);
+    when(attrAAid.getId()).thenReturn("AA");
+    when(attrAA.getId()).thenReturn("AA");
+
+    EditorAttribute attrAB = mock(EditorAttribute.class);
+    EditorAttributeIdentifier attrABid = mock(EditorAttributeIdentifier.class);
+    when(attrABid.getId()).thenReturn("AB");
+    when(attrAB.getId()).thenReturn("AB");
+
+    EditorAttribute attrABA = mock(EditorAttribute.class);
+    EditorAttributeIdentifier attrABAid = mock(EditorAttributeIdentifier.class);
+    when(attrABAid.getId()).thenReturn("ABA");
+    when(attrABA.getId()).thenReturn("ABA");
+
+    when(attrA.getParent()).thenReturn(removedParentId);
+    when(attrAA.getParent()).thenReturn(attrAid);
+    when(attrAB.getParent()).thenReturn(attrAid);
+    when(attrABA.getParent()).thenReturn(attrABid);
+
+    List<EditorAttribute> attrs = newArrayList(attrOther, attrAA, attrAB, attrABA);
+    AttributeMapper.removeCompoundOrphans(attrs);
+    assertEquals(attrs, singletonList(attrOther));
   }
 }
