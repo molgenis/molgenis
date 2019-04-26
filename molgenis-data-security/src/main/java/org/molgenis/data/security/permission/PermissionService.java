@@ -2,31 +2,25 @@ package org.molgenis.data.security.permission;
 
 import java.util.Map;
 import java.util.Set;
-import org.molgenis.data.security.permission.model.LabelledObjectPermission;
+import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
-import org.molgenis.data.security.permission.model.ObjectPermissions;
-import org.molgenis.data.security.permission.model.Type;
-import org.molgenis.data.security.permission.model.TypePermission;
+import org.molgenis.data.security.permission.model.LabelledType;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 public interface PermissionService {
 
-  Set<Type> getTypes();
-
-  LabelledObjectPermission getPermission(
-      ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions);
-
   void createAcl(ObjectIdentity objectIdentity);
 
-  void createPermission(ObjectPermissions permissions);
+  void createPermission(Permission permissions);
 
-  void createPermissions(Set<ObjectPermissions> permissions);
+  void createPermissions(Set<Permission> permissions);
 
-  void updatePermission(ObjectPermissions permissions);
+  void updatePermission(Permission permissions);
 
-  void updatePermissions(Set<ObjectPermissions> permissions);
+  void updatePermissions(Set<Permission> permissions);
 
   void deletePermission(Sid sid, ObjectIdentity objectIdentity);
 
@@ -34,19 +28,22 @@ public interface PermissionService {
 
   void deleteType(String typeId);
 
-  TypePermission getPermissionsForType(String typeId, Set<Sid> sids, boolean isReturnInherited);
+  Map<String, Set<LabelledPermission>> getPermissionsForType(
+      String typeId, Set<Sid> sids, boolean includeInheritance);
 
-  TypePermission getPagedPermissionsForType(String typeId, Set<Sid> sids, int page, int pageSize);
+  Map<String, Set<LabelledPermission>> getPermissionsForType(
+      String typeId, Set<Sid> sids, int page, int pageSize);
 
-  Set<LabelledPermission> getAllPermissions(Set<Sid> sids, boolean isReturnInherited);
+  Set<LabelledPermission> getPermissionsForObject(
+      ObjectIdentity objectIdentity, Set<Sid> sids, boolean includeInheritance);
 
-  Set<String> getAcls(String typeId, int page, int pageSize);
+  Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean includeInheritance);
 
-  Set<String> getSuitablePermissionsForType(String typeId);
+  Set<LabelledType> getTypes();
+
+  Set<LabelledObject> getObjects(String typeId, int page, int pageSize);
+
+  Set<PermissionSet> getSuitablePermissionsForType(String typeId);
 
   boolean exists(ObjectIdentity objectIdentity, Sid sid);
-
-  void grant(Map<ObjectIdentity, PermissionSet> objectIdentityPermissionMap, Sid sid);
-
-  void grant(ObjectIdentity objectIdentity, PermissionSet permission, Sid sid);
 }

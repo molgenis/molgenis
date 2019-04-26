@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +38,7 @@ import org.molgenis.api.permissions.model.request.SetTypePermissionsRequest;
 import org.molgenis.api.permissions.model.response.AllPermissionsResponse;
 import org.molgenis.api.permissions.model.response.LabelledPermissionResponse;
 import org.molgenis.api.permissions.model.response.ObjectPermissionResponse;
+import org.molgenis.api.permissions.model.response.ObjectResponse;
 import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.api.permissions.model.response.TypeResponse;
@@ -42,14 +46,11 @@ import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.PermissionSetUtils;
 import org.molgenis.data.security.permission.UserRoleTools;
-import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
-import org.molgenis.data.security.permission.model.LabelledObjectPermission;
 import org.molgenis.data.security.permission.model.LabelledPermission;
-import org.molgenis.data.security.permission.model.ObjectPermissions;
+import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
-import org.molgenis.data.security.permission.model.Type;
-import org.molgenis.data.security.permission.model.TypePermission;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.model.Sid;
@@ -134,7 +135,11 @@ public class PermissionsController extends ApiController {
       value = "Get a list of permissions that can be used on a type",
       response = List.class)
   public Set<String> getSuitablePermissions(@PathVariable(value = TYPE_ID) String typeId) {
-    return permissionService.getSuitablePermissionsForType(typeId);
+    return permissionService
+        .getSuitablePermissionsForType(typeId)
+        .stream()
+        .map(permissionSet -> permissionSet.name())
+        .collect(Collectors.toSet());
   }
 
   @PostMapping(value = OBJECTS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
@@ -163,8 +168,14 @@ public class PermissionsController extends ApiController {
       pageSize = DEFAULT_PAGESIZE;
     }
 
-    Set<String> data = permissionService.getAcls(typeId, page, pageSize);
-
+    Set<ObjectResponse> data =
+        permissionService
+            .getObjects(typeId, page, pageSize)
+            .stream()
+            .map(
+                labelledObject ->
+                    ObjectResponse.create(labelledObject.getId(), labelledObject.getLabel()))
+            .collect(Collectors.toSet());
     int totalItems = objectIdentityService.getNrOfObjectIdentities(typeId);
     return getPermissionResponse("", page, pageSize, totalItems, data);
   }
@@ -179,10 +190,11 @@ public class PermissionsController extends ApiController {
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
-    LabelledObjectPermission labelledObjectPermission =
-        permissionService.getPermission(
+    Set<LabelledPermission> labelledObjectPermissions =
+        permissionService.getPermissionsForObject(
             entityHelper.getObjectIdentity(typeId, identifier), sids, inheritance);
-    ObjectPermissionResponse permissionResponse = convertToObjectResponse(labelledObjectPermission);
+    ObjectPermissionResponse permissionResponse =
+        convertToObjectResponse(identifier, labelledObjectPermissions);
     return permissionResponse;
   }
 
@@ -201,17 +213,17 @@ public class PermissionsController extends ApiController {
     Set<Sid> sids = getSidsFromQuery(queryString);
 
     PagedApiResponse response;
-    TypePermission typePermission;
-    TypePermissionsResponse permissionsResponse = null;
+    TypePermissionsResponse permissionsResponse;
+    Map<String, Set<LabelledPermission>> typePermission;
     if (page != null) {
-      typePermission = permissionService.getPagedPermissionsForType(typeId, sids, page, pageSize);
-      permissionsResponse = convertToTypeResponse(typePermission);
+      typePermission = permissionService.getPermissionsForType(typeId, sids, page, pageSize);
+      permissionsResponse = convertToTypeResponse(typeId, typePermission);
       Integer totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
       response =
           getPermissionResponse(queryString, page, pageSize, totalItems, permissionsResponse);
     } else {
       typePermission = permissionService.getPermissionsForType(typeId, sids, inheritance);
-      permissionsResponse = convertToTypeResponse(typePermission);
+      permissionsResponse = convertToTypeResponse(typeId, typePermission);
       response = getPermissionResponse(queryString, permissionsResponse);
     }
     return response;
@@ -226,7 +238,7 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
-    Set<LabelledPermission> permissions = permissionService.getAllPermissions(sids, inheritance);
+    Set<LabelledPermission> permissions = permissionService.getPermissions(sids, inheritance);
     return convertToAllPermissionsResponse(permissions);
   }
 
@@ -238,8 +250,8 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest request) {
-    ObjectPermissions permissions = convertRequests(request.getPermissions(), typeId, identifier);
-    permissionService.updatePermission(permissions);
+    Set<Permission> permissions = convertRequests(request.getPermissions(), typeId, identifier);
+    permissionService.updatePermissions(permissions);
     return ResponseEntity.noContent().build();
   }
 
@@ -250,7 +262,7 @@ public class PermissionsController extends ApiController {
   public ResponseEntity setTypePermissions(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest request) {
-    Set<ObjectPermissions> permissions = convertRequests(request.getObjects(), typeId);
+    Set<Permission> permissions = convertRequests(request.getObjects(), typeId);
     permissionService.updatePermissions(permissions);
     return ResponseEntity.noContent().build();
   }
@@ -262,8 +274,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest setTypePermissionsRequest)
       throws URISyntaxException {
-    Set<ObjectPermissions> permissions =
-        convertRequests(setTypePermissionsRequest.getObjects(), typeId);
+    Set<Permission> permissions = convertRequests(setTypePermissionsRequest.getObjects(), typeId);
     permissionService.createPermissions(permissions);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
@@ -276,9 +287,9 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
       throws URISyntaxException {
-    ObjectPermissions permissions =
+    Set<Permission> permissions =
         convertRequests(setIdentityPermissionRequest.getPermissions(), typeId, identifier);
-    permissionService.createPermission(permissions);
+    permissionService.createPermissions(permissions);
     return ResponseEntity.created(new URI(request.getRequestURI())).build();
   }
 
@@ -316,7 +327,7 @@ public class PermissionsController extends ApiController {
     }
   }
 
-  private Set<TypeResponse> convertTypes(Set<Type> types) {
+  private Set<TypeResponse> convertTypes(Set<LabelledType> types) {
     return types
         .stream()
         .map(type -> TypeResponse.create(type.getId(), type.getEntityType(), type.getLabel()))
@@ -324,37 +335,59 @@ public class PermissionsController extends ApiController {
   }
 
   private ObjectPermissionResponse convertToObjectResponse(
-      LabelledObjectPermission labelledObjectPermission) {
-    Set<PermissionResponse> permissions =
-        convertToPermissions(labelledObjectPermission.getPermissions());
-    LabelledObjectIdentity labelledObjectIdentity =
-        labelledObjectPermission.getLabelledObjectIdentity();
-    String id = labelledObjectIdentity.getIdentifier().toString();
-    String label = labelledObjectIdentity.getIdentifierLabel();
+      String id, Set<LabelledPermission> labelledObjectPermissions) {
+    Set<PermissionResponse> permissions = convertToPermissions(labelledObjectPermissions);
+
+    String label = getIdentifierLabel(labelledObjectPermissions);
     return ObjectPermissionResponse.create(id, label, permissions);
   }
 
-  private TypePermissionsResponse convertToTypeResponse(TypePermission typePermission) {
-    Set<ObjectPermissionResponse> objectPermissions = new HashSet<>();
-    for (LabelledObjectPermission labelledObjectPermission :
-        typePermission.getObjectPermissions()) {
-      objectPermissions.add(convertToObjectResponse(labelledObjectPermission));
+  private String getIdentifierLabel(Set<LabelledPermission> permissions) {
+    Optional<LabelledPermission> first = permissions.stream().findFirst();
+    String label = null;
+    if (first.isPresent()) {
+      label = first.get().getLabelledObjectIdentity().getIdentifierLabel();
     }
-    return TypePermissionsResponse.create(
-        typePermission.getTypeId(), typePermission.getTypeLabel(), objectPermissions);
+    return label;
   }
 
-  private Set<PermissionResponse> convertToPermissions(Set<Permission> permissions) {
-    return permissions
+  private TypePermissionsResponse convertToTypeResponse(
+      String type, Map<String, Set<LabelledPermission>> typePermissions) {
+    Set<ObjectPermissionResponse> objectPermissions = new LinkedHashSet<>();
+    for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
+      objectPermissions.add(convertToObjectResponse(entry.getKey(), entry.getValue()));
+    }
+    String label = getTypeLabel(typePermissions);
+    return TypePermissionsResponse.create(type, label, objectPermissions);
+  }
+
+  private String getTypeLabel(Map<String, Set<LabelledPermission>> typePermissions) {
+    String label = null;
+    Optional<Entry<String, Set<LabelledPermission>>> firstEntry =
+        typePermissions.entrySet().stream().findFirst();
+    if (firstEntry.isPresent()) {
+      Set<LabelledPermission> permissions = firstEntry.get().getValue();
+      Optional<LabelledPermission> first = permissions.stream().findFirst();
+      if (first.isPresent()) {
+        label = first.get().getLabelledObjectIdentity().getTypeLabel();
+      }
+    }
+    return label;
+  }
+
+  private Set<PermissionResponse> convertToPermissions(Set<LabelledPermission> permissions) {
+    LinkedHashSet<PermissionResponse> result = new LinkedHashSet();
+    permissions
         .stream()
         .map(
             labelledPermission ->
                 PermissionResponse.create(
                     userRoleTools.getUser(labelledPermission.getSid()),
                     userRoleTools.getRole(labelledPermission.getSid()),
-                    labelledPermission.getPermission(),
+                    PermissionSetUtils.getPermissionStringValue(labelledPermission),
                     convertLabelledPermissions(labelledPermission.getInheritedPermissions())))
-        .collect(Collectors.toSet());
+        .forEach(permissionResponse -> result.add(permissionResponse));
+    return result;
   }
 
   private AllPermissionsResponse convertToAllPermissionsResponse(
@@ -376,7 +409,7 @@ public class PermissionsController extends ApiController {
                 permission.getLabelledObjectIdentity().getTypeLabel(),
                 permission.getLabelledObjectIdentity().getIdentifier().toString(),
                 permission.getLabelledObjectIdentity().getIdentifierLabel(),
-                permission.getPermission(),
+                permission.getPermission().name(),
                 convertLabelledPermissions(permission.getInheritedPermissions()));
         permissionResponses.add(labelledResponse);
       }
@@ -384,25 +417,23 @@ public class PermissionsController extends ApiController {
     return permissionResponses;
   }
 
-  private ObjectPermissions convertRequests(
+  private Set<Permission> convertRequests(
       List<PermissionRequest> requests, String typeId, String identifier) {
     Set<Permission> permissions = new HashSet<>();
     for (PermissionRequest permissionRequest : requests) {
       permissions.add(
           Permission.create(
+              entityHelper.getObjectIdentity(typeId, identifier),
               getSid(permissionRequest.getUser(), permissionRequest.getRole()),
-              permissionRequest.getPermission(),
-              null));
+              PermissionSetUtils.paramValueToPermissionSet(permissionRequest.getPermission())));
     }
-    return ObjectPermissions.create(
-        entityHelper.getObjectIdentity(typeId, identifier), permissions);
+    return permissions;
   }
 
-  private Set<ObjectPermissions> convertRequests(
-      List<ObjectPermissionsRequest> requests, String typeId) {
-    Set<ObjectPermissions> permissions = new HashSet<>();
+  private Set<Permission> convertRequests(List<ObjectPermissionsRequest> requests, String typeId) {
+    Set<Permission> permissions = new HashSet<>();
     for (ObjectPermissionsRequest request : requests) {
-      permissions.add(convertRequests(request.getPermissions(), typeId, request.getObjectId()));
+      permissions.addAll(convertRequests(request.getPermissions(), typeId, request.getObjectId()));
     }
     return permissions;
   }

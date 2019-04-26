@@ -2,7 +2,7 @@ package org.molgenis.jobs;
 
 import org.molgenis.jobs.model.JobExecution;
 
-/** @param <T> Type of the JobExecutions that this factory understands. */
+/** @param <T> LabelledType of the JobExecutions that this factory understands. */
 public abstract class JobFactory<T extends JobExecution> {
   /**
    * Creates a Job instance.

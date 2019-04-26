@@ -4,15 +4,18 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -125,24 +128,6 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
     RoleMembership roleMembership1 = mock(RoleMembership.class);
     RoleMembership roleMembership2 = mock(RoleMembership.class);
 
-    Repository roleRepository = mock(Repository.class);
-    Query roleQuery = mock(Query.class);
-    Query role1Query = mock(Query.class);
-    Query role2Query = mock(Query.class);
-    Query role3Query = mock(Query.class);
-
-    doReturn(role1Query).when(roleQuery).eq(RoleMetadata.NAME, "role1");
-    when(role1Query.findOne()).thenReturn(role1);
-
-    doReturn(role2Query).when(roleQuery).eq(RoleMetadata.NAME, "role2");
-    when(role2Query.findOne()).thenReturn(role2);
-
-    doReturn(role3Query).when(roleQuery).eq(RoleMetadata.NAME, "role3");
-    when(role3Query.findOne()).thenReturn(role3);
-
-    when(roleRepository.query()).thenReturn(roleQuery);
-    doReturn(roleRepository).when(dataService).getRepository(RoleMetadata.ROLE, Role.class);
-
     when(roleMembership1.getRole()).thenReturn(role1);
     when(roleMembership2.getRole()).thenReturn(role2);
 
@@ -164,7 +149,112 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(RoleMetadata.ROLE), EntityTypePermission.READ_DATA);
 
+    Query query = mock(Query.class);
+    Query query1 = mock(Query.class);
+    Query query2 = mock(Query.class);
+    Query query3 = mock(Query.class);
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    doReturn(query1).when(query).eq(RoleMetadata.NAME, "role1");
+    doReturn(query2).when(query).eq(RoleMetadata.NAME, "role2");
+    doReturn(query3).when(query).eq(RoleMetadata.NAME, "role3");
+    when(query1.findOne()).thenReturn(role1);
+    when(query2.findOne()).thenReturn(role2);
+    when(query3.findOne()).thenReturn(role3);
+
     Set<Sid> expected = Sets.newHashSet(role1Sid, role2Sid, role3Sid);
     assertEquals(userRoleTools.getRoles(user), expected);
+  }
+
+  @Test
+  public void testGetAllAvailableSids() {
+    User user = mock(User.class);
+    when(user.getUsername()).thenReturn("username");
+    when(userService.getUsers()).thenReturn(Collections.singletonList(user));
+
+    Role role = mock(Role.class);
+    when(role.getString(RoleMetadata.NAME)).thenReturn("role1");
+    List<Entity> roles = Collections.singletonList(role);
+    when(dataService.findAll(RoleMetadata.ROLE)).thenReturn(roles.stream());
+    assertEquals(
+        userRoleTools.getAllAvailableSids(),
+        Sets.newHashSet(new GrantedAuthoritySid("ROLE_role1"), new PrincipalSid("username")));
+  }
+
+  @Test
+  public void testGetSids() {
+    List<Sid> expected =
+        Arrays.asList(
+            new PrincipalSid("user1"),
+            new PrincipalSid("user2"),
+            new GrantedAuthoritySid("ROLE_role1"),
+            new GrantedAuthoritySid("ROLE_role2"));
+
+    Query query = mock(Query.class);
+
+    doReturn(query).when(query).eq(RoleMetadata.NAME, "ROLE1");
+    doReturn(query).when(query).eq(RoleMetadata.NAME, "ROLE2");
+    doReturn(mock(Role.class)).when(query).findOne();
+
+    doReturn(mock(User.class)).when(userService).getUser("user1");
+    doReturn(mock(User.class)).when(userService).getUser("user2");
+
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    when(query.findOne()).thenReturn(mock(Role.class));
+
+    assertTrue(
+        userRoleTools
+            .getSids(Arrays.asList("user1", "user2"), Arrays.asList("role1", "role2"))
+            .containsAll(expected));
+  }
+
+  @Test
+  public void testSortSids() {
+    Sid sid1 = new PrincipalSid("b");
+    Sid sid2 = new PrincipalSid("a");
+    Sid sid3 = new GrantedAuthoritySid("ROLE_b");
+    Sid sid4 = new GrantedAuthoritySid("ROLE_a");
+    LinkedList expected = new LinkedList<>();
+    expected.addAll(Arrays.asList(sid2, sid4, sid1, sid3));
+    assertEquals(userRoleTools.sortSids(Sets.newHashSet(sid1, sid2, sid3, sid4)), expected);
+  }
+
+  @Test
+  public void testGetRoles() {
+    Sid sid1 = new GrantedAuthoritySid("ROLE_a");
+    Sid sid2 = new GrantedAuthoritySid("ROLE_b");
+    LinkedList expected = new LinkedList<>();
+    expected.addAll(Arrays.asList(sid2, sid1));
+
+    Role role = mock(Role.class);
+    Role roleA = mock(Role.class);
+    when(roleA.getName()).thenReturn("a");
+    Role roleB = mock(Role.class);
+    when(roleB.getName()).thenReturn("b");
+    when(role.getIncludes()).thenReturn(Arrays.asList(roleA, roleB));
+
+    Query query = mock(Query.class);
+    Query query1 = mock(Query.class);
+    Query query2 = mock(Query.class);
+
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    doReturn(query).when(query).eq(RoleMetadata.NAME, "role1");
+    doReturn(query1).when(query).eq(RoleMetadata.NAME, "a");
+    doReturn(query2).when(query).eq(RoleMetadata.NAME, "b");
+    when(query.findOne()).thenReturn(role);
+    when(query1.findOne()).thenReturn(mock(Role.class));
+    when(query2.findOne()).thenReturn(mock(Role.class));
+
+    when(userPermissionEvaluator.hasPermission(
+            new EntityTypeIdentity(RoleMetadata.ROLE), EntityTypePermission.READ_DATA))
+        .thenReturn(true);
+
+    assertTrue(
+        userRoleTools
+            .getRoles(
+                Sets.newHashSet(
+                    new GrantedAuthoritySid("ROLE_role1"),
+                    new GrantedAuthoritySid("ROLE_a"),
+                    new GrantedAuthoritySid("ROLE_b")))
+            .containsAll(expected));
   }
 }

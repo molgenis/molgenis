@@ -49,6 +49,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -69,6 +70,7 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
@@ -77,6 +79,7 @@ import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -400,7 +403,12 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
     permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), PermissionSet.READ);
     permissionMap.put(new PackageIdentity(PACK_PERMISSION), PermissionSet.WRITEMETA);
     permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), PermissionSet.WRITE);
-    testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
+
+    Sid sid = SidUtils.createUserSid(USERNAME);
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      testPermissionService.createPermission(
+          Permission.create(entry.getKey(), sid, entry.getValue()));
+    }
   }
 
   private void depopulate() {

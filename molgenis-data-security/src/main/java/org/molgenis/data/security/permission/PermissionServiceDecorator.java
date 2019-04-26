@@ -16,11 +16,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.exception.InsufficientPermissionDeniedException;
 import org.molgenis.data.security.exception.ReadPermissionDeniedException;
 import org.molgenis.data.security.exception.SidPermissionException;
-import org.molgenis.data.security.permission.model.LabelledObjectPermission;
+import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
-import org.molgenis.data.security.permission.model.ObjectPermissions;
-import org.molgenis.data.security.permission.model.Type;
-import org.molgenis.data.security.permission.model.TypePermission;
+import org.molgenis.data.security.permission.model.LabelledType;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.model.MutableAcl;
@@ -47,7 +46,7 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   @Override
-  public Set<Type> getTypes() {
+  public Set<LabelledType> getTypes() {
     return permissionService
         .getTypes()
         .stream()
@@ -56,10 +55,11 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   @Override
-  public LabelledObjectPermission getPermission(
+  public Set<LabelledPermission> getPermissionsForObject(
       ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
     checkReadPermission(objectIdentity.getType(), sids);
-    return permissionService.getPermission(objectIdentity, sids, isReturnInheritedPermissions);
+    return permissionService.getPermissionsForObject(
+        objectIdentity, sids, isReturnInheritedPermissions);
   }
 
   @Override
@@ -76,28 +76,28 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   @Override
-  public void createPermission(ObjectPermissions objectPermissions) {
+  public void createPermission(Permission objectPermissions) {
     checkSuOrOwner(objectPermissions.getObjectIdentity());
     permissionService.createPermission(objectPermissions);
   }
 
   @Override
-  public void createPermissions(Set<ObjectPermissions> permissions) {
-    for (ObjectPermissions objectPermissions : permissions) {
+  public void createPermissions(Set<Permission> permissions) {
+    for (Permission objectPermissions : permissions) {
       checkSuOrOwner(objectPermissions.getObjectIdentity());
     }
     permissionService.createPermissions(permissions);
   }
 
   @Override
-  public void updatePermission(ObjectPermissions objectPermissions) {
+  public void updatePermission(Permission objectPermissions) {
     checkSuOrOwner(objectPermissions.getObjectIdentity());
     permissionService.updatePermission(objectPermissions);
   }
 
   @Override
-  public void updatePermissions(Set<ObjectPermissions> permissions) {
-    for (ObjectPermissions objectPermissions : permissions) {
+  public void updatePermissions(Set<Permission> permissions) {
+    for (Permission objectPermissions : permissions) {
       checkSuOrOwner(objectPermissions.getObjectIdentity());
     }
     permissionService.updatePermissions(permissions);
@@ -126,33 +126,33 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   @Override
-  public TypePermission getPermissionsForType(
+  public Map<String, Set<LabelledPermission>> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     checkReadPermission(typeId, sids);
     return permissionService.getPermissionsForType(typeId, sids, isReturnInherited);
   }
 
   @Override
-  public TypePermission getPagedPermissionsForType(
+  public Map<String, Set<LabelledPermission>> getPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     checkReadPermission(typeId, sids);
-    return permissionService.getPagedPermissionsForType(typeId, sids, page, pageSize);
+    return permissionService.getPermissionsForType(typeId, sids, page, pageSize);
   }
 
   @Override
-  public Set<LabelledPermission> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
+  public Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean isReturnInherited) {
     checkPermissionsOnSid(sids);
-    return permissionService.getAllPermissions(sids, isReturnInherited);
+    return permissionService.getPermissions(sids, isReturnInherited);
   }
 
   @Override
-  public Set<String> getAcls(String typeId, int page, int pageSize) {
+  public Set<LabelledObject> getObjects(String typeId, int page, int pageSize) {
     checkReadPermission(typeId, Collections.emptySet());
-    return permissionService.getAcls(typeId, page, pageSize);
+    return permissionService.getObjects(typeId, page, pageSize);
   }
 
   @Override
-  public Set<String> getSuitablePermissionsForType(String typeId) {
+  public Set<PermissionSet> getSuitablePermissionsForType(String typeId) {
     return permissionService.getSuitablePermissionsForType(typeId);
   }
 
@@ -160,20 +160,6 @@ public class PermissionServiceDecorator implements PermissionService {
   public boolean exists(ObjectIdentity objectIdentity, Sid sid) {
     checkReadPermission(objectIdentity.getType(), Collections.singleton(sid));
     return permissionService.exists(objectIdentity, sid);
-  }
-
-  @Override
-  public void grant(Map<ObjectIdentity, PermissionSet> objectIdentityPermissionMap, Sid sid) {
-    for (ObjectIdentity objectIdentity : objectIdentityPermissionMap.keySet()) {
-      checkSuOrOwner(objectIdentity);
-    }
-    permissionService.grant(objectIdentityPermissionMap, sid);
-  }
-
-  @Override
-  public void grant(ObjectIdentity objectIdentity, PermissionSet permission, Sid sid) {
-    checkSuOrOwner(objectIdentity);
-    permissionService.grant(objectIdentity, permission, sid);
   }
 
   private void checkPermissionsOnSid(Set<Sid> sids) {

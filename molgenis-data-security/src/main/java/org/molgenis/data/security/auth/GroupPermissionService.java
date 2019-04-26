@@ -16,6 +16,7 @@ import java.util.Objects;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.springframework.security.acls.model.MutableAclService;
@@ -50,11 +51,14 @@ public class GroupPermissionService {
             roleValue -> {
               PermissionSet permissionSet = PERMISSION_SETS_PER_ROLE.get(roleValue.getLabel());
               Sid roleSid = createRoleSid(roleValue.getName());
-              permissionService.grant(packageIdentity, permissionSet, roleSid);
-              permissionService.grant(groupIdentity, permissionSet, roleSid);
+              permissionService.createPermission(
+                  Permission.create(packageIdentity, roleSid, permissionSet));
+              permissionService.createPermission(
+                  Permission.create(groupIdentity, roleSid, permissionSet));
             });
     if (groupValue.isPublic()) {
-      permissionService.grant(groupIdentity, READ, createAuthoritySid(AUTHORITY_USER));
+      permissionService.createPermission(
+          Permission.create(groupIdentity, createAuthoritySid(AUTHORITY_USER), READ));
     }
   }
 }

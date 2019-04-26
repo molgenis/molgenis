@@ -1,9 +1,10 @@
 package org.molgenis.data.security.permission.model;
 
 import com.google.auto.value.AutoValue;
-import java.util.Set;
 import javax.annotation.Nullable;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.AutoGson;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 @AutoValue
@@ -11,18 +12,17 @@ import org.springframework.security.acls.model.Sid;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Permission {
+  @Nullable
+  public abstract ObjectIdentity getObjectIdentity();
 
   @Nullable
   public abstract Sid getSid();
 
   @Nullable
-  public abstract String getPermission();
-
-  @Nullable
-  public abstract Set<LabelledPermission> getInheritedPermissions();
+  public abstract PermissionSet getPermission();
 
   public static Permission create(
-      Sid sid, String permission, Set<LabelledPermission> inheritedPermissions) {
-    return new AutoValue_Permission(sid, permission, inheritedPermissions);
+      ObjectIdentity objectIdentity, Sid sid, PermissionSet permission) {
+    return new AutoValue_Permission(objectIdentity, sid, permission);
   }
 }

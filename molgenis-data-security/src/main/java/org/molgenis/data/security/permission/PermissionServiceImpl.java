@@ -4,23 +4,16 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.security.permission.PermissionSetUtils.COUNT;
-import static org.molgenis.data.security.permission.PermissionSetUtils.READ;
-import static org.molgenis.data.security.permission.PermissionSetUtils.READMETA;
-import static org.molgenis.data.security.permission.PermissionSetUtils.WRITE;
-import static org.molgenis.data.security.permission.PermissionSetUtils.WRITEMETA;
-import static org.molgenis.data.security.permission.PermissionSetUtils.paramValueToPermissionSet;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -34,13 +27,10 @@ import org.molgenis.data.security.exception.PermissionNotSuitableException;
 import org.molgenis.data.security.exception.UnknownAceException;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.data.security.permission.inheritance.model.InheritedPermissionsResult;
-import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
-import org.molgenis.data.security.permission.model.LabelledObjectPermission;
+import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
-import org.molgenis.data.security.permission.model.ObjectPermissions;
+import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
-import org.molgenis.data.security.permission.model.Type;
-import org.molgenis.data.security.permission.model.TypePermission;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
@@ -86,59 +76,69 @@ public class PermissionServiceImpl implements PermissionService {
   }
 
   @Override
-  public Set<Type> getTypes() {
+  public Set<LabelledType> getTypes() {
     Set types = new HashSet();
     for (String typeId : mutableAclClassService.getAclClassTypes()) {
       String entityTypeId = entityHelper.getEntityTypeIdFromType(typeId);
       String label = entityHelper.getLabel(typeId);
-      types.add(Type.create(typeId, entityTypeId, label));
+      types.add(LabelledType.create(typeId, entityTypeId, label));
     }
     return types;
   }
 
   @Override
-  public Set<String> getAcls(String typeId, int page, int pageSize) {
+  public Set<LabelledObject> getObjects(String typeId, int page, int pageSize) {
     entityHelper.checkEntityTypeExists(typeId);
     return objectIdentityService
         .getObjectIdentities(typeId, pageSize, (page - 1) * pageSize)
         .stream()
-        .map(objectIdentity -> objectIdentity.getIdentifier().toString())
+        .map(objectIdentity -> getLabelledObject(objectIdentity))
         .collect(toSet());
   }
 
+  private LabelledObject getLabelledObject(ObjectIdentity objectIdentity) {
+    String label =
+        entityHelper.getLabel(objectIdentity.getType(), objectIdentity.getIdentifier().toString());
+    return LabelledObject.create(objectIdentity.getIdentifier().toString(), label);
+  }
+
   @Override
-  public Set<String> getSuitablePermissionsForType(String typeId) {
+  public Set<PermissionSet> getSuitablePermissionsForType(String typeId) {
     entityHelper.checkEntityTypeExists(typeId);
-    Set<String> permissions;
+    Set<PermissionSet> permissions;
     switch (typeId) {
       case EntityTypeIdentity.ENTITY_TYPE:
       case PackageIdentity.PACKAGE:
-        permissions = Sets.newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA);
+        permissions =
+            Sets.newHashSet(
+                PermissionSet.READMETA,
+                PermissionSet.COUNT,
+                PermissionSet.READ,
+                PermissionSet.WRITE,
+                PermissionSet.WRITEMETA);
         break;
       case PLUGIN:
-        permissions = Sets.newHashSet(READ);
+        permissions = Sets.newHashSet(PermissionSet.READ);
         break;
       default: // RLS
-        permissions = Sets.newHashSet(READ, WRITE);
+        permissions = Sets.newHashSet(PermissionSet.READ, PermissionSet.WRITE);
         break;
     }
     return permissions;
   }
 
   @Override
-  public LabelledObjectPermission getPermission(
+  public Set<LabelledPermission> getPermissionsForObject(
       ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
     entityHelper.checkEntityExists(objectIdentity);
     Acl acl = mutableAclService.readAclById(objectIdentity);
-    return LabelledObjectPermission.create(
-        entityHelper.getLabelledObjectIdentity(objectIdentity),
-        getPermissionForObjectIdentity(acl, sids, isReturnInheritedPermissions));
+    return getPermissionForObjectIdentity(acl, sids, isReturnInheritedPermissions);
   }
 
   @Override
-  public Set<LabelledPermission> getAllPermissions(Set<Sid> sids, boolean isReturnInherited) {
+  public Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean isReturnInherited) {
     Set<LabelledPermission> result = new LinkedHashSet<>();
-    for (Type type : getTypes()) {
+    for (LabelledType type : getTypes()) {
       String entityTypeId = type.getEntityType();
       if (dataService.hasEntityType(entityTypeId)) {
         Set<Sid> sidsToQuery;
@@ -147,20 +147,12 @@ public class PermissionServiceImpl implements PermissionService {
         } else {
           sidsToQuery = sids;
         }
-        Set<LabelledObjectPermission> labelledObjectPermissions =
-            getPermissionsForType(type.getId(), sidsToQuery, isReturnInherited)
-                .getObjectPermissions();
-        if (!labelledObjectPermissions.isEmpty()) {
-          for (LabelledObjectPermission labelledPermission : labelledObjectPermissions) {
-            LabelledObjectIdentity labelledObjectIdentity =
-                labelledPermission.getLabelledObjectIdentity();
-            for (Permission permission : labelledPermission.getPermissions()) {
-              result.add(
-                  LabelledPermission.create(
-                      permission.getSid(),
-                      labelledObjectIdentity,
-                      permission.getPermission(),
-                      permission.getInheritedPermissions()));
+        Map<String, Set<LabelledPermission>> permissions =
+            getPermissionsForType(type.getId(), sidsToQuery, isReturnInherited);
+        if (!permissions.isEmpty()) {
+          for (Set<LabelledPermission> labelledPermissions : permissions.values()) {
+            for (LabelledPermission permission : labelledPermissions) {
+              result.add(permission);
             }
           }
         }
@@ -170,35 +162,36 @@ public class PermissionServiceImpl implements PermissionService {
   }
 
   @Override
-  public TypePermission getPagedPermissionsForType(
+  public Map<String, Set<LabelledPermission>> getPermissionsForType(
       String typeId, Set<Sid> sids, int page, int pageSize) {
     entityHelper.checkEntityTypeExists(typeId);
 
     List<ObjectIdentity> objectIdentities =
         objectIdentityService.getObjectIdentities(typeId, sids, pageSize, (page - 1) * pageSize);
 
-    Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
+    Map<ObjectIdentity, Acl> aclMap = new LinkedHashMap<>();
     if (!objectIdentities.isEmpty()) {
       aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
     }
-    return TypePermission.create(
-        typeId,
-        entityHelper.getLabel(typeId),
-        getPermissions(aclMap, objectIdentities, sids, false));
+    return getPermissions(aclMap, objectIdentities, sids, false);
   }
 
   @Override
-  public TypePermission getPermissionsForType(
+  public Map<String, Set<LabelledPermission>> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     entityHelper.checkEntityTypeExists(typeId);
     List<ObjectIdentity> objectIdentities;
     if (sids.isEmpty()) {
       objectIdentities = objectIdentityService.getObjectIdentities(typeId);
     } else {
-      objectIdentities =
-          objectIdentityService.getObjectIdentities(typeId, userRoleTools.getInheritedSids(sids));
+      if (isReturnInherited) {
+        objectIdentities =
+            objectIdentityService.getObjectIdentities(typeId, userRoleTools.getInheritedSids(sids));
+      } else {
+        objectIdentities = objectIdentityService.getObjectIdentities(typeId, sids);
+      }
     }
-    Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
+    Map<ObjectIdentity, Acl> aclMap = new LinkedHashMap<>();
     if (!objectIdentities.isEmpty()) {
       if (sids.isEmpty()) {
         aclMap = mutableAclService.readAclsById(objectIdentities);
@@ -206,9 +199,9 @@ public class PermissionServiceImpl implements PermissionService {
         aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
       }
     }
-    Set<LabelledObjectPermission> permissions =
+    Map<String, Set<LabelledPermission>> permissions =
         getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
-    return TypePermission.create(typeId, entityHelper.getLabel(typeId), permissions);
+    return permissions;
   }
 
   @Override
@@ -220,72 +213,60 @@ public class PermissionServiceImpl implements PermissionService {
 
   @Override
   @Transactional
-  public void createPermission(ObjectPermissions objectPermissions) {
-    ObjectIdentity objectIdentity = objectPermissions.getObjectIdentity();
+  public void createPermission(Permission permission) {
+    ObjectIdentity objectIdentity = permission.getObjectIdentity();
     entityHelper.checkEntityExists(objectIdentity);
-    for (Permission permission : objectPermissions.getPermissions()) {
-      MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
-      if (!getSuitablePermissionsForType(objectIdentity.getType())
-          .contains(permission.getPermission())) {
-        throw new PermissionNotSuitableException(
-            permission.getPermission(), objectIdentity.getType());
-      }
-      Sid sid = permission.getSid();
-      if (getPermissionResponses(acl, false, singleton(sid)).isEmpty()) {
-        acl.insertAce(
-            acl.getEntries().size(),
-            paramValueToPermissionSet(permission.getPermission()),
-            sid,
-            true);
-        mutableAclService.updateAcl(acl);
-      } else {
-        throw new DuplicatePermissionException(objectIdentity, sid);
-      }
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
+    if (!getSuitablePermissionsForType(objectIdentity.getType())
+        .contains(permission.getPermission())) {
+      throw new PermissionNotSuitableException(
+          permission.getPermission().name(), objectIdentity.getType());
     }
-  }
-
-  @Override
-  @Transactional
-  public void createPermissions(Set<ObjectPermissions> permissions) {
-    for (ObjectPermissions objectPermissions : permissions) {
-      createPermission(objectPermissions);
-    }
-  }
-
-  @Override
-  @Transactional
-  public void updatePermission(ObjectPermissions objectPermissions) {
-    ObjectIdentity objectIdentity = objectPermissions.getObjectIdentity();
-    for (Permission permission : objectPermissions.getPermissions()) {
-      entityHelper.checkEntityExists(objectIdentity);
-      MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
-      if (!getSuitablePermissionsForType(objectIdentity.getType())
-          .contains(permission.getPermission())) {
-        throw new PermissionNotSuitableException(
-            permission.getPermission(), objectIdentity.getType());
-      }
-      Sid sid = permission.getSid();
-      LabelledObjectPermission current =
-          getPermission(objectIdentity, Collections.singleton(sid), false);
-      if (current.getPermissions().isEmpty()) {
-        throw new UnknownAceException(objectIdentity, sid, "update");
-      }
-      deleteAce(sid, acl);
-      acl.insertAce(
-          acl.getEntries().size(),
-          paramValueToPermissionSet(permission.getPermission()),
-          sid,
-          true);
+    Sid sid = permission.getSid();
+    if (getPermissionResponses(acl, false, singleton(sid)).isEmpty()) {
+      acl.insertAce(acl.getEntries().size(), permission.getPermission(), sid, true);
       mutableAclService.updateAcl(acl);
+    } else {
+      throw new DuplicatePermissionException(objectIdentity, sid);
     }
   }
 
   @Override
   @Transactional
-  public void updatePermissions(Set<ObjectPermissions> permissions) {
-    for (ObjectPermissions objectPermissions : permissions) {
-      entityHelper.checkEntityExists(objectPermissions.getObjectIdentity());
-      updatePermission(objectPermissions);
+  public void createPermissions(Set<Permission> permissions) {
+    for (Permission permission : permissions) {
+      createPermission(permission);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void updatePermission(Permission permission) {
+    ObjectIdentity objectIdentity = permission.getObjectIdentity();
+    entityHelper.checkEntityExists(objectIdentity);
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
+    if (!getSuitablePermissionsForType(objectIdentity.getType())
+        .contains(permission.getPermission())) {
+      throw new PermissionNotSuitableException(
+          permission.getPermission().name(), objectIdentity.getType());
+    }
+    Sid sid = permission.getSid();
+    Set<LabelledPermission> current =
+        getPermissionsForObject(objectIdentity, singleton(sid), false);
+    if (current.isEmpty()) {
+      throw new UnknownAceException(objectIdentity, sid, "update");
+    }
+    deleteAce(sid, acl);
+    acl.insertAce(acl.getEntries().size(), permission.getPermission(), sid, true);
+    mutableAclService.updateAcl(acl);
+  }
+
+  @Override
+  @Transactional
+  public void updatePermissions(Set<Permission> permissions) {
+    for (Permission permission : permissions) {
+      entityHelper.checkEntityExists(permission.getObjectIdentity());
+      updatePermission(permission);
     }
   }
 
@@ -339,24 +320,6 @@ public class PermissionServiceImpl implements PermissionService {
     return acl.getEntries().stream().anyMatch(ace -> ace.getSid().equals(sid));
   }
 
-  @Override
-  public void grant(Map<ObjectIdentity, PermissionSet> objectIdentityPermissionMap, Sid sid) {
-    for (Entry<ObjectIdentity, PermissionSet> entry : objectIdentityPermissionMap.entrySet()) {
-      createPermission(
-          ObjectPermissions.create(
-              entry.getKey(),
-              Collections.singleton(Permission.create(sid, entry.getValue().name(), null))));
-    }
-  }
-
-  @Override
-  public void grant(ObjectIdentity objectIdentity, PermissionSet permission, Sid sid) {
-    createPermission(
-        ObjectPermissions.create(
-            objectIdentity,
-            Collections.singleton(Permission.create(sid, permission.name(), null))));
-  }
-
   private void deleteAce(Sid sid, MutableAcl acl) {
     int nrEntries = acl.getEntries().size();
     for (int i = nrEntries - 1; i >= 0; i--) {
@@ -368,32 +331,28 @@ public class PermissionServiceImpl implements PermissionService {
     }
   }
 
-  private Set<LabelledObjectPermission> getPermissions(
+  private Map<String, Set<LabelledPermission>> getPermissions(
       Map<ObjectIdentity, Acl> acls,
       List<ObjectIdentity> objectIdentities,
       Set<Sid> sids,
       boolean isReturnInheritedPermissions) {
-    Set<LabelledObjectPermission> result = new LinkedHashSet<>();
+    Map<String, Set<LabelledPermission>> result = new LinkedHashMap<>();
     objectIdentities.forEach(
         objectIdentity ->
-            result.add(
-                LabelledObjectPermission.create(
-                    entityHelper.getLabelledObjectIdentity(objectIdentity),
-                    getPermissionForObjectIdentity(
-                        acls.get(objectIdentity), sids, isReturnInheritedPermissions))));
-    return result
-        .stream()
-        .filter(labelledObjectPermission -> !labelledObjectPermission.getPermissions().isEmpty())
-        .collect(toSet());
+            result.put(
+                objectIdentity.getIdentifier().toString(),
+                getPermissionForObjectIdentity(
+                    acls.get(objectIdentity), sids, isReturnInheritedPermissions)));
+    return result;
   }
 
-  private Set<Permission> getPermissionForObjectIdentity(
+  private Set<LabelledPermission> getPermissionForObjectIdentity(
       Acl acl, Set<Sid> sids, boolean isReturnInheritedPermissions) {
-    Set<Permission> result = new LinkedHashSet<>();
-    Map<String, Set<Permission>> resultMap = new HashMap<>();
+    Set<LabelledPermission> result = new LinkedHashSet<>();
+    Map<String, Set<LabelledPermission>> resultMap = new LinkedHashMap<>();
     getPermissionsOnAceForSids(sids, acl, resultMap, isReturnInheritedPermissions);
-    Collection<Set<Permission>> identityPermissionResponses = resultMap.values();
-    for (Set<Permission> permissions : identityPermissionResponses) {
+    Collection<Set<LabelledPermission>> identityPermissionResponses = resultMap.values();
+    for (Set<LabelledPermission> permissions : identityPermissionResponses) {
       if (!permissions.isEmpty()) {
         result.addAll(permissions);
       }
@@ -404,36 +363,34 @@ public class PermissionServiceImpl implements PermissionService {
   private void getPermissionsOnAceForSids(
       Set<Sid> sids,
       Acl acl,
-      Map<String, Set<Permission>> result,
+      Map<String, Set<LabelledPermission>> result,
       boolean isReturnInheritedPermissions) {
     ObjectIdentity objectIdentity = acl.getObjectIdentity();
-    Set<Permission> permissions = getPermissionResponses(acl, isReturnInheritedPermissions, sids);
+    Set<LabelledPermission> permissions =
+        getPermissionResponses(acl, isReturnInheritedPermissions, sids);
 
     result.put(objectIdentity.getIdentifier().toString(), permissions);
   }
 
-  private Set<Permission> getPermissionResponses(
+  private Set<LabelledPermission> getPermissionResponses(
       Acl acl, boolean isReturnInheritedPermissions, Set<Sid> sids) {
-    Set<Permission> result = new LinkedHashSet<>();
+    Set<LabelledPermission> result = new LinkedHashSet<>();
 
-    if (!sids.isEmpty()) {
-      for (Sid sid : sids) {
-        getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
-      }
-    } else {
-      for (Sid sid : userRoleTools.getAllAvailableSids()) {
-        getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
-      }
+    if (sids.isEmpty()) {
+      sids = userRoleTools.getAllAvailableSids();
+    }
+    for (Sid sid : sids) {
+      getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
     }
     return result;
   }
 
   private void getPermissionResponsesForSingleSid(
-      Acl acl, boolean isReturnInheritedPermissions, Set<Permission> result, Sid sid) {
-    String ownPermission = null;
+      Acl acl, boolean isReturnInheritedPermissions, Set<LabelledPermission> result, Sid sid) {
+    PermissionSet ownPermission = null;
     for (AccessControlEntry ace : acl.getEntries()) {
       if (sid.equals(ace.getSid())) {
-        ownPermission = PermissionSetUtils.getPermissionStringValue(ace);
+        ownPermission = PermissionSetUtils.getPermissionSet(ace);
       }
     }
     List<LabelledPermission> labelledPermissions = new LinkedList<>();
@@ -446,7 +403,12 @@ public class PermissionServiceImpl implements PermissionService {
       if (deduplicatedInheritedPermissions.isEmpty()) {
         deduplicatedInheritedPermissions = null;
       }
-      result.add(Permission.create(sid, ownPermission, deduplicatedInheritedPermissions));
+      result.add(
+          LabelledPermission.create(
+              sid,
+              entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()),
+              ownPermission,
+              deduplicatedInheritedPermissions));
     }
   }
 

@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -25,7 +26,7 @@ public class EntityHelper {
   public static final String ENTITY_PREFIX = "entity-";
   // FIXMEL using constants from the plugin metadata introduces cyclic dependencies
   public static final String PLUGIN = "plugin";
-  public static final String SYS_SEC_PLUGIN = "sys_sec_plugin";
+  public static final String SYS_PLUGIN = "sys_Plugin";
   private final DataService dataService;
 
   public EntityHelper(DataService dataService) {
@@ -42,7 +43,7 @@ public class EntityHelper {
         result = EntityTypeMetadata.ENTITY_TYPE_META_DATA;
         break;
       case PLUGIN:
-        result = SYS_SEC_PLUGIN;
+        result = SYS_PLUGIN;
         break;
       case GroupIdentity.GROUP:
         result = GroupMetadata.GROUP;
@@ -105,7 +106,7 @@ public class EntityHelper {
   public void checkEntityTypeExists(String typeId) {
     String entityTypeId = getEntityTypeIdFromType(typeId);
     if (!dataService.hasEntityType(entityTypeId)) {
-      throw new InvalidTypeIdException(typeId);
+      throw new UnknownEntityTypeException(typeId);
     }
   }
 }

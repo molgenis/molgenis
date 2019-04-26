@@ -3,6 +3,7 @@ package org.molgenis.data.security.permission.inheritance.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.Acl;
 
@@ -11,7 +12,7 @@ import org.springframework.security.acls.model.Acl;
 public abstract class InheritedAclPermissionsResult {
   public static InheritedAclPermissionsResult create(
       Acl acl,
-      String ownPermission,
+      PermissionSet ownPermission,
       List<InheritedUserPermissionsResult> parentRolePermissions,
       InheritedAclPermissionsResult parentAclPermissions) {
     return new AutoValue_InheritedAclPermissionsResult(
@@ -21,7 +22,7 @@ public abstract class InheritedAclPermissionsResult {
   public abstract Acl getAcl();
 
   @Nullable
-  public abstract String getOwnPermission();
+  public abstract PermissionSet getOwnPermission();
 
   @Nullable
   public abstract List<InheritedUserPermissionsResult> getParentRolePermissions();

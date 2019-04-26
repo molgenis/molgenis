@@ -5,9 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.Collections;
 import org.molgenis.data.security.permission.PermissionService;
-import org.molgenis.data.security.permission.model.ObjectPermissions;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
@@ -57,9 +55,6 @@ public class PermissionPopulator {
     pairs.forEach(
         pair ->
             permissionService.createPermission(
-                ObjectPermissions.create(
-                    objectIdentity,
-                    Collections.singleton(
-                        Permission.create(pair.getB(), pair.getA().name(), null)))));
+                Permission.create(objectIdentity, pair.getB(), pair.getA())));
   }
 }

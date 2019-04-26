@@ -3,7 +3,9 @@ package org.molgenis.integrationtest.platform;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -20,13 +22,15 @@ public class RunAsSystemPermissionService {
   @Transactional
   @RunAsSystem
   public void grant(Map<ObjectIdentity, PermissionSet> objectPermissionMap, Sid sid) {
-    permissionService.grant(objectPermissionMap, sid);
+    for (Entry<ObjectIdentity, PermissionSet> entry : objectPermissionMap.entrySet()) {
+      permissionService.createPermission(Permission.create(entry.getKey(), sid, entry.getValue()));
+    }
   }
 
   @Transactional
   @RunAsSystem
   public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, Sid sid) {
-    permissionService.grant(objectIdentity, permissionSet, sid);
+    permissionService.createPermission(Permission.create(objectIdentity, sid, permissionSet));
   }
 
   @Transactional(readOnly = true)

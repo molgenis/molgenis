@@ -371,7 +371,7 @@ public class SortaController extends PluginController {
     }
   }
 
-  @PostMapping(value = "/match/upload", headers = "Content-Type=multipart/form-data")
+  @PostMapping(value = "/match/upload", headers = "Content-LabelledType=multipart/form-data")
   public String upload(
       @RequestParam(value = "taskName") String jobName,
       @RequestParam(value = "selectOntologies") String ontologyIri,

@@ -21,7 +21,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertFalse;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,6 +65,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
@@ -73,6 +74,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -306,6 +308,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     // Test default value
     assertEquals(LanguageService.getBundle().getString("car"), "car");
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -354,6 +358,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
       waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
       assertPresent(entityTypeDynamic, entities);
     }
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -392,6 +398,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -436,6 +444,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -475,6 +485,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             metaDataService.deleteEntityType(singletonList(entityType));
           }
         });
+
+    cleanupUserPermissions();
   }
 
   /** Test used as a caching benchmark */
@@ -501,6 +513,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             dataService.findOne(entityTypeDynamic.getId(), q3);
           }
         });
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -520,6 +534,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
     assertEquals(searchService.count(entityTypeDynamic, q), 0);
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 5);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -544,6 +560,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic, q), 0);
 
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 3333);
+
+    cleanupUserPermissions();
   }
 
   private List<Entity> createDynamicAndAdd(int count) {
@@ -633,6 +651,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     // Check id are equals
     assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -642,6 +662,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexCreateMetaData(
         searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -651,6 +673,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexDeleteMetaData(
         searchService, dataService, entityTypeDynamic, metaDataService, indexService);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -660,6 +684,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataUpdateAttribute(
         searchService, entityTypeDynamic, metaDataService, indexService);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -736,6 +762,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         searchService,
         metaDataService,
         indexService);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -745,6 +773,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveCompoundAttribute(
         entityTypeDynamic, attributeFactory, searchService, metaDataService, indexService);
+
+    cleanupUserPermissions();
   }
 
   // Derived from fix: https://github.com/molgenis/molgenis/issues/5227
@@ -809,6 +839,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     q6.search("searchTestBatchUpdate");
     long count6 = searchService.count(entityTypeDynamic, q6);
     assertEquals(count6, 1L);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -835,6 +867,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           all.forEach(e -> LOG.info(e.getEntityTypeId() + "." + e.getEntityId()));
           waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
         });
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -851,6 +885,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         new AggregateResult(
             singletonList(singletonList(1L)), singletonList(1L), singletonList("option1"));
     assertEquals(result, expectedResult);
+
+    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -869,6 +905,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             asList(0L, 1L),
             asList("option1", "option2"));
     assertEquals(result, expectedResult);
+
+    cleanupUserPermissions();
   }
 
   private AggregateResult runAggregateQuery(
@@ -885,6 +923,31 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   private void populateUserPermissions() {
+    Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
+        getObjectIdentityPermissionSetMap();
+    Sid sid = createUserSid(requireNonNull(USERNAME));
+    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
+  }
+
+  private void cleanupUserPermissions() {
+    Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
+        getObjectIdentityPermissionSetMap();
+    Sid sid = createUserSid(requireNonNull(USERNAME));
+    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.deletePermission(sid, entry.getKey());
+          });
+    }
+  }
+
+  private Map<ObjectIdentity, PermissionSet> getObjectIdentityPermissionSetMap() {
     Map<ObjectIdentity, PermissionSet> entityTypePermissionMap = new HashMap<>();
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
@@ -898,8 +961,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), PermissionSet.WRITE);
-
-    testPermissionService.grant(
-        entityTypePermissionMap, createUserSid(requireNonNull(getCurrentUsername())));
+    return entityTypePermissionMap;
   }
 }

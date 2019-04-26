@@ -1,12 +1,18 @@
 package org.molgenis.data.security.permission;
 
 import static java.lang.String.format;
+import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.COUNT_MASK;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.READMETA;
 import static org.molgenis.security.core.PermissionSet.READ_MASK;
 import static org.molgenis.security.core.PermissionSet.READ_META_MASK;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA_MASK;
 import static org.molgenis.security.core.PermissionSet.WRITE_MASK;
 
+import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.AccessControlEntry;
 
@@ -19,25 +25,25 @@ public class PermissionSetUtils {
 
   private PermissionSetUtils() {}
 
-  public static String getPermissionStringValue(AccessControlEntry accessControlEntry) {
+  public static PermissionSet getPermissionSet(AccessControlEntry accessControlEntry) {
     int mask = accessControlEntry.getPermission().getMask();
     switch (mask) {
       case READ_META_MASK:
-        return READMETA;
+        return PermissionSet.READMETA;
       case COUNT_MASK:
-        return COUNT;
+        return PermissionSet.COUNT;
       case READ_MASK:
-        return READ;
+        return PermissionSet.READ;
       case WRITE_MASK:
-        return WRITE;
+        return PermissionSet.WRITE;
       case WRITEMETA_MASK:
-        return WRITEMETA;
+        return PermissionSet.WRITEMETA;
       default:
         throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
     }
   }
 
-  static PermissionSet paramValueToPermissionSet(String paramValue) {
+  public static PermissionSet paramValueToPermissionSet(String paramValue) {
     switch (paramValue.toUpperCase()) {
       case READMETA:
         return PermissionSet.READMETA;
@@ -52,5 +58,27 @@ public class PermissionSetUtils {
       default:
         throw new IllegalArgumentException(format("Unknown PermissionSet '%s'", paramValue));
     }
+  }
+
+  public static String getPermissionStringValue(LabelledPermission labelledPermission) {
+    PermissionSet permissionSet = labelledPermission.getPermission();
+    if (permissionSet != null) {
+      int mask = permissionSet.getMask();
+      switch (mask) {
+        case READ_META_MASK:
+          return READMETA;
+        case COUNT_MASK:
+          return COUNT;
+        case READ_MASK:
+          return READ;
+        case WRITE_MASK:
+          return WRITE;
+        case WRITEMETA_MASK:
+          return WRITEMETA;
+        default:
+          throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
+      }
+    }
+    return null;
   }
 }

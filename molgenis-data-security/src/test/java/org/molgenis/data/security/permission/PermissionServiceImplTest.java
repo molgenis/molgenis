@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.permission.EntityHelper.PLUGIN;
-import static org.molgenis.data.security.permission.EntityHelper.SYS_SEC_PLUGIN;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.READMETA;
@@ -18,27 +17,32 @@ import static org.molgenis.security.core.PermissionSet.WRITE;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
-import org.molgenis.security.acl.AclClassService;
+import org.molgenis.data.security.permission.model.LabelledObject;
+import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
+import org.molgenis.data.security.permission.model.LabelledPermission;
+import org.molgenis.data.security.permission.model.LabelledType;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -56,7 +60,6 @@ import org.testng.annotations.Test;
 
 public class PermissionServiceImplTest extends AbstractMockitoTest {
   @Mock MutableAclService mutableAclService;
-  @Mock AclClassService aclClassService;
   @Mock PermissionInheritanceResolver inheritanceResolver;
   @Mock ObjectIdentityService objectIdentityService;
   @Mock DataService dataService;
@@ -81,9 +84,17 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetClasses() {
     resetMocks();
-    when(aclClassService.getAclClassTypes())
+    when(mutableAclClassService.getAclClassTypes())
         .thenReturn(Arrays.asList("entity-test1", "entity-test2"));
-    assertEquals(permissionsApiService.getTypes(), Arrays.asList("entity-test1", "entity-test2"));
+    doReturn("label1").when(entityHelper).getLabel("entity-test1");
+    doReturn("entityType1").when(entityHelper).getEntityTypeIdFromType("entity-test1");
+    doReturn("label2").when(entityHelper).getLabel("entity-test2");
+    doReturn("entityType2").when(entityHelper).getEntityTypeIdFromType("entity-test2");
+    assertEquals(
+        permissionsApiService.getTypes(),
+        Arrays.asList(
+            LabelledType.create("entity-test1", "entityType1", "label1"),
+            LabelledType.create("entity-test2", "entityType2", "label2")));
   }
 
   @Test
@@ -95,17 +106,16 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             Arrays.asList(
                 new ObjectIdentityImpl("classId", "test1"),
                 new ObjectIdentityImpl("classId", "test2")));
-    doReturn(true).when(dataService).hasEntityType("type");
-    when(entityHelper.getEntityTypeIdFromType("entity-type")).thenReturn("type");
+    doReturn("label1").when(entityHelper).getLabel("classId", "test1");
+    doReturn("label2").when(entityHelper).getLabel("classId", "test2");
     assertEquals(
-        permissionsApiService.getAcls("entity-type", 1, 10), Arrays.asList("test1", "test2"));
+        permissionsApiService.getObjects("entity-type", 1, 10),
+        Arrays.asList(
+            LabelledObject.create("test2", "label2"), LabelledObject.create("test1", "label1")));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypeEntityType() {
-    when(dataService.hasEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType(EntityTypeIdentity.ENTITY_TYPE))
-        .thenReturn(EntityTypeMetadata.ENTITY_TYPE_META_DATA);
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType(EntityTypeIdentity.ENTITY_TYPE),
         newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
@@ -113,9 +123,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testGetSuitablePermissionsForTypePackage() {
-    when(dataService.hasEntityType(PackageMetadata.PACKAGE)).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType(PackageIdentity.PACKAGE))
-        .thenReturn(PackageMetadata.PACKAGE);
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType(PackageIdentity.PACKAGE),
         newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
@@ -123,16 +130,11 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testGetSuitablePermissionsForTypePlugin() {
-    when(dataService.hasEntityType(PLUGIN)).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType(PLUGIN)).thenReturn(SYS_SEC_PLUGIN);
     assertEquals(permissionsApiService.getSuitablePermissionsForType(PLUGIN), newHashSet(READ));
   }
 
   @Test
   public void testGetSuitablePermissionsForTypeEntity() {
-    when(dataService.hasEntityType("row_level_secured_entity")).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType("entity-row_level_secured_entity"))
-        .thenReturn("row_level_secured_entity");
     assertEquals(
         permissionsApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"),
         newHashSet(READ, WRITE));
@@ -140,14 +142,10 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testGetPermission() {
-    doReturn(true).when(dataService).hasEntityType("typeId");
     PrincipalSid sid1 = mock(PrincipalSid.class);
-    when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
-    when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
-    ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
+    ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
@@ -157,50 +155,50 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(ace2.getSid()).thenReturn(sid2);
     when(ace2.getPermission()).thenReturn(WRITEMETA);
     when(acl.getEntries()).thenReturn(Arrays.asList(ace1, ace2));
+    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
-    Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
-    aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
-
-    when(mutableAclService.readAclsById(
-            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            Arrays.asList(sid1, sid2)))
-        .thenReturn(aclMap);
+    when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
 
     Entity entity = mock(Entity.class);
-    @SuppressWarnings("unchecked")
-    Repository<Entity> repo = mock(Repository.class);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
 
-    // FIXME  ObjectPermissions permission1 =
-    // FIXME     ObjectPermissions.create(objectIdentity, null, "user2", "WRITEMETA", null);
-    // FIXME ObjectPermissions permission2 =
-    // FIXME     ObjectPermissions.create(objectIdentity, null, "user1", "COUNT", null);
-    // FIXME Set<ObjectPermissions> expected = newHashSet(permission1, permission2);
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    LabelledPermission permission1 =
+        LabelledPermission.create(
+            sid2,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            WRITEMETA,
+            null);
+    LabelledPermission permission2 =
+        LabelledPermission.create(
+            sid1,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            COUNT,
+            null);
+    Set<LabelledPermission> expected = newHashSet(permission1, permission2);
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
-    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
 
-    // FIXME assertEquals(
-    // FIXME     newHashSet(
-    // FIXME         permissionsApiService.getPermission(
-    // FIXME             new ObjectIdentityImpl("entity-typeId", "identifier"), sids, true)),
-    // FIXME     expected);
+    assertEquals(
+        newHashSet(
+            permissionsApiService.getPermissionsForObject(
+                new ObjectIdentityImpl("entity-typeId", "identifier"), sids, true)),
+        expected);
   }
 
   @Test
   public void testGetAllPermissions() {
-    Entity entity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    when(aclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     doReturn(true).when(dataService).hasEntityType("typeId");
     PrincipalSid sid1 = mock(PrincipalSid.class);
-    when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
-    when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
@@ -227,30 +225,39 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             new ArrayList<>(sids)))
         .thenReturn(aclMap);
 
-    // FIXME ObjectPermissions permission1 =
-    // FIXME     ObjectPermissions.create(objectIdentity, null, "user1", "COUNT", null);
-    // FIXME ObjectPermissions permission2 =
-    // FIXME     ObjectPermissions.create(objectIdentity, null, "user2", "WRITEMETA", null);
-    // FIXME List<ObjectPermissions> expected = Arrays.asList(permission1, permission2);
+    LabelledPermission permission1 =
+        LabelledPermission.create(
+            sid1,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            COUNT,
+            null);
+    LabelledPermission permission2 =
+        LabelledPermission.create(
+            sid2,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            WRITEMETA,
+            null);
+    Set<LabelledPermission> expected = Sets.newHashSet(permission1, permission2);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
     when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    when(entityHelper.getLabel("entity-typeId")).thenReturn("label");
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
     when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
 
-    // FIXME assertEquals(newHashSet(permissionsApiService.getAllPermissions(sids, true)),
-    // expected);
+    assertEquals(newHashSet(permissionsApiService.getPermissions(sids, true)), expected);
   }
 
   @Test
   public void testGetPagedPermissionsForType() {
-    Entity entity = mock(Entity.class);
-
-    doReturn(true).when(dataService).hasEntityType("typeId");
     PrincipalSid sid1 = mock(PrincipalSid.class);
-    when(sid1.getPrincipal()).thenReturn("user1");
     PrincipalSid sid2 = mock(PrincipalSid.class);
-    when(sid2.getPrincipal()).thenReturn("user2");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
@@ -272,29 +279,41 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
-    // FIXME  ObjectPermissions permission1 =
-    // FIXME      ObjectPermissions.create(objectIdentity, null, "user1", "COUNT", null);
-    // FIXME ObjectPermissions permission2 =
-    // FIXME     ObjectPermissions.create(objectIdentity, null, "user2", "WRITEMETA", null);
-    // FIXME List<ObjectPermissions> expected = Arrays.asList(permission1, permission2);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2), 20, 60))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
     when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    // FIXME  assertEquals(
-    // FIXME      permissionsApiService.getPagedPermissionsForType("entity-typeId", sids, 4, 20),
-    // expected);
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+
+    LabelledPermission permission1 =
+        LabelledPermission.create(
+            sid1,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            COUNT,
+            null);
+    LabelledPermission permission2 =
+        LabelledPermission.create(
+            sid2,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            WRITEMETA,
+            null);
+    Map<String, HashSet<LabelledPermission>> expected =
+        Collections.singletonMap("identifier", newHashSet(permission1, permission2));
+    assertEquals(
+        permissionsApiService.getPermissionsForType("entity-typeId", sids, 4, 20), expected);
   }
 
   @Test
   public void testGetPermissionsForType() {
-    doReturn(true).when(dataService).hasEntityType("typeId");
-    PrincipalSid sid1 = new PrincipalSid("user1");
-    PrincipalSid sid2 = new PrincipalSid("user2");
+    PrincipalSid sid1 = mock(PrincipalSid.class);
+    PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
@@ -316,32 +335,41 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             Arrays.asList(sid1, sid2)))
         .thenReturn(aclMap);
 
-    Entity entity = mock(Entity.class);
-
-    // FIXME  ObjectPermissions permission1 =
-    // FIXME      ObjectPermissions.create(objectIdentity, null, "user2", "WRITEMETA", null);
-    // FIXME  ObjectPermissions permission2 =
-    // FIXME      ObjectPermissions.create(objectIdentity, null, "user1", "COUNT", null);
-    // FIXME  List<ObjectPermissions> expected = Arrays.asList(permission2, permission1);
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
-    when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
     when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList(sids));
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
 
-    // FIXME  assertEquals(
-    // FIXME      permissionsApiService.getPermissionsForType("entity-typeId", sids, true),
-    // expected);
+    LabelledPermission permission1 =
+        LabelledPermission.create(
+            sid1,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            COUNT,
+            null);
+    LabelledPermission permission2 =
+        LabelledPermission.create(
+            sid2,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            WRITEMETA,
+            null);
+    Map<String, HashSet<LabelledPermission>> expected =
+        Collections.singletonMap("identifier", newHashSet(permission1, permission2));
+    assertEquals(
+        permissionsApiService.getPermissionsForType("entity-typeId", sids, false), expected);
   }
 
   @Test
   public void testGetPermissionsForTypeWithoutUserQuery() {
-    doReturn(true).when(dataService).hasEntityType("typeId");
-    PrincipalSid sid1 = new PrincipalSid("user1");
-    PrincipalSid sid2 = new PrincipalSid("user2");
+    PrincipalSid sid1 = mock(PrincipalSid.class);
+    PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
@@ -362,65 +390,59 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             singletonList(new ObjectIdentityImpl("entity-typeId", "identifier"))))
         .thenReturn(aclMap);
 
-    Entity entity = mock(Entity.class);
-
-    // FIXME  ObjectPermissions permission1 =
-    // FIXME      ObjectPermissions.create(objectIdentity, null, "user2", "WRITEMETA", null);
-    // FIXME  ObjectPermissions permission2 =
-    // FIXME      ObjectPermissions.create(objectIdentity, null, "user1", "COUNT", null);
-    // FIXME  List<ObjectPermissions> expected = Arrays.asList(permission2, permission1);
     when(objectIdentityService.getObjectIdentities("entity-typeId"))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
-    when(userRoleTools.getAllAvailableSids()).thenReturn(newHashSet(sid1, sid2));
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
 
-    // FIXME  assertEquals(
-    // FIXME     permissionsApiService.getPermissionsForType("entity-typeId",
-    // Collections.emptySet(), true),
-    // FIXME     expected);
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+    when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
+
+    LabelledPermission permission1 =
+        LabelledPermission.create(
+            sid1,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            COUNT,
+            null);
+    LabelledPermission permission2 =
+        LabelledPermission.create(
+            sid2,
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+            WRITEMETA,
+            null);
+    Map<String, HashSet<LabelledPermission>> expected =
+        Collections.singletonMap("identifier", newHashSet(permission1, permission2));
+    assertEquals(
+        permissionsApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), false),
+        expected);
   }
 
   @Test
   public void testCreateAcl() {
-    Entity entity = mock(Entity.class);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     permissionsApiService.createAcl(new ObjectIdentityImpl("entity-typeId", "identifier"));
     verify(mutableAclService).createAcl(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 
   @Test
   public void testCreatePermission() {
-    Entity entity = mock(Entity.class);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-
-    Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
     when(mutableAclService.readAclById(new ObjectIdentityImpl("entity-typeId", "identifier")))
         .thenReturn(acl);
-    // PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-    Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
 
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    // FIXME permissionsApiService.createPermission(
-    // FIXME     singletonList(permission), new ObjectIdentityImpl("entity-typeId", "identifier"));
+    Sid role = new GrantedAuthoritySid("ROLE_role");
 
-    verify(acl).insertAce(0, WRITE, expectedSid, true);
+    permissionsApiService.createPermission(
+        Permission.create(new ObjectIdentityImpl("entity-typeId", "identifier"), role, WRITE));
+
+    verify(acl).insertAce(0, WRITE, role, true);
     verify(mutableAclService).updateAcl(acl);
   }
 
   @Test
   public void testCreatePermissions() {
-    Entity entity = mock(Entity.class);
-    doReturn(entity).when(dataService).findOneById("typeId", "identifier");
-    doReturn(entity).when(dataService).findOneById("typeId", "identifier2");
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-
-    Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
 
@@ -430,25 +452,20 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     doReturn(acl2)
         .when(mutableAclService)
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier2"));
-    /*    PermissionRequest permission1 = PermissionRequest.create("role", null, "WRITE");
-    ObjectPermissionsRequest objectPermissionsRequest1 =
-        ObjectPermissionsRequest.create("identifier", singletonList(permission1));
-    PermissionRequest permission2 = PermissionRequest.create(null, "user1", "READ");
-    ObjectPermissionsRequest objectPermissionsRequest2 =
-        ObjectPermissionsRequest.create("identifier2", singletonList(permission2));*/
+    Permission permission1 =
+        Permission.create(
+            new ObjectIdentityImpl("entity-typeId", "identifier"),
+            new GrantedAuthoritySid("ROLE_role"),
+            WRITE);
+    Permission permission2 =
+        Permission.create(
+            new ObjectIdentityImpl("entity-typeId", "identifier2"),
+            new PrincipalSid("user1"),
+            READ);
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     Sid expectedSid2 = new PrincipalSid("user1");
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    doReturn(new ObjectIdentityImpl("entity-typeId", "identifier"))
-        .when(entityHelper)
-        .getObjectIdentity("entity-typeId", "identifier");
-    doReturn(new ObjectIdentityImpl("entity-typeId", "identifier2"))
-        .when(entityHelper)
-        .getObjectIdentity("entity-typeId", "identifier2");
-    // FIXME  permissionsApiService.createPermissions(
-    // FIXME     Arrays.asList(objectPermissionsRequest1, objectPermissionsRequest2),
-    // "entity-typeId");
+    permissionsApiService.createPermissions(Sets.newHashSet(permission1, permission2));
 
     verify(acl).insertAce(0, WRITE, expectedSid, true);
     verify(acl2).insertAce(0, READ, expectedSid2, true);
@@ -457,9 +474,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testSetPermission() {
+    Sid role = new GrantedAuthoritySid("ROLE_role");
     Entity entity = mock(Entity.class);
-    doReturn(entity).when(dataService).findOneById("typeId", "identifier");
-    Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
@@ -467,79 +483,56 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         .when(mutableAclService)
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
 
-    // PermissionRequest permission = PermissionRequest.create("role", null, "WRITE");
-
-    doReturn(true).when(dataService).hasEntityType("typeId");
     when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
-    when(ace1.getSid()).thenReturn(sid);
+    when(ace1.getSid()).thenReturn(role);
     when(ace1.getPermission()).thenReturn(COUNT);
     when(acl.getEntries()).thenReturn(singletonList(ace1));
 
-    Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
-    aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
 
-    when(mutableAclService.readAclsById(
-            singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")),
-            singletonList(sid)))
-        .thenReturn(aclMap);
-
-    Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
-
-    // FIXME  permissionsApiService.updatePermission(
-    // FIXME     singletonList(permission), new ObjectIdentityImpl("entity-typeId", "identifier"));
+    permissionsApiService.updatePermission(
+        Permission.create(new ObjectIdentityImpl("entity-typeId", "identifier"), role, WRITE));
 
     verify(acl).deleteAce(0);
-    verify(acl).insertAce(1, WRITE, expectedSid, true);
+    verify(acl).insertAce(1, WRITE, role, true);
     verify(mutableAclService, times(2)).updateAcl(acl);
   }
 
   @Test
   public void testSetPermissions() {
     Entity entity = mock(Entity.class);
-    doReturn(entity).when(dataService).findOneById("typeId", "identifier");
     Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
     doReturn(acl).when(mutableAclService).readAclById(objectIdentity);
 
-    doReturn(true).when(dataService).hasEntityType("typeId");
-
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
     when(ace1.getSid()).thenReturn(sid);
     when(ace1.getPermission()).thenReturn(COUNT);
     when(acl.getEntries()).thenReturn(singletonList(ace1));
 
-    Map<ObjectIdentity, Acl> aclMap = new HashMap<>();
-    aclMap.put(new ObjectIdentityImpl("entity-typeId", "identifier"), acl);
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
 
-    when(mutableAclService.readAclsById(singletonList(objectIdentity), singletonList(sid)))
-        .thenReturn(aclMap);
-
-    Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    when(entityHelper.getObjectIdentity("entity-typeId", "identifier")).thenReturn(objectIdentity);
-    when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
-    // FIXME permissionsApiService.updatePermissions(singleton(identityPermissions),
-    // "entity-typeId");
+    permissionsApiService.updatePermissions(
+        singleton(Permission.create(objectIdentity, sid, WRITE)));
 
     verify(acl).deleteAce(0);
-    verify(acl).insertAce(1, WRITE, expectedSid, true);
+    verify(acl).insertAce(1, WRITE, sid, true);
     verify(mutableAclService, times(2)).updateAcl(acl);
   }
 
   @Test
   public void testDeletePermission() {
-    Entity entity = mock(Entity.class);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(entity);
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-
     Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
     AccessControlEntry ace = mock(AccessControlEntry.class);
@@ -556,8 +549,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testAddType() {
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("typeId");
     Attribute attribute = mock(Attribute.class);
@@ -582,18 +573,11 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testDeleteType() {
-    when(dataService.hasEntityType("typeId")).thenReturn(true);
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     permissionsApiService.deleteType("entity-typeId");
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
   }
 
   private void resetMocks() {
-    reset(
-        mutableAclService,
-        aclClassService,
-        inheritanceResolver,
-        objectIdentityService,
-        dataService);
+    reset(mutableAclService, inheritanceResolver, objectIdentityService, dataService);
   }
 }

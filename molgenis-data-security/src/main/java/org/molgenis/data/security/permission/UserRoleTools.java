@@ -121,10 +121,10 @@ public class UserRoleTools {
   private List<Sid> getParentRoles(String roleName) {
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(RoleMetadata.ROLE), EntityTypePermission.READ_DATA)) {
+
       Role role =
           dataService
-              .getRepository(RoleMetadata.ROLE, Role.class)
-              .query()
+              .query(RoleMetadata.ROLE, Role.class)
               .eq(RoleMetadata.NAME, roleName)
               .findOne();
       if (role == null) {
@@ -206,7 +206,7 @@ public class UserRoleTools {
   }
 
   List<Sid> sortSids(Set<Sid> sids) {
-    List<Sid> result = new ArrayList<>(sids);
+    List<Sid> result = new LinkedList<>(sids);
     result.sort(comparing(UserRoleTools::getName));
     return result;
   }

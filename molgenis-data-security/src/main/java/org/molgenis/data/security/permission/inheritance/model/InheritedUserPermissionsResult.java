@@ -3,6 +3,7 @@ package org.molgenis.data.security.permission.inheritance.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.Sid;
 
@@ -11,7 +12,7 @@ import org.springframework.security.acls.model.Sid;
 public abstract class InheritedUserPermissionsResult {
   public static InheritedUserPermissionsResult create(
       Sid sid,
-      String ownPermission,
+      PermissionSet ownPermission,
       List<InheritedUserPermissionsResult> inheritedUserPermissionsResult) {
     return new AutoValue_InheritedUserPermissionsResult(
         sid, ownPermission, inheritedUserPermissionsResult);
@@ -21,7 +22,7 @@ public abstract class InheritedUserPermissionsResult {
   public abstract Sid getSid();
 
   @Nullable
-  public abstract String getOwnPermission();
+  public abstract PermissionSet getOwnPermission();
 
   @Nullable
   public abstract List<InheritedUserPermissionsResult> getInheritedUserPermissionsResult();

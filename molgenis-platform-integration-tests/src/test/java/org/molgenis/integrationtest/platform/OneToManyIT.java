@@ -3,7 +3,6 @@ package org.molgenis.integrationtest.platform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Streams.stream;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.OneToManyTestHarness.ATTR_AUTHOR;
@@ -32,9 +31,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
-import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Iterables;
@@ -43,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
@@ -51,6 +49,7 @@ import org.molgenis.data.OneToManyTestHarness;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
@@ -58,10 +57,12 @@ import org.molgenis.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -86,6 +87,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
   @BeforeClass
   public void setUp() {
+    populateUserPermissions();
     waitForWorkToBeFinished(indexService, LOG);
   }
 
@@ -108,8 +110,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
   public void testAuthorAndBookInsert(TestCaseType testCase) {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 
     String bookEntityName = authorsAndBooks.getBookMetaData().getId();
@@ -153,8 +153,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
   public void testPersonInsert(TestCaseType testCase) {
-    populateUserPermissions();
-
     List<Entity> persons = importPersons(testCase);
 
     String personEntityName = persons.get(0).getEntityType().getId();
@@ -180,8 +178,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testL1SingleEntityUpdate() {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
       Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getId(), BOOK_1);
@@ -218,8 +214,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testL1StreamingEntityUpdate() {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
       Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getId(), BOOK_1);
@@ -256,8 +250,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testL1EntitySingleEntityDelete() {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
       Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getId(), BOOK_1);
@@ -281,8 +273,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testL1EntityStreamingEntityDelete() {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
       Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getId(), BOOK_1);
@@ -306,8 +296,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
   public void testUpdateAuthorValue(TestCaseType testCase) {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
     String bookName = authorsAndBooks.getBookMetaData().getId();
     String authorName = authorsAndBooks.getAuthorMetaData().getId();
@@ -340,8 +328,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
   public void testUpdateParentValue(TestCaseType testCase) {
-    populateUserPermissions();
-
     List<Entity> persons = importPersons(testCase);
     String personName = persons.get(0).getEntityType().getId();
 
@@ -382,8 +368,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testUpdateAuthorOrderAscending() {
-    populateUserPermissions();
-
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(ASCENDING_ORDER);
     String bookName = authorsAndBooks.getBookMetaData().getId();
     String authorName = authorsAndBooks.getAuthorMetaData().getId();
@@ -409,7 +393,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testUpdateAuthorOrderDescending() {
-    populateUserPermissions();
 
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(DESCENDING_ORDER);
     String bookName = authorsAndBooks.getBookMetaData().getId();
@@ -436,8 +419,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testUpdateParentOrderAscending() {
-    populateUserPermissions();
-
     List<Entity> persons = importPersons(ASCENDING_ORDER);
     String personName = persons.get(0).getEntityType().getId();
 
@@ -463,8 +444,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(singleThreaded = true)
   public void testUpdateParentOrderDescending() {
-    populateUserPermissions();
-
     List<Entity> persons = importPersons(DESCENDING_ORDER);
     String personName = persons.get(0).getEntityType().getId();
 
@@ -526,8 +505,14 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @Autowired private PermissionService testPermissionService;
 
   private void populateUserPermissions() {
-    testPermissionService.grant(
-        getPermissionMap(), createUserSid(requireNonNull(getCurrentUsername())));
+    Sid sid = SidUtils.createUserSid(USERNAME);
+    for (Entry<ObjectIdentity, PermissionSet> entry : getPermissionMap().entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
   }
 
   private Map<ObjectIdentity, PermissionSet> getPermissionMap() {

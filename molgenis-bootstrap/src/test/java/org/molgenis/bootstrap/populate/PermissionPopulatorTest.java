@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.mockito.Mock;
 import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;
@@ -62,7 +63,9 @@ public class PermissionPopulatorTest extends AbstractMockitoTest {
 
     permissionPopulator.populate(applicationContext);
 
-    verify(permissionService).grant(objectIdentity0, PermissionSet.COUNT, sid0);
-    verify(permissionService).grant(objectIdentity1, PermissionSet.READ, sid1);
+    verify(permissionService)
+        .createPermission(Permission.create(objectIdentity0, sid0, PermissionSet.COUNT));
+    verify(permissionService)
+        .createPermission(Permission.create(objectIdentity1, sid1, PermissionSet.READ));
   }
 }

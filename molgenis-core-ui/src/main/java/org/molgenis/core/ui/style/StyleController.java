@@ -35,7 +35,7 @@ public class StyleController {
       @PathVariable("theme") String theme,
       HttpServletResponse response)
       throws MolgenisStyleException {
-    response.setHeader("Content-Type", "text/css");
+    response.setHeader("Content-LabelledType", "text/css");
     response.setHeader("Cache-Control", "max-age=31536000");
 
     final String themeName = theme.endsWith(".css") ? theme : theme + ".css";

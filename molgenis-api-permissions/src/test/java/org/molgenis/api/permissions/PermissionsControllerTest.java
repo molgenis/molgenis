@@ -1,11 +1,16 @@
 package org.molgenis.api.permissions;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.api.permissions.PermissionsController.BASE_URI;
+import static org.molgenis.api.permissions.PermissionsController.DEFAULT_PAGE;
+import static org.molgenis.api.permissions.PermissionsController.DEFAULT_PAGESIZE;
 import static org.molgenis.api.permissions.PermissionsController.OBJECTS;
 import static org.molgenis.api.permissions.PermissionsController.TYPES;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -17,18 +22,20 @@ import com.google.common.collect.Sets;
 import cz.jirutka.rsql.parser.RSQLParser;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.mockito.Mock;
-import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
-import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.UserRoleTools;
+import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.data.security.permission.model.LabelledPermission;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -36,6 +43,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -111,8 +119,11 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetAclsForType() throws Exception {
-    // FIXME when(permissionsService.getAcls("typeId", DEFAULT_PAGE, DEFAULT_PAGESIZE))
-    // FIXME     .thenReturn(Arrays.asList("test1", "test2"));
+    when(permissionsService.getObjects("typeId", DEFAULT_PAGE, DEFAULT_PAGESIZE))
+        .thenReturn(
+            Sets.newHashSet(
+                LabelledObject.create("test1", "label1"),
+                LabelledObject.create("test2", "label2")));
     when(objectIdentityService.getNrOfObjectIdentities("typeId")).thenReturn(80);
 
     MvcResult result =
@@ -123,32 +134,36 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[\"test1\",\"test2\"]}");
+        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[{\"id\":\"test2\",\"label\":\"label2\"},{\"id\":\"test1\",\"label\":\"label1\"}]}");
   }
 
   @Test
   public void testGetAcePermission() throws Exception {
-    Sid sid1 = new GrantedAuthoritySid("role1");
-    Sid sid2 = new GrantedAuthoritySid("role2");
-    List<LabelledPermission> objectPermissionResponses =
-        Arrays.asList(
+    Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
+    Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
+    Set<LabelledPermission> objectPermissionResponses =
+        Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "READ",
+                PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "WRITE",
+                WRITE,
                 null));
-    // FIXME when(permissionsService.getPermission(objectIdentity, Sets.newHashSet(user1, role1),
-    // true))
-    // FIXME      .thenReturn(objectPermissionResponses);
-
+    when(permissionsService.getPermissionsForObject(
+            objectIdentity, Sets.newHashSet(user1, role1), true))
+        .thenReturn(objectPermissionResponses);
+    when(userRoleTools.getSids(
+            Collections.singletonList("user1"), Collections.singletonList("role1")))
+        .thenReturn(Arrays.asList(user1, role1));
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Collections.singletonList("role1"));
+
+    when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
 
     MvcResult result =
         mockMvc
@@ -159,29 +174,32 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}");
+        "{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}");
   }
 
   @Test
   public void testGetAcePermissions() throws Exception {
-    Sid sid1 = new GrantedAuthoritySid("role1");
-    Sid sid2 = new GrantedAuthoritySid("role2");
-    List<LabelledPermission> objectPermissionResponses =
-        Arrays.asList(
+    Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
+    Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
+    Set<LabelledPermission> objectPermissionResponses =
+        Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "READ",
+                PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "WRITE",
+                WRITE,
                 null));
-    // FIXME  when(permissionsService.getPermissionsForType(
-    // FIXME         "typeId", Sets.newHashSet(user1, role1, role2), false))
-    // FIXME     .thenReturn(objectPermissionResponses);
-
+    Map<String, Set<LabelledPermission>> expected =
+        Collections.singletonMap("typeId", objectPermissionResponses);
+    when(permissionsService.getPermissionsForType(
+            "typeId", Sets.newHashSet(user1, role1, role2), false))
+        .thenReturn(expected);
+    when(userRoleTools.getSids(Collections.singletonList("user1"), Arrays.asList("role1", "role2")))
+        .thenReturn(Arrays.asList(user1, role1, role2));
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
@@ -194,67 +212,70 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/"
-            + "typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}]}}");
   }
 
   @Test
   public void testGetAcePermissionsPaged() throws Exception {
-    Sid sid1 = new GrantedAuthoritySid("role1");
-    Sid sid2 = new GrantedAuthoritySid("role2");
-    List<LabelledPermission> objectPermissionResponses =
-        Arrays.asList(
+    Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
+    Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
+    Set<LabelledPermission> objectPermissionResponses =
+        Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "READ",
+                PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "WRITE",
+                WRITE,
                 null));
-    // FIXME when(permissionsService.getPagedPermissionsForType(
-    // FIXME       "typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
-    // FIXME      .thenReturn(objectPermissionResponses);
+    Map<String, Set<LabelledPermission>> expected =
+        Collections.singletonMap("typeId", objectPermissionResponses);
+    when(userRoleTools.getSids(Collections.singletonList("user1"), Arrays.asList("role1", "role2")))
+        .thenReturn(Arrays.asList(user1, user2, role1, role2));
+    when(permissionsService.getPermissionsForType(
+            "typeId", Sets.newHashSet(user1, user2, role1, role2), 2, 10))
+        .thenReturn(expected);
     when(objectIdentityService.getNrOfObjectIdentities(
             "typeId", Sets.newHashSet(user1, user2, role1, role2)))
         .thenReturn(80);
 
     PermissionsQuery permissionsQuery = new PermissionsQuery();
-    permissionsQuery.setUsers(Collections.singletonList("test"));
+    permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
 
     MvcResult result =
         mockMvc
             .perform(
-                get(BASE_URI + "/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10"))
+                get(BASE_URI + "/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10"))
             .andExpect(status().isOk())
             .andReturn();
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==test,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"role2\",\"permission\":\"READ\"},{\"user\":\"role1\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}]}}");
   }
 
   @Test
   public void testGetAllPermissionsForUser() throws Exception {
-    Sid sid1 = new GrantedAuthoritySid("role1");
-    Sid sid2 = new GrantedAuthoritySid("role2");
-    List<LabelledPermission> objectPermissionResponses =
-        Arrays.asList(
+    Set<LabelledPermission> objectPermissionResponses =
+        Sets.newHashSet(
             LabelledPermission.create(
-                sid1,
+                user1,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "READ",
+                PermissionSet.READ,
                 null),
             LabelledPermission.create(
-                sid2,
+                user1,
                 LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
-                "WRITE",
+                WRITE,
                 null));
-    // FIXME when(permissionsService.getAllPermissions(Sets.newHashSet(user1), false))
-    // FIXME      .thenReturn(objectPermissionResponses);
+    when(permissionsService.getPermissions(Sets.newHashSet(user1), false))
+        .thenReturn(objectPermissionResponses);
+    when(userRoleTools.getSids(Collections.singletonList("user1"), Collections.emptyList()))
+        .thenReturn(Collections.singletonList(new PrincipalSid("user1")));
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
 
@@ -266,7 +287,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"types\":[{\"typeId\":\"typeId\",\"label\":\"label\",\"objects\":[{\"objectId\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"user\":\"user1\",\"permission\":\"READ\"},{\"user\":\"user2\",\"permission\":\"WRITE\"}]}]}]}");
+        "{\"permissions\":[{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"Read\"},{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"Write\"}]}");
   }
 
   @Test
@@ -289,11 +310,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
                 .content(requestJson))
         .andExpect(status().isNoContent());
 
-    PermissionRequest permissionRequest1 = PermissionRequest.create(null, "test2", "READ");
-    PermissionRequest permissionRequest2 = PermissionRequest.create(null, "test", "WRITE");
-    // FIXME verify(permissionsService)
-    // FIXME     .updatePermission(Arrays.asList(permissionRequest1, permissionRequest2),
-    // objectIdentity);
+    Permission permission1 =
+        Permission.create(
+            new ObjectIdentityImpl("typeId", "identifier"), new PrincipalSid("test2"), READ);
+    Permission permission2 =
+        Permission.create(
+            new ObjectIdentityImpl("typeId", "identifier"), new PrincipalSid("test"), WRITE);
+
+    verify(permissionsService).updatePermissions(Sets.newHashSet(permission1, permission2));
   }
 
   @Test
@@ -322,24 +346,25 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             + "]}"
             + "]"
             + "}";
+    ObjectIdentity objectIdentity1 = new ObjectIdentityImpl("typeId", "rij1");
+    ObjectIdentity objectIdentity2 = new ObjectIdentityImpl("typeId", "rij2");
+    doReturn(objectIdentity1).when(entityHelper).getObjectIdentity("typeId", "rij1");
+    doReturn(objectIdentity2).when(entityHelper).getObjectIdentity("typeId", "rij2");
+
     mockMvc
         .perform(
             patch(BASE_URI + "/typeId").contentType(APPLICATION_JSON_UTF8).content(requestJson))
         .andExpect(status().isNoContent());
 
-    ObjectPermissionsRequest permission1 =
-        ObjectPermissionsRequest.create(
-            "rij1",
-            Arrays.asList(
-                PermissionRequest.create("IT_VIEWER", null, "WRITE"),
-                PermissionRequest.create("IT_MANAGER", null, "READ")));
-    ObjectPermissionsRequest permission2 =
-        ObjectPermissionsRequest.create(
-            "rij2",
-            Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
+    Permission permission1 =
+        Permission.create(objectIdentity1, new GrantedAuthoritySid("ROLE_IT_VIEWER"), WRITE);
+    Permission permission2 =
+        Permission.create(objectIdentity1, new GrantedAuthoritySid("ROLE_IT_MANAGER"), READ);
+    Permission permission3 =
+        Permission.create(objectIdentity2, new GrantedAuthoritySid("ROLE_IT_VIEWER"), WRITE);
 
-    // FIXME verify(permissionsService).updatePermissions(Arrays.asList(permission1, permission2),
-    // "typeId");
+    verify(permissionsService)
+        .updatePermissions(Sets.newHashSet(permission3, permission1, permission2));
   }
 
   @Test
@@ -368,23 +393,24 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             + "]}"
             + "]"
             + "}";
+    ObjectIdentity objectIdentity1 = new ObjectIdentityImpl("typeId", "rij1");
+    ObjectIdentity objectIdentity2 = new ObjectIdentityImpl("typeId", "rij2");
+    doReturn(objectIdentity1).when(entityHelper).getObjectIdentity("typeId", "rij1");
+    doReturn(objectIdentity2).when(entityHelper).getObjectIdentity("typeId", "rij2");
+
+    Permission permission1 =
+        Permission.create(objectIdentity1, new GrantedAuthoritySid("ROLE_IT_VIEWER"), WRITE);
+    Permission permission2 =
+        Permission.create(objectIdentity1, new GrantedAuthoritySid("ROLE_IT_MANAGER"), READ);
+    Permission permission3 =
+        Permission.create(objectIdentity2, new GrantedAuthoritySid("ROLE_IT_VIEWER"), WRITE);
+
     mockMvc
         .perform(post(BASE_URI + "/typeId").contentType(APPLICATION_JSON_UTF8).content(requestJson))
         .andExpect(status().isCreated());
 
-    ObjectPermissionsRequest permission1 =
-        ObjectPermissionsRequest.create(
-            "rij1",
-            Arrays.asList(
-                PermissionRequest.create("IT_VIEWER", null, "WRITE"),
-                PermissionRequest.create("IT_MANAGER", null, "READ")));
-    ObjectPermissionsRequest permission2 =
-        ObjectPermissionsRequest.create(
-            "rij2",
-            Collections.singletonList(PermissionRequest.create("IT_VIEWER", null, "WRITE")));
-
-    // FIXME verify(permissionsService).createPermissions(Arrays.asList(permission1, permission2),
-    // "typeId");
+    verify(permissionsService)
+        .createPermissions(Sets.newHashSet(permission3, permission1, permission2));
   }
 
   @Test
@@ -407,11 +433,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
                 .content(requestJson))
         .andExpect(status().isCreated());
 
-    List<PermissionRequest> permissionRequests =
-        Arrays.asList(
-            PermissionRequest.create(null, "test2", "READ"),
-            PermissionRequest.create(null, "test", "WRITE"));
-    // FIXME verify(permissionsService).createPermission(permissionRequests, objectIdentity);
+    Permission permission1 =
+        Permission.create(
+            new ObjectIdentityImpl("typeId", "identifier"), new PrincipalSid("test2"), READ);
+    Permission permission2 =
+        Permission.create(
+            new ObjectIdentityImpl("typeId", "identifier"), new PrincipalSid("test"), WRITE);
+
+    verify(permissionsService).createPermissions(Sets.newHashSet(permission1, permission2));
   }
 
   @Test

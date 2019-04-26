@@ -4,6 +4,7 @@ import java.util.Collections;
 import org.molgenis.data.security.permission.inheritance.model.InheritedAclPermissionsResult;
 import org.molgenis.data.security.permission.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.data.security.permission.inheritance.model.InheritedUserPermissionsResult;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.Sid;
 
@@ -20,7 +21,8 @@ public class InheritanceTestUtils {
       Acl packageAcl, Acl parentPackageAcl, Sid role1, Sid role2, Sid role3) {
     // Permissions on parentpackage
     InheritedUserPermissionsResult parentPackageAclPermissionsRole3 =
-        InheritedUserPermissionsResult.create(role3, "WRITEMETA", Collections.emptyList());
+        InheritedUserPermissionsResult.create(
+            role3, PermissionSet.WRITEMETA, Collections.emptyList());
     InheritedUserPermissionsResult parentPackageAclPermissionsRole1 =
         InheritedUserPermissionsResult.create(
             role1, null, Collections.singletonList(parentPackageAclPermissionsRole3));
@@ -33,10 +35,10 @@ public class InheritanceTestUtils {
     // Permissions on package
     InheritedAclPermissionsResult packageAclPermissions =
         InheritedAclPermissionsResult.create(
-            packageAcl, "READ", Collections.emptyList(), parentPackageAclPermissions);
+            packageAcl, PermissionSet.READ, Collections.emptyList(), parentPackageAclPermissions);
     // Permissions on entity
     InheritedUserPermissionsResult entityPermissionRole2 =
-        InheritedUserPermissionsResult.create(role2, "WRITE", Collections.emptyList());
+        InheritedUserPermissionsResult.create(role2, PermissionSet.WRITE, Collections.emptyList());
 
     return InheritedPermissionsResult.create(
         Collections.singletonList(entityPermissionRole2), packageAclPermissions);

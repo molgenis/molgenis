@@ -24,7 +24,6 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.util.Arrays;
-import java.util.List;
 import org.molgenis.api.permissions.PermissionsController;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.api.tests.utils.RestTestUtils.Permission;
@@ -114,9 +113,9 @@ public class PermissionAPIIT {
         .all();
 
     String response1 =
-        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
+        "{permissions=[{permission=READ, user="
             + testUserName
-            + "}]}";
+            + "}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
 
     Response actual =
         given()
@@ -146,9 +145,9 @@ public class PermissionAPIIT {
         .all();
 
     String response2 =
-        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
+        "{permissions=[{permission=WRITE, user="
             + testUserName
-            + "}]}";
+            + "}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
     Response actual2 =
         given()
             .log()
@@ -176,17 +175,22 @@ public class PermissionAPIIT {
         .log()
         .all();
 
-    String response3 = "{\"permissions\":[{\"user\":\"admin\",\"permission\":\"WRITEMETA\"}]}";
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
-        .then()
-        .statusCode(200)
-        .log()
-        .all()
-        .body(equalTo(response3));
+    String response3 =
+        "{permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+    Response actual3 =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, adminToken)
+            .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .response();
+
+    JsonPath path3 = actual3.getBody().jsonPath();
+    assertEquals(path3.getJsonObject("").toString(), response3);
   }
 
   @Test
@@ -213,37 +217,46 @@ public class PermissionAPIIT {
         .all();
 
     String response =
-        "{\"permissions\":[{\"user\":\"admin\",\"permission\":\"WRITEMETA\"},{\"user\":\""
+        "{permissions=[{user="
             + testUserName
-            + "\",\"inheritedPermissions\":[{\"objectId\":\"perm1\",\"label\":\"perm1\",\"typeLabel\":\"Package\",\"typeId\":\"package\",\"permission\":\"READ\",\"inheritedPermissions\":[]}]}]}";
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1?inheritance=true")
-        .then()
-        .statusCode(200)
-        .log()
-        .all()
-        .body(equalTo(response));
+            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=Read, label=Package, objectId=package, inheritedPermissions=[]}]}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+    Response actual =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, adminToken)
+            .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1?inheritance=true")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .response();
+
+    JsonPath path = actual.getBody().jsonPath();
+    assertEquals(path.getJsonObject("").toString(), response);
+
     String response2 =
-        "{\"permissions\":[{\"user\":\""
+        "{permissions=[{user="
             + testUserName
-            + "\",\"inheritedPermissions\":[{\"objectId\":\"perm1\",\"label\":\"perm1\",\"typeLabel\":\"Package\",\"typeId\":\"package\",\"permission\":\"READ\",\"inheritedPermissions\":[]}]}]}";
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(
-            PermissionsController.BASE_URI
-                + "/entityType/perm1_entity1?q=user=="
-                + testUserName
-                + "&inheritance=true")
-        .then()
-        .statusCode(200)
-        .log()
-        .all()
-        .body(equalTo(response2));
+            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=Read, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
+    Response actual2 =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, adminToken)
+            .get(
+                PermissionsController.BASE_URI
+                    + "/entityType/perm1_entity1?q=user=="
+                    + testUserName
+                    + "&inheritance=true")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .response();
+
+    JsonPath path2 = actual2.getBody().jsonPath();
+    assertEquals(path2.getJsonObject("").toString(), response2);
   }
 
   // patch for type (multiple at once) - get for type - delete as admin
@@ -252,9 +265,11 @@ public class PermissionAPIIT {
     String create =
         "{objects:[{objectId:perm1_entity2,permissions:[{user:"
             + testUserName
-            + ",permission:READMETA},{user:"
+            + ",permission:READMETA},"
+            + "{user:"
             + testUserName2
-            + ",permission:READMETA}]},{objectId:perm2_entity3,permissions:[{user:"
+            + ",permission:READMETA}]},"
+            + "{objectId:perm2_entity3,permissions:[{user:"
             + testUserName
             + ",permission:READMETA}]}]}";
     given()
@@ -294,17 +309,17 @@ public class PermissionAPIIT {
             + testUserName
             + "}, {permission=READ, user="
             + testUserName2
-            + "}], label=entity2, objectId=perm1_entity2}, {permissions=[{permission=WRITEMETA, user="
+            + "}], id=perm1_entity2, label=entity2}, {permissions=[{permission=WRITEMETA, user="
             + testUserName
-            + "}], label=entity3, objectId=perm2_entity3}, {permissions=[{permission=READ, user="
-            + testUserName
-            + "}, {permission=READ, user="
-            + testUserName2
-            + "}], label=Role, objectId=sys_sec_Role}, {permissions=[{permission=READ, user="
+            + "}], id=perm2_entity3, label=entity3}, {permissions=[{permission=READ, user="
             + testUserName
             + "}, {permission=READ, user="
             + testUserName2
-            + "}], label=Role Membership, objectId=sys_sec_RoleMembership}]}";
+            + "}], id=sys_sec_Role, label=Role}, {permissions=[{permission=READ, user="
+            + testUserName
+            + "}, {permission=READ, user="
+            + testUserName2
+            + "}], id=sys_sec_RoleMembership, label=Role Membership}], id=entityType, label=Entity type}";
 
     Response actual =
         given()
@@ -349,16 +364,18 @@ public class PermissionAPIIT {
         .log()
         .all();
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .get(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5")
-        .then()
-        .statusCode(200)
-        .log()
-        .all()
-        .body("data", equalTo(Arrays.asList("1", "2")));
+    Response actual =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, adminToken)
+            .get(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5")
+            .then()
+            .statusCode(200)
+            .extract()
+            .response();
+    JsonPath path = actual.getBody().jsonPath();
+    assertEquals(path.getJsonObject("data").toString(), "[{id=1, label=1}, {id=2, label=2}]");
   }
 
   @Test
@@ -385,11 +402,11 @@ public class PermissionAPIIT {
             .extract()
             .response();
     JsonPath path = actual.getBody().jsonPath();
-    String expected =
-        "package,entity-sys_job_ResourceDownloadJobExecution,entity-sys_FileMeta,entity-sys_ImportRun,entity-sys_job_OneClickImportJobExecution,entity-sys_job_ResourceDeleteJobExecution,entity-sys_job_ResourceCopyJobExecution,entityType,plugin,entity-perm2_entity4";
-    List<String> expectedList = Arrays.asList(expected.split(","));
-    assertTrue(path.getList("").containsAll(expectedList));
-    assertEquals(path.getList("").size(), expectedList.size());
+    String body = path.getJsonObject("").toString();
+    assertTrue(body.contains("{entityType=sys_md_Package, id=package, label=Package}"));
+    assertTrue(body.contains("{entityType=sys_md_EntityType, id=entityType, label=Entity type}"));
+    assertTrue(body.contains("{entityType=sys_Plugin, id=plugin, label=Plugin}"));
+    assertTrue(body.contains("{entityType=perm2_entity4, id=entity-perm2_entity4, label=entity4}"));
   }
 
   @Test
@@ -403,7 +420,7 @@ public class PermissionAPIIT {
         .statusCode(200)
         .log()
         .all()
-        .body(equalTo("[\"READ\",\"WRITE\"]"));
+        .body(equalTo("[\"Read\",\"Write\"]"));
   }
 
   @Test
@@ -427,7 +444,9 @@ public class PermissionAPIIT {
         .all();
 
     String response =
-        "{\"permissions\":[{\"user\":\"" + testUserName + "\",\"permission\":\"READ\"}]}";
+        "{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"permissions\":[{\"user\":\""
+            + testUserName
+            + "\",\"permission\":\"READ\"}]}";
     given()
         .log()
         .all()

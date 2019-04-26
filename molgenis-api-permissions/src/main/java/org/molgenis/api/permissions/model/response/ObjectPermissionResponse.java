@@ -10,11 +10,10 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class ObjectPermissionResponse {
+  public abstract String getId();
 
   @Nullable
   public abstract String getLabel();
-
-  public abstract String getId();
 
   public abstract Set<PermissionResponse> getPermissions();
 

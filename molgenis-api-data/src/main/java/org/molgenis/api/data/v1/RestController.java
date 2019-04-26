@@ -491,7 +491,7 @@ public class RestController {
   @Transactional
   @PostMapping(
       value = "/{entityTypeId}",
-      headers = "Content-Type=application/x-www-form-urlencoded")
+      headers = "Content-LabelledType=application/x-www-form-urlencoded")
   public void createFromFormPost(
       @PathVariable("entityTypeId") String entityTypeId,
       HttpServletRequest request,
@@ -510,7 +510,7 @@ public class RestController {
 
   /** Creates a new entity from a html form post. */
   @Transactional
-  @PostMapping(value = "/{entityTypeId}", headers = "Content-Type=multipart/form-data")
+  @PostMapping(value = "/{entityTypeId}", headers = "Content-LabelledType=multipart/form-data")
   public void createFromFormPostMultiPart(
       @PathVariable("entityTypeId") String entityTypeId,
       MultipartHttpServletRequest request,
@@ -633,7 +633,7 @@ public class RestController {
   @PostMapping(
       value = "/{entityTypeId}/{id}",
       params = "_method=PUT",
-      headers = "Content-Type=multipart/form-data")
+      headers = "Content-LabelledType=multipart/form-data")
   @ResponseStatus(NO_CONTENT)
   public void updateFromFormPostMultiPart(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -669,7 +669,7 @@ public class RestController {
   @PostMapping(
       value = "/{entityTypeId}/{id}",
       params = "_method=PUT",
-      headers = "Content-Type=application/x-www-form-urlencoded")
+      headers = "Content-LabelledType=application/x-www-form-urlencoded")
   @ResponseStatus(NO_CONTENT)
   public void updateFromFormPost(
       @PathVariable("entityTypeId") String entityTypeId,
