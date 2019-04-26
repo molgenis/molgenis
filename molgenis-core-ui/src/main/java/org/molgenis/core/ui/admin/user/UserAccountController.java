@@ -142,9 +142,7 @@ public class UserAccountController extends PluginController {
         message = "Invalid password entered",
         response = ErrorMessageResponse.class)
   })
-  @PostMapping(
-      value = "/update",
-      headers = "Content-LabelledType=application/x-www-form-urlencoded")
+  @PostMapping(value = "/update", headers = "Content-Type=application/x-www-form-urlencoded")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateAccount(@Valid @NotNull AccountUpdateRequest updateRequest) {
     String newPassword = validatePasswordInUpdateRequest(updateRequest);

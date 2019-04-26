@@ -17,7 +17,7 @@ public class InvalidEmxIdentifierException extends CodedRuntimeException {
 
   @Override
   public String getMessage() {
-    return format("LabelledType:%s Id:%s", entity.getEntityType().getLabel(), entity.getIdValue());
+    return format("Type:%s Id:%s", entity.getEntityType().getLabel(), entity.getIdValue());
   }
 
   @Override

@@ -26,7 +26,7 @@ public class DefaultValueReferenceValidatorImplTest {
   public void setUpBeforeMethod() {
     dataService = mock(DataService.class, RETURNS_DEEP_STUBS);
     entityType = when(mock(EntityType.class).getIdValue()).thenReturn("entityTypeId").getMock();
-    when(entityType.getLabel()).thenReturn("My Entity LabelledType");
+    when(entityType.getLabel()).thenReturn("My Entity Type");
     defaultValueReferenceValidator = new DefaultValueReferenceValidatorImpl(dataService);
   }
 
@@ -47,7 +47,7 @@ public class DefaultValueReferenceValidatorImplTest {
   @Test(
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
-          "'My Entity LabelledType' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+          "'My Entity Type' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
   public void testValidateEntityNotReferencedValidationException() {
     Attribute attribute = createMockAttribute(AttributeType.XREF, "id");
     initializeDataServiceMock(Stream.of(attribute));
@@ -71,7 +71,7 @@ public class DefaultValueReferenceValidatorImplTest {
   @Test(
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
-          "'My Entity LabelledType' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+          "'My Entity Type' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
   public void testValidateEntitiesNotReferencedValidationException() {
     Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
     initializeDataServiceMock(Stream.of(attribute));
@@ -94,7 +94,7 @@ public class DefaultValueReferenceValidatorImplTest {
   @Test(
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
-          "'My Entity LabelledType' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+          "'My Entity Type' with id 'id' is referenced as default value by attribute\\(s\\): 'myAttribute'")
   public void testValidateEntityNotReferencedByIdValidationException() {
     Attribute attribute = createMockAttribute(AttributeType.XREF, "id");
     initializeDataServiceMock(Stream.of(attribute));
@@ -116,7 +116,7 @@ public class DefaultValueReferenceValidatorImplTest {
   @Test(
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
-          "'My Entity LabelledType' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
+          "'My Entity Type' with id 'id1' is referenced as default value by attribute\\(s\\): 'myAttribute'")
   public void testValidateEntitiesNotReferencedByIdValidationException() {
     Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
     initializeDataServiceMock(Stream.of(attribute));
@@ -136,7 +136,7 @@ public class DefaultValueReferenceValidatorImplTest {
   @Test(
       expectedExceptions = MolgenisValidationException.class,
       expectedExceptionsMessageRegExp =
-          "'My Entity LabelledType' entities are referenced as default value by attributes")
+          "'My Entity Type' entities are referenced as default value by attributes")
   public void testValidateEntityTypeNotReferencedValidationException() {
     Attribute attribute = createMockAttribute(AttributeType.MREF, "id0,id1");
     initializeDataServiceMock(Stream.of(attribute));

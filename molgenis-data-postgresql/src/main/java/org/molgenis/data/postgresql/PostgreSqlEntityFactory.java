@@ -77,7 +77,7 @@ class PostgreSqlEntityFactory {
 
     /**
      * Maps a single results set value to an entity value. See the JDBC 4.0 specification appendix B
-     * titled "Data LabelledType Conversion Tables" for conversion rules.
+     * titled "Data Type Conversion Tables" for conversion rules.
      *
      * @param resultSet result set
      * @param attr attribute
@@ -90,7 +90,7 @@ class PostgreSqlEntityFactory {
 
     /**
      * Maps a single results set value to an entity value. See the JDBC 4.0 specification appendix B
-     * titled "Data LabelledType Conversion Tables" for conversion rules.
+     * titled "Data Type Conversion Tables" for conversion rules.
      *
      * @param resultSet result set
      * @param attr attribute

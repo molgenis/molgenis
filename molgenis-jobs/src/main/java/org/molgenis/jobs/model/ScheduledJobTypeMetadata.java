@@ -34,7 +34,7 @@ public class ScheduledJobTypeMetadata extends SystemEntityType {
 
   @Override
   public void init() {
-    setLabel("Scheduled Job LabelledType");
+    setLabel("Scheduled Job Type");
     setPackage(jobPackage);
     addAttribute(NAME, ROLE_ID).setLabel("Name");
     addAttribute(LABEL, ROLE_LABEL).setDataType(STRING).setLabel("Label");

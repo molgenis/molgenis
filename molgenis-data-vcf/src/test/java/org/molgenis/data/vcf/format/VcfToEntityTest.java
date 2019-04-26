@@ -60,10 +60,10 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
             + "##source=NextGENeV2.2\n"
             + "##reference=C:\\Program_Files_(x86)\\SoftGenetics\\NextGENe\\References\\Human_v37_2_dna\n"
             + "##contig=<ID=1,length=249240621>\n"
-            + "##INFO=<ID=NS,Number=1,LabelledType=Integer,Description=\"Number of Samples With Data\">\n"
-            + "##INFO=<ID=DF,Number=0,LabelledType=Flag,Description=\"Flag field\">\n"
-            + "##INFO=<ID=DF2,Number=0,LabelledType=Flag,Description=\"Flag field 2\">\n"
-            + "##INFO=<ID=CHAR,Number=0,LabelledType=Character,Description=\"char field\">\n"
+            + "##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">\n"
+            + "##INFO=<ID=DF,Number=0,Type=Flag,Description=\"Flag field\">\n"
+            + "##INFO=<ID=DF2,Number=0,Type=Flag,Description=\"Flag field 2\">\n"
+            + "##INFO=<ID=CHAR,Number=0,Type=Character,Description=\"char field\">\n"
             + "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n";
     vcfMetaSmall = parseHeaders(headersSmall);
     vcfToEntitySmall =
@@ -197,7 +197,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
   public void testToEntityMissingValues() throws IOException {
     String vcfHeaders =
         "##fileformat=VCFv4.1\n"
-            + "##INFO=<ID=GoNL_AF,Number=.,LabelledType=Float,Description=\"The allele frequency for variants seen in the population used for the GoNL project\">\n"
+            + "##INFO=<ID=GoNL_AF,Number=.,Type=Float,Description=\"The allele frequency for variants seen in the population used for the GoNL project\">\n"
             + "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n";
     VcfMeta vcfMeta = parseHeaders(vcfHeaders);
     VcfToEntity vcfToEntity =

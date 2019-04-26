@@ -43,7 +43,7 @@ public class MappingJobExecutionMetadata extends SystemEntityType {
         .setNillable(false);
     addAttribute(TARGET_ENTITY_TYPE_ID)
         .setDataType(STRING)
-        .setLabel("Target Entity LabelledType ID")
+        .setLabel("Target Entity Type ID")
         .setNillable(false);
     addAttribute(ADD_SOURCE_ATTRIBUTE)
         .setDataType(BOOL)
