@@ -218,7 +218,7 @@ public class AccountServiceImpl implements AccountService {
       builder.append(" ");
       builder.append(lastName);
     }
-    builder.append(",\n\n")
+    builder.append(",\n\n");
     builder.append("Your registration request for ");
     builder.append(appName);
     builder.append(" was approved.\n");
