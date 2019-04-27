@@ -1,5 +1,5 @@
-# Running the platform integration tests
-If you've checked out the code and made changes to the platform, you may want to run the 
+# Platform integration tests
+If you've checked out the code and made changes to the platform, you may want to run the
 platform integration tests.
 These are some instructions on how to run the integration tests on your developer machine.
 
@@ -18,7 +18,7 @@ To run the integration tests on a pre-existing database, disable the `create-it-
 By default the build will connect to database `molgenis_test` on a local postgres installation, the username and password will both be `molgenis`.
 You can override these settings in the molgenis-platform-integration-tests pom.xml file or in command line parameters:
 ```
-mvn clean verify -P'!create-it-db' -Dit_db_name=myname -Dit_db_user=postgres -Dit_db_password` 
+mvn clean verify -P'!create-it-db' -Dit_db_name=myname -Dit_db_user=postgres -Dit_db_password`
 ```
 (No value means a blank password.)
 
@@ -41,12 +41,12 @@ The code will not make any attempts to delete the integration test database and 
 
 ### system properties
 By default, IntelliJ reads system properties from your pom.xml and adds those to the
-test runs. 
+test runs.
 
-> **This won't work!** 
+> **This won't work!**
 
 You should disable this feature:
-1. Go to preferences / Build, Execution, Deployment / Maven / Running Tests 
+1. Go to preferences / Build, Execution, Deployment / Maven / Running Tests
 2. Uncheck the box labelled `systemPropertyVariables`
 
 ## When building pull requests

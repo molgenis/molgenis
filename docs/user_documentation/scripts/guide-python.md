@@ -1,8 +1,9 @@
-**
-The Python API is a script that allows access to your MOLGENIS data from python. It is available on every MOLGENIS with version 1.14.0 and up on the URL `http://molgenis.mydomain.example/molgenis.py`.
-**
+# Python client example
 
-#Example
+::: tip Summary
+MOLGENIS Python API allows access to your MOLGENIS data from python. It is available on every MOLGENIS with version 1.14.0 and up on the URL `http://molgenis.mydomain.example/molgenis.py`.
+:::
+
 As an example, let's create a plot for publicly available ASE data available on https://molgenis56.target.rug.nl/. For a description of the data, take a look at [http://molgenis.org/ase](http://molgenis.org/ase).
 
 We'll be creating a scatter plot so if you haven't already, install matplotlib from the commandline:
@@ -51,7 +52,7 @@ print(session.get("ASE", q=[{"field":"SNP_ID", "operator":"EQUALS", "value":"rs1
 ```
 ```python
 [{u'Alternative_allele': u'T', u'P_Value': 7.1708540619282e-14, u'Genes': {u'href': u'/api/v1/ASE/rs12460890/Genes'}, u'Fraction_alternative_allele': 0.527, u'Pos': 829568, u'Reference_allele': u'C', u'Chr': u'19', u'href': u'/api/v1/ASE/rs12460890', u'Samples': u'21', u'Likelihood_ratio_test_D': 56.0207947348388, u'SNP_ID': u'rs12460890'}]
-```	
+```
 This SNP has a mild but significant allele-specific expression, based on expression counts in 21 samples.
 
 Let's retrieve the samples for this SNP:

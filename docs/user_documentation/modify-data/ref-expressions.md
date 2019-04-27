@@ -1,13 +1,13 @@
-# Expressions
+# Reference: Expressions
 
 ## Introduction
-For some entity type attributes an expression can be set that determines whether or not a condition is true based on the 
-attribute values e.g. to determine whether values are valid. The expression format is based on the 
+For some entity type attributes an expression can be set that determines whether or not a condition is true based on the
+attribute values e.g. to determine whether values are valid. The expression format is based on the
 [Magma JavaScript API](http://wiki.obiba.org/display/OPALDOC/Magma+Javascript+API).
 
 ### Examples
 The following expression returns true when the value of attribute 'myAttributeName' of an entity only contains
-alphanumberic characters: 
+alphanumberic characters:
 ```js
 $('myStringAttributeName').matches(/^[a-z0-9]+$/i).value()
 ```
@@ -68,7 +68,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 # Special case: reference types
 If an attribute is a reference type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use the 'attr' operation, to access the values of different columns in the row being referenced. E.g. `$('cookie').attr('name').value()` gives you the value of the name column inside the table being referenced by the cookie column. See below for a more detailed example.
 
-Imagine __table A__ referencing __table B__. 
+Imagine __table A__ referencing __table B__.
 
 __Table A__ has 2 columns: id, cookie.
 __Table B__ has 3 columns: id, name, tastiness.

@@ -1,15 +1,15 @@
-# IntelliJ
+# Howto develop molgenis
 
-A rough guide on how to develop molgenis in IntelliJ IDEA.
+A rough guide on how to develop molgenis in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA 2016.1 Ultimate, courteously provided to us by
 JetBrains on an open source license. Most of the time we use the latest IntelliJ version.
 
-## Middleware
+## Middleware needed
 Before you start, make sure the following middleware is installed on your system.
 * Java 8 JDK (latest version available from Oracle)
 * Maven >= 3.1.0 (The built-in maven version of IntelliJ is too old to compile molgenis.)
 * Apache Tomcat 8.5.x
-* PostGreSQL server. 
+* PostGreSQL server.
 * ElasticSearch
 See [quickstart](./quickstart/guide-tomcat.html) for details
 
@@ -22,7 +22,7 @@ Create a molgenis superuser in postgres.
  create database molgenis owner molgenis;
   ```
 
-## Molgenis settings
+## Create molgenis settings
 You'll need a molgenis-server.properties file. In your home dir, create a folder
 `.molgenis`. Put a file in there called `molgenis-server.properties` and fill it with this information:
 
@@ -38,7 +38,7 @@ You'll need a molgenis-server.properties file. In your home dir, create a folder
 * Open Preferences, Build Execution Deployment, Maven
 * Set the home dir to where your >= 3.1.0 maven installation lives.
 
-## Creating the molgenis project
+## Get the molgenis sourcecode
 * File, New, Project from version control, Git (or Github)
 * Pick `https://github.com/molgenis/molgenis.git` for the repository URL.
 * In the Event log: Non-managed pom.xml file found. Choose "Add as Maven Project". (You'll also see 'JPA framework is detected'. Ignore that.)
@@ -189,7 +189,7 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost` 
+* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost`
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.
@@ -205,7 +205,7 @@ Whenever you tab from molgenis to the browser, all modified resources will be co
 A browser reload should display the changes.
 
 Note: In some cases InteliJ might not pick up all changes in the file system made during the
- build process. This may result in an error referencing a missing jar file. This can be fixed by 
+ build process. This may result in an error referencing a missing jar file. This can be fixed by
  selecting the 'Synchronize molgenis' option from the project action menu.
 
 ## Security
@@ -232,6 +232,6 @@ Building the project can be sped up by not building the javascript. To skip buil
 
 to the maven build command.
 
-* Note: 
+* Note:
     - If javascript was not already built, javascript will be missing and the application will not function properly.
-    - If changes were made to the javascript these changes will not be built into the application (as building will be skipped). 
+    - If changes were made to the javascript these changes will not be built into the application (as building will be skipped).

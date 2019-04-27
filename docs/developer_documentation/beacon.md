@@ -1,11 +1,6 @@
-MOLGENIS Beacon API
-===================
-
-> Create Beacons and Beacon organisations on-top of your genetic data using MOLGENIS Beacons.
-
-##### What is a MOLGENIS beacon
+# Beacon API
 A beacon is a gateway to your data. By creating a beacon and pointing at specific data sets within the MOLGENIS database, you allow
-people to query multiple data sets via one entry point. 
+people to query multiple data sets via one entry point.
 
 Read more about beacons [here](https://beacon-network.org/#/about).
 
@@ -17,7 +12,7 @@ The MOLGENIS Beacons are meant to be used with genetic data sets containing at l
 
 A MOLGENIS beacon only exposes whether a specific variant **exists**. Nothing more.
 
-##### What is a MOLGENIS Organization
+## Organization
 An organization can be used to organize one or more beacons. An organization is the business card for your beacons.
 When hooking up your beacon to the global https://beacon-network.org, the organization information is shown when your beacons respond to queries.
 
@@ -136,7 +131,7 @@ Configure dataset as Beacon
 And now we can link to this organization and dataset by editing the Beacon row we created before
 
 ![Adding a Beacon](../images/beacon/add-beacon-form.png?raw=true, "beacon/add-beacon-form")
- 
+
 And by requesting info on our beacon again  
 `http://localhost:8080/beacon/MyFirstBeacon`
 

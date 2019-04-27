@@ -1,9 +1,6 @@
-# Creating apps for MOLGENIS
-To be able to host your app inside MOLGENIS, you need to create an archive in a specific format.
+# Create apps
 
-To get started right away, you can download an [example archive here](../data/example-app.zip).
-
-Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
+You can create add-on user interfaces using html+javascript. To be able to host your app inside MOLGENIS, you need to create an archive in a specific format. To get started right away, you can download an [example archive here](../data/example-app.zip). Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
 
 ## Archive structure
 If you downloaded the example archive, you probably noticed that the structure of the archive is pretty straight forward.
@@ -18,8 +15,8 @@ If you downloaded the example archive, you probably noticed that the structure o
     |-- example.css
 ```
 
-The index.html is your main entry point, and the contents will be interpreted and rendered by a FreeMarker engine. 
-Relative to your index.html you can include js and css. 
+The index.html is your main entry point, and the contents will be interpreted and rendered by a FreeMarker engine.
+Relative to your index.html you can include js and css.
 
 > note: If you use absolute paths, MOLGENIS is unable to serve your resources properly
 
@@ -67,7 +64,7 @@ This file is needed by the target MOLGENIS-instance. It will be used to render t
 ```
 
 ## Configuration
-The config.json is a small configuration file that will tell MOLGENIS about your app. 
+The config.json is a small configuration file that will tell MOLGENIS about your app.
 It contains the following parameters
 
 | Parameter | type | mandatory | Description |
@@ -77,7 +74,7 @@ It contains the following parameters
 | version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
 | apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
 | name | string |yes | The name of the app. May not contain '/'
-| includeMenuAndFooter | boolean |yes | 
+| includeMenuAndFooter | boolean |yes |
   If you want MOLGENIS to serve your app with the standard header (with menu and polyfill), and footer, set this value to __true__ |
 | runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
@@ -121,7 +118,7 @@ So instead of _example.js_, use _example.0943Ajd09834fd.js_.
 Build tools like webpack already generate your source files with a hash code included in the file name.
 
 ## Using webpack for rapid app prototyping
-To use webpack in rapid prototyping of your MOLGENIS apps, use the standard webpack template 
+To use webpack in rapid prototyping of your MOLGENIS apps, use the standard webpack template
 and make some small tweaks to make it a `build -> compress -> upload` workflow.
 
 First you need to install 2 plugins:
@@ -131,7 +128,7 @@ yarn --dev add zip-webpack-plugin@2.0.0
 yarn --dev add generate-json-webpack-plugin
 ```
 
-Make sure that you set the following two parameters in your production config. 
+Make sure that you set the following two parameters in your production config.
 
 In **config/index.js**
 
@@ -153,9 +150,9 @@ In **build/webpack.prod.conf.js**
 
 ```javascript
 plugins: [
-  
+
   ...  
-  
+
   new HtmlWebpackPlugin({
     filename: process.env.NODE_ENV === 'testing'
       ? 'index.html'
@@ -172,9 +169,9 @@ plugins: [
     // necessary to consistently work with multiple chunks via CommonsChunkPlugin
     chunksSortMode: 'dependency'
   }),
-      
+
   ...   
-  
+
   new GenerateJsonPlugin('config.json', {
       name: packageJson.name,
       label: packageJson.name,

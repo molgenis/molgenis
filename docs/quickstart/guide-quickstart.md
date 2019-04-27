@@ -1,4 +1,4 @@
-# Quickstart guide
+# First contact
 
 ## Using our demo server
 The first thing you can do is to get some hands-on experience by trying out our [demo server](http://molgenis.org/demo). This server contains several data sets including biobank data and genetic data. If you want to try importing some example files, then the only thing needed from your end is that you create an account. An email will be sent containing your login in credentials.
@@ -15,7 +15,7 @@ If you want to skip this theory lesson and download an excel file right away to 
 Now for the example. Say that you have an existing excel sheet with a couple of thousand rows of data and several columns. This data can look something like this:
 
 **Data sheet**:
- 
+
 |Identifier|Gene    |Protein measured|Protein count|
 |----------|--------|----------------|-------------|
 |A12345_Z  |BRCA2   |P51587          |321          |
@@ -56,4 +56,4 @@ Of course, simply uploading and showing data is not the only thing you can do wi
 ## Running your own MOLGENIS
 You can run MOLGENIS on you local machine or on your own linux server.
 
-Either you run it in [Maven cargo](./guide-cargo.md), in a local [Tomcat webserver](./guide-tomcat.md), or you [clone the code](./guide-local-compile.md) from GitHub and compile it to start developing
+Either you run it in [Docker](./guide-docker.md), in a local [Tomcat webserver](./guide-tomcat.md), or you [clone the code](./guide-local-compile.md) from GitHub and compile it to start developing

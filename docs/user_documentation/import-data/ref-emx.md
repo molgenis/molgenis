@@ -1,10 +1,10 @@
-# EMX model
-EMX (entity model extensible) is a flexible spreadsheet format to easily upload any tabular data using Excel or a zipfile of tab-delimited *.tsv files. 
-This works because you can tell MOLGENIS the 'model' of your data via a special sheet named 'attributes'. 
+# EMX upload format
+
+The default import format for MOLGENIS is 'EMX'. This is a flexible spreadsheet format (Excel, CSV) that allows you to annotate your data with a data model. This works because you can tell MOLGENIS the 'model' of your data via a special sheet named 'attributes'.
 Optionally, you can also add metadata on entities (i.e., classes, tables), and packages (i.e, models and submodels).
 It is also possible to provide packages in an emx file via the 'packages' sheet without providing the attributes sheet.
 
-## Minimal example 
+## Minimal example
 ([download](../../data/simple_data_example_v20180912.xlsx))
 
 For example, if you want to upload an Excel with sheet 'patients':
@@ -29,7 +29,7 @@ Then you must provide a model of your 'patients' via Excel with sheet named 'att
 
 You can first upload the 'model' and then the 'data'. Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
 
-## Advanced example 
+## Advanced example
 ([download](../../data/advanced_data_example_v20171206.xlsx))
 
 Lets assume we want to upload multiple data sheets, with relations between them:
@@ -60,7 +60,7 @@ Users:
 | jdoe2    |        | jane_doe    | jane      | doe      |
 | pdoe     |        | papa_doe    | papa      | doe      |
 
-Note: users looks similar patients, i.e. they are also persons having 'displayName', 'firstName', and 'lastName'. We will use this in the model below. 
+Note: users looks similar patients, i.e. they are also persons having 'displayName', 'firstName', and 'lastName'. We will use this in the model below.
 
 To model the data advanced data example, again you need to provide the 'attributes' (i.e., columns, properties). Optionally, you can also describe entities (i.e., classes, tables), and packages (i.e, models and submodels) which gives you some advanced options.
 
@@ -92,7 +92,7 @@ Entities:
 | users    | hospital | persons |          | users extends persons, meaning it 'inherits' attribute definition |
 | patients | hospital | persons |          | patient extends person, adding patientNumber                      |
 
-In most cases the 'attributes' sheet is all you need. However, in some cases you may want to add more details on the 'entity'. Here we wanted to show use of 'abstract' (i.e., interfaces) to create model class 'persons' and 'extends' (i.e., subclass, inheritance) to define that 'user' and 'patient' have the same attributes as 'persons'. When data model become larger, or when many data sheets are loaded then the 'package' construct enables you to group your (meta)data. 
+In most cases the 'attributes' sheet is all you need. However, in some cases you may want to add more details on the 'entity'. Here we wanted to show use of 'abstract' (i.e., interfaces) to create model class 'persons' and 'extends' (i.e., subclass, inheritance) to define that 'user' and 'patient' have the same attributes as 'persons'. When data model become larger, or when many data sheets are loaded then the 'package' construct enables you to group your (meta)data.
 
 Packages:
 
@@ -104,7 +104,7 @@ Packages:
 ## Rules for technical names
 For all technical names in the EMX format, the following rules apply:
 - No special characters, except for; '_' and '#', only letters, numbers are allowed.
-- No names starting with digits. 
+- No names starting with digits.
 - The keywords: "login", "logout", "csv", "base", "exist", "meta", are not allowed.
 
 These rules only apply to the technical names, labels are not limited by these rules.
@@ -112,7 +112,7 @@ These rules only apply to the technical names, labels are not limited by these r
 ## Attributes options
 
 ### Required columns
-#### entity 
+#### entity
 Name of the entity this attribute is part of
 #### name
 Name of attribute, unique per entity.
@@ -143,28 +143,28 @@ Defines the data type (default: string)
 | hyperlink    | A link to a website                                                                           | A link to a website                                              |
 | one_to_many  | This data type is only supported in MOLGENIS 2.0. A data type that defines the one to many relationship between two columns in two separate tables. Having this data types requires having another table with an xref column which is linked to the one_to_many. The one_to_many requires a refEntity like the other referring data types, but unlike the others, it also requires a “mappedBy” column. In this column the name of the xref in the other column should be specified. For instance, an author can write several books. Books are stored in one table (called “books”) with “author” as xref and as refEntity “authors”. In the authors table authors are stored with books as one_to_many. The books attribute has the refEntity “books” and is mappedBy “author”. | A comma separated list of id’s. Requires having an xref to this attribute in another table. Since one_to_many attributes are mapped by a xref attribute they cannot be specified in data sheets.    |
 
-#### refEntity 
+#### refEntity
 Used in combination with xref, mref, categorical, categorical_mref or one_to_many. Should refer to an entity.
 
-#### nillable 
+#### nillable
 Whether the column may be left empty. Default: false
 
-#### idAttribute 
+#### idAttribute
 Whether this field is the unique key for the entity. Default: false. Use 'AUTO' for auto generated (string) identifiers.
 
-#### description 
+#### description
 Free text documentation describing the attribute
 
-#### description-{languageCode} 
+#### description-{languageCode}
 Description for specified language (can be multiple languages, example: description-nl)
 
-#### rangeMin 
+#### rangeMin
 Used to set range in case of int or long attributes
 
-#### rangeMax 
+#### rangeMax
 Used to set range in case of int or long attributes
 
-#### lookupAttribute 
+#### lookupAttribute
 true/false, default false
 
 Indicates if this attribute should appear in the xref/mref search dropdown in the dataexplorer.
@@ -173,26 +173,26 @@ An entity inherits the lookupAttributes from the entity it extends.
 
 If an entity has no lookupAttributes, the labelAttribute is used in the dropdown.
 
-#### label 
+#### label
 optional human readable name of the attribute
 
 #### label-{languageCode}
 label for specified language (can be multiple languages, example: label-nl)
 
-#### aggregateable 
+#### aggregateable
 true/false to indicate if the user can use this atrribute in an aggregate query
 
-#### labelAttribute 
+#### labelAttribute
 true/false to indicate that the value of this attribute should be used as label for the entity (in the dataexplorer when used in xref/mref). Default: false.
 A labelAttribute must be visible. If an entity's idAttribute is not visible, it should have a labelAttribute.
 
 #### readOnly
 true/false to indicate a readOnly attribute
 
-#### tags 
+#### tags
 ability to tag the data referring to the tags sections, described below
 
-#### validationExpression 
+#### validationExpression
 Magma JavaScript validation expression that must return a bool. Must return true if valid and false if invalid. See the [Expressions](ref-expressions.md) section for a syntax description.
 
 #### visible
@@ -228,8 +228,8 @@ is used to create computed attributes.
 ##### Template
 
 In addition to basic 'computed strings' and 'computed' objects a template can be used as expression. The template expression format is:
-{"template":"..."} with the value a [Mustache](http://mustache.github.io/) template. Tags must refer to attribute identifiers 
-(e.g. {% raw %}{{myStringAttribute}}{% endraw %}). For attributes referencing another entity type the attribute in the referencing entity type needs to be 
+{"template":"..."} with the value a [Mustache](http://mustache.github.io/) template. Tags must refer to attribute identifiers
+(e.g. {% raw %}{{myStringAttribute}}{% endraw %}). For attributes referencing another entity type the attribute in the referencing entity type needs to be
 specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
 
 *Example:*
@@ -237,7 +237,7 @@ specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
 | name	         | entity	      | dataType | refEntity	 | expression                                               |
 |----------------|--------------|----------|-------------|----------------------------------------------------------|
 | id	           | MyEntityType |	string	 |			       |                                                          |
-| xref0	         | MyEntityType |	xref	   | MyReference |                                                          |	
+| xref0	         | MyEntityType |	xref	   | MyReference |                                                          |
 | xref1	         | MyEntityType |	xref	   | MyReference |                                                          |
 | computedXref	 | MyEntityType |	string	 |             | {% raw %}{"template":"lorum {{xref0.id}} ipsum {{xref1.label}}"}{% endraw %} |
 | mref0	         | MyEntityType |	mref	   | MyReference |                                                          |
@@ -252,48 +252,48 @@ specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
 ## Entities options
 ### Required columns
 
-#### entity 
+#### entity
 unique name of the entity. If packages are provided, name must be unique within a package.
 
 ### Optional columns
 
-#### extends 
+#### extends
 reference to another entity that is extended
 
-#### package 
+#### package
 name of the group this entity is part of
 
-#### abstract 
+#### abstract
 indicate if data can be provided for this entity (abstract entities are only used for data modeling purposes but cannot accept data)
 
-#### description 
+#### description
 free text description of the entity
 
-#### description-{languageCode} 
+#### description-{languageCode}
 description for specified language (can be multiple languages, example: description-nl)
 
 #### backend
 the backend (database) to store the entities in (currently only PostgreSQL)
 
-#### tags 
+#### tags
 ability to tag the data referring to the tags sections, described below
 
 ## Packages options
 
 ### Required columns
 
-#### name 
+#### name
 unique name of the package. If parent package is provided the name is unique within the parent.
 
 ### Optional columns
 
-#### description 
+#### description
 free text description of the package
 
-#### parent 
+#### parent
 use when packages is a sub-package of another package
 
-#### tags 
+#### tags
 mechanism to add flexible meta data such as ontology references, hyperlinks
 
 ## Tags options (BETA)
@@ -308,10 +308,10 @@ Optionally, additional information can be provided beyond the standard meta data
 
 ### Required columns
 
-#### identifier 
+#### identifier
 unique name of this tag, such that it can be referenced
 
-#### label 
+#### label
 the human readable label of the tag (e.g. the 'like' tag as shown above).
 
 ### Optional columns
@@ -321,7 +321,7 @@ url to the value object (will become an hyperlink in the user interface)
 
 #### relationLabel
 human readible label of the relation, e.g. 'Documentation and Help'
- 
+
 #### relationIRI
 url to the relation definition, e.g. http://edamontology.org/topic_3061
 
@@ -384,4 +384,3 @@ Example:
 | Male    | Man              | Man            |
 | Female  | Vrouw            | Frau           |
 | Unknown | Onbekend         | Unbekannt      |
-

@@ -1,4 +1,4 @@
-# Deploy MOLGENIS with Apache Tomcat
+# Install on Apache Tomcat
 
 The components needed to run MOLGENIS locally or on a server are:
 

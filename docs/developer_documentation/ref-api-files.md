@@ -1,7 +1,6 @@
-**
+# File API
+
 The Files API allows you do upload/download files.
-**
-# Endpoints
 
 ## Upload file
 
@@ -64,7 +63,21 @@ GET /api/files/v1/myFileId?alt=media
 | 403 Forbidden       | If the authenticated user does not have READ permissions on the file metadata     |
 | 404 Not Found       | If the file identifier is unknown                                                 |
 
-## Retrieve file metadata
+## Delete file
+
+### Request
+```
+DELETE /api/files/v1/myFileId
+```
+
+### Response
+| Status code         | Description
+|---------------------|-----------------------------------------------------------------------------------|
+| 204 No Content      | File and filemeta deleted.                                                        |
+| 403 Forbidden       | If the authenticated user does not have WRITE permissions on the file metadata    |
+| 404 Not Found       | If the file identifier is unknown                                                 |
+
+## Get file metadata
 
 ### Request
 ```
@@ -87,17 +100,3 @@ Example:
   "size": 11189,
 }
 ```
-
-## Delete file
-
-### Request
-```
-DELETE /api/files/v1/myFileId
-```
-
-### Response
-| Status code         | Description
-|---------------------|-----------------------------------------------------------------------------------|
-| 204 No Content      | File and filemeta deleted.                                                        |
-| 403 Forbidden       | If the authenticated user does not have WRITE permissions on the file metadata    |
-| 404 Not Found       | If the file identifier is unknown                                                 |

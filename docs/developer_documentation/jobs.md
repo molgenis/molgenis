@@ -1,5 +1,4 @@
-# Jobs
-## Two kinds of jobs
+# Creating new job types
 
 There are two kinds of jobs. **Ordinary jobs** are simple long-running tasks that
 get executed once.
@@ -26,7 +25,7 @@ The implementation sits in a method @Service bean.
 public class HelloWorldService
 {
   // This is a Service bean, so you can ask Spring to @Autowire any dependency you need to do the job
-  
+
   /**
    * Greets the user.
    */
@@ -50,15 +49,15 @@ This helps:
 * To uniformly show Progress bars and a list of recently executed jobs in the Jobs plugin.
 
 The `JobExecution` entity is abstract. You will not find a repository for it.
-So let's extend the JobExecution entity and add a `delay` attribute to store the value of the delay 
-parameter. We could also add an attribute to store the value of the who String. But instead, we'll 
+So let's extend the JobExecution entity and add a `delay` attribute to store the value of the delay
+parameter. We could also add an attribute to store the value of the who String. But instead, we'll
 use the `user` attribute which we inherit from `JobExecution`
 
 ```java
 public class HelloWorldJobExecution extends JobExecution
 {
   [... standard constructors go here ...]
-  
+
   // getter and setter for the job-specific parameters
   public int getDelay()
   {
@@ -72,7 +71,7 @@ public class HelloWorldJobExecution extends JobExecution
 }
 ```
 
-You'll also need to create classes `HelloWorldJobExecutionMetadata` and `HelloWorldJobExecutionFactory`, 
+You'll also need to create classes `HelloWorldJobExecutionMetadata` and `HelloWorldJobExecutionFactory`,
 just like for any system entity you create.
 
 #### Job Factory
@@ -101,7 +100,7 @@ If you want to run a Hello World job, you should
  * use it to create a new instance of `HelloWorldJobExecution`
  * set the parameter values
  * submit it for execution using `JobExecutor.submit()`
- 
+
  ```java
 HelloWorldJobExecution jobExecution = factory.create();
 jobExecution.setDelay(1);
@@ -134,7 +133,7 @@ will be written to the JobExecution using JavaBean setters. So make sure that th
 match the bean's property names and types. In this particular case, the `delay` property of type integer
 will get written to `HelloWorldJobExcution.setDelay()`.
 
-For scheduled jobs, the value of the `user` property of the JobExecution will get set automatically to the user who created 
+For scheduled jobs, the value of the `user` property of the JobExecution will get set automatically to the user who created
 the `ScheduledJob`.
 
 #### Complete code
@@ -154,12 +153,12 @@ while running.
 The progress message plus the time the method was called will be logged in the `log`
 attribute of the `JobExecution` entity.
 
-If your job runs outside of Molgenis, like in R or on the cluster, it should update its 
+If your job runs outside of Molgenis, like in R or on the cluster, it should update its
 JobExecution entity through the REST API to keep track of progress and status.
 
 ### Transactions and running as user
 If you want to run the job as a transaction, annotate your @Service method with @Transactional.
-The wisdom of having long-running transactions is debatable, so you may want to think up 
+The wisdom of having long-running transactions is debatable, so you may want to think up
 some compensating actions instead to run if the job fails and put those in a catch block.
 
 ### Job React Components

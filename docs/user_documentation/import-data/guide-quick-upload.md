@@ -1,17 +1,19 @@
-# Quick data import
-The Quick data import allows you to easily get your data into MOLGENIS, without the need of understanding the EMX format.
+# Quick import
+
+In case the data structure is simple you can bypass the data modeling part as described in the structured import.
+Instead, the Quick data import will automatically derive the data structure (with some obvious limitations).
 There are some assumptions we make with regards file types and file contents.
 
 1. The supported file types are _CSV_, _XLS_, _XLSX_, and a _ZIP_ file containing _CSV_ files
 2. A file consists of a at least two lines, the first is the header, the rest is data
-3. We always expect the first line to be the header 
+3. We always expect the first line to be the header
 
 - __Empty files can not be imported__
 - __Files containing only a header can not be uploaded__
 - __You need a package you can write content into, usually the package of the group you are a member of__
 
 ## Metadata guessing
-The quick data import tries to guess what type your data is. 
+The quick data import tries to guess what type your data is.
 MOLGENIS supports multiple data types like booleans, date fields, numbers etc.
 
 1. To get __INTEGERS__, use values like _1_, _30_, _2012_, etc...
@@ -27,14 +29,14 @@ MOLGENIS has an explicit data structure within the application. You need to know
 ### Terminology
 In this section we introduce and explain the terminology concerning data structure of MOLGENIS.
 
-* Groups: a group of people who manage data within one package (folder). 
+* Groups: a group of people who manage data within one package (folder).
 * Package: Each group has a root package where it can store its data.
-Packages can have child packages to logically subdivide that root package into a tree structure, 
+Packages can have child packages to logically subdivide that root package into a tree structure,
 like folders on a hard drive.
 * Entity Type: An entity type is the metadata of a data collection, like a table in a database.
 * Entity: The actual data that is collected based on the template from an entity type, like a table row
 in a database.
-* Attribute: An attribute describes the characteristics of a data item in an entity type, like a column 
+* Attribute: An attribute describes the characteristics of a data item in an entity type, like a column
 in a database
 
 Data is imported into the MOLGENIS database as a single _entity_ (table)
@@ -57,5 +59,5 @@ You can move the package to the location you want after the import is done.
 
 There are two types of links:
 1. The file name will send you to the MOLGENIS navigator. Here you can view all packages, and the corresponding data tables.
-2. The nested links (sheet names for Excel, file names for CSV) will take you to the data explorer. 
+2. The nested links (sheet names for Excel, file names for CSV) will take you to the data explorer.
 Here you can view, filter, query, download, and share your data

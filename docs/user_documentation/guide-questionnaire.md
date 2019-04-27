@@ -1,8 +1,7 @@
-**
+# Questionnaire
+
 MOLGENIS offers a questionnaire module which can present a questionnaire to users.
-These questionnaires are defined in our [EMX format](./ref-emx.md). Each questionnaire can be filled in once, and generates one row
-of data in a table used to collect the questionnaires that where submitted.
-**
+These questionnaires are defined in our [EMX format](./ref-emx.md). Each questionnaire can be filled in once, and generates one row of data in a table used to collect the questionnaires that where submitted.
 
 # Minimal example
 [download](../data/simple-questionnaire.xlsx) simple questionnaire example. Import this xlsx file via the standard [import wizard](./guide-upload.md)
@@ -39,12 +38,12 @@ This table contains the answers for all the users that filled in the questionnai
 
 # Configure PDF report
 After submitting a questionnaire users can download a PDF report of their data. All questions and answers that were provided will be presented nicely formatted in this report.  
-This PDF report has an optional intro text and logo. To provide these, an extra attribute, with the name "report_header" should be added to the questionnaire. This attribute 
+This PDF report has an optional intro text and logo. To provide these, an extra attribute, with the name "report_header" should be added to the questionnaire. This attribute
 should be of datatype "xref" with as refEntity a table that specifies the "intro" and "logo". To have the same logo and intro for each participant, use the defaultValue option to
 specify the data row in the config table. Example structure:
- 
+
 Attributes:
- 
+
 | name               | entity               | dataType               | idAttribute | labelAttribute | defaultValue | refEntity          | label                                           | partOfAttribute |
 |--------------------|----------------------|------------------------|-------------|----------------|--------------|--------------------|-------------------------------------------------|-----------------|
 | id                 | demo_report_header   | string                 | TRUE        | TRUE           |              |                    |                                                 |                 |
@@ -61,4 +60,4 @@ Attributes:
 | questions          | demo_questionnaire   | compound               | FALSE       | FALSE          |              |                    |                                                 |                 |
 | question1          | demo_questionnaire   | bool                   | FALSE       | FALSE          |              |                    | Do you think this questionnaire is quite small? | questions       |
 
-The intro should be some text information about the PDF report. The logo should be a data URL (and therefore is of type text). 
+The intro should be some text information about the PDF report. The logo should be a data URL (and therefore is of type text).

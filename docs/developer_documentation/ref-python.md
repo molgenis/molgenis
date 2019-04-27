@@ -1,19 +1,21 @@
-** 
-The MOLGENIS python REST Client allows you to retrieve, create, update and delete entities using python.
-**
+# Python client API
 
-You can install the Python REST Client as a package with `pip`: 
+::: tip Python client
+The MOLGENIS python client API allows you to retrieve, create, update and delete entities from within python.
+:::
+
+You can install the Python REST Client as a package with `pip`:
 ```
 pip install molgenis-py-client
-``` 
-Now you can create a python script. 
+```
+Now you can create a python script.
 To get started, you should import the Python client, connect to a molgenis server and login:
 ```python
 import molgenis.client
 session = molgenis.client.Session("https://molgenis.mydomain.example/api/")
 session.login("username","password")
 ```
-Always put the import and molgenis.Session in your script to make the api work. 
+Always put the import and molgenis.Session in your script to make the api work.
 
 # Overview example
 ```python
@@ -23,7 +25,7 @@ session.login("username","password")
 my_table = session.get("package_entityName")
 print(my_table)
 ```
-To get a full overview of all functions in the python client, you can look at the 
+To get a full overview of all functions in the python client, you can look at the
 [examples on GitHub](https://github.com/molgenis/molgenis-py-client/tree/master/examples).
 
 # Methods
@@ -36,7 +38,7 @@ Login to the MOLGENIS REST API<br/><br/>
 Argument    | Description                                       | Required | Default
 ------------|---------------------------------------------------|----------|--------
 `username`  | Username for a registered molgenis user           | yes      |
-`password`  | Password for the user                             | yes      | 
+`password`  | Password for the user                             | yes      |
 
 ## logout
 ```python
@@ -54,7 +56,7 @@ Retrieves a single entity row from an entity repository.<br/><br/>
 Argument    | Description                                       | Required | Default
 ------------|---------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                | yes      |
-`id`        | The value for the idAttribute of the entity       | yes      | 
+`id`        | The value for the idAttribute of the entity       | yes      |
 `attributes`|  The list of attributes to retrieve               | no       | All attributes
 `expand`    | The attributes to expand                          | no       | None
 
@@ -91,7 +93,7 @@ Greater than | `=gt=` or `>`
 Greater tha or equal to | `=ge=` or `>=`
 
 Argument can be a single value, or multiple values in parenthesis separated by comma. Value that doesn’t contain any reserved character or a white space can be unquoted, other arguments must be enclosed in single or double quotes.			
-			
+
 **Examples**
 
 ```python
@@ -117,12 +119,12 @@ Argument    | Description                                          | Required | 
 `files`     | Dictionary containing file attribute values for the  | no       | Empty dictionary
             | entity row. The dictionary should for each file      |          |
             | attribute map the attribute name to a tuple          |          |
-            | containing the file name and an input stream.        |          | 
+            | containing the file name and an input stream.        |          |
 `data`	    | Dictionary mapping attribute name to non-file        | no       | Empty dictionary
             | attribute value for the entity row, gets merged      |          |
             | with the kwargs argument                             |          |
 `**kwargs`  | Keyword arguments get merged with the data argument  | no       |
-            
+
 **Examples**
 
 ```python
@@ -140,10 +142,10 @@ Updates a value of a specified attribute in a specified row in a specified entit
 Argument    | Description                                          | Required | Default
 ------------|------------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                   | yes      |
-`id`        | The value for the idAttribute of the entity          | yes      | 
-`attr`	    | Attribute to update                                  | yes      | 
-`value`     | New value of the attribute                           | yes      | 
-  
+`id`        | The value for the idAttribute of the entity          | yes      |
+`attr`	    | Attribute to update                                  | yes      |
+`value`     | New value of the attribute                           | yes      |
+
 ## add_all
 ```python
 session.add_all(entity, entities)
@@ -154,7 +156,7 @@ Creates new instances of an entity (i.e. adds new rows to the entity data table)
 Argument    | Description                                              | Required | Default
 ------------|----------------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                       | yes      |
-`entities`  | List of dictionaries with the attributes of the entities | yes      | 
+`entities`  | List of dictionaries with the attributes of the entities | yes      |
 
 **Example**
 
@@ -170,24 +172,24 @@ session.add_all("demo_sightings", update)
 ```python
 session.delete(entity, id)
 ```
-Deletes row based on its id. 
+Deletes row based on its id.
 
 Argument    | Description                                              | Required | Default
 ------------|----------------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                       | yes      |
-`id`        | Id of the entity that should be deleted                  | yes      | 
+`id`        | Id of the entity that should be deleted                  | yes      |
 
 
 ## delete_list
 ```python
 session.delete_list(entity, entities)
 ```
-Deletes a number of rows based on a list of id's. 
+Deletes a number of rows based on a list of id's.
 
 Argument    | Description                                              | Required | Default
 ------------|----------------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                       | yes      |
-`entities`  | List of id's of entities that should be deleted          | yes      | 
+`entities`  | List of id's of entities that should be deleted          | yes      |
 
 ## upload_zip
 ```python
@@ -200,7 +202,7 @@ Argument         | Description                                                  
 `meta_data_zip`  | A zip file containing an attribute, entities, packages file  | yes      |
                  | (tsv/csv) to specify the meta data and optionally data       |          |
                  | defined in the meta data files                               |          |
-                             
+
 
 
 ## get_entity_meta_data

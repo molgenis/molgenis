@@ -1,25 +1,25 @@
-**
+# REST v1
+
 The MOLGENIS REST API allows you to retrieve and modify your data model entities and entity collections. The API supports all CRUD (create, read, update and delete) methods as well as resource collections paging & filtering and resource field expansion. At the moment of writing JSON and form data are supported as request content types and JSON is the only supported response content type.
-**
 
 Your MOLGENIS data model defines the resources and resource collections that can be accessed and modified. Lets assume that your data model contains the entities DataSet, Protocol and Feature. The REST API will consist of the following endpoints:
 
-# Collections
+## tables / entityTypes
 
-MOLGENIS entity collections are available as end-points:
+Each MOLGENIS table, also known as 'entity collections' or 'entityType' is available with its own end-point. In the examples below 'dataset', 'protocol' and 'feature' are each different tables.
 
 *Endpoints*
 * http://molgenis.mydomain.example/api/v1/dataset
 * http://molgenis.mydomain.example/api/v1/protocol
 * http://molgenis.mydomain.example/api/v1/feature
 
-## Retrieve collection
+## Retrieve data
 
-Each entity collection has its own end-point:
+Each table has its own end-point:
 
 *Request*
 ```
-GET http://molgenis.mydomain.example/api/v1/dataset 
+GET http://molgenis.mydomain.example/api/v1/dataset
 ```
 *Response*
 ```javascript
@@ -50,7 +50,7 @@ Datasets can be completely deleted (Nb. the meta data will be kept):
 
 *Request*
 ```
-DELETE http://molgenis.mydomain.example/api/v1/dataset 
+DELETE http://molgenis.mydomain.example/api/v1/dataset
 ```
 *Response*
 ```javascript
@@ -129,9 +129,9 @@ Content-Type: application/json
 Each data row within a collection (i.e. entity instance) can be accessed via its identifier:
 
 *Endpoints*
-* http://molgenis.mydomain.example/api/v1/dataset/<entity id>
-* http://molgenis.mydomain.example/api/v1/protocol/<entity id>
-* http://molgenis.mydomain.example/api/v1/feature/<entity id>
+* http://molgenis.mydomain.example/api/v1/dataset/\<entity id\>
+* http://molgenis.mydomain.example/api/v1/protocol/\<entity id\>
+* http://molgenis.mydomain.example/api/v1/feature/\<entity id\>
 
 ## Retrieve
 
@@ -152,7 +152,7 @@ GET http://molgenis.mydomain.example/api/v1/dataset/1
 }
 ```
 *href* is the location of this resource, *name* is a string value and *protocol* is the location of the entity that this dataset refers to.
- 
+
 ## Create
 
 By psoting a JSON message that matches the meta data attributes you can add new instances:
@@ -173,7 +173,7 @@ Content-Type: application/json
 201 Created
 
 In the response headers you can find the id of the newly created resource:
-Example: Location: /api/v1/person/AAAACTUMDL2N4BTTSWWS6PQAAE 
+Example: Location: /api/v1/person/AAAACTUMDL2N4BTTSWWS6PQAAE
 ```
 ## Update
 

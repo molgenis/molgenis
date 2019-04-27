@@ -1,21 +1,21 @@
-** 
-The MOLGENIS R API client allows you to retrieve, create, update and delete entities from within the [R](http://r-project.org) environment.
-**
+# R script client
 
-Just add 
+The MOLGENIS R API client allows you to retrieve, create, update and delete entities from within the [R](http://r-project.org) environment.
+
+Just add
 ```
 source("http://molgenis.mydomain.example/molgenis.R")
-``` 
+```
 at the top of your script and you can connect to a MOLGENIS server. Typically the first thing you do is login and the last thing is logout.
 
-**NOTE:** For https connections use 
+**NOTE:** For https connections use
 ```
 eval(expr = parse(text = getURL("https://molgenis.mydomain.example/molgenis.R?molgenis-token=${molgenisToken}")))
 ```  
 
 **NOTE:** The MOLGENIS R-api client supports up to R-version 3.2.x
 
-# Overview example
+## Overview example
 
 ```
 source("http://molgenis.mydomain.example/molgenis.R")
@@ -23,17 +23,16 @@ source("http://molgenis.mydomain.example/molgenis.R")
 
 molgenis.login("admin", "admin")
 
-df <- molgenis.get("celiacsprue", 
+df <- molgenis.get("celiacsprue",
                    q = "celiac_weight>80 and celiac_height>180",
                    num = 1000,
                    attributes = c("celiac_weight", "celiac_height", "celiac_gender"))
-                   
+
 plot(df$Celiac_Height ~ df$Celiac_Weight, col=df$Celiac_Gender)
 
 molgenis.logout()
 ```
 
-# Methods
 ## login
 ```
 molgenis.login(username,password)
@@ -78,7 +77,7 @@ Greater than | `=gt=` or `>`
 Greater tha or equal to | `=ge=` or `>=`
 
 Argument can be a single value, or multiple values in parenthesis separated by comma. Value that doesn’t contain any reserved character or a white space can be unquoted, other arguments must be enclosed in single or double quotes.			
-			
+
 **Examples**
 
 ```
