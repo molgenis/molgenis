@@ -1,6 +1,7 @@
-# Apps in MOLGENIS
-To manage Apps in MOLGENIS you can use the MOLGENIS App manager. It is a tool to upload, search, and manage your apps. With a an easy to use format we want
-to facilitate rapid app development on top of your own data models. 
+# Installing apps
+
+MOLGENIS provides developers option to create new 'apps', To manage Apps in MOLGENIS you can use the MOLGENIS App manager. It is a tool to upload, search, and manage your apps. With a an easy to use format we want
+to facilitate rapid app development on top of your own data models.
 
 How to create your own MOLGENIS app is described [here](../../developer_documentation/app-development.md)
 
@@ -22,11 +23,11 @@ Your result is an app in the app manager, ready to be managed!
 ![am03 - after upload](../../images/app-manager/am03-after-upload.png?raw=true, "am03-after-upload")
 
 ##### Note
-If anything is missing inside your archive or important configuration is missing from your config file, 
+If anything is missing inside your archive or important configuration is missing from your config file,
 the app will not be uploaded and you will get a summary of missing files or parameters.
 
 ## Manage your first app
-As you can see, the newly uploaded App will be shown as an app card. 
+As you can see, the newly uploaded App will be shown as an app card.
 This card gives you a brief overview about the status and contents of the app.
 
 ### Activating your app
@@ -50,10 +51,10 @@ Lets add it to the menu and open the app
 The content is a bit minimal but, congratulations! You just added your first app.
 
 ### Searching for apps
-Going back to the app manager screen, we have two small pieces of functionality left. 
+Going back to the app manager screen, we have two small pieces of functionality left.
 Once you get a lot of apps, you can use the search function to quickly find apps that might be relevant to you.
 
-We just imported a lot of them 
+We just imported a lot of them
 
 ![am06 - before search](../../images/app-manager/am06-before-search.png?raw=true, "am06-before-search")
 

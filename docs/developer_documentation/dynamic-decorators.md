@@ -1,6 +1,4 @@
-**
-This section describes how you can make use of the dynamic decorators
-**
+# Decorators
 
 MOLGENIS decorators are used to add functionality, like for example security checks, to repository functionality.
 Most of these decorators are applied to all repositories, with the dynamic decorators it is possible to configure for which entity types a decorator should be used.
@@ -19,7 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-  
+
 public class LoggingRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
   private static final Logger LOG = LoggerFactory.getLogger(LoggingRepositoryDecorator.class);
@@ -51,11 +49,11 @@ This class must implement DynamicRepositoryDecoratorFactory
 Example:
 ```$xslt
 package org.molgenis.app;
-  
+
 import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.springframework.stereotype.Component;
-  
+
 @Component
 public class LoggingRepositoryDecoratorFactory implements DynamicRepositoryDecoratorFactory
 {
@@ -67,19 +65,19 @@ public class LoggingRepositoryDecoratorFactory implements DynamicRepositoryDecor
   {
     return new LoggingRepositoryDecorator(repository);
   }
-  
+
   @Override
   public String getId()
   {
     return ID;
   }
-      
+
   @Override
   public String getLabel()
-  { 
+  {
     return "Logging Decorator";
   }
-  
+
   @Override
   public String getDescription()
   {
@@ -90,7 +88,7 @@ public class LoggingRepositoryDecoratorFactory implements DynamicRepositoryDecor
 
 # Configuring a dynamic decorator for an entityType
 To apply a dynamic decorator to an entity type, a row should be added to the "sys_dec_DecoratorConfiguration" via the dataexplorer, this entity contains:
-- The identifier of the entitytype. 
+- The identifier of the entitytype.
 - an mref to the decorators to be applied
 
 Once this row is added the decorators are applied to the specified entity type.

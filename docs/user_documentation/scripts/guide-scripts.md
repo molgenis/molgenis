@@ -1,9 +1,10 @@
-**
+# Scripts plugin
+
+
 Scripts are defined in the Scripts plugin and can be reused, e.g. as part of reports. By default you can find it in the menu under Plugins, Scripts.
 The Scripts plugin allows you to create, edit and delete the available scripts.
-**
 
-# Create a script
+## Create a script
 You open the script editor by clicking the "New script" button.
 
 * Name: The name uniquely identifies the script
@@ -14,8 +15,8 @@ You open the script editor by clicking the "New script" button.
 * Script: The actual script content goes here.
 * Result file extension: Allows you to render output in your script. For instance, if you set this to `png`, the script will be provided with a parameter `outputFile`. You can write your png image to this file. When the script is done, the contents of the file will be served as a result of the script invocation request.
 * Generate security token: Allows you to use `${molgenisToken}` in the script for authentication.
- 
-# Passing parameters
+
+## Passing parameters
 
 If your Type is R, JavaScript or Python, the Script Content is interpreted as a [Freemarker](http://freemarker.apache.org) template. The parameters are provided as Freemarker variables. You can render them in the script by typing `${parameter}`, but the full Freemarker syntax is at your disposal, so for instance `<#if><#else><#/if>` constructs are also available.
 
@@ -61,7 +62,7 @@ var name = $("name")
 var amount = int($("amount"))
 ```
 
-# Security token
+## Security token
 
 Your script can access data inside a MOLGENIS repository through the APIs.
 If the data is private data, you can set Generate Security Token to Yes.
@@ -77,7 +78,7 @@ eval(expr = parse(text = getURL("https://molgenis01.target.rug.nl/molgenis.R?mol
 molgenis.get("MolgenisUser")
 ```
 
-# Running a script
+## Running a script
 You can run your script by pressing the "Run" button.
 If the script has parameters, you'll be presented with a popup form to specify them.
 
@@ -86,7 +87,7 @@ For instance, to run the `bmi` script with parameters `weight=50` and `height=1.
 
 **Beware that you need to URL-encode parameter values if they contain special characters**
 
-# Permissions
+## Permissions
 Note that in order to execute scripts, users need
 
 * to be authenticated (i.e. anonymous users cannot execute your scripts)
@@ -94,13 +95,13 @@ Note that in order to execute scripts, users need
 * View permissions on the ScriptParameter entity
 * View permissions on the ScriptType entity
 
-# Example
+## Example
 Let's take the R script from [the previous example](#example-rest-R) and add it to the Script plugin. The script will fetch the public ASE data from [https://molgenis56.target.rug.nl/](https://molgenis56.target.rug.nl/)
 
 You'll need a running instance of MOLGENIS.
 So either run this example locally on your own MOLGENIS instance or Sign Up on our demo server [https://molgenis09.target.rug.nl/](https://molgenis09.target.rug.nl/)
 
-## Create the script
+### Create the script
 
 Go to the Script plugin and create a new script.
 
@@ -150,7 +151,7 @@ Note how we use the `snp_id` parameter a second time, to render the plot title.
 
 Save the script.
 
-## Call the script
+### Call the script
 Push the "Run" button.
 
 In the popup, specify the value for `snp_id`, for example `rs2287988`.
@@ -159,10 +160,10 @@ Click on "Run".
 
 ![image](../../images/rs2287988.png)
 
-## Call the script via API
+### Call the script via API
 Scripts can be scheduled by URL (for example using [Postman](https://www.getpostman.com/)).
 
-The URL to do this is "[MOLGENIS_SERVER]/scripts/{scriptname}/submit". 
+The URL to do this is "[MOLGENIS_SERVER]/scripts/{scriptname}/submit".
 A Json object containing a map of parameters used by the script should be provided.
 
 The server will return a href to the jobExecution of the the scheduled ScriptJob, which can be used to poll the status or get the link to the result of the script.

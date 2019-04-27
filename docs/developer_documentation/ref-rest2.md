@@ -1,11 +1,9 @@
-**
+# REST v2
+
 We are expanding and improving the REST api. At its heart is a simplified query syntax called RSQL for collection queries
 For query syntax see [RSQL parser](https://github.com/jirutka/rsql-parser). In addition we simplify the reading of entities.
-**
 
-# Instance
-
-## Read instance
+## Get
 Key | Type | Description
 --- | --- | ---
 *attrs* | Comma-separated string | Defines which fields in the API response to select
@@ -26,14 +24,7 @@ POST http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?_method=G
 attrs=attr0(subattr0,subattr1),attr1(*)
 ```
 
-## Delete instance
-
-*Request*
-```
-DELETE http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>
-```
-
-# Query
+## Query
 
 We use the [RSQL](https://github.com/jirutka/rsql-parser) HTTP/URL based query language:
 
@@ -63,7 +54,7 @@ GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val;q=attr1=g
 
 See the [MOLGENIS RSQL documentation](./ref-RSQL.md) for all supported operators in MOLGENIS and matching examples.
 
-## Aggregation
+## Aggregate contents
 
 We also support aggregation of the result query:
 
@@ -81,7 +72,7 @@ GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2&q=attr4==val
 ```
 
-## Including categorical options
+## Join data from other tables
 
 For simple lookup lists, it might be a convenience to include the list in the initial API response.
 You can do this for CATEGORICAL, and CATEGORICAL_MREF attributes using `includeCategories`.
@@ -93,7 +84,7 @@ Key | Type | Description
 *includeCategories* | boolean | Includes a list of categorical options in attribute metadata for CATEGORICAL and CATEGORICAL_MREF attributes
 
 ### Sorting categorical options
-You can add a unique, visible attribute to the metadata of the table after the ID-attribute to sort the categorical options. 
+You can add a unique, visible attribute to the metadata of the table after the ID-attribute to sort the categorical options.
 
 **NOTE: Make sure the ID-attribute is invisible.**
 
@@ -113,7 +104,7 @@ You can add a unique, visible attribute to the metadata of the table after the I
 
 When you call a V2 call with the includeCategories option this column will be used to sort on.
 
-## Example request - response
+### Example request - response
 **TableA**
 
 | id | category |
@@ -163,11 +154,14 @@ GET http://molgenis.mydomain.example/api/v2/TableA?includeCategories=true
 }
 ```
 
-# Batch 
+## Create/Add, Update, Delete by ID
 
-When working with larger datasets the RESTv2 api provides batching via the 'entities' parameter:
+*Request*
+```
+DELETE http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>
+```
 
-## Create
+## Batch add/create
 
 To create/add a list of entities into a collection you can POST the 'entities' parameter to a collection:
 
@@ -208,7 +202,7 @@ Body
 * href: "/api/v2/Person/2" returns a created resource
 * location: /api/v2/person/?q=id=in=(1,2) returns all created resources
 ```
-## Update
+## Batch update
 
 To batch update a list of entities of a collection you can PUT the 'entities' parameter to a collection:
 
@@ -236,7 +230,8 @@ Content-Type: application/json
 204 No Content
 ```
 
-## Delete (since v3.0.0)
+## Batch delete
+(since v3.0.0)
 
 To delete a list of entities of a collection you can DELETE the 'entityIds' parameter to a collection:
 

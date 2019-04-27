@@ -1,7 +1,6 @@
-**
+# File API
+
 The Files API allows you do upload/download files.
-**
-# Endpoints
 
 ## Upload file
 
@@ -101,3 +100,4 @@ DELETE /api/files/myFileId
 | 204 No Content      | File and filemeta deleted.                                                        |
 | 403 Forbidden       | If the authenticated user does not have WRITE permissions on the file metadata    |
 | 404 Not Found       | If the file identifier is unknown                                                 |
+

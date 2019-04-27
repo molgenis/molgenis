@@ -7,6 +7,7 @@ The components needed to run MOLGENIS locally are:
 
 ![MOLGENIS components](../images/install/molgenis_architecture.svg?raw=true)
 
+
 **
 You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **

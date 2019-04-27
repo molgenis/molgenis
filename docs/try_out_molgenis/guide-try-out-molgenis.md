@@ -15,7 +15,7 @@ If you want to skip this theory lesson and download an excel file right away to 
 Now for the example. Say that you have an existing excel sheet with a couple of thousand rows of data and several columns. This data can look something like this:
 
 **Data sheet**:
- 
+
 |Identifier|Gene    |Protein measured|Protein count|
 |----------|--------|----------------|-------------|
 |A12345_Z  |BRCA2   |P51587          |321          |

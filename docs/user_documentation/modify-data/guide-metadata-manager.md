@@ -1,26 +1,26 @@
-# Metadata manager
-The metadata manager can be used to manage your metadata.
+# Data model editor
 
+The metadata manager can be used to change the metadata of your tables, i.e., create tables (aka entityTypes), add, remove columns (aka attributes).
 ![1](../../images/metadata-manager/full-edit-overview.png?raw=true)
 
-This entails changing descriptions, changing the labels, changing the package in which the EntityType lives, but it also 
+This entails changing descriptions, changing the labels, changing the package in which the EntityType lives, but it also
 means you can add and remove attributes (columns), or even change the order in which they are shown in the data explorer.
 
-The metadata manager also allows you to create new EntityTypes (tables) from scratch! 
-No longer do you need to understand the EMX format and import excel sheets via the importer, you can create new data tables 
+The metadata manager also allows you to create new EntityTypes (tables) from scratch!
+No longer do you need to understand the EMX format and import excel sheets via the importer, you can create new data tables
 from scratch using the metadata manager user interface.
 
-## Creating a new EntityType
-To create a new EntityType, press the blue 'plus' button next to the EntityType select dropdown.
+## Add table (create)
+To create a new table (EntityType), press the blue 'plus' button next to the EntityType select dropdown.
 
 ![2](../../images/metadata-manager/entity-edit-form-new.png?raw=true)
 
-You will get an empty template, allowing you to build your EntityType from scratch. 
-If you are familiar with relational database concepts, you will probably recognize most of the inputs. 
+You will get an empty template, allowing you to build your EntityType from scratch.
+If you are familiar with relational database concepts, you will probably recognize most of the inputs.
 In any case, here we will take you through the different fields and explain their use.
 
-__Extends__ 
-: The extends dropdown lets you choose another EntityType which your EntityType will extend. 
+__Extends__
+: The extends dropdown lets you choose another EntityType which your EntityType will extend.
 This means that any attributes that EntityType might have, will be inherited by your EntityType.
 
 An EntityType __has__ to be abstract in order for you to extend it.
@@ -51,7 +51,7 @@ __Description__
 : Piece of text describing your EntityType.
 
 __Package__
-: Setting a Package allows you to group EntityTypes together under a single namespace. 
+: Setting a Package allows you to group EntityTypes together under a single namespace.
 _Note_: Packages can not be created via the metadata manager, you have to create them either in the dataexplorer or upload them via the importer
 
 __ID attribute__
@@ -95,12 +95,12 @@ __Description__
 : A description for your attribute.
 
 __Type__
-: Now the type field is a very important one. It determines which type of data will be allowed in this column. 
+: Now the type field is a very important one. It determines which type of data will be allowed in this column.
 This can be strings and numbers, or more advanced types like dates, email, enum, or the very MOLGENIS specific xref or mref types.
 Some of the types will reveal extra fields on selection, we will go through these special fields now.
 
 _Select int or long_
-: Selecting a numerical type will give you the added options _minimum range_ and _maximum_ range. 
+: Selecting a numerical type will give you the added options _minimum range_ and _maximum_ range.
 As the names suggest, it will allow you to set rules that number values in this column have to adhere to.
 
 _Selecting categorical, categorical_mref, xref, mref_
@@ -116,7 +116,7 @@ The mapped by and order by fields are now open to you. Mapped by is the same as 
 determine how your values are sorted, e.g country;ASC will sort the reference values on the country column in ascending order.
 
 __Parent__
-: It is possible to nest an attribute under another attribute. 
+: It is possible to nest an attribute under another attribute.
 The parent option shows you a dropdown with all the Compound attributes present in your EntityType.
 
 __Nullable__
@@ -155,8 +155,9 @@ If everything is correct, you will get a message saying save was successful. If 
 After saving, your new EntityType will be available in the dropdown for further editing, and you can start importing data
 for it via the importer.
 
-## Editing existing EntityTypes
-You can select existing EntityTypes in the dropdown at the top of the screen
+## Change table (alter)
+
+You can select existing table (EntityType) in the dropdown at the top of the screen
 
 ![5](../../images/metadata-manager/header-select-open.png?raw=true)
 
@@ -189,6 +190,7 @@ This list describes the allowed conversion of data types in the metadata edit.
 | TEXT                  | ALL                 |
 | XREF                  | STRING, INT, LONG, CATEGORICAL, MREF, CATEGORICAL_MREF|
 
-## Deleting existing EntityTypes
+## Delete table (drop)
+
 If you want to remove an EntityType because you want to start over or had some experiments that are no longer necessary, you can go and
 select that EntityType and hit the big 'Delete entity' button

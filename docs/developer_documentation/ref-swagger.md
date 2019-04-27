@@ -1,4 +1,4 @@
-# Swagger specification for MOLGENIS
+# Swagger documentation
 Swagger documentation can be divided into 2 sections:
 
 * REST API
@@ -29,11 +29,11 @@ user can see.
 
 ### URL
 By default, the API documentation is added to the menu.
-If you remove it from the menu, users with plugin permissions can still access the plugin on the url 
+If you remove it from the menu, users with plugin permissions can still access the plugin on the url
 `<server>/plugin/swagger/`.
 
 ## Authorization
-The Molgenis REST api supports two forms of authentication: The standard session token header and 
+The Molgenis REST api supports two forms of authentication: The standard session token header and
 an x-molgenis-token header.
 
 ### ApiKey
@@ -43,7 +43,7 @@ This token will then be added as an `x-molgenis-token` header by the Swagger UI 
 You can view and edit the token by clicking the dark green `Authorize` button at the top of the page.
 
 ![Api key authorization](../images/swagger/apikey.png?raw=true, "swagger/apikey")
- 
+
 ## Specification of module specific controllers
 When you toggle the listbox in the header of the swagger documentation, you can choose different MOLGENIS-modules.
 
@@ -91,9 +91,9 @@ When you want to contribute to MOLGENIS and are developing a module, there are a
   urls: [
     { name: 'molgenis', url: '${molgenisUrl}' },
     { name: 'core-ui', url: '${baseUrl}/swagger/core-ui-swagger.json'}
-    { name: '#module name from pom.xml#', url: '${baseUrl}/swagger/#module name from pom.xml#-swagger.json'} 
+    { name: '#module name from pom.xml#', url: '${baseUrl}/swagger/#module name from pom.xml#-swagger.json'}
   ],
-  ``` 
+  ```
 - Add swagger-annotations dependency to module pom.xml
   ```
   <dependency>
@@ -119,4 +119,3 @@ When you want to contribute to MOLGENIS and are developing a module, there are a
   	{
   ```
   For real life examples see the `UserAccountController.java` in MOLGENIS.
-  

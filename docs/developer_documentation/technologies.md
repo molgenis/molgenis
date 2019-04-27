@@ -1,6 +1,6 @@
-**
+# Technologies used
+
 We are happy to reuse as much as we can from high-quality existing open source software projects. Find below a listing of the technologies we use:
-**
 
 # Development
 * [YourKit Java profiler](https://www.yourkit.com/java/profiler/index.jsp) - for profiling our apps with a full-featured intelligent Java Profiler. YourKit, LLC supports our open source project

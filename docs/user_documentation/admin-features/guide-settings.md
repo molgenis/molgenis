@@ -1,4 +1,4 @@
-# Settings
+# Application settings
 There are different items where you can configure settings in MOLGENIS:
 - [Application settings](#application-settings)
 - [Authentication settings](#authentication-settings)
@@ -25,11 +25,11 @@ Filling out the settings in the *Application settings* in MOLGENIS.
 
 You have to configure 6 properties:
 
-- *ReCaptcha secret*: Can be obtained by configuring your domain in [ReCaptcha from Google](https://www.google.com/recaptcha) 
+- *ReCaptcha secret*: Can be obtained by configuring your domain in [ReCaptcha from Google](https://www.google.com/recaptcha)
 - *ReCaptcha site*: Can be obtained by configuring your domain in [ReCaptcha from Google](https://www.google.com/recaptcha)
 - *Enable reCaptcha*: If set to true then the reCaptcha is enabled in MOLGENIS
 - *Verification URI*: Fires a request for verification if the user is a BOT or not
-- *BOT threshold*: A number between 0.0 and 1.0. 1.0 is most likely a human and 0.0 is most likely a BOT. The threshold is compare to the score that reCaptcha calculates. 
+- *BOT threshold*: A number between 0.0 and 1.0. 1.0 is most likely a human and 0.0 is most likely a BOT. The threshold is compare to the score that reCaptcha calculates.
 
 > note: Make sure you have your [Mail settings](#mail-settings) configured as well.
 
@@ -38,7 +38,7 @@ You should configure an email server to interact with your users for things like
 You can find the mail settings in the Admin menu, under Settings.
 At the top of the page, type "Mail settings" into the selection box.
 
-For backwards compatibility, the default settings are filled with the values provided in `molgenis-server.properties` 
+For backwards compatibility, the default settings are filled with the values provided in `molgenis-server.properties`
 under the keys `mail.username` and `mail.password`, but the values provided here will override those settings.
 
 For basic configuration, you only need to provide the username and password fields with a valid Gmail username and password.
@@ -54,7 +54,7 @@ mail.smtp.starttls.enable=true
 mail.smtp.quitwait=false
 ```
 
-You may override these properties or add additional properties and override these defaults by adding entities to the 
+You may override these properties or add additional properties and override these defaults by adding entities to the
 ```JavaMailProperty``` repository in the Data Explorer. Each key may be provided at most once.
 For a list of valid keys, check https://javamail.java.net/nonav/docs/api/ and per protocol:
 
@@ -82,13 +82,13 @@ You can add them by entering them in the mail property table. Or override them i
 #!/bin/bash
 
 export mail.smtp.auth=false
-export mail.from=noreply@domain.ext 
+export mail.from=noreply@domain.ext
 ```
 
 *molgenis-server.properties:*
 ```properties
 mail.smtp.auth=false
-mail.from=noreply@domain.ext 
+mail.from=noreply@domain.ext
 ```
 
 You need to add the ```mail.from``` property otherwise the server resolves to ```root@localhost```.
@@ -96,24 +96,23 @@ You need to add the ```mail.from``` property otherwise the server resolves to ``
 > note When you start the server clean it will populate the database with the environment variables. After that the database is your configuration truth.
 
 ## Authentication settings
-When you are a superuser in MOLGENIS, you can configure three authentication methods: 
+When you are a superuser in MOLGENIS, you can configure three authentication methods:
  * Username/password signin *(default)*
  * Google-sigin
  * Token-authentication
- 
+
 **Username/password signin (default)**  
 In the App Settings:
  * Set user-moderation to user can sign up
- * Set two factor authentication: 
+ * Set two factor authentication:
    * Disabled: users CAN NOT use two-factor-authentication
    * Enforced: users MUST use two-factor-authentication
    * Enabled: users CAN use two-factor-authentication
-   
+
 **prompted:** The default setting for tow-factor-authentication for a fresh installation *"Disabled"*. When two-factor-authentication is *"Enabled"* it is default disabled for the users.  
 
 **Google-signin**  
-The Google-signin setting is used to enable the possibility for users to login with their Google-account. 
- 
+The Google-signin setting is used to enable the possibility for users to login with their Google-account.
+
 **Token-authentication**
 No specific superuser settings are necessary for the implementation of token-authentication.
- 
