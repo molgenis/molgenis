@@ -9,13 +9,13 @@ import java.util.List;
 import org.springframework.security.acls.model.ObjectIdentity;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class InsufficientPermissionDeniedException extends PermissionDeniedException {
-  private static final String ERROR_CODE = "PRM09";
+public class InsufficientPermissionsException extends PermissionDeniedException {
+  private static final String ERROR_CODE = "DS26";
   private final String identifier;
   private final String type;
   private final List<String> roles;
 
-  public InsufficientPermissionDeniedException(ObjectIdentity objectIdentity, List<String> roles) {
+  public InsufficientPermissionsException(ObjectIdentity objectIdentity, List<String> roles) {
     super(ERROR_CODE);
     requireNonNull(objectIdentity);
     this.identifier = objectIdentity.getIdentifier().toString();
@@ -23,7 +23,7 @@ public class InsufficientPermissionDeniedException extends PermissionDeniedExcep
     this.roles = requireNonNull(roles);
   }
 
-  public InsufficientPermissionDeniedException(String type, String identifier, List<String> roles) {
+  public InsufficientPermissionsException(String type, String identifier, List<String> roles) {
     super(ERROR_CODE);
     this.type = requireNonNull(type);
     this.identifier = requireNonNull(identifier);

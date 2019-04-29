@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ReadPermissionDeniedException extends PermissionDeniedException {
-  private static final String ERROR_CODE = "PRM07";
+  private static final String ERROR_CODE = "DS24";
 
   private final String typeId;
 

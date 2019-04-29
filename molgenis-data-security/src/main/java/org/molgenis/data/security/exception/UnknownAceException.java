@@ -3,12 +3,12 @@ package org.molgenis.data.security.exception;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.permission.UserRoleTools.getName;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.data.UnknownDataException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
-public class UnknownAceException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM04";
+public class UnknownAceException extends UnknownDataException {
+  private static final String ERROR_CODE = "DS21";
   private final ObjectIdentity objectIdentity;
   private final Sid sid;
   private final String operation;

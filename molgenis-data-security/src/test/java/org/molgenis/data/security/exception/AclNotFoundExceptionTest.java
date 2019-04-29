@@ -1,30 +1,29 @@
-package org.molgenis.api.permissions.exceptions;
+package org.molgenis.data.security.exception;
 
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.security.exception.InvalidTypeIdException;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class InvalidTypeIdExceptionTest extends ExceptionMessageTest {
+public class AclNotFoundExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
-    messageSource.addMolgenisNamespaces("api-permissions");
+    messageSource.addMolgenisNamespaces("data-security");
   }
 
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
-        new InvalidTypeIdException("type"), lang, message);
+        new AclNotFoundException("type"), lang, message);
   }
 
   @Test
   public void testGetMessage() {
-    CodedRuntimeException ex = new InvalidTypeIdException("type");
+    CodedRuntimeException ex = new AclNotFoundException("type");
     assertEquals(ex.getMessage(), "typeId:type");
   }
 
@@ -32,10 +31,7 @@ public class InvalidTypeIdExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {
-        "en",
-        "Unknown type identifier 'type', if you attempt to use a entitytype identifier please prefix with 'entity-'."
-      }
+      new Object[] {"en", "No ACL information could be found for type 'type'."}
     };
   }
 }

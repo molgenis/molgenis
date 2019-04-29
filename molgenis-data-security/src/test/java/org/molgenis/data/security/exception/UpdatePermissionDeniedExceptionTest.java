@@ -1,10 +1,9 @@
-package org.molgenis.api.permissions.exceptions;
+package org.molgenis.data.security.exception;
 
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import org.mockito.Mockito;
-import org.molgenis.data.security.exception.InsufficientPermissionDeniedException;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.testng.annotations.BeforeMethod;
@@ -14,7 +13,7 @@ import org.testng.annotations.Test;
 public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
-    messageSource.addMolgenisNamespaces("api-permissions");
+    messageSource.addMolgenisNamespaces("data-security");
   }
 
   @Test(dataProvider = "languageMessageProvider")
@@ -24,7 +23,7 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
     ExceptionMessageTest.assertExceptionMessageEquals(
-        new InsufficientPermissionDeniedException(
+        new InsufficientPermissionsException(
             objectIdentity, Collections.singletonList("superuser")),
         lang,
         message);
@@ -35,8 +34,8 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     ObjectIdentity objectIdentity = Mockito.mock(ObjectIdentity.class);
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
-    InsufficientPermissionDeniedException ex =
-        new InsufficientPermissionDeniedException(
+    InsufficientPermissionsException ex =
+        new InsufficientPermissionsException(
             objectIdentity, Collections.singletonList("superuser"));
     assertEquals(ex.getMessage(), "type:type, identifier:identifier, roles:[superuser]");
   }

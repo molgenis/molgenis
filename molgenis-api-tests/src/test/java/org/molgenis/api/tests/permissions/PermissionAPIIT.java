@@ -219,7 +219,7 @@ public class PermissionAPIIT {
     String response =
         "{permissions=[{user="
             + testUserName
-            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=Read, label=Package, objectId=package, inheritedPermissions=[]}]}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
     Response actual =
         given()
             .log()
@@ -238,7 +238,7 @@ public class PermissionAPIIT {
     String response2 =
         "{permissions=[{user="
             + testUserName
-            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=Read, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
+            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
     Response actual2 =
         given()
             .log()
@@ -420,7 +420,7 @@ public class PermissionAPIIT {
         .statusCode(200)
         .log()
         .all()
-        .body(equalTo("[\"Read\",\"Write\"]"));
+        .body(equalTo("[\"READ\",\"WRITE\"]"));
   }
 
   @Test

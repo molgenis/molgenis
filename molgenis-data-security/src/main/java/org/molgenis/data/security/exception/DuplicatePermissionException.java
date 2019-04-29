@@ -3,12 +3,12 @@ package org.molgenis.data.security.exception;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.permission.UserRoleTools.getName;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.data.DataAlreadyExistsException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
-public class DuplicatePermissionException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM12";
+public class DuplicatePermissionException extends DataAlreadyExistsException {
+  private static final String ERROR_CODE = "DS27";
   private final ObjectIdentity objectIdentity;
   private final Sid sid;
 

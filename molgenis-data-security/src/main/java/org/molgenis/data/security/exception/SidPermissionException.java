@@ -2,10 +2,8 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
-
-public class SidPermissionException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM08";
+public class SidPermissionException extends PermissionDeniedException {
+  private static final String ERROR_CODE = "DS25";
   private final String sids;
 
   public SidPermissionException(String sids) {

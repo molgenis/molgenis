@@ -1,11 +1,11 @@
-package org.molgenis.api.permissions.exceptions;
+package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
 public class AclNotFoundException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM03";
+  private static final String ERROR_CODE = "DS20";
 
   private final String typeId;
 

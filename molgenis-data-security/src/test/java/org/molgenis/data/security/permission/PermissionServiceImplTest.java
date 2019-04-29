@@ -201,7 +201,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
@@ -260,7 +259,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
@@ -316,7 +314,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
@@ -372,7 +369,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);
@@ -482,8 +478,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     doReturn(acl)
         .when(mutableAclService)
         .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
-
-    when(objectIdentity.getIdentifier()).thenReturn("identifier");
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
     AccessControlEntry ace1 = mock(AccessControlEntry.class);

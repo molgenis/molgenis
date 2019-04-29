@@ -2,10 +2,10 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.BadRequestException;
 
-public class PermissionNotSuitableException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM06";
+public class PermissionNotSuitableException extends BadRequestException {
+  private static final String ERROR_CODE = "DS23";
 
   private final String permission;
   private final String typeId;

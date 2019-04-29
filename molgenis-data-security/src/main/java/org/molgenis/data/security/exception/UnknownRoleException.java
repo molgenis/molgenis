@@ -2,9 +2,9 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.data.UnknownDataException;
 
-public class UnknownRoleException extends CodedRuntimeException {
+public class UnknownRoleException extends UnknownDataException {
   private static final String ERROR_CODE = "DS19";
   private final String name;
 

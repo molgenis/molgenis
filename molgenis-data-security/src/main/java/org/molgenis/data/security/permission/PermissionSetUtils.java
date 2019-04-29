@@ -17,8 +17,8 @@ import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.AccessControlEntry;
 
 public class PermissionSetUtils {
-  static final String READMETA = "READMETA";
-  static final String COUNT = "COUNT";
+  public static final String READMETA = "READMETA";
+  public static final String COUNT = "COUNT";
   public static final String READ = "READ";
   public static final String WRITE = "WRITE";
   public static final String WRITEMETA = "WRITEMETA";
@@ -62,6 +62,27 @@ public class PermissionSetUtils {
 
   public static String getPermissionStringValue(LabelledPermission labelledPermission) {
     PermissionSet permissionSet = labelledPermission.getPermission();
+    if (permissionSet != null) {
+      int mask = permissionSet.getMask();
+      switch (mask) {
+        case READ_META_MASK:
+          return READMETA;
+        case COUNT_MASK:
+          return COUNT;
+        case READ_MASK:
+          return READ;
+        case WRITE_MASK:
+          return WRITE;
+        case WRITEMETA_MASK:
+          return WRITEMETA;
+        default:
+          throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
+      }
+    }
+    return null;
+  }
+
+  public static String getPermissionStringValue(PermissionSet permissionSet) {
     if (permissionSet != null) {
       int mask = permissionSet.getMask();
       switch (mask) {

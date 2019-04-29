@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.exception.InsufficientPermissionDeniedException;
+import org.molgenis.data.security.exception.InsufficientPermissionsException;
 import org.molgenis.data.security.exception.ReadPermissionDeniedException;
 import org.molgenis.data.security.exception.SidPermissionException;
 import org.molgenis.data.security.permission.model.LabelledObject;
@@ -70,7 +70,7 @@ public class PermissionServiceDecorator implements PermissionService {
 
   private void checkSuOrSystem(String type, String identifier) {
     if (!SecurityUtils.currentUserIsSuOrSystem()) {
-      throw new InsufficientPermissionDeniedException(
+      throw new InsufficientPermissionsException(
           type, identifier, Collections.singletonList("superuser"));
     }
   }
@@ -114,7 +114,7 @@ public class PermissionServiceDecorator implements PermissionService {
     if (SecurityUtils.currentUserIsSuOrSystem()) {
       permissionService.addType(typeId);
     } else {
-      throw new InsufficientPermissionDeniedException(
+      throw new InsufficientPermissionsException(
           "type", typeId, Collections.singletonList("superuser"));
     }
   }
@@ -181,7 +181,7 @@ public class PermissionServiceDecorator implements PermissionService {
     Sid sid = createSecurityContextSid();
     boolean isOwner = acl.getOwner().equals(sid);
     if (!SecurityUtils.currentUserIsSuOrSystem() && !isOwner) {
-      throw new InsufficientPermissionDeniedException(
+      throw new InsufficientPermissionsException(
           acl.getObjectIdentity(), Arrays.asList("superuser", "owner"));
     }
   }

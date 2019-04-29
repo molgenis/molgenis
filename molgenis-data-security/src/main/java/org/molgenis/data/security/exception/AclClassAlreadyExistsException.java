@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.i18n.CodedRuntimeException;
 
 public class AclClassAlreadyExistsException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM14";
+  private static final String ERROR_CODE = "DS29";
 
   private final String typeId;
 

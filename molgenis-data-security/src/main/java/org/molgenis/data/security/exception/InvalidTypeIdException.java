@@ -2,10 +2,10 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.BadRequestException;
 
-public class InvalidTypeIdException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM05";
+public class InvalidTypeIdException extends BadRequestException {
+  private static final String ERROR_CODE = "DS22";
 
   private final String typeId;
 
