@@ -52,6 +52,7 @@ import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.transaction.annotation.Transactional;
@@ -138,7 +139,7 @@ public class PermissionsController extends ApiController {
     return permissionService
         .getSuitablePermissionsForType(typeId)
         .stream()
-        .map(permissionSet -> permissionSet.name())
+        .map(permissionSet -> PermissionSetUtils.getPermissionStringValue(permissionSet))
         .collect(Collectors.toSet());
   }
 
@@ -401,16 +402,35 @@ public class PermissionsController extends ApiController {
     if (objectPermissionResponses != null) {
       permissionResponses = new LinkedHashSet<>();
       for (LabelledPermission permission : objectPermissionResponses) {
-        LabelledPermissionResponse labelledResponse =
-            LabelledPermissionResponse.create(
-                userRoleTools.getUser(permission.getSid()),
-                userRoleTools.getRole(permission.getSid()),
-                permission.getLabelledObjectIdentity().getType(),
-                permission.getLabelledObjectIdentity().getTypeLabel(),
-                permission.getLabelledObjectIdentity().getIdentifier().toString(),
-                permission.getLabelledObjectIdentity().getIdentifierLabel(),
-                permission.getPermission().name(),
-                convertLabelledPermissions(permission.getInheritedPermissions()));
+        PermissionSet permissionSet = permission.getPermission();
+        String permissionString = null;
+        if (permissionSet != null) {
+          permissionString = PermissionSetUtils.getPermissionStringValue(permissionSet);
+        }
+        LabelledPermissionResponse labelledResponse;
+        if (permission.getLabelledObjectIdentity() != null) {
+          labelledResponse =
+              LabelledPermissionResponse.create(
+                  userRoleTools.getUser(permission.getSid()),
+                  userRoleTools.getRole(permission.getSid()),
+                  permission.getLabelledObjectIdentity().getType(),
+                  permission.getLabelledObjectIdentity().getTypeLabel(),
+                  permission.getLabelledObjectIdentity().getIdentifier().toString(),
+                  permission.getLabelledObjectIdentity().getIdentifierLabel(),
+                  permissionString,
+                  convertLabelledPermissions(permission.getInheritedPermissions()));
+        } else {
+          labelledResponse =
+              LabelledPermissionResponse.create(
+                  userRoleTools.getUser(permission.getSid()),
+                  userRoleTools.getRole(permission.getSid()),
+                  null,
+                  null,
+                  null,
+                  null,
+                  permissionString,
+                  convertLabelledPermissions(permission.getInheritedPermissions()));
+        }
         permissionResponses.add(labelledResponse);
       }
     }

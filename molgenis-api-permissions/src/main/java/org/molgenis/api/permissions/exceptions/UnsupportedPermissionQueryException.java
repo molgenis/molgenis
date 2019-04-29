@@ -3,7 +3,7 @@ package org.molgenis.api.permissions.exceptions;
 import org.molgenis.i18n.CodedRuntimeException;
 
 public class UnsupportedPermissionQueryException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "PRM11";
+  private static final String ERROR_CODE = "PRM04";
 
   public UnsupportedPermissionQueryException() {
     super(ERROR_CODE);

@@ -287,7 +287,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"permissions\":[{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"Read\"},{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"Write\"}]}");
+        "{\"permissions\":[{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"READ\"},{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"WRITE\"}]}");
   }
 
   @Test
