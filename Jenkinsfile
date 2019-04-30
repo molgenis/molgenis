@@ -172,6 +172,13 @@ pipeline {
                             script {
                                 env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
                             }
+                            // deploy Docker image
+                            dir('molgenis-app') {
+                                script {
+                                    sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
+                                }
+                            }
+                            // deploy RPM
                             // need to run install phase first
                             // the rpm:rpm goal is bound to the package phase
                             // which implies that the next snapshot version is installed
@@ -179,7 +186,6 @@ pipeline {
                             sh "mvn -q -B install -DskipTests -T4 && mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
                             dir('molgenis-app') {
                                 script {
-                                    sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                     sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
