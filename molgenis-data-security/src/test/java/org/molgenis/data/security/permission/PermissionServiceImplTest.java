@@ -159,8 +159,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
 
-    Entity entity = mock(Entity.class);
-
     LabelledPermission permission1 =
         LabelledPermission.create(
             sid2,
@@ -184,6 +182,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
     sids.add(sid2);
+
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList<>(sids));
 
     assertEquals(
         newHashSet(
@@ -393,7 +393,9 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         .thenReturn(
             LabelledObjectIdentity.create(
                 "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
-    when(userRoleTools.getAllAvailableSids()).thenReturn(Sets.newHashSet(sid1, sid2));
+    HashSet<Sid> sids = newHashSet(sid1, sid2);
+    when(userRoleTools.getAllAvailableSids()).thenReturn(sids);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList<>(sids));
 
     LabelledPermission permission1 =
         LabelledPermission.create(
@@ -490,6 +492,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             LabelledObjectIdentity.create(
                 "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
 
+    when(userRoleTools.sortSids(singleton(role))).thenReturn(new LinkedList(singletonList(role)));
+
     permissionsApiService.updatePermission(
         Permission.create(new ObjectIdentityImpl("entity-typeId", "identifier"), role, WRITE));
 
@@ -517,6 +521,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             LabelledObjectIdentity.create(
                 "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
 
+    when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
     permissionsApiService.updatePermissions(
         singleton(Permission.create(objectIdentity, sid, WRITE)));
 

@@ -347,7 +347,7 @@ public class PermissionServiceImpl implements PermissionService {
     if (sids.isEmpty()) {
       sids = userRoleTools.getAllAvailableSids();
     }
-    for (Sid sid : sids) {
+    for (Sid sid : userRoleTools.sortSids(sids)) {
       getPermissionResponsesForSingleSid(acl, isReturnInheritedPermissions, result, sid);
     }
     return result;

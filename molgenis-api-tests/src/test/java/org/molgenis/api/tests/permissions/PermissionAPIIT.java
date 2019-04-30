@@ -113,9 +113,9 @@ public class PermissionAPIIT {
         .all();
 
     String response1 =
-        "{permissions=[{permission=READ, user="
+        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
             + testUserName
-            + "}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+            + "}], id=perm1_entity1, label=entity1}";
 
     Response actual =
         given()
@@ -145,9 +145,9 @@ public class PermissionAPIIT {
         .all();
 
     String response2 =
-        "{permissions=[{permission=WRITE, user="
+        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
             + testUserName
-            + "}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+            + "}], id=perm1_entity1, label=entity1}";
     Response actual2 =
         given()
             .log()
@@ -217,9 +217,9 @@ public class PermissionAPIIT {
         .all();
 
     String response =
-        "{permissions=[{user="
+        "{permissions=[{permission=WRITEMETA, user=admin}, {user="
             + testUserName
-            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}, {permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
     Response actual =
         given()
             .log()
@@ -305,20 +305,20 @@ public class PermissionAPIIT {
         .all();
 
     String response1 =
-        "{objects=[{permissions=[{permission=WRITE, user="
-            + testUserName
-            + "}, {permission=READ, user="
+        "{objects=[{permissions=[{permission=READ, user="
             + testUserName2
+            + "}, {permission=WRITE, user="
+            + testUserName
             + "}], id=perm1_entity2, label=entity2}, {permissions=[{permission=WRITEMETA, user="
             + testUserName
             + "}], id=perm2_entity3, label=entity3}, {permissions=[{permission=READ, user="
-            + testUserName
-            + "}, {permission=READ, user="
             + testUserName2
+            + "}, {permission=READ, user="
+            + testUserName
             + "}], id=sys_sec_Role, label=Role}, {permissions=[{permission=READ, user="
-            + testUserName
-            + "}, {permission=READ, user="
             + testUserName2
+            + "}, {permission=READ, user="
+            + testUserName
             + "}], id=sys_sec_RoleMembership, label=Role Membership}], id=entityType, label=Entity type}";
 
     Response actual =
