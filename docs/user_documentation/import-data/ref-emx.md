@@ -233,8 +233,8 @@ is used to create computed attributes.
 
 In addition to basic 'computed strings' and 'computed' objects a template can be used as expression. The template expression format is:
 {"template":"..."} with the value a [Mustache](http://mustache.github.io/) template. Tags must refer to attribute identifiers 
-(e.g. {% raw %}{{myStringAttribute}}{% endraw %}). For attributes referencing another entity type the attribute in the referencing entity type needs to be 
-specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
+(e.g. {{myStringAttribute}}). For attributes referencing another entity type the attribute in the referencing entity type needs to be 
+specified as well (e.g. {{myXrefAttribute.id}}).
 
 *Example:*
 
@@ -243,13 +243,13 @@ specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
 | id	           | MyEntityType |	string	 |			       |                                                          |
 | xref0	         | MyEntityType |	xref	   | MyReference |                                                          |	
 | xref1	         | MyEntityType |	xref	   | MyReference |                                                          |
-| computedXref	 | MyEntityType |	string	 |             | {% raw %}{"template":"lorum {{xref0.id}} ipsum {{xref1.label}}"}{% endraw %} |
+| computedXref	 | MyEntityType |	string	 |             | {"template":"lorum {{xref0.id}} ipsum {{xref1.label}}"} |
 | mref0	         | MyEntityType |	mref	   | MyReference |                                                          |
 | mref1	         | MyEntityType |	mref	   | MyReference |                                                          |
-| computedMref	 | MyEntityType |	string   |						 | {% raw %}{"template":"my {{mref0.id}} text {{mref1.label}}"}{% endraw %}     |
+| computedMref	 | MyEntityType |	string   |						 | {"template":"my {{mref0.id}} text {{mref1.label}}"}     |
 | string0	       | MyEntityType |	string	 |						 |                                                          |
 | string1	       | MyEntityType |	string	 |						 |                                                          |
-| computedString | MyEntityType |	string	 |						 | {% raw %}{"template":"{{string0}} and {{string1}}"}{% endraw %}              |
+| computedString | MyEntityType |	string	 |						 | {"template":"{{string0}} and {{string1}}"}             |
 | id	           | MyReference  |	string	 |						 |                                                          |
 | label	         | MyReference  |	string	 |						 |                                                          |
 

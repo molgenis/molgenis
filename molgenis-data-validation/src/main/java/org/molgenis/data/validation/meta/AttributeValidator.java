@@ -36,6 +36,7 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.TemplateExpressionEvaluator;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
@@ -83,6 +85,7 @@ public class AttributeValidator {
     validateDefaultValue(attr, validationMode == ADD || validationMode == UPDATE);
     validateParent(attr);
     validateChildren(attr);
+    validateExpression(attr);
 
     switch (validationMode) {
       case ADD:
@@ -100,6 +103,16 @@ public class AttributeValidator {
         break;
       default:
         throw new UnexpectedEnumException(validationMode);
+    }
+  }
+
+  void validateExpression(Attribute attr) {
+    if (attr.getExpression() != null) {
+      if (Arrays.asList(EMAIL, ENUM, HYPERLINK, SCRIPT, STRING, TEXT)
+          .contains(attr.getDataType())) {
+        // throws exception if invalid
+        TemplateExpressionEvaluator.getTemplate(attr);
+      }
     }
   }
 
