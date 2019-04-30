@@ -20,7 +20,8 @@ public class MolgenisRController {
     }
 
     model.addAttribute(
-        "api_url", ServletUriComponentsBuilder.fromCurrentRequest().path(API_URI).toUriString());
+        "api_url",
+        ServletUriComponentsBuilder.fromCurrentContextPath().path(API_URI).toUriString());
 
     return "molgenis.R";
   }
