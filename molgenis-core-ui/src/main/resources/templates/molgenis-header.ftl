@@ -88,7 +88,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
 
-<body>
+<body class="mg-page">
     <#if !(version??) || version == 1>
         <#-- Navbar menu -->
         <#if menu_id??>
@@ -124,7 +124,7 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid"
+<div class="container-fluid mg-page-content"
      style="padding-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 60}<#else>60</#if>px;">
     <div class="row">
         <div class="col-md-12">
