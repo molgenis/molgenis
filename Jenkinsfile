@@ -183,9 +183,10 @@ pipeline {
                             // the rpm:rpm goal is bound to the package phase
                             // which implies that the next snapshot version is installed
                             // the artifact is built and the rpm plugin refers to the artifact build in the release:prepare goal
-                            sh "mvn -q -B install -DskipTests -T4 && mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
+                            sh "mvn -q -B install -DskipTests -T4"
                             dir('molgenis-app') {
                                 script {
+                                    sh "mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
                                     // make sure you have no linebreaks in RPM variable
                                     env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
                                     sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
