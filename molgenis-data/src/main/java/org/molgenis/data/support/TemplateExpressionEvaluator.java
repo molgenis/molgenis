@@ -148,7 +148,7 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
     }
   }
 
-  private Template getTemplate(Attribute attribute) {
+  public static Template getTemplate(Attribute attribute) {
     String expression = attribute.getExpression();
     if (expression == null) {
       throw new TemplateExpressionException(attribute);
