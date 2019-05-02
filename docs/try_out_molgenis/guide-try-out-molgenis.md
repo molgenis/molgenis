@@ -1,7 +1,7 @@
-# Quickstart guide
+# Try out MOLGENIS
 
 ## Using our demo server
-The first thing you can do is to get some hands-on experience by trying out our [demo server](http://molgenis.org/demo). This server contains several data sets including biobank data and genetic data. If you want to try importing some example files, then the only thing needed from your end is that you create an account. An email will be sent containing your login in credentials.
+The first thing you can do is to get some hands-on experience by trying out our [demo server](https://molgenis.org/demo). This server contains several data sets including biobank data and genetic data. If you want to try importing some example files, then the only thing needed from your end is that you create an account. An email will be sent containing your login in credentials.
 But perhaps you want to see how your own data looks like, but not upload it for other people to see, not yet anyway. So let's jump right into that.  
 
 ## Getting your first data in
@@ -56,4 +56,7 @@ Of course, simply uploading and showing data is not the only thing you can do wi
 ## Running your own MOLGENIS
 You can run MOLGENIS on you local machine or on your own linux server.
 
-Either you run it in [Maven cargo](./guide-cargo.md), in a local [Tomcat webserver](./guide-tomcat.md), or you [clone the code](./guide-local-compile.md) from GitHub and compile it to start developing
+- Run in a local [docker-compose](../install_molgenis/guide-docker.md) stack
+- Run on a [server](../install_molgenis/guide-standalone-server.md)
+- Run on a [Kubernetes](../install_molgenis/guide-kubernetes.md) cluster
+- You [clone the code](../install_molgenis/guide-local-compile.md) from GitHub and compile it to start developing

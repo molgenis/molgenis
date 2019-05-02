@@ -5,9 +5,8 @@
 
 MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life science research. 
 
-See https://molgenis.gitbooks.io/molgenis for documentation.
+See https://molgenis.gitbooks.io/molgenis/content for documentation.
 
-For more about our organisation, see https://molgenis.github.io
+For more about our organisation, see https://molgenis.org
 
-## Installation
-See [The Quick start guide](https://molgenis.gitbooks.io/molgenis/quickstart/guide-quickstart.html).
+[Try out MOLGENIS](https://molgenis.gitbooks.io/molgenis/try_out_molgenis/guide-try-out-molgenis.html).
