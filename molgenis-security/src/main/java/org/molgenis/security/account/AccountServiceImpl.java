@@ -224,7 +224,7 @@ public class AccountServiceImpl implements AccountService {
     builder.append(" was approved.\n");
     builder.append("Your account is now active.\n\n");
     builder.append("Kind regards,\n\n");
-    builder.append("MOLGENIS support");
+    builder.append("Server administrator");
     return builder.toString();
   }
 
