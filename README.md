@@ -9,4 +9,4 @@ See https://molgenis.gitbooks.io/molgenis/content for documentation.
 
 For more about our organisation, see https://molgenis.org
 
-[Try out MOLGENIS](https://molgenis.gitbooks.io/molgenis/try_molgenis/guide-try-molgenis.html).
+[Try out MOLGENIS](https://molgenis.gitbooks.io/molgenis/try_out_molgenis/guide-try-out-molgenis.html).
