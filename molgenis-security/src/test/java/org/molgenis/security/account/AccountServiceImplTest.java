@@ -95,8 +95,11 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     SimpleMailMessage expected = new SimpleMailMessage();
     expected.setTo("jan.jansen@activation.nl");
     expected.setText(
-        "Dear Jan Jansen,\n\nyour registration request for Molgenis title was approved.\n"
-            + "Your account is now active.\n");
+        "Dear Jan Jansen,\n\nYour registration request for Molgenis title was approved.\n" +
+        "Your account is now active.\n\n" +
+        "Kind regards,\n\n" +
+        "Server administrator"
+    );
     expected.setSubject("Your registration request for Molgenis title");
     verify(mailSender).send(expected);
   }
