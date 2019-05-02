@@ -1,0 +1,29 @@
+<svg width="661" height="256" version="1.1" baseProfile="full" viewbox="0 0 661 256" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" style="font-weight:bold; font-size:12pt; font-family:'Calibri', Helvetica, sans-serif;;stroke-width:3;stroke-linejoin:round;stroke-linecap:round"><path d="M378.5 44.5 L378.5 64.5 L378.5 84.5 L378.5 84.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M373.2 71.2 L378.5 77.8 L383.8 71.2 L378.5 84.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<path d="M317 141.2 L69 192.5 L69 212.5 L69 212.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M63.7 199.2 L69 205.8 L74.3 199.2 L69 212.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<path d="M317 155.8 L234.5 192.5 L234.5 212.5 L234.5 212.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M229.2 199.2 L234.5 205.8 L239.8 199.2 L234.5 212.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<path d="M378.5 172.5 L378.5 192.5 L378.5 212.5 L378.5 212.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M373.2 199.2 L378.5 205.8 L383.8 199.2 L378.5 212.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<path d="M440 162.6 L494 192.5 L494 212.5 L494 212.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M488.7 199.2 L494 205.8 L499.3 199.2 L494 212.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<path d="M440 145.4 L612 192.5 L612 212.5 L612 212.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;"></path>
+<path d="M606.7 199.2 L612 205.8 L617.3 199.2 L612 212.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;"></path>
+<rect x="317.5" y="84.5" height="88" width="123" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"></rect>
+<text x="379" y="106" style="text-anchor: middle;">tomcat</text>
+<path d="M317.5 115.5 L440.5 115.5" style="stroke:#33322E;fill:none;stroke-dasharray:none;"></path>
+<rect x="330.5" y="128.5" height="31" width="97" style="stroke:#33322E;fill:#fdf6e3;stroke-dasharray:none;"></rect>
+<text x="379" y="150" style="text-anchor: middle;">MOLGENIS</text>
+<rect x="308.5" y="13.5" height="31" width="140" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:6 6;"></rect>
+<text x="378.5" y="35" style="font-weight:normal;text-anchor: middle;">nginx-ingress</text>
+<rect x="13.5" y="212.5" height="31" width="111" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"></rect>
+<text x="69" y="234" style="text-anchor: middle;">Postgresql</text>
+<rect x="164.5" y="212.5" height="31" width="140" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"></rect>
+<text x="234.5" y="234" style="text-anchor: middle;">ElasticSearch</text>
+<rect x="344.5" y="212.5" height="31" width="68" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;"></rect>
+<text x="378.5" y="234" style="text-anchor: middle;">Minio</text>
+<rect x="452.5" y="212.5" height="31" width="83" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:6 6;"></rect>
+<text x="494" y="234" style="font-weight:normal;text-anchor: middle;">OpenCPU</text>
+<rect x="575.5" y="212.5" height="31" width="73" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:6 6;"></rect>
+<text x="612" y="234" style="font-weight:normal;text-anchor: middle;">Python</text></svg>
