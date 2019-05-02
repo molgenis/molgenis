@@ -2,7 +2,7 @@
 
 * [Introduction](README.md)
 * [Release Notes](https://github.com/molgenis/molgenis/releases)
-* [Try out MOLGENIS](try_molgenis/guide-try-molgenis.md)
+* [Try out MOLGENIS](try_out_molgenis/guide-try-out-molgenis.md)
 * Run MOLGENIS
   * [Quick start \(docker\)](install_molgenis/guide-docker.md)
   * [Run MOLGENIS compiling the code](install_molgenis/guide-local-compile.md)
