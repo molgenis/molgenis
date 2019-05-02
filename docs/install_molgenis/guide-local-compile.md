@@ -1,6 +1,11 @@
-# Deploy MOLGENIS with Apache Tomcat
+# Develop MOLGENIS locally
+To develop MOLGENIS on you machine we recommend to use IntelliJ as IDE. 
+You need to install the prerequisites as well.
 
-The components needed to run MOLGENIS locally or on a server are:
+## Prerequisites for MOLGENIS development
+The components needed to run MOLGENIS locally are:
+
+![MOLGENIS components](../images/install/molgenis_architecture.svg?raw=true)
 
 **
 You can download, install and use MOLGENIS for free under license [LGPLv3]().
@@ -13,14 +18,12 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 * [Minio v6](https://minio.io/)
 * Optional: [OpenCPU 2.1](https://www.opencpu.org/download.html) and [R 3.5.x](https://www.r-project.org/) (enables R scripting feature)
 * Optional: [Python 3.6](https://www.python.org/downloads/) (enables Python scripting feature)
-* [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
-
-Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-8.5-doc/deployer-howto.html).
+Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-9.0-doc/deployer-howto.html).
 
 Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice it will not work yet. This is because your database needs to be configured, and a single properties file needs to be set.
 
-**Setting your molgenis-server.properties**   
+## Setting your molgenis-server.properties   
 The properties file supplies information to the application regarding the database URL, and the initial administrator password. To make it clear to Tomcat where to find your properties file, you have to edit the setenv.sh file in the apache-tomcat folder.
 
 ```
@@ -45,7 +48,7 @@ MINIO_SECRET_KEY=molgenis
 Remember the *molgenis* specified in your db_uri, because this will be the name of the database you will create later on in PostgreSQL. This effectively means that whatever you call your database, your db_uri should point to it.
 
 **Setting up your PostgreSQL**  
-If you are unfamiliar with PostgreSQL, follow one of their [PostgreSQL installation guides](https://www.postgresql.org/docs/9.6/static/index.html). Once you have a PostgreSQL server running, open up the included pgAdmin application that is supplied with most PostgreSQL installations, and perform the following actions:
+If you are unfamiliar with PostgreSQL, follow one of their [PostgreSQL installation guides](https://www.postgresql.org/docs/11/static/index.html). Once you have a PostgreSQL server running, open up the included pgAdmin application that is supplied with most PostgreSQL installations, and perform the following actions:
 
 - Add a database 'molgenis'
 - Add a user 'molgenis' (password 'molgenis') under Login Roles
@@ -55,10 +58,17 @@ For example, in psql terminal type:
 ```
 CREATE DATABASE molgenis;
 CREATE USER molgenis WITH PASSWORD 'molgenis';
+
+-- optional for creation of databases by molgenis user
+-- this is needed when you run integration tests 
 ALTER USER molgenis CREATEDB;
+
+GRANT ALL PRIVILEGES ON SCHEMA molgenis TO molgenis;
 ```
 
-**Configuring Elasticsearch**  
+Set the credentials of the database in the *molgenis-server.properties*. See [Setting your molgenis-server.properties](setting-your-molgenis-server-properties)
+
+## Configuring Elasticsearch  
 Open elasticsearch.yml in the Elasticsearch config directory and set the following properties:
 ```
 cluster.name: molgenis
@@ -75,10 +85,24 @@ By default MOLGENIS will try to connect to a node within cluster 'molgenis' on a
 elasticsearch.cluster.name=my-cluster-name
 elasticsearch.transport.addresses=127.1.2.3:9300,127.3.4.5:9301
 ```
-**Launching MOLGENIS**  
-Now that your database server, Elasticsearch and properties file have been configured, restart the Apache Tomcat server.
-If you open up a web browser and navigate to where your apache-tomcat applications are deployed (often this is localhost:8080) you should see the following:  
 
-![](../images//molgenis_home_logged_out.png?raw=true, "molgenis home page")  
+## Get the code
+Create account on github.com. 
 
-Congratulations! You now have your MOLGENIS application up and running. Remember the admin.password you set in the molgenis-server.properties file? Use that password to login as the admin user. The next section will take you through the different modules MOLGENIS has to offer.
+Copy the clone URL.
+
+```bash
+mkdir -p ~/git
+cd ~/git 
+git clone http://github.com/molgenis/molgenis
+``` 
+
+*Optionally select stable molgenis version:*
+
+```bash
+git fetch --tags origin
+git checkout <tag name: see https://github.com/molgenis/molgenis/releases>
+```
+
+## Start MOLGENIS
+We use [IntelliJ](../developer_documentation/intellij.md) as IDE to run the code in.
