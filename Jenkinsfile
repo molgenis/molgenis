@@ -42,13 +42,14 @@ pipeline {
             environment {
                 // PR-1234-231
                 TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                // 0.0.0-SNAPSHOT-PR-1234-231
-                PREVIEW_VERSION = "0.0.0-SNAPSHOT-${TAG}"
             }
             stages {
                 stage('Build [ PR ]') {
                     steps {
                         container('maven') {
+                            script {
+                                env.PREVIEW_VERSION = sh(script: "grep version pom.xml | grep SNAPSHOT | cut -d'>' -f2 | cut -d'<' -f1", returnStdout: true).trim() + "-${env.TAG}"
+                            }
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
                             sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K -C ${GIT_COMMIT}"
