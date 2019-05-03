@@ -54,7 +54,7 @@ public class GroupRestController {
   public static final String USER = "/user";
 
   @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
-  private static final String SECURITY_API_PATH = ApiNamespace.API_PATH + "/identities/v1";
+  private static final String SECURITY_API_PATH = ApiNamespace.API_PATH + "/identities";
 
   static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
   private static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";

@@ -389,7 +389,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(true);
     mockMvc
-        .perform(delete("/api/identities/v1/group/devs/member/henkie"))
+        .perform(delete("/api/identities/group/devs/member/henkie"))
         .andExpect(status().isNoContent());
     verify(groupService).removeMember(group, user);
   }
@@ -399,7 +399,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(false);
     mockMvc
-        .perform(delete("/api/identities/v1/group/devs/member/henkie"))
+        .perform(delete("/api/identities/group/devs/member/henkie"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.errors[0].code").value("DS10"))
         .andExpect(
@@ -418,7 +418,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .getGroup("devs");
 
     mockMvc
-        .perform(delete("/api/identities/v1/group/devs/member/henkie"))
+        .perform(delete("/api/identities/group/devs/member/henkie"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.errors[0].code").value("D02"))
         .andExpect(
@@ -434,7 +434,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(true);
     mockMvc
-        .perform(delete("/api/identities/v1/group/devs/member/henkie"))
+        .perform(delete("/api/identities/group/devs/member/henkie"))
         .andExpect(status().isNotFound());
   }
 
@@ -452,7 +452,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .removeMember(group, user);
 
     mockMvc
-        .perform(delete("/api/identities/v1/group/devs/member/henkie"))
+        .perform(delete("/api/identities/group/devs/member/henkie"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.errors[0].code").value("D02"))
         .andExpect(
