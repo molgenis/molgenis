@@ -65,7 +65,7 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     InheritedPermissionsResult expected =
         getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
 
-    assertEquals(resolver.getInheritedPermissions(entityAcl, user), expected);
+    assertEquals(resolver.getInheritedPermissionsResults(entityAcl, user), expected);
   }
 
   @Test

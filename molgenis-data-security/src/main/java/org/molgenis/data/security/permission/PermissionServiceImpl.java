@@ -9,7 +9,6 @@ import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,6 @@ import org.molgenis.data.security.exception.DuplicatePermissionException;
 import org.molgenis.data.security.exception.PermissionNotSuitableException;
 import org.molgenis.data.security.exception.UnknownAceException;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
-import org.molgenis.data.security.permission.inheritance.model.InheritedPermissionsResult;
 import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.LabelledType;
@@ -176,6 +174,14 @@ public class PermissionServiceImpl implements PermissionService {
   public Map<String, Set<LabelledPermission>> getPermissionsForType(
       String typeId, Set<Sid> sids, boolean isReturnInherited) {
     entityHelper.checkEntityTypeExists(typeId);
+    List<ObjectIdentity> objectIdentities = getObjectIdentities(typeId, sids, isReturnInherited);
+    Map<ObjectIdentity, Acl> aclMap = readAcls(sids, objectIdentities);
+
+    return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
+  }
+
+  private List<ObjectIdentity> getObjectIdentities(
+      String typeId, Set<Sid> sids, boolean isReturnInherited) {
     List<ObjectIdentity> objectIdentities;
     if (sids.isEmpty()) {
       objectIdentities = objectIdentityService.getObjectIdentities(typeId);
@@ -187,6 +193,10 @@ public class PermissionServiceImpl implements PermissionService {
         objectIdentities = objectIdentityService.getObjectIdentities(typeId, sids);
       }
     }
+    return objectIdentities;
+  }
+
+  private Map<ObjectIdentity, Acl> readAcls(Set<Sid> sids, List<ObjectIdentity> objectIdentities) {
     Map<ObjectIdentity, Acl> aclMap = new LinkedHashMap<>();
     if (!objectIdentities.isEmpty()) {
       if (sids.isEmpty()) {
@@ -195,8 +205,7 @@ public class PermissionServiceImpl implements PermissionService {
         aclMap = mutableAclService.readAclsById(objectIdentities, userRoleTools.sortSids(sids));
       }
     }
-
-    return getPermissions(aclMap, objectIdentities, sids, isReturnInherited);
+    return aclMap;
   }
 
   @Override
@@ -361,25 +370,18 @@ public class PermissionServiceImpl implements PermissionService {
         ownPermission = PermissionSetUtils.getPermissionSet(ace);
       }
     }
-    List<LabelledPermission> labelledPermissions = new LinkedList<>();
+    Set<LabelledPermission> inheritedPermissions = new LinkedHashSet<>();
     if (isReturnInheritedPermissions) {
-      InheritedPermissionsResult inheritedPermissionsResult =
-          inheritanceResolver.getInheritedPermissions(acl, sid);
-      labelledPermissions.addAll(
-          inheritanceResolver.convertToInheritedPermissions(inheritedPermissionsResult));
+      inheritedPermissions.addAll(inheritanceResolver.getInheritedPermissions(acl, sid));
     }
-    if (ownPermission != null || !labelledPermissions.isEmpty()) {
-      LinkedHashSet<LabelledPermission> deduplicatedInheritedPermissions =
-          new LinkedHashSet<>(labelledPermissions);
-      if (deduplicatedInheritedPermissions.isEmpty()) {
-        deduplicatedInheritedPermissions = null;
-      }
+    if (ownPermission != null || !inheritedPermissions.isEmpty()) {
+      inheritedPermissions = inheritedPermissions.isEmpty() ? null : inheritedPermissions;
       result.add(
           LabelledPermission.create(
               sid,
               entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()),
               ownPermission,
-              deduplicatedInheritedPermissions));
+              inheritedPermissions));
     }
   }
 }

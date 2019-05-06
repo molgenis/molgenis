@@ -40,7 +40,7 @@ public class PermissionInheritanceResolver {
     this.entityHelper = requireNonNull(entityHelper);
   }
 
-  public InheritedPermissionsResult getInheritedPermissions(Acl acl, Sid sid) {
+  InheritedPermissionsResult getInheritedPermissionsResults(Acl acl, Sid sid) {
     List<InheritedUserPermissionsResult> inheritedUserPermissionsResult =
         getPermissionsForRoles(acl, sid);
     InheritedAclPermissionsResult inheritedAclPermissionsResult = getParentAclPermissions(acl, sid);
@@ -114,8 +114,15 @@ public class PermissionInheritanceResolver {
             && isNotEmpty(result.getParentAclPermissions()));
   }
 
-  public Set<LabelledPermission> convertToInheritedPermissions(
+  public Set<LabelledPermission> getInheritedPermissions(Acl acl, Sid sid) {
+    InheritedPermissionsResult inheritedPermissionsResult =
+        getInheritedPermissionsResults(acl, sid);
+    return convertToInheritedPermissions(inheritedPermissionsResult);
+  }
+
+  Set<LabelledPermission> convertToInheritedPermissions(
       InheritedPermissionsResult inheritedPermissionsResult) {
+
     List<InheritedUserPermissionsResult> parentRolePermissions =
         inheritedPermissionsResult.getRequestedAclParentRolesPermissions();
     InheritedAclPermissionsResult parentAclPermissions =
