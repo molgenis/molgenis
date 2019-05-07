@@ -58,6 +58,7 @@ public class GroupRestController {
 
   static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
   private static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
+  private static final String ROLE_EXTEND_END_POINT = GROUP_END_POINT + "/{groupName}/role";
   private static final String GROUP_PERMISSION_END_POINT =
       GROUP_END_POINT + "/{groupName}/permission";
   static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
@@ -227,6 +228,73 @@ public class GroupRestController {
     final Role newRole = roleService.getRole(groupMember.getRoleName());
 
     groupService.updateMemberRole(group, member, newRole);
+  }
+
+  @PostMapping(ROLE_EXTEND_END_POINT)
+  @ApiOperation(value = "Make a role extend a group role", response = ResponseEntity.class)
+  @Transactional
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "Group role included in role",
+        response = ResponseEntity.class)
+  })
+  public ResponseEntity addExtends(
+      @PathVariable(value = "groupName") String groupName,
+      @RequestBody AddExtendsCommand addExtendsCommand) {
+    checkGroupPermission(groupName, GroupPermission.ADD_MEMBERSHIP);
+    final Group group = groupService.getGroup(groupName);
+    final String groupRoleName = addExtendsCommand.getGroupRoleName();
+    final String memberRoleName = addExtendsCommand.getMemberRoleName();
+    final Role groupRole = roleService.getRole(groupRoleName);
+    final Role memberRole = roleService.getRole(memberRoleName);
+
+    groupService.addExtendsRole(group, groupRole, memberRole);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
+  @ApiOperation(value = "Change group role extension", response = ResponseEntity.class)
+  @Transactional
+  @ResponseStatus(HttpStatus.OK)
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "Updated membership role", response = ResponseEntity.class)
+  })
+  public void updateExtends(
+      @PathVariable(value = "groupName") String groupName,
+      @PathVariable(value = "roleName") String roleName,
+      @RequestBody UpdateExtendsCommand updateExtendsCommand) {
+    checkGroupPermission(groupName, GroupPermission.UPDATE_MEMBERSHIP);
+    final Group group = groupService.getGroup(groupName);
+    final String groupRoleName = updateExtendsCommand.getRole();
+    final Role memberRole = roleService.getRole(roleName);
+    final Role groupRole = roleService.getRole(groupRoleName);
+
+    groupService.updateExtendsRole(group, groupRole, memberRole);
+  }
+
+  @DeleteMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
+  @ApiOperation(
+      value = "Remove extension from a grouprole from a role",
+      response = ResponseEntity.class)
+  @Transactional
+  @ApiResponses({
+    @ApiResponse(
+        code = 204,
+        message = "Group role extension removed from role",
+        response = ResponseEntity.class)
+  })
+  public ResponseEntity removeExtends(
+      @PathVariable(value = "groupName") String groupName,
+      @PathVariable(value = "roleName") String memberRoleName) {
+    checkGroupPermission(groupName, GroupPermission.REMOVE_MEMBERSHIP);
+    final Group group = groupService.getGroup(groupName);
+    final Role memberRole = roleService.getRole(memberRoleName);
+
+    groupService.removeExtendsRole(group, memberRole);
+
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping(GROUP_END_POINT + "/{groupName}/role")
