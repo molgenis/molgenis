@@ -1,4 +1,4 @@
-# Python client example
+# Python
 
 ::: tip Summary
 MOLGENIS Python API allows access to your MOLGENIS data from python. It is available on every MOLGENIS with version 1.14.0 and up on the URL `http://molgenis.mydomain.example/molgenis.py`.
@@ -12,7 +12,7 @@ We'll be creating a scatter plot so if you haven't already, install matplotlib f
 pip install matplotlib
 ```
 
-Download the python api from a molgenis server, for instance [https://molgenis01.target.rug.nl/molgenis.py](https://molgenis56.target.rug.nl/molgenis.py) and save it in `molgenis.py`.
+Download the python api from a molgenis server, for instance [https://molgenis01.target.rug.nl/molgenis.py](https://molgenis56.gcc.rug.nl/molgenis.py) and save it in `molgenis.py`.
 
 Start an interactive python shell and create a molgenis connection:
 
@@ -117,4 +117,4 @@ And add a line for the non-specific expression.
 plt.plot([0, 5000], [0, 5000])
 plt.show()
 ```
-![image](../../images/rs12460890-py.png)
+![image](images/rs12460890-py.png)

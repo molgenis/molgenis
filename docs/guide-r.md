@@ -1,4 +1,4 @@
-# R script example
+# R
 
 ::: tip summary
 The R API is a script that allows access to your MOLGENIS data via the R-Project statistical package. It is available on every MOLGENIS on the URL `http://molgenis.mydomain.example/molgenis.R`.

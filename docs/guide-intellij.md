@@ -1,4 +1,4 @@
-# Howto develop molgenis
+# Using IntelliJ
 
 A rough guide on how to develop molgenis in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA 2016.1 Ultimate, courteously provided to us by

@@ -1,4 +1,4 @@
-# Python client API
+# Python-api client
 
 ::: tip Python client
 The MOLGENIS python client API allows you to retrieve, create, update and delete entities from within python.

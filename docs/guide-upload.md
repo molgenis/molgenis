@@ -1,4 +1,4 @@
-# Import tool
+# Import data
 
 In this section you will learn how to systematically upload using meta-data annotated spreadsheets and strict formats.
 Let us not wait any longer! After a quick re-cap of terminology and formats we will describe how you can import your data.

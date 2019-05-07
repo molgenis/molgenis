@@ -1,4 +1,4 @@
-# Quick import
+# Quickly import data
 
 In case the data structure is simple you can bypass the data modeling part as described in the structured import.
 Instead, the Quick data import will automatically derive the data structure (with some obvious limitations).

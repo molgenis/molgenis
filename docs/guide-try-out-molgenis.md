@@ -47,7 +47,7 @@ Go to the Upload menu. You now should see something like this:
 
 ![Importer first screen](images/importer_first_screen.png?raw=true, "importer")
 
-To keep it simple, all you need to do is click the 'select a file' button, select your newly made EMX file, and press the next button until it starts importing. Don't worry about all the options you are skipping, we will handle those in the [upload guide](../user_documentation/import-data/guide-upload.md). After your import is done, you can view your data in the data explorer. Go there by clicking the 'Data Explorer' link in the menu.
+To keep it simple, all you need to do is click the 'select a file' button, select your newly made EMX file, and press the next button until it starts importing. Don't worry about all the options you are skipping, we will handle those in the [upload guide](guide-upload.md). After your import is done, you can view your data in the data explorer. Go there by clicking the 'Data Explorer' link in the menu.
 
 Congratulations! You have now deployed MOLGENIS either locally or on a server, and you have made the first steps on getting your data into the MOLGENIS database. Play around a bit with the different data explorer filters to get a feel on how MOLGENIS works.
 

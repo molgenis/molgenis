@@ -1,4 +1,4 @@
-# Technologies used
+# Technologies
 
 We are happy to reuse as much as we can from high-quality existing open source software projects. Find below a listing of the technologies we use:
 

@@ -1,4 +1,4 @@
-# Develop MOLGENIS locally
+# Develop locally
 To develop MOLGENIS on you machine we recommend to use IntelliJ as IDE. 
 You need to install the prerequisites as well.
 

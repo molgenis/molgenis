@@ -31,7 +31,7 @@ This is a popup screen that allows you to add filters for different attributes i
 ![Dataexplorer filter wizard](images/dataexplorer/filterwizard.png?raw=true, "dataexplorer/filterwizard")
 
 Any filters you use are stored in the URL as an RSQL query. This allows you to bookmark pages with certain columns and filters selected inside a specific table.
-For more information on RSQL operators, you can take a look at our [RSQL operator](developer_documentation/ref-RSQL.md) documentation.
+For more information on RSQL operators, you can take a look at our [RSQL operator](guide-rsql.md) documentation.
 
 ## Add, Edit, Update, Delete
 

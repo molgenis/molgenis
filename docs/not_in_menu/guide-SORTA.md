@@ -11,7 +11,7 @@ For the full paper, see [Pang et al, Database(Oxford)](http://database.oxfordjou
 We implemented the following three steps. First, coding systems or ontologies are uploaded and indexed in Lucene to enable fast searches (once for each ontology). Second, users create their own coding/recoding project by uploading a list of data values. What users get back is a shortlist of matching concepts for each value that has been retrieved from the selected coding system based on their lexical relevance.
 
 
-![SORTA example](../../images/sorta_example.jpg?raw=true, "sorta/example")
+![SORTA example](../images/sorta_example.jpg?raw=true, "sorta/example")
 
 Above is an example of matching the input value ‘external auditory canal defect’ with HPO ontology terms. A list of candidate HPO ontology terms was retrieved from the index and sorted based on similarity scores. Users can select a mapping by clicking the ‘v’ button. If none of the candidate mappings are suitable, users can choose the ‘No match’ option.
 
@@ -25,9 +25,9 @@ Step 3 - The N-gram algorithm is applied to re-calculate the similarity scores b
 Step 4 - Users can pick the correct matches from the list of concepts sorted based on N-gram similarity scores.
  
 
-![SORTA design](../../images/sorta_design.png?raw=true, "sorta/design")
+![SORTA design](../images/sorta_design.png?raw=true, "sorta/design")
  
 
 ## Ontology model
 
-Standard codes (ontologies) can be imported using the [EMX format](../import-data/ref-emx.md) , the model can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser. 
+Standard codes (ontologies) can be imported using the [EMX format](../guide-emx.md) , the model can be browsed and viewed as a UML diagram as well as a flat list in the webbrowser. 

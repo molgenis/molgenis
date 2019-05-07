@@ -1,5 +1,4 @@
-# R script client
-
+# R-api client
 The MOLGENIS R API client allows you to retrieve, create, update and delete entities from within the [R](http://r-project.org) environment.
 
 Just add
