@@ -66,25 +66,20 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
       new ImmutableMultimap.Builder<>();
 
   WebAppPermissionRegistry() {
-    Sid anonymousUser = createAnonymousSid();
+    Sid anonymousRole = createAnonymousSid();
     Sid user = createAuthoritySid(AUTHORITY_USER);
     Sid viewer = createAuthoritySid(AUTHORITY_VIEWER);
     Sid editor = createAuthoritySid(AUTHORITY_EDITOR);
     Sid manager = createAuthoritySid(AUTHORITY_MANAGER);
 
-    register(PLUGIN, HomeController.ID, anonymousUser, READ);
-    register(PLUGIN, HomeController.ID, user, READ);
+    register(PLUGIN, HomeController.ID, anonymousRole, READ);
     register(PLUGIN, UserAccountController.ID, user, READ);
-    register(PLUGIN, AppController.ID, anonymousUser, READ);
-    register(PLUGIN, AppController.ID, user, READ);
-    register(PACKAGE, PACKAGE_BEACON, anonymousUser, READ);
-    register(PACKAGE, PACKAGE_BEACON, user, READ);
+    register(PLUGIN, AppController.ID, anonymousRole, READ);
+    register(PACKAGE, PACKAGE_BEACON, anonymousRole, READ);
     register(PLUGIN, FeedbackController.ID, user, READ);
-    register(PLUGIN, RedirectController.ID, anonymousUser, READ);
-    register(PLUGIN, RedirectController.ID, user, READ);
+    register(PLUGIN, RedirectController.ID, anonymousRole, READ);
     register(PLUGIN, ImportWizardController.ID, editor, READ);
-    register(ENTITY_TYPE, FREEMARKER_TEMPLATE, anonymousUser, READ);
-    register(ENTITY_TYPE, FREEMARKER_TEMPLATE, user, READ);
+    register(ENTITY_TYPE, FREEMARKER_TEMPLATE, anonymousRole, READ);
     register(ENTITY_TYPE, FREEMARKER_TEMPLATE, editor, WRITE);
     register(PLUGIN, DataExplorerController.ID, viewer, READ);
     register(
@@ -103,13 +98,10 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(PACKAGE, PACKAGE_ONTOLOGY, user, READ);
     register(PLUGIN, QuestionnaireController.ID, editor, READ);
     register(PACKAGE, PACKAGE_GENOME_BROWSER, viewer, READ);
-    register(ENTITY_TYPE, LANGUAGE, anonymousUser, READ);
-    register(ENTITY_TYPE, LANGUAGE, user, READ);
-    register(ENTITY_TYPE, L10N_STRING, anonymousUser, READ);
-    register(ENTITY_TYPE, L10N_STRING, user, READ);
+    register(ENTITY_TYPE, LANGUAGE, anonymousRole, READ);
+    register(ENTITY_TYPE, L10N_STRING, anonymousRole, READ);
     register(PACKAGE, PACKAGE_META, user, READ);
-    register(ENTITY_TYPE, DECORATOR_CONFIGURATION, anonymousUser, READ);
-    register(ENTITY_TYPE, DECORATOR_CONFIGURATION, user, READ);
+    register(ENTITY_TYPE, DECORATOR_CONFIGURATION, anonymousRole, READ);
     register(PACKAGE, PACKAGE_META, manager, WRITE);
     register(PLUGIN, NavigatorController.ID, viewer, READ);
     register(ENTITY_TYPE, RESOURCE_DOWNLOAD_JOB_EXECUTION, editor, WRITE);
