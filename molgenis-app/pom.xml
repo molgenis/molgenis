@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>8.0.5-SNAPSHOT</version>
+    <version>8.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-app</artifactId>
   <packaging>war</packaging>
@@ -18,8 +18,6 @@
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
     <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
-
-    <rpm.release.version>${project.version}</rpm.release.version>
 
     <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
@@ -61,7 +59,6 @@
           <name>molgenis</name>
           <prefix>/usr/local</prefix>
           <changelogFile>CHANGELOG.md</changelogFile>
-          <version>${rpm.release.version}</version>
           <defineStatements>
             <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
           </defineStatements>
@@ -70,12 +67,12 @@
           <mappings>
             <mapping>
               <directory>/usr/local/share/molgenis/war</directory>
-              <filemode>755</filemode>
+              <filemode>700</filemode>
               <username>molgenis</username>
               <groupname>molgenis</groupname>
               <sources>
                 <source>
-                  <location>target/${project.artifactId}-${rpm.release.version}.war</location>
+                  <location>target/${project.artifactId}-${project.version}.war</location>
                 </source>
               </sources>
             </mapping>

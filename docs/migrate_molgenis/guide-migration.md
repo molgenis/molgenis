@@ -1,4 +1,5 @@
 # Migration
+The versions
 
 ## From 7.x to 8.0.x
 There are a few major changes in the migration from 7.x to 8.x.
@@ -28,8 +29,6 @@ pg_dump molgenis > molgenis.sql
 
 Load you database using on the new server (as root-user):
 
-Be sure you drop the database before you load the customer database.
-
 ```
 cd /tmp/
 psql molgenis < molgenis.sql
@@ -39,20 +38,16 @@ psql molgenis < molgenis.sql
 Go to a terminal and tar you files into an archive (as root-user):
 
 ```
-cd /home/molgens/
-tar -pzcvf /tmp/molgenis.tar.gz /data
+cd /tmp/
+tar -pzcvf molgenis.tar.gz /home/molgenis/data
 ```
 
 Restore the filestore on the new server (as root-user):
 
 ```bash
-cd /home/molgenis
-mv data data_backup
+cd /tmp/
 tar -pxvzf molgenis.tar.gz
 ```
-
->note: if you use our [Ansible playbook](https://github.com/molgenis/ansible) to deploy MOLGENIS you have to do the following steps:
-> - execute: ```chmod -R 770 /home/molgenis```
 
 #### Configuration
 Go to a terminal and tar you files into an archive (as root-user):
@@ -69,25 +64,10 @@ cd /tmp/
 cp molgenis-server.properties /home/molgenis/ .
 ```
 
-You need to add additional properties to make the deployment work with MOLGENIS 8.0.x
-
-```
-MINIO_ACCESS_KEY=molgenis
-MINIO_SECRET_KEY=molgenis
-```
-
 ### EMX models and other configuration
 The following changes require manual actions (if applicable for your application):
 
 - MREF as labels are not allowed anymore. You should use template expressions. Please check: [template expressions](../user_documentation/import-data/ref-emx.md#template).
-    - You can migrate the database first and if you encounter the following error 
-    
-      ```
-      Error:
-        Conversion failure in entity type [#name#] attribute [#name#]; No converter found capable of converting from type [org.molgenis.data.support.DynamicEntity] to type [java.lang.String]
-      ```  
-    
-      You can fix these attributes in the Metadata Manager by editing the expression of the mentioned attribute.
 - If users or groups were giving special permissions on the _Settings Manager_ Plugin, these permissions should be set again for the replacement _Settings_ Plugin. The plugin itself is replaced automatically.
    
 
