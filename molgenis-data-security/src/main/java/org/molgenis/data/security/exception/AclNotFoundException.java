@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.i18n.CodedRuntimeException;
 
 public class AclNotFoundException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "DS20";
+  private static final String ERROR_CODE = "DS30";
 
   private final String typeId;
 

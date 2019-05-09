@@ -8,7 +8,7 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 public class UnknownAceException extends UnknownDataException {
-  private static final String ERROR_CODE = "DS21";
+  private static final String ERROR_CODE = "DS31";
   private final ObjectIdentity objectIdentity;
   private final Sid sid;
   private final String operation;
