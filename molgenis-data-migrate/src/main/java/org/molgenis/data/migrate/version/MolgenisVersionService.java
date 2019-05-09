@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService {
   /** package-private for testability */
-  static final int VERSION = 35;
+  static final int VERSION = 37;
 
   private final DataSource dataSource;
 
-  public MolgenisVersionService(DataSource dataSource) {
+  MolgenisVersionService(DataSource dataSource) {
     this.dataSource = requireNonNull(dataSource);
   }
 

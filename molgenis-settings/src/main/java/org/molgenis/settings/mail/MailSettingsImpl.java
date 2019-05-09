@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
@@ -35,11 +34,6 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   private static final String ID = "MailSettings";
 
   public static final String DEFAULT_REPLY_EMAIL_ADDRESS = "molgenis+admin@gmail.com";
-
-  public MailSettingsImpl(Entity entity) {
-    super(ID);
-    set(entity);
-  }
 
   public MailSettingsImpl() {
     super(ID);

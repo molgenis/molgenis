@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,22 +30,30 @@ public class TokenAuthenticationFilterTest {
 
   @Test
   public void doFilter() throws IOException, ServletException {
-    MockHttpServletRequest request = new MockHttpServletRequest();
-    MockHttpServletResponse response = new MockHttpServletResponse();
-    FilterChain chain = mock(FilterChain.class);
+    SecurityContext previous = SecurityContextHolder.getContext();
+    try {
+      SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+      SecurityContextHolder.setContext(testContext);
 
-    RestAuthenticationToken auth =
-        new RestAuthenticationToken(
-            "admin", "admin", Arrays.asList(new SimpleGrantedAuthority("admin")), "token");
+      MockHttpServletRequest request = new MockHttpServletRequest();
+      MockHttpServletResponse response = new MockHttpServletResponse();
+      FilterChain chain = mock(FilterChain.class);
 
-    request.setRequestURI("/api/v1/dataset");
-    request.addHeader(TokenExtractor.TOKEN_HEADER, "token");
-    when(authenticationProvider.authenticate(new RestAuthenticationToken("token")))
-        .thenReturn(auth);
+      RestAuthenticationToken auth =
+          new RestAuthenticationToken(
+              "admin", "admin", Arrays.asList(new SimpleGrantedAuthority("admin")), "token");
 
-    filter.doFilter(request, response, chain);
-    verify(chain).doFilter(request, response);
+      request.setRequestURI("/api/v1/dataset");
+      request.addHeader(TokenExtractor.TOKEN_HEADER, "token");
+      when(authenticationProvider.authenticate(new RestAuthenticationToken("token")))
+          .thenReturn(auth);
 
-    assertEquals(SecurityContextHolder.getContext().getAuthentication(), auth);
+      filter.doFilter(request, response, chain);
+      verify(chain).doFilter(request, response);
+
+      assertEquals(SecurityContextHolder.getContext().getAuthentication(), auth);
+    } finally {
+      SecurityContextHolder.setContext(previous);
+    }
   }
 }

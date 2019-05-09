@@ -111,6 +111,9 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     copyService.copy(singletonList(id), targetPackageId, progress);
     await().atMost(5, TimeUnit.SECONDS).until(copyJobFinished(progress));
 
+    LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
+    waitForWorkToBeFinished(indexService, LOG);
+
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     assertEquals(packages.size(), 1);
@@ -163,6 +166,9 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     copyService.copy(singletonList(id), targetPackageId, progress);
     await().atMost(5, TimeUnit.SECONDS).until(copyJobFinished(progress));
 
+    LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
+    waitForWorkToBeFinished(indexService, LOG);
+
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
@@ -201,6 +207,9 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
     await().atMost(5, TimeUnit.SECONDS).until(copyJobFinished(progress));
+
+    LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
+    waitForWorkToBeFinished(indexService, LOG);
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());

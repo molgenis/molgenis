@@ -225,14 +225,22 @@ public class MappingServiceController extends PluginController {
    */
   @PostMapping("/addEntityMapping")
   public String addEntityMapping(
-      @RequestParam String mappingProjectId, String target, String source) {
+      @RequestParam String mappingProjectId, String target, String source, String algorithmSource) {
     EntityType sourceEntityType = dataService.getEntityType(source);
+    EntityType algorithmSourceEntityType =
+        !StringUtils.isBlank(algorithmSource) ? dataService.getEntityType(algorithmSource) : null;
     EntityType targetEntityType = dataService.getEntityType(target);
 
     MappingProject project = mappingService.getMappingProject(mappingProjectId);
     EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityType);
     mappingService.updateMappingProject(project);
-    autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, project);
+    if (algorithmSourceEntityType == null) {
+      autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, project);
+    } else {
+      EntityMapping copySourceEntityMapping =
+          project.getMappingTarget(target).getMappingForSource(algorithmSource);
+      copyAlgorithms(project, mapping, copySourceEntityMapping);
+    }
 
     return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
   }
@@ -507,7 +515,7 @@ public class MappingServiceController extends PluginController {
             searchTerms);
 
     // If no relevant attributes are found, return all source attributes
-    if (attributeSearchResults.getHits().iterator().hasNext()) {
+    if (!attributeSearchResults.getHits().iterator().hasNext()) {
       return stream(entityMapping.getSourceEntityType().getAtomicAttributes())
           .filter(attribute -> attribute.getDataType() != COMPOUND)
           .map(ExplainedAttributeDto::create)
@@ -1012,6 +1020,12 @@ public class MappingServiceController extends PluginController {
       EntityType targetEntityType,
       MappingProject project) {
     algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping);
+    mappingService.updateMappingProject(project);
+  }
+
+  private void copyAlgorithms(
+      MappingProject project, EntityMapping entityMapping, EntityMapping copySourceEntityMapping) {
+    algorithmService.copyAlgorithms(copySourceEntityMapping, entityMapping);
     mappingService.updateMappingProject(project);
   }
 

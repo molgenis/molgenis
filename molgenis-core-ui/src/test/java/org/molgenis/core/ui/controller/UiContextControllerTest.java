@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.gson.Gson;
 import java.io.File;
 import java.nio.file.Files;
-import org.junit.AfterClass;
 import org.mockito.Mock;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.settings.AppSettings;
@@ -27,11 +26,13 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,7 +41,6 @@ import org.testng.annotations.Test;
 public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextTests {
 
   private MockMvc mockMvc;
-  private static Authentication AUTHENTICATION_PREVIOUS;
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
   @Autowired private FallbackExceptionHandler fallbackExceptionHandler;
@@ -51,6 +51,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Mock private AppSettings appSettings;
   @Mock private CookieWallService cookieWallService;
+  private SecurityContext previousContext;
 
   @Configuration
   public static class Config {
@@ -85,14 +86,16 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @BeforeClass
   public void setUpBeforeClass() {
-    AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     Authentication authentication = mock(AnonymousAuthenticationToken.class);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
   }
 
   @AfterClass
-  public void resetAuth() {
-    SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
@@ -110,7 +113,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
     when(cookieWallService.showCookieWall()).thenReturn(false);
 
     mockMvc
-        .perform(get("/plugin/app-ui-context"))
+        .perform(get("/app-ui-context"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.navBarLogo", is(appSettings.getLogoNavBarHref())))
         .andExpect(jsonPath("$.logoTop", is(appSettings.getLogoTopHref())))

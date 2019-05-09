@@ -3,6 +3,10 @@ package org.molgenis.data.importer.emx;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_I18NSTRINGS;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_LANGUAGES;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -57,13 +61,13 @@ public class EmxImportService implements ImportService {
   }
 
   private boolean isMetadataSheet(String entityTypeId) {
-    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)
-        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_PACKAGES);
+    return entityTypeId.equalsIgnoreCase(EMX_ATTRIBUTES)
+        || entityTypeId.equalsIgnoreCase(EMX_PACKAGES);
   }
 
   private boolean isI18nSheet(String entityTypeId) {
-    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)
-        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS);
+    return entityTypeId.equalsIgnoreCase(EMX_LANGUAGES)
+        || entityTypeId.equalsIgnoreCase(EMX_I18NSTRINGS);
   }
 
   @Override
@@ -131,8 +135,8 @@ public class EmxImportService implements ImportService {
       String selectedPackage) {
     List<String> skipEntities =
         newArrayList(
-            EmxMetadataParser.EMX_ATTRIBUTES,
-            EmxMetadataParser.EMX_PACKAGES,
+            EMX_ATTRIBUTES,
+            EMX_PACKAGES,
             EmxMetadataParser.EMX_ENTITIES,
             EmxMetadataParser.EMX_TAGS);
     ImmutableMap<String, EntityType> entityTypeMap =
@@ -151,5 +155,18 @@ public class EmxImportService implements ImportService {
             });
 
     return importableEntitiesMap;
+  }
+
+  @Override
+  public MetadataAction getMetadataAction(RepositoryCollection source) {
+    // Default metadata action is 'ADD' but only if any metadata is available.
+    if (source.hasRepository(EMX_ATTRIBUTES)
+        || source.hasRepository(EMX_PACKAGES)
+        || source.hasRepository(EMX_LANGUAGES)
+        || source.hasRepository(EMX_I18NSTRINGS)) {
+      return MetadataAction.ADD;
+    } else {
+      return MetadataAction.IGNORE;
+    }
   }
 }

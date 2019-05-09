@@ -1,9 +1,12 @@
 package org.molgenis.semanticmapper.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -70,6 +73,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -77,6 +81,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -131,6 +136,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   private Attribute heightAttr;
 
   private MockMvc mockMvc;
+  private SecurityContext previousContext;
 
   public MappingServiceControllerTest() {
     super(Strictness.WARN);
@@ -139,14 +145,22 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   @BeforeClass
   public void beforeClass() {
     initMocks(this);
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", null);
+    authentication.setAuthenticated(true);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
+  }
+
+  @AfterClass
+  public void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @BeforeMethod
   public void beforeTest() {
     user = when(mock(User.class).getUsername()).thenReturn(USERNAME).getMock();
-    TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", null);
-    authentication.setAuthenticated(true);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
 
     hop = entityTypeFactory.create("HOP");
     ageAttr = attrMetaFactory.create().setName("age").setDataType(INT);
@@ -566,7 +580,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
+  public void testGetSemanticSearchAttributeMappingRelevantAttributes() {
     Map<String, String> requestBody =
         ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
     MappingProject mappingProject = mock(MappingProject.class);
@@ -599,5 +613,96 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     assertEquals(
         controller.getSemanticSearchAttributeMapping(requestBody),
         singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
+  }
+
+  @Test
+  public void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
+    Map<String, String> requestBody =
+        ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
+    MappingProject mappingProject = mock(MappingProject.class);
+    when(mappingService.getMappingProject("id0")).thenReturn(mappingProject);
+    MappingTarget mappingTarget = mock(MappingTarget.class);
+    EntityMapping entityMapping = mock(EntityMapping.class);
+    EntityType targetEntityType = mock(EntityType.class);
+    when(entityMapping.getTargetEntityType()).thenReturn(targetEntityType);
+    EntityType sourceEntityType = mock(EntityType.class);
+    Attribute stringAttribute =
+        when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(stringAttribute.getName()).thenReturn("stringAttribute");
+    Attribute compoundAttribute =
+        when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+    when(compoundAttribute.getName()).thenReturn("compoundAttribute");
+    when(sourceEntityType.getAtomicAttributes())
+        .thenReturn(asList(stringAttribute, compoundAttribute));
+    when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
+    when(mappingTarget.getMappingForSource("source0")).thenReturn(entityMapping);
+    when(mappingProject.getMappingTarget("target0")).thenReturn(mappingTarget);
+    Multimap<Relation, OntologyTerm> multiMap = ArrayListMultimap.create();
+    when(ontologyTagService.getTagsForAttribute(targetEntityType, null)).thenReturn(multiMap);
+    when(semanticSearchService.findAttributes(sourceEntityType, targetEntityType, null, emptySet()))
+        .thenReturn(AttributeSearchResults.create(stringAttribute, Hits.create(emptyList())));
+    assertEquals(
+        controller.getSemanticSearchAttributeMapping(requestBody),
+        singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
+  }
+
+  @Test
+  public void testAddEntityMapping() {
+    String mappingProjectId = "MyMappingProjectId";
+    MappingProject mappingProject = mock(MappingProject.class);
+    when(mappingService.getMappingProject(mappingProjectId)).thenReturn(mappingProject);
+
+    String targetEntityTypeId = "MyTargetEntityTypeId";
+    String sourceEntityTypeId = "MySourceEntityTypeId";
+    EntityType targetEntityType = mock(EntityType.class);
+    EntityType sourceEntityType = mock(EntityType.class);
+    doReturn(targetEntityType).when(dataService).getEntityType(targetEntityTypeId);
+    doReturn(sourceEntityType).when(dataService).getEntityType(sourceEntityTypeId);
+
+    MappingTarget mappingTarget = mock(MappingTarget.class);
+    EntityMapping entityMapping = mock(EntityMapping.class);
+    when(mappingTarget.addSource(sourceEntityType)).thenReturn(entityMapping);
+    when(mappingProject.getMappingTarget(targetEntityTypeId)).thenReturn(mappingTarget);
+
+    controller.addEntityMapping(mappingProjectId, targetEntityTypeId, sourceEntityTypeId, null);
+
+    verify(mappingTarget).addSource(sourceEntityType);
+    verify(algorithmService)
+        .autoGenerateAlgorithm(sourceEntityType, targetEntityType, entityMapping);
+    verify(mappingService, times(2)).updateMappingProject(mappingProject);
+  }
+
+  @Test
+  public void testAddEntityMappingCopyAlgorithms() {
+    String mappingProjectId = "MyMappingProjectId";
+    MappingProject mappingProject = mock(MappingProject.class);
+    when(mappingService.getMappingProject(mappingProjectId)).thenReturn(mappingProject);
+
+    String targetEntityTypeId = "MyTargetEntityTypeId";
+    String sourceEntityTypeId = "MySourceEntityTypeId";
+    String algorithmSourceEntityTypeId = "MyAlgorithmSourceEntityTypeId";
+    EntityType targetEntityType = mock(EntityType.class);
+    EntityType sourceEntityType = mock(EntityType.class);
+    EntityType algorithmSourceEntityType = mock(EntityType.class);
+    doReturn(targetEntityType).when(dataService).getEntityType(targetEntityTypeId);
+    doReturn(sourceEntityType).when(dataService).getEntityType(sourceEntityTypeId);
+    doReturn(algorithmSourceEntityType)
+        .when(dataService)
+        .getEntityType(algorithmSourceEntityTypeId);
+
+    MappingTarget mappingTarget = mock(MappingTarget.class);
+    EntityMapping entityMapping = mock(EntityMapping.class);
+    when(mappingTarget.addSource(sourceEntityType)).thenReturn(entityMapping);
+    EntityMapping sourceEntityMapping = mock(EntityMapping.class);
+    when(mappingTarget.getMappingForSource(algorithmSourceEntityTypeId))
+        .thenReturn(sourceEntityMapping);
+    when(mappingProject.getMappingTarget(targetEntityTypeId)).thenReturn(mappingTarget);
+
+    controller.addEntityMapping(
+        mappingProjectId, targetEntityTypeId, sourceEntityTypeId, algorithmSourceEntityTypeId);
+
+    verify(mappingTarget).addSource(sourceEntityType);
+    verify(algorithmService).copyAlgorithms(sourceEntityMapping, entityMapping);
+    verify(mappingService, times(2)).updateMappingProject(mappingProject);
   }
 }

@@ -15,6 +15,8 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
+import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Optional;
@@ -29,6 +31,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.TemplateExpressionSyntaxException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.testng.Assert;
@@ -54,7 +57,7 @@ public class AttributeValidatorTest {
           "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
   public void validateAttributeInvalidName() {
     Attribute attr = makeMockAttribute("invalid.name");
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test
@@ -69,7 +72,7 @@ public class AttributeValidatorTest {
     when(mappedByAttr.getDataType()).thenReturn(XREF);
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test(
@@ -87,7 +90,7 @@ public class AttributeValidatorTest {
     when(mappedByAttr.getDataType()).thenReturn(XREF);
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test(
@@ -105,7 +108,7 @@ public class AttributeValidatorTest {
     when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test
@@ -121,7 +124,7 @@ public class AttributeValidatorTest {
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
     when(attr.getOrderBy()).thenReturn(new Sort(mappedByAttrName, ASC));
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test(
@@ -143,7 +146,7 @@ public class AttributeValidatorTest {
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
     when(attr.getOrderBy()).thenReturn(new Sort("fail", ASC));
-    attributeValidator.validate(attr, ValidationMode.ADD);
+    attributeValidator.validate(attr, ADD);
   }
 
   @Test(
@@ -449,6 +452,22 @@ public class AttributeValidatorTest {
     return new Object[][] {
       {currentAttr1, newAttr1}, {currentAttr2, newAttr2}, {currentAttr3, newAttr3}
     };
+  }
+
+  @Test(expectedExceptions = TemplateExpressionSyntaxException.class)
+  public void testTemplateExpressionInvalid() {
+    Attribute attr = makeMockAttribute("name");
+    when(attr.getExpression()).thenReturn("test");
+    when(attr.getDataType()).thenReturn(STRING);
+    attributeValidator.validate(attr, ADD_SKIP_ENTITY_VALIDATION);
+  }
+
+  @Test
+  public void testTemplateExpressionValid() {
+    Attribute attr = makeMockAttribute("name");
+    when(attr.getExpression()).thenReturn("{template:xref.id}");
+    when(attr.getDataType()).thenReturn(STRING);
+    attributeValidator.validate(attr, ADD_SKIP_ENTITY_VALIDATION);
   }
 
   private static Attribute makeMockAttribute(String name) {

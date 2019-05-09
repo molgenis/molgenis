@@ -8,8 +8,8 @@ import org.molgenis.validation.exception.LocalhostNotAllowedException;
 import org.molgenis.validation.exception.RelativePathNotAllowedException;
 
 public class UriValidator {
-  private static final String HTTP = "http";
-  private static final String FTP = "ftp";
+
+  private UriValidator() {}
 
   public static URI getSafeUri(String fileLocation)
       throws UnknownHostException, URISyntaxException {

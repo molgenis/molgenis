@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Step35UpdateAclSystemSid extends MolgenisUpgrade {
-  private static final Logger LOG = LoggerFactory.getLogger(Step33UpdateForeignKeyDeferred.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Step35UpdateAclSystemSid.class);
 
   private final DataSource dataSource;
 

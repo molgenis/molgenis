@@ -74,7 +74,7 @@
                 <h4 class="modal-title" id="change-password-modal-label">Change password</h4>
             </div>
             <div class="modal-body">
-                <form id="change-password-form" class="form-horizontal" method="POST" action="" role="form">
+                <form id="change-password-form" class="form-horizontal" method="POST" action="${changePasswordEndpoint}" role="form">
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="loginPassword">Password</label>
                         <div class="col-md-8">

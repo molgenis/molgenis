@@ -2,11 +2,13 @@ package org.molgenis.data.meta.model;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -18,6 +20,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.molgenis.data.MolgenisDataException;
@@ -80,13 +83,9 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
   @Test
   public void setLabel() {
-    EntityType entityTypeMeta = mock(EntityType.class);
+    EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
     doReturn(strAttr).when(entityTypeMeta).getAttribute(LABEL);
-    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
-    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
     EntityType entityType = new EntityType(entityTypeMeta);
     String label = "label";
     entityType.setLabel(label);
@@ -96,11 +95,7 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
   @Test
   public void setLabelNull() {
-    EntityType entityTypeMeta = mock(EntityType.class);
-    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
-    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
+    EntityType entityTypeMeta = mockEntityTypeMeta();
     EntityType entityType = new EntityType(entityTypeMeta);
     assertNull(entityType.getLabel());
     assertNull(entityType.getString(LABEL));
@@ -108,10 +103,8 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
   @Test
   public void newInstanceShallowCopy() {
-    EntityType entityTypeMeta = mock(EntityType.class);
+    EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
     Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
     Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
     doReturn(strAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.ID);
@@ -119,11 +112,9 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
     doReturn(strAttr).when(entityTypeMeta).getAttribute(LABEL);
     doReturn(strAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.DESCRIPTION);
     doReturn(mrefAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.ATTRIBUTES);
-    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
     doReturn(xrefAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.EXTENDS);
     doReturn(mrefAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.TAGS);
     doReturn(strAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.BACKEND);
-    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
 
     Package package_ = mock(Package.class);
 
@@ -196,15 +187,11 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
       expectedExceptionsMessageRegExp =
           "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
   public void addAttributeWithDuplicateName() {
-    EntityType entityTypeMeta = mock(EntityType.class);
+    EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
     Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
     doReturn(strAttr).when(entityTypeMeta).getAttribute(LABEL);
     doReturn(mrefAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.ATTRIBUTES);
-    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
-    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
     EntityType entityType = new EntityType(entityTypeMeta);
     entityType.setLabel("myEntity");
     Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
@@ -215,16 +202,50 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
   @Test
   public void addLabelAttributeSetsNillableFalse() {
-    EntityType entityTypeMeta = mock(EntityType.class);
-    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
-    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
+    EntityType entityTypeMeta = mockEntityTypeMeta();
     EntityType entityType = new EntityType(entityTypeMeta);
     Attribute attr = mock(Attribute.class);
 
     entityType.setAttributeRoles(attr, ROLE_LABEL);
 
     verify(attr).setNillable(false);
+  }
+
+  @Test
+  public void testRemoveAttribute() {
+    EntityType entityTypeMeta = mockEntityTypeMeta();
+    EntityType entityType = new EntityType(entityTypeMeta);
+    Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
+    doReturn(mrefAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.ATTRIBUTES);
+
+    Attribute normalAttr = mock(Attribute.class);
+    when(normalAttr.getName()).thenReturn("normalAttr");
+    Attribute compoundAttr =
+        when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+    when(compoundAttr.getName()).thenReturn("compoundAttr");
+    Attribute childAttr1 = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    when(compoundAttr.getName()).thenReturn("childAttr1");
+    Attribute childAttr2 = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+    when(compoundAttr.getName()).thenReturn("childAttr2");
+    Attribute childAttr2a = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    when(compoundAttr.getName()).thenReturn("childAttr2a");
+    when(compoundAttr.getChildren()).thenReturn(asList(childAttr1, childAttr2));
+    when(childAttr2.getChildren()).thenReturn(singletonList(childAttr2a));
+    entityType.setOwnAllAttributes(
+        asList(normalAttr, compoundAttr, childAttr1, childAttr2, childAttr2a));
+
+    entityType.removeAttribute(compoundAttr);
+
+    assertEquals(Iterables.size(entityType.getAllAttributes()), 1);
+    assertEquals(entityType.getAllAttributes().iterator().next(), normalAttr);
+  }
+
+  private EntityType mockEntityTypeMeta() {
+    EntityType entityTypeMeta = mock(EntityType.class);
+    Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    Attribute boolAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    doReturn(boolAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.IS_ABSTRACT);
+    doReturn(intAttr).when(entityTypeMeta).getAttribute(EntityTypeMetadata.INDEXING_DEPTH);
+    return entityTypeMeta;
   }
 }

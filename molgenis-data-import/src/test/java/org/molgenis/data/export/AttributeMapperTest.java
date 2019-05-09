@@ -47,7 +47,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(attr.getParent()).thenReturn(parent);
     when(parent.getName()).thenReturn("compound");
     when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(false);
 
     doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
     doReturn("label1").when(attr).get(AttributeMetadata.LABEL);
@@ -62,6 +61,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     doReturn("express").when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn("validate").when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn("molgenis").when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(true).when(attr).get(AttributeMetadata.IS_AUTO);
 
     List<Object> expected =
         newArrayList(
@@ -88,94 +88,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             "validate",
             "molgenis",
             "tag1,tag2",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-    List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
-  }
-
-  @Test
-  public void testMapAttributeAuto() {
-    Attribute attr = mock(Attribute.class);
-    Attribute parent = mock(Attribute.class);
-    EntityType entityType = mock(EntityType.class);
-    EntityType refEntityType = mock(EntityType.class);
-    when(entityType.getId()).thenReturn("entityId");
-    when(refEntityType.getId()).thenReturn("refEntityId");
-    Tag tag1 = mock(Tag.class);
-    Tag tag2 = mock(Tag.class);
-
-    when(tag1.getId()).thenReturn("tag1");
-    when(tag2.getId()).thenReturn("tag2");
-
-    when(attr.getEntity()).thenReturn(entityType);
-    when(attr.hasRefEntity()).thenReturn(true);
-    when(attr.getRefEntity()).thenReturn(refEntityType);
-    when(attr.getLookupAttributeIndex()).thenReturn(1);
-    when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));
-    when(attr.getVisibleExpression()).thenReturn(null);
-    when(attr.isVisible()).thenReturn(true);
-    when(attr.getNullableExpression()).thenReturn(null);
-    when(attr.isNillable()).thenReturn(true);
-    when(attr.getParent()).thenReturn(parent);
-    when(parent.getName()).thenReturn("compound");
-    when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(true);
-    when(attr.getEnumOptions()).thenReturn(null);
-
-    doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
-    doReturn("label1").when(attr).get(AttributeMetadata.LABEL);
-    doReturn("this is attr 1").when(attr).get(AttributeMetadata.DESCRIPTION);
-    doReturn(STRING).when(attr).get(AttributeMetadata.TYPE);
-    doReturn(true).when(attr).get(AttributeMetadata.IS_UNIQUE);
-    doReturn(true).when(attr).get(AttributeMetadata.IS_LABEL_ATTRIBUTE);
-    doReturn(false).when(attr).get(AttributeMetadata.IS_READ_ONLY);
-    doReturn(false).when(attr).get(AttributeMetadata.IS_AGGREGATABLE);
-    doReturn(null).when(attr).get(AttributeMetadata.RANGE_MAX);
-    doReturn(null).when(attr).get(AttributeMetadata.RANGE_MIN);
-    doReturn("express").when(attr).get(AttributeMetadata.EXPRESSION);
-    doReturn("validate").when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
-    doReturn("molgenis").when(attr).get(AttributeMetadata.DEFAULT_VALUE);
-
-    List<Object> expected =
-        newArrayList(
-            "attr1",
-            "label1",
-            "this is attr 1",
-            "entityId",
-            "STRING",
-            "refEntityId",
             "true",
-            "true",
-            "true",
-            "auto",
-            "true",
-            "false",
-            "false",
-            "true",
-            null,
-            "compound",
-            null,
-            null,
-            null,
-            "express",
-            "validate",
-            "molgenis",
-            "tag1,tag2",
             null,
             null,
             null,
@@ -220,7 +133,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(attr.getParent()).thenReturn(parent);
     when(parent.getName()).thenReturn("compound");
     when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(false);
     when(attr.getEnumOptions()).thenReturn(null);
 
     doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
@@ -277,6 +189,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null,
             null,
+            null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
     assertEquals(actual, expected);
@@ -306,7 +219,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(attr.isNillable()).thenReturn(true);
     when(attr.getParent()).thenReturn(null);
     when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(false);
     when(attr.getEnumOptions()).thenReturn(null);
 
     doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
@@ -363,6 +275,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null,
             null,
+            null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
     assertEquals(actual, expected);
@@ -392,7 +305,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(attr.isNillable()).thenReturn(true);
     when(attr.getParent()).thenReturn(null);
     when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(false);
     when(attr.getEnumOptions()).thenReturn(newArrayList("enum1", "enum2"));
 
     doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
@@ -434,6 +346,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null,
             "tag1,tag2",
+            null,
             null,
             null,
             null,
@@ -478,7 +391,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(attr.isNillable()).thenReturn(true);
     when(attr.getParent()).thenReturn(null);
     when(attr.isIdAttribute()).thenReturn(true);
-    when(attr.isAuto()).thenReturn(false);
     when(attr.getEnumOptions()).thenReturn(newArrayList("enum1", "enum2"));
 
     doReturn("attr1").when(attr).get(AttributeMetadata.NAME);
@@ -494,6 +406,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     doReturn(null).when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(null).when(attr).get("isAuto");
     doReturn("Dutch Label").when(attr).get("labelNl");
     doReturn("Dutch description").when(attr).get("descriptionNl");
     doReturn("English Label").when(attr).get("labelEn");
@@ -536,6 +449,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null,
             "tag1,tag2",
+            null,
             "English Label",
             "English description",
             "Dutch Label",

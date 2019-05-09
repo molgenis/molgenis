@@ -88,7 +88,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
 
-<body>
+<body class="mg-page">
     <#if !(version??) || version == 1>
         <#-- Navbar menu -->
         <#if menu_id??>
@@ -124,8 +124,8 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid"
-     style="padding-top: <#if app_settings.logoTopHref??>${app_settings.logoTopMaxHeight + 60}<#elseif version gt 1>60</#if>px;">
+<div class="container-fluid mg-page-content"
+     style="padding-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 60}<#else>60</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -185,7 +185,7 @@
             <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
                 <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
                 <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
-                                 style="max-height: ${app_settings.logoTopMaxHeight}px"></a>
+                                 style="max-height: ${app_settings.logoTopMaxHeight}px;max-width: 90%;"></a>
             </header>
             </#if>
             <div class="navbar-header">

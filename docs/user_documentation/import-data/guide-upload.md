@@ -17,7 +17,7 @@ in a database
 
 ## Permissions
 When we're uploading a new entity type, we need a package to add it to.
-The easiest way is to [create a group](../admin-features/security/guide-groups-roles.md) first.
+The easiest way is to [create a group](../admin-features/guide-ref-security) first.
 
 > N.B. You cannot create the group after importing the package!
 

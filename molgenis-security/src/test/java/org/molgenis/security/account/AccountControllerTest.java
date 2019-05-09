@@ -14,11 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.testng.Assert.assertEquals;
 
 import com.google.gson.Gson;
-import java.util.Collections;
-import org.mockito.ArgumentCaptor;
+import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.security.auth.User;
@@ -36,7 +34,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -59,10 +56,12 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
 
   @Autowired private AppSettings appSettings;
 
+  @Autowired private PasswordResetter passwordResetter;
+
   private MockMvc mockMvc;
 
   @BeforeMethod
-  public void setUp() throws Exception {
+  public void setUp() {
     FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
     freeMarkerViewResolver.setSuffix(".ftl");
     mockMvc =
@@ -117,69 +116,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
         .andExpect(view().name("forward:/"))
         .andExpect(model().attribute("warningMessage", "message"));
     verify(accountService).activateUser("123");
-  }
-
-  @Test
-  public void registerUser_activationModeUserProxy() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
-    when(authenticationSettings.getSignUpModeration()).thenReturn(false);
-
-    this.mockMvc
-        .perform(
-            post("/account/register")
-                .header("X-Forwarded-Host", "website.com")
-                .param("username", "admin")
-                .param("password", "adminpw-invalid")
-                .param("confirmPassword", "adminpw-invalid")
-                .param("email", "admin@molgenis.org")
-                .param("lastname", "min")
-                .param("firstname", "ad")
-                .param("recaptch", "validCaptcha")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-        .andExpect(status().isOk())
-        .andExpect(
-            content()
-                .string(
-                    "{\"message\":\""
-                        + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER
-                        + "\"}"));
-    ArgumentCaptor<User> molgenisUserCaptor = ArgumentCaptor.forClass(User.class);
-    ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
-    verify(accountService)
-        .createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
-    assertEquals(baseActivationUriCaptor.getValue(), "http://website.com/account/activate");
-  }
-
-  @Test
-  public void registerUser_activationModeUserProxyWithScheme() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
-    when(authenticationSettings.getSignUpModeration()).thenReturn(false);
-
-    this.mockMvc
-        .perform(
-            post("/account/register")
-                .header("X-Forwarded-Proto", "https")
-                .header("X-Forwarded-Host", "website.com")
-                .param("username", "admin")
-                .param("password", "adminpw-invalid")
-                .param("confirmPassword", "adminpw-invalid")
-                .param("email", "admin@molgenis.org")
-                .param("lastname", "min")
-                .param("firstname", "ad")
-                .param("recaptch", "validCaptcha")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-        .andExpect(status().isOk())
-        .andExpect(
-            content()
-                .string(
-                    "{\"message\":\""
-                        + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER
-                        + "\"}"));
-    ArgumentCaptor<User> molgenisUserCaptor = ArgumentCaptor.forClass(User.class);
-    ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
-    verify(accountService)
-        .createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
-    assertEquals(baseActivationUriCaptor.getValue(), "https://website.com/account/activate");
   }
 
   @Test
@@ -282,7 +218,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isNoContent());
-    verify(accountService).resetPassword("admin@molgenis.org");
+    verify(passwordResetter).resetPassword("admin@molgenis.org");
   }
 
   @Test
@@ -308,10 +244,10 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
       return new AccountController(
           accountService(),
           reCaptchaV3Service(),
-          redirectStrategy(),
           authenticationSettings(),
           molgenisUserFactory(),
-          appSettings());
+          appSettings(),
+          passwordResetter());
     }
 
     @Bean
@@ -325,11 +261,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     }
 
     @Bean
-    public RedirectStrategy redirectStrategy() {
-      return mock(RedirectStrategy.class);
-    }
-
-    @Bean
     public AuthenticationSettings authenticationSettings() {
       return mock(AuthenticationSettings.class);
     }
@@ -340,7 +271,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
       DataService dataService = mock(DataService.class);
       User user = mock(User.class);
       when(dataService.findAll(USER, new QueryImpl().eq(EMAIL, "admin@molgenis.org")))
-          .thenReturn(Collections.<Entity>singletonList(user).stream());
+          .thenReturn(Stream.<Entity>of(user));
 
       return dataService;
     }
@@ -360,6 +291,11 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     @Bean
     public AppSettings appSettings() {
       return mock(AppSettings.class);
+    }
+
+    @Bean
+    public PasswordResetter passwordResetter() {
+      return mock(PasswordResetter.class);
     }
   }
 }

@@ -163,4 +163,15 @@ public class AttributeMapping {
     }
     return null;
   }
+
+  /** @return shallow copy of the given AttributeMapping */
+  public static AttributeMapping createCopy(AttributeMapping attributeMapping) {
+    return new AttributeMapping(
+        attributeMapping.getIdentifier(),
+        attributeMapping.getTargetAttributeName(),
+        attributeMapping.getTargetAttribute(),
+        attributeMapping.getAlgorithm(),
+        attributeMapping.getSourceAttributes(),
+        attributeMapping.getAlgorithmState().name());
+  }
 }

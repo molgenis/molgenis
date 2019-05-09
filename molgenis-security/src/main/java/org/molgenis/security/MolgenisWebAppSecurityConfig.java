@@ -17,6 +17,7 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.exception.WebAppSecurityConfigException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.oidc.DataServiceClientRegistrationRepository;
 import org.molgenis.security.oidc.MappedOidcUserService;
@@ -73,6 +74,9 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.NullSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -86,7 +90,9 @@ import org.springframework.web.servlet.LocaleResolver;
 
 @Import(DataServiceClientRegistrationRepository.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
+
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
+  private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
 
   @Autowired private DataService dataService;
 
@@ -122,6 +128,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter =
         new DelegatingRequestMatcherHeaderWriter(matcher, new CacheControlHeadersWriter());
 
+    http.securityContext().securityContextRepository(securityContextRepository());
+
     http.exceptionHandling().authenticationEntryPoint(delegatingEntryPoint());
 
     HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
@@ -129,7 +137,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     http.requestCache().requestCache(requestCache);
 
     http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
-
     // add default header options but use custom cache control header writer
     http.cors()
         .and()
@@ -179,7 +186,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers("/molgenis.R")
         .permitAll()
         .antMatchers(AccountController.CHANGE_PASSWORD_URI)
-        .authenticated()
+        .permitAll()
         .antMatchers("/account/**")
         .permitAll()
         .antMatchers(PATTERN_SWAGGER)
@@ -196,7 +203,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers("/plugin/void/**")
         .permitAll()
-        .antMatchers("/plugin/app-ui-context")
+        .antMatchers("/app-ui-context/**")
         .permitAll()
         .antMatchers("/api/**")
         .permitAll()
@@ -244,15 +251,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .addLogoutHandler(
             (req, res, auth) -> {
               if (req.getSession(false) != null
-                  && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null) {
-                req.setAttribute("continueWithUnsupportedBrowser", true);
+                  && req.getSession().getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                req.setAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER, true);
               }
             })
         .logoutSuccessHandler(
             (req, res, auth) -> {
               StringBuilder logoutSuccessUrl = new StringBuilder("/");
-              if (req.getAttribute("continueWithUnsupportedBrowser") != null) {
-                logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+              if (req.getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                logoutSuccessUrl.append("?" + CONTINUE_WITH_UNSUPPORTED_BROWSER + "=true");
               }
               SimpleUrlLogoutSuccessHandler logoutSuccessHandler =
                   new SimpleUrlLogoutSuccessHandler();
@@ -310,6 +317,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public AuthenticationProvider tokenAuthenticationProvider() {
     return new TokenAuthenticationProvider(tokenService(), userDetailsChecker());
+  }
+
+  @Bean
+  public SecurityContextRepository securityContextRepository() {
+    return new TokenAwareSecurityContextRepository(
+        new NullSecurityContextRepository(), new HttpSessionSecurityContextRepository());
   }
 
   @Bean
@@ -394,7 +407,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
       authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
       auth.authenticationProvider(authenticationProvider);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WebAppSecurityConfigException(e);
     }
   }
 

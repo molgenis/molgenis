@@ -223,11 +223,12 @@ public class ImportWizardController extends AbstractWizardController {
     return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
   }
 
-  @SuppressWarnings("squid:S2083")
+  @SuppressWarnings({"squid:S2083", "squid:S5144"})
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException, URISyntaxException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
 
+    // Fix vulnerability reported by sonar: squid:S5144
     URL url = UriValidator.getSafeUri(fileLocation).toURL();
 
     try (InputStream is = url.openStream()) {
@@ -258,7 +259,6 @@ public class ImportWizardController extends AbstractWizardController {
     // no action specified? default is ADD just like the importerPlugin
     ImportRun importRun;
     String fileExtension = getExtension(file.getName());
-    MetadataAction metadataAction = getMetadataAction(metadataActionStr);
     DataAction dataAction = getDataAction(actionStr);
     if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName()))) {
       throw new MolgenisDataException(
@@ -267,6 +267,8 @@ public class ImportWizardController extends AbstractWizardController {
     ImportService importService = importServiceFactory.getImportService(file.getName());
     RepositoryCollection repositoryCollection =
         fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+    MetadataAction metadataAction =
+        getMetadataAction(metadataActionStr, importService, repositoryCollection);
 
     importRun =
         importRunService.addImportRun(
@@ -286,10 +288,13 @@ public class ImportWizardController extends AbstractWizardController {
     return importRun;
   }
 
-  private MetadataAction getMetadataAction(@Nullable @CheckForNull String action) {
+  private MetadataAction getMetadataAction(
+      @Nullable @CheckForNull String action,
+      ImportService importService,
+      RepositoryCollection repositoryCollection) {
     MetadataAction metadataAction;
     if (action == null) {
-      metadataAction = MetadataAction.ADD;
+      metadataAction = importService.getMetadataAction(repositoryCollection);
     } else {
       try {
         metadataAction = MetadataAction.valueOf(action.toUpperCase());
