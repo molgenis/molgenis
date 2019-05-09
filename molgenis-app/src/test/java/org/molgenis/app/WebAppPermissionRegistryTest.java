@@ -5,9 +5,9 @@ import static org.molgenis.security.core.PermissionSet.READ;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
+import java.util.Collections;
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.PermissionSet;
@@ -28,8 +28,6 @@ public class WebAppPermissionRegistryTest {
         permissions.get(new PluginIdentity(HomeController.ID));
     assertEquals(
         copyOf(pairs),
-        ImmutableSet.of(
-            new Pair<>(READ, new GrantedAuthoritySid("ROLE_ANONYMOUS")),
-            new Pair<>(READ, new GrantedAuthoritySid("ROLE_USER"))));
+        Collections.singleton(new Pair<>(READ, new GrantedAuthoritySid("ROLE_ANONYMOUS"))));
   }
 }

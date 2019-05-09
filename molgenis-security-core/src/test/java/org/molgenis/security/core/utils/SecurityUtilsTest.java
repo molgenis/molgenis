@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -65,6 +66,10 @@ public class SecurityUtilsTest {
   @Test
   public void currentUserIsAuthenticated_true() {
     when(authentication.isAuthenticated()).thenReturn(true);
+    GrantedAuthority authorityUser =
+        when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_USER).getMock();
+    when((Collection<GrantedAuthority>) authentication.getAuthorities())
+        .thenReturn(Collections.singletonList(authorityUser));
     assertTrue(SecurityUtils.currentUserIsAuthenticated());
   }
 
