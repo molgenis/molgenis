@@ -1,16 +1,16 @@
-# Permission API
+# Permissions API
 
-This API can be used to perform create, update and delete operations on the MOLGENIS permission system.
+This API can be used to perform create, retrieval, update and delete operations on the MOLGENIS permission system.
 The MOLGENIS permission is based on [Spring Security](https://spring.io/projects/spring-security).
 
 ## Parameters
 These parameters are used by the endpoint in this API:
 - 'typeId': This is the type of resource for which the permission is granted. 
-This maps to the 'type' in Spring security's [ObjectIdentity](https://docs.spring.io/spring-security/site/docs/4.2.11.RELEASE/apidocs/org/springframework/security/acls/model/ObjectIdentity.html).
+This maps to the 'type' in Spring security's [ObjectIdentity](https://docs.spring.io/spring-security/site/docs/5.1.x/api/org/springframework/security/acls/model/ObjectIdentity.html).
 In MOLGENIS examples of these types are 'entityType', 'package', 'plugin', and also row level secured entities, in which case the type is the entityType identifier prefixed with "entity-" 
 - 'identifier': This is the identifier of the actual resource within the resource type for which the permission is granted. 
 This maps to the 'identifier' in Spring security's ObjectIdentity.
-- 'inheritance': a boolean indicating if inherited permissions should be returned or only the permission that are actually set for the roles and users requested. This parameter is only used in the the GET permission requests. Setting this to true will return a tree with all inherited permissions for the requested users and roles. This field cannot be combined with paging.
+- 'inheritance': a boolean indicating if inherited permissions should be returned or only the permission that are actually set for the roles and users requested. This parameter is only used in the GET permission requests. Setting this to true will return a tree with all inherited permissions for the requested users and roles. This field cannot be combined with paging.
 - 'page': The pagenumber for the results, should only be provided combined with 'pageSize'. This field cannot be combined with 'inheritance=true'.
 - 'pageSize': The number of results per result page, should only be provided combined with 'page'. This field cannot be combined with 'inheritance=true'.
 - 'permission': A permission for a resource, the permissions that can be used differ per resource type, but are always a subset of READMETA,COUNT,READ,WRITE,WRITEMETA. 
@@ -128,10 +128,10 @@ Response:
    ]
    ```
 
-### Creating a new resource type in the system (Row level securing an entity)
+### Creating a new resource type in the system (Row level securing an entity type)
 
 This will create a new type in the system and add access control lists for all existing rows.
-This enables row level security.
+This enables row level security and is only enabled for superusers.
 Please keep in mind that all existing rows will get the current user as owner.
 
 ##### Endpoint
@@ -149,12 +149,12 @@ URL: 'typeId' as described in the [parameters section](##Parameters)
 |409 Conflict | the type already exists |
 
 ##### Example
-Enable row level security on entity 'hospital_neurology_patients'.
+Enable row level security on entity type 'hospital_neurology_patients'.
 
 Request:
 ```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
 
-### Deleting a resource type from the system (Removing row level security from an entity)
+### Deleting a resource type from the system (Removing row level security from an entity type)
 
 This will delete a type, the access control lists for all rows will remain in the system.
 This disables row level security.
@@ -174,7 +174,7 @@ URL: 'typeId' as described in the [parameters section](##Parameters)
 |404 Not found | the type does not exist |
 
 ##### Example
-Enable row level security on entity 'hospital_neurology_patients'.
+Enable row level security on entity type 'hospital_neurology_patients'.
 
 Request:
 ```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
@@ -199,7 +199,7 @@ URL:
 |409 Conflict | the a access control list already exists for this object |
 
 ##### Example
-Add an ACL for 'Patient1' in entity 'hospital_neurology_patients'.
+Add an ACL for 'Patient1' in _entity_ type 'hospital_neurology_patients'.
 
 Request:
 ```POST https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients/Patient1```

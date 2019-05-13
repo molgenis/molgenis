@@ -76,7 +76,7 @@ public class ResettableOAuth2AuthorizedClientService implements OAuth2Authorized
     }
   }
 
-  /** Copy of {@link InMemoryOAuth2AuthorizedClientService} getIdentity */
+  /** Copy of {@link InMemoryOAuth2AuthorizedClientService} getIdentifier */
   private String getIdentifier(ClientRegistration registration, String principalName) {
     String identifier = "[" + registration.getRegistrationId() + "][" + principalName + "]";
     return Base64.getEncoder().encodeToString(identifier.getBytes(UTF_8));

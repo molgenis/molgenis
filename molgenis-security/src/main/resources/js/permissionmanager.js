@@ -26,6 +26,7 @@
             $.get(molgenis.getContextUrl() + '/plugin/role/' + $(this).val(), function (data) {
                 $('#plugin-role-permission-table tbody').empty().html(createPermissionTable(data, ['read']))
             })
+
         })
         $('#plugin-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/plugin/user/' + $(this).val(), function (data) {

@@ -30,9 +30,9 @@ import org.springframework.security.acls.model.Sid;
 public class PermissionServiceDecorator implements PermissionService {
 
   private final UserRoleTools userRoleTools;
-  private MutableAclService mutableAclService;
-  private PermissionService permissionService;
-  private DataService dataService;
+  private final MutableAclService mutableAclService;
+  private final PermissionService permissionService;
+  private final DataService dataService;
 
   public PermissionServiceDecorator(
       PermissionService permissionService,

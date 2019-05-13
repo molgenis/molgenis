@@ -14,11 +14,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
-/** @see JdbcMutableAclService */
 public class ObjectIdentityServiceImpl implements ObjectIdentityService {
 
   private static final String SQL_COUNT_OBJECT_IDENTITIES =

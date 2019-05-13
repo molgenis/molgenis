@@ -43,7 +43,7 @@ public class UnknownAceExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-      new Object[] {"en", "No permission found to delete for id 'id' of type 'type' for 'role1'."}
+      new Object[] {"en", "No permission found to 'delete' for id 'id' of type 'type' for 'role1'."}
     };
   }
 }

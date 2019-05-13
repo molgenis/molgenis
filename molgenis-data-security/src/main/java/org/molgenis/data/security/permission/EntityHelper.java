@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityHelper {
   public static final String ENTITY_PREFIX = "entity-";
-  // FIXMEL using constants from the plugin metadata introduces cyclic dependencies
   public static final String PLUGIN = "plugin";
   public static final String SYS_PLUGIN = "sys_Plugin";
   private final DataService dataService;

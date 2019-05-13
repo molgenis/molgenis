@@ -290,25 +290,18 @@ public class PermissionServiceImpl implements PermissionService {
   public void addType(String typeId) {
     entityHelper.checkEntityTypeExists(typeId);
     EntityType entityType = dataService.getEntityType(entityHelper.getEntityTypeIdFromType(typeId));
-    if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
-      mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
-      // Create ACL's for existing rows
-      dataService
-          .findAll(entityType.getId())
-          .forEach(
-              entity -> {
-                try {
-                  mutableAclService.createAcl(new EntityIdentity(entity));
-                } catch (AlreadyExistsException e) {
-                  LOG.warn(
-                      "Acl for entity '{}' of type '{}' already exists",
-                      entity.getIdValue(),
-                      entityType.getIdValue());
-                }
-              });
-    } else {
-      throw new AclClassAlreadyExistsException(typeId);
-    }
+    mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
+    // Create ACL's for existing rows
+    dataService
+        .findAll(entityType.getId())
+        .forEach(
+            entity -> {
+              try {
+                mutableAclService.createAcl(new EntityIdentity(entity));
+              } catch (AlreadyExistsException e) {
+                throw new AclClassAlreadyExistsException(typeId);
+              }
+            });
   }
 
   @Override
@@ -326,12 +319,16 @@ public class PermissionServiceImpl implements PermissionService {
 
   private void deleteAce(Sid sid, MutableAcl acl) {
     int nrEntries = acl.getEntries().size();
+    boolean updated = false;
     for (int i = nrEntries - 1; i >= 0; i--) {
       AccessControlEntry accessControlEntry = acl.getEntries().get(i);
       if (accessControlEntry.getSid().equals(sid)) {
         acl.deleteAce(i);
-        mutableAclService.updateAcl(acl);
+        updated = true;
       }
+    }
+    if (updated) {
+      mutableAclService.updateAcl(acl);
     }
   }
 

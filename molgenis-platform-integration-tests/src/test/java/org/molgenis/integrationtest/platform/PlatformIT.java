@@ -191,6 +191,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   @AfterMethod
   public void afterMethod() {
+    cleanupUserPermissions();
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeStatic.getId());
@@ -308,8 +309,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     // Test default value
     assertEquals(LanguageService.getBundle().getString("car"), "car");
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -358,8 +357,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
       waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
       assertPresent(entityTypeDynamic, entities);
     }
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -398,8 +395,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -444,8 +439,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -485,8 +478,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             metaDataService.deleteEntityType(singletonList(entityType));
           }
         });
-
-    cleanupUserPermissions();
   }
 
   /** Test used as a caching benchmark */
@@ -513,8 +504,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             dataService.findOne(entityTypeDynamic.getId(), q3);
           }
         });
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -534,8 +523,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
     assertEquals(searchService.count(entityTypeDynamic, q), 0);
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 5);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -560,8 +547,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic, q), 0);
 
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 3333);
-
-    cleanupUserPermissions();
   }
 
   private List<Entity> createDynamicAndAdd(int count) {
@@ -651,8 +636,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     // Check id are equals
     assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -662,8 +645,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexCreateMetaData(
         searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -673,8 +654,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexDeleteMetaData(
         searchService, dataService, entityTypeDynamic, metaDataService, indexService);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -684,8 +663,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataUpdateAttribute(
         searchService, entityTypeDynamic, metaDataService, indexService);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -762,8 +739,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         searchService,
         metaDataService,
         indexService);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -773,8 +748,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
     IndexMetadataCUDOperationsPlatformIT.testIndexUpdateMetaDataRemoveCompoundAttribute(
         entityTypeDynamic, attributeFactory, searchService, metaDataService, indexService);
-
-    cleanupUserPermissions();
   }
 
   // Derived from fix: https://github.com/molgenis/molgenis/issues/5227
@@ -839,8 +812,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     q6.search("searchTestBatchUpdate");
     long count6 = searchService.count(entityTypeDynamic, q6);
     assertEquals(count6, 1L);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -867,8 +838,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           all.forEach(e -> LOG.info(e.getEntityTypeId() + "." + e.getEntityId()));
           waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
         });
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -885,8 +854,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         new AggregateResult(
             singletonList(singletonList(1L)), singletonList(1L), singletonList("option1"));
     assertEquals(result, expectedResult);
-
-    cleanupUserPermissions();
   }
 
   @WithMockUser(username = USERNAME)
@@ -905,8 +872,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
             asList(0L, 1L),
             asList("option1", "option2"));
     assertEquals(result, expectedResult);
-
-    cleanupUserPermissions();
   }
 
   private AggregateResult runAggregateQuery(
