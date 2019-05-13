@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Api("Permissions API")
 @RestController
@@ -113,7 +114,11 @@ public class PermissionsController extends ApiController {
       HttpServletRequest request, @PathVariable(value = TYPE_ID) String typeId)
       throws URISyntaxException {
     permissionService.addType(typeId);
-    return ResponseEntity.created(new URI(request.getRequestURI())).build();
+    return ResponseEntity.created(getUriFromRequest(request)).build();
+  }
+
+  private URI getUriFromRequest(HttpServletRequest request) {
+    return ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
   }
 
   @DeleteMapping(value = TYPES + "/{" + TYPE_ID + "}")
@@ -151,7 +156,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(OBJECT_ID) String identifier)
       throws URISyntaxException {
     permissionService.createAcl(entityHelper.getObjectIdentity(typeId, identifier));
-    return ResponseEntity.created(new URI(request.getRequestURI())).build();
+    return ResponseEntity.created(getUriFromRequest(request)).build();
   }
 
   @GetMapping(value = OBJECTS + "/{" + TYPE_ID + "}")
@@ -277,7 +282,7 @@ public class PermissionsController extends ApiController {
       throws URISyntaxException {
     Set<Permission> permissions = convertRequests(setTypePermissionsRequest.getObjects(), typeId);
     permissionService.createPermissions(permissions);
-    return ResponseEntity.created(new URI(request.getRequestURI())).build();
+    return ResponseEntity.created(getUriFromRequest(request)).build();
   }
 
   @PostMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
@@ -291,7 +296,7 @@ public class PermissionsController extends ApiController {
     Set<Permission> permissions =
         convertRequests(setIdentityPermissionRequest.getPermissions(), typeId, identifier);
     permissionService.createPermissions(permissions);
-    return ResponseEntity.created(new URI(request.getRequestURI())).build();
+    return ResponseEntity.created(getUriFromRequest(request)).build();
   }
 
   @DeleteMapping(value = "{" + TYPE_ID + "}/{" + OBJECT_ID + "}")

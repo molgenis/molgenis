@@ -2,6 +2,7 @@ package org.molgenis.api.permissions.model.request;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -11,6 +12,7 @@ import org.molgenis.util.AutoGson;
 public abstract class TypePermissionsRequest {
   public abstract String getTypeId();
 
+  @NotEmpty
   public abstract List<ObjectPermissionsRequest> getObjects();
 
   public static TypePermissionsRequest create(

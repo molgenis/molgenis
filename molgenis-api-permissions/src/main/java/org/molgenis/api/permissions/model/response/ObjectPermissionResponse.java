@@ -2,7 +2,6 @@ package org.molgenis.api.permissions.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -12,7 +11,6 @@ import org.molgenis.util.AutoGson;
 public abstract class ObjectPermissionResponse {
   public abstract String getId();
 
-  @Nullable
   public abstract String getLabel();
 
   public abstract Set<PermissionResponse> getPermissions();

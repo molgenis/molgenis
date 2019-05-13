@@ -8,6 +8,7 @@ import static org.molgenis.data.security.permission.EntityHelper.SYS_PLUGIN;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -43,7 +44,8 @@ public class PermissionInheritanceResolver {
   InheritedPermissionsResult getInheritedPermissionsResults(Acl acl, Sid sid) {
     List<InheritedUserPermissionsResult> inheritedUserPermissionsResult =
         getPermissionsForRoles(acl, sid);
-    InheritedAclPermissionsResult inheritedAclPermissionsResult = getParentAclPermissions(acl, sid);
+    InheritedAclPermissionsResult inheritedAclPermissionsResult =
+        getParentAclPermissions(acl, sid).orElse(null);
     return InheritedPermissionsResult.create(
         inheritedUserPermissionsResult, inheritedAclPermissionsResult);
   }
@@ -64,7 +66,7 @@ public class PermissionInheritanceResolver {
     return inheritedUserPermissionsResults;
   }
 
-  private InheritedAclPermissionsResult getParentAclPermissions(Acl acl, Sid sid) {
+  private Optional<InheritedAclPermissionsResult> getParentAclPermissions(Acl acl, Sid sid) {
     InheritedAclPermissionsResult parentAclPermissions;
     List<InheritedUserPermissionsResult> parentRolePermissions;
     Acl parentAcl = acl.getParentAcl();
@@ -72,13 +74,13 @@ public class PermissionInheritanceResolver {
       PermissionSet ownPermission = getPermissionsForAcl(parentAcl, sid);
       parentRolePermissions = getPermissionsForRoles(parentAcl, sid);
       parentAclPermissions =
-          getParentAclPermissions(
-              parentAcl, sid); // Get permissions for parentAcl of the parentAcl - Recursive
+          getParentAclPermissions(parentAcl, sid)
+              .orElse(null); // Get permissions for parentAcl of the parentAcl - Recursive
       InheritedAclPermissionsResult inheritedAclPermissionsResult =
           InheritedAclPermissionsResult.create(
               parentAcl, ownPermission, parentRolePermissions, parentAclPermissions);
       if (isNotEmpty(inheritedAclPermissionsResult)) {
-        return inheritedAclPermissionsResult;
+        return Optional.of(inheritedAclPermissionsResult);
       }
     }
     return null;

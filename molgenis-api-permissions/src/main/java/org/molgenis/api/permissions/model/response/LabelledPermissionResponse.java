@@ -2,6 +2,7 @@ package org.molgenis.api.permissions.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
@@ -11,27 +12,35 @@ import org.molgenis.util.AutoGson;
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class LabelledPermissionResponse {
   @Nullable
+  @CheckForNull
   public abstract String getUser();
 
   @Nullable
+  @CheckForNull
   public abstract String getRole();
 
   @Nullable
+  @CheckForNull
   public abstract String getObjectId();
 
   @Nullable
+  @CheckForNull
   public abstract String getLabel();
 
   @Nullable
+  @CheckForNull
   public abstract String getTypeLabel();
 
   @Nullable
+  @CheckForNull
   public abstract String getTypeId();
 
   @Nullable
+  @CheckForNull
   public abstract String getPermission();
 
   @Nullable
+  @CheckForNull
   public abstract Set<LabelledPermissionResponse> getInheritedPermissions();
 
   public static LabelledPermissionResponse create(

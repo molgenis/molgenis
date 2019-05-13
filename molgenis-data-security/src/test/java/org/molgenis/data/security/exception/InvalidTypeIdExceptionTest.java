@@ -33,7 +33,7 @@ public class InvalidTypeIdExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en",
-        "Unknown type identifier 'type', if you attempt to use a entitytype identifier please prefix with 'entity-'."
+        "Unknown type identifier 'type', if you attempt to use a entity type identifier please prefix with 'entity-'."
       }
     };
   }
