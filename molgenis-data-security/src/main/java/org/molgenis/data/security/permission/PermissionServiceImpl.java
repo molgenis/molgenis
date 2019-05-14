@@ -4,7 +4,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.security.EntityPermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 
 import com.google.common.collect.Sets;
 import java.util.HashSet;
@@ -77,7 +77,8 @@ public class PermissionServiceImpl implements PermissionService {
     Set<LabelledType> types = new HashSet<>();
     for (String typeId : mutableAclClassService.getAclClassTypes()) {
       String entityTypeId = entityHelper.getEntityTypeIdFromType(typeId);
-      if (userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityTypeId), READ)) {
+      if (userPermissionEvaluator.hasPermission(
+          new EntityTypeIdentity(entityTypeId), READ_METADATA)) {
         String label = entityHelper.getLabel(typeId);
         types.add(LabelledType.create(typeId, entityTypeId, label));
       }
@@ -138,20 +139,17 @@ public class PermissionServiceImpl implements PermissionService {
   public Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean isReturnInherited) {
     Set<LabelledPermission> result = new LinkedHashSet<>();
     for (LabelledType type : getTypes()) {
-      String entityTypeId = type.getEntityType();
-      if (dataService.hasEntityType(entityTypeId)) {
-        Set<Sid> sidsToQuery;
-        if (isReturnInherited) {
-          sidsToQuery = userRoleTools.getInheritedSids(sids);
-        } else {
-          sidsToQuery = sids;
-        }
-        Map<String, Set<LabelledPermission>> permissions =
-            getPermissionsForType(type.getId(), sidsToQuery, isReturnInherited);
-        if (!permissions.isEmpty()) {
-          for (Set<LabelledPermission> labelledPermissions : permissions.values()) {
-            result.addAll(labelledPermissions);
-          }
+      Set<Sid> sidsToQuery;
+      if (isReturnInherited) {
+        sidsToQuery = userRoleTools.getInheritedSids(sids);
+      } else {
+        sidsToQuery = sids;
+      }
+      Map<String, Set<LabelledPermission>> permissions =
+          getPermissionsForType(type.getId(), sidsToQuery, isReturnInherited);
+      if (!permissions.isEmpty()) {
+        for (Set<LabelledPermission> labelledPermissions : permissions.values()) {
+          result.addAll(labelledPermissions);
         }
       }
     }

@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.security.EntityPermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DataService;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.exception.InsufficientPermissionsException;
 import org.molgenis.data.security.exception.ReadPermissionDeniedException;
@@ -38,10 +38,11 @@ public class PermissionServiceDecorator implements PermissionService {
   private final MutableAclService mutableAclService;
   private final PermissionService permissionService;
   private final UserPermissionEvaluator userPermissionEvaluator;
+  private final EntityHelper entityHelper;
 
   public PermissionServiceDecorator(
       PermissionService permissionService,
-      DataService dataService,
+      EntityHelper entityHelper,
       UserRoleTools userRoleTools,
       MutableAclService mutableAclService,
       UserPermissionEvaluator userPermissionEvaluator) {
@@ -49,6 +50,7 @@ public class PermissionServiceDecorator implements PermissionService {
     this.userRoleTools = requireNonNull(userRoleTools);
     this.mutableAclService = requireNonNull(mutableAclService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+    this.entityHelper = requireNonNull(entityHelper);
   }
 
   @Override
@@ -171,8 +173,13 @@ public class PermissionServiceDecorator implements PermissionService {
 
   @Override
   public Set<PermissionSet> getSuitablePermissionsForType(String typeId) {
-    checkReadPermission(typeId, Collections.emptySet());
-    return permissionService.getSuitablePermissionsForType(typeId);
+    String entityTypeId = entityHelper.getEntityTypeIdFromType(typeId);
+    if (userPermissionEvaluator.hasPermission(
+        new EntityTypeIdentity(entityTypeId), READ_METADATA)) {
+      return permissionService.getSuitablePermissionsForType(typeId);
+    } else {
+      throw new ReadPermissionDeniedException(typeId);
+    }
   }
 
   @Override

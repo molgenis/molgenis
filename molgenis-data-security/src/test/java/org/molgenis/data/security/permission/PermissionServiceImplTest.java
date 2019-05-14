@@ -9,6 +9,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 import static org.molgenis.data.security.permission.EntityHelper.PLUGIN;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
@@ -93,6 +94,12 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     doReturn("entityType1").when(entityHelper).getEntityTypeIdFromType("entity-test1");
     doReturn("label2").when(entityHelper).getLabel("entity-test2");
     doReturn("entityType2").when(entityHelper).getEntityTypeIdFromType("entity-test2");
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("entityType1"), READ_METADATA);
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("entityType2"), READ_METADATA);
     assertEquals(
         permissionsApiService.getTypes(),
         Arrays.asList(
@@ -199,7 +206,9 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
   public void testGetAllPermissions() {
     when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
-    doReturn(true).when(dataService).hasEntityType("typeId");
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("typeId"), READ_METADATA);
     PrincipalSid sid1 = mock(PrincipalSid.class);
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);

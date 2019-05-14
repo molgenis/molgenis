@@ -151,13 +151,13 @@ public class PermissionsController extends ApiController {
 
   @PostMapping(value = OBJECTS + "/{" + TYPE_ID + "}/{" + OBJECT_ID + "}")
   @ApiOperation(value = "Create a type for a entity", response = ResponseEntity.class)
-  public ApiResponse createType(
+  public ResponseEntity createAcl(
       HttpServletRequest request,
       @PathVariable(TYPE_ID) String typeId,
       @PathVariable(OBJECT_ID) String identifier)
       throws URISyntaxException {
     permissionService.createAcl(entityHelper.getObjectIdentity(typeId, identifier));
-    return ApiResponse.create(ResponseEntity.created(getUriFromRequest(request)).build());
+    return ResponseEntity.created(getUriFromRequest(request)).build();
   }
 
   @GetMapping(value = OBJECTS + "/{" + TYPE_ID + "}")

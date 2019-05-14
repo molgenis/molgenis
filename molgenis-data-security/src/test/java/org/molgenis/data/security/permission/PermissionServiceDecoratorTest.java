@@ -6,12 +6,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.EntityPermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import java.util.Collections;
 import org.mockito.Mock;
-import org.molgenis.data.DataService;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
@@ -37,7 +39,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   private SecurityContext originalSecurityContext;
   @Mock MutableAclService mutableAclService;
   @Mock PermissionService permissionService;
-  @Mock DataService dataService;
+  @Mock EntityHelper entityHelper;
   @Mock UserRoleTools userRoleTools;
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   private PermissionServiceDecorator permissionServiceDecorator;
@@ -52,7 +54,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     permissionServiceDecorator =
         new PermissionServiceDecorator(
             permissionService,
-            dataService,
+            entityHelper,
             userRoleTools,
             mutableAclService,
             userPermissionEvaluator);
@@ -83,9 +85,15 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     LabelledType type2 = LabelledType.create("entity-type2", "type2", "label");
     LabelledType type3 = LabelledType.create("entity-type3", "type3", "label");
     when(permissionService.getTypes()).thenReturn(Sets.newHashSet(type1, type2, type3));
-    doReturn(true).when(dataService).hasEntityType("type1");
-    doReturn(false).when(dataService).hasEntityType("type2");
-    doReturn(true).when(dataService).hasEntityType("type3");
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("type1"), READ);
+    doReturn(false)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("type2"), READ);
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity("type3"), READ);
     assertEquals(permissionServiceDecorator.getTypes(), Sets.newHashSet(type1, type3));
   }
 
@@ -246,6 +254,10 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
 
   @Test
   public void testGetSuitablePermissionsForType() {
+    setUser();
+    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
+    when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("typeId"), READ_METADATA))
+        .thenReturn(true);
     permissionServiceDecorator.getSuitablePermissionsForType("entity-typeId");
     verify(permissionService).getSuitablePermissionsForType("entity-typeId");
   }

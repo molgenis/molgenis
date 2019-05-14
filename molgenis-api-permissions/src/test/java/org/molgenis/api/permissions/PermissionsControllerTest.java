@@ -175,7 +175,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}");
+        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}}");
   }
 
   @Test
@@ -294,7 +294,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"permissions\":[{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"READ\"},{\"user\":\"user1\",\"objectId\":\"typeId\",\"label\":\"typeLabel\",\"typeLabel\":\"identifier\",\"typeId\":\"label\",\"permission\":\"WRITE\"}]}");
+        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"}]}}");
   }
 
   @Test

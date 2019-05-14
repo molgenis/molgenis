@@ -48,12 +48,12 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
 
   @Test
   public void testGetUser() {
-    assertEquals(UserRoleTools.getUsername(new PrincipalSid("test")), "test");
+    assertEquals(UserRoleTools.getUsername(new PrincipalSid("test")).get(), "test");
   }
 
   @Test
   public void testGetRole() {
-    assertEquals(UserRoleTools.getRolename(new GrantedAuthoritySid("ROLE_test")), "test");
+    assertEquals(UserRoleTools.getRolename(new GrantedAuthoritySid("ROLE_test")).get(), "test");
   }
 
   @Test

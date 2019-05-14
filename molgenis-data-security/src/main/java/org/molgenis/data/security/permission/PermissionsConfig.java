@@ -54,6 +54,6 @@ public class PermissionsConfig {
             entityHelper,
             userPermissionEvaluator);
     return new PermissionServiceDecorator(
-        permissionService, dataService, userRoleTools, mutableAclService, userPermissionEvaluator);
+        permissionService, entityHelper, userRoleTools, mutableAclService, userPermissionEvaluator);
   }
 }
