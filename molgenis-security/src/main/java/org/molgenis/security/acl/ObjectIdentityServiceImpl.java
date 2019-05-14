@@ -95,7 +95,7 @@ public class ObjectIdentityServiceImpl implements ObjectIdentityService {
   }
 
   @Override
-  public List<ObjectIdentity> getObjectIdentities(String classId, Integer limit, Integer offset) {
+  public List<ObjectIdentity> getObjectIdentities(String classId, int limit, int offset) {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put(CLASS_ID, classId);
     paramMap.put(LIMIT, limit);
@@ -108,7 +108,7 @@ public class ObjectIdentityServiceImpl implements ObjectIdentityService {
 
   @Override
   public List<ObjectIdentity> getObjectIdentities(
-      String classId, Set<Sid> sids, Integer limit, Integer offset) {
+      String classId, Set<Sid> sids, int limit, int offset) {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put(SIDS, getSidIdentifiers(sids));
     paramMap.put(CLASS_ID, classId);
