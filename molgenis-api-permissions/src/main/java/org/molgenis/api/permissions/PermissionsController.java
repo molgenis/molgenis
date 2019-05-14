@@ -388,9 +388,9 @@ public class PermissionsController extends ApiController {
         .map(
             labelledPermission ->
                 PermissionResponse.create(
-                    userRoleTools.getUser(labelledPermission.getSid()),
-                    userRoleTools.getRole(labelledPermission.getSid()),
-                    PermissionSetUtils.getPermissionStringValue(labelledPermission),
+                    userRoleTools.getUsername(labelledPermission.getSid()).orElse(null),
+                    userRoleTools.getRolename(labelledPermission.getSid()).orElse(null),
+                    PermissionSetUtils.getPermissionStringValue(labelledPermission).orElse(null),
                     convertLabelledPermissions(labelledPermission.getInheritedPermissions())))
         .forEach(permissionResponse -> result.add(permissionResponse));
     return result;
@@ -414,23 +414,28 @@ public class PermissionsController extends ApiController {
         }
         LabelledPermissionResponse labelledResponse;
         if (permission.getLabelledObjectIdentity() != null) {
+          ObjectResponse objectResponse =
+              ObjectResponse.create(
+                  permission.getLabelledObjectIdentity().getIdentifier().toString(),
+                  permission.getLabelledObjectIdentity().getIdentifierLabel());
+          TypeResponse typeResponse =
+              TypeResponse.create(
+                  permission.getLabelledObjectIdentity().getType(),
+                  permission.getLabelledObjectIdentity().getEntityTypeId(),
+                  permission.getLabelledObjectIdentity().getTypeLabel());
           labelledResponse =
               LabelledPermissionResponse.create(
-                  userRoleTools.getUser(permission.getSid()),
-                  userRoleTools.getRole(permission.getSid()),
-                  permission.getLabelledObjectIdentity().getType(),
-                  permission.getLabelledObjectIdentity().getTypeLabel(),
-                  permission.getLabelledObjectIdentity().getIdentifier().toString(),
-                  permission.getLabelledObjectIdentity().getIdentifierLabel(),
+                  userRoleTools.getUsername(permission.getSid()).orElse(null),
+                  userRoleTools.getRolename(permission.getSid()).orElse(null),
+                  objectResponse,
+                  typeResponse,
                   permissionString,
                   convertLabelledPermissions(permission.getInheritedPermissions()));
         } else {
           labelledResponse =
               LabelledPermissionResponse.create(
-                  userRoleTools.getUser(permission.getSid()),
-                  userRoleTools.getRole(permission.getSid()),
-                  null,
-                  null,
+                  userRoleTools.getUsername(permission.getSid()).orElse(null),
+                  userRoleTools.getRolename(permission.getSid()).orElse(null),
                   null,
                   null,
                   permissionString,

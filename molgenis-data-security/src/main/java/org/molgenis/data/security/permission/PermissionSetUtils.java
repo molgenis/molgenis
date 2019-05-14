@@ -12,6 +12,7 @@ import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA_MASK;
 import static org.molgenis.security.core.PermissionSet.WRITE_MASK;
 
+import java.util.Optional;
 import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.AccessControlEntry;
@@ -60,21 +61,21 @@ public class PermissionSetUtils {
     }
   }
 
-  public static String getPermissionStringValue(LabelledPermission labelledPermission) {
+  public static Optional<String> getPermissionStringValue(LabelledPermission labelledPermission) {
     PermissionSet permissionSet = labelledPermission.getPermission();
     if (permissionSet != null) {
       int mask = permissionSet.getMask();
       switch (mask) {
         case READ_META_MASK:
-          return READMETA;
+          return Optional.of(READMETA);
         case COUNT_MASK:
-          return COUNT;
+          return Optional.of(COUNT);
         case READ_MASK:
-          return READ;
+          return Optional.of(READ);
         case WRITE_MASK:
-          return WRITE;
+          return Optional.of(WRITE);
         case WRITEMETA_MASK:
-          return WRITEMETA;
+          return Optional.of(WRITEMETA);
         default:
           throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
       }

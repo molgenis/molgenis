@@ -45,6 +45,7 @@ import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -66,6 +67,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
   @Mock MutableAclClassService mutableAclClassService;
   @Mock UserRoleTools userRoleTools;
   @Mock EntityHelper entityHelper;
+  @Mock UserPermissionEvaluator userPermissionEvaluator;
   private PermissionServiceImpl permissionsApiService;
 
   @BeforeMethod
@@ -78,7 +80,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
             dataService,
             mutableAclClassService,
             userRoleTools,
-            entityHelper);
+            entityHelper,
+            userPermissionEvaluator);
   }
 
   @Test
@@ -163,21 +166,21 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         LabelledPermission.create(
             sid2,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             WRITEMETA,
             null);
     LabelledPermission permission2 =
         LabelledPermission.create(
             sid1,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             COUNT,
             null);
     Set<LabelledPermission> expected = newHashSet(permission1, permission2);
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     LinkedHashSet<Sid> sids = new LinkedHashSet<>();
     sids.add(sid1);
@@ -228,14 +231,14 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         LabelledPermission.create(
             sid1,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             COUNT,
             null);
     LabelledPermission permission2 =
         LabelledPermission.create(
             sid2,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             WRITEMETA,
             null);
     Set<LabelledPermission> expected = Sets.newHashSet(permission1, permission2);
@@ -247,7 +250,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
     when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
 
     assertEquals(newHashSet(permissionsApiService.getPermissions(sids, true)), expected);
@@ -286,20 +289,20 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     LabelledPermission permission1 =
         LabelledPermission.create(
             sid1,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             COUNT,
             null);
     LabelledPermission permission2 =
         LabelledPermission.create(
             sid2,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             WRITEMETA,
             null);
     Map<String, HashSet<LabelledPermission>> expected =
@@ -341,20 +344,20 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     LabelledPermission permission1 =
         LabelledPermission.create(
             sid1,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             COUNT,
             null);
     LabelledPermission permission2 =
         LabelledPermission.create(
             sid2,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             WRITEMETA,
             null);
     Map<String, HashSet<LabelledPermission>> expected =
@@ -392,7 +395,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
     HashSet<Sid> sids = newHashSet(sid1, sid2);
     when(userRoleTools.getAllAvailableSids()).thenReturn(sids);
     when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList<>(sids));
@@ -401,14 +404,14 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         LabelledPermission.create(
             sid1,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             COUNT,
             null);
     LabelledPermission permission2 =
         LabelledPermission.create(
             sid2,
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"),
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"),
             WRITEMETA,
             null);
     Map<String, HashSet<LabelledPermission>> expected =
@@ -490,7 +493,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     when(userRoleTools.sortSids(singleton(role))).thenReturn(new LinkedList(singletonList(role)));
 
@@ -519,7 +522,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
-                "entity-typeId", "typeLabel", "identifier", "identifierLabel"));
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
     permissionsApiService.updatePermissions(

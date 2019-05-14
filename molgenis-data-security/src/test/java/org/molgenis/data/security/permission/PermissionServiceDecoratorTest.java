@@ -15,6 +15,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -38,6 +39,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   @Mock PermissionService permissionService;
   @Mock DataService dataService;
   @Mock UserRoleTools userRoleTools;
+  @Mock UserPermissionEvaluator userPermissionEvaluator;
   private PermissionServiceDecorator permissionServiceDecorator;
 
   @BeforeClass
@@ -49,7 +51,11 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   public void setUpBeforeMethod() {
     permissionServiceDecorator =
         new PermissionServiceDecorator(
-            permissionService, dataService, userRoleTools, mutableAclService);
+            permissionService,
+            dataService,
+            userRoleTools,
+            mutableAclService,
+            userPermissionEvaluator);
   }
 
   private void setSu() {

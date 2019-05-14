@@ -1,5 +1,7 @@
 package org.molgenis.api.permissions.model.response;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.auto.value.AutoValue;
 import java.util.Set;
 import javax.annotation.CheckForNull;
@@ -21,24 +23,20 @@ public abstract class LabelledPermissionResponse {
 
   @Nullable
   @CheckForNull
-  public abstract String getObjectId();
+  public abstract ObjectResponse getObject();
 
   @Nullable
   @CheckForNull
-  public abstract String getLabel();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getTypeLabel();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getTypeId();
+  public abstract TypeResponse getType();
 
   @Nullable
   @CheckForNull
   public abstract String getPermission();
 
+  /**
+   * returns null if inheritance was not requested. If requested but not present an empty set is
+   * returned.
+   */
   @Nullable
   @CheckForNull
   public abstract Set<LabelledPermissionResponse> getInheritedPermissions();
@@ -46,13 +44,16 @@ public abstract class LabelledPermissionResponse {
   public static LabelledPermissionResponse create(
       String user,
       String role,
-      String typeId,
-      String typeLabel,
-      String identifier,
-      String label,
+      ObjectResponse object,
+      TypeResponse type,
       String permission,
       Set<LabelledPermissionResponse> inheritedPermissions) {
+    if (isNullOrEmpty(user) && isNullOrEmpty(role)) {
+      throw new IllegalStateException("No user and role provided.");
+    } else if (!isNullOrEmpty(user) && !isNullOrEmpty(role)) {
+      throw new IllegalStateException("Both user and role provided.");
+    }
     return new AutoValue_LabelledPermissionResponse(
-        user, role, typeId, typeLabel, identifier, label, permission, inheritedPermissions);
+        user, role, object, type, permission, inheritedPermissions);
   }
 }

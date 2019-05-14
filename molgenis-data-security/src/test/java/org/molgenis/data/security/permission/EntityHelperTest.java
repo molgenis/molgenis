@@ -73,7 +73,8 @@ public class EntityHelperTest extends AbstractMockitoTest {
     assertEquals(
         entityHelper.getLabelledObjectIdentity(
             new ObjectIdentityImpl("entity-typeId", "identifier")),
-        LabelledObjectIdentity.create("entity-typeId", "typeLabel", "identifier", "label"));
+        LabelledObjectIdentity.create(
+            "entity-typeId", "typeId", "typeLabel", "identifier", "label"));
   }
 
   @Test(expectedExceptions = UnknownEntityException.class)

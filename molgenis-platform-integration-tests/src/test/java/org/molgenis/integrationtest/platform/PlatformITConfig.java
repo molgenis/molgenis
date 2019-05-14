@@ -40,6 +40,7 @@ import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -159,6 +160,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
   @Autowired private MutableAclClassService mutableAclClassService;
   @Autowired private UserRoleTools userRoleTools;
   @Autowired private EntityHelper entityHelper;
+  @Autowired private UserPermissionEvaluator userPermissionEvaluator;
 
   @Override
   public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -175,7 +177,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
             dataService,
             mutableAclClassService,
             userRoleTools,
-            entityHelper));
+            entityHelper,
+            userPermissionEvaluator));
   }
 
   @Bean

@@ -14,7 +14,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
-import static org.molgenis.api.tests.utils.RestTestUtils.uploadEMXFileWithoutPackage;
+import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFileWithoutPackage;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -85,7 +85,7 @@ public class PermissionAPIIT {
   @BeforeMethod
   public void beforeMethod() {
     LOG.info("Importing Test data");
-    uploadEMXFileWithoutPackage(adminToken, "/Permissions_TestEMX.xlsx");
+    uploadEmxFileWithoutPackage(adminToken, "/Permissions_TestEMX.xlsx");
     LOG.info("Importing Done");
   }
 

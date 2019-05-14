@@ -4,6 +4,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.security.EntityPermission.READ;
 
 import com.google.common.collect.Sets;
 import java.util.HashSet;
@@ -30,8 +31,7 @@ import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.AlreadyExistsException;
@@ -42,9 +42,7 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.transaction.annotation.Transactional;
 
 public class PermissionServiceImpl implements PermissionService {
-
-  private static final Logger LOG = LoggerFactory.getLogger(PermissionServiceImpl.class);
-  public static final String PLUGIN = "plugin";
+  private static final String PLUGIN = "plugin";
 
   private final MutableAclService mutableAclService;
   private final PermissionInheritanceResolver inheritanceResolver;
@@ -53,6 +51,7 @@ public class PermissionServiceImpl implements PermissionService {
   private final MutableAclClassService mutableAclClassService;
   private final UserRoleTools userRoleTools;
   private final EntityHelper entityHelper;
+  private final UserPermissionEvaluator userPermissionEvaluator;
 
   public PermissionServiceImpl(
       MutableAclService mutableAclService,
@@ -61,7 +60,8 @@ public class PermissionServiceImpl implements PermissionService {
       DataService dataService,
       MutableAclClassService mutableAclClassService,
       UserRoleTools userRoleTools,
-      EntityHelper entityHelper) {
+      EntityHelper entityHelper,
+      UserPermissionEvaluator userPermissionEvaluator) {
     this.mutableAclService = requireNonNull(mutableAclService);
     this.inheritanceResolver = requireNonNull(inheritanceResolver);
     this.objectIdentityService = requireNonNull(objectIdentityService);
@@ -69,6 +69,7 @@ public class PermissionServiceImpl implements PermissionService {
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
     this.userRoleTools = requireNonNull(userRoleTools);
     this.entityHelper = requireNonNull(entityHelper);
+    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
   @Override
@@ -76,8 +77,10 @@ public class PermissionServiceImpl implements PermissionService {
     Set<LabelledType> types = new HashSet<>();
     for (String typeId : mutableAclClassService.getAclClassTypes()) {
       String entityTypeId = entityHelper.getEntityTypeIdFromType(typeId);
-      String label = entityHelper.getLabel(typeId);
-      types.add(LabelledType.create(typeId, entityTypeId, label));
+      if (userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityTypeId), READ)) {
+        String label = entityHelper.getLabel(typeId);
+        types.add(LabelledType.create(typeId, entityTypeId, label));
+      }
     }
     return types;
   }

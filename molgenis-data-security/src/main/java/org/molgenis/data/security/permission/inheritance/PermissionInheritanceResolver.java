@@ -83,7 +83,7 @@ public class PermissionInheritanceResolver {
         return Optional.of(inheritedAclPermissionsResult);
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   private PermissionSet getPermissionsForAcl(Acl acl, Sid sid) {

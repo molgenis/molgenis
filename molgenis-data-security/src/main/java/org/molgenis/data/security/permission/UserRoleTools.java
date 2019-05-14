@@ -7,11 +7,13 @@ import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.SidUtils.getRoleName;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserRoleTools {
 
+  public static final String ANONYMOUS = "ANONYMOUS";
   private final UserService userService;
   private final DataService dataService;
   private final UserPermissionEvaluator userPermissionEvaluator;
@@ -52,13 +55,16 @@ public class UserRoleTools {
   }
 
   public void checkRoleExists(String role) {
-    if (dataService
-            .query(RoleMetadata.ROLE, Role.class)
-            .eq(RoleMetadata.NAME, role.toUpperCase())
-            .findOne()
-        == null) {
+    if (getRole(role.toUpperCase()) == null) {
       throw new UnknownRoleException(role);
     }
+  }
+
+  private Role getRole(String rolename) {
+    return dataService
+        .query(RoleMetadata.ROLE, Role.class)
+        .eq(RoleMetadata.NAME, rolename)
+        .findOne();
   }
 
   public void checkUserExists(String user) {
@@ -80,31 +86,31 @@ public class UserRoleTools {
     return results;
   }
 
-  public static String getUser(Sid sid) {
+  public static Optional<String> getUsername(Sid sid) {
     if (sid instanceof PrincipalSid) {
-      return ((PrincipalSid) sid).getPrincipal();
+      return Optional.of(((PrincipalSid) sid).getPrincipal());
     }
-    return null;
+    return Optional.empty();
   }
 
-  public static String getRole(Sid sid) {
+  public static Optional<String> getRolename(Sid sid) {
     if (sid instanceof GrantedAuthoritySid) {
       String role = ((GrantedAuthoritySid) sid).getGrantedAuthority();
-      return SidUtils.getRoleName(role);
+      return Optional.of(SidUtils.getRoleName(role));
     }
-    return null;
+    return Optional.empty();
   }
 
   public static String getName(Sid sid) {
-    String name = getRole(sid);
-    if (name == null) {
-      name = getUser(sid);
+    Optional<String> name = getRolename(sid);
+    if (!name.isPresent()) {
+      name = getUsername(sid);
     }
-    if (name == null) {
+    if (!name.isPresent()) {
       throw new IllegalStateException(
           "Sid should always be either a GrantedAuthoritySid or a PrincipalSid");
     }
-    return name;
+    return name.get();
   }
 
   public List<Sid> getRolesForSid(Sid sid) {
@@ -119,27 +125,28 @@ public class UserRoleTools {
   }
 
   private List<Sid> getParentRoles(String roleName) {
+    List<Sid> result = new ArrayList<>();
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(RoleMetadata.ROLE), EntityTypePermission.READ_DATA)) {
-
-      Role role =
-          dataService
-              .query(RoleMetadata.ROLE, Role.class)
-              .eq(RoleMetadata.NAME, roleName)
-              .findOne();
-      if (role == null) {
-        throw new UnknownEntityException(RoleMetadata.ROLE, roleName);
+      if (!roleName.equals(ANONYMOUS)) {
+        Role role = getRole(roleName);
+        if (role == null) {
+          throw new UnknownEntityException(RoleMetadata.ROLE, roleName);
+        }
+        result.addAll(
+            StreamSupport.stream(role.getIncludes().spliterator(), false)
+                .map(parentRole -> SidUtils.createRoleSid(parentRole.getName()))
+                .collect(Collectors.toList()));
       }
-      return StreamSupport.stream(role.getIncludes().spliterator(), false)
-          .map(parentRole -> SidUtils.createRoleSid(parentRole.getName()))
-          .collect(Collectors.toList());
     } else {
       throw new InsufficientInheritancePermissionsException();
     }
+    return result;
   }
 
   private List<Sid> getRolesForUser(Sid sid) {
-    String username = UserRoleTools.getUser(sid);
+    String username =
+        UserRoleTools.getUsername(sid).orElseThrow(() -> new NullPointerException("null username"));
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(RoleMembershipMetadata.ROLE_MEMBERSHIP),
         EntityTypePermission.READ_DATA)) {
@@ -209,5 +216,18 @@ public class UserRoleTools {
     List<Sid> result = new LinkedList<>(sids);
     result.sort(comparing(UserRoleTools::getName));
     return result;
+  }
+
+  boolean isSuperUser(Sid sid) {
+    String username = getUsername(sid).orElse(null);
+    if (username == null) {
+      String rolename =
+          getRolename(sid)
+              .orElseThrow(() -> new IllegalArgumentException("Sid is neither a user nor a role."));
+      Role role = getRole(SidUtils.createRoleAuthority(rolename));
+      return AUTHORITY_SU.equals(role);
+    }
+    User user = userService.getUser(username);
+    return user.isSuperuser();
   }
 }

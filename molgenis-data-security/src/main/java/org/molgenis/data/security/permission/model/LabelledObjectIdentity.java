@@ -13,6 +13,8 @@ public abstract class LabelledObjectIdentity implements ObjectIdentity {
 
   public abstract String getType();
 
+  public abstract String getEntityTypeId();
+
   public abstract String getTypeLabel();
 
   public abstract Serializable getIdentifier();
@@ -20,7 +22,12 @@ public abstract class LabelledObjectIdentity implements ObjectIdentity {
   public abstract String getIdentifierLabel();
 
   public static LabelledObjectIdentity create(
-      String type, String typeLabel, Serializable identifier, String identifierLabel) {
-    return new AutoValue_LabelledObjectIdentity(type, typeLabel, identifier, identifierLabel);
+      String type,
+      String entityTypeId,
+      String typeLabel,
+      Serializable identifier,
+      String identifierLabel) {
+    return new AutoValue_LabelledObjectIdentity(
+        type, entityTypeId, typeLabel, identifier, identifierLabel);
   }
 }

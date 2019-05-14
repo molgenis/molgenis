@@ -6,6 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.acls.model.MutableAclService;
@@ -19,6 +20,7 @@ public class PermissionsConfig {
   private final MutableAclClassService mutableAclClassService;
   private final UserRoleTools userRoleTools;
   private final EntityHelper entityHelper;
+  private final UserPermissionEvaluator userPermissionEvaluator;
 
   PermissionsConfig(
       MutableAclService mutableAclService,
@@ -27,7 +29,8 @@ public class PermissionsConfig {
       DataService dataService,
       MutableAclClassService mutableAclClassService,
       UserRoleTools userRoleTools,
-      EntityHelper entityHelper) {
+      EntityHelper entityHelper,
+      UserPermissionEvaluator userPermissionEvaluator) {
     this.mutableAclService = requireNonNull(mutableAclService);
     this.inheritanceResolver = requireNonNull(inheritanceResolver);
     this.objectIdentityService = requireNonNull(objectIdentityService);
@@ -35,6 +38,7 @@ public class PermissionsConfig {
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
     this.userRoleTools = requireNonNull(userRoleTools);
     this.entityHelper = requireNonNull(entityHelper);
+    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
   @Bean
@@ -47,8 +51,9 @@ public class PermissionsConfig {
             dataService,
             mutableAclClassService,
             userRoleTools,
-            entityHelper);
+            entityHelper,
+            userPermissionEvaluator);
     return new PermissionServiceDecorator(
-        permissionService, dataService, userRoleTools, mutableAclService);
+        permissionService, dataService, userRoleTools, mutableAclService, userPermissionEvaluator);
   }
 }

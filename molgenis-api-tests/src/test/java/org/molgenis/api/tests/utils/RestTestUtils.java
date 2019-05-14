@@ -140,10 +140,10 @@ public class RestTestUtils {
    * @param fileName the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEMXFileWithoutPackage(String adminToken, String fileName) {
+  public static String uploadEmxFileWithoutPackage(String adminToken, String fileName) {
     File file = getResourceFile(fileName);
 
-    return uploadEMXFileWithoutPackage(adminToken, file);
+    return uploadEmxFileWithoutPackage(adminToken, file);
   }
 
   /**
@@ -178,7 +178,7 @@ public class RestTestUtils {
       String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 
-    return uploadEMXFileWithoutPackage(adminToken, file);
+    return uploadEmxFileWithoutPackage(adminToken, file);
   }
 
   private static String uploadEMXFile(String adminToken, File file) {
@@ -198,7 +198,7 @@ public class RestTestUtils {
     return monitorImportJob(adminToken, importJobStatusUrl);
   }
 
-  private static String uploadEMXFileWithoutPackage(String adminToken, File file) {
+  private static String uploadEmxFileWithoutPackage(String adminToken, File file) {
     String importJobStatusUrl =
         given()
             .multiPart(file)

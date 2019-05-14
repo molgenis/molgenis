@@ -92,7 +92,6 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testCreateAcl() throws Exception {
-
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     mockMvc
         .perform(post(BASE_URI + "/" + OBJECTS + "/typeId/identifier"))
@@ -145,12 +144,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
         Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 WRITE,
                 null));
     when(permissionsService.getPermissionsForObject(
@@ -185,12 +186,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
         Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 WRITE,
                 null));
     Map<String, Set<LabelledPermission>> expected =
@@ -223,12 +226,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
         Sets.newHashSet(
             LabelledPermission.create(
                 sid1,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 sid2,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 WRITE,
                 null));
     Map<String, Set<LabelledPermission>> expected =
@@ -264,12 +269,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
         Sets.newHashSet(
             LabelledPermission.create(
                 user1,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 PermissionSet.READ,
                 null),
             LabelledPermission.create(
                 user1,
-                LabelledObjectIdentity.create("typeId", "typeLabel", "identifier", "label"),
+                LabelledObjectIdentity.create(
+                    "typeId", "entityTypeId", "typeLabel", "identifier", "label"),
                 WRITE,
                 null));
     when(permissionsService.getPermissions(Sets.newHashSet(user1), false))

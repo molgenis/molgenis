@@ -76,12 +76,12 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     Acl parentPackageAcl = mock(Acl.class);
     ObjectIdentity parentPackageObjectIdentity = new ObjectIdentityImpl("package", "parent");
     LabelledObjectIdentity labelledParentPackageObjectIdentity =
-        LabelledObjectIdentity.create("package", "package", "parent", "Parent");
+        LabelledObjectIdentity.create("package", "sys_md_package", "package", "parent", "Parent");
     when(parentPackageAcl.getObjectIdentity()).thenReturn(parentPackageObjectIdentity);
     Acl packageAcl = mock(Acl.class);
     ObjectIdentity packageObjectIdentity = new ObjectIdentityImpl("package", "pack");
     LabelledObjectIdentity labelledPackageObjectIdentity =
-        LabelledObjectIdentity.create("package", "package", "pack", "Pack");
+        LabelledObjectIdentity.create("package", "sys_md_package", "package", "pack", "Pack");
     when(packageAcl.getObjectIdentity()).thenReturn(packageObjectIdentity);
 
     InheritedPermissionsResult input =
@@ -105,13 +105,14 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     LabelledPermission parentPermission =
         LabelledPermission.create(
             null,
-            LabelledObjectIdentity.create("package", "package", "parent", "Parent"),
+            LabelledObjectIdentity.create(
+                "package", "sys_md_package", "package", "parent", "Parent"),
             null,
             singleton(role1Permission));
     LabelledPermission packPermission =
         LabelledPermission.create(
             null,
-            LabelledObjectIdentity.create("package", "package", "pack", "Pack"),
+            LabelledObjectIdentity.create("package", "sys_md_package", "package", "pack", "Pack"),
             PermissionSet.READ,
             singleton(parentPermission));
     LabelledPermission role2Permission =

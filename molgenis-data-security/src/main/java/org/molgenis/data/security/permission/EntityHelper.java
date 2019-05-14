@@ -87,11 +87,16 @@ public class EntityHelper {
 
   public LabelledObjectIdentity getLabelledObjectIdentity(ObjectIdentity objectIdentity) {
     String typeLabel = getLabel(objectIdentity.getType());
+    String entityTypeId = getEntityTypeIdFromType(objectIdentity.getType());
     String identifierLabel =
         getLabel(objectIdentity.getType(), objectIdentity.getIdentifier().toString());
 
     return LabelledObjectIdentity.create(
-        objectIdentity.getType(), typeLabel, objectIdentity.getIdentifier(), identifierLabel);
+        objectIdentity.getType(),
+        entityTypeId,
+        typeLabel,
+        objectIdentity.getIdentifier(),
+        identifierLabel);
   }
 
   public void checkEntityExists(ObjectIdentity objectIdentity) {
