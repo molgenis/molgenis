@@ -11,6 +11,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.exception.InvalidTypeIdException;
 import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -101,5 +102,35 @@ public class EntityHelperTest extends AbstractMockitoTest {
   public void testCheckEntityTypeExists() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
     entityHelper.checkEntityTypeExists("entity-typeId");
+  }
+
+  @Test
+  public void testGetEntityTypeIdFromClassPlugin() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("plugin"), "sys_Plugin");
+  }
+
+  @Test
+  public void testGetEntityTypeIdFromClassET() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("entityType"), "sys_md_EntityType");
+  }
+
+  @Test
+  public void testGetEntityTypeIdFromClassGroup() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("group"), "sys_sec_Group");
+  }
+
+  @Test
+  public void testGetEntityTypeIdFromClassPack() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("package"), "sys_md_Package");
+  }
+
+  @Test
+  public void testGetEntityTypeIdFromClassEntity() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("entity-test"), "test");
+  }
+
+  @Test(expectedExceptions = InvalidTypeIdException.class)
+  public void testGetEntityTypeIdFromClassError() {
+    assertEquals(entityHelper.getEntityTypeIdFromType("error"), "");
   }
 }

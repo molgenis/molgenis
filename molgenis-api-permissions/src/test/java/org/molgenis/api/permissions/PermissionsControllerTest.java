@@ -175,7 +175,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}}");
+        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}}");
   }
 
   @Test
@@ -215,7 +215,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
   }
 
   @Test
@@ -260,7 +260,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role1\",\"permission\":\"READ\"},{\"role\":\"role2\",\"permission\":\"WRITE\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
   }
 
   @Test
@@ -294,7 +294,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"}]}}");
+        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"}]}}");
   }
 
   @Test

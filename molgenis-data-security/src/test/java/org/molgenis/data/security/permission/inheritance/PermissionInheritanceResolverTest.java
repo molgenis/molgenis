@@ -15,7 +15,6 @@ import java.util.Set;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.security.exception.InvalidTypeIdException;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionTestUtils;
 import org.molgenis.data.security.permission.UserRoleTools;
@@ -121,35 +120,5 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     List<LabelledPermission> expected = Arrays.asList(role2Permission, packPermission);
 
     assertEquals(actual, expected);
-  }
-
-  @Test
-  public void testGetEntityTypeIdFromClassPlugin() {
-    assertEquals(resolver.getEntityTypeIdFromClass("plugin"), "sys_Plugin");
-  }
-
-  @Test
-  public void testGetEntityTypeIdFromClassET() {
-    assertEquals(resolver.getEntityTypeIdFromClass("entityType"), "sys_md_EntityType");
-  }
-
-  @Test
-  public void testGetEntityTypeIdFromClassGroup() {
-    assertEquals(resolver.getEntityTypeIdFromClass("group"), "sys_sec_Group");
-  }
-
-  @Test
-  public void testGetEntityTypeIdFromClassPack() {
-    assertEquals(resolver.getEntityTypeIdFromClass("package"), "sys_md_Package");
-  }
-
-  @Test
-  public void testGetEntityTypeIdFromClassEntity() {
-    assertEquals(resolver.getEntityTypeIdFromClass("entity-test"), "test");
-  }
-
-  @Test(expectedExceptions = InvalidTypeIdException.class)
-  public void testGetEntityTypeIdFromClassError() {
-    assertEquals(resolver.getEntityTypeIdFromClass("error"), "");
   }
 }

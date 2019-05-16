@@ -34,6 +34,7 @@ import org.springframework.security.acls.model.Sid;
 
 public class PermissionServiceDecorator implements PermissionService {
 
+  public static final String SUPERUSER = "superuser";
   private final UserRoleTools userRoleTools;
   private final MutableAclService mutableAclService;
   private final PermissionService permissionService;
@@ -83,7 +84,7 @@ public class PermissionServiceDecorator implements PermissionService {
   private void checkSuOrSystem(String type, String identifier) {
     if (!SecurityUtils.currentUserIsSuOrSystem()) {
       throw new InsufficientPermissionsException(
-          type, identifier, Collections.singletonList("superuser"));
+          type, identifier, Collections.singletonList(SUPERUSER));
     }
   }
 
@@ -132,7 +133,7 @@ public class PermissionServiceDecorator implements PermissionService {
       permissionService.addType(typeId);
     } else {
       throw new InsufficientPermissionsException(
-          "type", typeId, Collections.singletonList("superuser"));
+          "type", typeId, Collections.singletonList(SUPERUSER));
     }
   }
 
@@ -209,7 +210,7 @@ public class PermissionServiceDecorator implements PermissionService {
     boolean isOwner = acl.getOwner().equals(sid);
     if (!SecurityUtils.currentUserIsSuOrSystem() && !isOwner) {
       throw new InsufficientPermissionsException(
-          acl.getObjectIdentity(), Arrays.asList("superuser", "owner"));
+          acl.getObjectIdentity(), Arrays.asList(SUPERUSER, "owner"));
     }
   }
 
@@ -223,7 +224,7 @@ public class PermissionServiceDecorator implements PermissionService {
     // User are allowed to query for their own permissions including permissions from roles they
     // have.
     Sid currentUser = createSecurityContextSid();
-    // run as system: only the roles of the current user are requested;
+    // run as system: only the roles of the current user are requested.
     Set<Sid> roles = runAsSystem(() -> userRoleTools.getRoles(currentUser));
     for (Sid sid : sids) {
       if (!roles.contains(sid) && !(currentUser.equals(sid))) {

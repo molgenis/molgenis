@@ -95,7 +95,7 @@ public class EntityHelper {
         objectIdentity.getType(),
         entityTypeId,
         typeLabel,
-        objectIdentity.getIdentifier(),
+        objectIdentity.getIdentifier().toString(),
         identifierLabel);
   }
 

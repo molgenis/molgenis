@@ -23,6 +23,7 @@ public class PermissionSetUtils {
   public static final String READ = "READ";
   public static final String WRITE = "WRITE";
   public static final String WRITEMETA = "WRITEMETA";
+  public static final String UNEXPECTED_MASK_MESSAGE = "Unexpected mask '%d'";
 
   private PermissionSetUtils() {}
 
@@ -40,7 +41,7 @@ public class PermissionSetUtils {
       case WRITEMETA_MASK:
         return PermissionSet.WRITEMETA;
       default:
-        throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
+        throw new IllegalArgumentException(format(UNEXPECTED_MASK_MESSAGE, mask));
     }
   }
 
@@ -77,7 +78,7 @@ public class PermissionSetUtils {
         case WRITEMETA_MASK:
           return Optional.of(WRITEMETA);
         default:
-          throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
+          throw new IllegalArgumentException(format(UNEXPECTED_MASK_MESSAGE, mask));
       }
     }
     return Optional.empty();
@@ -98,7 +99,7 @@ public class PermissionSetUtils {
         case WRITEMETA_MASK:
           return WRITEMETA;
         default:
-          throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
+          throw new IllegalArgumentException(format(UNEXPECTED_MASK_MESSAGE, mask));
       }
     }
     return null;

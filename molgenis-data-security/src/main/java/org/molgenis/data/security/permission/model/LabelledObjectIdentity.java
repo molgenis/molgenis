@@ -1,7 +1,6 @@
 package org.molgenis.data.security.permission.model;
 
 import com.google.auto.value.AutoValue;
-import java.io.Serializable;
 import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.ObjectIdentity;
 
@@ -11,13 +10,9 @@ import org.springframework.security.acls.model.ObjectIdentity;
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class LabelledObjectIdentity implements ObjectIdentity {
 
-  public abstract String getType();
-
   public abstract String getEntityTypeId();
 
   public abstract String getTypeLabel();
-
-  public abstract Serializable getIdentifier();
 
   public abstract String getIdentifierLabel();
 
@@ -25,9 +20,9 @@ public abstract class LabelledObjectIdentity implements ObjectIdentity {
       String type,
       String entityTypeId,
       String typeLabel,
-      Serializable identifier,
+      String identifier,
       String identifierLabel) {
     return new AutoValue_LabelledObjectIdentity(
-        type, entityTypeId, typeLabel, identifier, identifierLabel);
+        identifier, type, entityTypeId, typeLabel, identifierLabel);
   }
 }

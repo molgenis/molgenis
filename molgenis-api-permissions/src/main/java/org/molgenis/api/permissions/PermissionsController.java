@@ -13,7 +13,6 @@ import cz.jirutka.rsql.parser.ast.Node;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -145,7 +144,7 @@ public class PermissionsController extends ApiController {
         permissionService
             .getSuitablePermissionsForType(typeId)
             .stream()
-            .map(permissionSet -> PermissionSetUtils.getPermissionStringValue(permissionSet))
+            .map(PermissionSetUtils::getPermissionStringValue)
             .collect(Collectors.toSet()));
   }
 
@@ -154,8 +153,7 @@ public class PermissionsController extends ApiController {
   public ResponseEntity createAcl(
       HttpServletRequest request,
       @PathVariable(TYPE_ID) String typeId,
-      @PathVariable(OBJECT_ID) String identifier)
-      throws URISyntaxException {
+      @PathVariable(OBJECT_ID) String identifier) {
     permissionService.createAcl(entityHelper.getObjectIdentity(typeId, identifier));
     return ResponseEntity.created(getUriFromRequest(request)).build();
   }
@@ -279,8 +277,7 @@ public class PermissionsController extends ApiController {
   public ResponseEntity<Object> createPermissions(
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
-      @RequestBody SetTypePermissionsRequest setTypePermissionsRequest)
-      throws URISyntaxException {
+      @RequestBody SetTypePermissionsRequest setTypePermissionsRequest) {
     Set<Permission> permissions = convertRequests(setTypePermissionsRequest.getObjects(), typeId);
     permissionService.createPermissions(permissions);
     return ResponseEntity.created(getUriFromRequest(request)).build();
@@ -292,8 +289,7 @@ public class PermissionsController extends ApiController {
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
-      @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest)
-      throws URISyntaxException {
+      @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest) {
     Set<Permission> permissions =
         convertRequests(setIdentityPermissionRequest.getPermissions(), typeId, identifier);
     permissionService.createPermissions(permissions);
@@ -389,11 +385,11 @@ public class PermissionsController extends ApiController {
         .map(
             labelledPermission ->
                 PermissionResponse.create(
-                    userRoleTools.getUsername(labelledPermission.getSid()).orElse(null),
-                    userRoleTools.getRolename(labelledPermission.getSid()).orElse(null),
+                    UserRoleTools.getUsername(labelledPermission.getSid()).orElse(null),
+                    UserRoleTools.getRolename(labelledPermission.getSid()).orElse(null),
                     PermissionSetUtils.getPermissionStringValue(labelledPermission).orElse(null),
                     convertLabelledPermissions(labelledPermission.getInheritedPermissions())))
-        .forEach(permissionResponse -> result.add(permissionResponse));
+        .forEach(result::add);
     return result;
   }
 
@@ -426,8 +422,8 @@ public class PermissionsController extends ApiController {
                   permission.getLabelledObjectIdentity().getTypeLabel());
           labelledResponse =
               LabelledPermissionResponse.create(
-                  userRoleTools.getUsername(permission.getSid()).orElse(null),
-                  userRoleTools.getRolename(permission.getSid()).orElse(null),
+                  UserRoleTools.getUsername(permission.getSid()).orElse(null),
+                  UserRoleTools.getRolename(permission.getSid()).orElse(null),
                   objectResponse,
                   typeResponse,
                   permissionString,
@@ -435,8 +431,8 @@ public class PermissionsController extends ApiController {
         } else {
           labelledResponse =
               LabelledPermissionResponse.create(
-                  userRoleTools.getUsername(permission.getSid()).orElse(null),
-                  userRoleTools.getRolename(permission.getSid()).orElse(null),
+                  UserRoleTools.getUsername(permission.getSid()).orElse(null),
+                  UserRoleTools.getRolename(permission.getSid()).orElse(null),
                   null,
                   null,
                   permissionString,
@@ -469,7 +465,7 @@ public class PermissionsController extends ApiController {
     return permissions;
   }
 
-  public Sid getSid(String user, String role) {
+  private Sid getSid(String user, String role) {
     if (isNullOrEmpty(user) && isNullOrEmpty(role)) {
       throw new MissingUserOrRoleException();
     } else if (!isNullOrEmpty(user) && !isNullOrEmpty(role)) {

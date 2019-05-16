@@ -7,6 +7,7 @@ import org.molgenis.data.DataAlreadyExistsException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class DuplicatePermissionException extends DataAlreadyExistsException {
   private static final String ERROR_CODE = "DS27";
   private final ObjectIdentity objectIdentity;

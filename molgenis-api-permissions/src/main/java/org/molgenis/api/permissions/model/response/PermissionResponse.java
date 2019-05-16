@@ -26,7 +26,7 @@ public abstract class PermissionResponse {
 
   @Nullable
   @CheckForNull
-  public abstract Set<LabelledPermissionResponse> getInheritedPermissions();;
+  public abstract Set<LabelledPermissionResponse> getInheritedPermissions();
 
   public static PermissionResponse create(
       String user,

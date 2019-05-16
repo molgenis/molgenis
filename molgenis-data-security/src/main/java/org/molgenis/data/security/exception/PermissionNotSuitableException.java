@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.i18n.BadRequestException;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class PermissionNotSuitableException extends BadRequestException {
   private static final String ERROR_CODE = "DS23";
 

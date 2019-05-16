@@ -7,6 +7,7 @@ import org.molgenis.data.UnknownDataException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnknownAceException extends UnknownDataException {
   private static final String ERROR_CODE = "DS31";
   private final ObjectIdentity objectIdentity;

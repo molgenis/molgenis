@@ -1,22 +1,12 @@
 package org.molgenis.data.security.permission.inheritance;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.permission.EntityHelper.ENTITY_PREFIX;
-import static org.molgenis.data.security.permission.EntityHelper.PLUGIN;
-import static org.molgenis.data.security.permission.EntityHelper.SYS_PLUGIN;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.GroupIdentity;
-import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.GroupMetadata;
-import org.molgenis.data.security.exception.InvalidTypeIdException;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionSetUtils;
 import org.molgenis.data.security.permission.UserRoleTools;
@@ -172,31 +162,5 @@ public class PermissionInheritanceResolver {
       results.add(LabelledPermission.create(sid, null, ownPermission, labelledPermissions));
     }
     return results;
-  }
-
-  String getEntityTypeIdFromClass(String typeId) {
-    String result;
-    switch (typeId) {
-      case PackageIdentity.PACKAGE:
-        result = PackageMetadata.PACKAGE;
-        break;
-      case EntityTypeIdentity.ENTITY_TYPE:
-        result = EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-        break;
-      case PLUGIN:
-        result = SYS_PLUGIN;
-        break;
-      case GroupIdentity.GROUP:
-        result = GroupMetadata.GROUP;
-        break;
-      default:
-        if (typeId.startsWith(ENTITY_PREFIX)) {
-          result = typeId.substring(7);
-        } else {
-          throw new InvalidTypeIdException(typeId);
-        }
-        break;
-    }
-    return result;
   }
 }
