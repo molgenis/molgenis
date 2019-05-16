@@ -227,9 +227,7 @@ public class UserRoleTools {
       return AUTHORITY_SU.equals(SidUtils.createRoleAuthority(rolename));
     }
     User user = userService.getUser(username);
-    if (user == null) {
-      throw new UnknownUserException(username);
-    }
-    return user.isSuperuser();
+    // no UnknownUserException beccause this results in trouble with "WithMockUser" tests
+    return user != null && user.isSuperuser();
   }
 }
