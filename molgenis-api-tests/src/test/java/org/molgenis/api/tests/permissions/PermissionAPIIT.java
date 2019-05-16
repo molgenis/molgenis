@@ -113,9 +113,9 @@ public class PermissionAPIIT {
         .all();
 
     String response1 =
-        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
+        "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
             + testUserName
-            + "}], id=perm1_entity1, label=entity1}";
+            + "}], id=perm1_entity1, label=entity1}}";
 
     Response actual =
         given()
@@ -145,9 +145,9 @@ public class PermissionAPIIT {
         .all();
 
     String response2 =
-        "{permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
+        "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
             + testUserName
-            + "}], id=perm1_entity1, label=entity1}";
+            + "}], id=perm1_entity1, label=entity1}}";
     Response actual2 =
         given()
             .log()
@@ -176,7 +176,7 @@ public class PermissionAPIIT {
         .all();
 
     String response3 =
-        "{permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}";
+        "{data={permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}}";
     Response actual3 =
         given()
             .log()
@@ -194,7 +194,7 @@ public class PermissionAPIIT {
   }
 
   @Test
-  public void testSetPermissionsInhertited() {
+  public void testSetPermissionsInherited() {
     /*
      * Create READ permission for test user
      * Get permission to check if it was created succesfully
@@ -217,9 +217,11 @@ public class PermissionAPIIT {
         .all();
 
     String response =
-        "{permissions=[{permission=WRITEMETA, user=admin}, {user="
+        "{data={permissions=[{permission=WRITEMETA, user=admin}, {user="
             + testUserName
-            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
+            + ", inheritedPermissions=["
+            + "{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], id=perm1_entity1, label=entity1}}";
+
     Response actual =
         given()
             .log()
@@ -236,9 +238,11 @@ public class PermissionAPIIT {
     assertEquals(path.getJsonObject("").toString(), response);
 
     String response2 =
-        "{permissions=[{user="
+        "{data={permissions=[{user="
             + testUserName
-            + ", inheritedPermissions=[{typeLabel=perm1, typeId=perm1, permission=READ, label=Package, objectId=package, inheritedPermissions=[]}]}], id=perm1_entity1, label=entity1}";
+            + ", "
+            + "inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], "
+            + "id=perm1_entity1, label=entity1}}";
     Response actual2 =
         given()
             .log()
@@ -420,7 +424,7 @@ public class PermissionAPIIT {
         .statusCode(200)
         .log()
         .all()
-        .body(equalTo("[\"READ\",\"WRITE\"]"));
+        .body(equalTo("{\"data\":[\"READ\",\"WRITE\"]}"));
   }
 
   @Test
@@ -444,9 +448,9 @@ public class PermissionAPIIT {
         .all();
 
     String response =
-        "{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"permissions\":[{\"user\":\""
+        "{\"data\":{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"permissions\":[{\"user\":\""
             + testUserName
-            + "\",\"permission\":\"READ\"}]}";
+            + "\",\"permission\":\"READ\"}]}}";
     given()
         .log()
         .all()

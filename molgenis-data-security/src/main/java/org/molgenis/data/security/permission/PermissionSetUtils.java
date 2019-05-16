@@ -80,7 +80,7 @@ public class PermissionSetUtils {
           throw new IllegalArgumentException(format("Unexpected mask '%d'", mask));
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   public static String getPermissionStringValue(PermissionSet permissionSet) {
