@@ -224,10 +224,12 @@ public class UserRoleTools {
       String rolename =
           getRolename(sid)
               .orElseThrow(() -> new IllegalArgumentException("Sid is neither a user nor a role."));
-      Role role = getRole(SidUtils.createRoleAuthority(rolename));
-      return AUTHORITY_SU.equals(role);
+      return AUTHORITY_SU.equals(SidUtils.createRoleAuthority(rolename));
     }
     User user = userService.getUser(username);
+    if (user == null) {
+      throw new UnknownUserException(username);
+    }
     return user.isSuperuser();
   }
 }
