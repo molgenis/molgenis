@@ -55,9 +55,9 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   @Override
-  public Set<LabelledType> getTypes() {
+  public Set<LabelledType> getLabelledTypes() {
     return permissionService
-        .getTypes()
+        .getLabelledTypes()
         .stream()
         .filter(
             type ->

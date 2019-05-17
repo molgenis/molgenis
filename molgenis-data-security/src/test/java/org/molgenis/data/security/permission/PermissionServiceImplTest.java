@@ -101,7 +101,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("entityType2"), READ_METADATA);
     assertEquals(
-        permissionsApiService.getTypes(),
+        permissionsApiService.getLabelledTypes(),
         Arrays.asList(
             LabelledType.create("entity-test1", "entityType1", "label1"),
             LabelledType.create("entity-test2", "entityType2", "label2")));
@@ -205,10 +205,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetAllPermissions() {
     when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
-
-    doReturn(true)
-        .when(userPermissionEvaluator)
-        .hasPermission(new EntityTypeIdentity("typeId"), READ_METADATA);
     PrincipalSid sid1 = mock(PrincipalSid.class);
     PrincipalSid sid2 = mock(PrincipalSid.class);
     MutableAcl acl = mock(MutableAcl.class);
@@ -254,8 +250,6 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     when(objectIdentityService.getObjectIdentities("entity-typeId", newHashSet(sid1, sid2)))
         .thenReturn(singletonList(new ObjectIdentityImpl("entity-typeId", "identifier")));
 
-    when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
-    when(entityHelper.getLabel("entity-typeId")).thenReturn("label");
     when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
         .thenReturn(
             LabelledObjectIdentity.create(
@@ -584,6 +578,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   public void testDeleteType() {
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
     permissionsApiService.deleteType("entity-typeId");
     verify(mutableAclClassService).deleteAclClass("entity-typeId");
   }

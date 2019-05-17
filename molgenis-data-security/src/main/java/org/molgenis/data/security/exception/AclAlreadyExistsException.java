@@ -4,23 +4,25 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.DataAlreadyExistsException;
 
-public class AclClassAlreadyExistsException extends DataAlreadyExistsException {
-  private static final String ERROR_CODE = "DS29";
+public class AclAlreadyExistsException extends DataAlreadyExistsException {
+  private static final String ERROR_CODE = "DS35";
 
   private final String typeId;
+  private final String id;
 
-  public AclClassAlreadyExistsException(String typeId) {
+  public AclAlreadyExistsException(String typeId, String id) {
     super(ERROR_CODE);
     this.typeId = requireNonNull(typeId);
+    this.id = requireNonNull(id);
   }
 
   @Override
   public String getMessage() {
-    return String.format("typeId:%s", typeId);
+    return String.format("typeId:%s, id:%s", typeId, id);
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {typeId};
+    return new Object[] {typeId, id};
   }
 }

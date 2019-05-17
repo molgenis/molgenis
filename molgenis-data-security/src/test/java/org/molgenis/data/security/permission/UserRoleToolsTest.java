@@ -3,6 +3,7 @@ package org.molgenis.data.security.permission;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -25,6 +26,7 @@ import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
@@ -169,6 +171,12 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   public void testGetAllAvailableSids() {
     User user = mock(User.class);
     when(user.getUsername()).thenReturn("username");
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity(UserMetadata.USER), READ_DATA);
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new EntityTypeIdentity(RoleMetadata.ROLE), READ_DATA);
     when(userService.getUsers()).thenReturn(Collections.singletonList(user));
 
     Role role = mock(Role.class);
@@ -177,7 +185,10 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
     when(dataService.findAll(RoleMetadata.ROLE)).thenReturn(roles.stream());
     assertEquals(
         userRoleTools.getAllAvailableSids(),
-        Sets.newHashSet(new GrantedAuthoritySid("ROLE_role1"), new PrincipalSid("username")));
+        Sets.newHashSet(
+            new GrantedAuthoritySid("ROLE_role1"),
+            new GrantedAuthoritySid("ROLE_ANONYMOUS"),
+            new PrincipalSid("username")));
   }
 
   @Test

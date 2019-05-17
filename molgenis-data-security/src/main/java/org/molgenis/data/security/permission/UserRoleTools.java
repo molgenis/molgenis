@@ -3,6 +3,7 @@ package org.molgenis.data.security.permission;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
@@ -10,6 +11,7 @@ import static org.molgenis.security.core.SidUtils.getRoleName;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.exception.InsufficientInheritancePermissionsException;
 import org.molgenis.data.security.exception.UnknownRoleException;
 import org.molgenis.data.security.user.UnknownUserException;
@@ -194,20 +197,27 @@ public class UserRoleTools {
   }
 
   Set<Sid> getAllAvailableSids() {
-    Set<Sid> sids =
-        userService
-            .getUsers()
-            .stream()
-            .map(user -> new PrincipalSid(user.getUsername()))
-            .collect(toSet());
+    Set<Sid> sids = new HashSet<>();
+    if (userPermissionEvaluator.hasPermission(
+        new EntityTypeIdentity(UserMetadata.USER), READ_DATA)) {
+      sids =
+          userService
+              .getUsers()
+              .stream()
+              .map(user -> new PrincipalSid(user.getUsername()))
+              .collect(toSet());
+    }
+    if (userPermissionEvaluator.hasPermission(
+        new EntityTypeIdentity(RoleMetadata.ROLE), READ_DATA)) {
+      Set<Sid> roles =
+          dataService
+              .findAll(RoleMetadata.ROLE)
+              .map(role -> new GrantedAuthoritySid(ROLE_PREFIX + role.getString(RoleMetadata.NAME)))
+              .collect(toSet());
 
-    Set<Sid> roles =
-        dataService
-            .findAll(RoleMetadata.ROLE)
-            .map(role -> new GrantedAuthoritySid(ROLE_PREFIX + role.getString(RoleMetadata.NAME)))
-            .collect(toSet());
-
-    sids.addAll(roles);
+      sids.addAll(roles);
+    }
+    sids.add(SidUtils.createSecurityContextSid());
 
     return sids;
   }

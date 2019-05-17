@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -132,7 +131,7 @@ public class PermissionsController extends ApiController {
   @GetMapping(value = TYPES)
   @ApiOperation(value = "Get a list of ACL types in the system", response = ResponseEntity.class)
   public ApiResponse getRlsEntities() {
-    return ApiResponse.create(convertTypes(permissionService.getTypes()));
+    return ApiResponse.create(convertTypes(permissionService.getLabelledTypes()));
   }
 
   @GetMapping(value = TYPES + "/permissions/{" + TYPE_ID + "}")
@@ -199,7 +198,7 @@ public class PermissionsController extends ApiController {
         permissionService.getPermissionsForObject(
             entityHelper.getObjectIdentity(typeId, identifier), sids, inheritance);
     ObjectPermissionResponse permissionResponse =
-        convertToObjectResponse(identifier, labelledObjectPermissions);
+        convertToObjectResponse(typeId, identifier, labelledObjectPermissions);
     return ApiResponse.create(permissionResponse);
   }
 
@@ -338,44 +337,20 @@ public class PermissionsController extends ApiController {
   }
 
   private ObjectPermissionResponse convertToObjectResponse(
-      String id, Set<LabelledPermission> labelledObjectPermissions) {
+      String typeId, String id, Set<LabelledPermission> labelledObjectPermissions) {
     Set<PermissionResponse> permissions = convertToPermissions(labelledObjectPermissions);
-
-    String label = getIdentifierLabel(labelledObjectPermissions);
+    String label = entityHelper.getLabel(typeId, id);
     return ObjectPermissionResponse.create(id, label, permissions);
   }
 
-  private String getIdentifierLabel(Set<LabelledPermission> permissions) {
-    Optional<LabelledPermission> first = permissions.stream().findFirst();
-    String label = null;
-    if (first.isPresent()) {
-      label = first.get().getLabelledObjectIdentity().getIdentifierLabel();
-    }
-    return label;
-  }
-
   private TypePermissionsResponse convertToTypeResponse(
-      String type, Map<String, Set<LabelledPermission>> typePermissions) {
+      String typeId, Map<String, Set<LabelledPermission>> typePermissions) {
     Set<ObjectPermissionResponse> objectPermissions = new LinkedHashSet<>();
     for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
-      objectPermissions.add(convertToObjectResponse(entry.getKey(), entry.getValue()));
+      objectPermissions.add(convertToObjectResponse(typeId, entry.getKey(), entry.getValue()));
     }
-    String label = getTypeLabel(typePermissions);
-    return TypePermissionsResponse.create(type, label, objectPermissions);
-  }
-
-  private String getTypeLabel(Map<String, Set<LabelledPermission>> typePermissions) {
-    String label = null;
-    Optional<Entry<String, Set<LabelledPermission>>> firstEntry =
-        typePermissions.entrySet().stream().findFirst();
-    if (firstEntry.isPresent()) {
-      Set<LabelledPermission> permissions = firstEntry.get().getValue();
-      Optional<LabelledPermission> first = permissions.stream().findFirst();
-      if (first.isPresent()) {
-        label = first.get().getLabelledObjectIdentity().getTypeLabel();
-      }
-    }
-    return label;
+    String label = entityHelper.getLabel(typeId);
+    return TypePermissionsResponse.create(typeId, label, objectPermissions);
   }
 
   private Set<PermissionResponse> convertToPermissions(Set<LabelledPermission> permissions) {

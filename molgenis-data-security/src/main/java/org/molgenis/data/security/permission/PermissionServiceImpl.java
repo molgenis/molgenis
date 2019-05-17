@@ -19,10 +19,12 @@ import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.exception.AclAlreadyExistsException;
 import org.molgenis.data.security.exception.AclClassAlreadyExistsException;
 import org.molgenis.data.security.exception.DuplicatePermissionException;
 import org.molgenis.data.security.exception.PermissionNotSuitableException;
 import org.molgenis.data.security.exception.UnknownAceException;
+import org.molgenis.data.security.exception.UnknownTypeException;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
@@ -73,17 +75,20 @@ public class PermissionServiceImpl implements PermissionService {
   }
 
   @Override
-  public Set<LabelledType> getTypes() {
+  public Set<LabelledType> getLabelledTypes() {
     Set<LabelledType> types = new HashSet<>();
     for (String typeId : mutableAclClassService.getAclClassTypes()) {
       String entityTypeId = entityHelper.getEntityTypeIdFromType(typeId);
-      if (userPermissionEvaluator.hasPermission(
-          new EntityTypeIdentity(entityTypeId), READ_METADATA)) {
-        String label = entityHelper.getLabel(typeId);
-        types.add(LabelledType.create(typeId, entityTypeId, label));
-      }
+      String label = entityHelper.getLabel(typeId);
+      types.add(LabelledType.create(typeId, entityTypeId, label));
     }
-    return types;
+    return types
+        .stream()
+        .filter(
+            type ->
+                userPermissionEvaluator.hasPermission(
+                    new EntityTypeIdentity(type.getEntityType()), READ_METADATA))
+        .collect(toSet());
   }
 
   @Override
@@ -138,7 +143,7 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean isReturnInherited) {
     Set<LabelledPermission> result = new LinkedHashSet<>();
-    for (LabelledType type : getTypes()) {
+    for (String type : mutableAclClassService.getAclClassTypes()) {
       Set<Sid> sidsToQuery;
       if (isReturnInherited) {
         sidsToQuery = userRoleTools.getInheritedSids(sids);
@@ -146,7 +151,7 @@ public class PermissionServiceImpl implements PermissionService {
         sidsToQuery = sids;
       }
       Map<String, Set<LabelledPermission>> permissions =
-          getPermissionsForType(type.getId(), sidsToQuery, isReturnInherited);
+          getPermissionsForType(type, sidsToQuery, isReturnInherited);
       if (!permissions.isEmpty()) {
         for (Set<LabelledPermission> labelledPermissions : permissions.values()) {
           result.addAll(labelledPermissions);
@@ -290,7 +295,11 @@ public class PermissionServiceImpl implements PermissionService {
   @Transactional
   public void addType(String typeId) {
     entityHelper.checkEntityTypeExists(typeId);
+    entityHelper.checkIsNotSystem(typeId);
     EntityType entityType = dataService.getEntityType(entityHelper.getEntityTypeIdFromType(typeId));
+    if (mutableAclClassService.getAclClassTypes().contains(typeId)) {
+      throw new AclClassAlreadyExistsException(typeId);
+    }
     mutableAclClassService.createAclClass(typeId, EntityIdentityUtils.toIdType(entityType));
     // Create ACL's for existing rows
     dataService
@@ -300,7 +309,7 @@ public class PermissionServiceImpl implements PermissionService {
               try {
                 mutableAclService.createAcl(new EntityIdentity(entity));
               } catch (AlreadyExistsException e) {
-                throw new AclClassAlreadyExistsException(typeId);
+                throw new AclAlreadyExistsException(typeId, entityType.getId());
               }
             });
   }
@@ -309,6 +318,10 @@ public class PermissionServiceImpl implements PermissionService {
   @Transactional
   public void deleteType(String typeId) {
     entityHelper.checkEntityTypeExists(typeId);
+    entityHelper.checkIsNotSystem(typeId);
+    if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
+      throw new UnknownTypeException(typeId);
+    }
     mutableAclClassService.deleteAclClass(typeId);
   }
 

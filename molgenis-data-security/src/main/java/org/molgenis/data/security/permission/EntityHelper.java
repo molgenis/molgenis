@@ -1,6 +1,7 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import java.io.Serializable;
 import org.molgenis.data.DataService;
@@ -15,7 +16,9 @@ import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.exception.InvalidTypeIdException;
+import org.molgenis.data.security.exception.SystemRlsModificationException;
 import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -73,16 +76,25 @@ public class EntityHelper {
 
   public String getLabel(String typeId, String identifier) {
     String entityTypeId = getEntityTypeIdFromType(typeId);
-    Entity entity = dataService.getRepository(entityTypeId).findOneById(identifier);
-    if (entity == null) {
+    Entity[] result = new Entity[1];
+    runAsSystem(
+        () -> {
+          result[0] = dataService.getRepository(entityTypeId).findOneById(identifier);
+        });
+    if (result[0] == null) {
       throw new UnknownEntityException(entityTypeId, identifier);
     }
-    return entity.getLabelValue().toString();
+    return result[0].getLabelValue().toString();
   }
 
   public String getLabel(String typeId) {
     String entityTypeId = getEntityTypeIdFromType(typeId);
-    return dataService.getRepository(entityTypeId).getEntityType().getLabel();
+    String[] result = new String[1];
+    runAsSystem(
+        () -> {
+          result[0] = dataService.getRepository(entityTypeId).getEntityType().getLabel();
+        });
+    return result[0];
   }
 
   public LabelledObjectIdentity getLabelledObjectIdentity(ObjectIdentity objectIdentity) {
@@ -111,6 +123,14 @@ public class EntityHelper {
     String entityTypeId = getEntityTypeIdFromType(typeId);
     if (!dataService.hasEntityType(entityTypeId)) {
       throw new UnknownEntityTypeException(typeId);
+    }
+  }
+
+  public void checkIsNotSystem(String typeId) {
+    String entityTypeId = getEntityTypeIdFromType(typeId);
+    EntityType entityType = dataService.getEntityType(entityTypeId);
+    if (EntityTypeUtils.isSystemEntity(entityType)) {
+      throw new SystemRlsModificationException(entityTypeId);
     }
   }
 }

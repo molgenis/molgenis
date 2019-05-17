@@ -166,7 +166,7 @@ This disables row level security.
 
 ##### Endpoint
 ```
-POST https://molgenis.mydomain.example/api/permissions/types/{typeId}
+DELETE https://molgenis.mydomain.example/api/permissions/types/{typeId}
 ```
 ##### Parameters
 URL: 'typeId' as described in the [parameters section](##Parameters)

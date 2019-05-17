@@ -186,7 +186,7 @@ public interface PermissionService {
   Set<LabelledPermission> getPermissions(Set<Sid> sids, boolean includeInheritance);
 
   /** Retrieves the types that are available in the system */
-  Set<LabelledType> getTypes();
+  Set<LabelledType> getLabelledTypes();
 
   /**
    * Retrieves the objects of a type in the system

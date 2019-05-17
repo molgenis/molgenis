@@ -84,7 +84,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     LabelledType type1 = LabelledType.create("entity-type1", "type1", "label");
     LabelledType type2 = LabelledType.create("entity-type2", "type2", "label");
     LabelledType type3 = LabelledType.create("entity-type3", "type3", "label");
-    when(permissionService.getTypes()).thenReturn(Sets.newHashSet(type1, type2, type3));
+    when(permissionService.getLabelledTypes()).thenReturn(Sets.newHashSet(type1, type2, type3));
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("type1"), READ);
@@ -94,7 +94,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("type3"), READ);
-    assertEquals(permissionServiceDecorator.getTypes(), Sets.newHashSet(type1, type3));
+    assertEquals(permissionServiceDecorator.getLabelledTypes(), Sets.newHashSet(type1, type3));
   }
 
   @Test
