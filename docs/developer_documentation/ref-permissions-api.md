@@ -58,43 +58,45 @@ List of ACL types available in the system.
 ##### Example 
 Response:
 ```
-[
-    {
-        "id": "entity-sys_ImportRun",
-        "entityType": "sys_ImportRun",
-        "label": "Import"
-    },
-    {
-        "id": "entity-sys_job_ResourceCopyJobExecution",
-        "entityType": "sys_job_ResourceCopyJobExecution",
-        "label": "Resource Copy Job Execution"
-    },
-    {
-        "id": "entity-hospital_cardiology_patients",
-        "entityType": "hospital_cardiology_patients",
-        "label": "patients"
-    },
-    {
-        "id": "package",
-        "entityType": "sys_md_Package",
-        "label": "Package"
-    },
-    {
-        "id": "entity-sys_FileMeta",
-        "entityType": "sys_FileMeta",
-        "label": "File metadata"
-    },
-    {
-        "id": "plugin",
-        "entityType": "sys_Plugin",
-        "label": "Plugin"
-    },
-    {
-        "id": "entityType",
-        "entityType": "sys_md_EntityType",
-        "label": "Entity type"
-    }
-]
+"data": {
+  [
+      {
+          "id": "entity-sys_ImportRun",
+          "entityType": "sys_ImportRun",
+          "label": "Import"
+      },
+      {
+          "id": "entity-sys_job_ResourceCopyJobExecution",
+          "entityType": "sys_job_ResourceCopyJobExecution",
+          "label": "Resource Copy Job Execution"
+      },
+      {
+          "id": "entity-hospital_cardiology_patients",
+          "entityType": "hospital_cardiology_patients",
+          "label": "patients"
+      },
+      {
+          "id": "package",
+          "entityType": "sys_md_Package",
+          "label": "Package"
+      },
+      {
+          "id": "entity-sys_FileMeta",
+          "entityType": "sys_FileMeta",
+          "label": "File metadata"
+      },
+      {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
+      },
+      {
+          "id": "entityType",
+          "entityType": "sys_md_EntityType",
+          "label": "Entity type"
+      }
+  ]
+}
    ```
 
 ### Getting all suitable permissions for a resource type
@@ -119,13 +121,16 @@ A list of permissions that can be used for this resource type.
 Request:
 ```https://molgenis.mydomain.example/api/permissions/types/permissions/entityType```
 Response:
-```[
+```
+"data": {
+  [
        "READMETA",
        "READ",
        "COUNT",
        "WRITEMETA",
        "WRITE"
    ]
+}
    ```
 
 ### Creating a new resource type in the system (Row level securing an entity type)
@@ -290,7 +295,8 @@ GET https://molgenis.mydomain.example/api/permissions/package/hospital_neurology
 ```
 Response:
 ```
-{
+"data": {
+  {
        "permissions": [
            {
                "user": "Neurologist",
@@ -316,17 +322,22 @@ Response:
                "user": "Reception",
                "inheritedPermissions": [
                    {
-                       "identifier": "hospital",
-                       "label": "hospital",
-                       "typeLabel": "Package",
-                       "typeId": "package",
-                       "permission": "READ",
-                       "inheritedPermissions": []
+                      "object":{
+                        "id": "hospital",
+                        "label": "hospital"
+                      },
+                      "type":{
+                        "label": "Package",
+                        "id": "package"
+                      },
+                      "permission": "READ",
+                      "inheritedPermissions": []
                    }
                ]
            }
        ]
    }
+ }
    ```
 The neurologist and the nurse inherit their READ permissions from the their "NEUROLOGY" role, while the reception inherits the READ permission from the READ permission they have on the parent package "hospital" of the "hospital_neurology" package.
 
@@ -432,13 +443,19 @@ Request:
 Response:
 ```
 {
+"data": {
     "permissions": [
         {
             "user": "Cardiologist",
-            "objectId": "plugin",
-            "label": "Plugin",
-            "typeLabel": "dataexplorer",
-            "typeId": "dataexplorer",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "dataexplorer",
+              "id": "dataexplorer"
+            },
             "inheritedPermissions": [
                 {
                     "role": "CARDIOLOGY",
@@ -449,18 +466,28 @@ Response:
         },
         {
             "role": "CARDIOLOGY",
-            "objectId": "plugin",
-            "label": "Plugin",
-            "typeLabel": "dataexplorer",
-            "typeId": "dataexplorer",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "dataexplorer",
+              "id": "dataexplorer"
+            },
             "permission": "READ"
         },
         {
             "user": "Cardiologist",
-            "objectId": "plugin",
-            "label": "Plugin",
-            "typeLabel": "home",
-            "typeId": "home",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "home",
+              "id": "home"
+            },
             "inheritedPermissions": [
                 {
                     "role": "CARDIOLOGY",
@@ -471,10 +498,14 @@ Response:
         },
         {
             "user": "Cardiologist",
-            "objectId": "entityType",
-            "label": "Entity type",
-            "typeLabel": "hospital_cardiology_patients",
-            "typeId": "patients",
+            "object":{
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type": { 
+              "label": "hospital_cardiology_patients",
+              "id": "patients"
+            },
             "permission": "WRITE",
             "inheritedPermissions": [
                 {
@@ -486,18 +517,28 @@ Response:
         },
         {
             "role": "CARDIOLOGY",
-            "objectId": "entityType",
-            "label": "Entity type",
-            "typeLabel": "hospital_cardiology_patients",
-            "typeId": "patients",
+            "object":{
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type":{
+              "label": "hospital_cardiology_patients",
+              "typeId": "patients"
+            },
             "permission": "READ"
         },
         {
             "user": "Cardiologist",
-            "objectId": "entityType",
-            "label": "Entity type",
-            "typeLabel": "hospital_cardiology_results",
-            "typeId": "results",
+            "object": 
+            {
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type":
+            {
+              "label": "hospital_cardiology_results",
+              "id": "results"
+            },
             "permission": "WRITE",
             "inheritedPermissions": [
                 {
@@ -509,13 +550,18 @@ Response:
         },
         {
             "role": "CARDIOLOGY",
-            "objectId": "entityType",
-            "label": "Entity type",
-            "typeLabel": "hospital_cardiology_results",
-            "typeId": "results",
+            "object": {
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type": {
+              "label": "hospital_cardiology_results",
+              "id": "results"
+            },
             "permission": "READ"
         }
     ]
+  }
 }
 ```
 
@@ -575,28 +621,30 @@ The endpoint expects a list of resources, each of which should contrain the iden
 URL: https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
 Body:
 ```
-{
-	objects:[{
-			id:Patient1,
-			permissions:[
-			{
-				role:CARDIOLOGY,
-				permission:WRITE
-			}
-		]
-	},{
-			id:Patient2,
-			permissions:[
-			{
-				user:Cardiologist,
-				permission:WRITE
-			},
-			{
-				user:CardioNurse,
-				permission:READ
-			}
-		]}
-	]
+"data": {
+  {
+    objects:[{
+        id:Patient1,
+        permissions:[
+        {
+          role:CARDIOLOGY,
+          permission:WRITE
+        }
+      ]
+    },{
+        id:Patient2,
+        permissions:[
+        {
+          user:Cardiologist,
+          permission:WRITE
+        },
+        {
+          user:CardioNurse,
+          permission:READ
+        }
+      ]}
+    ]
+  }
 }
 ```
 
