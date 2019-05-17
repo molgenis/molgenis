@@ -21,14 +21,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
 import org.springframework.security.acls.domain.AuditLogger;
+import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
 import org.springframework.security.acls.domain.SpringCacheBasedAclCache;
 import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -37,15 +40,23 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * https://github.com/spring-projects/spring-security/issues/4814.
  */
 @Configuration
-@Import(DataSourceConfig.class)
+@Import({DataSourceConfig.class})
 public class AclConfig {
   private final DataSource dataSource;
   private final TransactionManager transactionManager;
+  private final RoleHierarchy roleHierarchy;
   @Autowired JdbcTemplate jdbcTemplate;
 
-  public AclConfig(DataSource dataSource, TransactionManager transactionManager) {
+  public AclConfig(
+      DataSource dataSource, TransactionManager transactionManager, RoleHierarchy roleHierarchy) {
     this.dataSource = requireNonNull(dataSource);
     this.transactionManager = requireNonNull(transactionManager);
+    this.roleHierarchy = requireNonNull(roleHierarchy);
+  }
+
+  @Bean
+  public SidRetrievalStrategy sidRetrievalStrategy() {
+    return new SidRetrievalStrategyImpl(roleHierarchy);
   }
 
   @Bean
@@ -66,7 +77,10 @@ public class AclConfig {
         new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_MODIFY_AUDITING);
     GrantedAuthority gaGeneralChanges =
         new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_GENERAL_CHANGES);
-    return new AclAuthorizationStrategyImpl(gaTakeOwnership, gaModifyAuditing, gaGeneralChanges);
+    AclAuthorizationStrategyImpl aclAuthorizationStrategy =
+        new AclAuthorizationStrategyImpl(gaTakeOwnership, gaModifyAuditing, gaGeneralChanges);
+    aclAuthorizationStrategy.setSidRetrievalStrategy(sidRetrievalStrategy());
+    return aclAuthorizationStrategy;
   }
 
   @Bean
@@ -127,6 +141,8 @@ public class AclConfig {
 
   @Bean
   public AclPermissionEvaluator aclPermissionEvaluator() {
-    return new AclPermissionEvaluator(aclService());
+    AclPermissionEvaluator permissionEvaluator = new AclPermissionEvaluator(aclService());
+    permissionEvaluator.setSidRetrievalStrategy(sidRetrievalStrategy());
+    return permissionEvaluator;
   }
 }
