@@ -206,6 +206,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
+    when(entityHelper.getLabel("typeId")).thenReturn("typeLabel");
 
     MvcResult result =
         mockMvc
@@ -215,7 +216,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
   }
 
   @Test
@@ -250,7 +251,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
-
+    when(entityHelper.getLabel("typeId")).thenReturn("typeLabel");
     MvcResult result =
         mockMvc
             .perform(
@@ -260,7 +261,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     assertEquals(
         result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"typeId\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
   }
 
   @Test
