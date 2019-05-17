@@ -30,9 +30,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DataserviceRoleHierarchy implements RoleHierarchy {
   private static final Logger LOG = LoggerFactory.getLogger(DataserviceRoleHierarchy.class);
   private static final int PAGE_SIZE = 1000;
