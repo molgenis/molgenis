@@ -245,11 +245,11 @@ public class GroupRestController {
     checkGroupPermission(groupName, GroupPermission.ADD_MEMBERSHIP);
     final Group group = groupService.getGroup(groupName);
     final String groupRoleName = addExtendsCommand.getGroupRoleName();
-    final String memberRoleName = addExtendsCommand.getMemberRoleName();
+    final String includingRoleName = addExtendsCommand.getMemberRoleName();
     final Role groupRole = roleService.getRole(groupRoleName);
-    final Role memberRole = roleService.getRole(memberRoleName);
+    final Role includingRole = roleService.getRole(includingRoleName);
 
-    groupService.addExtendsRole(group, groupRole, memberRole);
+    groupService.addExtendsRole(group, groupRole, includingRole);
 
     return ResponseEntity.ok().build();
   }
@@ -268,10 +268,10 @@ public class GroupRestController {
     checkGroupPermission(groupName, GroupPermission.UPDATE_MEMBERSHIP);
     final Group group = groupService.getGroup(groupName);
     final String groupRoleName = updateExtendsCommand.getRole();
-    final Role memberRole = roleService.getRole(roleName);
+    final Role includingRole = roleService.getRole(roleName);
     final Role groupRole = roleService.getRole(groupRoleName);
 
-    groupService.updateExtendsRole(group, groupRole, memberRole);
+    groupService.updateExtendsRole(group, groupRole, includingRole);
   }
 
   @DeleteMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
@@ -287,12 +287,12 @@ public class GroupRestController {
   })
   public ResponseEntity removeExtends(
       @PathVariable(value = "groupName") String groupName,
-      @PathVariable(value = "roleName") String memberRoleName) {
+      @PathVariable(value = "roleName") String includingRoleName) {
     checkGroupPermission(groupName, GroupPermission.REMOVE_MEMBERSHIP);
     final Group group = groupService.getGroup(groupName);
-    final Role memberRole = roleService.getRole(memberRoleName);
+    final Role includingRole = roleService.getRole(includingRoleName);
 
-    groupService.removeExtendsRole(group, memberRole);
+    groupService.removeExtendsRole(group, includingRole);
 
     return ResponseEntity.noContent().build();
   }
