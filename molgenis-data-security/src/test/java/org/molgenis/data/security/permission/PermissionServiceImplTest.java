@@ -194,6 +194,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     sids.add(sid2);
 
     when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList<>(sids));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     assertEquals(
         newHashSet(
@@ -435,7 +436,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     MutableAcl acl = mock(MutableAcl.class);
     when(mutableAclService.readAclById(new ObjectIdentityImpl("entity-typeId", "identifier")))
         .thenReturn(acl);
-
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
     Sid role = new GrantedAuthoritySid("ROLE_role");
 
     permissionsApiService.createPermission(
@@ -469,6 +470,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
 
     Sid expectedSid = new GrantedAuthoritySid("ROLE_role");
     Sid expectedSid2 = new PrincipalSid("user1");
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
+
     permissionsApiService.createPermissions(Sets.newHashSet(permission1, permission2));
 
     verify(acl).insertAce(0, WRITE, expectedSid, true);
@@ -499,6 +502,7 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
                 "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     when(userRoleTools.sortSids(singleton(role))).thenReturn(new LinkedList(singletonList(role)));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     permissionsApiService.updatePermission(
         Permission.create(new ObjectIdentityImpl("entity-typeId", "identifier"), role, WRITE));
@@ -528,6 +532,8 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
                 "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
 
     when(userRoleTools.sortSids(singleton(sid))).thenReturn(new LinkedList(singletonList(sid)));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
+
     permissionsApiService.updatePermissions(
         singleton(Permission.create(objectIdentity, sid, WRITE)));
 
@@ -541,11 +547,23 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     Sid sid = mock(Sid.class);
     MutableAcl acl = mock(MutableAcl.class);
     AccessControlEntry ace = mock(AccessControlEntry.class);
-    when(ace.getSid()).thenReturn(sid);
     when(acl.getEntries()).thenReturn(singletonList(ace));
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
+    doReturn(acl).when(mutableAclService).readAclById(objectIdentity, singletonList(sid));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
+    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
 
-    when(mutableAclService.readAclById(objectIdentity, singletonList(sid))).thenReturn(acl);
+    AccessControlEntry ace1 = mock(AccessControlEntry.class);
+    when(ace1.getSid()).thenReturn(sid);
+    when(ace1.getPermission()).thenReturn(COUNT);
+    when(acl.getEntries()).thenReturn(singletonList(ace1));
+    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
+
+    doReturn(acl).when(mutableAclService).readAclById(objectIdentity);
+
+    LinkedHashSet<Sid> sids = new LinkedHashSet<>();
+    sids.add(sid);
+    when(userRoleTools.sortSids(sids)).thenReturn(new LinkedList<>(sids));
 
     permissionsApiService.deletePermission(sid, objectIdentity);
     verify(acl).deleteAce(0);
