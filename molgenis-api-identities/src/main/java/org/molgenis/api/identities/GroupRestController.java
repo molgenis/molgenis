@@ -230,30 +230,6 @@ public class GroupRestController {
     groupService.updateMemberRole(group, member, newRole);
   }
 
-  @PostMapping(ROLE_EXTEND_END_POINT)
-  @ApiOperation(value = "Make a role extend a group role", response = ResponseEntity.class)
-  @Transactional
-  @ApiResponses({
-    @ApiResponse(
-        code = 200,
-        message = "Group role included in role",
-        response = ResponseEntity.class)
-  })
-  public ResponseEntity addExtends(
-      @PathVariable(value = "groupName") String groupName,
-      @RequestBody AddExtendsCommand addExtendsCommand) {
-    checkGroupPermission(groupName, GroupPermission.ADD_MEMBERSHIP);
-    final Group group = groupService.getGroup(groupName);
-    final String groupRoleName = addExtendsCommand.getGroupRoleName();
-    final String includingRoleName = addExtendsCommand.getMemberRoleName();
-    final Role groupRole = roleService.getRole(groupRoleName);
-    final Role includingRole = roleService.getRole(includingRoleName);
-
-    groupService.addExtendsRole(group, groupRole, includingRole);
-
-    return ResponseEntity.ok().build();
-  }
-
   @PutMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
   @ApiOperation(value = "Change group role extension", response = ResponseEntity.class)
   @Transactional
@@ -264,7 +240,7 @@ public class GroupRestController {
   public void updateExtends(
       @PathVariable(value = "groupName") String groupName,
       @PathVariable(value = "roleName") String roleName,
-      @RequestBody UpdateExtendsCommand updateExtendsCommand) {
+      @RequestBody UpdateIncludeCommand updateExtendsCommand) {
     checkGroupPermission(groupName, GroupPermission.UPDATE_MEMBERSHIP);
     final Group group = groupService.getGroup(groupName);
     final String groupRoleName = updateExtendsCommand.getRole();

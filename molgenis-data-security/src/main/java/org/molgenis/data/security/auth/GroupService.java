@@ -251,14 +251,6 @@ public class GroupService {
     dataService.delete(GroupMetadata.GROUP, group);
   }
 
-  public void addExtendsRole(Group group, Role groupRole, Role memberRole) {
-    isGroupRole(groupRole, newArrayList(group.getRoles()));
-    List<Role> newIncludes = newArrayList(memberRole.getIncludes());
-    newIncludes.add(groupRole);
-    memberRole.setIncludes(newIncludes);
-    dataService.update(ROLE, memberRole);
-  }
-
   public void updateExtendsRole(Group group, Role groupRole, Role memberRole) {
     List<Role> newIncludes = removeIncludedGroupRoles(group, memberRole);
     newIncludes.add(groupRole);

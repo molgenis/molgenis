@@ -348,22 +348,6 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddExtendsRole() {
-    Role anonymousRole = mock(Role.class, "anonymous");
-    Role groupRole = mock(Role.class, "group");
-    Role groupEditorRole = mock(Role.class, "group editor");
-    Role includedRole = mock(Role.class, "included");
-    when(groupRole.getName()).thenReturn("viewer");
-    when(groupEditorRole.getName()).thenReturn("editor");
-    when(group.getRoles()).thenReturn(Arrays.asList(groupEditorRole, groupRole));
-    when(anonymousRole.getIncludes()).thenReturn(singletonList(includedRole));
-
-    groupService.addExtendsRole(group, groupRole, anonymousRole);
-    verify(anonymousRole).setIncludes(Arrays.asList(includedRole, groupRole));
-    verify(dataService).update(ROLE, anonymousRole);
-  }
-
-  @Test
   public void testUpdateExtendsRole() {
     Role anonymousRole = mock(Role.class, "anonymous");
     Role groupRole = mock(Role.class, "group");

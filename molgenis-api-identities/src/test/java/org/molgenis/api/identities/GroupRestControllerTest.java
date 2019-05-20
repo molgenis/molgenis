@@ -596,24 +596,6 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testAddExtendsRole() throws Exception {
-    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
-        .thenReturn(true);
-    when(groupService.getGroup("devs")).thenReturn(group);
-    doReturn(editor).when(roleService).getRole("DEVS_EDITOR");
-    doReturn(anonymous).when(roleService).getRole("anonymous");
-
-    mockMvc
-        .perform(
-            post(GROUP_END_POINT + "/devs/role")
-                .contentType(APPLICATION_JSON_UTF8)
-                .content(gson.toJson(AddExtendsCommand.create("DEVS_EDITOR", "anonymous"))))
-        .andExpect(status().isOk());
-
-    verify(groupService).addExtendsRole(group, editor, anonymous);
-  }
-
-  @Test
   public void testUpdateExtendsRole() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
@@ -625,7 +607,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .perform(
             put(GROUP_END_POINT + "/devs/role/anonymous")
                 .contentType(APPLICATION_JSON_UTF8)
-                .content(gson.toJson(UpdateExtendsCommand.create("DEVS_EDITOR"))))
+                .content(gson.toJson(UpdateIncludeCommand.create("DEVS_EDITOR"))))
         .andExpect(status().isOk());
 
     verify(groupService).updateExtendsRole(group, editor, anonymous);
