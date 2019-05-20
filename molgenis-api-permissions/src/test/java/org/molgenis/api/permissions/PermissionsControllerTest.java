@@ -166,6 +166,8 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
 
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
 
+    doReturn("label").when(entityHelper).getLabel("typeId", "identifier");
+
     MvcResult result =
         mockMvc
             .perform(
@@ -206,7 +208,8 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
-    when(entityHelper.getLabel("typeId")).thenReturn("typeLabel");
+    doReturn("typeLabel").when(entityHelper).getLabel("typeId");
+    doReturn("label").when(entityHelper).getLabel("typeId", "identifier");
 
     MvcResult result =
         mockMvc
@@ -251,7 +254,9 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
     PermissionsQuery permissionsQuery = new PermissionsQuery();
     permissionsQuery.setUsers(Collections.singletonList("user1"));
     permissionsQuery.setRoles(Arrays.asList("role1", "role2"));
-    when(entityHelper.getLabel("typeId")).thenReturn("typeLabel");
+    doReturn("typeLabel").when(entityHelper).getLabel("typeId");
+    doReturn("label").when(entityHelper).getLabel("typeId", "identifier");
+
     MvcResult result =
         mockMvc
             .perform(

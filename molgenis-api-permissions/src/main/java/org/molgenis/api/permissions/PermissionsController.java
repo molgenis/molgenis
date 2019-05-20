@@ -47,7 +47,6 @@ import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.PermissionSetUtils;
 import org.molgenis.data.security.permission.UserRoleTools;
-import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
@@ -199,7 +198,7 @@ public class PermissionsController extends ApiController {
         permissionService.getPermissionsForObject(
             entityHelper.getObjectIdentity(typeId, identifier), sids, inheritance);
     ObjectPermissionResponse permissionResponse =
-        convertToObjectResponse(labelledObjectPermissions);
+        convertToObjectResponse(typeId, identifier, labelledObjectPermissions);
     return ApiResponse.create(permissionResponse);
   }
 
@@ -338,18 +337,10 @@ public class PermissionsController extends ApiController {
   }
 
   private ObjectPermissionResponse convertToObjectResponse(
-      Set<LabelledPermission> labelledObjectPermissions) {
+      String typeId, String id, Set<LabelledPermission> labelledObjectPermissions) {
     Set<PermissionResponse> permissions = convertToPermissions(labelledObjectPermissions);
-    LabelledPermission labelledObjectPermission =
-        labelledObjectPermissions
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Empty set of permissions"));
-    LabelledObjectIdentity objectIdentity = labelledObjectPermission.getLabelledObjectIdentity();
-    return ObjectPermissionResponse.create(
-        objectIdentity.getIdentifier().toString(),
-        objectIdentity.getIdentifierLabel(),
-        permissions);
+    String label = entityHelper.getLabel(typeId, id);
+    return ObjectPermissionResponse.create(id, label, permissions);
   }
 
   private TypePermissionsResponse convertToTypeResponse(
@@ -358,7 +349,16 @@ public class PermissionsController extends ApiController {
     for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
       Set<LabelledPermission> permissions = entry.getValue();
       if (!permissions.isEmpty()) {
-        objectPermissions.add(convertToObjectResponse(permissions));
+        LabelledPermission labelledObjectPermission =
+            permissions
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Empty set of permissions"));
+        objectPermissions.add(
+            convertToObjectResponse(
+                typeId,
+                labelledObjectPermission.getLabelledObjectIdentity().getIdentifier().toString(),
+                permissions));
       }
     }
     String label = entityHelper.getLabel(typeId);
