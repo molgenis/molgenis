@@ -608,7 +608,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
             put(GROUP_END_POINT + "/devs/role/anonymous")
                 .contentType(APPLICATION_JSON_UTF8)
                 .content(gson.toJson(UpdateIncludeCommand.create("DEVS_EDITOR"))))
-        .andExpect(status().isOk());
+        .andExpect(status().isNoContent());
 
     verify(groupService).updateExtendsRole(group, editor, anonymous);
   }

@@ -233,9 +233,9 @@ public class GroupRestController {
   @PutMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
   @ApiOperation(value = "Change group role extension", response = ResponseEntity.class)
   @Transactional
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponses({
-    @ApiResponse(code = 200, message = "Updated membership role", response = ResponseEntity.class)
+    @ApiResponse(code = 204, message = "Updated membership role", response = ResponseEntity.class)
   })
   public void updateExtends(
       @PathVariable(value = "groupName") String groupName,
