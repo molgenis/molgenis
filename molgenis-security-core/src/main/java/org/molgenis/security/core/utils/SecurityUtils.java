@@ -5,6 +5,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -96,7 +97,6 @@ public class SecurityUtils {
 
   public static boolean currentUserIsAnonymous() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    return authentication == null
-        || (currentUserHasRole(AUTHORITY_ANONYMOUS) && !currentUserHasRole(AUTHORITY_USER));
+    return authentication == null || (authentication instanceof AnonymousAuthenticationToken);
   }
 }

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -82,10 +83,11 @@ public class SecurityUtilsTest {
   @SuppressWarnings("unchecked")
   @Test
   public void currentUserIsAuthenticated_falseAnonymous() {
-    when(authentication.isAuthenticated()).thenReturn(true);
+    Authentication anonymousAuthentication = mock(AnonymousAuthenticationToken.class);
+    when(anonymousAuthentication.isAuthenticated()).thenReturn(true);
     GrantedAuthority authoritySu =
         when(mock(GrantedAuthority.class).getAuthority()).thenReturn("ROLE_ANONYMOUS").getMock();
-    when((Collection<GrantedAuthority>) authentication.getAuthorities())
+    when((Collection<GrantedAuthority>) anonymousAuthentication.getAuthorities())
         .thenReturn(Collections.singletonList(authoritySu));
     assertFalse(SecurityUtils.currentUserIsAuthenticated());
   }
