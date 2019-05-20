@@ -18,6 +18,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.AclAlreadyExistsException;
 import org.molgenis.data.security.exception.AclClassAlreadyExistsException;
@@ -114,6 +115,7 @@ public class PermissionServiceImpl implements PermissionService {
     switch (typeId) {
       case EntityTypeIdentity.ENTITY_TYPE:
       case PackageIdentity.PACKAGE:
+      case GroupIdentity.GROUP:
         permissions =
             Sets.newHashSet(
                 PermissionSet.READMETA,
@@ -135,9 +137,16 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public Set<LabelledPermission> getPermissionsForObject(
       ObjectIdentity objectIdentity, Set<Sid> sids, boolean isReturnInheritedPermissions) {
+    checkTypeExists(objectIdentity.getType());
     entityHelper.checkEntityExists(objectIdentity);
     Acl acl = mutableAclService.readAclById(objectIdentity);
     return getPermissionResponses(acl, isReturnInheritedPermissions, sids);
+  }
+
+  private void checkTypeExists(String type) {
+    if (!mutableAclClassService.getAclClassTypes().contains(type)) {
+      throw new UnknownTypeException(type);
+    }
   }
 
   @Override
@@ -225,6 +234,7 @@ public class PermissionServiceImpl implements PermissionService {
   @Transactional
   public void createPermission(Permission permission) {
     ObjectIdentity objectIdentity = permission.getObjectIdentity();
+    checkTypeExists(objectIdentity.getType());
     entityHelper.checkEntityExists(objectIdentity);
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
     if (!getSuitablePermissionsForType(objectIdentity.getType())
@@ -253,6 +263,7 @@ public class PermissionServiceImpl implements PermissionService {
   @Transactional
   public void updatePermission(Permission permission) {
     ObjectIdentity objectIdentity = permission.getObjectIdentity();
+    checkTypeExists(objectIdentity.getType());
     entityHelper.checkEntityExists(objectIdentity);
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
     if (!getSuitablePermissionsForType(objectIdentity.getType())
@@ -285,7 +296,9 @@ public class PermissionServiceImpl implements PermissionService {
   public void deletePermission(Sid sid, ObjectIdentity objectIdentity) {
     entityHelper.checkEntityExists(objectIdentity);
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
-    if (acl == null) {
+    Set<LabelledPermission> current =
+        getPermissionsForObject(objectIdentity, singleton(sid), false);
+    if (acl == null || current.isEmpty()) {
       throw new UnknownAceException(objectIdentity, sid, "delete");
     }
     deleteAce(sid, acl);
@@ -317,11 +330,9 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   @Transactional
   public void deleteType(String typeId) {
+    checkTypeExists(typeId);
     entityHelper.checkEntityTypeExists(typeId);
     entityHelper.checkIsNotSystem(typeId);
-    if (!mutableAclClassService.getAclClassTypes().contains(typeId)) {
-      throw new UnknownTypeException(typeId);
-    }
     mutableAclClassService.deleteAclClass(typeId);
   }
 

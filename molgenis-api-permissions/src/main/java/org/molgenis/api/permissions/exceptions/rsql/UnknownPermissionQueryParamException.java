@@ -2,9 +2,9 @@ package org.molgenis.api.permissions.exceptions.rsql;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.BadRequestException;
 
-public class UnknownPermissionQueryParamException extends CodedRuntimeException {
+public class UnknownPermissionQueryParamException extends BadRequestException {
   private static final String ERROR_CODE = "PRM01";
 
   private final String key;

@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 public class EntityHelperTest extends AbstractMockitoTest {
   @Mock DataService dataService;
+  @Mock Repository repository;
   private EntityHelper entityHelper;
 
   @BeforeMethod
@@ -81,14 +82,17 @@ public class EntityHelperTest extends AbstractMockitoTest {
   @Test(expectedExceptions = UnknownEntityException.class)
   public void testCheckEntityExistsFail() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(null);
+    when(dataService.getRepository("typeId")).thenReturn(repository);
+    when(repository.findOneById("identifier")).thenReturn(null);
     entityHelper.checkEntityExists(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 
   @Test
   public void testCheckEntityExists() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
-    when(dataService.findOneById("typeId", "identifier")).thenReturn(mock(Entity.class));
+
+    when(dataService.getRepository("typeId")).thenReturn(repository);
+    when(repository.findOneById("identifier")).thenReturn(mock(Entity.class));
     entityHelper.checkEntityExists(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 

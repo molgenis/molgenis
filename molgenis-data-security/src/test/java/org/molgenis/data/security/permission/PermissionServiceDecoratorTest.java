@@ -2,6 +2,7 @@ package org.molgenis.data.security.permission;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
@@ -38,6 +40,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
 
   private SecurityContext originalSecurityContext;
   @Mock MutableAclService mutableAclService;
+  @Mock MutableAclClassService mutableAclClassService;
   @Mock PermissionService permissionService;
   @Mock EntityHelper entityHelper;
   @Mock UserRoleTools userRoleTools;
@@ -57,6 +60,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
             entityHelper,
             userRoleTools,
             mutableAclService,
+            mutableAclClassService,
             userPermissionEvaluator);
   }
 
@@ -129,6 +133,9 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
 
     Permission permission = Permission.create(objectIdentity, sid, PermissionSet.WRITE);
+
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("type"));
+
     permissionServiceDecorator.createPermission(permission);
     verify(permissionService).createPermission(permission);
     resetContext();
@@ -143,6 +150,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     MutableAcl acl = mock(MutableAcl.class);
     when(acl.getOwner()).thenReturn(sid);
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("type"));
 
     Permission permission = Permission.create(objectIdentity, sid, PermissionSet.WRITE);
     permissionServiceDecorator.createPermissions(Collections.singleton(permission));
@@ -160,6 +168,8 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     when(acl.getOwner()).thenReturn(sid);
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
 
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("type"));
+
     Permission permission = Permission.create(objectIdentity, sid, PermissionSet.WRITE);
     permissionServiceDecorator.updatePermission(permission);
     verify(permissionService).updatePermission(permission);
@@ -175,7 +185,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     MutableAcl acl = mock(MutableAcl.class);
     when(acl.getOwner()).thenReturn(sid);
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
-
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("type"));
     Permission permission = Permission.create(objectIdentity, sid, PermissionSet.WRITE);
     permissionServiceDecorator.updatePermissions(Collections.singleton(permission));
     verify(permissionService).updatePermissions(Collections.singleton(permission));
@@ -191,7 +201,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     MutableAcl acl = mock(MutableAcl.class);
     when(acl.getOwner()).thenReturn(sid);
     when(mutableAclService.readAclById(objectIdentity)).thenReturn(acl);
-
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("type"));
     permissionServiceDecorator.deletePermission(sid, objectIdentity);
     verify(permissionService).deletePermission(sid, objectIdentity);
     resetContext();

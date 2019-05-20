@@ -9,6 +9,7 @@ import static org.molgenis.security.core.SidUtils.createUserSid;
 
 import com.google.common.base.Strings;
 import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.RSQLParserException;
 import cz.jirutka.rsql.parser.ast.Node;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -311,11 +312,15 @@ public class PermissionsController extends ApiController {
   private Set<Sid> getSidsFromQuery(String queryString) {
     Set<Sid> sids = Collections.emptySet();
     if (!Strings.isNullOrEmpty(queryString)) {
-      Node node = rsqlParser.parse(queryString);
-      PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
-      sids =
-          new LinkedHashSet<>(
-              userRoleTools.getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles()));
+      try {
+        Node node = rsqlParser.parse(queryString);
+        PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
+        sids =
+            new LinkedHashSet<>(
+                userRoleTools.getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles()));
+      } catch (RSQLParserException e) {
+
+      }
     }
     return sids;
   }

@@ -1,8 +1,8 @@
 package org.molgenis.api.permissions.exceptions.rsql;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.BadRequestException;
 
-public class UnsupportedPermissionQueryOperatorException extends CodedRuntimeException {
+public class UnsupportedPermissionQueryOperatorException extends BadRequestException {
   private static final String ERROR_CODE = "PRM02";
 
   public UnsupportedPermissionQueryOperatorException() {

@@ -79,12 +79,23 @@ public class EntityHelper {
     Entity[] result = new Entity[1];
     runAsSystem(
         () -> {
-          result[0] = dataService.getRepository(entityTypeId).findOneById(identifier);
+          result[0] = getEntityByIdentifier(identifier, entityTypeId);
         });
     if (result[0] == null) {
       throw new UnknownEntityException(entityTypeId, identifier);
     }
     return result[0].getLabelValue().toString();
+  }
+
+  private Entity getEntityByIdentifier(Object identifier, String entityTypeId) {
+    if (entityTypeId.equals(GroupMetadata.GROUP)) {
+      return dataService
+          .getRepository(entityTypeId)
+          .query()
+          .eq(GroupMetadata.NAME, identifier)
+          .findOne();
+    }
+    return dataService.getRepository(entityTypeId).findOneById(identifier);
   }
 
   public String getLabel(String typeId) {
@@ -114,7 +125,7 @@ public class EntityHelper {
   public void checkEntityExists(ObjectIdentity objectIdentity) {
     checkEntityTypeExists(objectIdentity.getType());
     String entityTypeId = getEntityTypeIdFromType(objectIdentity.getType());
-    if (dataService.findOneById(entityTypeId, objectIdentity.getIdentifier()) == null) {
+    if (getEntityByIdentifier(objectIdentity.getIdentifier(), entityTypeId) == null) {
       throw new UnknownEntityException(entityTypeId, objectIdentity.getIdentifier());
     }
   }

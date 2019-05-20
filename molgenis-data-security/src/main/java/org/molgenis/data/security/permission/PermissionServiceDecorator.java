@@ -20,10 +20,12 @@ import org.molgenis.data.security.exception.InsufficientPermissionsException;
 import org.molgenis.data.security.exception.ReadPermissionDeniedException;
 import org.molgenis.data.security.exception.SidPermissionException;
 import org.molgenis.data.security.exception.SuperUserPermissionsException;
+import org.molgenis.data.security.exception.UnknownTypeException;
 import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -37,6 +39,7 @@ public class PermissionServiceDecorator implements PermissionService {
   public static final String SUPERUSER = "superuser";
   private final UserRoleTools userRoleTools;
   private final MutableAclService mutableAclService;
+  private final MutableAclClassService mutableAclClassService;
   private final PermissionService permissionService;
   private final UserPermissionEvaluator userPermissionEvaluator;
   private final EntityHelper entityHelper;
@@ -46,10 +49,12 @@ public class PermissionServiceDecorator implements PermissionService {
       EntityHelper entityHelper,
       UserRoleTools userRoleTools,
       MutableAclService mutableAclService,
+      MutableAclClassService mutableAclClassService,
       UserPermissionEvaluator userPermissionEvaluator) {
     this.permissionService = requireNonNull(permissionService);
     this.userRoleTools = requireNonNull(userRoleTools);
     this.mutableAclService = requireNonNull(mutableAclService);
+    this.mutableAclClassService = requireNonNull(mutableAclClassService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
     this.entityHelper = requireNonNull(entityHelper);
   }
@@ -205,6 +210,9 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   private void checkSuOrOwner(ObjectIdentity objectIdentity) {
+    if (!mutableAclClassService.getAclClassTypes().contains(objectIdentity.getType())) {
+      throw new UnknownTypeException(objectIdentity.getType());
+    }
     entityHelper.checkEntityExists(objectIdentity);
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
     Sid sid = createSecurityContextSid();
