@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -105,6 +106,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   @Mock private Role viewer;
   @Mock private Role editor;
   @Mock private Role manager;
+  @Mock private Role anonymous;
   @Mock private LocaleResolver localeResolver;
   @Mock private RoleMembership memberShip;
 
@@ -591,6 +593,39 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(
             jsonPath("$.errors[0].message")
                 .value("Role 'DEVS_EDITOR' is not a valid group role for group 'devs'."));
+  }
+
+  @Test
+  public void testUpdateExtendsRole() throws Exception {
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
+        .thenReturn(true);
+    when(groupService.getGroup("devs")).thenReturn(group);
+    doReturn(editor).when(roleService).getRole("DEVS_EDITOR");
+    doReturn(anonymous).when(roleService).getRole("anonymous");
+
+    mockMvc
+        .perform(
+            put(GROUP_END_POINT + "/devs/role/anonymous")
+                .contentType(APPLICATION_JSON_UTF8)
+                .content(gson.toJson(UpdateIncludeCommand.create("DEVS_EDITOR"))))
+        .andExpect(status().isNoContent());
+
+    verify(groupService).updateExtendsRole(group, editor, anonymous);
+  }
+
+  @Test
+  public void testRemoveExtendsRole() throws Exception {
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
+        .thenReturn(true);
+    when(groupService.getGroup("devs")).thenReturn(group);
+    doReturn(anonymous).when(roleService).getRole("anonymous");
+
+    mockMvc
+        .perform(
+            delete(GROUP_END_POINT + "/devs/role/anonymous").contentType(APPLICATION_JSON_UTF8))
+        .andExpect(status().isNoContent());
+
+    verify(groupService).removeExtendsRole(group, anonymous);
   }
 
   @Test
