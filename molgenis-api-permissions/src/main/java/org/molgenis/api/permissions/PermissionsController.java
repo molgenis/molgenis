@@ -356,7 +356,10 @@ public class PermissionsController extends ApiController {
       String typeId, Map<String, Set<LabelledPermission>> typePermissions) {
     Set<ObjectPermissionResponse> objectPermissions = new LinkedHashSet<>();
     for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
-      objectPermissions.add(convertToObjectResponse(entry.getValue()));
+      Set<LabelledPermission> permissions = entry.getValue();
+      if (!permissions.isEmpty()) {
+        objectPermissions.add(convertToObjectResponse(permissions));
+      }
     }
     String label = entityHelper.getLabel(typeId);
     return TypePermissionsResponse.create(typeId, label, objectPermissions);
