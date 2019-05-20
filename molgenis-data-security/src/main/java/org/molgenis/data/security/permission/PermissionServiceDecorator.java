@@ -205,6 +205,7 @@ public class PermissionServiceDecorator implements PermissionService {
   }
 
   private void checkSuOrOwner(ObjectIdentity objectIdentity) {
+    entityHelper.checkEntityExists(objectIdentity);
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
     Sid sid = createSecurityContextSid();
     boolean isOwner = acl.getOwner().equals(sid);
