@@ -253,6 +253,9 @@ public class GroupService {
 
   public void updateExtendsRole(Group group, Role groupRole, Role memberRole) {
     List<Role> newIncludes = removeIncludedGroupRoles(group, memberRole);
+    if (!isGroupRole(groupRole, newArrayList(group.getRoles()))) {
+      throw new NotAValidGroupRoleException(groupRole, group);
+    }
     newIncludes.add(groupRole);
     memberRole.setIncludes(newIncludes);
     dataService.update(ROLE, memberRole);
