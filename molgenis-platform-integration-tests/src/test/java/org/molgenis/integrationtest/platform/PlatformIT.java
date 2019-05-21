@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.platform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -191,7 +192,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   @AfterMethod
   public void afterMethod() {
-    cleanupUserPermissions();
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeStatic.getId());
@@ -205,6 +205,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
     waitForIndexToBeStable(refEntityTypeDynamic, indexService, LOG);
     waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
+    cleanupUserPermissions();
   }
 
   private void addDefaultLanguages() {
@@ -907,7 +908,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
       runAsSystem(
           () -> {
-            testPermissionService.deletePermission(sid, entry.getKey());
+            if (!testPermissionService
+                .getPermissionsForObject(entry.getKey(), singleton(sid), false)
+                .isEmpty()) {
+              testPermissionService.deletePermission(sid, entry.getKey());
+            }
           });
     }
   }
