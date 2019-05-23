@@ -307,9 +307,7 @@ public class RestControllerV2 {
 
     try {
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
       final EntityCollectionBatchCreateResponseBodyV2 responseBody =
@@ -318,8 +316,7 @@ public class RestControllerV2 {
 
       // Add all entities
       if (ATTRIBUTE_META_DATA.equals(entityTypeId)) {
-        entities
-            .stream()
+        entities.stream()
             .map(attribute -> (Attribute) attribute)
             .forEach(attribute -> dataService.getMeta().addAttribute(attribute));
       } else {
@@ -434,9 +431,7 @@ public class RestControllerV2 {
 
     try {
       List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
 
@@ -481,9 +476,7 @@ public class RestControllerV2 {
       }
 
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .filter(e -> e.size() == 2)
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
@@ -516,7 +509,12 @@ public class RestControllerV2 {
     }
   }
 
-  /** Get all l10n resource strings in the language of the current user */
+  /**
+   * Get all l10n resource strings in the language of the current user
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
+   */
+  @Deprecated
   @GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
   public Map<String, String> getL10nStrings() {
     Map<String, String> translations = new HashMap<>();
@@ -532,7 +530,10 @@ public class RestControllerV2 {
   /**
    * Get the localization resource strings for a specific language and namespace. Will *not* provide
    * fallback values if the specified language is not available.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
    */
+  @Deprecated
   @GetMapping(
       value = "/i18n/{namespace}/{language}",
       produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
@@ -541,7 +542,12 @@ public class RestControllerV2 {
     return localizationService.getMessages(namespace, new Locale(language));
   }
 
-  /** Get a properties file to put on your classpath. */
+  /**
+   * Get a properties file to put on your classpath.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
+   */
+  @Deprecated
   @GetMapping(
       value = "/i18n/{namespace}_{language}.properties",
       produces = TEXT_PLAIN_VALUE + ";charset=UTF-8 ")
@@ -559,22 +565,24 @@ public class RestControllerV2 {
   /**
    * Registers missing message IDs. Used by XHR backend of i18next. User needs permissions on the
    * entity to add the values, otherwise they'll only be logged.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
    */
+  @Deprecated
   @PostMapping("/i18n/{namespace}")
   @ResponseStatus(CREATED)
   public void registerMissingResourceStrings(
       @PathVariable String namespace, HttpServletRequest request) {
     Set<String> messageIDs =
-        request
-            .getParameterMap()
-            .entrySet()
-            .stream()
+        request.getParameterMap().entrySet().stream()
             .map(Map.Entry::getKey)
             .filter(id -> !id.equals(TIME_PARAM_NAME))
             .collect(toSet());
     localizationService.addMissingMessageIds(namespace, messageIDs);
   }
 
+  /** @deprecated use /api/v2/sys_L10nString endpoints */
+  @Deprecated
   @DeleteMapping("/i18n/{namespace}")
   @ResponseStatus(NO_CONTENT)
   public void deleteNamespace(@PathVariable String namespace) {
