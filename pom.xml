@@ -973,6 +973,7 @@
   <modules>
     <module>molgenis-amazon-bucket</module>
     <module>molgenis-api</module>
+    <module>molgenis-api-permissions</module>
     <module>molgenis-api-data</module>
     <module>molgenis-api-fair</module>
     <module>molgenis-api-files</module>

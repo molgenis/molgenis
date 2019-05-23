@@ -50,6 +50,7 @@
   * API
     * [REST](developer_documentation/guide-rest.md)
       * [Files api](developer_documentation/ref-api-files.md)
+      * [Permissions api](developer_documentation/ref-permissions-api.md)
       * [REST api V1](developer_documentation/ref-rest.md)
       * [REST api V2](developer_documentation/ref-rest2.md)
       * [RSQL operators](developer_documentation/ref-RSQL.md)

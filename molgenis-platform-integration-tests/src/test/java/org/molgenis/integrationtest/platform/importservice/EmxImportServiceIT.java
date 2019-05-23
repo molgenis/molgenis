@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.data.Entity;
@@ -39,11 +40,13 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -1000,14 +1003,27 @@ public class EmxImportServiceIT extends ImportServiceIT {
     permissionMap.put(new EntityTypeIdentity("sys_FileMeta"), PermissionSet.READ);
     permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
     permissionMap.put(new PackageIdentity("it"), PermissionSet.WRITEMETA);
-
-    testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
+    Sid sid = SidUtils.createUserSid(USERNAME);
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
   }
 
   private void populateManagerPermissions() {
     populateUserPermissions();
     Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
     permissionMap.put(new PackageIdentity("sys_md"), PermissionSet.WRITE);
-    testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
+    Sid sid = SidUtils.createUserSid(USERNAME);
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
   }
 }

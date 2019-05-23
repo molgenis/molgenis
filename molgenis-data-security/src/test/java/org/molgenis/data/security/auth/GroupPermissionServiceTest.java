@@ -7,8 +7,9 @@ import static org.molgenis.security.core.SidUtils.createRoleSid;
 import org.mockito.Mock;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.GroupValueFactoryTest;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
@@ -34,9 +35,13 @@ public class GroupPermissionServiceTest extends AbstractMockitoTest {
     groupPermissionService.grantDefaultPermissions(groupValue);
 
     verify(permissionService)
-        .grant(new PackageIdentity("bbmri_eric"), WRITEMETA, createRoleSid("BBMRI_ERIC_MANAGER"));
+        .createPermission(
+            Permission.create(
+                new PackageIdentity("bbmri_eric"), createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA));
     verify(aclService).createAcl(new GroupIdentity("bbmri-eric"));
     verify(permissionService)
-        .grant(new GroupIdentity("bbmri-eric"), WRITEMETA, createRoleSid("BBMRI_ERIC_MANAGER"));
+        .createPermission(
+            Permission.create(
+                new GroupIdentity("bbmri-eric"), createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA));
   }
 }

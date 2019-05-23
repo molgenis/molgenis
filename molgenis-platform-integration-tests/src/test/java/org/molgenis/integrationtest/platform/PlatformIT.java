@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.platform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -21,7 +22,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertFalse;
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,15 +65,17 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -202,6 +205,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
     waitForIndexToBeStable(refEntityTypeDynamic, indexService, LOG);
     waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
+    cleanupUserPermissions();
   }
 
   private void addDefaultLanguages() {
@@ -885,6 +889,35 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   private void populateUserPermissions() {
+    Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
+        getObjectIdentityPermissionSetMap();
+    Sid sid = createUserSid(requireNonNull(USERNAME));
+    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
+  }
+
+  private void cleanupUserPermissions() {
+    Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
+        getObjectIdentityPermissionSetMap();
+    Sid sid = createUserSid(requireNonNull(USERNAME));
+    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            if (!testPermissionService
+                .getPermissionsForObject(entry.getKey(), singleton(sid), false)
+                .isEmpty()) {
+              testPermissionService.deletePermission(sid, entry.getKey());
+            }
+          });
+    }
+  }
+
+  private Map<ObjectIdentity, PermissionSet> getObjectIdentityPermissionSetMap() {
     Map<ObjectIdentity, PermissionSet> entityTypePermissionMap = new HashMap<>();
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
@@ -898,8 +931,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), PermissionSet.WRITE);
-
-    testPermissionService.grant(
-        entityTypePermissionMap, createUserSid(requireNonNull(getCurrentUsername())));
+    return entityTypePermissionMap;
   }
 }

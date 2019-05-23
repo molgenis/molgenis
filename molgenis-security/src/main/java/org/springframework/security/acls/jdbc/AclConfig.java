@@ -11,6 +11,8 @@ import org.molgenis.security.acl.AclCacheTransactionListener;
 import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
+import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.acl.ObjectIdentityServiceImpl;
 import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +103,11 @@ public class AclConfig {
   @Bean
   public MutableAclClassService mutableAclClassService() {
     return new MutableAclClassServiceImpl(jdbcTemplate, aclCache());
+  }
+
+  @Bean
+  public ObjectIdentityService objectIdentityService() {
+    return new ObjectIdentityServiceImpl(jdbcTemplate);
   }
 
   @Bean

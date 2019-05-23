@@ -137,6 +137,21 @@ public class RestTestUtils {
    * <p>Importing is done async in the backend, but this methods waits for importing to be done.
    *
    * @param adminToken to use for login
+   * @param fileName the file to upload
+   * @return String indicating state of completed job
+   */
+  public static String uploadEmxFileWithoutPackage(String adminToken, String fileName) {
+    File file = getResourceFile(fileName);
+
+    return uploadEmxFileWithoutPackage(adminToken, file);
+  }
+
+  /**
+   * Import emx file using add/update.
+   *
+   * <p>Importing is done async in the backend, but this methods waits for importing to be done.
+   *
+   * @param adminToken to use for login
    * @param pathToFileFolder path to folder to look for emx file to import
    * @param fileName name of the file to upload
    * @return String indicating state of completed job
@@ -163,7 +178,7 @@ public class RestTestUtils {
       String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 
-    return uploadEMXFileWithoutPackage(adminToken, file);
+    return uploadEmxFileWithoutPackage(adminToken, file);
   }
 
   private static String uploadEMXFile(String adminToken, File file) {
@@ -183,7 +198,7 @@ public class RestTestUtils {
     return monitorImportJob(adminToken, importJobStatusUrl);
   }
 
-  private static String uploadEMXFileWithoutPackage(String adminToken, File file) {
+  private static String uploadEmxFileWithoutPackage(String adminToken, File file) {
     String importJobStatusUrl =
         given()
             .multiPart(file)

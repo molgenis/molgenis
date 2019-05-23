@@ -9,7 +9,6 @@ import static org.awaitility.Awaitility.await;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
-import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
@@ -18,6 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -31,6 +31,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.integrationtest.utils.TestProgress;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.molgenis.navigator.copy.service.CopyServiceImpl;
@@ -40,12 +42,13 @@ import org.molgenis.navigator.copy.service.PackageCopier;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.navigator.util.ResourceCollector;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -94,6 +97,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
         () -> {
           addPackages();
           addTestEntityTypes();
+          populatePermissions();
         });
   }
 
@@ -101,7 +105,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
   public void testCopyPackage() {
-    populatePermissions();
     String targetPackageId = "target1";
     addTargetPackage(targetPackageId);
 
@@ -157,7 +160,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
   public void testCopyEntityType() {
-    populatePermissions();
     String targetPackageId = "target2";
     addTargetPackage(targetPackageId);
     ResourceIdentifier id = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
@@ -197,7 +199,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
   public void testCopyBoth() {
-    populatePermissions();
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
@@ -269,10 +270,16 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
           metadataService.addPackage(pack);
         });
 
-    testPermissionService.grant(
-        ImmutableMap.of(new PackageIdentity(id), PermissionSet.WRITEMETA),
-        createUserSid(requireNonNull(getCurrentUsername())));
-
+    Sid sid = SidUtils.createUserSid(requireNonNull(getCurrentUsername()));
+    Map<ObjectIdentity, PermissionSet> permissionMap =
+        ImmutableMap.of(new PackageIdentity(id), PermissionSet.WRITEMETA);
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
     waitForWorkToBeFinished(indexService, LOG);
   }
 
@@ -310,6 +317,13 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), PermissionSet.READ);
     permissionMap.put(new PackageIdentity(PACKAGE_A), PermissionSet.READ);
 
-    testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
+    Sid sid = SidUtils.createUserSid(requireNonNull(USERNAME));
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
   }
 }

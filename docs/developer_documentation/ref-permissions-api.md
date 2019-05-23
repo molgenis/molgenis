@@ -1,0 +1,762 @@
+# Permissions API
+
+This API can be used to perform create, retrieval, update and delete operations on the MOLGENIS permission system.
+The MOLGENIS permission is based on [Spring Security](https://spring.io/projects/spring-security).
+
+## Parameters
+These parameters are used by the endpoint in this API:
+- 'typeId': This is the type of resource for which the permission is granted. 
+This maps to the 'type' in Spring security's [ObjectIdentity](https://docs.spring.io/spring-security/site/docs/5.1.x/api/org/springframework/security/acls/model/ObjectIdentity.html).
+In MOLGENIS examples of these types are 'entityType', 'package', 'plugin', and also row level secured entities, in which case the type is the entityType identifier prefixed with "entity-" 
+- 'identifier': This is the identifier of the actual resource within the resource type for which the permission is granted. 
+This maps to the 'identifier' in Spring security's ObjectIdentity.
+- 'inheritance': a boolean indicating if inherited permissions should be returned or only the permission that are actually set for the roles and users requested. This parameter is only used in the GET permission requests. Setting this to true will return a tree with all inherited permissions for the requested users and roles. This field cannot be combined with paging.
+- 'page': The pagenumber for the results, should only be provided combined with 'pageSize'. This field cannot be combined with 'inheritance=true'.
+- 'pageSize': The number of results per result page, should only be provided combined with 'page'. This field cannot be combined with 'inheritance=true'.
+- 'permission': A permission for a resource, the permissions that can be used differ per resource type, but are always a subset of READMETA,COUNT,READ,WRITE,WRITEMETA. 
+
+## Query for user or role
+- user
+The user for which to get/create/update the permission. This should be the username as stated in the 'sys_sec_User' table in the MOLGENIS database.
+- role
+The role for which to get/create/update the permission. This should be the rolename as stated in the 'sys_sec_Role' table in the MOLGENIS database.
+
+The user/role query for this API's GET operations should be provided in the [RSQL syntax](developer_documentation/ref-RSQL.md)
+Examples:
+
+Query for user 'Cardiologist' or users with role "CARDIOLOGY"
+```
+q=user==Cardiologist,role==CARDIOLOGY
+```
+Query for users 'Cardiologist' or 'Neurologist'
+```
+q=user=in=(Cardiologist,Neurologist)
+```
+### Permission inheritance
+There are two kinds of inheritance in the permission system:
+- Users inherit permissions from their roles, and roles from their parentroles.
+- The access control list (ACL) for a resource can have a parent, in that case permissions on the parent also grant permissions on the child ACL's. In the current MOLGENIS system this is the case for entity types and packages, both inherit permissions from the package in which they reside..
+
+## Managing row level security
+### Getting all resource types in the system
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions/types
+```
+##### Parameters
+URL: none
+Query: none
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok | Success |
+|403 Forbidden | the user has no permissions to execute this action |
+
+##### Response body
+List of ACL types available in the system.
+##### Example 
+Response:
+```
+"data": {
+  [
+      {
+          "id": "entity-sys_ImportRun",
+          "entityType": "sys_ImportRun",
+          "label": "Import"
+      },
+      {
+          "id": "entity-sys_job_ResourceCopyJobExecution",
+          "entityType": "sys_job_ResourceCopyJobExecution",
+          "label": "Resource Copy Job Execution"
+      },
+      {
+          "id": "entity-hospital_cardiology_patients",
+          "entityType": "hospital_cardiology_patients",
+          "label": "patients"
+      },
+      {
+          "id": "package",
+          "entityType": "sys_md_Package",
+          "label": "Package"
+      },
+      {
+          "id": "entity-sys_FileMeta",
+          "entityType": "sys_FileMeta",
+          "label": "File metadata"
+      },
+      {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
+      },
+      {
+          "id": "entityType",
+          "entityType": "sys_md_EntityType",
+          "label": "Entity type"
+      }
+  ]
+}
+   ```
+
+### Getting all suitable permissions for a resource type
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions/types/permissions/{typeId}
+```
+##### Parameters
+URL: TypeId as described in the [parameters section](##Parameters)
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok | Success |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type does not exist |
+
+##### Response body
+A list of permissions that can be used for this resource type.
+
+##### Example 
+Request:
+```https://molgenis.mydomain.example/api/permissions/types/permissions/entityType```
+Response:
+```
+"data": {
+  [
+       "READMETA",
+       "READ",
+       "COUNT",
+       "WRITEMETA",
+       "WRITE"
+   ]
+}
+   ```
+
+### Creating a new resource type in the system (Row level securing an entity type)
+
+This will create a new type in the system and add access control lists for all existing rows.
+This enables row level security and is only enabled for superusers.
+Please keep in mind that all existing rows will get the current user as owner.
+
+##### Endpoint
+```
+POST https://molgenis.mydomain.example/api/permissions/types/{typeId}
+```
+##### Parameters
+URL: 'typeId' as described in the [parameters section](##Parameters)
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|201 Created | Type created |
+|403 Forbidden  | the user has no permissions to execute this action |
+|409 Conflict | the type already exists |
+
+##### Example
+Enable row level security on entity type 'hospital_neurology_patients'.
+
+Request:
+```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
+
+### Deleting a resource type from the system (Removing row level security from an entity type)
+
+This will delete a type, the access control lists for all rows will remain in the system.
+This disables row level security.
+
+##### Endpoint
+```
+DELETE https://molgenis.mydomain.example/api/permissions/types/{typeId}
+```
+##### Parameters
+URL: 'typeId' as described in the [parameters section](##Parameters)
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|204 No content| Type removed |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type does not exist |
+
+##### Example
+Enable row level security on entity type 'hospital_neurology_patients'.
+
+Request:
+```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
+
+### Creating a new access control list for a resource
+##### Endpoint
+```
+POST https://molgenis.mydomain.example/api/permissions/objects/{typeId}/{objectId}
+```
+##### Parameters
+URL: 
+- 'typeId' as described in the [parameters section](##Parameters)
+- 'identifier' as described in the [parameters section](##Parameters)
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|201 Created | access control list created |
+|400 Bad request| the permission request content is not valid |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role does not exist |
+|409 Conflict | the a access control list already exists for this object |
+
+##### Example
+Add an ACL for 'Patient1' in _entity_ type 'hospital_neurology_patients'.
+
+Request:
+```POST https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients/Patient1```
+
+### Getting all objects of a type
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions/objects/{typeId}
+```
+##### Parameters
+URL:
+- 'typeId' as described in the [parameters section](##Parameters)
+Query: 
+- Optional: 'page' as described in the [parameters section](##Parameters)
+- Optional: 'pageSize' as described in the [parameters section](##Parameters)
+
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok | Success |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Response body
+List of ACLs for a type in the system.
+##### Example 
+Request:
+```
+GET https://molgenis.mydomain.example/api/objects/entity-hospital_cardiology_patients
+```
+Response:
+```
+{
+    "page": {
+        "size": 100,
+        "totalElements": 3,
+        "totalPages": 1,
+        "number": 1
+    },
+    "links": {
+        "self": "https://molgenis.mydomain.example/api/permissions/objects/entity-hospital_cardiology_patients?page=1&pageSize=100"
+    },
+    "data": [
+        {
+            "id": "Patient1",
+            "label": "Patient1"
+        },
+        {
+            "id": "Patient2",
+            "label": "Patient2"
+        },
+        {
+            "id": "Patient3",
+            "label": "Patient3"
+        }
+    ]
+}
+   ```
+
+## Retrieving permissions for users and roles
+
+### Getting permissions for one or more users and/or roles for a resource
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}
+```
+##### Parameters
+URL: 
+- 'typeId' as described in the [parameters section](##Parameters)
+- 'identifier' as described in the [parameters section](##Parameters)
+Query: 
+- Optional: [Query for user or role](##Query for user or role)
+- Optional: 'inheritance' as described in the [parameters section](##Parameters)
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok | Success |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Response body
+A list of permissions objects containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance).
+The user and role of a permission can be absent if permission is only derived from inherited permissions. 
+
+##### Example
+Request:
+```
+GET https://molgenis.mydomain.example/api/permissions/package/hospital_neurology?inheritance=true
+```
+Response:
+```
+"data": {
+  {
+       "permissions": [
+           {
+               "user": "Neurologist",
+               "inheritedPermissions": [
+                   {
+                       "role": "NEUROLOGY",
+                       "permission": "READ",
+                       "inheritedPermissions": []
+                   }
+               ]
+           },
+           {
+               "user": "NeuroNurse",
+               "inheritedPermissions": [
+                   {
+                       "role": "NEUROLOGY",
+                       "permission": "READ",
+                       "inheritedPermissions": []
+                   }
+               ]
+           },
+           {
+               "user": "Reception",
+               "inheritedPermissions": [
+                   {
+                      "object":{
+                        "id": "hospital",
+                        "label": "hospital"
+                      },
+                      "type":{
+                        "label": "Package",
+                        "id": "package"
+                      },
+                      "permission": "READ",
+                      "inheritedPermissions": []
+                   }
+               ]
+           }
+       ]
+   }
+ }
+   ```
+The neurologist and the nurse inherit their READ permissions from the their "NEUROLOGY" role, while the reception inherits the READ permission from the READ permission they have on the parent package "hospital" of the "hospital_neurology" package.
+
+### Getting permissions for one or more users and/or roles for a resource type
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions/{typeId}
+```
+##### Parameters
+URL: 
+- 'typeId' as described in the [parameters section](##Parameters)
+Query: 
+- Optional: [Query for user or role](##Query for user or role)
+- Optional: 'inheritance' as described in the [parameters section](##Parameters)
+- Optional: 'page' as described in the [parameters section](##Parameters)
+- Optional: 'pageSize' as described in the [parameters section](##Parameters)
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok |  |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Response body
+A list of permissions per resource is returned in the 'data' field.
+These lists of permissions contain object containing the 'identifier' and the 'label' for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance) if any.
+The 'user'/'role' and 'permission' of a permission can be absent if permission is only derived from inherited permissions. 
+A links object is returned with a URL for the current result page in the 'self' field. If available a 'previous' and 'next' page are returned with links to the previous and next page of results/
+Optionally a 'page' object is returned containing the size and number of the current page and a 'totalElements' field containing the total number of results and 'totalPages' containing the total number of queries.
+The page object is only returned if the request contained paging parameters
+
+##### Example
+Request:
+```https://molgenis.mydomain.example/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10```
+Response:
+```
+{
+    "page": {
+        "size": 10,
+        "totalElements": 2,
+        "totalPages": 1,
+        "number": 1
+    },
+    "links": {
+        "self": "/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10"
+    },
+    "data": {
+        "objects": [
+            {
+                "id": "hospital_cardiology_patients",
+                "label": "patients",
+                "permissions": [
+                    {
+                        "role": "CARDIOLOGY",
+                        "permission": "WRITE"
+                    }
+                ]
+            },
+            {
+                "id": "hospital_cardiology_results",
+                "label": "results",
+                "permissions": [
+                    {
+                        "user": "Cardiologist",
+                        "permission": "WRITE"
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+
+
+### Getting all permissions for one or more users and/or roles
+##### Endpoint
+```
+GET https://molgenis.mydomain.example/api/permissions
+```
+##### Parameters
+URL: none
+Query: 
+[Query for user or role](##Query for user or role)
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|200 Ok | Success |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Response body
+A list of permissions on resources per resource type.
+For every resource type a object is returned containing the typeId, a label for the typeId, a label for the resource type and a list of permissions per resource.
+These lists of permissions contain object containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance).
+The user and role of a permission can be absent if permission is only derived from inherited permissions.
+
+
+##### Example 
+Request:
+```https://molgenis.mydomain.example/api/permissions?q=user==Cardiologist&inheritance=true```
+Response:
+```
+{
+"data": {
+    "permissions": [
+        {
+            "user": "Cardiologist",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "dataexplorer",
+              "id": "dataexplorer"
+            },
+            "inheritedPermissions": [
+                {
+                    "role": "CARDIOLOGY",
+                    "permission": "READ",
+                    "inheritedPermissions": []
+                }
+            ]
+        },
+        {
+            "role": "CARDIOLOGY",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "dataexplorer",
+              "id": "dataexplorer"
+            },
+            "permission": "READ"
+        },
+        {
+            "user": "Cardiologist",
+            "object":{
+              "id": "plugin",
+              "label": "Plugin"
+            },
+            "type":
+            {
+              "label": "home",
+              "id": "home"
+            },
+            "inheritedPermissions": [
+                {
+                    "role": "CARDIOLOGY",
+                    "permission": "READ",
+                    "inheritedPermissions": []
+                }
+            ]
+        },
+        {
+            "user": "Cardiologist",
+            "object":{
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type": { 
+              "label": "hospital_cardiology_patients",
+              "id": "patients"
+            },
+            "permission": "WRITE",
+            "inheritedPermissions": [
+                {
+                    "role": "CARDIOLOGY",
+                    "permission": "READ",
+                    "inheritedPermissions": []
+                }
+            ]
+        },
+        {
+            "role": "CARDIOLOGY",
+            "object":{
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type":{
+              "label": "hospital_cardiology_patients",
+              "typeId": "patients"
+            },
+            "permission": "READ"
+        },
+        {
+            "user": "Cardiologist",
+            "object": 
+            {
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type":
+            {
+              "label": "hospital_cardiology_results",
+              "id": "results"
+            },
+            "permission": "WRITE",
+            "inheritedPermissions": [
+                {
+                    "role": "CARDIOLOGY",
+                    "permission": "READ",
+                    "inheritedPermissions": []
+                }
+            ]
+        },
+        {
+            "role": "CARDIOLOGY",
+            "object": {
+              "id": "entityType",
+              "label": "Entity type"
+            },
+            "type": {
+              "label": "hospital_cardiology_results",
+              "id": "results"
+            },
+            "permission": "READ"
+        }
+    ]
+  }
+}
+```
+
+
+## Granting permissions to users and roles
+
+### Creating permissions for one or more users and/or roles for a resource
+##### Endpoint
+```
+POST https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}
+```
+##### Request
+The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|201 No content | permissions created |
+|400 Bad request| the permission request content is not valid |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role does not exist |
+|409 Conflict | the a permission already exists for this combination of user/role and object |
+
+##### Example request
+URL:
+https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+Body:
+```{
+   	permissions:[{
+   		permission:READ,
+   		role:CARDIOLOGY
+   	},{
+   		permission:WRITE,
+   		user:Cardiologist
+   	}]
+   }
+   ```
+
+### Create permissions for one or more users and/or roles for resources of a certain type
+```
+POST https://molgenis.mydomain.example/api/permissions/{typeId}")
+``` 
+
+##### Request
+The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
+
+##### Response 
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|201 No content | permissions created |
+|400 Bad request| the permission request content is not valid |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role does not exist |
+|409 Conflict | the a permission already exists for this combination of user/role and object |
+
+##### Example
+URL: https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
+Body:
+```
+"data": {
+  {
+    objects:[{
+        id:Patient1,
+        permissions:[
+        {
+          role:CARDIOLOGY,
+          permission:WRITE
+        }
+      ]
+    },{
+        id:Patient2,
+        permissions:[
+        {
+          user:Cardiologist,
+          permission:WRITE
+        },
+        {
+          user:CardioNurse,
+          permission:READ
+        }
+      ]}
+    ]
+  }
+}
+```
+
+### Update permissions for one or more users and/or roles for a resource type
+##### Endpoint
+```
+PATCH https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}")
+```
+Request: 
+The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
+
+##### Response
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|204 No content | permissions updated |
+|400 Bad request| the permission request content is not valid |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Example 
+Request:
+URL: https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+Body:
+```{
+   	permissions:[{
+   		permission:WRITE,
+   		role:CARDIOLOGY
+   	},{
+   		permission:WRITEMETA,
+   		user:Cardiologist
+   	}]
+   }
+   ```
+
+### Update permissions for one or more users and/or roles for resources of a certain type
+```
+PATCH https://molgenis.mydomain.example/api/permissions/{typeId}")
+``` 
+
+##### Request
+The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
+
+##### Response 
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|204 No content | permissions updated |
+|400 Bad request| the permission request content is not valid |
+|403 Forbidden  | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Example
+URL: https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
+Body:
+```
+{
+	objects:[{
+			id:Patient1,
+			permissions:[
+			{
+				role:CARDIOLOGY,
+				permission:WRITE
+			}
+		]
+	},{
+			id:Patient2,
+			permissions:[
+			{
+				user:Cardiologist,
+				permission:WRITE
+			},
+			{
+				user:CardioNurse,
+				permission:READ
+			}
+		]}
+	]
+}
+```
+
+### Removing permissions for one or more users and/or roles for a resource
+
+##### Endpoint
+```
+DELETE https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}
+```
+
+##### Parameters
+- 'typeId' as described in the [parameters section](##Parameters)
+- 'identifier' as described in the [parameters section](##Parameters)
+Body: 
+a json object with either a ['user' or a 'role'](##Query for user or role) field for the user/role which the permission should be deleted.
+The field takes a single user or role. 
+
+##### Response: 
+| Status code         | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+|204 No content | Permission deleted |
+|400 Bad request | the permission request content is not valid |
+|403 Forbidden | the user has no permissions to execute this action |
+|404 Not found | the type, object, user, role or permission does not exist |
+
+##### Example 
+Request:
+
+URL 
+```
+https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+```
+
+Body 
+```
+{
+  user:Cardiologist
+}
+```

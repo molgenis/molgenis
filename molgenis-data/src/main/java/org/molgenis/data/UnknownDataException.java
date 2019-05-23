@@ -12,7 +12,7 @@ package org.molgenis.data;
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class UnknownDataException extends ErrorCodedDataAccessException {
-  UnknownDataException(String errorCode) {
+  protected UnknownDataException(String errorCode) {
     super(errorCode);
   }
 }

@@ -402,5 +402,10 @@
       <artifactId>molgenis-frontend</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-permissions</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

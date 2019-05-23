@@ -12,6 +12,7 @@ import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.exception.PermissionDeniedException;
 import org.molgenis.i18n.BadRequestException;
 import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,13 @@ public class GlobalControllerExceptionHandler {
     LOG.info("", e);
     return ExceptionHandlerUtils.handleException(
         e, handlerMethod, BAD_REQUEST, e.getErrorCode(), environment);
+  }
+
+  @ExceptionHandler(ForbiddenException.class)
+  public Object handleException(ForbiddenException e, HandlerMethod handlerMethod) {
+    LOG.info("", e);
+    return ExceptionHandlerUtils.handleException(
+        e, handlerMethod, FORBIDDEN, e.getErrorCode(), environment);
   }
 
   @ExceptionHandler(CodedRuntimeException.class)
