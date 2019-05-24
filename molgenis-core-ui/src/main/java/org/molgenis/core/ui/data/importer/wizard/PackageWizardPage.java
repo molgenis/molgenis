@@ -95,9 +95,7 @@ public class PackageWizardPage extends AbstractWizardPage {
           // The entities that can not be imported. If even one entity can not be imported,
           // everything fails
           List<String> entitiesNotImportable =
-              entitiesImportable
-                  .entrySet()
-                  .stream()
+              entitiesImportable.entrySet().stream()
                   .filter(entity -> !entity.getValue())
                   .map(Map.Entry::getKey)
                   .collect(toList());

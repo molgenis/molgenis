@@ -635,8 +635,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
   private List<Map<String, Object>> createMrefs(
       Attribute attr, Attribute updatedAttr, Attribute idAttribute, List<Entity> entities) {
-    return entities
-        .stream()
+    return entities.stream()
         .map(
             entity -> {
               Entity refEntity = entity.getEntity(attr.getName());

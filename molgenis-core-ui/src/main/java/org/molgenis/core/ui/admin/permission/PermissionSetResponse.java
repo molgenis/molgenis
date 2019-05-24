@@ -23,8 +23,7 @@ public abstract class PermissionSetResponse {
   public static PermissionSetResponse create(
       PermissionSet permissionSet, Set<Permission> permissions) {
     List<PermissionResponse> permissionsGranted =
-        permissions
-            .stream()
+        permissions.stream()
             .map(PermissionResponse::create)
             .sorted(comparing(PermissionResponse::getType))
             .collect(toList());

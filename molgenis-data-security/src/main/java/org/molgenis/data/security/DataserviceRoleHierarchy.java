@@ -52,8 +52,7 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
           }
 
           Set<String> roleNames =
-              authorities
-                  .stream()
+              authorities.stream()
                   .map(GrantedAuthority::getAuthority)
                   .filter(name -> name.startsWith(ROLE_PREFIX))
                   .map(name -> name.substring(ROLE_PREFIX.length()))
@@ -63,8 +62,7 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
           Set<String> newlyDiscovered = roleNames;
           while (!newlyDiscovered.isEmpty()) {
             Set<String> included =
-                newlyDiscovered
-                    .stream()
+                newlyDiscovered.stream()
                     .flatMap(role -> allRoleInclusions.get(role).stream())
                     .collect(toSet());
             newlyDiscovered = copyOf(difference(included, roleNames));
@@ -72,8 +70,7 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
           }
 
           Set<SimpleGrantedAuthority> reachableRoles =
-              roleNames
-                  .stream()
+              roleNames.stream()
                   .map(SidUtils::createRoleAuthority)
                   .map(SimpleGrantedAuthority::new)
                   .collect(toSet());

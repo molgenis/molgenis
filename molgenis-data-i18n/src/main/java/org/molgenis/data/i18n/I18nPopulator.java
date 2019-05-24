@@ -45,8 +45,7 @@ public class I18nPopulator {
   public void populateL10nStrings() {
     AllPropertiesMessageSource allPropertiesMessageSource = new AllPropertiesMessageSource();
     String[] namespaces =
-        localizationMessageSources
-            .stream()
+        localizationMessageSources.stream()
             .map(PropertiesMessageSource::getNamespace)
             .toArray(String[]::new);
     allPropertiesMessageSource.addMolgenisNamespaces(namespaces);

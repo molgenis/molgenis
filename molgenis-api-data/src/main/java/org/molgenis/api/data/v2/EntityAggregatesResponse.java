@@ -75,8 +75,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2 {
     }
 
     private static List<Object> convert(List<Object> xLabels) {
-      return xLabels
-          .stream()
+      return xLabels.stream()
           .map(
               xLabel -> {
                 Object value;

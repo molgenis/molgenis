@@ -88,8 +88,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     StringBuilder stringBuilder = new StringBuilder();
     if (!sourceAttributes.isEmpty()) {
       stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
-      sourceAttributes
-          .stream()
+      sourceAttributes.stream()
           .forEach(
               attribute ->
                   stringBuilder
@@ -110,8 +109,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     boolean isTargetSuitable =
         oneToOneCategoryAlgorithmGenerator.isFrequencyCategory(convertToCategory(targetAttribute));
     boolean areSourcesSuitable =
-        sourceAttributes
-            .stream()
+        sourceAttributes.stream()
             .map(this::convertToCategory)
             .allMatch(oneToOneCategoryAlgorithmGenerator::isFrequencyCategory);
     return isTargetSuitable && areSourcesSuitable;
@@ -154,8 +152,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     StringBuilder stringBuilder = new StringBuilder();
 
     List<Category> sortedCategories =
-        convertToCategory(attribute)
-            .stream()
+        convertToCategory(attribute).stream()
             .filter(category -> category.getAmountWrapper() != null)
             .collect(Collectors.toList());
 

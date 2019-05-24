@@ -280,15 +280,13 @@ public class EmxImportServiceIT extends ImportServiceIT {
   private void verifyItEmxAutoId() {
     List<Entity> entities = findAllAsList("it_emx_autoid_testAutoId");
     assertTrue(
-        entities
-            .stream()
+        entities.stream()
             .anyMatch(
                 entity ->
                     testAutoIdFirstRow.get("firstName").equals(entity.get("firstName"))
                         && testAutoIdFirstRow.get("lastName").equals(entity.get("lastName"))));
     assertTrue(
-        entities
-            .stream()
+        entities.stream()
             .anyMatch(
                 entity ->
                     testAutoIdLastRow.get("firstName").equals(entity.get("firstName"))
@@ -565,16 +563,13 @@ public class EmxImportServiceIT extends ImportServiceIT {
     File file = getFile("/xls/" + fileName);
     String packageName = String.join(PACKAGE_SEPARATOR, packageTokens);
     Map<String, Object> entityTypeCountMap =
-        entityCountMap
-            .entrySet()
-            .stream()
+        entityCountMap.entrySet().stream()
             .collect(
                 Collectors.toMap(
                     entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(),
                     Map.Entry::getValue));
     Set<String> entityTypeFullyQualifiedNames =
-        entityTypeNames
-            .stream()
+        entityTypeNames.stream()
             .map(entityName -> packageName + PACKAGE_SEPARATOR + entityName)
             .collect(toSet());
     return new Object[] {
@@ -593,16 +588,13 @@ public class EmxImportServiceIT extends ImportServiceIT {
     File updateFile = getFile("/xls/" + updateFileName);
     String packageName = String.join(PACKAGE_SEPARATOR, packageTokens);
     Map<String, Object> entityTypeCountMap =
-        entityCountMap
-            .entrySet()
-            .stream()
+        entityCountMap.entrySet().stream()
             .collect(
                 Collectors.toMap(
                     entry -> packageName + PACKAGE_SEPARATOR + entry.getKey(),
                     Map.Entry::getValue));
     Set<String> entityTypeFullyQualifiedNames =
-        entityTypeNames
-            .stream()
+        entityTypeNames.stream()
             .map(entityName -> packageName + PACKAGE_SEPARATOR + entityName)
             .collect(toSet());
     return new Object[] {

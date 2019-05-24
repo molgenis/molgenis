@@ -159,8 +159,7 @@ public class PermissionCheckingDecorator<E extends Entity> extends AbstractRepos
               List<E> entities = delegate().findAll(batchIds.stream()).collect(toList());
               delegate()
                   .deleteAll(
-                      entities
-                          .stream()
+                      entities.stream()
                           .filter(permissionChecker::isDeleteAllowed)
                           .map(Entity::getIdValue));
             });

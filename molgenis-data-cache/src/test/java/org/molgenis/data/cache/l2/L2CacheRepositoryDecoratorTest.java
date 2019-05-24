@@ -165,7 +165,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
               List<Object> queried =
                   ((Stream<Object>) invocation.getArguments()[0]).collect(toList());
               return Lists.transform(
-                      queried, id -> lotsOfEntities.get(Integer.parseInt(id.toString())))
+                  queried, id -> lotsOfEntities.get(Integer.parseInt(id.toString())))
                   .stream();
             });
 

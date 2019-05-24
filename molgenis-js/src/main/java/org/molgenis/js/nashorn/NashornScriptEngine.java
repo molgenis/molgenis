@@ -78,9 +78,7 @@ public class NashornScriptEngine {
       ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) nashornValue;
       if (scriptObjectMirror.isArray()) {
         convertedValue =
-            scriptObjectMirror
-                .values()
-                .stream()
+            scriptObjectMirror.values().stream()
                 .map(this::convertNashornValue)
                 .collect(Collectors.toList());
       } else {

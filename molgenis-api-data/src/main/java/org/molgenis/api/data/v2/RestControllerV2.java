@@ -309,9 +309,7 @@ public class RestControllerV2 {
 
     try {
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
       final EntityCollectionBatchCreateResponseBodyV2 responseBody =
@@ -320,8 +318,7 @@ public class RestControllerV2 {
 
       // Add all entities
       if (ATTRIBUTE_META_DATA.equals(entityTypeId)) {
-        entities
-            .stream()
+        entities.stream()
             .map(attribute -> (Attribute) attribute)
             .forEach(attribute -> dataService.getMeta().addAttribute(attribute));
       } else {
@@ -438,9 +435,7 @@ public class RestControllerV2 {
 
     try {
       List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
 
@@ -485,9 +480,7 @@ public class RestControllerV2 {
       }
 
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .filter(e -> e.size() == 2)
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
@@ -585,10 +578,7 @@ public class RestControllerV2 {
   public void registerMissingResourceStrings(
       @PathVariable String namespace, HttpServletRequest request) {
     Set<String> messageIDs =
-        request
-            .getParameterMap()
-            .entrySet()
-            .stream()
+        request.getParameterMap().entrySet().stream()
             .map(Map.Entry::getKey)
             .filter(id -> !id.equals(TIME_PARAM_NAME))
             .collect(toSet());

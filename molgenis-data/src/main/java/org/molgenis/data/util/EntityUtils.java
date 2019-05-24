@@ -68,8 +68,7 @@ public class EntityUtils {
       case ONE_TO_MANY:
         EntityType mrefEntity = attr.getRefEntity();
         List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
-        return mrefIdStrValues
-            .stream()
+        return mrefIdStrValues.stream()
             .map(
                 mrefIdStrValue ->
                     getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(), entityManager))

@@ -394,9 +394,7 @@ public class MappingServiceController extends PluginController {
     MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
     MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
     List<String> sourceNames =
-        mappingTarget
-            .getEntityMappings()
-            .stream()
+        mappingTarget.getEntityMappings().stream()
             .map(i -> i.getSourceEntityType().getId())
             .collect(toList());
 
@@ -446,10 +444,7 @@ public class MappingServiceController extends PluginController {
     model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
     model.addAttribute(
         "packages",
-        dataService
-            .getMeta()
-            .getPackages()
-            .stream()
+        dataService.getMeta().getPackages().stream()
             .filter(p -> !isSystemPackage(p))
             .collect(toList()));
     return VIEW_SINGLE_MAPPING_PROJECT;
@@ -493,8 +488,7 @@ public class MappingServiceController extends PluginController {
 
     if (StringUtils.isNotBlank(searchTermsString)) {
       searchTerms.addAll(
-          Sets.newHashSet(searchTermsString.toLowerCase().split("\\s+or\\s+"))
-              .stream()
+          Sets.newHashSet(searchTermsString.toLowerCase().split("\\s+or\\s+")).stream()
               .filter(StringUtils::isNotBlank)
               .map(String::trim)
               .collect(Collectors.toSet()));
@@ -548,9 +542,7 @@ public class MappingServiceController extends PluginController {
         targetEntityType.getAttribute(generateAlgorithmRequest.getTargetAttributeName());
 
     List<Attribute> sourceAttributes =
-        generateAlgorithmRequest
-            .getSourceAttributes()
-            .stream()
+        generateAlgorithmRequest.getSourceAttributes().stream()
             .map(sourceEntityType::getAttribute)
             .collect(toList());
 
@@ -748,8 +740,7 @@ public class MappingServiceController extends PluginController {
       Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
       if (!sourceAttributeNames.isEmpty()) {
         List<Attribute> sourceAttributes =
-            sourceAttributeNames
-                .stream()
+            sourceAttributeNames.stream()
                 .map(
                     attributeName -> {
                       EntityType sourceEntityType = entityMapping.getSourceEntityType();
@@ -1051,8 +1042,7 @@ public class MappingServiceController extends PluginController {
   }
 
   private List<EntityType> getWritableEntityTypes() {
-    return getEntityTypes()
-        .stream()
+    return getEntityTypes().stream()
         .filter(emd -> !emd.isAbstract())
         .filter(
             emd -> dataService.getCapabilities(emd.getId()).contains(RepositoryCapability.WRITABLE))

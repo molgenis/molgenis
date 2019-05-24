@@ -72,8 +72,7 @@ public class ZipFileUtil {
     }
 
     public List<File> getFiles() {
-      return getPaths()
-          .stream()
+      return getPaths().stream()
           .map(Path::toFile)
           .filter(file -> !file.isDirectory())
           .collect(toList());

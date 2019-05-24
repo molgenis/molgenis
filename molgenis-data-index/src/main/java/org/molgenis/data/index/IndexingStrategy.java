@@ -33,8 +33,7 @@ public class IndexingStrategy {
     ImmutableSet<String> allEntityTypeIds =
         changes.stream().map(Impact::getEntityTypeId).collect(toImmutableSet());
     Set<String> dependentEntities =
-        allEntityTypeIds
-            .stream()
+        allEntityTypeIds.stream()
             .flatMap(dependencyModel::getEntityTypesDependentOn)
             .collect(toImmutableSet());
     Set<Impact> result = collectResult(split.get(false), split.get(true), dependentEntities);
@@ -65,8 +64,7 @@ public class IndexingStrategy {
     ImmutableSet.Builder<Impact> result = ImmutableSet.builder();
     result.addAll(wholeRepoActions);
     dependentEntityIds.stream().map(Impact::createWholeRepositoryImpact).forEach(result::add);
-    singleEntityChanges
-        .stream()
+    singleEntityChanges.stream()
         .filter(action -> !wholeRepoIds.contains(action.getEntityTypeId()))
         .forEach(result::add);
     return result.build();

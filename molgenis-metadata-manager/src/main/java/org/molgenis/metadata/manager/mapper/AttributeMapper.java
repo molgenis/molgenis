@@ -67,8 +67,7 @@ public class AttributeMapper {
   static void removeCompoundOrphans(List<EditorAttribute> editorAttributes) {
     Set<String> ids = editorAttributes.stream().map(EditorAttribute::getId).collect(toSet());
     List<EditorAttribute> attrsToDelete =
-        editorAttributes
-            .stream()
+        editorAttributes.stream()
             .filter(attr -> attr.getParent() != null)
             .filter(attr -> !ids.contains(attr.getParent().getId()))
             .collect(toList());
@@ -266,9 +265,7 @@ public class AttributeMapper {
     String editorAttributeId = editorAttribute.getId();
 
     int index =
-        editorEntityType
-            .getLookupAttributes()
-            .stream()
+        editorEntityType.getLookupAttributes().stream()
             .map(EditorAttributeIdentifier::getId)
             .collect(toList())
             .indexOf(editorAttributeId);

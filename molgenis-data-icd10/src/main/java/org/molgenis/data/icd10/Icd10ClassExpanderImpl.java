@@ -16,8 +16,7 @@ public class Icd10ClassExpanderImpl implements Icd10ClassExpander {
 
   @Override
   public Collection<Entity> expandClasses(Collection<Entity> diseaseClasses) {
-    return diseaseClasses
-        .stream()
+    return diseaseClasses.stream()
         .flatMap(this::expandClass)
         .map(this::toDiseaseClass)
         .distinct()

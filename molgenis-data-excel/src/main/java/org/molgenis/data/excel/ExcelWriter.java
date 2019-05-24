@@ -79,8 +79,7 @@ public class ExcelWriter implements WritableFactory {
   public ExcelSheetWriter createWritable(String entityTypeId, List<String> attributeNames) {
     List<Attribute> attributes =
         attributeNames != null
-            ? attributeNames
-                .stream()
+            ? attributeNames.stream()
                 .map(attrName -> attrMetaFactory.create().setName(attrName))
                 .collect(Collectors.toList())
             : null;

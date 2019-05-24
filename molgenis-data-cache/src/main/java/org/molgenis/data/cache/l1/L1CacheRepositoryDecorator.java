@@ -100,16 +100,14 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
     String entityId = getEntityType().getId();
     EntityType entityType = getEntityType();
     List<Object> missingIds =
-        batch
-            .stream()
+        batch.stream()
             .filter(id -> !l1Cache.get(entityId, id, entityType).isPresent())
             .collect(toList());
 
     Map<Object, Entity> missingEntities =
         delegate().findAll(missingIds.stream()).collect(toMap(Entity::getIdValue, e -> e));
 
-    return batch
-        .stream()
+    return batch.stream()
         .map(
             id ->
                 l1Cache

@@ -687,9 +687,7 @@ public class EntityType extends StaticEntity implements Labeled {
    */
   public Iterable<Attribute> getOwnAtomicAttributes() {
     return () ->
-        getCachedOwnAttrs()
-            .values()
-            .stream()
+        getCachedOwnAttrs().values().stream()
             .filter(attr -> attr.getDataType() != COMPOUND)
             .iterator();
   }

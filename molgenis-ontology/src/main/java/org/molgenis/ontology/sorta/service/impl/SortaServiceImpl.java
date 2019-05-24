@@ -415,8 +415,7 @@ public class SortaServiceImpl implements SortaService {
       Set<String> createStemmedWordSet =
           informationContentService.createStemmedWordSet(cleanedQueryString);
 
-      createStemmedWordSet
-          .stream()
+      createStemmedWordSet.stream()
           .filter(
               originalWord ->
                   Iterables.contains(synonymStemmedWords, originalWord)

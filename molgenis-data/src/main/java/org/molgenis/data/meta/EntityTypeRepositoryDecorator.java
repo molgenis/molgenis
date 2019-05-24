@@ -180,8 +180,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
       Map<String, Attribute> existingAttrsMap,
       RepositoryCollection backend,
       EntityType concreteExistingEntityType) {
-    difference(existingAttrsMap.keySet(), attrsMap.keySet())
-        .stream()
+    difference(existingAttrsMap.keySet(), attrsMap.keySet()).stream()
         .map(existingAttrsMap::get)
         .forEach(
             removedAttribute ->
@@ -193,8 +192,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
       Map<String, Attribute> existingAttrsMap,
       RepositoryCollection backend,
       EntityType concreteExistingEntityType) {
-    difference(attrsMap.keySet(), existingAttrsMap.keySet())
-        .stream()
+    difference(attrsMap.keySet(), existingAttrsMap.keySet()).stream()
         .map(attrsMap::get)
         .forEach(
             addedAttribute -> backend.addAttribute(concreteExistingEntityType, addedAttribute));
@@ -208,9 +206,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
   /** Removes the mappedBy attributes of each OneToMany pair in the supplied map of EntityTypes */
   private void removeMappedByAttributes(Map<String, EntityType> resolvedEntityTypes) {
-    resolvedEntityTypes
-        .values()
-        .stream()
+    resolvedEntityTypes.values().stream()
         .flatMap(EntityType::getMappedByAttributes)
         .filter(attribute -> resolvedEntityTypes.containsKey(attribute.getEntity().getId()))
         .forEach(attribute -> dataService.delete(ATTRIBUTE_META_DATA, attribute));

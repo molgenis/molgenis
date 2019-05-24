@@ -85,9 +85,7 @@ public class GroupService {
     Package rootPackage = packageFactory.create(groupValue.getRootPackage());
 
     Map<String, Role> roles =
-        groupValue
-            .getRoles()
-            .stream()
+        groupValue.getRoles().stream()
             .map(roleFactory::create)
             .collect(toMap(Role::getName, identity()));
 
@@ -212,8 +210,7 @@ public class GroupService {
 
   private RoleMembership findRoleMembership(User member, List<Role> groupRoles) {
     Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-    return memberships
-        .stream()
+    return memberships.stream()
         .filter(m -> m.getUser().getId().equals(member.getId()))
         .findFirst()
         .orElseThrow(() -> unknownMembershipForUser(member));
@@ -270,8 +267,7 @@ public class GroupService {
   private List<Role> removeIncludedGroupRoles(Group group, Role memberRole) {
     ArrayList<Role> includes = newArrayList(memberRole.getIncludes());
     ArrayList<Role> groupRoles = newArrayList(group.getRoles());
-    return includes
-        .stream()
+    return includes.stream()
         .filter(role -> !isGroupRole(role, groupRoles))
         .collect(Collectors.toList());
   }

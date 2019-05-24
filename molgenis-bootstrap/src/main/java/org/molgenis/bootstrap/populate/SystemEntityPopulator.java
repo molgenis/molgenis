@@ -41,9 +41,7 @@ public class SystemEntityPopulator {
   private void populate(SystemEntityRegistry systemEntityRegistry) {
     // sort entities by type
     Multimap<EntityType, Entity> entityByTypeMap =
-        systemEntityRegistry
-            .getEntities()
-            .stream()
+        systemEntityRegistry.getEntities().stream()
             .collect(toArrayListMultimap(Entity::getEntityType, Function.identity()));
 
     // sort entity types

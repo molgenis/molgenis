@@ -123,9 +123,7 @@ public class IndexActionRegisterServiceImpl
     IndexActionGroup indexActionGroup = indexActionGroupFactory.create(transactionId);
     IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
     Stream<Impact> impactStream =
-        indexingStrategy
-            .determineImpact(changes, dependencyModel)
-            .stream()
+        indexingStrategy.determineImpact(changes, dependencyModel).stream()
             .filter(key -> !excludedEntities.contains(key.getEntityTypeId()));
     List<IndexAction> indexActions =
         mapWithIndex(
@@ -190,9 +188,7 @@ public class IndexActionRegisterServiceImpl
   @Override
   public boolean forgetIndexActions(String transactionId) {
     LOG.debug("Forget index actions for transaction {}", transactionId);
-    return !changesPerTransaction
-        .removeAll(transactionId)
-        .stream()
+    return !changesPerTransaction.removeAll(transactionId).stream()
         .map(Impact::getEntityTypeId)
         .allMatch(excludedEntities::contains);
   }
@@ -207,8 +203,7 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public boolean isEntityDirty(EntityKey entityKey) {
-    return getChangesForCurrentTransaction()
-        .stream()
+    return getChangesForCurrentTransaction().stream()
         .filter(Impact::isSingleEntity)
         .map(Impact::toEntityKey)
         .anyMatch(entityKey::equals);
@@ -216,8 +211,7 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public boolean isEntireRepositoryDirty(EntityType entityType) {
-    return getChangesForCurrentTransaction()
-        .stream()
+    return getChangesForCurrentTransaction().stream()
         .filter(Impact::isWholeRepository)
         .map(Impact::getEntityTypeId)
         .anyMatch(entityType.getId()::equals);
@@ -230,8 +224,7 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public Set<EntityKey> getDirtyEntities() {
-    return getChangesForCurrentTransaction()
-        .stream()
+    return getChangesForCurrentTransaction().stream()
         .filter(Impact::isSingleEntity)
         .map(Impact::toEntityKey)
         .collect(toSet());
@@ -239,8 +232,7 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public Set<String> getEntirelyDirtyRepositories() {
-    return getChangesForCurrentTransaction()
-        .stream()
+    return getChangesForCurrentTransaction().stream()
         .filter(Impact::isWholeRepository)
         .map(Impact::getEntityTypeId)
         .collect(toSet());
