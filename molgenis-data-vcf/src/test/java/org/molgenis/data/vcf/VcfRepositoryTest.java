@@ -131,8 +131,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
     List<List<Entity>> allValues = entityListCaptor.getAllValues();
 
     List<List<Integer>> positions =
-        allValues
-            .stream()
+        allValues.stream()
             .map(
                 batch ->
                     batch.stream().map(entity -> entity.getInt(POS)).collect(Collectors.toList()))
@@ -144,8 +143,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
             ImmutableList.of(6097450, 7569187)));
 
     Set<String> chroms =
-        allValues
-            .stream()
+        allValues.stream()
             .flatMap(batch -> batch.stream().map(entity -> entity.getString(CHROM)))
             .collect(Collectors.toSet());
     assertEquals(chroms, singleton("1"));

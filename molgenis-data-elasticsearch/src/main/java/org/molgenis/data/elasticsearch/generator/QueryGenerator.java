@@ -767,8 +767,7 @@ public class QueryGenerator {
   }
 
   private String getQueryFieldName(List<Attribute> attributePath) {
-    return attributePath
-        .stream()
+    return attributePath.stream()
         .map(this::getQueryFieldName)
         .collect(joining(ATTRIBUTE_SEPARATOR));
   }

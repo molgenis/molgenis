@@ -61,9 +61,7 @@ public class PermissionServiceDecorator implements PermissionService {
 
   @Override
   public Set<LabelledType> getLabelledTypes() {
-    return permissionService
-        .getLabelledTypes()
-        .stream()
+    return permissionService.getLabelledTypes().stream()
         .filter(
             type ->
                 userPermissionEvaluator.hasPermission(

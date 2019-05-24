@@ -110,8 +110,7 @@ public class PermissionManagerController extends PluginController {
     model.addAttribute(
         "users",
         Lists.newArrayList(
-            getUsers()
-                .stream()
+            getUsers().stream()
                 .filter(
                     user -> {
                       Boolean superuser = user.isSuperuser();
@@ -128,8 +127,7 @@ public class PermissionManagerController extends PluginController {
         getEntityTypes().filter(entityType -> !entityType.isAbstract()).collect(toList());
     Collection<String> aclClasses = mutableAclClassService.getAclClassTypes();
     entityTypes.sort(comparing(EntityType::getLabel));
-    return entityTypes
-        .stream()
+    return entityTypes.stream()
         .map(
             entityType -> {
               boolean rlsEnabled = aclClasses.contains(EntityIdentityUtils.toType(entityType));
@@ -300,10 +298,7 @@ public class PermissionManagerController extends PluginController {
   @GetMapping("/permissionSets")
   @ResponseBody
   public List<PermissionSetResponse> getPermissionSets() {
-    return permissionRegistry
-        .getPermissionSets()
-        .entrySet()
-        .stream()
+    return permissionRegistry.getPermissionSets().entrySet().stream()
         .map(entry -> PermissionSetResponse.create(entry.getKey(), entry.getValue()))
         .sorted(comparing(PermissionSetResponse::getPermissions, comparingInt(List::size)))
         .collect(toList());
@@ -366,8 +361,7 @@ public class PermissionManagerController extends PluginController {
     Map<ObjectIdentity, Acl> aclMap =
         mutableAclService.readAclsById(objectIdentities, singletonList(sid));
     Set<String> ids =
-        objectIdentities
-            .stream()
+        objectIdentities.stream()
             .map(ObjectIdentity::getIdentifier)
             .map(Object::toString)
             .collect(toSet());
@@ -379,8 +373,7 @@ public class PermissionManagerController extends PluginController {
     acls.forEach(
         (objectIdentity, acl) -> {
           String id = objectIdentity.getIdentifier().toString();
-          acl.getEntries()
-              .stream()
+          acl.getEntries().stream()
               .filter(ace -> ace.getSid().equals(sid))
               .map(this::getPermissionString)
               .forEach(permission -> result.put(id, permission));

@@ -53,8 +53,7 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule {
   protected String getMatchedTermFromTheRulelabelContainsWords(String label) {
     if (StringUtils.isNotBlank(label)) {
       Set<String> tokens = split(label);
-      return words
-          .stream()
+      return words.stream()
           .filter(word -> tokens.containsAll(split(word)))
           .findFirst()
           .orElse(StringUtils.EMPTY);
@@ -63,8 +62,7 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule {
   }
 
   protected Set<String> split(String label) {
-    return Sets.newHashSet(TERM_SPLITTER.split(label.toLowerCase()))
-        .stream()
+    return Sets.newHashSet(TERM_SPLITTER.split(label.toLowerCase())).stream()
         .map(this::removeIllegalChars)
         .collect(Collectors.toSet());
   }

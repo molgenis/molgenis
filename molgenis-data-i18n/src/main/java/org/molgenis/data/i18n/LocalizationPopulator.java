@@ -57,8 +57,7 @@ public class LocalizationPopulator {
             .getExistingMessages(namespace, messageIds)
             .collect(toMap(L10nString::getMessageID, identity()));
     Map<String, L10nString> toAdd =
-        Sets.difference(messageIds, toUpdate.keySet())
-            .stream()
+        Sets.difference(messageIds, toUpdate.keySet()).stream()
             .map(msgId -> createL10nString(namespace, msgId))
             .collect(toMap(L10nString::getMessageID, identity()));
     Map<String, L10nString> all =

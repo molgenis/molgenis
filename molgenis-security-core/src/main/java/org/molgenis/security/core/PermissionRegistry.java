@@ -26,9 +26,7 @@ public class PermissionRegistry {
   }
 
   public Map<PermissionSet, Set<Permission>> getPermissionSets() {
-    return mapping
-        .entries()
-        .stream()
+    return mapping.entries().stream()
         .collect(groupingBy(Entry::getValue, LinkedHashMap::new, mapping(Entry::getKey, toSet())));
   }
 }

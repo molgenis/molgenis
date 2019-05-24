@@ -201,9 +201,7 @@ public class UserRoleTools {
     if (userPermissionEvaluator.hasPermission(
         new EntityTypeIdentity(UserMetadata.USER), READ_DATA)) {
       sids =
-          userService
-              .getUsers()
-              .stream()
+          userService.getUsers().stream()
               .map(user -> new PrincipalSid(user.getUsername()))
               .collect(toSet());
     }

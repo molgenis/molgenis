@@ -110,8 +110,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
   private void verifyOboRow(
       List<Entity> synonyms, String ontologyTermName, String ontologyTermIRI) {
     Optional<Entity> molOntCoreOpt =
-        synonyms
-            .stream()
+        synonyms.stream()
             .filter(s -> s.getString("ontologyTermName").equals(ontologyTermName))
             .findFirst();
     assertTrue(molOntCoreOpt.isPresent());
@@ -166,8 +165,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
     List<Entity> entities =
         dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
     Optional<Entity> organizationOpt =
-        entities
-            .stream()
+        entities.stream()
             .filter(e -> e.getString("ontologyTermName").equals("organization"))
             .findFirst();
     assertTrue(organizationOpt.isPresent());

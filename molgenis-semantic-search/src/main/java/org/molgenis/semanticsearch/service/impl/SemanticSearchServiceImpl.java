@@ -140,8 +140,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
         });
 
     return Hits.create(
-        attributeSearchHits
-            .stream()
+        attributeSearchHits.stream()
             .map(explainedAttribute -> Hit.create(explainedAttribute, 1f))
             .collect(toList()));
   }
@@ -168,8 +167,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
   boolean isGoodMatch(Map<String, Double> matchedTags, String label) {
     label = label.toLowerCase();
     return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100
-        || Sets.newHashSet(label.split(" "))
-            .stream()
+        || Sets.newHashSet(label.split(" ")).stream()
             .allMatch(
                 word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
   }
@@ -206,8 +204,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
 
     if (null != searchTerms && !searchTerms.isEmpty()) {
       Set<String> escapedSearchTerms =
-          searchTerms
-              .stream()
+          searchTerms.stream()
               .filter(StringUtils::isNotBlank)
               .map(QueryParser::escape)
               .collect(Collectors.toSet());
@@ -304,8 +301,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     }
 
     List<Hit<OntologyTerm>> hits =
-        candidates
-            .stream()
+        candidates.stream()
             .filter(
                 ontologyTerm ->
                     filterOntologyTerm(
@@ -382,9 +378,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
   Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms) {
     // ontologyTerm.getSynonyms() will never be empty because it contains itself as a synonym
     Optional<Hit<String>> bestSynonym =
-        ontologyTerm
-            .getSynonyms()
-            .stream()
+        ontologyTerm.getSynonyms().stream()
             .map(synonym -> Hit.create(synonym, distanceFrom(synonym, searchTerms)))
             .max(Comparator.naturalOrder());
 

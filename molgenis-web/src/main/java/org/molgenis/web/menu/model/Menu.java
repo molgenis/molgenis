@@ -22,8 +22,7 @@ public abstract class Menu implements MenuNode {
   @Override
   public Optional<MenuNode> filter(Predicate<MenuNode> predicate) {
     List<MenuNode> filteredItems =
-        getItems()
-            .stream()
+        getItems().stream()
             .map(item -> item.filter(predicate))
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -71,8 +70,7 @@ public abstract class Menu implements MenuNode {
   }
 
   public Optional<MenuItem> firstItem() {
-    return getItems()
-        .stream()
+    return getItems().stream()
         .map(MenuNode::firstItem)
         .filter(Optional::isPresent)
         .map(Optional::get)

@@ -141,9 +141,7 @@ public class PermissionsController extends ApiController {
       response = List.class)
   public ApiResponse getSuitablePermissions(@PathVariable(value = TYPE_ID) String typeId) {
     return ApiResponse.create(
-        permissionService
-            .getSuitablePermissionsForType(typeId)
-            .stream()
+        permissionService.getSuitablePermissionsForType(typeId).stream()
             .map(PermissionSetUtils::getPermissionStringValue)
             .collect(Collectors.toSet()));
   }
@@ -174,9 +172,7 @@ public class PermissionsController extends ApiController {
     }
 
     Set<ObjectResponse> data =
-        permissionService
-            .getObjects(typeId, page, pageSize)
-            .stream()
+        permissionService.getObjects(typeId, page, pageSize).stream()
             .map(
                 labelledObject ->
                     ObjectResponse.create(labelledObject.getId(), labelledObject.getLabel()))
@@ -335,8 +331,7 @@ public class PermissionsController extends ApiController {
   }
 
   private Set<TypeResponse> convertTypes(Set<LabelledType> types) {
-    return types
-        .stream()
+    return types.stream()
         .map(type -> TypeResponse.create(type.getId(), type.getEntityType(), type.getLabel()))
         .collect(Collectors.toSet());
   }
@@ -355,8 +350,7 @@ public class PermissionsController extends ApiController {
       Set<LabelledPermission> permissions = entry.getValue();
       if (!permissions.isEmpty()) {
         LabelledPermission labelledObjectPermission =
-            permissions
-                .stream()
+            permissions.stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Empty set of permissions"));
         objectPermissions.add(
@@ -372,8 +366,7 @@ public class PermissionsController extends ApiController {
 
   private Set<PermissionResponse> convertToPermissions(Set<LabelledPermission> permissions) {
     LinkedHashSet<PermissionResponse> result = new LinkedHashSet();
-    permissions
-        .stream()
+    permissions.stream()
         .map(
             labelledPermission ->
                 PermissionResponse.create(

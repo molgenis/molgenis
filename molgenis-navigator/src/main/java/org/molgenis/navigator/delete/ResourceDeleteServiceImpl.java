@@ -86,8 +86,7 @@ public class ResourceDeleteServiceImpl implements ResourceDeleteService {
   }
 
   private List<Package> getDeletablePackages(List<Package> packages, Set<Object> packageIds) {
-    return packages
-        .stream()
+    return packages.stream()
         .filter(aPackage -> isDeletablePackage(aPackage, packageIds))
         .collect(toList());
   }

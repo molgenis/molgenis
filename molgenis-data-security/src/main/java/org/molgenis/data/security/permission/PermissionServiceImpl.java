@@ -83,8 +83,7 @@ public class PermissionServiceImpl implements PermissionService {
       String label = entityHelper.getLabel(typeId);
       types.add(LabelledType.create(typeId, entityTypeId, label));
     }
-    return types
-        .stream()
+    return types.stream()
         .filter(
             type ->
                 userPermissionEvaluator.hasPermission(
@@ -95,8 +94,7 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public Set<LabelledObject> getObjects(String typeId, int page, int pageSize) {
     entityHelper.checkEntityTypeExists(typeId);
-    return objectIdentityService
-        .getObjectIdentities(typeId, pageSize, (page - 1) * pageSize)
+    return objectIdentityService.getObjectIdentities(typeId, pageSize, (page - 1) * pageSize)
         .stream()
         .map(this::getLabelledObject)
         .collect(toSet());

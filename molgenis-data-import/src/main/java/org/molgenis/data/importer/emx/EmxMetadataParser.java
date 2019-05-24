@@ -340,9 +340,7 @@ public class EmxMetadataParser implements MetadataParser {
       MyEntitiesValidationReport report,
       Map<String, EntityType> metaDataMap) {
     metaDataMap.values().forEach(entityTypeValidator::validate);
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->
@@ -352,18 +350,14 @@ public class EmxMetadataParser implements MetadataParser {
                             attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION)));
 
     // validate package/entity/attribute tags
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getPackage)
         .filter(Objects::nonNull)
         .forEach(aPackage -> aPackage.getTags().forEach(tagValidator::validate));
     metaDataMap
         .values()
         .forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->

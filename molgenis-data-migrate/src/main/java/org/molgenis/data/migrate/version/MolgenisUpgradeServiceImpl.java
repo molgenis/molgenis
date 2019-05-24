@@ -48,8 +48,7 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService {
           schemaVersion,
           versionService.getAppVersion());
 
-      upgrades
-          .stream()
+      upgrades.stream()
           .filter(upgrade -> upgrade.getFromVersion() >= schemaVersion)
           .forEach(this::runUpgrade);
 

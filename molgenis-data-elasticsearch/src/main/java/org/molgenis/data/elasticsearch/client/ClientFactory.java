@@ -82,8 +82,7 @@ class ClientFactory {
   }
 
   private InetSocketTransportAddress[] createInetTransportAddresses() {
-    return inetAddresses
-        .stream()
+    return inetAddresses.stream()
         .map(InetSocketTransportAddress::new)
         .toArray(InetSocketTransportAddress[]::new);
   }

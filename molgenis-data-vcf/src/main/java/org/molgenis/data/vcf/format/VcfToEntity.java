@@ -380,8 +380,7 @@ public class VcfToEntity {
           List<?> vcfInfoValTokens = (List<?>) vcfInfoVal;
           // TODO Use list data type once available (see http://www.molgenis.org/ticket/2681)
           val =
-              vcfInfoValTokens
-                  .stream()
+              vcfInfoValTokens.stream()
                   .map(
                       vcfInfoValToken -> vcfInfoValToken != null ? vcfInfoValToken.toString() : ".")
                   .collect(joining(","));

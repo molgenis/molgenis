@@ -70,9 +70,7 @@ public class GenomeBrowserService {
         allTracks.putAll(getReferenceTracks(track));
       }
       results =
-          allTracks
-              .values()
-              .stream()
+          allTracks.values().stream()
               .map(GenomeBrowserTrack::toTrackString)
               .collect(Collectors.toList());
     }

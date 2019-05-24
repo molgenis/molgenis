@@ -56,18 +56,14 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry {
 
   @Override
   public boolean hasSystemAttribute(String attrIdentifier) {
-    return systemEntityTypeMap
-        .values()
-        .stream()
+    return systemEntityTypeMap.values().stream()
         .map(systemEntityType -> getSystemAttribute(systemEntityType, attrIdentifier))
         .anyMatch(Objects::nonNull);
   }
 
   @Override
   public Attribute getSystemAttribute(String attrIdentifier) {
-    return systemEntityTypeMap
-        .values()
-        .stream()
+    return systemEntityTypeMap.values().stream()
         .map(
             systemEntityType -> {
               Attribute attribute = getSystemAttribute(systemEntityType, attrIdentifier);

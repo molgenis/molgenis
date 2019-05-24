@@ -88,9 +88,7 @@ public class EntityMapping {
   }
 
   public Stream<String> getMissingTargetAttributeNames() {
-    return attributeMappings
-        .values()
-        .stream()
+    return attributeMappings.values().stream()
         .filter(attributeMapping -> attributeMapping.getAlgorithmState() == MISSING_TARGET)
         .map(AttributeMapping::getTargetAttributeName);
   }

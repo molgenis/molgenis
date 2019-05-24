@@ -110,8 +110,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
   public ExcelSheetWriter createWritable(String entityTypeId, List<String> attributeNames) {
     List<Attribute> attributes =
         attributeNames != null
-            ? attributeNames
-                .stream()
+            ? attributeNames.stream()
                 .map(attrName -> attributeFactory.create().setName(attrName))
                 .collect(Collectors.toList())
             : null;

@@ -379,9 +379,7 @@ public class RestTestUtils {
       String adminToken, String username, Map<String, Permission> permissions) {
     if (adminToken != null) {
       Map<String, String> params =
-          permissions
-              .entrySet()
-              .stream()
+          permissions.entrySet().stream()
               .collect(
                   toMap(
                       entry -> "radio-" + entry.getKey(),
@@ -414,9 +412,7 @@ public class RestTestUtils {
       String adminToken, String username, Map<String, Permission> permissions) {
     if (adminToken != null) {
       Map<String, String> params =
-          permissions
-              .entrySet()
-              .stream()
+          permissions.entrySet().stream()
               .collect(
                   toMap(
                       entry -> "radio-" + entry.getKey(),

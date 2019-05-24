@@ -56,8 +56,7 @@ public class UnitResolverImpl implements UnitResolver {
         // Option 2: Search unit ontology for a match
         OntologyTerm unitOntologyTerm =
             resolveUnitOntologyTerm(
-                tokens
-                    .stream()
+                tokens.stream()
                     .map(this::convertNumberToOntologyTermStyle)
                     .collect(Collectors.toSet()));
 
@@ -122,16 +121,14 @@ public class UnitResolverImpl implements UnitResolver {
   Set<String> tokenize(String... terms) {
     Set<String> tokens = new HashSet<>();
     if (terms != null && terms.length > 0) {
-      Sets.newHashSet(terms)
-          .stream()
+      Sets.newHashSet(terms).stream()
           .filter(StringUtils::isNotBlank)
           .map(StringUtils::lowerCase)
           .map(this::replaceIllegalChars)
           .forEach(
               term ->
                   tokens.addAll(
-                      Sets.newHashSet(term.split("\\s+"))
-                          .stream()
+                      Sets.newHashSet(term.split("\\s+")).stream()
                           .filter(this::notPureNumberExpression)
                           .map(UnitHelper::numberToSuperscript)
                           .collect(Collectors.toSet())));

@@ -61,8 +61,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
             fetch,
             entities ->
                 consumer.accept(
-                    entities
-                        .stream()
+                    entities.stream()
                         .filter(entity -> isActionPermitted(entity, READ))
                         .collect(toList())),
             batchSize);

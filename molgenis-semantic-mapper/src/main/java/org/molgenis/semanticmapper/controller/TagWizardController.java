@@ -109,8 +109,7 @@ public class TagWizardController extends PluginController {
     EntityType emd = dataService.getEntityType(target);
     List<Attribute> attributes = newArrayList(emd.getAttributes());
     Map<String, Multimap<Relation, OntologyTerm>> taggedAttributes =
-        attributes
-            .stream()
+        attributes.stream()
             .collect(
                 toMap((Attribute::getName), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
