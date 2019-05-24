@@ -30,6 +30,7 @@ import org.molgenis.api.permissions.exceptions.MissingUserOrRoleException;
 import org.molgenis.api.permissions.exceptions.PageWithoutPageSizeException;
 import org.molgenis.api.permissions.exceptions.UnsupportedPermissionQueryException;
 import org.molgenis.api.permissions.exceptions.UserAndRoleException;
+import org.molgenis.api.permissions.exceptions.rsql.PermissionQueryParseException;
 import org.molgenis.api.permissions.model.request.DeletePermissionRequest;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
@@ -330,7 +331,7 @@ public class PermissionsController extends ApiController {
             new LinkedHashSet<>(
                 userRoleTools.getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles()));
       } catch (RSQLParserException e) {
-
+        throw new PermissionQueryParseException(e);
       }
     }
     return sids;
