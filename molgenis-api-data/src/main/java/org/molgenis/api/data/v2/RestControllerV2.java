@@ -151,7 +151,9 @@ public class RestControllerV2 {
     this.repoCopier = requireNonNull(repoCopier);
   }
 
+  /** @deprecated replaced with a call to '/api' with method 'OPTIONS' */
   @Autowired
+  @Deprecated
   @GetMapping("/version")
   public Map<String, String> getVersion(
       @Value("${molgenis.version:@null}") String molgenisVersion,

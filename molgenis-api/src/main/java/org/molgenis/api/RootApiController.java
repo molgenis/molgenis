@@ -5,14 +5,16 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.ApiNamespace.API_PATH;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api("Api Root")
 @RestController
 @RequestMapping(API_PATH)
 public class RootApiController extends ApiController {
@@ -29,7 +31,9 @@ public class RootApiController extends ApiController {
     this.molgenisBuildDate = requireNonNull(molgenisBuildDate);
   }
 
-  @Autowired
+  @ApiOperation(
+      value = "Get the current version and build date of the application.",
+      response = VersionResponse.class)
   @RequestMapping(method = OPTIONS)
   public VersionResponse getVersion() throws ParseException {
     Instant date;

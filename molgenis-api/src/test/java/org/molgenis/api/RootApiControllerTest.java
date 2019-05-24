@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @TestPropertySource(properties = {"molgenis.version = 10.3.8"})
 @ContextConfiguration(classes = {GsonConfig.class})
-public class VersionControllerTest extends AbstractTestNGSpringContextTests {
+public class RootApiControllerTest extends AbstractTestNGSpringContextTests {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
