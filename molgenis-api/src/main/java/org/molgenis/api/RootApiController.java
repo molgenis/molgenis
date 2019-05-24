@@ -33,9 +33,9 @@ public class RootApiController extends ApiController {
 
   @ApiOperation(
       value = "Get the current version and build date of the application.",
-      response = VersionResponse.class)
+      response = OptionsResponse.class)
   @RequestMapping(method = OPTIONS)
-  public VersionResponse getVersion() throws ParseException {
+  public OptionsResponse getVersion() throws ParseException {
     Instant date;
     if (molgenisBuildDate.equals("${maven.build.timestamp}")) {
       date = now().toInstant();
@@ -43,6 +43,6 @@ public class RootApiController extends ApiController {
       date = new SimpleDateFormat(VERSION_DATE_FORMAT).parse(molgenisBuildDate).toInstant();
     }
     AppVersionResponse appVersionResponse = AppVersionResponse.create(molgenisVersion, date);
-    return VersionResponse.create(appVersionResponse);
+    return OptionsResponse.create(appVersionResponse);
   }
 }
