@@ -5,7 +5,7 @@
   "dependencies": {
     "@molgenis/app-manager": "0.1.1",
     "@molgenis/core-ui": "0.2.3",
-    "@molgenis/data-row-edit": "2.0.0",
+    "@molgenis/data-row-edit": "2.0.1",
     "@molgenis/menu": "0.1.6",
     "@molgenis/metadata-manager": "0.1.2",
     "@molgenis/navigator": "0.1.1",
@@ -14,6 +14,6 @@
     "@molgenis/scripts": "1.0.1",
     "@molgenis/searchall": "0.1.2",
     "@molgenis/security": "0.1.4",
-    "@molgenis/settings": "1.0.2"
+    "@molgenis/settings": "1.0.3"
   }
 }
