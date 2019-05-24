@@ -355,11 +355,13 @@ public class RestControllerV2 {
   /**
    * Copy an entity.
    *
+   * @deprecated use the navigator in the ui to copy entities.
    * @param entityTypeId name of the entity that will be copied.
    * @param request CopyEntityRequestV2
    * @param response HttpServletResponse
    * @return String name of the new entity
    */
+  @Deprecated
   @Transactional
   @PostMapping(value = "copy/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public String copyEntity(
