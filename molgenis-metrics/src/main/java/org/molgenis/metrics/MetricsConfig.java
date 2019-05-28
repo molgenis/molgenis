@@ -23,8 +23,8 @@ public class MetricsConfig {
   }
 
   @Bean
-  public MeterRegistry meterRegistry() {
-    MeterRegistry result = new PrometheusMeterRegistry(DEFAULT);
+  public PrometheusMeterRegistry meterRegistry() {
+    PrometheusMeterRegistry result = new PrometheusMeterRegistry(DEFAULT);
     binders.forEach(binder -> binder.bindTo(result));
     return result;
   }
