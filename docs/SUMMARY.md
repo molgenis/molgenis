@@ -38,7 +38,7 @@
   * [REST api V1](guide-api-rest.md)
   * [REST api V2](guide-api-rest2.md)
   * [Python client](guide-client-python.md)
-  * [R api](guide-api-r.md)     
+  * [R client](guide-client-r.md)     
   * [Files api](guide-api-files.md)
   * [Upload api](guide-api-import.md)
   * [Beacon](guide-beacon.md)
