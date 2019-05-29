@@ -227,7 +227,7 @@ is used to create computed attributes.
 | myAttr1 | myEntity  | My Attr 1    | date   	 | FALSE	      |             |TRUE		    | FALSE	  | TRUE           |            |
 | myAttr2 | myEntity  | My Attr 2    | int      | FALSE	      |             |TRUE		    | FALSE	  | TRUE           |            |
 | attr1   | newEntity |    Attr 1    | string   | FALSE	      |             |TRUE		    | FALSE	  | TRUE           |            |
-| attr2   | newEntity |    Attr 2    | string   | TRUE 	      |             |TRUE		    | FALSE	  | TRUE           |            |
+| attr2   | newEntity |    Attr 2    | string   | TRUE 	      |             |TRUE		    | FALSE	  | TRUE           |            | 
 
 ##### Template
 
@@ -251,7 +251,7 @@ specified as well (e.g. {{myXrefAttribute.id}}).
 | string1	       | MyEntityType |	string	 |						 |                                                          |
 | computedString | MyEntityType |	string	 |						 | {"template":"{{string0}} and {{string1}}"}             |
 | id	           | MyReference  |	string	 |						 |                                                          |
-| label	         | MyReference  |	string	 |						 |                                                          |
+| label	         | MyReference  |	string	 |						 |                                                          | 
 
 ## Entities options
 ### Required columns
