@@ -158,6 +158,6 @@ We now get information on our organization
 
 Specifications
 --------------
-The complete API schema and methods can be found [on this GitHub page](https://github.com/ga4gh/beacon-team/tree/develop/src/main/resources/avro)
+The complete specification can be found on [ga4gh-beacon/specification](https://github.com/ga4gh-beacon/specification)
 
 Within MOLGENIS we decided on a subset of the API. Due to the dynamic nature of our data, we can not always supply all fields.
