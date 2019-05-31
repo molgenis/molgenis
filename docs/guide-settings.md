@@ -1,4 +1,4 @@
-# Application settings
+# Settings
 There are different items where you can configure settings in MOLGENIS:
 - [Application settings](#application-settings)
 - [Authentication settings](#authentication-settings)
