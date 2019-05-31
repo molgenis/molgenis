@@ -1,8 +1,6 @@
 # Python
 
-::: tip Summary
-MOLGENIS Python API allows access to your MOLGENIS data from python. It is available on every MOLGENIS with version 1.14.0 and up on the URL `http://molgenis.mydomain.example/molgenis.py`.
-:::
+> MOLGENIS Python API allows access to your MOLGENIS data from python. It is available on every MOLGENIS with version 1.14.0 and up on the URL `http://molgenis.mydomain.example/molgenis.py`.
 
 As an example, let's create a plot for publicly available ASE data available on https://molgenis56.target.rug.nl/. For a description of the data, take a look at [http://molgenis.org/ase](http://molgenis.org/ase).
 
