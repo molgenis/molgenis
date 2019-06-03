@@ -2,6 +2,7 @@ package org.molgenis.api.permissions.exceptions.rsql;
 
 import org.molgenis.i18n.BadRequestException;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnsupportedPermissionQueryOperatorException extends BadRequestException {
   private static final String ERROR_CODE = "PRM02";
 
