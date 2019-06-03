@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["security-ui/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 
 <@header css js version/>
@@ -19,8 +19,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/security-ui/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/security-ui/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/security-ui/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/security/dist/css/security-ui/app.css"/>
+
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/security-ui/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/security-ui/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/security-ui/app.js"/>"></script>
 
 <@footer version/>
