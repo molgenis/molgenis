@@ -3,7 +3,7 @@
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
-    <version>7.4.6-SNAPSHOT</version>
+    <version>7.4.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>molgenis-beacon</artifactId>
