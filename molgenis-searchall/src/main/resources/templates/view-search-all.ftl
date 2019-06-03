@@ -20,8 +20,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/searchall/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/searchall/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/searchall/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/searchall/dist/css/searchall/app.css"/>
+
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/searchall/dist/js/searchall/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/searchall/dist/js/searchall/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/searchall/dist/js/searchall/app.js"/>"></script>
 
 <@footer version/>

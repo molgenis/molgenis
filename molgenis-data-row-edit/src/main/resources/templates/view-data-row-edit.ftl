@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["data-row-edit/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 
 <@header css js version/>
@@ -19,8 +19,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/data-row-edit/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/data-row-edit/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/data-row-edit/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/data-row-edit/dist/css/data-row-edit/app.css"/>
+
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/app.js"/>"></script>
 
 <@footer version/>
