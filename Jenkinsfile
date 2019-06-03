@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
-        CHART_VERSION = '0.8.1'
+        CHART_VERSION = '0.12.0'
     }
     stages {
         stage('Retrieve build secrets') {
