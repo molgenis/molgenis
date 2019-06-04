@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.4.8-SNAPSHOT</version>
+    <version>7.4.8</version>
   </parent>
   <artifactId>molgenis-platform-integration-tests</artifactId>
 
