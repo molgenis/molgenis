@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.4.8</version>
+    <version>7.4.9-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-amazon-bucket</artifactId>
   <packaging>jar</packaging>
