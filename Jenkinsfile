@@ -170,7 +170,7 @@ pipeline {
                             }
                         }
                         container('maven') {
-                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
+                            sh "mvn -B release:perform -Darguments=\"-B -DskipTests -Pproduction\""
                             // Can not use DSL here because of bug in Jenkins
                             // The build wants to create a tmp directory in the target/checkout/molgenis-app
                             // This is not permitted
