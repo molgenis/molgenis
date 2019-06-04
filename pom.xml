@@ -587,7 +587,8 @@
           <configuration>
             <serverId>${sonatype.id}</serverId>
             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            <!-- closing the repo in the build fails miserably with a connection reset error -->
+            <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
           </configuration>
         </plugin>
         <plugin>
