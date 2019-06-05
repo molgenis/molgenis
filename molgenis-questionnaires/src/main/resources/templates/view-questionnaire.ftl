@@ -19,10 +19,10 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/questionnaires/dist/css/questionnaires/app.css"/>
+<link rel="stylesheet" href="/@molgenis-ui/questionnaires/dist/css/app.css"/>
 
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/questionnaires/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/questionnaires/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/questionnaires/app.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/questionnaires/dist/js/app.js"/>"></script>
 
 <@footer version/>

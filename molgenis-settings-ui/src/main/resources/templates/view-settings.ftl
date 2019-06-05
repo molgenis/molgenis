@@ -19,10 +19,10 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/settings/dist/css/settings/app.css"/>
+<link rel="stylesheet" href="/@molgenis-ui/settings/dist/css/app.css"/>
 
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/settings/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/settings/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/settings/app.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/settings/dist/js/app.js"/>"></script>
 
 <@footer version/>
