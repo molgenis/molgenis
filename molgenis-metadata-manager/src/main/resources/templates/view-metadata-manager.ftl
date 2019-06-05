@@ -18,10 +18,10 @@
         }
     </script>
 
-    <link rel="stylesheet" href="/@molgenis-ui/metadata-manager/dist/css/metadata-manager/app.css"/>
+    <link rel="stylesheet" href="/@molgenis-ui/metadata-manager/dist/css/app.css"/>
 
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/metadata-manager/manifest.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/metadata-manager/vendor.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/metadata-manager/app.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/manifest.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/vendor.js"/>"></script>
+    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/app.js"/>"></script>
 
 <@footer version/>

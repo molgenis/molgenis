@@ -73,7 +73,7 @@
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
         <#-- Include molgenis-menu css -->
-        <link rel="stylesheet" href="<@resource_href "/@molgenis-ui/menu/dist/js/menu/context.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/@molgenis-ui/menu/dist/js/context.css"/>" type="text/css">
 
     </#if>
 
@@ -119,7 +119,7 @@
 
         <#-- Include the Vue version of the molgenis menu  -->
         <div id="molgenis-site-menu"></div>
-        <script type=text/javascript src="<@resource_href "/@molgenis-ui/menu/dist/js/menu/context.umd.js"/>"></script>
+        <script type=text/javascript src="<@resource_href "/@molgenis-ui/menu/dist/js/context.umd.js"/>"></script>
     </#if>
 
 <#-- Start application content -->

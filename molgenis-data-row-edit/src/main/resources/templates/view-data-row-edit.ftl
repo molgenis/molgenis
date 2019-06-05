@@ -19,10 +19,10 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/data-row-edit/dist/css/data-row-edit/app.css"/>
+<link rel="stylesheet" href="/@molgenis-ui/data-row-edit/dist/css/app.css"/>
 
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/data-row-edit/app.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/@molgenis-ui/data-row-edit/dist/js/app.js"/>"></script>
 
 <@footer version/>
