@@ -9,8 +9,8 @@ MAIL_USER=molgenis
 MAIL_PASSWORD=xxxx
 MINIO_BUCKET_NAME=molgenis
 MINIO_ENDPOINT=http://127.0.0.1:9000
-MINIO_ACCESS_KEY=
-MINIO_SECRET_KEY=
+MINIO_ACCESS_KEY=molgenis
+MINIO_SECRET_KEY=molgenis
 MINIO_REGION=
 
 echo "########################################"
@@ -42,6 +42,7 @@ then
       -e "s|__MINIO_SECRET_KEY__|${MINIO_SECRET_KEY}|" \
       -e "s|__MINIO_REGION__|${MINIO_REGION}|" \
       /usr/local/share/molgenis/templates/molgenis-server.properties > ${MOLGENIS_HOME}/molgenis-server.properties
+      chown molgenis:molgenis ${MOLGENIS_HOME}/molgenis-server.properties
 else
   echo "[INFO] molgenis-server.properties already exists"
 fi
