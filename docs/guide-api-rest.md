@@ -155,7 +155,7 @@ GET http://molgenis.mydomain.example/api/v1/dataset/1
 
 ## Create
 
-By psoting a JSON message that matches the meta data attributes you can add new instances:
+By posting a JSON message that matches the meta data attributes you can add new instances:
 
 *Request*
 ```

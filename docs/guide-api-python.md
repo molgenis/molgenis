@@ -1,8 +1,6 @@
 # Python-api client
 
-::: tip Python client
-The MOLGENIS python client API allows you to retrieve, create, update and delete entities from within python.
-:::
+> The MOLGENIS python client API allows you to retrieve, create, update and delete entities from within python.
 
 You can install the Python REST Client as a package with `pip`:
 ```
@@ -116,13 +114,8 @@ Creates a new instance of an entity (i.e. a new row of the entity data table) an
 Argument    | Description                                          | Required | Default
 ------------|------------------------------------------------------|----------|--------
 `entity`    | Fully qualified name of the entity                   | yes      |
-`files`     | Dictionary containing file attribute values for the  | no       | Empty dictionary
-            | entity row. The dictionary should for each file      |          |
-            | attribute map the attribute name to a tuple          |          |
-            | containing the file name and an input stream.        |          |
-`data`	    | Dictionary mapping attribute name to non-file        | no       | Empty dictionary
-            | attribute value for the entity row, gets merged      |          |
-            | with the kwargs argument                             |          |
+`files`     | Dictionary containing file attribute values for the entity row. The dictionary should for each file attribute map the attribute name to a tuple Containing the file name and an input stream.  | no       | Empty dictionary
+`data`	    | Dictionary mapping attribute name to non-file attribute value for the entity row, gets merged with the kwargs argument       | no       | Empty dictionary 
 `**kwargs`  | Keyword arguments get merged with the data argument  | no       |
 
 **Examples**
@@ -199,11 +192,7 @@ This function uploads a zip file based on the EMX format.
 
 Argument         | Description                                                  | Required | Default
 -----------------|--------------------------------------------------------------|----------|--------
-`meta_data_zip`  | A zip file containing an attribute, entities, packages file  | yes      |
-                 | (tsv/csv) to specify the meta data and optionally data       |          |
-                 | defined in the meta data files                               |          |
-
-
+`meta_data_zip`  | A zip file containing an attribute, entities, packages file (tsv/csv) to specify the meta data and optionally data defined in the meta data files | yes |
 
 ## get_entity_meta_data
 ```python

@@ -81,7 +81,7 @@ If you need some aspiration for a nice home page, you visit either the [ASE webs
 
 ## Entity report
 
-By default, the entity report will be generated using the generic [Freemarker](http://freemarker.incubator.apache.org/docs/index.html) template [`view-entityreport-generic-default.ftl`](https://github.com/molgenis/molgenis/blob/master/molgenis-dataexplorer/src/main/resources/templates/view-entityreport-generic-default.ftl). You can customize this entity report for specific entities by adding Freemarker Templates for those entity. You'll need write permission for the entity `FreemarkerTemplate` to do this.
+By default, the entity report will be generated using the generic [Freemarker](http://freemarker.apache.org/) template [`view-entityreport-generic-default.ftl`](https://github.com/molgenis/molgenis/blob/master/molgenis-dataexplorer/src/main/resources/templates/view-entityreport-generic-default.ftl). You can customize this entity report for specific entities by adding Freemarker Templates for those entity. You'll need write permission for the entity `FreemarkerTemplate` to do this.
 
 1. In the top menu, select the Data Explorer.
 2. In the pulldown, select the entity FreemarkerTemplate

@@ -1,6 +1,6 @@
 # Apps
 
-You can create add-on user interfaces using html+javascript. To be able to host your app inside MOLGENIS, you need to create an archive in a specific format. To get started right away, you can download an [example archive here](data/example-app.zip). Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
+You can create add-on user interfaces using html+javascript. To be able to host your app inside MOLGENIS, you need to create an archive in a specific format. To get started right away, you can download an [example archive here](data/molgenis-app-example.zip). Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
 
 ## Archive structure
 If you downloaded the example archive, you probably noticed that the structure of the archive is pretty straight forward.
@@ -74,8 +74,7 @@ It contains the following parameters
 | version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
 | apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
 | name | string |yes | The name of the app. May not contain '/'
-| includeMenuAndFooter | boolean |yes |
-  If you want MOLGENIS to serve your app with the standard header (with menu and polyfill), and footer, set this value to __true__ |
+| includeMenuAndFooter | boolean |yes | If you want MOLGENIS to serve your app with the standard header (with menu and polyfill), and footer, set this value to __true__ |
 | runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
 ### Example

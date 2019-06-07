@@ -1,4 +1,4 @@
-# File API
+# Files API
 
 The Files API allows you do upload/download files.
 
