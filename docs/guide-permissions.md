@@ -27,7 +27,7 @@ Remember that molgenis_user that we created in the user management section?
 If you go to the users tab and look for molgenis_user, you will find it does not have any permissions yet,
 except for those inherited from the User role.
 Let's change it so that the User role grants the permission to open the Data explorer,
-and the molgenis_user will be able to see the example_data_table data set, which we created in the [upload-guide](guide-upload.md).
+and the molgenis_user will be able to see the example_data_table data set, which we created in the [upload-guide](guide-data-import.md).
 
 ### Setting Role permissions  
 As you open the permission manager, the Roles tab is already selected.

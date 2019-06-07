@@ -1,4 +1,4 @@
-# Navigator
+# Using the navigator
 
 The "Navigator" plugin enables browsing and manipulation of resources (e.g. packages and tables, a.k.a. entity types).
 Resources can be created/edited, moved/copied, uploaded/downloaded and deleted.

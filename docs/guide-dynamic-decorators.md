@@ -1,4 +1,4 @@
-# Decorators
+# Dynamic decorators
 
 MOLGENIS decorators are used to add functionality, like for example security checks, to repository functionality.
 Most of these decorators are applied to all repositories, with the dynamic decorators it is possible to configure for which entity types a decorator should be used.

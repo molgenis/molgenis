@@ -1,9 +1,9 @@
-# Installing apps
+# Apps in MOLGENIS
 
 MOLGENIS provides developers option to create new 'apps', To manage Apps in MOLGENIS you can use the MOLGENIS App manager. It is a tool to upload, search, and manage your apps. With a an easy to use format we want
 to facilitate rapid app development on top of your own data models.
 
-How to create your own MOLGENIS app is described [here](guide-app-development.md)
+How to create your own MOLGENIS app is described [here](guide-development-apps.md)
 
 The following paragraphs will give a brief tutorial on the App manager and its functions.
 
@@ -41,7 +41,7 @@ Lets use the toggle button now to activate our example app.
 
 Activating an app does two things:
 * Set the status of an app to active in the database
-* Add an app to our internal Plugin table, allowing for management via the [Menu manager](guide-customize.md), or setting permissions via the [Permission manager](guide-permission-manager.md#permissions)
+* Add an app to our internal Plugin table, allowing for management via the [Menu manager](guide-customize.md), or setting permissions via the [Permission manager](guide-permissions.md#permissions)
 
 ### Add app to menu and view
 Lets add it to the menu and open the app

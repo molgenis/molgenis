@@ -1,4 +1,4 @@
-# FAIR data point
+# FAIR api
 
 MOLGENIS partly supports the FAIR(Findable, Accessible, Interoperable, and Re-usable) [data principles](https://www.force11.org/group/fairgroup/fairprinciples).
 

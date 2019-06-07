@@ -1,4 +1,4 @@
-# REST v2
+# REST api (v2)
 
 We are expanding and improving the REST api. At its heart is a simplified query syntax called RSQL for collection queries
 For query syntax see [RSQL parser](https://github.com/jirutka/rsql-parser). In addition we simplify the reading of entities.

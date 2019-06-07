@@ -1,4 +1,4 @@
-# EMX model
+# EMX format
 
 The default import format for MOLGENIS is 'EMX'. This is a flexible spreadsheet format (Excel, CSV) that allows you to annotate your data with a data model. This works because you can tell MOLGENIS the 'model' of your data via a special sheet named 'attributes'.
 Optionally, you can also add metadata on entities (i.e., classes, tables), and packages (i.e, models and submodels).

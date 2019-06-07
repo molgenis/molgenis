@@ -1,4 +1,4 @@
-# Develop locally
+# Developing MOLGENIS
 To develop MOLGENIS on you machine we recommend to use IntelliJ as IDE. 
 You need to install the prerequisites as well.
 
@@ -106,4 +106,4 @@ git checkout <tag name: see https://github.com/molgenis/molgenis/releases>
 ```
 
 ## Start MOLGENIS
-We use [IntelliJ](guide-intellij.md) as IDE to run the code in.
+We use [IntelliJ](guide-using-an-ide.md) as IDE to run the code in.

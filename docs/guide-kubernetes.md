@@ -1,4 +1,4 @@
-# Run MOLGENIS on Kubernetes
+# Kubernetes (experimental)
 > note: We are currently moving MOLGENIS to the cloud via Kubernetes. However, **this is NOT production ready**.
 
 There are a few basic concepts you should know before you read this guide.

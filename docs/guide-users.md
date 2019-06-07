@@ -1,4 +1,4 @@
-# User management
+# Users
 
 Prerequisites: [configure mailsettings](guide-settings.md#mail-settings)
 

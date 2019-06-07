@@ -1,10 +1,10 @@
-# Using IntelliJ
+# Using an IDE (Intellij)
 
 A rough guide on how to develop molgenis in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA 2016.1 Ultimate, courteously provided to us by
 JetBrains on an open source license. Most of the time we use the latest IntelliJ version.
 
-**[Deploy backend services](guide-local-compile.md)**
+**[Deploy backend services](guide-development.md)**
 
 ## Set the maven home dir in IntelliJ
 * Open Preferences, Build Execution Deployment, Maven

@@ -128,7 +128,7 @@ After the data is uploaded into MOLGENIS, you can change the permissions for the
 In the permissions view you can do this repeatedely for multiple groups:
 
 1. Select a group: which user group will get these permissions.
-2. Select permission for an entity (table). You can choose between: Edit, View, Count and None. For more information about permissions visit the [fine grained permission guide](guide-permission-manager.md)
+2. Select permission for an entity (table). You can choose between: Edit, View, Count and None. For more information about permissions visit the [fine grained permission guide](guide-permissions.md)
 
 ![Upload file screen](images/upload/result-screen.png?raw=true, "Result")
 

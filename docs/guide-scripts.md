@@ -1,5 +1,4 @@
-# Scripts plugin
-
+# Scripts
 
 Scripts are defined in the Scripts plugin and can be reused, e.g. as part of reports. By default you can find it in the menu under Plugins, Scripts.
 The Scripts plugin allows you to create, edit and delete the available scripts.

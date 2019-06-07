@@ -1,4 +1,4 @@
-# Schedule Jobs
+# Schedule jobs
 
 ## Introduction
 

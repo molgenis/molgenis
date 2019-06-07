@@ -1,4 +1,4 @@
-# Search
+# Using the search-all
 
 Via the "Search all data" plugin it is possible to search for all hits in all data rows, and names and labels of metadata.
 

@@ -1,4 +1,4 @@
-# Groups and Roles
+# Groups and roles
 To understand the security context of MOLGENIS you need to understand the following concepts.
 
 * **Group**
@@ -33,7 +33,7 @@ You can start performing these steps to configure groups in MOLGENIS.
   
 - **Step 2: Add members**
   
-  When you have defined your group, you can add members to the group. Admins can also add new users, for more information see the [user management guide](guide-user-management.md).
+  When you have defined your group, you can add members to the group. Admins can also add new users, for more information see the [user management guide](guide-users.md).
 
 - **Step 3: Add members to groups** 
 
@@ -156,7 +156,7 @@ from the `VIEWER` role.
 2. As the admin, you only want Managers and Editors to use the Navigator. You achieve this by removing the Navigator plugin permission
 from the `VIEWER` role, and giving the `EDITOR` role `VIEW` permission to the Navigator plugin.
 
-*For more information on how to give permissions to roles, read up on the [Permission Manager](guide-permission-manager.md)*
+*For more information on how to give permissions to roles, read up on the [Permission Manager](guide-permissions.md)*
 
 The group roles include each other as well, in the same manner as the default roles. Your group's Manager can see and do 
 everything your group's Editor can, etc. See the following schematic for an overview of how all the roles connect for a group 

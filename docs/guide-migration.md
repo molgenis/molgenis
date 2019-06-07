@@ -1,4 +1,4 @@
-# Migration
+# Migration guide
 
 ## From 7.x to 8.0.x
 There are a few major changes in the migration from 7.x to 8.x.

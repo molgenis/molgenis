@@ -1,4 +1,4 @@
-# Data model editor
+# Modify metadata
 
 The metadata manager can be used to change the metadata of your tables, i.e., create tables (aka entityTypes), add, remove columns (aka attributes).
 ![1](images/metadata-manager/full-edit-overview.png?raw=true)

@@ -4,7 +4,7 @@ MOLGENIS offers a questionnaire module which can present a questionnaire to user
 These questionnaires are defined in our [EMX format](guide-emx.md). Each questionnaire can be filled in once, and generates one row of data in a table used to collect the questionnaires that where submitted.
 
 # Minimal example
-[download](data/simple-questionnaire.xlsx) simple questionnaire example. Import this xlsx file via the standard [import wizard](guide-upload.md)
+[download](data/simple-questionnaire.xlsx) simple questionnaire example. Import this xlsx file via the standard [import wizard](guide-data-import.md)
 
 The above example showcases a very simple questionnaire.
 It asks for your age, and if you are 18 or older the question "Do you have a drivers license" will appear.

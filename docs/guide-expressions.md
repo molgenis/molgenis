@@ -1,4 +1,4 @@
-# Expressions
+# Using expressions
 
 ## Introduction
 For some entity type attributes an expression can be set that determines whether or not a condition is true based on the

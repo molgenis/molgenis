@@ -1,4 +1,4 @@
-# Securing your local development machine
+# Security
 
 When you deploy molgenis to a server, the server's firewall will shield
 the services from unauthorized access.

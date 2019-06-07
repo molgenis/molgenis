@@ -1,4 +1,4 @@
-# RSQL
+# RSQL operators
 
 ## Background
 The MOLGENIS REST query API makes use of RSQL. RSQL is a query language for parametrized filtering of entries in RESTful APIs. It’s based on FIQL (Feed Item Query Language), that was originally specified by Mark Nottingham as a language for querying Atom feeds. However the simplicity of RSQL and its capability to express complex queries in a compact and HTTP URI-friendly way makes it a good candidate for becoming a generic query language for searching REST endpoints.

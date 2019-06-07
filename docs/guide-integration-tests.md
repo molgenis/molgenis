@@ -1,9 +1,9 @@
-# Platform integration tests
+# Running integration tests
 If you've checked out the code and made changes to the platform, you may want to run the
 platform integration tests.
 These are some instructions on how to run the integration tests on your developer machine.
 
-## in Maven
+## In Maven
 To run integration tests in maven, call `mvn clean verify`. By default:
 * The build will expect a standard postgres database server to be running on default port that is accessible for user `molgenis`
 with password `molgenis` and database creation privileges

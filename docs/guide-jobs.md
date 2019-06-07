@@ -1,4 +1,4 @@
-# Creating new job types
+# Jobs
 
 There are two kinds of jobs. **Ordinary jobs** are simple long-running tasks that
 get executed once.

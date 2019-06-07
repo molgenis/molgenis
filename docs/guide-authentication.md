@@ -1,4 +1,4 @@
-# Authentication
+# Setup authentication
 
 In case data is access controlled, you need to authenticate yourself. In MOLGENIS you can sign in using three methods.
  * Username/password sign in

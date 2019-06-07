@@ -1,4 +1,4 @@
-# Explorer
+# Using the dataexplorer
 
 The data explorer allows to select tables (aka EntityType or 'entity') and view, edit, filter and download their contents, assuming you have the right permissions.
 
@@ -82,7 +82,7 @@ You will need:
 2. Create a user; e.g. *Manager*
 3. Assign the user to the group with a manager-role
 4. Login as Manager
-5. Import a data set: "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Upload guide](guide-upload.md).
+5. Import a data set: "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Import guide](guide-data-import.md).
 
 ### Aggregation view
 

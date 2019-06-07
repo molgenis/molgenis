@@ -1,4 +1,4 @@
-# Swagger documentation
+# Swagger specification
 Swagger documentation can be divided into 2 sections:
 
 * REST API

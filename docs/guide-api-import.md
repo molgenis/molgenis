@@ -1,6 +1,6 @@
 # Import API
 
-This API provides programmatic access to the [import wizard](guide-upload.md).
+This API provides programmatic access to the [Import guide](guide-data-import.md).
 
 ## Request
 

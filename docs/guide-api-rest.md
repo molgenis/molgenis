@@ -1,4 +1,4 @@
-# REST v1
+# REST api (v1)
 
 The MOLGENIS REST API allows you to retrieve and modify your data model entities and entity collections. The API supports all CRUD (create, read, update and delete) methods as well as resource collections paging & filtering and resource field expansion. At the moment of writing JSON and form data are supported as request content types and JSON is the only supported response content type.
 

@@ -1,4 +1,4 @@
-# Beacon API
+# Beacon api
 A beacon is a gateway to your data. By creating a beacon and pointing at specific data sets within the MOLGENIS database, you allow
 people to query multiple data sets via one entry point.
 

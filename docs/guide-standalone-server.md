@@ -1,4 +1,4 @@
-# Run MOLGENIS on a standalone server
+# Standalone server (tomcat)
 
 At the moment we support two OS variants.
 
