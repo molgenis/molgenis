@@ -7,6 +7,9 @@ DB_PASSWORD=molgenis
 ADMIN_PASSWORD=
 MAIL_USER=molgenis
 MAIL_PASSWORD=xxxx
+OPENCPU_HOST=opencpu.molgenis.org
+OPENCPU_PORT=443
+OPENCPU_SCHEME=https
 MINIO_BUCKET_NAME=molgenis
 MINIO_ENDPOINT=http://127.0.0.1:9000
 MINIO_ACCESS_KEY=molgenis
@@ -36,6 +39,9 @@ then
       -e "s|__ADMIN_PASSWORD__|${ADMIN_PASSWORD}|" \
       -e "s|__MAIL_USER__|${MAIL_USER}|" \
       -e "s|__MAIL_PASSWORD__|${MAIL_PASSWORD}|" \
+      -e "s|__OPENCPU_HOST__|${OPENCPU_HOST}|" \
+      -e "s|__OPENCPU_PORT__|${OPENCPU_PORT}|" \
+      -e "s|__OPENCPU_SCHEME__|${OPENCPU_SCHEME}|" \
       -e "s|__MINIO_BUCKET_NAME__|${MINIO_BUCKET_NAME}|" \
       -e "s|__MINIO_ENDPOINT__|${MINIO_ENDPOINT}|" \
       -e "s|__MINIO_ACCESS_KEY__|${MINIO_ACCESS_KEY}|" \
