@@ -296,6 +296,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers(PATTERN_CSS)
         .antMatchers(PATTERN_IMG)
         .antMatchers(PATTERN_JS)
+        .antMatchers(PATTERN_MOLGENIS_UI)
         .antMatchers(PATTERN_FONTS);
   }
 
