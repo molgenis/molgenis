@@ -84,6 +84,74 @@ You will need:
 4. Login as Manager
 5. Import a data set: "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Import guide](guide-data-import.md).
 
+###### Override the entity view
+
+Steps:
+
+1. Go to the Data Explorer.
+2. Select the "cities" entity via the entity select dropdown.
+3. The entity view modal is opened when you click on the ![View entity report button](images/reports/view-entityreport-button.png?raw=true, "Entity view") button".
+4. The default view will be: ![View entity report default](images/reports/default-entityreport-view.png?raw=true, "Entity view")
+5. Let's upload our own template.
+   1. Go to the data explorer and select the FreemarkerTemplate entity.
+   2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
+	   * Name: ```view-entityreport-specific-test_cities.ftl```
+	   * Value: ```<div>City name: ${entity.get('cityName')}\</div>"```
+    ![view-Cities-entitiesreport](images/reports/view-entityreport-specific-test_cities.png?raw=true,"view-Cities-entitiesreport")
+6. Repeat steps 2 and 3.
+7. The new view will be: ![View entity report custom](images/reports/custom-entityreport-view.png?raw=true, "Entity view")
+
+###### Add an instances view tab
+1. Go to the data explorer and select the "cities" entity through the entity select dropdown.
+2. Let's upload our own template.
+	1. Go to the data explorer and select the FreemarkerTemplate entity.
+	2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
+
+Name: ```view-Cities-entitiesreport.ftl```
+
+Value:
+
+```html
+<link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css"/>
+
+<div id="map" style="width: 600px; height: 400px"></div>
+
+<script>
+    function showMap() {
+        var map = L.map('map').setView([38, -80], 4);
+
+        L.tileLayer('//api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
+            id: 'mapbox.streets'
+        }).addTo(map);
+
+    <#list datasetRepository.iterator() as city>
+        L.marker([${city.get("lat")},${city.get("lng")}]).addTo(map)
+                .bindPopup("${city.get("cityName")}").openPopup();
+    </#list>
+    }
+    $.getScript("//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js", showMap);
+</script>
+```
+
+![view-Cities-entitiesreport](images/reports/view-Cities-entitiesreport.png?raw=true, "view-Cities-entitiesreport")
+
+
+3. Click on the settings icon ![Settings](images/settings.png?raw=true, "Settings")
+	1. Check: Modules -> Data -> Reports -> ```Yes```
+	2. Set: Reports -> Reports -> ```test_cities:Cities```
+	   * test_citites is the entity name.
+	   * Cities is the template name.
+
+	![Entities report settings](images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
+4. Refresh the page and repeat step 1.
+5. The result:![Custom entities report](images/reports/custom-entities-report.png?raw=true, "Custom entities report")
+
+
 ### Aggregation view
 
 The aggregation module allows you to produce aggregated counts for queries on the data.
@@ -153,7 +221,9 @@ More information on the "featureInfoPlugin" functionallity can be found [here](h
 
 ** **
 
-### Example data for genome browser
+### Try it out
+
+#### Example - data for genome browser
 
 Upload the [vcf_example_file](data/Documentation_VCF.vcf "VCF example file") using the importer.
 Let's select an entity containing genomic variants, by selecting the entity name you just chose for the upload in the entity select.
@@ -174,7 +244,7 @@ Click the symbol in front of the "SAMPLES" column header to show the columns bel
 
 Click the magnifying glass in front of the data line, to show a report for that line. The default report just shows all attribute values in a structured way. However, as stated above, all kinds of reports can be added at runtime.
 
-## Example data
+#### Example - with data from Excel
 Upload [emx_example_file](data/Documentation_EMX.xlsx "EMX example file") through the importer.
 Navigate to the data explorer and select the aggregates tab. Select the just uploaded "biobanks" entity.
 
@@ -187,69 +257,3 @@ You now get a table representing the amount of samples in both biobanks per type
 Finally, select "patientid" in the third dropdown, the distinct attribute.
 The table will update to show you how many patients with at least one sample of a specific type are available in a biobank.
 
-###### Override the entity view
-
-Steps:
-
-1. Go to the Data Explorer.
-2. Select the "cities" entity via the entity select dropdown.
-3. The entity view modal is opened when you click on the ![View entity report button](images/reports/view-entityreport-button.png?raw=true, "Entity view") button".
-4. The default view will be: ![View entity report default](images/reports/default-entityreport-view.png?raw=true, "Entity view")
-5. Let's upload our own template.
-   1. Go to the data explorer and select the FreemarkerTemplate entity.
-   2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
-	   * Name: ```view-entityreport-specific-test_cities.ftl```
-	   * Value: ```<div>City name: ${entity.get('cityName')}\</div>"```
-    ![view-Cities-entitiesreport](images/reports/view-entityreport-specific-test_cities.png?raw=true,"view-Cities-entitiesreport")
-6. Repeat steps 2 and 3.
-7. The new view will be: ![View entity report custom](images/reports/custom-entityreport-view.png?raw=true, "Entity view")
-
-###### Add an instances view tab
-1. Go to the data explorer and select the "cities" entity through the entity select dropdown.
-2. Let's upload our own template.
-	1. Go to the data explorer and select the FreemarkerTemplate entity.
-	2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
-
-Name: ```view-Cities-entitiesreport.ftl```
-
-Value:
-
-```html
-<link rel="stylesheet"
-      href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css"/>
-
-<div id="map" style="width: 600px; height: 400px"></div>
-
-<script>
-    function showMap() {
-        var map = L.map('map').setView([38, -80], 4);
-
-        L.tileLayer('//api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
-            id: 'mapbox.streets'
-        }).addTo(map);
-
-    <#list datasetRepository.iterator() as city>
-        L.marker([${city.get("lat")},${city.get("lng")}]).addTo(map)
-                .bindPopup("${city.get("cityName")}").openPopup();
-    </#list>
-    }
-    $.getScript("//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js", showMap);
-</script>
-```
-
-![view-Cities-entitiesreport](images/reports/view-Cities-entitiesreport.png?raw=true, "view-Cities-entitiesreport")
-
-
-3. Click on the settings icon ![Settings](images/settings.png?raw=true, "Settings")
-	1. Check: Modules -> Data -> Reports -> ```Yes```
-	2. Set: Reports -> Reports -> ```test_cities:Cities```
-	   * test_citites is the entity name.
-	   * Cities is the template name.
-
-	![Entities report settings](images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
-4. Refresh the page and repeat step 1.
-5. The result:![Custom entities report](images/reports/custom-entities-report.png?raw=true, "Custom entities report")

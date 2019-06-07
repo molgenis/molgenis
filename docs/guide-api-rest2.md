@@ -24,7 +24,14 @@ POST http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>?_method=G
 attrs=attr0(subattr0,subattr1),attr1(*)
 ```
 
-## Query
+## Delete
+
+*Request*
+```
+DELETE http://molgenis.mydomain.example/api/v2/<entity_name>/<entity_id>
+```
+
+# Query
 
 We use the [RSQL](https://github.com/jirutka/rsql-parser) HTTP/URL based query language:
 

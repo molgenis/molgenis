@@ -35,7 +35,7 @@ You have to fill in the verification code in de box below the QR-code. If you ha
 
 ![two-factor authentication recoverycodes](images/molgenis_two-factor-authentication_recoverycodes.png?raw=true, "two-factor authentication recoverycodes")
 
-Make sure you store the recovery codes somewhere (not in MOLGENIS) so you can access them when you for example lose your phone (see [TROUBLESHOOTING](#TROUBLESHOOTING)).
+Make sure you store the recovery codes somewhere (not in MOLGENIS) so you can access them when you for example lose your phone.
 Each time you sign in, you will have to enter the verification code.
 
 ![two-factor authentication configured](images/molgenis_two-factor-authentication_configured.png?raw=true, "two-factor authentication configured")
