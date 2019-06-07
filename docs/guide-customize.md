@@ -158,7 +158,7 @@ When clicking the copy button, the URL is copied to your clipboard. You can past
 ### Accessing entity details from Freemarker
 The model will contain
  * a variable named `entity` of type [`org.molgenis.data.Entity`](https://github.com/molgenis/molgenis/blob/master/molgenis-data/src/main/java/org/molgenis/data/Entity.java)
- * a variable named `entityMetadata` of type [`org.molgenis.data.EntityMetaData`](https://github.com/molgenis/molgenis/blob/master/molgenis-data/src/main/java/org/molgenis/data/EntityMetaData.java)
+ * a variable named `entityTypeMetadata` of type [`org.molgenis.data.meta.model.EntityTypeMetaData`](https://github.com/molgenis/molgenis/blob/master/molgenis-data/src/main/java/org/molgenis/data/meta/model/EntityTypeMetadata.java)
 which you can use to specify the contents of your template.
 
 * To display the value of one of the entity's attributes value, use `${entity.getString("<the attribute name>")}`.

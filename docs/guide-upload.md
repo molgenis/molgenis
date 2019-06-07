@@ -49,7 +49,7 @@ Regarding CSV: The number of values on a row must match the number of column hea
 # Import overview
 The upload module is the place in MOLGENIS where you can upload your data into the MOLGENIS application. If you have the permissions, you will see the upload menu item.
 
-![Upload menu item](images/upload/upload-menu-item.png, "upload menu item")
+![Upload menu item](images/upload/upload-menu-item.png?raw=true, "upload menu item")
 
 The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)) example file.
 
@@ -93,12 +93,12 @@ Data options:
 * Add entities / update existing: Importer adds new entities or updates existing entities.
 * Update entities: Importer updates existing entities or fails if entity does not exist.
 
-![Upload file screen](images/upload/options-screen.png, "Options")
+![Upload file screen](images/upload/options-screen.png?raw=true, "Options")
 
 ### Choose packages
 If some Entity types do not yet have a package specified, you must choose where you want to create them.
 
-![Upload file screen](images/upload/packages-screen.png, "Packages")
+![Upload file screen](images/upload/packages-screen.png?raw=true, "Packages")
 
 ### Check validation
 
@@ -117,7 +117,7 @@ When you see this page the validation is already done. This page validates the s
 * Available: Are there fields in the meta data that are optionel and were not found in the entity?
 * Unknown: Are there fields defined in the entity that were undefined in the meta data?
 
-![Upload file screen](images/upload/validation-screen.png, "Validation")
+![Upload file screen](images/upload/validation-screen.png?raw=true, "Validation")
 
 ### Review results
 

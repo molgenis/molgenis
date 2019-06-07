@@ -136,9 +136,6 @@ will get written to `HelloWorldJobExcution.setDelay()`.
 For scheduled jobs, the value of the `user` property of the JobExecution will get set automatically to the user who created
 the `ScheduledJob`.
 
-#### Complete code
-Check out [the complete Hello World job example](https://github.com/molgenis/molgenis/tree/master/molgenis-jobs/src/test/java/org/molgenis/data/jobs/model/hello).
-
 ### A bit more about the Progress interface
 Use the `Progress` interface to log the progress of the job execution.
 

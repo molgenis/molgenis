@@ -1,6 +1,6 @@
 # Apps
 
-You can create add-on user interfaces using html+javascript. To be able to host your app inside MOLGENIS, you need to create an archive in a specific format. To get started right away, you can download an [example archive here](../data/example-app.zip). Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
+You can create add-on user interfaces using html+javascript. To be able to host your app inside MOLGENIS, you need to create an archive in a specific format. To get started right away, you can download an [example archive here](data/example-app.zip). Following paragraphs will explain in detail how to construct and configure your resources to make it a certified MOLGENIS app.
 
 ## Archive structure
 If you downloaded the example archive, you probably noticed that the structure of the archive is pretty straight forward.
