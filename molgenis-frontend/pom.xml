@@ -16,7 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <registry.url>https://registry.molgenis.org/repository/npm-group/</registry.url>
+    <registry.url>https://registry.npmjs.org/</registry.url>
 
     <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
 
@@ -78,6 +78,9 @@
             <phase>generate-resources</phase>
             <configuration>
               <arguments>install --no-lockfile</arguments>
+              <environmentVariables>
+                <npm_config_registry>${registry.url}</npm_config_registry>
+              </environmentVariables>
             </configuration>
           </execution>
         </executions>
