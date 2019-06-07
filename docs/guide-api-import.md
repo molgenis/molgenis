@@ -1,4 +1,4 @@
-# Import API
+# Import api
 
 This API provides programmatic access to the [Import guide](guide-data-import.md).
 
