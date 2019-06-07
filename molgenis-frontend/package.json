@@ -3,17 +3,17 @@
   "private": true,
   "license": "LGPL-3.0",
   "dependencies": {
-    "@molgenis/app-manager": "0.1.1",
-    "@molgenis/core-ui": "0.2.3",
-    "@molgenis/data-row-edit": "2.0.1",
-    "@molgenis/menu": "0.1.6",
-    "@molgenis/metadata-manager": "0.1.2",
-    "@molgenis/navigator": "0.1.1",
-    "@molgenis/one-click-importer": "0.1.2",
-    "@molgenis/questionnaires": "1.0.0",
-    "@molgenis/scripts": "1.0.1",
-    "@molgenis/searchall": "0.1.2",
-    "@molgenis/security": "0.1.4",
-    "@molgenis/settings": "1.0.3"
+    "@molgenis-ui/app-manager": "0.1.2",
+    "@molgenis-ui/core-ui": "0.3.0",
+    "@molgenis-ui/data-row-edit": "3.0.0",
+    "@molgenis-ui/menu": "0.1.7",
+    "@molgenis-ui/metadata-manager": "0.1.3",
+    "@molgenis-ui/navigator": "0.1.2",
+    "@molgenis-ui/one-click-importer": "0.1.3",
+    "@molgenis-ui/questionnaires": "2.0.0",
+    "@molgenis-ui/scripts": "2.0.0",
+    "@molgenis-ui/searchall": "0.1.3",
+    "@molgenis-ui/security": "0.1.5",
+    "@molgenis-ui/settings": "2.0.0"
   }
 }

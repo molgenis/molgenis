@@ -26,45 +26,31 @@
   </properties>
 
   <build>
-    <resources>
-      <resource>
-        <directory>node_modules/@molgenis/app-manager/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/core-ui/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/data-row-edit/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/menu/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/metadata-manager/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/navigator/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/one-click-importer/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/questionnaires/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/searchall/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/security/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/settings/dist</directory>
-      </resource>
-      <resource>
-        <directory>node_modules/@molgenis/scripts/dist</directory>
-      </resource>
-    </resources>
     <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>node_modules</directory>
+                  <includes>
+                    <include>@molgenis-ui/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
@@ -92,9 +78,6 @@
             <phase>generate-resources</phase>
             <configuration>
               <arguments>install --no-lockfile</arguments>
-              <environmentVariables>
-                <npm_config_registry>${registry.url}</npm_config_registry>
-              </environmentVariables>
             </configuration>
           </execution>
         </executions>
