@@ -20,7 +20,7 @@
 * Access control
   * [Users](guide-users.md)
   * [Groups and roles](guide-groups-roles.md)
-  * [Permissions](guide-permissions.md)
+  * [Finegrained permissions](guide-permissions.md)
 * Data processing
   * [Scripts](guide-scripts.md)
   * [R](guide-r.md)
