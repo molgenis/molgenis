@@ -1,4 +1,4 @@
-# Questionnaire
+# Questionnaires
 
 MOLGENIS offers a questionnaire module which can present a questionnaire to users.
 These questionnaires are defined in our [EMX format](guide-emx.md). Each questionnaire can be filled in once, and generates one row of data in a table used to collect the questionnaires that where submitted.
