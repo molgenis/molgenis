@@ -1,4 +1,4 @@
-## Download data
+## Downloading data
 
 To enable batch downloads from the commandline, MOLGENIS provides a EMX download tool.
 The tool can be downloaded from [here](https://github.com/molgenis/molgenis-EMX-downloader/releases).
