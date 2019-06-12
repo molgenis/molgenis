@@ -1,4 +1,4 @@
-# Create themes
+# Creating themes
 
 Molgenis allows for many customizations. One of them is uploading your own bootstrap themes.
 
