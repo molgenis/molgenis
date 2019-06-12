@@ -25,7 +25,7 @@
   * [Scripts](guide-scripts.md)
   * [R](guide-r.md)
   * [Python](guide-python.md)
-  * [Job schedule](guide-schedule.md)
+  * [Schedule jobs](guide-schedule.md)
 * Configuration
   * [Settings](guide-settings.md)
   * [Customize MOLGENIS](guide-customize.md)
