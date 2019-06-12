@@ -38,13 +38,16 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/</outputDirectory>
+              <outputDirectory>${project.build.directory}/generated-resources/</outputDirectory>
               <resources>
                 <resource>
                   <directory>node_modules</directory>
                   <includes>
                     <include>@molgenis-ui/**</include>
                   </includes>
+                  <excludes>
+                    <exclude>**/node_modules/**</exclude>
+                  </excludes>
                 </resource>
               </resources>
             </configuration>
