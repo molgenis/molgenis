@@ -20,8 +20,8 @@
 
     <link rel="stylesheet" href="/@molgenis-ui/metadata-manager/dist/css/app.css"/>
 
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/manifest.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/vendor.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/@molgenis-ui/metadata-manager/dist/js/app.js"/>"></script>
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/manifest.js"></script>
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/vendor.js"></script>
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/app.js"></script>
 
 <@footer version/>

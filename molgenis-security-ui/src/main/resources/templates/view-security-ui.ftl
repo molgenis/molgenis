@@ -21,8 +21,8 @@
 
 <link rel="stylesheet" href="/@molgenis-ui/security/dist/css/app.css"/>
 
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/@molgenis-ui/security/dist/js/app.js"/>"></script>
+<script type=text/javascript src=/@molgenis-ui/security/dist/js/manifest.js"></script>
+<script type=text/javascript src="/@molgenis-ui/security/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/security/dist/js/app.js"></script>
 
 <@footer version/>
