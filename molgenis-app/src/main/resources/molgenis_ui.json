@@ -108,7 +108,7 @@
       "type": "menu",
       "id": "admin",
       "label": "Admin",
-      "items": [SecurityUtilsTest,
+      "items": [
         {
           "type": "plugin",
           "id": "logmanager",
