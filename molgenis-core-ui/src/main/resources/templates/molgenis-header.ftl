@@ -25,9 +25,9 @@
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <script src="<@resource_href "/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"/>"></script>
-        <script src="<@resource_href "/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"/>"></script>
-        <script src="<@resource_href "/@molgenis-ui/core-ui/dist/js/dist/molgenis-global-ui.js"/>"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global-ui.js"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
