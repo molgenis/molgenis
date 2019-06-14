@@ -65,6 +65,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -91,7 +92,7 @@ import org.springframework.web.servlet.LocaleResolver;
 @Import(DataServiceClientRegistrationRepository.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
+  public static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
   private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
 
   @Autowired private DataService dataService;
@@ -168,6 +169,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     http.authenticationProvider(twoFactorAuthenticationProvider());
     http.authenticationProvider(recoveryAuthenticationProvider());
 
+    http.addFilterAfter(
+        oAuth2AuthenticationProcessingFilter(), TwoFactorAuthenticationFilter.class);
+
     ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
         expressionInterceptUrlRegistry = http.authorizeRequests();
     configureUrlAuthorization(expressionInterceptUrlRegistry);
@@ -206,6 +210,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers("/app-ui-context/**")
         .permitAll()
         .antMatchers("/api/**")
+        .permitAll()
+        .antMatchers("/oauth/**")
         .permitAll()
         .antMatchers("/webjars/**")
         .permitAll()
@@ -272,6 +278,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Bean
+  public OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter()
+      throws Exception {
+    OAuth2AuthenticationProcessingFilter oAuth2AuthenticationProcessingFilter =
+        new OAuth2AuthenticationProcessingFilter();
+    oAuth2AuthenticationProcessingFilter.setAuthenticationManager(authenticationManager());
+    return oAuth2AuthenticationProcessingFilter;
+  }
+
+  @Bean
   public AuthenticationEntryPoint delegatingEntryPoint() {
     AuthenticationEntryPoint pluginEntryPoint =
         new LoginUrlAuthenticationEntryPoint(MolgenisLoginController.URI);
@@ -287,7 +302,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Override
-  public void configure(WebSecurity web) throws Exception {
+  public void configure(WebSecurity web) {
     web.ignoring()
         .antMatchers(PATTERN_CSS)
         .antMatchers(PATTERN_IMG)
