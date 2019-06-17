@@ -3,7 +3,11 @@
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
+<<<<<<< HEAD
     <version>8.2.0-SNAPSHOT</version>
+=======
+    <version>8.0.6-SNAPSHOT</version>
+>>>>>>> d0f739f88cc691a18df340cdb7c3fc86e533d4d8
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

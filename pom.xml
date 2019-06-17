@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>8.2.0-SNAPSHOT</version>
+  <version>8.0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -510,7 +510,6 @@
           <configuration>
             <serverId>${sonatype.id}</serverId>
             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
           </configuration>
         </plugin>
         <plugin>
