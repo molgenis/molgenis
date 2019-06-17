@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Data API v3 test</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+          integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+          crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+          integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    api = {
+      get: function (entityTypeId, options) {
+        let url = 'http://localhost:8080/api/entity/' + entityTypeId
+        let params = []
+        if(options.filter.length > 0) {
+          params.push('filter=' + options.filter.join(','))
+        }
+        if(options.expand.length > 0) {
+          params.push('expand=' + options.expand.join(','))
+        }
+        if (options.number) {
+          params.push('number=' + options.number)
+        }
+        if (options.size) {
+          params.push('size=' + options.size)
+        }
+        if (options.sort) {
+          params.push('sort=' + options.sort)
+        }
+        if (options.query) {
+          params.push('q=' + options.query)
+        }
+        let query = params.join('&')
+        if (query.length > 0) {
+          url += '?' + query
+        }
+        return fetch(url, {headers: {'x-molgenis-token': 'admin'}})
+      }
+    }
+  </script>
+  <style>
+    .custom-select {
+      margin-bottom: 1rem
+    }
+    select {
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Entity API V3 demo</h1>
+  <div id="app">
+    <entities-table></entities-table>
+  </div>
+</div>
+</body>
+<script>
+  Vue.component('entities-table', {
+    data: function () {
+      return {
+        metadata: {id: 'string', label: 'string', description: 'string', parent: 'xref', children: 'mref'},
+        sizeOptions: [5, 10, 20, 40],
+        data: null,
+        number: 0,
+        size: 5,
+        sort: null,
+        filter: ['id', 'label', 'description'],
+        expand: [],
+        query: null,
+        url: null
+      }
+    },
+    watch: {
+      number: function () {
+        this.onPageChange()
+      },
+      size: function () {
+        this.number = 0
+        this.onPageChange()
+      },
+      sort: function () {
+        this.onPageChange()
+      },
+      filter: function () {
+        this.expand = []
+        for(let id of this.filter) {
+          switch(this.metadata[id]) {
+            case 'mref':
+            case 'xref':
+              this.expand.push(id)
+              break
+          }
+        }
+        this.onPageChange()
+      },
+      query: function () {
+        this.onPageChange()
+      }
+    },
+    created: function () {
+      this.onPageChange()
+    },
+    methods: {
+      onPageChange: function () {
+        const self = this
+        api.get('sys_md_Package', {number: this.number, size: this.size, sort: this.sort, filter: this.filter, expand: this.expand, query: this.query}).then(
+          function (response) {
+            response.json().then(function (data) {
+              self.url = response.url
+              self.data = data
+            })
+          }
+        )
+      }
+    },
+    template: `
+        <div v-if="data">
+          <div class="alert alert-info" role="alert">
+            <span>GET {{ url }}</span>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <p>Search:</p>
+              <input v-model="query" type="search" class="form-control">
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-3">
+              <p>Attributes:</p>
+              <select multiple v-model="filter" class="custom-select" :size="Object.keys(metadata).length">
+                <option v-for="(value, key) in metadata">{{ key }}</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <p>Expand:</p>
+              <select multiple disabled v-model="expand" class="custom-select" :size="Object.keys(metadata).length">
+                <option v-for="(value, key) in metadata" v-if="metadata[key] === 'xref' || metadata[key] === 'mref'">{{ key }}</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <p>Sort by:</p>
+              <select v-model="sort" class="custom-select" :size="filter.length * 2">
+                  <option v-for="item in filter" :value="'+' + item">{{ item }} (ascending)</option>
+                  <option v-for="item in filter" :value="'-' + item">{{ item }} (descending)</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <p>Results per page:</p>
+              <select v-model="size" class="custom-select" :size="sizeOptions.length">
+                <option v-for="i in sizeOptions">{{ i }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col">
+              <nav>
+                <ul class="pagination justify-content-center">
+                  <li :class="{'page-item': true, 'disabled': number === 0}"><a class="page-link" href="#" @click="number -= 1">Previous</a></li>
+                  <li v-for="i in data.page.totalPages" :class="{'page-item': true, 'active': number === i - 1}"><a class="page-link" href="#" @click="number = i - 1">{{ i }}</a></li>
+                  <li :class="{'page-item': true, 'disabled': number === (data.page.totalPages - 1)}"><a class="page-link" href="#" @click="number += 1">Next</a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+          <table class="table table-striped table-sm mt-2">
+            <thead>
+              <th v-for="header in filter">{{ header }}</th>
+            </thead>
+            <tbody>
+              <tr v-for="item in data.items">
+                <td v-for="header in filter">{{ metadata[header] === 'xref' ? (item.data[header] ? item.data[header].data.id : '') : (metadata[header] === 'mref' ? (item.data[header].items.map(item => item.data.id).join(', ')) : item.data[header]) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="font-italic text-right">{{ data.page.totalElements }} results</p>
+        </div>`
+  })
+
+  var app = new Vue({
+    el: '#app'
+  })
+</script>
+</html> 
