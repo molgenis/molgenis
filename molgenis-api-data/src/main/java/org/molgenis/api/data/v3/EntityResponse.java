@@ -14,10 +14,10 @@ public abstract class EntityResponse {
 
   @Nullable
   @CheckForNull
-  public abstract Map<String, Object> getItem();
+  public abstract Map<String, Object> getData();
 
-  public static EntityResponse create(LinksResponse newLinks, Map<String, Object> newItem) {
-    return builder().setLinks(newLinks).setItem(newItem).build();
+  public static EntityResponse create(LinksResponse newLinks, Map<String, Object> newData) {
+    return builder().setLinks(newLinks).setData(newData).build();
   }
 
   public static Builder builder() {
@@ -29,7 +29,7 @@ public abstract class EntityResponse {
 
     public abstract Builder setLinks(LinksResponse newLinks);
 
-    public abstract Builder setItem(Map<String, Object> newItem);
+    public abstract Builder setData(Map<String, Object> newData);
 
     public abstract EntityResponse build();
   }

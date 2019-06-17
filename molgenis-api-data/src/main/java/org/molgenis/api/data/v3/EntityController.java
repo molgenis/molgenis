@@ -197,7 +197,7 @@ class EntityController extends ApiController {
 
     return EntityResponse.builder()
         .setLinks(LinksResponse.create(null, uri, null))
-        .setItem(entityData)
+        .setData(entityData)
         .build();
   }
 

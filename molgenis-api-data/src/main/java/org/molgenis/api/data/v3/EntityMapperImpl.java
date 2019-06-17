@@ -31,7 +31,7 @@ public class EntityMapperImpl implements EntityMapper {
 
     if (filter.hasItems()) {
       Map<String, Object> data = createEntityResponseData(entity, filter, expand);
-      builder.setItem(data);
+      builder.setData(data);
     }
 
     URI uri = createEntityResponseUri(entity);
