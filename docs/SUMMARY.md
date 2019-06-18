@@ -50,6 +50,7 @@
   * [Developing Apps in MOLGENIS](guide-development-apps.md)
   * [Using an IDE (Intellij)](guide-using-an-ide.md)
   * [Technologies](guide-technologies.md)
+  * [Architecture](guide-architecture.md)
   * [Dynamic decorators](guide-dynamic-decorators.md)
   * [Running the integration tests](guide-integration-tests.md)
   * [Jobs](guide-jobs.md)
