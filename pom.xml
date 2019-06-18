@@ -539,6 +539,9 @@
         <groupId>com.coveo</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
         <version>${fmt-maven-plugin.version}</version>
+        <configuration>
+          <verbose>true</verbose>
+        </configuration>
         <executions>
           <execution>
             <goals>
