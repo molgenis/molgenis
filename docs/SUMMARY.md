@@ -1,75 +1,72 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Release Notes](https://github.com/molgenis/molgenis/releases)
-* [Try out MOLGENIS](try_out_molgenis/guide-try-out-molgenis.md)
-* Run MOLGENIS
-  * [Quick start \(docker\)](install_molgenis/guide-docker.md)
-  * [Run MOLGENIS compiling the code](install_molgenis/guide-local-compile.md)
-  * Run MOLGENIS in production
-    * [Kubernetes \(experimental\)](install_molgenis/guide-kubernetes.md)
-    * [Standalone server \(tomcat\)](install_molgenis/guide-standalone-server.md)
-  * Migrate MOLGENIS
-    * [Migration guide](migrate_molgenis/guide-migration.md)
-* User Documentation
-  * Data
-    * Import data
-      * [Quick data upload](user_documentation/import-data/guide-quick-upload.md)
-      * [Advanced data upload](user_documentation/import-data/guide-upload.md)
-        * [EMX format](user_documentation/import-data/ref-emx.md)
-        * [Localization](user_documentation/import-data/guide-l10n.md)
-    * Finding data
-      * [Using Navigator](user_documentation/finding-data/guide-navigator.md)
-      * [Using search-all](user_documentation/finding-data/guide-search.md)
-      * [Using dataexplorer](user_documentation/finding-data/guide-explore.md)
-    * Modify data
-      * [Using expressions](user_documentation/modify-data/ref-expressions.md)
-      * [Modify metadata](user_documentation/modify-data/guide-metadata-manager.md)
-      * [SORTA](user_documentation/modify-data/guide-SORTA.md)
-    * [Downloading data](user_documentation/modify-data/guide-emx-download.md)
-    * [Scheduled Jobs](user_documentation/modify-data/guide-schedule.md)
-  * [Sysadmin features](user_documentation/sysadmin-features.md)
-    * Security
-      * [Users](user_documentation/admin-features/security/guide-user-management.md)
-      * [Groups and Roles](user_documentation/admin-features/security/guide-groups-roles.md)
-      * [Permissions](user_documentation/admin-features/security/guide-permission-manager.md)
-      * [Authentication](user_documentation/admin-features/security/guide-authentication.md)
-    * [Settings](user_documentation/admin-features/guide-settings.md)
-    * [Customize MOLGENIS](user_documentation/admin-features/guide-customize.md)
-    * [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)
-  * Catalogues
-    * [Biobanking](user_documentation/catalogues/biobanking.md)
-      * [Biobank Directory](user_documentation/catalogues/biobank-directory.md)
-  * [Questionnaires](user_documentation/guide-questionnaire.md)
-  * [Scripts](user_documentation/scripts/guide-scripts.md)
-    * [R](user_documentation/scripts/guide-R.md)
-    * [Python](user_documentation/scripts/guide-python.md)
-* Developer documentation
-  * [Architecture](developer_documentation/architecture.md)
-  * [Technologies](developer_documentation/technologies.md)
-  * API
-    * [REST](developer_documentation/guide-rest.md)
-      * [Files api](developer_documentation/ref-api-files.md)
-      * [Permissions api](developer_documentation/ref-permissions-api.md)
-      * [REST api V1](developer_documentation/ref-rest.md)
-      * [REST api V2](developer_documentation/ref-rest2.md)
-      * [RSQL operators](developer_documentation/ref-RSQL.md)
-      * [Swagger specification](developer_documentation/ref-swagger.md)
-    * [R](developer_documentation/ref-R.md)
-    * [Python](developer_documentation/ref-python.md)
-    * [FAIR](developer_documentation/guide-fair.md)
-  * IDE
-    * [IntelliJ](developer_documentation/intellij.md)
-  * Frontend
-    * [App development](developer_documentation/app-development.md)
-    * [Frontend development](developer_documentation/frontend-development.md)
-    * [Creating bootstrap themes](developer_documentation/creating-themes.md)
-  * Backend  
-    * [Security](developer_documentation/security.md)
-    * [Data Backend](developer_documentation/backend.md)
-    * [Services](developer_documentation/service.md)
-    * [Jobs](developer_documentation/jobs.md)
-    * [Dynamic Decorators](developer_documentation/dynamic-decorators.md)
-  * Testing
-    * [Running the integration tests](developer_documentation/integration-tests.md)
+  * [What is MOLGENIS](README.md)
+  * [Try out MOLGENIS](guide-try-out-molgenis.md)
+  * [Quick start \(docker\)](guide-docker.md)
+* Find, view, query
+  * [Using the navigator](guide-navigator.md)
+  * [Using the search-all](guide-search.md)
+  * [Using the dataexplorer](guide-explore.md)
+  * [Setup authentication](guide-authentication.md)
+* Data management
+  * [EMX format](guide-emx.md)
+  * [Quickly import data](guide-data-quick-import.md)
+  * [Advanced data import](guide-data-import.md)
+  * [Modify metadata](guide-data-metadata.md)
+  * [Questionnaires](guide-questionnaire.md)
+  * [Downloading data](guide-data-download.md)
+  * [Using expressions](guide-expressions.md)
+* Access control
+  * [Users](guide-users.md)
+  * [Groups and roles](guide-groups-roles.md)
+  * [Finegrained permissions](guide-permissions.md)
+* Data processing
+  * [Scripts](guide-scripts.md)
+  * [R](guide-r.md)
+  * [Python](guide-python.md)
+  * [Schedule jobs](guide-schedule.md)
+* Configuration
+  * [Settings](guide-settings.md)
+  * [Customize MOLGENIS](guide-customize.md)
+  * [Localization](guide-l10n.md)
+  * [Apps in MOLGENIS](guide-app-manager.md)
+  * [Creating themes](guide-creating-themes.md)
+* Interoperability
+  * [Swagger specification](guide-swagger.md)
+  * [REST api v1](guide-api-rest.md)
+  * [REST api v2](guide-api-rest2.md)    
+  * [Files api](guide-api-files.md)
+  * [Import api](guide-api-import.md)
+  * [Permissions api](guide-api-permissions.md)
+  * [Python-api client](guide-client-python.md)
+  * [R-api client](guide-client-r.md)   
+  * [Beacon api](guide-beacon.md)
+  * [FAIR api](guide-fair.md)
+  * [RSQL operators](guide-rsql.md)  
+* For developers
+  * [Developing MOLGENIS](guide-development.md)
+  * [Developing frontend in MOLGENIS](guide-development-frontend.md)
+  * [Developing Apps in MOLGENIS](guide-development-apps.md)
+  * [Using an IDE (Intellij)](guide-using-an-ide.md)
+  * [Technologies](guide-technologies.md)
+  * [Dynamic decorators](guide-dynamic-decorators.md)
+  * [Running the integration tests](guide-integration-tests.md)
+  * [Jobs](guide-jobs.md)
+  * [Security](guide-security.md)
+* For system administrators
+  * [Kubernetes \(experimental\)](guide-kubernetes.md)
+  * [Standalone server \(tomcat\)](guide-standalone-server.md)
+  * [Migration guide](guide-migration.md)
 
+#* User Documentation
+#  * Data
+#    * Modify data      
+#      * [SORTA](user_documentation/modify-data/guide-SORTA.md)
+#  * Catalogues
+#    * [Biobanking](user_documentation/catalogues/biobanking.md)
+#      * [Biobank Directory](user_documentation/catalogues/biobank-directory.md)
+#  * Backend  
+#    * [Data Backend](developer_documentation/backend.md)
+#  * Testing
+    
