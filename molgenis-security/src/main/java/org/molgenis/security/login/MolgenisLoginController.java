@@ -3,11 +3,14 @@ package org.molgenis.security.login;
 import static org.molgenis.security.login.MolgenisLoginController.URI;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,15 +27,42 @@ public class MolgenisLoginController {
   private static final String ERROR_MESSAGE_BAD_CREDENTIALS =
       "The username or password you entered is incorrect.";
   public static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
-  private static final String ERROR_MESSAGE_SESSION_AUTHENTICATION =
-      "Your login session has expired.";
+  static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
   private static final String ERROR_MESSAGE_UNKNOWN = "Sign in failed.";
 
-  private static final String VIEW_LOGIN = "view-login";
+  static final String VIEW_LOGIN = "view-login";
+  public static final String SPRING_SECURITY_CONTEXT = "SPRING_SECURITY_CONTEXT";
+  public static final String SPRING_SECURITY_SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST";
+  public static final String JSESSIONID = "JSESSIONID";
 
   @GetMapping
-  public String getLoginPage() {
+  public String getLoginPage(HttpServletRequest httpServletRequest, Model model) {
+    if (hasInvalidSessionId(httpServletRequest)) {
+      return getLoginErrorPage(model);
+    }
     return VIEW_LOGIN;
+  }
+
+  private boolean hasInvalidSessionId(HttpServletRequest httpServletRequest) {
+    if (httpServletRequest.getSession(false) != null) {
+      HttpSession session = httpServletRequest.getSession(false);
+      SecurityContext context = (SecurityContext) session.getAttribute(SPRING_SECURITY_CONTEXT);
+      boolean hasAuthentication = context != null && context.getAuthentication() != null;
+      SavedRequest savedRequest =
+          (SavedRequest) session.getAttribute(SPRING_SECURITY_SAVED_REQUEST);
+      boolean hasSessionCookie =
+          savedRequest != null
+              && savedRequest
+                  .getCookies()
+                  .stream()
+                  .filter(cookie -> cookie.getName().equals(JSESSIONID))
+                  .findFirst()
+                  .isPresent();
+      if (!hasAuthentication && hasSessionCookie) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @GetMapping(params = PARAM_SESSION_EXPIRED)
