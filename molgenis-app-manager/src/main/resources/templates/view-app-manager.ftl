@@ -2,15 +2,17 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css = ["app-manager/app.css"]>
+<#assign css = []>
 <#assign js=[]>
 <#assign version = 2>
 <@header css js version/>
 
 <div id="app-manager"></div>
 
-<script type=text/javascript src="<@resource_href "/js/app-manager/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/app-manager/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/app-manager/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/app-manager/dist/css/app.css"/>
+
+<script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/manifest.js"></script>
+<script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/app.js"></script>
 
 <@footer version/>

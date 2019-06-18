@@ -1,13 +1,19 @@
 version: "3.1"
 services:
+    nginx:
+      image: nginx:stable
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf
+        - ./redirect-map.conf:/etc/nginx/redirect-map.conf
+      ports:
+        - 80:80
+
     molgenis:
       build:
         context: .
         args:
           WAR_FILE: target/molgenis-app-*.war
-
-      ports:
-        - 8081:8080
+      container_name: molgenis
       environment:
         - molgenis.home=/home/molgenis
         - opencpu.uri.host=opencpu
