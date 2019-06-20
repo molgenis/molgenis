@@ -24,7 +24,7 @@ before_install:
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.6.0
 install:
-  - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4 -X
+  - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144
