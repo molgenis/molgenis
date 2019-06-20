@@ -1,10 +1,9 @@
 #!/bin/bash
 
-MOLGENIS_HOME=/home/molgenis/
+MOLGENIS_HOME=/usr/local/share/molgenis/
 
 DB_USER=molgenis
 DB_PASSWORD=molgenis
-ADMIN_PASSWORD=
 MAIL_USER=molgenis
 MAIL_PASSWORD=xxxx
 OPENCPU_HOST=opencpu.molgenis.org
@@ -36,7 +35,6 @@ if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]
 then
   sed -e "s|__DB_USER__|${DB_USER}|" \
       -e "s|__DB_PASSWORD__|${DB_PASSWORD}|" \
-      -e "s|__ADMIN_PASSWORD__|${ADMIN_PASSWORD}|" \
       -e "s|__MAIL_USER__|${MAIL_USER}|" \
       -e "s|__MAIL_PASSWORD__|${MAIL_PASSWORD}|" \
       -e "s|__OPENCPU_HOST__|${OPENCPU_HOST}|" \
