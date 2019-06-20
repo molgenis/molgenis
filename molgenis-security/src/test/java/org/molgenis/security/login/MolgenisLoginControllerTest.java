@@ -4,8 +4,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.login.MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE;
-import static org.molgenis.security.login.MolgenisLoginController.ERROR_MESSAGE_SESSION_AUTHENTICATION;
 import static org.molgenis.security.login.MolgenisLoginController.SPRING_SECURITY_CONTEXT;
 import static org.molgenis.security.login.MolgenisLoginController.SPRING_SECURITY_SAVED_REQUEST;
 import static org.molgenis.security.login.MolgenisLoginController.VIEW_LOGIN;
@@ -127,7 +125,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
     when(request.getSession(false)).thenReturn(session);
 
     assertEquals(controller.getLoginPage(request, model), VIEW_LOGIN);
-    verify(model).addAttribute(ERROR_MESSAGE_ATTRIBUTE, ERROR_MESSAGE_SESSION_AUTHENTICATION);
+    verify(model).addAttribute("errorMessage", "Your login session has expired.");
   }
 
   @Configuration
