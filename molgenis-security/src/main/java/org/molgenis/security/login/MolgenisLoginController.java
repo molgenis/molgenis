@@ -2,6 +2,7 @@ package org.molgenis.security.login;
 
 import static org.molgenis.security.login.MolgenisLoginController.URI;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,8 +28,7 @@ public class MolgenisLoginController {
   private static final String ERROR_MESSAGE_BAD_CREDENTIALS =
       "The username or password you entered is incorrect.";
   public static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
-  static final String ERROR_MESSAGE_SESSION_AUTHENTICATION =
-      "Your login session has expired.";
+  static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
   private static final String ERROR_MESSAGE_UNKNOWN = "Sign in failed.";
 
   static final String VIEW_LOGIN = "view-login";
@@ -51,13 +51,17 @@ public class MolgenisLoginController {
       boolean hasAuthentication = context != null && context.getAuthentication() != null;
       SavedRequest savedRequest =
           (SavedRequest) session.getAttribute(SPRING_SECURITY_SAVED_REQUEST);
-      boolean hasSessionCookie =
-          savedRequest != null
-              && savedRequest.getCookies().stream()
-                  .filter(cookie -> cookie.getName().equals(JSESSIONID))
-                  .findFirst()
-                  .isPresent();
+      boolean hasSessionCookie = savedRequest != null && hasSessionCookie(savedRequest);
       if (!hasAuthentication && hasSessionCookie) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean hasSessionCookie(SavedRequest savedRequest) {
+    for (Cookie cookie : savedRequest.getCookies()) {
+      if (cookie.getName().equals(JSESSIONID)) {
         return true;
       }
     }
