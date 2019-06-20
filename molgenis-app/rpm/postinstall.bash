@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MOLGENIS_HOME=/usr/local/share/molgenis
+MOLGENIS_HOME=/usr/local/share/molgenis/
 
 DB_USER=molgenis
 DB_PASSWORD=molgenis
