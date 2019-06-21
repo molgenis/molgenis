@@ -1,52 +1,23 @@
 package org.molgenis.api.data.v3;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 
-public class EntitiesRequest {
-  @NotNull private String entityTypeId;
-  private List<String> filter;
-  private List<String> expand;
-
+public class EntitiesRequest extends BaseEntityRequest {
   @Min(0)
   private int number = 0;
 
-  @Min(0)
+  @Min(1)
   @Max(100)
   private int size = 100;
 
   private List<String> sort;
   // TODO RSQL query
   private String q;
-
-  public String getEntityTypeId() {
-    return entityTypeId;
-  }
-
-  public void setEntityTypeId(String entityTypeId) {
-    this.entityTypeId = entityTypeId;
-  }
-
-  public Set<String> getFilter() {
-    return filter != null ? ImmutableSet.copyOf(filter) : ImmutableSet.of();
-  }
-
-  public void setFilter(List<String> filter) {
-    this.filter = filter;
-  }
-
-  public Set<String> getExpand() {
-    return expand != null ? ImmutableSet.copyOf(expand) : ImmutableSet.of();
-  }
-
-  public void setExpand(List<String> expand) {
-    this.expand = expand;
-  }
 
   public int getNumber() {
     return number;
@@ -64,16 +35,31 @@ public class EntitiesRequest {
     this.size = size;
   }
 
-  public List<String> getSort() {
-    return sort != null ? ImmutableList.copyOf(sort) : ImmutableList.of();
+  public Optional<Sort> getSort() {
+    if (sort == null) {
+      return Optional.empty();
+    }
+
+    Sort sortObj = new Sort();
+    sort.forEach(
+        sortItem -> {
+          if (sortItem.charAt(0) == '+') {
+            sortObj.on(sortItem.substring(1), Direction.ASC);
+          } else if (sortItem.charAt(0) == '-') {
+            sortObj.on(sortItem.substring(1), Direction.DESC);
+          } else {
+            sortObj.on(sortItem);
+          }
+        });
+    return Optional.ofNullable(sortObj);
   }
 
   public void setSort(List<String> sort) {
     this.sort = sort;
   }
 
-  public String getQ() {
-    return q;
+  public Optional<String> getQ() {
+    return Optional.ofNullable(q);
   }
 
   public void setQ(String q) {

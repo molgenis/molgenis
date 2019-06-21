@@ -3,14 +3,13 @@ package org.molgenis.api.data.v3;
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 
-import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.api.data.v3.EntityResponse.Builder;
+import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -24,33 +23,80 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityMapperImpl implements EntityMapper {
+  private static final int MAX_DEPTH = 2;
 
   @Override
   public EntityResponse map(Entity entity, Selection filter, Selection expand) {
-    Builder builder = EntityResponse.builder();
+    return mapRecursive(entity, filter, expand, 0);
+  }
+
+  @Override
+  public EntitiesResponse map(
+      EntityCollection entityCollection, Selection filter, Selection expand) {
+    EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
+
+    URI self = createEntitiesResponseUri(entityCollection.getEntityTypeId());
+    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+
+    Page page = entityCollection.getPage();
+    if (page != null) {
+      PageResponse pageResponse =
+          PageResponse.create(
+              entityCollection.getSize(),
+              page.getTotal(),
+              page.getTotal() > 0
+                  ? (int) Math.ceil(page.getTotal() / (double) page.getPageSize())
+                  : 0,
+              page.getOffset() / page.getPageSize());
+      builder.setPage(pageResponse);
+    }
+
+    return builder.setLinks(linksResponse).build();
+  }
+
+  private EntityResponse mapRecursive(
+      Entity entity, Selection filter, Selection expand, int depth) {
+    if (depth > MAX_DEPTH) {
+      throw new IllegalArgumentException("max_depth exceeded: " + depth);
+    }
+    EntityResponse.Builder builder = EntityResponse.builder();
 
     if (filter.hasItems()) {
-      Map<String, Object> data = createEntityResponseData(entity, filter, expand);
-      builder.setData(data);
+      Map<String, Object> dataMap = new LinkedHashMap<>();
+      stream(entity.getEntityType().getAtomicAttributes())
+          .filter(attribute -> filter.hasItem(attribute.getName()))
+          .forEach(
+              attribute ->
+                  dataMap.put(
+                      attribute.getName(), mapRecursive(entity, attribute, filter, expand, depth)));
+
+      builder.setData(dataMap);
     }
 
     URI uri = createEntityResponseUri(entity);
     return builder.setLinks(LinksResponse.create(null, uri, null)).build();
   }
 
-  private Map<String, Object> createEntityResponseData(
-      Entity entity, Selection filter, Selection expand) {
-    Map<String, Object> dataMap = new LinkedHashMap<>();
+  private EntitiesResponse.Builder mapRecursive(
+      EntityCollection entityCollection, Selection filter, Selection expand, int depth) {
+    if (depth > MAX_DEPTH) {
+      throw new IllegalArgumentException("max_depth exceeded: " + depth);
+    }
+    EntitiesResponse.Builder builder = EntitiesResponse.builder();
 
-    stream(entity.getEntityType().getAtomicAttributes())
-        .filter(attribute -> filter.hasItem(attribute.getName()))
-        .forEach(
-            attribute -> dataMap.put(attribute.getName(), map(entity, attribute, filter, expand)));
+    if (filter.hasItems()) {
+      List<EntityResponse> entityResponses =
+          entityCollection.getEntities().stream()
+              .map(entity -> mapRecursive(entity, filter, expand, depth))
+              .collect(toList());
+      builder.setItems(entityResponses);
+    }
 
-    return dataMap;
+    return builder;
   }
 
-  private Object map(Entity entity, Attribute attribute, Selection filter, Selection expand) {
+  private Object mapRecursive(
+      Entity entity, Attribute attribute, Selection filter, Selection expand, int depth) {
     Object value;
 
     String attributeName = attribute.getName();
@@ -62,12 +108,12 @@ public class EntityMapperImpl implements EntityMapper {
       case CATEGORICAL:
       case FILE:
       case XREF:
-        value = mapReference(entity, attributeName, filter, expand);
+        value = mapReference(entity, attribute, filter, expand, depth + 1);
         break;
       case CATEGORICAL_MREF:
       case MREF:
       case ONE_TO_MANY:
-        value = mapReferences(entity, attributeName, filter, expand);
+        value = mapReferences(entity, attribute, filter, expand, depth + 1);
         break;
       case DATE:
         value = entity.getLocalDate(attributeName);
@@ -101,52 +147,64 @@ public class EntityMapperImpl implements EntityMapper {
     return value;
   }
 
-  private EntityResponse mapReference(
-      Entity entity, String attributeName, Selection filter, Selection expand) {
-    Entity refEntity = entity.getEntity(attributeName);
+  private @Nullable @CheckForNull EntityResponse mapReference(
+      Entity entity, Attribute attribute, Selection filter, Selection expand, int depth) {
+    Entity refEntity = entity.getEntity(attribute.getName());
     if (refEntity == null) {
+      // note that returning an empty EntityResponse with a link and no data would not make sense,
+      // since the link would results in a 404 when requested.
       return null;
     }
 
-    Selection refFilter;
-    Selection refExpand;
-    if (expand.hasItem(attributeName)) {
-      refFilter = filter.getSelection(attributeName);
-      refExpand = expand.getSelection(attributeName);
-    } else {
-      refFilter = Selection.EMPTY_SELECTION;
-      refExpand = Selection.EMPTY_SELECTION;
-    }
-
-    return map(refEntity, refFilter, refExpand);
+    Selection refFilter = getReferenceFilter(attribute, filter, expand);
+    Selection refExpand = getReferenceExpand(attribute, expand);
+    return mapRecursive(refEntity, refFilter, refExpand, depth);
   }
 
-  private Object mapReferences(
-      Entity entity, String attributeName, Selection filter, Selection expand) {
-    if (expand.hasItem(attributeName)) {
+  private EntitiesResponse mapReferences(
+      Entity entity, Attribute attribute, Selection filter, Selection expand, int depth) {
+    URI uri = createEntityResponseUri(entity, attribute.getName());
+    if (expand.hasItem(attribute.getName())) {
+      String refEntityTypeId = attribute.getRefEntity().getId();
+      List<Entity> refEntities = stream(entity.getEntities(attribute.getName())).collect(toList());
 
-      Selection refFilter = filter.getSelection(attributeName);
-      Selection refExpand = expand.getSelection(attributeName);
+      EntityCollection entityCollection =
+          EntityCollection.builder()
+              .setEntityTypeId(refEntityTypeId)
+              .setEntities(refEntities)
+              .setEntityId(entity.getIdValue().toString())
+              .build();
 
-      Iterable<Entity> refEntities = entity.getEntities(attributeName);
-      List<EntityResponse> items =
-          stream(refEntities)
-              .skip(0)
-              .limit(20)
-              .map(refEntity -> map(refEntity, refFilter, refExpand))
-              .collect(toList());
-      int totalElements = Iterables.size(refEntities);
-      int totalPages = totalElements > 0 ? (int) Math.ceil(totalElements / (double) 20) : 0;
-
-      LinksResponse links =
-          LinksResponse.create(null, createEntityResponseUri(entity, attributeName), null);
-      PageResponse page = PageResponse.create(items.size(), totalElements, totalPages, 0);
-      return EntitiesResponse.create(links, items, page);
-
+      Selection refFilter = getReferenceFilter(attribute, filter, expand);
+      Selection refExpand = getReferenceExpand(attribute, expand);
+      return mapRecursive(entityCollection, refFilter, refExpand, depth)
+          .setLinks(LinksResponse.create(null, uri, null))
+          .build();
     } else {
-      URI uri = createEntityResponseUri(entity, attributeName);
+
       return EntitiesResponse.builder().setLinks(LinksResponse.create(null, uri, null)).build();
     }
+  }
+
+  private Selection getReferenceFilter(Attribute attribute, Selection filter, Selection expand) {
+    return expand.hasItem(attribute.getName())
+        ? filter.getSelection(attribute.getName()).orElse(Selection.FULL_SELECTION)
+        : Selection.EMPTY_SELECTION;
+  }
+
+  private Selection getReferenceExpand(Attribute attribute, Selection expand) {
+    return expand.hasItem(attribute.getName())
+        ? expand.getSelection(attribute.getName()).orElse(Selection.EMPTY_SELECTION)
+        : Selection.EMPTY_SELECTION;
+  }
+
+  private URI createEntitiesResponseUri(String entityTypeId) {
+    return ServletUriComponentsBuilder.fromCurrentRequestUri()
+        .replacePath(null)
+        .path(EntityController.API_ENTITY_PATH)
+        .pathSegment(entityTypeId)
+        .build()
+        .toUri();
   }
 
   private URI createEntityResponseUri(Entity entity) {

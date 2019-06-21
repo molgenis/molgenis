@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 class Selection {
   static final Selection EMPTY_SELECTION = new Selection(emptyMap());
@@ -42,21 +43,22 @@ class Selection {
     return hasItem;
   }
 
-  Selection getSelection(String item) {
-    Selection selection;
-    if (itemSelections != null) {
-      selection = itemSelections.get(item);
-      if (selection == null) {
-        selection = EMPTY_SELECTION;
-      }
-    } else {
-      selection = EMPTY_SELECTION;
-    }
-    return selection;
+  Optional<Selection> getSelection(String item) {
+    Selection selection = itemSelections != null ? itemSelections.get(item) : null;
+    return Optional.ofNullable(selection);
   }
 
   @Override
   public String toString() {
-    return "Selection{" + "items=" + itemSelections + '}';
+    StringBuilder stringBuilder = new StringBuilder("Selection{");
+    if (itemSelections == null) {
+      stringBuilder.append("<all>");
+    } else if (itemSelections.isEmpty()) {
+      stringBuilder.append("<none>");
+    } else {
+      stringBuilder.append(itemSelections);
+    }
+    stringBuilder.append('}');
+    return stringBuilder.toString();
   }
 }
