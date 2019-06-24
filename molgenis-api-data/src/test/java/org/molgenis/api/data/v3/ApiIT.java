@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 // 10. request zero-items case
 // 11. error codes
 // 12. encoding entity type identifiers, entity identifiers etc.
+// 13 de REST hack
 public class ApiIT {
 
   @Test
