@@ -2,7 +2,6 @@ package org.molgenis.api.data.v3;
 
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.Sort;
 import org.testng.annotations.Test;
 
 public class SortConverterTest {

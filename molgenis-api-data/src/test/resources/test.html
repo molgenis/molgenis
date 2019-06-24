@@ -151,7 +151,7 @@
             <div class="col-3">
               <p>Sort by:</p>
               <select v-model="sort" class="custom-select" :size="filter.length * 2">
-                  <option v-for="item in filter" :value="'+' + item">{{ item }} (ascending)</option>
+                  <option v-for="item in filter" :value="'%2B' + item">{{ item }} (ascending)</option>
                   <option v-for="item in filter" :value="'-' + item">{{ item }} (descending)</option>
               </select>
             </div>
