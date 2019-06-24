@@ -1,6 +1,5 @@
 package org.molgenis.api.data.v3;
 
-import org.molgenis.data.Sort;
 import org.springframework.core.convert.converter.Converter;
 
 public class SortConverter implements Converter<String, Sort> {

@@ -1,11 +1,8 @@
 package org.molgenis.api.data.v3;
 
-import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import org.molgenis.data.Sort;
-import org.molgenis.data.Sort.Direction;
 
 public class EntitiesRequest extends BaseEntityRequest {
   @Min(0)
@@ -15,7 +12,7 @@ public class EntitiesRequest extends BaseEntityRequest {
   @Max(100)
   private int size = 100;
 
-  private List<String> sort;
+  private Sort sort;
   // TODO RSQL query
   private String q;
 
@@ -36,25 +33,10 @@ public class EntitiesRequest extends BaseEntityRequest {
   }
 
   public Optional<Sort> getSort() {
-    if (sort == null) {
-      return Optional.empty();
-    }
-
-    Sort sortObj = new Sort();
-    sort.forEach(
-        sortItem -> {
-          if (sortItem.charAt(0) == '+') {
-            sortObj.on(sortItem.substring(1), Direction.ASC);
-          } else if (sortItem.charAt(0) == '-') {
-            sortObj.on(sortItem.substring(1), Direction.DESC);
-          } else {
-            sortObj.on(sortItem);
-          }
-        });
-    return Optional.ofNullable(sortObj);
+    return Optional.ofNullable(sort);
   }
 
-  public void setSort(List<String> sort) {
+  public void setSort(Sort sort) {
     this.sort = sort;
   }
 
