@@ -11,7 +11,7 @@ import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,29 +22,24 @@ class EntityController extends ApiController {
   private static final String API_ENTITY_ID = "entity";
   static final String API_ENTITY_PATH = ApiNamespace.API_PATH + '/' + API_ENTITY_ID;
 
-  private final DataService dataService;
+  private final DataServiceV3 dataServiceV3;
   private final EntityMapper entityMapper;
 
-  EntityController(DataService dataService, EntityMapper entityMapper) {
+  EntityController(DataServiceV3 dataServiceV3, EntityMapper entityMapper) {
     super(API_ENTITY_ID, 3);
-    this.dataService = requireNonNull(dataService);
+    this.dataServiceV3 = requireNonNull(dataServiceV3);
     this.entityMapper = requireNonNull(entityMapper);
   }
 
-  // FIXME convert entityId to correct type
-  // TODO use fetch in dataservice call
   @GetMapping("/{entityTypeId}/{entityId}")
   EntityResponse getEntity(@Valid EntityRequest entityRequest) {
-    String entityTypeId = entityRequest.getEntityTypeId();
-    String entityId = entityRequest.getEntityId();
-
-    Entity entity = dataService.findOneById(entityTypeId, entityId);
-    if (entity == null) {
-      throw new UnknownEntityException(entityTypeId, entityId);
-    }
-
     Selection filter = entityRequest.getFilter();
     Selection expand = entityRequest.getExpand();
+
+    Entity entity =
+        dataServiceV3.find(
+            entityRequest.getEntityTypeId(), entityRequest.getEntityId(), filter, expand);
+
     return entityMapper.map(entity, filter, expand);
   }
 
@@ -80,7 +75,8 @@ class EntityController extends ApiController {
 
   private Query<Entity> createQuery(EntitiesRequest entitiesRequest) {
     Query<Entity> query =
-        dataService
+        ApplicationContextProvider.getApplicationContext()
+            .getBean(DataService.class)
             .query(entitiesRequest.getEntityTypeId())
             .offset(entitiesRequest.getNumber() * entitiesRequest.getSize())
             .pageSize(entitiesRequest.getSize());
