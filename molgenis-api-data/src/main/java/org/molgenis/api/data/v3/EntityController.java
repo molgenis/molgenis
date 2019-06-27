@@ -12,8 +12,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,6 +44,12 @@ class EntityController extends ApiController {
             entityRequest.getEntityTypeId(), entityRequest.getEntityId(), filter, expand);
 
     return entityMapper.map(entity, filter, expand);
+  }
+
+  @DeleteMapping("/{entityTypeId}/{entityId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void deleteEntity(@Valid DeleteEntityRequest deleteRequest) {
+    dataServiceV3.delete(deleteRequest.getEntityTypeId(), deleteRequest.getEntityId());
   }
 
   // TODO use fetch in dataservice call

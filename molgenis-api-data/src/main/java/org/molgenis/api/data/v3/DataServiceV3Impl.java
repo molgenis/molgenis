@@ -29,13 +29,10 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional(readOnly = true)
   @Override
   public Entity find(String entityTypeId, String entityId, Selection filter, Selection expand) {
-    Repository<Entity> repository =
-        metaDataService
-            .getRepository(entityTypeId)
-            .orElseThrow(() -> new UnknownRepositoryException(entityTypeId));
+    Repository<Entity> repository = getRepository(entityTypeId);
     EntityType entityType = repository.getEntityType();
-
     Object typedEntityId = toTypedEntityId(entityType, entityId);
+
     Fetch fetch = toFetch(entityType, filter, expand);
 
     Entity entity = repository.findOneById(typedEntityId, fetch);
@@ -44,6 +41,29 @@ class DataServiceV3Impl implements DataServiceV3 {
     }
 
     return entity;
+  }
+
+  @Transactional
+  @Override
+  public void delete(String entityTypeId, String entityId) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
+    Object typedEntityId = toTypedEntityId(entityType, entityId);
+
+    // repository.deleteById succeeds if entity doesn't exist, so check for existence first
+    Fetch idFetch = new Fetch().field(entityType.getIdAttribute().getName());
+    Entity entity = repository.findOneById(typedEntityId, idFetch);
+    if (entity == null) {
+      throw new UnknownEntityException(entityTypeId, entityId);
+    }
+
+    repository.deleteById(typedEntityId);
+  }
+
+  private Repository<Entity> getRepository(String entityTypeId) {
+    return metaDataService
+        .getRepository(entityTypeId)
+        .orElseThrow(() -> new UnknownRepositoryException(entityTypeId));
   }
 
   private Object toTypedEntityId(EntityType entityType, String entityId) {

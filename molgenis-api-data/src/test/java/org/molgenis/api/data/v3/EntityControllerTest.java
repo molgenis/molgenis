@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -39,5 +40,19 @@ public class EntityControllerTest extends AbstractMockitoTest {
     EntityResponse entityResponse = mock(EntityResponse.class);
     when(entityMapper.map(entity, filter, expand)).thenReturn(entityResponse);
     assertEquals(entityController.getEntity(entityRequest), entityResponse);
+  }
+
+  @Test
+  public void testDeleteEntity() {
+    String entityTypeId = "MyEntityTypeId";
+    String entityId = "MyId";
+
+    DeleteEntityRequest deleteEntityRequest = new DeleteEntityRequest();
+    deleteEntityRequest.setEntityTypeId(entityTypeId);
+    deleteEntityRequest.setEntityId(entityId);
+
+    entityController.deleteEntity(deleteEntityRequest);
+
+    verify(dataServiceV3).delete(entityTypeId, entityId);
   }
 }

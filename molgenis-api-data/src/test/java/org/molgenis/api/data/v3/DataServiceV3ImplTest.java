@@ -3,7 +3,9 @@ package org.molgenis.api.data.v3;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -40,7 +42,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
-    when(idAttribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(idAttribute.getDataType()).thenReturn(STRING);
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
@@ -68,7 +70,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
-    when(idAttribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(idAttribute.getDataType()).thenReturn(STRING);
 
     EntityType refEntityType = mock(EntityType.class);
 
@@ -114,7 +116,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
-    when(idAttribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(idAttribute.getDataType()).thenReturn(STRING);
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
@@ -126,5 +128,58 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
     dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testDelete() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyId";
+
+    Attribute idAttribute = mock(Attribute.class);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(idAttribute.getName()).thenReturn("id");
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+
+    Entity entity = mock(Entity.class);
+    when(repository.findOneById(entityId, new Fetch().field("id"))).thenReturn(entity);
+    dataServiceV3Impl.delete(entityTypeId, entityId);
+
+    verify(repository).deleteById(entityId);
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void testDeleteUnknownEntityType() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyId";
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+
+    dataServiceV3Impl.delete(entityTypeId, entityId);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testDeleteUnknownEntity() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyId";
+
+    Attribute idAttribute = mock(Attribute.class);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(idAttribute.getName()).thenReturn("id");
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+
+    dataServiceV3Impl.delete(entityTypeId, entityId);
   }
 }
