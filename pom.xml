@@ -107,6 +107,7 @@
     <jaxb-api.version>2.2.11</jaxb-api.version>
     <vcf-io.version>1.0.3</vcf-io.version>
     <minio.version>6.0.2</minio.version>
+    <ph-javacc-maven-plugin.version>4.1.3</ph-javacc-maven-plugin.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -933,11 +934,15 @@
         <artifactId>jaxb-api</artifactId>
         <version>${jaxb-api.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
         <version>${minio.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.maven</groupId>
+        <artifactId>ph-javacc-maven-plugin</artifactId>
+        <version>${ph-javacc-maven-plugin.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
