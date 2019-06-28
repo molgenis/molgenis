@@ -5,9 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
 
-/**
- * Data API v3 CRUD operations.
- */
+/** Data API v3 CRUD operations. */
 interface DataServiceV3 {
   /**
    * Create one entity.

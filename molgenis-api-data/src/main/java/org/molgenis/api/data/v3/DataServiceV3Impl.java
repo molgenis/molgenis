@@ -75,7 +75,8 @@ class DataServiceV3Impl implements DataServiceV3 {
 
   @Transactional
   @Override
-  public void updatePartial(String entityTypeId, String entityId, Map<String, Object> requestValues) {
+  public void updatePartial(
+      String entityTypeId, String entityId, Map<String, Object> requestValues) {
     Repository<Entity> repository = getRepository(entityTypeId);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);

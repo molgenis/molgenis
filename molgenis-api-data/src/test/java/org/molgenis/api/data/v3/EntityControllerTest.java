@@ -91,7 +91,6 @@ public class EntityControllerTest extends AbstractMockitoTest {
     verify(dataServiceV3).updatePartial(entityTypeId, entityId, requestValueMap);
   }
 
-
   @Test
   public void testDeleteEntity() {
     String entityTypeId = "MyEntityTypeId";
