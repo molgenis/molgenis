@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 // 13 de REST hack
 public class ApiIT {
 
+  // TODO implement
   @Test
   public void testRetrieveResource() {
     // 1. filter (basic? multiple? nested?)
@@ -31,6 +32,7 @@ public class ApiIT {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void testRetrieveResourceSubResource() {
     // exc: entity type exists
@@ -39,6 +41,7 @@ public class ApiIT {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void testRetrieveResourceCollection() {
     // 1. paging
@@ -47,6 +50,7 @@ public class ApiIT {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void createResource() {
     // 1. location header
@@ -54,21 +58,25 @@ public class ApiIT {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void updateResource() {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void partialUpdateResource() {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void deleteResource() {
     throw new UnsupportedOperationException();
   }
 
+  // TODO implement
   @Test
   public void deleteResourceCollection() {
     throw new UnsupportedOperationException();

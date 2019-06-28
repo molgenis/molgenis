@@ -33,6 +33,12 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl = new DataServiceV3Impl(metaDataService, entityServiceV3);
   }
 
+  // TODO implement
+  @Test
+  public void testCreate() {
+    throw new UnsupportedOperationException();
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void testFind() {
@@ -130,6 +136,18 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
     dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
+  }
+
+  // TODO implement
+  @Test
+  public void testUpdate() {
+    throw new UnsupportedOperationException();
+  }
+
+  // TODO implement
+  @Test
+  public void testUpdatePartially() {
+    throw new UnsupportedOperationException();
   }
 
   @SuppressWarnings("unchecked")
