@@ -3,6 +3,7 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.data.v3.Selection.EMPTY_SELECTION;
 
+import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -15,15 +16,30 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Service
 class DataServiceV3Impl implements DataServiceV3 {
   private final MetaDataService metaDataService;
+  private final EntityManagerV3 entityManagerV3;
 
-  DataServiceV3Impl(MetaDataService metaDataService) {
+  DataServiceV3Impl(MetaDataService metaDataService, EntityManagerV3 entityManagerV3) {
     this.metaDataService = requireNonNull(metaDataService);
+    this.entityManagerV3 = requireNonNull(entityManagerV3);
+  }
+
+  @Transactional
+  @Override
+  public Entity create(String entityTypeId, Map<String, Object> requestValues) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
+
+    Entity entity = entityManagerV3.create(entityType);
+    entityManagerV3.populate(entityType, entity, requestValues);
+
+    repository.add(entity);
+    return entity;
   }
 
   @Transactional(readOnly = true)
@@ -41,6 +57,38 @@ class DataServiceV3Impl implements DataServiceV3 {
     }
 
     return entity;
+  }
+
+  @Transactional
+  @Override
+  public void update(String entityTypeId, String entityId, Map<String, Object> requestValues) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
+    Object typedEntityId = toTypedEntityId(entityType, entityId);
+
+    Entity entity = entityManagerV3.create(entityType); // what happens with auto values?
+    entityManagerV3.populate(entityType, entity, requestValues);
+    entity.setIdValue(typedEntityId);
+
+    repository.update(entity);
+  }
+
+  @Transactional
+  @Override
+  public void updatePartial(String entityTypeId, String entityId, Map<String, Object> requestValues) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
+    Object typedEntityId = toTypedEntityId(entityType, entityId);
+
+    Entity entity = repository.findOneById(entityId);
+    if (entity == null) {
+      throw new UnknownEntityException(entityTypeId, entityId);
+    }
+
+    entityManagerV3.populate(entityType, entity, requestValues);
+    entity.setIdValue(typedEntityId);
+
+    repository.update(entity);
   }
 
   @Transactional

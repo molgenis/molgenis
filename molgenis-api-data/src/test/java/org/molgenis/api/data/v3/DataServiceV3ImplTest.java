@@ -25,11 +25,12 @@ import org.testng.annotations.Test;
 
 public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
+  @Mock private EntityManagerV3 entityServiceV3;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    dataServiceV3Impl = new DataServiceV3Impl(metaDataService);
+    dataServiceV3Impl = new DataServiceV3Impl(metaDataService, entityServiceV3);
   }
 
   @SuppressWarnings("unchecked")
@@ -107,6 +108,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
   }
 
+  @SuppressWarnings("unchecked")
   @Test(expectedExceptions = UnknownEntityException.class)
   public void testFindUnknownEntity() {
     String entityTypeId = "MyEntityType";

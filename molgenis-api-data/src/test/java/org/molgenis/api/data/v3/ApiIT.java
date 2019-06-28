@@ -37,7 +37,6 @@ public class ApiIT {
     // exc: entity exists
     // exc: attribute does not exist
     throw new UnsupportedOperationException();
-
   }
 
   @Test
@@ -46,7 +45,6 @@ public class ApiIT {
     // 2. links: first page and last page
     // exc: max page size exceeded
     throw new UnsupportedOperationException();
-
   }
 
   @Test
@@ -54,13 +52,11 @@ public class ApiIT {
     // 1. location header
     // exc: already exists
     throw new UnsupportedOperationException();
-
   }
 
   @Test
   public void updateResource() {
     throw new UnsupportedOperationException();
-
   }
 
   @Test
