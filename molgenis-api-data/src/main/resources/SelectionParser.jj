@@ -1,0 +1,93 @@
+options {
+  STATIC=false;
+}
+
+PARSER_BEGIN(SelectionParser)
+
+package org.molgenis.api.data.v3;
+
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+
+class SelectionParser {
+  SelectionParser(String str) {
+    this(new StringReader(str));
+  }
+}
+
+PARSER_END(SelectionParser)
+
+TOKEN: {
+		<LEFT_PARENTHESIS: "(">
+	|	<RIGHT_PARENTHESIS: ")">
+	|	<COMMA: ",">
+	| <#LETTER: ["a"-"z","A"-"Z"]>
+  |	<#DIGIT: ["0"-"9"]>
+  |	<UNDERSCORE: "_">
+  |	<HASH: "#">
+}
+
+TOKEN: {
+		<IDENTIFIER: (<LETTER> | <DIGIT> | <UNDERSCORE> | <HASH>)+>
+}
+
+Selection parse() : {
+	Selection selection;
+}{
+	( selection = enclosedSelection()
+	| selection = unenclosedSelection()
+	)
+	<EOF>
+	{
+	  return selection;
+  }
+}
+
+private Selection enclosedSelection() : {
+  Selection selection;
+} {
+  (
+  <LEFT_PARENTHESIS>
+  selection = unenclosedSelection()
+  <RIGHT_PARENTHESIS>
+  )
+  { return selection; }
+}
+
+private Selection unenclosedSelection() : {
+  String key;
+  Selection subSelection = null;
+  Map<String, Selection> itemSelections = new HashMap<>();
+} {
+    key = identifier()
+    [
+      subSelection = enclosedSelection()
+    ]
+    {
+      itemSelections.put(key, subSelection);
+      key = null;
+      subSelection = null;
+    }
+    (
+      <COMMA>
+      key = identifier()
+      [
+        subSelection = enclosedSelection()
+      ]
+      {
+        itemSelections.put(key, subSelection);
+        key = null;
+        subSelection = null;
+      }
+    )*
+	{
+	  return new Selection(itemSelections);
+	}
+}
+
+private String identifier() : {
+} {
+  <IDENTIFIER>
+  { return token.image; }
+}

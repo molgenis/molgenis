@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 class Selection {
@@ -60,5 +61,22 @@ class Selection {
     }
     stringBuilder.append('}');
     return stringBuilder.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Selection selection = (Selection) o;
+    return Objects.equals(itemSelections, selection.itemSelections);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(itemSelections);
   }
 }
