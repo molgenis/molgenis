@@ -3,7 +3,7 @@ package org.molgenis.api.data.v2;
 import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParser;
-import org.molgenis.api.data.SortConverter;
+import org.molgenis.api.data.v3.SortConverter;
 import org.molgenis.web.rsql.AggregateQueryRsqlConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
