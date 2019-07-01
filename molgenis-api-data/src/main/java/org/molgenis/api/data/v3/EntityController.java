@@ -94,7 +94,6 @@ class EntityController extends ApiController {
     dataServiceV3.delete(deleteRequest.getEntityTypeId(), deleteRequest.getEntityId());
   }
 
-
   // TODO refactor this proof-of-concept code
   @GetMapping("/{entityTypeId}")
   EntitiesResponse getEntities(@Valid EntitiesRequest entitiesRequest) {
