@@ -125,6 +125,11 @@
       <artifactId>auto-value</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.zalando</groupId>
+      <artifactId>problem</artifactId>
+      <version>0.23.0</version>
+    </dependency>
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>

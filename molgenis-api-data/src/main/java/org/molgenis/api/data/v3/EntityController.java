@@ -3,6 +3,13 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.api.data.v3.SortV3Mapper.map;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAnonymous;
+import static org.zalando.problem.Status.BAD_REQUEST;
+import static org.zalando.problem.Status.CONFLICT;
+import static org.zalando.problem.Status.FORBIDDEN;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+import static org.zalando.problem.Status.NOT_FOUND;
+import static org.zalando.problem.Status.UNAUTHORIZED;
 
 import java.net.URI;
 import java.util.List;
@@ -11,13 +18,20 @@ import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.data.DataAlreadyExistsException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownDataException;
+import org.molgenis.data.security.exception.PermissionDeniedException;
+import org.molgenis.i18n.BadRequestException;
+import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.ForbiddenException;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.zalando.problem.Status;
 
 @RestController
 @RequestMapping(EntityController.API_ENTITY_PATH)
@@ -138,5 +153,57 @@ class EntityController extends ApiController {
     entitiesRequest.getSort().ifPresent(sort -> query.sort(map(sort)));
 
     return query;
+  }
+
+  @ExceptionHandler(UnknownDataException.class)
+  public ResponseEntity<Problem> handleException(UnknownDataException exception) {
+    return getProblemResponseEntity(
+        NOT_FOUND, exception.getLocalizedMessage(), exception.getErrorCode());
+  }
+
+  @ExceptionHandler(DataAlreadyExistsException.class)
+  public ResponseEntity<Problem> handleException(DataAlreadyExistsException exception) {
+    return getProblemResponseEntity(
+        CONFLICT, exception.getLocalizedMessage(), exception.getErrorCode());
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<Problem> handleException(BadRequestException exception) {
+    return getProblemResponseEntity(
+        BAD_REQUEST, exception.getLocalizedMessage(), exception.getErrorCode());
+  }
+
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<Problem> handleException(ForbiddenException exception) {
+    return getProblemResponseEntity(
+        FORBIDDEN, exception.getLocalizedMessage(), exception.getErrorCode());
+  }
+
+  @ExceptionHandler(PermissionDeniedException.class)
+  public ResponseEntity<Problem> handleException(PermissionDeniedException exception) {
+    return getProblemResponseEntity(
+        currentUserIsAnonymous() ? UNAUTHORIZED : FORBIDDEN,
+        exception.getLocalizedMessage(),
+        exception.getErrorCode());
+  }
+
+  @ExceptionHandler(CodedRuntimeException.class)
+  public ResponseEntity<Problem> handleException(CodedRuntimeException exception) {
+    return getProblemResponseEntity(
+        INTERNAL_SERVER_ERROR, exception.getLocalizedMessage(), exception.getErrorCode());
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<Problem> handleException(Exception exception) {
+    return new ResponseEntity(
+        new Problem(INTERNAL_SERVER_ERROR, exception.getLocalizedMessage(), "Unknown_error_code"),
+        HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  private ResponseEntity<Problem> getProblemResponseEntity(
+      Status status, String localizedMessage, String errorCode) {
+    return new ResponseEntity(
+        new Problem(status, localizedMessage, errorCode),
+        HttpStatus.valueOf(status.getStatusCode()));
   }
 }

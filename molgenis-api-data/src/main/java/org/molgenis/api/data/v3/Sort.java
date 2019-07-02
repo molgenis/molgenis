@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,26 +46,6 @@ public class Sort implements Iterable<Sort.Order> {
   public Sort on(String attr, Direction direction) {
     orders.add(new Order(attr, direction));
     return this;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((orders == null) ? 0 : orders.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    Sort other = (Sort) obj;
-    if (orders == null) {
-      if (other.orders != null) return false;
-    } else if (!orders.equals(other.orders)) return false;
-    return true;
   }
 
   @Override
@@ -113,27 +94,6 @@ public class Sort implements Iterable<Sort.Order> {
     }
 
     @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((attr == null) ? 0 : attr.hashCode());
-      result = prime * result + ((direction == null) ? 0 : direction.hashCode());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) return true;
-      if (obj == null) return false;
-      if (getClass() != obj.getClass()) return false;
-      Order other = (Order) obj;
-      if (attr == null) {
-        if (other.attr != null) return false;
-      } else if (!attr.equals(other.attr)) return false;
-      return direction == other.direction;
-    }
-
-    @Override
     public String toString() {
       return "Order [attr=" + attr + ", direction=" + direction + "]";
     }
@@ -151,5 +111,22 @@ public class Sort implements Iterable<Sort.Order> {
       }
     }
     return false;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Sort orders1 = (Sort) o;
+    return Objects.equals(orders, orders1.orders);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(orders);
   }
 }
