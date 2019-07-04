@@ -81,9 +81,9 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Entity entity = repository.findOneById(entityId);
+    Entity entity = repository.findOneById(typedEntityId);
     if (entity == null) {
-      throw new UnknownEntityException(entityTypeId, entityId);
+      throw new UnknownEntityException(entityTypeId, typedEntityId);
     }
 
     entityManagerV3.populate(entityType, entity, requestValues);
