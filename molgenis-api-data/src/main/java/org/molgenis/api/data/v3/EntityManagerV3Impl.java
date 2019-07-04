@@ -168,7 +168,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     if (requestValue != null) {
       if (requestValue instanceof Double) {
         doubleValue = (Double) requestValue;
-      } else if (!(requestValue instanceof Number)) {
+      } else if (requestValue instanceof Number) {
         doubleValue = ((Number) requestValue).doubleValue();
       } else {
         throw new RuntimeException("not a number"); // TODO
@@ -182,9 +182,9 @@ class EntityManagerV3Impl implements EntityManagerV3 {
   private Integer convertInt(Object requestValue) {
     Integer integerValue;
     if (requestValue != null) {
-      if (requestValue instanceof Double) {
+      if (requestValue instanceof Integer) {
         integerValue = (Integer) requestValue;
-      } else if (!(requestValue instanceof Number)) {
+      } else if (requestValue instanceof Number) {
         integerValue = ((Number) requestValue).intValue();
       } else {
         throw new RuntimeException("not a number"); // TODO
@@ -200,7 +200,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     if (requestValue != null) {
       if (requestValue instanceof Long) {
         longValue = (Long) requestValue;
-      } else if (!(requestValue instanceof Number)) {
+      } else if (requestValue instanceof Number) {
         longValue = ((Number) requestValue).longValue();
       } else {
         throw new RuntimeException("not a number"); // TODO

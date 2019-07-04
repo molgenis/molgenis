@@ -1,0 +1,28 @@
+{
+  "links": {
+    "self": "http://localhost:8080/api/entity/v3_MyDataset/1"
+  },
+  "data": {
+    "myBool": true,
+    "myDate": "2000-01-01",
+    "myDateTime": "1999-12-31T21:02:03Z",
+    "myDecimal": 1.1,
+    "myInt": 1,
+    "myLong": 3000000001,
+    "myString": "String 1",
+    "myText": "Text 1",
+    "myXref": {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyNumbers/1"
+      }
+    },
+    "myMref": {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/1/myMref"
+      }
+    },
+    "myComputed": "static",
+    "id": 1,
+    "label": "Row 1"
+  }
+}
