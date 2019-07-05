@@ -3,6 +3,7 @@ package org.molgenis.api.data.v2;
 import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParser;
+import org.molgenis.api.data.SortConverter;
 import org.molgenis.web.rsql.AggregateQueryRsqlConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +23,18 @@ public class RestConfig implements WebMvcConfigurer {
   @Override
   public void addFormatters(FormatterRegistry registry) {
     registry.addConverter(attributeFilterConverter());
+    registry.addConverter(sortConverter());
     registry.addConverter(aggregateQueryRsqlConverter());
   }
 
   @Bean
   public AttributeFilterConverter attributeFilterConverter() {
     return new AttributeFilterConverter();
+  }
+
+  @Bean
+  public SortConverter sortConverter() {
+    return new SortConverter();
   }
 
   @Bean
