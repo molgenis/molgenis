@@ -2,6 +2,7 @@ package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.data.v3.SortV3Mapper.map;
 
 import java.net.URI;
 import java.util.List;
@@ -134,7 +135,7 @@ class EntityController extends ApiController {
             .pageSize(entitiesRequest.getSize());
 
     entitiesRequest.getQ().ifPresent(query::search);
-    entitiesRequest.getSort().ifPresent(query::sort);
+    entitiesRequest.getSort().ifPresent(sort -> query.sort(map(sort)));
 
     return query;
   }

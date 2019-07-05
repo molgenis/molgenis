@@ -261,7 +261,6 @@
             <additionalOptions>--allow-script-in-comments</additionalOptions>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>com.github.kongchen</groupId>
           <artifactId>swagger-maven-plugin</artifactId>
@@ -527,6 +526,11 @@
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>${sonar-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>com.helger.maven</groupId>
+          <artifactId>ph-javacc-maven-plugin</artifactId>
+          <version>${ph-javacc-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -938,11 +942,6 @@
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
         <version>${minio.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.helger.maven</groupId>
-        <artifactId>ph-javacc-maven-plugin</artifactId>
-        <version>${ph-javacc-maven-plugin.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
