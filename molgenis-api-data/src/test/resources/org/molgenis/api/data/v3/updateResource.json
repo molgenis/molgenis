@@ -1,0 +1,23 @@
+{
+  "links": {
+    "self": "http://localhost:8080/api/entity/v3_MyDataset/25"
+  },
+  "data": {
+    "myBool": false,
+    "myDate": "2000-02-25",
+    "myDateTime": "2000-02-24T21:02:03Z",
+    "myDecimal": 250.1,
+    "myInt": 250,
+    "myLong": 3000000250,
+    "myString": "String 25b",
+    "myText": "Text 25b",
+    "myMref": {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/25/myMref"
+      }
+    },
+    "myComputed": "static",
+    "id": 25,
+    "label": "Row 25b"
+  }
+}

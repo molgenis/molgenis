@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import javax.validation.constraints.NotNull;
+import org.molgenis.api.model.Selection;
 
 public abstract class BaseEntityRequest {
   @NotNull private String entityTypeId;

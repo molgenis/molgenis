@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import org.mockito.Mock;
+import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.security.exception.InvalidTypeIdException;

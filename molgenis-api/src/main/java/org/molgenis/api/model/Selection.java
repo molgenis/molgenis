@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.model;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
@@ -9,22 +9,22 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-class Selection {
-  static final Selection EMPTY_SELECTION = new Selection(emptyMap());
-  static final Selection FULL_SELECTION = new Selection();
+public class Selection {
+  public static final Selection EMPTY_SELECTION = new Selection(emptyMap());
+  public static final Selection FULL_SELECTION = new Selection();
 
   private Map<String, Selection> itemSelections;
 
-  Selection() {
+  public Selection() {
     this.itemSelections = null;
   }
 
-  Selection(Map<String, Selection> itemSelections) {
+  public Selection(Map<String, Selection> itemSelections) {
     requireNonNull(itemSelections);
     this.itemSelections = unmodifiableMap(new HashMap<>(itemSelections));
   }
 
-  boolean hasItems() {
+  public boolean hasItems() {
     boolean hasItems;
     if (itemSelections == null) {
       hasItems = true;
@@ -34,7 +34,7 @@ class Selection {
     return hasItems;
   }
 
-  boolean hasItem(String item) {
+  public boolean hasItem(String item) {
     boolean hasItem;
     if (itemSelections == null) {
       hasItem = true;
@@ -44,7 +44,7 @@ class Selection {
     return hasItem;
   }
 
-  Optional<Selection> getSelection(String item) {
+  public Optional<Selection> getSelection(String item) {
     Selection selection = itemSelections != null ? itemSelections.get(item) : null;
     return Optional.ofNullable(selection);
   }
