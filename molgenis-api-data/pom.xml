@@ -42,24 +42,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>com.helger.maven</groupId>
-        <artifactId>ph-javacc-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>jjc1</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>javacc</goal>
-            </goals>
-            <configuration>
-              <jdkVersion>1.8</jdkVersion>
-              <sourceDirectory>src/main/resources</sourceDirectory>
-              <outputDirectory>${project.build.directory}/generated-sources/javacc</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -159,6 +141,28 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <!-- unused, causes Java 11 issues -->
+        <exclusion>
+          <groupId>io.rest-assured</groupId>
+          <artifactId>xml-path</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

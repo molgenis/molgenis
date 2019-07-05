@@ -1,5 +1,6 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.convert;
 
+import org.molgenis.api.model.Selection;
 import org.springframework.core.convert.converter.Converter;
 
 public class SelectionConverter implements Converter<String, Selection> {

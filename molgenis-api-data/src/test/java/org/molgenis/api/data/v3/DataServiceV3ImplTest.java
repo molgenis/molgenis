@@ -10,6 +10,7 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import java.util.Collections;
 import java.util.Optional;
 import org.mockito.Mock;
+import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;

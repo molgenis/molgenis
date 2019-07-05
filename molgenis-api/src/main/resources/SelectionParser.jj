@@ -1,14 +1,11 @@
-options {
-  STATIC=false;
-}
-
 PARSER_BEGIN(SelectionParser)
 
-package org.molgenis.api.data.v3;
+package org.molgenis.api.convert;
 
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.molgenis.api.model.Selection;
 
 class SelectionParser {
   SelectionParser(String str) {
