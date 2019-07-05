@@ -1,0 +1,104 @@
+  PARSER_BEGIN(SortParser)
+package org.molgenis.api.convert;
+
+import java.io.StringReader;
+import java.lang.IllegalArgumentException;
+import java.util.List;
+import java.util.ArrayList;
+import org.molgenis.api.model.Sort;
+import org.molgenis.api.model.Sort.Order;
+import org.molgenis.api.model.Sort.Order.Direction;
+
+class SortParser {
+  SortParser(String str) {
+    this(new StringReader(str));
+  }
+}
+
+  PARSER_END(SortParser)
+
+TOKEN: {
+    <ASCENDING: "+">
+  | <DESCENDING: "-">
+	| <#LETTER: ["a"-"z","A"-"Z"]>
+  |	<#DIGIT: ["0"-"9"]>
+  |	<UNDERSCORE: "_">
+  |	<HASH: "#">
+  |	<COMMA: ",">
+  | <IDENTIFIER: (<LETTER> | <DIGIT> | <UNDERSCORE> | <HASH>)+>
+}
+
+Sort parse() : {
+	Sort sort;
+}{
+	(
+	  sort = sort()
+  )
+	<EOF>
+	{
+	  return sort;
+  }
+}
+
+private Sort sort() : {
+  Order order;
+  List<Order> orders = new ArrayList<>();
+} {
+    order = order()
+    {
+      orders.add(order);
+    }
+    (
+      <COMMA>
+      order = order()
+      {
+        orders.add(order);
+      }
+    )*
+    {
+  return org.molgenis.api.model.Sort.create(orders);
+}
+}
+
+private Order order() : {
+  Direction direction = null;
+  String identifier;
+} {
+  (
+    direction = direction()
+  )?
+  identifier = identifier()
+  {
+    return Order.create(identifier, direction);
+  }
+}
+
+private Direction direction() : {
+  Direction direction;
+} {
+  (
+    direction = directionAscending()
+  | direction = directionDescending()
+  )
+  {
+    return direction;
+  }
+}
+
+private Direction directionAscending() : {
+} {
+  <ASCENDING>
+  { return Direction.ASC; }
+}
+
+private Direction directionDescending() : {
+} {
+  <DESCENDING>
+  { return Direction.DESC; }
+}
+
+private String identifier() : {
+} {
+  <IDENTIFIER>
+  { return token.image; }
+}

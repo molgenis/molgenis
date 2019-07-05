@@ -5,6 +5,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_MOLGENIS_UI;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
@@ -131,6 +132,10 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         .addResourceHandler(PATTERN_JS)
         .addResourceLocations("/js/", "classpath:/js/")
         .setCachePeriod(cachePeriod);
+    registry
+        .addResourceHandler(PATTERN_MOLGENIS_UI)
+        .addResourceLocations("/@molgenis-ui/", "classpath:/@molgenis-ui/")
+        .setCachePeriod(3600);
     registry
         .addResourceHandler(PATTERN_FONTS)
         .addResourceLocations("/fonts/", "classpath:/fonts/")

@@ -4,6 +4,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_MOLGENIS_UI;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
@@ -123,7 +124,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
                 new AntPathRequestMatcher(PATTERN_CSS),
                 new AntPathRequestMatcher(PATTERN_JS),
                 new AntPathRequestMatcher(PATTERN_IMG),
-                new AntPathRequestMatcher(PATTERN_FONTS)));
+                new AntPathRequestMatcher(PATTERN_FONTS),
+                new AntPathRequestMatcher(PATTERN_MOLGENIS_UI)));
 
     DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter =
         new DelegatingRequestMatcherHeaderWriter(matcher, new CacheControlHeadersWriter());
@@ -198,6 +200,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers(PATTERN_JS)
         .permitAll()
         .antMatchers(PATTERN_FONTS)
+        .permitAll()
+        .antMatchers(PATTERN_MOLGENIS_UI)
         .permitAll()
         .antMatchers("/html/**")
         .permitAll()
@@ -292,6 +296,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers(PATTERN_CSS)
         .antMatchers(PATTERN_IMG)
         .antMatchers(PATTERN_JS)
+        .antMatchers(PATTERN_MOLGENIS_UI)
         .antMatchers(PATTERN_FONTS);
   }
 

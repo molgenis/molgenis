@@ -7,10 +7,13 @@ DB_PASSWORD=molgenis
 ADMIN_PASSWORD=
 MAIL_USER=molgenis
 MAIL_PASSWORD=xxxx
+OPENCPU_HOST=opencpu.molgenis.org
+OPENCPU_PORT=443
+OPENCPU_SCHEME=https
 MINIO_BUCKET_NAME=molgenis
 MINIO_ENDPOINT=http://127.0.0.1:9000
-MINIO_ACCESS_KEY=
-MINIO_SECRET_KEY=
+MINIO_ACCESS_KEY=molgenis
+MINIO_SECRET_KEY=molgenis
 MINIO_REGION=
 
 echo "########################################"
@@ -36,12 +39,16 @@ then
       -e "s|__ADMIN_PASSWORD__|${ADMIN_PASSWORD}|" \
       -e "s|__MAIL_USER__|${MAIL_USER}|" \
       -e "s|__MAIL_PASSWORD__|${MAIL_PASSWORD}|" \
+      -e "s|__OPENCPU_HOST__|${OPENCPU_HOST}|" \
+      -e "s|__OPENCPU_PORT__|${OPENCPU_PORT}|" \
+      -e "s|__OPENCPU_SCHEME__|${OPENCPU_SCHEME}|" \
       -e "s|__MINIO_BUCKET_NAME__|${MINIO_BUCKET_NAME}|" \
       -e "s|__MINIO_ENDPOINT__|${MINIO_ENDPOINT}|" \
       -e "s|__MINIO_ACCESS_KEY__|${MINIO_ACCESS_KEY}|" \
       -e "s|__MINIO_SECRET_KEY__|${MINIO_SECRET_KEY}|" \
       -e "s|__MINIO_REGION__|${MINIO_REGION}|" \
       /usr/local/share/molgenis/templates/molgenis-server.properties > ${MOLGENIS_HOME}/molgenis-server.properties
+      chown molgenis:molgenis ${MOLGENIS_HOME}/molgenis-server.properties
 else
   echo "[INFO] molgenis-server.properties already exists"
 fi

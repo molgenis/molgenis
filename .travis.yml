@@ -22,7 +22,7 @@ before_install:
   - .ci/services/install-minio-6.sh
   - .ci/services/install-postgres-11.sh
   # Use wrapper script to install fixed maven version
-  - mvn -N io.takari:maven:wrapper -Dmaven=3.5.4
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.6.0
 install:
   - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:

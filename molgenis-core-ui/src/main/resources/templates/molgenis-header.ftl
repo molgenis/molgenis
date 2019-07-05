@@ -25,9 +25,9 @@
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
-        <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
-        <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global-ui.js"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
@@ -73,7 +73,7 @@
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
         <#-- Include molgenis-menu css -->
-        <link rel="stylesheet" href="<@resource_href "/js/menu/context.css"/>" type="text/css">
+        <link rel="stylesheet" href="/@molgenis-ui/menu/dist/context.css" type="text/css">
 
     </#if>
 
@@ -119,8 +119,7 @@
 
         <#-- Include the Vue version of the molgenis menu  -->
         <div id="molgenis-site-menu"></div>
-
-        <script type=text/javascript src="<@resource_href "/js/menu/context.umd.js"/>"></script>
+        <script type=text/javascript src="/@molgenis-ui/menu/dist/context.umd.js"></script>
     </#if>
 
 <#-- Start application content -->

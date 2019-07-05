@@ -11,7 +11,7 @@ then
   echo "[WARN] User 'molgenis' already exists"
 else
   groupadd molgenis
-  useradd molgenis -g molgenis
+  adduser molgenis -g molgenis --create-home
 fi
 
 TOMCAT_INSTALLED==$(rpm -qa | grep tomcat)

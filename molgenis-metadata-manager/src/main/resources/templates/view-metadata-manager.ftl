@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["metadata-manager/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 
 <@header css js version/>
@@ -18,8 +18,10 @@
         }
     </script>
 
-    <script type=text/javascript src="<@resource_href "/js/metadata-manager/manifest.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/metadata-manager/vendor.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/metadata-manager/app.js"/>"></script>
+    <link rel="stylesheet" href="/@molgenis-ui/metadata-manager/dist/css/app.css"/>
+
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/manifest.js"></script>
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/vendor.js"></script>
+    <script type=text/javascript src="/@molgenis-ui/metadata-manager/dist/js/app.js"></script>
 
 <@footer version/>

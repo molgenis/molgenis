@@ -158,14 +158,24 @@ public class AccountServiceImpl implements AccountService {
   }
 
   private String createActivatedEmailText(User user, String appName) {
-    return "Dear "
-        + user.getFirstName()
-        + " "
-        + user.getLastName()
-        + ",\n\n"
-        + "your registration request for "
-        + appName
-        + " was approved.\n"
-        + "Your account is now active.\n";
+    String firstName = user.getFirstName();
+    String lastName = user.getLastName();
+    if (firstName == null || firstName.isEmpty()) firstName = user.getUsername();
+    if (lastName == null || lastName.isEmpty()) lastName = null;
+    StringBuilder builder = new StringBuilder();
+    builder.append("Dear ");
+    builder.append(firstName);
+    if (lastName != null) {
+      builder.append(" ");
+      builder.append(lastName);
+    }
+    builder.append(",\n\n");
+    builder.append("Your registration request for ");
+    builder.append(appName);
+    builder.append(" was approved.\n");
+    builder.append("Your account is now active.\n\n");
+    builder.append("Kind regards,\n\n");
+    builder.append("Server administrator");
+    return builder.toString();
   }
 }
