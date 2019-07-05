@@ -13,6 +13,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -22,6 +23,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MolgenisRSQLTest extends AbstractMockitoTest {
+  @Mock private Repository<Entity> repository;
   @Mock private EntityType entityType;
   @Mock private EntityType genderEntityType;
   private MolgenisRSQL molgenisRSQL;
@@ -29,6 +31,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   @BeforeMethod
   public void beforeMethod() {
     molgenisRSQL = new MolgenisRSQL(new RSQLParser());
+    when(repository.getEntityType()).thenReturn(entityType);
   }
 
   @Test
@@ -38,19 +41,19 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(nameAttr).when(entityType).getAttribute("name");
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    Query<Entity> q = molgenisRSQL.createQuery("name==piet", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet", repository);
     assertEquals(q, new QueryImpl<>().eq("name", "piet"));
 
-    q = molgenisRSQL.createQuery("name=='piet paulusma'", entityType);
+    q = molgenisRSQL.createQuery("name=='piet paulusma'", repository);
     assertEquals(q, new QueryImpl<>().eq("name", "piet paulusma"));
 
-    q = molgenisRSQL.createQuery("age==87", entityType);
+    q = molgenisRSQL.createQuery("age==87", repository);
     assertEquals(q, new QueryImpl<>().eq("age", 87));
   }
 
   @Test(expectedExceptions = UnknownAttributeException.class)
   public void testUnknowAttribute() throws RSQLParserException {
-    molgenisRSQL.createQuery("nonexistingattribute==piet", entityType);
+    molgenisRSQL.createQuery("nonexistingattribute==piet", repository);
   }
 
   @Test
@@ -58,7 +61,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    Query<Entity> q = molgenisRSQL.createQuery("age>=87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("age>=87", repository);
     assertEquals(q, new QueryImpl<>().ge("age", 87));
   }
 
@@ -67,7 +70,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    Query<Entity> q = molgenisRSQL.createQuery("age>87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("age>87", repository);
     assertEquals(q, new QueryImpl<>().gt("age", 87));
   }
 
@@ -76,7 +79,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    Query<Entity> q = molgenisRSQL.createQuery("age<=87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("age<=87", repository);
     assertEquals(q, new QueryImpl<>().le("age", 87));
   }
 
@@ -85,7 +88,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    Query<Entity> q = molgenisRSQL.createQuery("age<87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("age<87", repository);
     assertEquals(q, new QueryImpl<>().lt("age", 87));
   }
 
@@ -98,10 +101,10 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
 
     // ';' and 'and' or synonyms
 
-    Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", repository);
     assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
 
-    q = molgenisRSQL.createQuery("name==piet;age==87", entityType);
+    q = molgenisRSQL.createQuery("name==piet;age==87", repository);
     assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
   }
 
@@ -114,10 +117,10 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
 
     // ',' and 'or' or synonyms
 
-    Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", repository);
     assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
 
-    q = molgenisRSQL.createQuery("name==piet,age==87", entityType);
+    q = molgenisRSQL.createQuery("name==piet,age==87", repository);
     assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
   }
 
@@ -126,7 +129,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
 
-    molgenisRSQL.createQuery("name>87", entityType);
+    molgenisRSQL.createQuery("name>87", repository);
   }
 
   @Test(expectedExceptions = NumberFormatException.class)
@@ -134,7 +137,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
-    molgenisRSQL.createQuery("age>bogus", entityType);
+    molgenisRSQL.createQuery("age>bogus", repository);
   }
 
   @Test
@@ -145,7 +148,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q =
-        molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityType);
+        molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", repository);
     assertEquals(
         q,
         new QueryImpl<>()
@@ -174,7 +177,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     when(genderAttr.getRefEntity()).thenReturn(genderEntityType);
     doReturn(genderAttr).when(entityType).getAttribute("gender");
 
-    Query<Entity> q = molgenisRSQL.createQuery("gender==2", entityType);
+    Query<Entity> q = molgenisRSQL.createQuery("gender==2", repository);
     assertEquals(q, new QueryImpl<>().eq("gender", 2));
   }
 }

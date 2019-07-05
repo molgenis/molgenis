@@ -12,6 +12,7 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -23,18 +24,27 @@ import org.molgenis.data.support.QueryImpl;
  * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> {
-  private final QueryImpl<Entity> q = new QueryImpl<>();
-  private final EntityType entityType;
+  private QueryImpl<Entity> q;
+  private final Repository<Entity> repository;
   private final RSQLValueParser rsqlValueParser = new RSQLValueParser();
 
-  public MolgenisRSQLVisitor(EntityType entityType) {
-    this.entityType = entityType;
+  public MolgenisRSQLVisitor(Repository<Entity> repository) {
+    this.repository = repository;
+  }
+
+  private void initQuery() {
+    if (q == null) {
+      q = new QueryImpl<>(repository);
+    }
   }
 
   @Override
   public Query<Entity> visit(AndNode node) {
-    q.nest(); // TODO only nest if more than one child
-
+    initQuery();
+    boolean nested = node.getChildren().size() > 1;
+    if (nested) {
+      q.nest();
+    }
     for (Iterator<Node> it = node.iterator(); it.hasNext(); ) {
       Node child = it.next();
       child.accept(this);
@@ -43,15 +53,19 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
         q.and();
       }
     }
-
-    q.unnest();
-
+    if (nested) {
+      q.unnest();
+    }
     return q;
   }
 
   @Override
   public Query<Entity> visit(OrNode node) {
-    q.nest(); // TODO only nest if more than one child
+    initQuery();
+    boolean nested = node.getChildren().size() > 1;
+    if (nested) {
+      q.nest();
+    }
 
     for (Iterator<Node> it = node.iterator(); it.hasNext(); ) {
       Node child = it.next();
@@ -61,14 +75,16 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
         q.or();
       }
     }
-
-    q.unnest();
+    if (nested) {
+      q.unnest();
+    }
 
     return q;
   }
 
   @Override
   public Query<Entity> visit(ComparisonNode node) {
+    initQuery();
     String attrName = node.getSelector();
     String symbol = node.getOperator().getSymbol();
     List<String> values = node.getArguments();
@@ -168,6 +184,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
   }
 
   private Attribute getAttribute(ComparisonNode node) {
+    EntityType entityType = repository.getEntityType();
     String attrName = node.getSelector();
 
     String[] attrTokens = attrName.split("\\.");

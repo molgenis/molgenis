@@ -27,9 +27,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.support.QueryImpl;
@@ -56,7 +56,7 @@ public class NegotiatorControllerTest {
   @Mock private UserPermissionEvaluator permissionService;
   @Mock private DataService dataService;
   @Mock private QueryRsqlConverter rsqlQueryConverter;
-  @Mock private EntityType entityType;
+  @Mock private Repository<Entity> repo;
   @Mock private NegotiatorEntityConfig negotiatorEntityConfig;
   @Mock private NegotiatorConfig negotiatorConfig;
   @Mock private QueryRsql queryRsql;
@@ -93,9 +93,8 @@ public class NegotiatorControllerTest {
     when(negotiatorEntityConfig.getNegotiatorConfig()).thenReturn(negotiatorConfig);
 
     /* get EntityCollection mock */
-    when(entityType.getId()).thenReturn("molgenis_id_1");
-    when(dataService.getEntityType("molgenis_id_1")).thenReturn(entityType);
-    when(queryRsql.createQuery(entityType)).thenReturn(molgenisQuery);
+    when(dataService.getRepository("molgenis_id_1")).thenReturn(repo);
+    when(queryRsql.createQuery(repo)).thenReturn(molgenisQuery);
     when(rsqlQueryConverter.convert("*=q=MOLGENIS")).thenReturn(queryRsql);
 
     LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -127,7 +126,7 @@ public class NegotiatorControllerTest {
     when(entity.getLabelValue()).thenReturn(entityOneLabel);
     when(entity.get("enabled")).thenReturn(true);
 
-    when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entity));
+    when(molgenisQuery.findAll()).thenReturn(Stream.of(entity));
     when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entity)).thenReturn(TRUE);
 
     ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
@@ -177,7 +176,7 @@ public class NegotiatorControllerTest {
     when(entity.getLabelValue()).thenReturn("Entity One");
     when(entity.get("enabled")).thenReturn(true);
 
-    when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.empty());
+    when(molgenisQuery.findAll()).thenReturn(Stream.empty());
 
     ExportValidationResponse actual = negotiatorController.validateNegotiatorExport(request);
     ExportValidationResponse expected =
@@ -208,8 +207,7 @@ public class NegotiatorControllerTest {
     when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
     when(entityDisabled.get("enabled")).thenReturn(false);
 
-    when(dataService.findAll("molgenis_id_1", molgenisQuery))
-        .thenReturn(Stream.of(entityEnabled, entityDisabled));
+    when(molgenisQuery.findAll()).thenReturn(Stream.of(entityEnabled, entityDisabled));
 
     when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityEnabled)).thenReturn(TRUE);
     when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
@@ -242,7 +240,7 @@ public class NegotiatorControllerTest {
     when(entityDisabled.getLabelValue()).thenReturn(entityDisabledLabel);
     when(entityDisabled.get("enabled")).thenReturn(false);
 
-    when(dataService.findAll("molgenis_id_1", molgenisQuery)).thenReturn(Stream.of(entityDisabled));
+    when(molgenisQuery.findAll()).thenReturn(Stream.of(entityDisabled));
 
     when(jsMagmaScriptEvaluator.eval("$(enabled).value()", entityDisabled)).thenReturn(FALSE);
 
@@ -326,7 +324,6 @@ public class NegotiatorControllerTest {
     when(permissionService.hasPermission(
             new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN))
         .thenReturn(false);
-    when(entityType.getId()).thenReturn("blah2");
 
     assertFalse(negotiatorController.showDirectoryButton("blah2"));
   }

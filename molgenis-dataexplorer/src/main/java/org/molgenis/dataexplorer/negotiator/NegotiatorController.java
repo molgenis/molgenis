@@ -17,8 +17,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.support.QueryImpl;
@@ -212,10 +212,10 @@ public class NegotiatorController extends PluginController {
   }
 
   private List<Entity> getCollectionEntities(NegotiatorRequest request) {
-    EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
+    Repository<Entity> repository = dataService.getRepository(request.getEntityId());
     Query<Entity> molgenisQuery =
-        rsqlQueryConverter.convert(request.getRsql()).createQuery(selectedEntityType);
-    return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
+        rsqlQueryConverter.convert(request.getRsql()).createQuery(repository);
+    return molgenisQuery.findAll().collect(toList());
   }
 
   private List<Entity> getDisabledCollections(

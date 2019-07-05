@@ -405,12 +405,12 @@ public class RestController {
       throws IOException {
     final Set<String> attributesSet = toAttributeSet(attributes);
 
-    EntityType meta;
+    Repository<Entity> repo;
     Iterable<Entity> entities;
     try {
-      meta = dataService.getEntityType(entityTypeId);
+      repo = dataService.getRepository(entityTypeId);
       Query<Entity> q =
-          new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+          new QueryStringParser(repo, molgenisRSQL).parseQueryString(req.getParameterMap());
 
       String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
       if (sortAttributeArray != null
@@ -464,6 +464,7 @@ public class RestController {
     }
 
     // Check attribute names
+    EntityType meta = repo.getEntityType();
     Iterable<String> attributesIterable =
         Iterables.transform(
             meta.getAtomicAttributes(), attribute -> attribute.getName().toLowerCase());

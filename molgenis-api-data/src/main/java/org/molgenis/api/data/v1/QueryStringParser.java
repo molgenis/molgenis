@@ -5,7 +5,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.web.rsql.MolgenisRSQL;
 
@@ -27,11 +27,11 @@ import org.molgenis.web.rsql.MolgenisRSQL;
  * <p>Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
  */
 public class QueryStringParser {
-  private final EntityType entityType;
+  private final Repository<Entity> repository;
   private final MolgenisRSQL molgenisRSQL;
 
-  public QueryStringParser(EntityType entityType, MolgenisRSQL molgenisRSQL) {
-    this.entityType = entityType;
+  public QueryStringParser(Repository<Entity> repository, MolgenisRSQL molgenisRSQL) {
+    this.repository = repository;
     this.molgenisRSQL = molgenisRSQL;
   }
 
@@ -48,7 +48,7 @@ public class QueryStringParser {
         } else if (paramName.equalsIgnoreCase("start")) {
           q.offset(DataConverter.toInt(paramValues[0]));
         } else if (paramName.equalsIgnoreCase("q")) {
-          Query<Entity> query = molgenisRSQL.createQuery(paramValues[0], entityType);
+          Query<Entity> query = molgenisRSQL.createQuery(paramValues[0], repository);
           for (QueryRule rule : query.getRules()) {
             q.addRule(rule);
           }
