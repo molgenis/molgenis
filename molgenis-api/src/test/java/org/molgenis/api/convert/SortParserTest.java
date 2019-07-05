@@ -1,39 +1,51 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.convert;
 
+import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.api.data.v3.Sort.Direction;
+import org.molgenis.api.model.Sort;
+import org.molgenis.api.model.Sort.Order;
+import org.molgenis.api.model.Sort.Order.Direction;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class SortParserTest {
 
   @Test
   public void testSort() throws ParseException {
-    assertEquals(new SortParser("+abc").parse(), new Sort().on("abc", Direction.ASC));
+    Assert.assertEquals(new SortParser("+abc").parse(), Sort.create("abc", Direction.ASC));
   }
 
   @Test
   public void testSortminus() throws ParseException {
-    assertEquals(new SortParser("-abc").parse(), new Sort().on("abc", Direction.DESC));
+    assertEquals(new SortParser("-abc").parse(), Sort.create("abc", Direction.DESC));
   }
 
   @Test
   public void testSortNoPrefix() throws ParseException {
-    assertEquals(new SortParser("abc").parse(), new Sort().on("abc", Direction.ASC));
+    assertEquals(new SortParser("abc").parse(), Sort.create("abc"));
   }
 
   @Test
   public void testSortPrefixCombi1() throws ParseException {
     assertEquals(
         new SortParser("+abc,-def,+ghi").parse(),
-        new Sort().on("abc", Direction.ASC).on("def", Direction.DESC).on("ghi", Direction.ASC));
+        Sort.create(
+            asList(
+                Order.create("abc", Direction.ASC),
+                Order.create("def", Direction.DESC),
+                Order.create("ghi", Direction.ASC))));
   }
 
   @Test
   public void testSortPrefixCombi2() throws ParseException {
     assertEquals(
         new SortParser("+abc,def,+ghi").parse(),
-        new Sort().on("abc", Direction.ASC).on("def", Direction.ASC).on("ghi", Direction.ASC));
+        Sort.create(
+            asList(
+                Order.create("abc", Direction.ASC),
+                Order.create("def"),
+                Order.create("ghi", Direction.ASC))));
   }
 
   @Test(expectedExceptions = ParseException.class)
@@ -61,9 +73,6 @@ public class SortParserTest {
     new SortParser(",abc").parse();
   }
 
-  // FIXME: anyway to cicumvent this exception and throw a ParseException instead
-  // this is caused by the fact that "" is allowed as sort prefix, and in will consume zero
-  // characters
   @Test(expectedExceptions = TokenMgrException.class)
   public void testSortillegal5() throws ParseException {
     new SortParser("*abc").parse();

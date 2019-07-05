@@ -3,6 +3,7 @@ package org.molgenis.api.data.v3;
 import java.util.Optional;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import org.molgenis.api.model.Sort;
 
 public class EntitiesRequest extends BaseEntityRequest {
   @Min(0)
