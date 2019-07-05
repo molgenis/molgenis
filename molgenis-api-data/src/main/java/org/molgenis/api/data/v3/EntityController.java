@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.model.Selection;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;

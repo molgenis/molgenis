@@ -1,11 +1,12 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.data.v3.Selection.EMPTY_SELECTION;
+import static org.molgenis.api.model.Selection.EMPTY_SELECTION;
 
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;

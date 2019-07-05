@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import java.util.Map;
+import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;

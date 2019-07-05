@@ -1,10 +1,11 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.convert;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.molgenis.api.model.Selection;
 import org.testng.annotations.Test;
 
 public class SelectionParserTest {
