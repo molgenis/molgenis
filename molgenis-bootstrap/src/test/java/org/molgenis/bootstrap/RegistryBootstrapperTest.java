@@ -15,6 +15,7 @@ import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.script.core.ScriptRunnerRegistrar;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.web.exception.ExceptionResponseGeneratorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.testng.annotations.BeforeMethod;
@@ -33,6 +34,7 @@ public class RegistryBootstrapperTest extends AbstractMockitoTest {
   @Mock private ImportServiceRegistrar importServiceRegistrar;
   @Mock private ScriptRunnerRegistrar scriptRunnerRegistrar;
   @Mock private JobFactoryRegistrar jobFactoryRegistrar;
+  @Mock private ExceptionResponseGeneratorRegistrar exceptionResponseGeneratorRegistrar;
   private RegistryBootstrapper registryBootstrapper;
 
   @BeforeMethod
@@ -47,12 +49,13 @@ public class RegistryBootstrapperTest extends AbstractMockitoTest {
             dynamicRepositoryDecoratorFactoryRegistrar,
             importServiceRegistrar,
             scriptRunnerRegistrar,
-            jobFactoryRegistrar);
+            jobFactoryRegistrar,
+            exceptionResponseGeneratorRegistrar);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testRegistryBootstrapper() {
-    new RegistryBootstrapper(null, null, null, null, null, null, null, null, null);
+    new RegistryBootstrapper(null, null, null, null, null, null, null, null, null, null);
   }
 
   @Test
@@ -71,5 +74,6 @@ public class RegistryBootstrapperTest extends AbstractMockitoTest {
     verify(importServiceRegistrar).register(event);
     verify(scriptRunnerRegistrar).register(event);
     verify(jobFactoryRegistrar).register(event);
+    verify(exceptionResponseGeneratorRegistrar).register(applicationContext);
   }
 }

@@ -107,6 +107,7 @@
     <jaxb-api.version>2.2.11</jaxb-api.version>
     <vcf-io.version>1.0.3</vcf-io.version>
     <minio.version>6.0.2</minio.version>
+    <zalando.problem.version>0.23.0</zalando.problem.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -260,7 +261,6 @@
             <additionalOptions>--allow-script-in-comments</additionalOptions>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>com.github.kongchen</groupId>
           <artifactId>swagger-maven-plugin</artifactId>
@@ -933,11 +933,15 @@
         <artifactId>jaxb-api</artifactId>
         <version>${jaxb-api.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
         <version>${minio.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.zalando</groupId>
+        <artifactId>problem</artifactId>
+        <version>${zalando.problem.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

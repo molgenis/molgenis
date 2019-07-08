@@ -17,21 +17,19 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermissionDeniedException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.exception.FallbackExceptionHandler;
-import org.molgenis.web.exception.GlobalControllerExceptionHandler;
-import org.molgenis.web.exception.SpringExceptionHandler;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.util.NestedServletException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -54,12 +53,6 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
   private MockMvc mockMvc;
 
   @Autowired private AppController appController;
-
-  @Autowired private FallbackExceptionHandler fallbackExceptionHandler;
-
-  @Autowired private SpringExceptionHandler springExceptionHandler;
-
-  @Autowired private GlobalControllerExceptionHandler globalControllerExceptionHandler;
 
   @Autowired private AppManagerService appManagerService;
 
@@ -117,11 +110,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
     when(appManagerService.getAppByName(appName)).thenReturn(appResponse);
 
     mockMvc =
-        MockMvcBuilders.standaloneSetup(appController)
-            .setControllerAdvice(
-                globalControllerExceptionHandler, fallbackExceptionHandler, springExceptionHandler)
-            .setLocaleResolver(localeResolver)
-            .build();
+        MockMvcBuilders.standaloneSetup(appController).setLocaleResolver(localeResolver).build();
   }
 
   @Test
@@ -136,11 +125,17 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
         .andExpect(view().name("view-app"));
   }
 
-  @Test
-  public void testServeAppNoPermissions() throws Exception {
+  @Test(
+      expectedExceptions = PluginPermissionDeniedException.class,
+      expectedExceptionsMessageRegExp = "pluginPermission: VIEW_PLUGIN, pluginId:app1")
+  public void testServeAppNoPermissions() throws Throwable {
     PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
     when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
-    mockMvc.perform(get(AppController.URI + "/app1/")).andExpect(status().isUnauthorized());
+    try {
+      mockMvc.perform(get(AppController.URI + "/app1/"));
+    } catch (NestedServletException e) {
+      throw e.getCause();
+    }
   }
 
   @Test
@@ -150,8 +145,10 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
     mockMvc.perform(get(AppController.URI + "/app1")).andExpect(status().is3xxRedirection());
   }
 
-  @Test
-  public void testServeAppInactiveApp() throws Exception {
+  @Test(
+      expectedExceptions = AppIsInactiveException.class,
+      expectedExceptionsMessageRegExp = "appName:app1")
+  public void testServeAppInactiveApp() throws Throwable {
     PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
     when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 
@@ -171,16 +168,11 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
     AppResponse appResponse = AppResponse.create(app);
     when(appManagerService.getAppByName("app1")).thenReturn(appResponse);
 
-    mockMvc
-        .perform(get(AppController.URI + "/app1/"))
-        .andExpect(status().is4xxClientError())
-        .andExpect(
-            model()
-                .attribute(
-                    "errorMessageResponse",
-                    ErrorMessageResponse.create(
-                        "Access denied for inactive app at location /app/app1", "AM07")))
-        .andExpect(view().name("view-exception"));
+    try {
+      mockMvc.perform(get(AppController.URI + "/app1/"));
+    } catch (NestedServletException e) {
+      throw e.getCause();
+    }
   }
 
   @Test
@@ -217,10 +209,10 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
           fileStore());
     }
 
-    @Bean
-    public GlobalControllerExceptionHandler globalControllerExceptionHandler() {
-      return new GlobalControllerExceptionHandler();
-    }
+    //    @Bean
+    //    public GlobalControllerExceptionHandler globalControllerExceptionHandler() {
+    //      return new GlobalControllerExceptionHandler();
+    //    }
 
     @Bean
     public AppManagerService appManagerService() {
@@ -247,14 +239,14 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
       return mock(UserPermissionEvaluator.class);
     }
 
-    @Bean
-    public FallbackExceptionHandler fallbackExceptionHandler() {
-      return new FallbackExceptionHandler();
-    }
-
-    @Bean
-    public SpringExceptionHandler springExceptionHandler() {
-      return new SpringExceptionHandler();
-    }
+    //    @Bean
+    //    public FallbackExceptionHandler fallbackExceptionHandler() {
+    //      return new FallbackExceptionHandler();
+    //    }
+    //
+    //    @Bean
+    //    public SpringExceptionHandler springExceptionHandler() {
+    //      return new SpringExceptionHandler();
+    //    }
   }
 }

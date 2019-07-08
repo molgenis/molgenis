@@ -15,11 +15,7 @@ import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
-import org.molgenis.web.exception.FallbackExceptionHandler;
-import org.molgenis.web.exception.GlobalControllerExceptionHandler;
-import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -43,9 +39,6 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
   private MockMvc mockMvc;
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
-  @Autowired private FallbackExceptionHandler fallbackExceptionHandler;
-  @Autowired private SpringExceptionHandler springExceptionHandler;
-  @Autowired private GlobalControllerExceptionHandler globalControllerExceptionHandler;
   @Autowired private Gson gson;
   @Mock private LocaleResolver localeResolver;
 
@@ -54,22 +47,7 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
   private SecurityContext previousContext;
 
   @Configuration
-  public static class Config {
-    @Bean
-    public GlobalControllerExceptionHandler globalControllerExceptionHandler() {
-      return new GlobalControllerExceptionHandler();
-    }
-
-    @Bean
-    public FallbackExceptionHandler fallbackExceptionHandler() {
-      return new FallbackExceptionHandler();
-    }
-
-    @Bean
-    public SpringExceptionHandler springExceptionHandler() {
-      return new SpringExceptionHandler();
-    }
-  }
+  public static class Config {}
 
   @BeforeMethod
   public void beforeMethod() {
@@ -79,8 +57,6 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
         MockMvcBuilders.standaloneSetup(uiContextController)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
             .setLocaleResolver(localeResolver)
-            .setControllerAdvice(
-                globalControllerExceptionHandler, fallbackExceptionHandler, springExceptionHandler)
             .build();
   }
 

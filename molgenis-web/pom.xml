@@ -14,6 +14,11 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-data</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -87,6 +92,10 @@
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.zalando</groupId>
+      <artifactId>problem</artifactId>
     </dependency>
     <!-- test dependencies -->
     <dependency>
