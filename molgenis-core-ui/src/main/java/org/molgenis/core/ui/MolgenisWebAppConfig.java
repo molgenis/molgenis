@@ -134,7 +134,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         .setCachePeriod(cachePeriod);
     registry
         .addResourceHandler(PATTERN_MOLGENIS_UI)
-        .addResourceLocations("/ui/", "classpath:/@molgenis-ui/")
+        .addResourceLocations("/ui/@molgenis-ui/", "classpath:/ui/@molgenis-ui/")
         .setCachePeriod(3600);
     registry
         .addResourceHandler(PATTERN_FONTS)

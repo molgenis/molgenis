@@ -72,7 +72,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/generated-resources/</outputDirectory>
+              <outputDirectory>${project.build.directory}/generated-resources/ui/</outputDirectory>
               <resources>
                 <resource>
                   <directory>node_modules</directory>
