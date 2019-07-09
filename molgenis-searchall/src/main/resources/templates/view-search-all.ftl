@@ -20,10 +20,10 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/searchall/dist/css/app.css"/>
+<link rel="stylesheet" href="/ui/@molgenis-ui/searchall/dist/css/app.css"/>
 
-<script type=text/javascript src="/@molgenis-ui/searchall/dist/js/manifest.js"></script>
-<script type=text/javascript src="/@molgenis-ui/searchall/dist/js/vendor.js"></script>
-<script type=text/javascript src="/@molgenis-ui/searchall/dist/js/app.js"></script>
+<script type=text/javascript src="/ui/@molgenis-ui/searchall/dist/js/manifest.js"></script>
+<script type=text/javascript src="/ui/@molgenis-ui/searchall/dist/js/vendor.js"></script>
+<script type=text/javascript src="/ui/@molgenis-ui/searchall/dist/js/app.js"></script>
 
 <@footer version/>

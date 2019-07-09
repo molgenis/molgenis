@@ -13,11 +13,11 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/scripts/dist/css/app.css"/>
-<link rel="stylesheet" href="/@molgenis-ui/scripts/dist/css/chunk-vendors.css"/>
+<link rel="stylesheet" href="/ui/@molgenis-ui/scripts/dist/css/app.css"/>
+<link rel="stylesheet" href="/ui/@molgenis-ui/scripts/dist/css/chunk-vendors.css"/>
 
 <@header css js version/>
     <div id="molgenis-scripts"></div>
-    <script type=text/javascript src="/@molgenis-ui/scripts/dist/js/chunk-vendors.js"></script>
-    <script type=text/javascript src="/@molgenis-ui/scripts/dist/js/app.js"></script>
+    <script type=text/javascript src="/ui/@molgenis-ui/scripts/dist/js/chunk-vendors.js"></script>
+    <script type=text/javascript src="/ui/@molgenis-ui/scripts/dist/js/app.js"></script>
 <@footer version/>
