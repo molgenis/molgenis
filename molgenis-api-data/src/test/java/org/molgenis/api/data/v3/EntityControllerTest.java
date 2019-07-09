@@ -7,11 +7,22 @@ import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.mockito.Mock;
+import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.model.Query;
+import org.molgenis.api.model.QueryRule.Operator;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
+import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,6 +33,7 @@ import org.testng.annotations.Test;
 public class EntityControllerTest extends AbstractMockitoTest {
   @Mock private DataServiceV3 dataServiceV3;
   @Mock private EntityMapper entityMapper;
+  @Mock private MessageSource messageSource;
   private EntityController entityController;
 
   @BeforeMethod
@@ -29,6 +41,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityController = new EntityController(dataServiceV3, entityMapper);
     RequestContextHolder.setRequestAttributes(
         new ServletRequestAttributes(new MockHttpServletRequest()));
+    MessageSourceHolder.setMessageSource(messageSource);
   }
 
   @SuppressWarnings("unchecked")
@@ -68,6 +81,40 @@ public class EntityControllerTest extends AbstractMockitoTest {
     assertEquals(entityController.getEntity(entityRequest), entityResponse);
   }
 
+  @Test
+  public void testGetEntities() {
+    String entityTypeId = "MyEntityTypeId";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.FULL_SELECTION;
+    Query query = new Query().addRule("field", Operator.EQUALS, Collections.singletonList("value"));
+    Sort sort = Sort.create("field", Direction.ASC);
+
+    EntitiesRequest entityRequest = new EntitiesRequest();
+    entityRequest.setEntityTypeId(entityTypeId);
+    entityRequest.setQ(query);
+    entityRequest.setSort(sort);
+    entityRequest.setFilter(filter);
+    entityRequest.setExpand(expand);
+    entityRequest.setSize(10);
+    entityRequest.setNumber(2);
+
+    List<Entity> entities = new ArrayList<>();
+    when(dataServiceV3.find(entityTypeId, query, sort, filter, expand, 10, 2)).thenReturn(entities);
+    when(dataServiceV3.count(entityTypeId, query)).thenReturn(30);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(entities)
+            .setPage(Page.builder().setOffset(20).setPageSize(10).setTotal(30).build())
+            .build();
+
+    EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
+    when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
+
+    assertEquals(entityController.getEntities(entityRequest), entitiesResponse);
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void testUpdateEntity() {
@@ -104,5 +151,22 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityController.deleteEntity(deleteEntityRequest);
 
     verify(dataServiceV3).delete(entityTypeId, entityId);
+  }
+
+  @Test
+  public void testDeleteEntities() {
+    String entityTypeId = "MyEntityTypeId";
+
+    Query query = new Query();
+    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
+
+    DeleteEntitiesRequest deleteEntitiesRequest = new DeleteEntitiesRequest();
+    deleteEntitiesRequest.setEntityTypeId(entityTypeId);
+    deleteEntitiesRequest.setQ(query);
+
+    entityController.deleteEntities(deleteEntitiesRequest);
+    QueryImpl molgenisQuery = new QueryImpl<>();
+    molgenisQuery.eq("test", "value");
+    verify(dataServiceV3).delete(entityTypeId, query);
   }
 }

@@ -1,0 +1,153 @@
+{
+  "links": {
+    "self": "http://localhost:8080/api/entity/v3_MyDataset"
+  },
+  "items": [
+    {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/5"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-05",
+        "myDateTime": "2000-01-04T21:02:03Z",
+        "myDecimal": 5.1,
+        "myInt": 5,
+        "myLong": 3000000005,
+        "myString": "String 5",
+        "myText": "Text 5",
+        "myXref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyNumbers/5"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyDataset/5/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 5,
+        "label": "Row 5"
+      }
+    },
+    {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/4"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-04",
+        "myDateTime": "2000-01-03T21:02:03Z",
+        "myDecimal": 4.1,
+        "myInt": 4,
+        "myLong": 3000000004,
+        "myString": "String 4",
+        "myText": "Text 4",
+        "myXref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyNumbers/4"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyDataset/4/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 4,
+        "label": "Row 4"
+      }
+    },
+    {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/3"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-03",
+        "myDateTime": "2000-01-02T21:02:03Z",
+        "myDecimal": 3.1,
+        "myInt": 3,
+        "myLong": 3000000003,
+        "myString": "String 3",
+        "myText": "Text 3",
+        "myXref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyNumbers/3"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyDataset/3/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 3,
+        "label": "Row 3"
+      }
+    },
+    {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/2"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-02",
+        "myDateTime": "2000-01-01T21:02:03Z",
+        "myDecimal": 2.1,
+        "myInt": 2,
+        "myLong": 3000000002,
+        "myString": "String 2",
+        "myText": "Text 2",
+        "myXref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyNumbers/2"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyDataset/2/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 2,
+        "label": "Row 2"
+      }
+    },
+    {
+      "links": {
+        "self": "http://localhost:8080/api/entity/v3_MyDataset/1"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-01",
+        "myDateTime": "1999-12-31T21:02:03Z",
+        "myDecimal": 1.1,
+        "myInt": 1,
+        "myLong": 3000000001,
+        "myString": "String 1",
+        "myText": "Text 1",
+        "myXref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyNumbers/1"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "http://localhost:8080/api/entity/v3_MyDataset/1/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 1,
+        "label": "Row 1"
+      }
+    }
+  ],
+  "page": {
+    "size": 5,
+    "totalElements": 5,
+    "totalPages": 1,
+    "number": 0
+  }
+}

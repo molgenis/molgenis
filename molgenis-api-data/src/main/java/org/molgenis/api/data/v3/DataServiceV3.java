@@ -1,7 +1,10 @@
 package org.molgenis.api.data.v3;
 
+import java.util.List;
 import java.util.Map;
+import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
@@ -60,4 +63,25 @@ interface DataServiceV3 {
    * @throws UnknownEntityException if no entity exists for the given entity identifier
    */
   void delete(String entityTypeId, String entityId);
+
+  /**
+   * Delete one entity.
+   *
+   * @param entityTypeId entity type identifier
+   * @param query query specifing which
+   * @throws UnknownRepositoryException if no repository exists for the given entity type identifier
+   * @throws UnknownEntityException if no entity exists for the given entity identifier
+   */
+  void delete(String entityTypeId, Query query);
+
+  List<Entity> find(
+      String entityTypeId,
+      Query q,
+      Sort sort,
+      Selection filter,
+      Selection expand,
+      int size,
+      int number);
+
+  int count(String entityTypeId, Query query);
 }

@@ -17,4 +17,9 @@ public class DataApiV3Config implements WebMvcConfigurer {
   public SelectionConverter selectionConverter() {
     return new SelectionConverter();
   }
+
+  @Bean
+  public QueryV3Mapper queryV3Mapper() {
+    return new QueryV3Mapper();
+  }
 }

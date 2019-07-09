@@ -3,6 +3,7 @@ package org.molgenis.api.data.v3;
 import java.util.Optional;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 
 public class EntitiesRequest extends BaseEntityRequest {
@@ -14,8 +15,8 @@ public class EntitiesRequest extends BaseEntityRequest {
   private int size = 100;
 
   private Sort sort;
-  // TODO RSQL query
-  private String q;
+
+  private Query q;
 
   public int getNumber() {
     return number;
@@ -41,11 +42,11 @@ public class EntitiesRequest extends BaseEntityRequest {
     this.sort = sort;
   }
 
-  public Optional<String> getQ() {
+  public Optional<Query> getQ() {
     return Optional.ofNullable(q);
   }
 
-  public void setQ(String q) {
+  public void setQ(Query q) {
     this.q = q;
   }
 }
