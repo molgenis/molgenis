@@ -4,7 +4,6 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.BAD_REQUEST;
-import static org.molgenis.api.tests.utils.RestTestUtils.FORBIDDEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.NOT_FOUND;
 import static org.molgenis.api.tests.utils.RestTestUtils.NO_CONTENT;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;

@@ -7,7 +7,6 @@ import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_HOST;
-import static org.molgenis.api.tests.utils.RestTestUtils.FORBIDDEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.NO_CONTENT;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
