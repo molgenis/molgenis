@@ -14,6 +14,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.COUNT;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
+import static org.molgenis.api.tests.utils.RestTestUtils.UNAUTHORIZED;
 import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
@@ -345,7 +346,7 @@ public class RestControllerV2IT {
         .when()
         .get(API_V2 + "sys_App?aggs=x==isActive")
         .then()
-        .statusCode(FORBIDDEN);
+        .statusCode(UNAUTHORIZED);
     // @formatter:on
   }
 

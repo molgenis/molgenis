@@ -141,7 +141,7 @@ public class RestControllerIT {
         .when()
         .delete(PATH + "sys_scr_ScriptType/R")
         .then()
-        .statusCode(FORBIDDEN)
+        .statusCode(UNAUTHORIZED)
         .body(
             "errors.message[0]",
             equalTo(
