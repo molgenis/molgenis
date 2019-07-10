@@ -57,7 +57,7 @@ class ExceptionHandlerFacadeImpl implements ExceptionHandlerFacade {
 
     ExceptionResponseGenerator<?> responseGenerator =
         responseGeneratorRegistry.getExceptionResponseGenerator(responseType);
-    return responseGenerator.createExceptionResponse(exception, httpStatus, isLogStackTraces());
+    return responseGenerator.createExceptionResponse(exception, httpStatus, isDevEnvironment());
   }
 
   private void logException(Exception exception, HttpStatus httpStatus) {
@@ -68,7 +68,7 @@ class ExceptionHandlerFacadeImpl implements ExceptionHandlerFacade {
     }
   }
 
-  private boolean isLogStackTraces() {
+  private boolean isDevEnvironment() {
     return "development".equals(environment);
   }
 

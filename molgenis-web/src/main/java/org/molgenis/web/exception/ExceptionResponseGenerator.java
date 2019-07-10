@@ -6,5 +6,11 @@ interface ExceptionResponseGenerator<T> {
 
   ExceptionResponseType getType();
 
-  T createExceptionResponse(Exception exception, HttpStatus httpStatus, boolean isLogStackTrace);
+  /**
+   * @param exception exception for which to create a response
+   * @param httpStatus HTTP response status code
+   * @param isDevEnvironment whether development environment or not (e.g. to log stack traces)
+   * @return exception response (e.g. ResponseEntity or ModelAndView)
+   */
+  T createExceptionResponse(Exception exception, HttpStatus httpStatus, boolean isDevEnvironment);
 }

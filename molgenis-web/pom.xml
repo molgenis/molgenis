@@ -93,10 +93,6 @@
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.zalando</groupId>
-      <artifactId>problem</artifactId>
-    </dependency>
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>

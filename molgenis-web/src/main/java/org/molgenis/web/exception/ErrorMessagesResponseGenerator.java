@@ -28,7 +28,7 @@ class ErrorMessagesResponseGenerator
 
   @Override
   public ResponseEntity<ErrorMessageResponse> createExceptionResponse(
-      Exception exception, HttpStatus httpStatus, boolean isLogStackTrace) {
+      Exception exception, HttpStatus httpStatus, boolean isDevEnvironment) {
     String errorCode = ExceptionUtils.getErrorCode(exception).orElse(null);
     ErrorMessageResponse errorMessageResponse = createErrorMessageResponse(exception, errorCode);
     return new ResponseEntity<>(errorMessageResponse, httpStatus);

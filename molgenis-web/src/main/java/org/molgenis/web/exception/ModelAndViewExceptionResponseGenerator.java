@@ -21,7 +21,7 @@ class ModelAndViewExceptionResponseGenerator implements ExceptionResponseGenerat
 
   @Override
   public ModelAndView createExceptionResponse(
-      Exception exception, HttpStatus httpStatus, boolean isLogStackTrace) {
+      Exception exception, HttpStatus httpStatus, boolean isDevEnvironment) {
     String errorCode = ExceptionUtils.getErrorCode(exception).orElse(null);
     ErrorMessageResponse errorMessageResponse =
         ErrorMessagesResponseGenerator.createErrorMessageResponse(exception, errorCode);
@@ -29,7 +29,7 @@ class ModelAndViewExceptionResponseGenerator implements ExceptionResponseGenerat
     Map<String, Object> model = new HashMap<>();
     model.put(KEY_ERROR_MESSAGE_RESPONSE, errorMessageResponse);
     model.put(KEY_HTTP_STATUS_CODE, httpStatus.value());
-    if (isLogStackTrace) {
+    if (isDevEnvironment) {
       model.put(KEY_STACK_TRACE, exception.getStackTrace());
     }
     return new ModelAndView(VIEW_EXCEPTION, model, httpStatus);

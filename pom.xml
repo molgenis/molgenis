@@ -107,7 +107,6 @@
     <jaxb-api.version>2.2.11</jaxb-api.version>
     <vcf-io.version>1.0.3</vcf-io.version>
     <minio.version>6.0.2</minio.version>
-    <zalando.problem.version>0.23.0</zalando.problem.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
