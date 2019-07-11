@@ -32,7 +32,6 @@ public class RestConfig implements WebMvcConfigurer {
     return new AttributeFilterConverter();
   }
 
-  @Bean
   public SortConverter sortConverter() {
     return new SortConverter();
   }

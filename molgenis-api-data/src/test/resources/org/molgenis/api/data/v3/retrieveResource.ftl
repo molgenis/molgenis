@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/entity/v3_MyDataset/25"
+    "self": "${API_TEST_HOST}/api/entity/v3_MyDataset/25"
   },
   "data": {
     "myBool": true,
@@ -13,12 +13,12 @@
     "myText": "Text 25",
     "myXref": {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyNumbers/5"
+        "self": "${API_TEST_HOST}/api/entity/v3_MyNumbers/5"
       }
     },
     "myMref": {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/25/myMref"
+        "self": "${API_TEST_HOST}/api/entity/v3_MyDataset/25/myMref"
       }
     },
     "myComputed": "static",

@@ -14,6 +14,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import freemarker.template.Configuration;
 import io.restassured.RestAssured;
 import java.io.IOException;
 import net.minidev.json.JSONArray;
@@ -43,6 +44,8 @@ import org.testng.annotations.Test;
 // 13 de REST hack
 public class EntityControllerIT extends AbstractApiTest {
   private static final Logger LOG = getLogger(EntityControllerIT.class);
+  private Configuration freemarker =
+      getFreemarkerConfig(ResourceUtils.getFile(this.getClass(), ""));
 
   @BeforeClass
   public static void setUpBeforeClass() {
@@ -53,9 +56,9 @@ public class EntityControllerIT extends AbstractApiTest {
 
   @AfterClass
   public static void tearDownAfterClass() {
-    AbstractApiTest.tearDownAfterClass();
-
     // deleteData();
+
+    AbstractApiTest.tearDownAfterClass();
   }
 
   // 1. location header
@@ -98,8 +101,7 @@ public class EntityControllerIT extends AbstractApiTest {
   // exc: no permission to read entity type
   @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResource() throws IOException {
-    String expectedJson = ResourceUtils.getString(getClass(), "retrieveResource.json");
-
+    String expectedJson = getProcessedTemplate("retrieveResource.ftl", freemarker);
     given()
         .get("/api/entity/v3_MyDataset/25")
         .then()
@@ -148,7 +150,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .then()
         .statusCode(NO_CONTENT.value());
 
-    String expectedJson = ResourceUtils.getString(getClass(), "updateResource.json");
+    String expectedJson = ResourceUtils.getString(getClass(), "updateResource.ftl");
 
     given()
         .get("/api/entity/v3_MyDataset/25")
