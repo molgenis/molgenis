@@ -937,11 +937,6 @@
         <artifactId>minio</artifactId>
         <version>${minio.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.zalando</groupId>
-        <artifactId>problem</artifactId>
-        <version>${zalando.problem.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
