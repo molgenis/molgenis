@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import org.molgenis.api.convert.QueryConverter;
+import org.molgenis.api.convert.QueryRsqlVisitor;
 import org.molgenis.api.convert.SortConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,7 @@ public class ApiConfig implements WebMvcConfigurer {
 
   @Bean
   public QueryConverter query() {
-    return new QueryConverter(rsqlParser);
+    return new QueryConverter(rsqlParser, new QueryRsqlVisitor());
   }
 
   @Override

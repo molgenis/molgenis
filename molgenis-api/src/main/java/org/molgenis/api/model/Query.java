@@ -1,89 +1,79 @@
 package org.molgenis.api.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import com.google.auto.value.AutoValue;
 import java.util.List;
-import java.util.Objects;
-import org.molgenis.api.model.QueryRule.Operator;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
-public class Query {
-  private final List<List<QueryRule>> rules = new ArrayList<>();
-
-  public Query() {
-    this.rules.add(new ArrayList<>());
+@AutoValue
+public abstract class Query {
+  public enum Operator {
+    /** item: not-null value: String */
+    EQUALS,
+    /** item: not-null value: String */
+    NOT_EQUALS,
+    /** item: not-null value: String List */
+    IN,
+    /** item: not-null value: String List */
+    NOT_IN,
+    /** field: null/not-null value: String */
+    MATCHES,
+    /** field: not-null value: String */
+    CONTAINS,
+    /** field: not-null value: String */
+    LESS_THAN,
+    /** field: not-null value: String */
+    LESS_THAN_OR_EQUAL_TO,
+    /** field: not-null value: String */
+    GREATER_THAN,
+    /** field: not-null value: String */
+    GREATER_THAN_OR_EQUAL_TO,
+    /** field: null value: Query List */
+    AND,
+    /** field: null value: Query List */
+    OR
   }
 
-  public List<QueryRule> getRules() {
-    if (this.rules.size() > 1)
-      throw new IllegalArgumentException("Nested query not closed, use unnest() or unnestAll()");
+  @Nullable
+  @CheckForNull
+  public abstract String getItem();
 
-    if (!this.rules.isEmpty()) {
-      List<QueryRule> queryRules = this.rules.get(this.rules.size() - 1);
+  public abstract Operator getOperator();
 
-      return Collections.unmodifiableList(queryRules);
-    } else return Collections.emptyList();
+  @Nullable
+  @CheckForNull
+  public abstract Object getValue();
+
+  public String getStringValue() {
+    return (String) getValue(); // TODO check if operator matches
   }
 
-  public Query or() {
-    rules.get(this.rules.size() - 1).add(new QueryRule(Operator.OR));
-    return this;
+  public List<String> getStringListValue() {
+    return (List<String>) getValue(); // TODO check if operator matches
   }
 
-  public Query and() {
-    rules.get(this.rules.size() - 1).add(new QueryRule(Operator.AND));
-    return this;
+  public List<Query> getQueryListValue() {
+    return (List<Query>) getValue(); // TODO check if operator matches
   }
 
-  public Query not() {
-    rules.get(this.rules.size() - 1).add(new QueryRule(Operator.NOT));
-    return this;
+  public static Query create(String newItem, Operator newOperator, Object newValue) {
+    return builder().setItem(newItem).setOperator(newOperator).setValue(newValue).build();
   }
 
-  public Query nest() {
-    // add element to our nesting list...
-    this.rules.add(new ArrayList<>());
-    return this;
+  public static Builder builder() {
+    // TODO assert that value type matches operator
+    return new AutoValue_Query.Builder();
   }
 
-  public Query unnest() {
-    if (this.rules.size() == 1)
-      throw new IllegalArgumentException("Cannot unnest root element of query");
+  @AutoValue.Builder
+  public abstract static class Builder {
 
-    // remove last element and add to parent as nested rule
-    QueryRule nested = new QueryRule(this.rules.get(this.rules.size() - 1));
-    this.rules.remove(this.rules.get(this.rules.size() - 1));
-    this.rules.get(this.rules.size() - 1).add(nested);
-    return this;
-  }
+    public abstract Builder setItem(String newItem);
 
-  public Query addRule(String field, Operator operator, List<String> values) {
-    rules.get(this.rules.size() - 1).add(new QueryRule(field, operator, values));
-    return this;
-  }
+    public abstract Builder setOperator(Operator newOperator);
 
-  public void search(List<String> values) {
-    rules.get(this.rules.size() - 1).add(new QueryRule(Operator.SEARCH, values));
-  }
+    public abstract Builder setValue(Object newValue);
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Query query = (Query) o;
-    return getRules().equals(query.getRules());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getRules());
-  }
-
-  @Override
-  public String toString() {
-    return "Query{" + "rules=" + rules + '}';
+    public abstract Query build();
   }
 }

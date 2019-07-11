@@ -1,14 +1,14 @@
 package org.molgenis.api.data.v3;
 
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
+import org.mockito.Mock;
 import org.molgenis.api.model.Query;
-import org.molgenis.api.model.QueryRule.Operator;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
@@ -18,328 +18,306 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.web.rsql.RSQLValueParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class QueryV3MapperTest extends AbstractMockitoTest {
-
+  @Mock private RSQLValueParser rsqlValueParser;
   private QueryV3Mapper queryMapper;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    queryMapper = new QueryV3Mapper();
+    queryMapper = new QueryV3Mapper(rsqlValueParser);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testQueryV3Mapper() {
+    new QueryV3Mapper(null);
   }
 
   @Test
-  public void testMapStringEquals() {
-    Query query = new Query();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
+  public void testMapEquals() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.EQUALS).setValue(value).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute);
+    Object parsedValue = mock(Object.class);
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.eq("test", "value");
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).eq("test", parsedValue));
   }
 
   @Test
-  public void testMapStringLike() {
-    Query query = new Query();
-    query.addRule("test", Operator.LIKE, Collections.singletonList("value"));
+  public void testMapEqualsNull() {
+    Query query = Query.builder().setItem("test").setOperator(Operator.EQUALS).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute);
+    when(rsqlValueParser.parse(null, attribute)).thenReturn(null);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.like("test", "value");
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(queryMapper.map(query, repository), new QueryImpl<>(repository).eq("test", null));
   }
 
   @Test
-  public void testMapStringSearch() {
-    Query query = new Query();
-    query.addRule("test", Operator.SEARCH, Collections.singletonList("value"));
+  public void testMapNotEquals() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.NOT_EQUALS).setValue(value).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute);
+    Object parsedValue = mock(Object.class);
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.search("test", "value");
-
-    assertEquals(queryMapper.map(query, repo), expected);
-  }
-
-  @Test
-  public void testMapStringSearchNoAttr() {
-    Query query = new Query();
-    query.search(Collections.singletonList("value"));
-
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    QueryImpl expected = new QueryImpl<>();
-    expected.search("value");
-
-    assertEquals(queryMapper.map(query, repo), expected);
-  }
-
-  @Test
-  public void testMapRange() {
-    Query query = new Query();
-    query.addRule("test", Operator.RANGE, Arrays.asList("1.1", "4"));
-
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.DECIMAL);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    QueryImpl expected = new QueryImpl<>();
-    expected.rng("test", 1.1, 4.0);
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository),
+        new QueryImpl<>(repository).not().eq("test", parsedValue));
   }
 
   @Test
   public void testMapIn() {
-    Query query = new Query();
-    query.addRule("test", Operator.IN, Arrays.asList("test", "test2"));
+    String value0 = "value0";
+    String value1 = "value1";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.IN)
+            .setValue(asList(value0, value1))
+            .build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute);
+    Object parsedValue0 = mock(Object.class);
+    doReturn(parsedValue0).when(rsqlValueParser).parse(value0, attribute);
+    Object parsedValue1 = mock(Object.class);
+    doReturn(parsedValue1).when(rsqlValueParser).parse(value1, attribute);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.in("test", Arrays.asList("test", "test2"));
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository),
+        new QueryImpl<>(repository).in("test", asList(parsedValue0, parsedValue1)));
   }
 
   @Test
-  public void testMapGt() {
-    Query query = new Query();
-    query.addRule("test", Operator.GREATER, Collections.singletonList("3"));
+  public void testMapNotIn() {
+    String value0 = "value0";
+    String value1 = "value1";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.NOT_IN)
+            .setValue(asList(value0, value1))
+            .build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.INT);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute);
+    Object parsedValue0 = mock(Object.class);
+    doReturn(parsedValue0).when(rsqlValueParser).parse(value0, attribute);
+    Object parsedValue1 = mock(Object.class);
+    doReturn(parsedValue1).when(rsqlValueParser).parse(value1, attribute);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.gt("test", 3);
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository),
+        new QueryImpl<>(repository).not().in("test", asList(parsedValue0, parsedValue1)));
   }
 
   @Test
-  public void testMapGe() {
-    Query query = new Query();
-    query.addRule("test", Operator.GREATER_EQUAL, Collections.singletonList("2019-01-01"));
+  public void testMapMatches() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.MATCHES).setValue(value).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.DATE);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.ge("test", parseLocalDate("2019-01-01"));
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).search("test", value));
   }
 
   @Test
-  public void testMapLe() {
-    Query query = new Query();
-    query.addRule("test", Operator.LESS_EQUAL, Collections.singletonList("3"));
+  public void testMapMatchesAllAttributes() {
+    String value = "value";
+    Query query = Query.builder().setOperator(Operator.MATCHES).setValue(value).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.INT);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.le("test", 3);
-
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(queryMapper.map(query, repository), new QueryImpl<>(repository).search(value));
   }
 
   @Test
-  public void testMapLt() {
-    Query query = new Query();
-    query.addRule("test", Operator.LESS, Collections.singletonList("2019-01-01"));
+  public void testMapContains() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.CONTAINS).setValue(value).build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.DATE);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.lt("test", parseLocalDate("2019-01-01"));
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).like("test", value));
+  }
 
-    assertEquals(queryMapper.map(query, repo), expected);
+  @Test
+  public void testMapLessThan() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.LESS_THAN).setValue(value).build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.INT);
+    Object parsedValue = "parsedValue";
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
+
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).lt("test", parsedValue));
+  }
+
+  @Test
+  public void testMapLessThanOrEqualTo() {
+    String value = "value";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.LESS_THAN_OR_EQUAL_TO)
+            .setValue(value)
+            .build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.INT);
+    Object parsedValue = "parsedValue";
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
+
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).le("test", parsedValue));
+  }
+
+  @Test
+  public void testMapGreaterThan() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.GREATER_THAN).setValue(value).build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.INT);
+    Object parsedValue = "parsedValue";
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
+
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).gt("test", parsedValue));
+  }
+
+  @Test
+  public void testMapGreaterThanOrEqualTo() {
+    String value = "value";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.GREATER_THAN_OR_EQUAL_TO)
+            .setValue(value)
+            .build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.INT);
+    Object parsedValue = "parsedValue";
+    when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
+
+    assertEquals(
+        queryMapper.map(query, repository), new QueryImpl<>(repository).ge("test", parsedValue));
   }
 
   @Test
   public void testMapAnd() {
-    Query query = new Query();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
-    query.and();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value2"));
+    String value0 = "value0";
+    String value1 = "value1";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.AND)
+            .setValue(
+                asList(
+                    Query.builder().setOperator(Operator.MATCHES).setValue(value0).build(),
+                    Query.builder().setOperator(Operator.MATCHES).setValue(value1).build()))
+            .build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.eq("test", "value");
-    expected.and();
-    expected.eq("test", "value2");
-    assertEquals(queryMapper.map(query, repo), expected);
+    assertEquals(
+        queryMapper.map(query, repository),
+        new QueryImpl<>(repository).nest().search(value0).and().search(value1).unnest());
   }
 
   @Test
   public void testMapOr() {
-    Query query = new Query();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
-    query.or();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value2"));
+    String value0 = "value0";
+    String value1 = "value1";
+    Query query =
+        Query.builder()
+            .setItem("test")
+            .setOperator(Operator.OR)
+            .setValue(
+                asList(
+                    Query.builder().setOperator(Operator.MATCHES).setValue(value0).build(),
+                    Query.builder().setOperator(Operator.MATCHES).setValue(value1).build()))
+            .build();
 
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
 
-    QueryImpl expected = new QueryImpl<>();
-    expected.eq("test", "value");
-    expected.or();
-    expected.eq("test", "value2");
-    assertEquals(queryMapper.map(query, repo), expected);
-  }
-
-  @Test
-  public void testMapNot() {
-    Query query = new Query();
-    query.not();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value2"));
-
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    QueryImpl expected = new QueryImpl<>();
-    expected.not();
-    expected.eq("test", "value2");
-    assertEquals(queryMapper.map(query, repo), expected);
-  }
-
-  @Test
-  public void testMapNested() {
-    Query query = new Query();
-    query.nest();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
-    query.and();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value2"));
-    query.unnest();
-
-    EntityType entityType = mock(EntityType.class);
-    Attribute attr = mock(Attribute.class);
-    when(attr.getDataType()).thenReturn(AttributeType.STRING);
-    when(entityType.getAttribute("test")).thenReturn(attr);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    QueryImpl expected = new QueryImpl<>();
-    expected.nest().eq("test", "value").and().eq("test", "value2").unnest();
-    assertEquals(queryMapper.map(query, repo), expected);
-  }
-
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testMapShould() {
-    Query query = new Query();
-    query.addRule("test", Operator.SHOULD, Collections.singletonList("value2"));
-
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    queryMapper.map(query, repo);
-  }
-
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testMapDisMax() {
-    Query query = new Query();
-    query.addRule("test", Operator.DIS_MAX, Collections.singletonList("value2"));
-
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    queryMapper.map(query, repo);
-  }
-
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testMapFuzzyMatch() {
-    Query query = new Query();
-    query.addRule("test", Operator.FUZZY_MATCH, Collections.singletonList("value2"));
-
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    queryMapper.map(query, repo);
-  }
-
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testMapNGram() {
-    Query query = new Query();
-    query.addRule("test", Operator.FUZZY_MATCH_NGRAM, Collections.singletonList("value2"));
-
-    EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
-
-    queryMapper.map(query, repo);
+    assertEquals(
+        queryMapper.map(query, repository),
+        new QueryImpl<>(repository).nest().search(value0).or().search(value1).unnest());
   }
 
   @Test(expectedExceptions = UnknownAttributeException.class)
-  public void testMapUnknownAttr() {
-    Query query = new Query();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value2"));
+  public void testMapEqualsUnknownAttribute() {
+    String value = "value";
+    Query query =
+        Query.builder()
+            .setItem("unknownAttribute")
+            .setOperator(Operator.EQUALS)
+            .setValue(value)
+            .build();
+
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+
+    queryMapper.map(query, repository);
+  }
+
+  @Test(expectedExceptions = UnexpectedEnumException.class)
+  public void testMapCompoundAttribute() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.EQUALS).setValue(value).build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.COMPOUND);
+
+    queryMapper.map(query, repository);
+  }
+
+  private Repository<Entity> createMockRepository(Attribute attribute) {
+    return createMockRepository(attribute, AttributeType.STRING);
+  }
+
+  private Repository<Entity> createMockRepository(
+      Attribute attribute, AttributeType attributeType) {
+    when(attribute.getDataType()).thenReturn(attributeType);
 
     EntityType entityType = mock(EntityType.class);
-    Repository<Entity> repo = mock(Repository.class);
-    when(repo.getEntityType()).thenReturn(entityType);
+    when(entityType.getAttribute("test")).thenReturn(attribute);
 
-    queryMapper.map(query, repo);
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+
+    return repository;
   }
 }

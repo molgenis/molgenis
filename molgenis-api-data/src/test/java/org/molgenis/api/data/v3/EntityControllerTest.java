@@ -1,5 +1,6 @@
 package org.molgenis.api.data.v3;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -7,14 +8,17 @@ import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.mockito.Mock;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
+import org.molgenis.api.data.v3.model.DeleteEntityRequest;
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
+import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
+import org.molgenis.api.data.v3.model.ReadEntityRequest;
 import org.molgenis.api.model.Query;
-import org.molgenis.api.model.QueryRule.Operator;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.Sort.Order.Direction;
@@ -67,7 +71,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.FULL_SELECTION;
 
-    EntityRequest entityRequest = new EntityRequest();
+    ReadEntityRequest entityRequest = new ReadEntityRequest();
     entityRequest.setEntityTypeId(entityTypeId);
     entityRequest.setEntityId(entityId);
     entityRequest.setFilter(filter);
@@ -86,10 +90,10 @@ public class EntityControllerTest extends AbstractMockitoTest {
     String entityTypeId = "MyEntityTypeId";
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.FULL_SELECTION;
-    Query query = new Query().addRule("field", Operator.EQUALS, Collections.singletonList("value"));
+    Query query = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     Sort sort = Sort.create("field", Direction.ASC);
 
-    EntitiesRequest entityRequest = new EntitiesRequest();
+    ReadEntitiesRequest entityRequest = new ReadEntitiesRequest();
     entityRequest.setEntityTypeId(entityTypeId);
     entityRequest.setQ(query);
     entityRequest.setSort(sort);
@@ -98,14 +102,14 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityRequest.setSize(10);
     entityRequest.setNumber(2);
 
-    List<Entity> entities = new ArrayList<>();
-    when(dataServiceV3.find(entityTypeId, query, sort, filter, expand, 10, 2)).thenReturn(entities);
-    when(dataServiceV3.count(entityTypeId, query)).thenReturn(30);
+    Entities entities = Entities.create(emptyList(), 30);
+    when(dataServiceV3.findAll(entityTypeId, query, filter, expand, sort, 10, 2))
+        .thenReturn(entities);
 
     EntityCollection entityCollection =
         EntityCollection.builder()
             .setEntityTypeId(entityTypeId)
-            .setEntities(entities)
+            .setEntities(emptyList())
             .setPage(Page.builder().setOffset(20).setPageSize(10).setTotal(30).build())
             .build();
 
@@ -157,8 +161,8 @@ public class EntityControllerTest extends AbstractMockitoTest {
   public void testDeleteEntities() {
     String entityTypeId = "MyEntityTypeId";
 
-    Query query = new Query();
-    query.addRule("test", Operator.EQUALS, Collections.singletonList("value"));
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.MATCHES).setValue("value").build();
 
     DeleteEntitiesRequest deleteEntitiesRequest = new DeleteEntitiesRequest();
     deleteEntitiesRequest.setEntityTypeId(entityTypeId);
@@ -167,6 +171,6 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityController.deleteEntities(deleteEntitiesRequest);
     QueryImpl molgenisQuery = new QueryImpl<>();
     molgenisQuery.eq("test", "value");
-    verify(dataServiceV3).delete(entityTypeId, query);
+    verify(dataServiceV3).deleteAll(entityTypeId, query);
   }
 }

@@ -1,162 +1,155 @@
 package org.molgenis.api.data.v3;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.api.model.QueryRule.Operator.GREATER;
-import static org.molgenis.api.model.QueryRule.Operator.GREATER_EQUAL;
-import static org.molgenis.api.model.QueryRule.Operator.LESS;
-import static org.molgenis.api.model.QueryRule.Operator.LESS_EQUAL;
-import static org.molgenis.api.model.QueryRule.Operator.RANGE;
 
+import java.util.Iterator;
 import java.util.List;
 import org.molgenis.api.model.Query;
-import org.molgenis.api.model.QueryRule;
-import org.molgenis.api.model.QueryRule.Operator;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.rsql.RSQLValueParser;
 
-public class QueryV3Mapper {
+class QueryV3Mapper {
+  private final RSQLValueParser rsqlValueParser;
 
-  private final RSQLValueParser rsqlValueParser = new RSQLValueParser();
-
-  public org.molgenis.data.Query map(Query query, Repository<Entity> repository) {
-    org.molgenis.data.Query newQuery = new QueryImpl<>(repository);
-    for (QueryRule rule : query.getRules()) {
-      mapRule(rule, repository.getEntityType(), newQuery);
-    }
-    return newQuery;
+  QueryV3Mapper(RSQLValueParser rsqlValueParser) {
+    this.rsqlValueParser = requireNonNull(rsqlValueParser);
   }
 
-  private void mapRule(
-      QueryRule rule, EntityType entityType, org.molgenis.data.Query molgenisQuery) {
-    String attrName = rule.getField();
-    Operator operator = rule.getOperator();
-    List<String> values = rule.getValue();
+  public org.molgenis.data.Query<Entity> map(Query query, Repository<Entity> repository) {
+    QueryImpl<Entity> entityQuery = new QueryImpl<>(repository);
+    map(query, entityQuery, repository.getEntityType());
+    return entityQuery;
+  }
 
-    boolean isNested = false;
+  private void map(Query query, QueryImpl<Entity> entityQuery, EntityType entityType) {
+    Operator operator = query.getOperator();
     switch (operator) {
-      case SEARCH:
-        String searchValue = values.get(0);
-        if (attrName.equals("*")) {
-          molgenisQuery.search(searchValue);
-        } else {
-          molgenisQuery.search(attrName, searchValue);
-        }
-        break;
       case EQUALS:
-        Object eqValue = rsqlValueParser.parse(values.get(0), getAttribute(entityType, attrName));
-        molgenisQuery.eq(attrName, eqValue);
+        entityQuery.eq(query.getItem(), mapValue(query, entityType));
+        break;
+      case NOT_EQUALS:
+        entityQuery.not().eq(query.getItem(), mapValue(query, entityType));
         break;
       case IN:
-        Attribute inAttr = getAttribute(entityType, attrName);
-        molgenisQuery.in(
-            attrName,
-            values.stream().map(value -> rsqlValueParser.parse(value, inAttr)).collect(toList()));
+        entityQuery.in(query.getItem(), (Iterable<?>) mapValue(query, entityType));
         break;
-      case LESS:
-        Attribute ltAttr = getAttribute(entityType, attrName);
-        validateNumericOrDate(ltAttr, LESS);
-        Object ltValue = rsqlValueParser.parse(values.get(0), ltAttr);
-        molgenisQuery.lt(attrName, ltValue);
+      case NOT_IN:
+        entityQuery.not().in(query.getItem(), (Iterable<?>) mapValue(query, entityType));
         break;
-      case LESS_EQUAL:
-        Attribute leAttr = getAttribute(entityType, attrName);
-        validateNumericOrDate(leAttr, LESS_EQUAL);
-        Object leValue = rsqlValueParser.parse(values.get(0), leAttr);
-        molgenisQuery.le(attrName, leValue);
+      case MATCHES:
+        entityQuery.search(query.getItem(), (String) mapValue(query, entityType));
         break;
-      case GREATER:
-        Attribute gtAttr = getAttribute(entityType, attrName);
-        validateNumericOrDate(gtAttr, GREATER);
-        Object gtValue = rsqlValueParser.parse(values.get(0), gtAttr);
-        molgenisQuery.gt(attrName, gtValue);
+      case CONTAINS:
+        entityQuery.like(query.getItem(), (String) mapValue(query, entityType));
         break;
-      case GREATER_EQUAL:
-        Attribute geAttr = getAttribute(entityType, attrName);
-        validateNumericOrDate(geAttr, GREATER_EQUAL);
-        Object geValue = rsqlValueParser.parse(values.get(0), geAttr);
-        molgenisQuery.ge(attrName, geValue);
+      case LESS_THAN:
+        entityQuery.lt(query.getItem(), mapValue(query, entityType));
         break;
-      case RANGE:
-        Attribute rngAttr = getAttribute(entityType, attrName);
-        validateNumericOrDate(rngAttr, RANGE);
-        Object fromValue =
-            values.get(0) != null ? rsqlValueParser.parse(values.get(0), rngAttr) : null;
-        Object toValue =
-            values.get(1) != null ? rsqlValueParser.parse(values.get(1), rngAttr) : null;
-        molgenisQuery.rng(attrName, fromValue, toValue);
+      case LESS_THAN_OR_EQUAL_TO:
+        entityQuery.le(query.getItem(), mapValue(query, entityType));
         break;
-      case LIKE:
-        String likeValue = values.get(0);
-        molgenisQuery.like(attrName, likeValue);
+      case GREATER_THAN:
+        entityQuery.gt(query.getItem(), mapValue(query, entityType));
         break;
-      case NOT:
-        molgenisQuery.not();
+      case GREATER_THAN_OR_EQUAL_TO:
+        entityQuery.ge(query.getItem(), mapValue(query, entityType));
         break;
       case AND:
-        molgenisQuery.and();
+        List<Query> subAndQueries = query.getQueryListValue();
+        entityQuery.nest();
+        for (Iterator<Query> it = subAndQueries.iterator(); it.hasNext(); ) {
+          map(it.next(), entityQuery, entityType);
+          if (it.hasNext()) {
+            entityQuery.and();
+          }
+        }
+        entityQuery.unnest();
         break;
       case OR:
-        molgenisQuery.or();
+        List<Query> subOrQueries = query.getQueryListValue();
+        entityQuery.nest();
+        for (Iterator<Query> it = subOrQueries.iterator(); it.hasNext(); ) {
+          map(it.next(), entityQuery, entityType);
+          if (it.hasNext()) {
+            entityQuery.or();
+          }
+        }
+        entityQuery.unnest();
         break;
-      case NESTED:
-        isNested = true;
-        break;
-      case SHOULD:
-      case DIS_MAX:
-      case FUZZY_MATCH:
-      case FUZZY_MATCH_NGRAM:
       default:
         throw new UnexpectedEnumException(operator);
     }
-    if (isNested) {
-      molgenisQuery.nest();
-      for (QueryRule nested : rule.getNestedRules()) {
-        mapRule(nested, entityType, molgenisQuery);
-      }
-      molgenisQuery.unnest();
-    }
   }
 
-  private void validateNumericOrDate(Attribute attr, Operator operator) {
-    switch (attr.getDataType()) {
-      case DATE:
-      case DATE_TIME:
-      case DECIMAL:
-      case INT:
-      case LONG:
+  private Object mapValue(Query query, EntityType entityType) {
+    Object mappedValue;
+
+    Operator operator = query.getOperator();
+    switch (operator) {
+      case EQUALS:
+      case NOT_EQUALS:
+        mappedValue =
+            rsqlValueParser.parse(
+                query.getStringValue(), getAttribute(query.getItem(), entityType));
         break;
-        // $CASES-OMITTED$
+      case MATCHES:
+      case CONTAINS:
+        mappedValue = query.getStringValue();
+        break;
+      case IN:
+      case NOT_IN:
+        Attribute attribute = getAttribute(query.getItem(), entityType);
+        mappedValue =
+            query.getStringListValue().stream()
+                .map(value -> rsqlValueParser.parse(value, attribute))
+                .collect(toList());
+        break;
+      case LESS_THAN:
+      case LESS_THAN_OR_EQUAL_TO:
+      case GREATER_THAN:
+      case GREATER_THAN_OR_EQUAL_TO:
+        Attribute compareAttribute = getAttribute(query.getItem(), entityType);
+        switch (compareAttribute.getDataType()) {
+          case DATE:
+          case DATE_TIME:
+          case DECIMAL:
+          case INT:
+          case LONG:
+            break;
+          default:
+            throw new UnexpectedEnumException(compareAttribute.getDataType());
+        }
+        mappedValue = rsqlValueParser.parse(query.getStringValue(), compareAttribute);
+        break;
+      case AND:
+      case OR:
       default:
-        throw new IllegalArgumentException(
-            "Can't perform operator "
-                + operator
-                + " on attribute '\""
-                + attr.getName()
-                + "\""); // FIXME: coded exception
+        throw new UnexpectedEnumException(operator);
     }
+
+    return mappedValue;
   }
 
-  private Attribute getAttribute(EntityType entityType, String attrName) {
-    String[] attrTokens = attrName.split("\\.");
-    Attribute attr = entityType.getAttribute(attrTokens[0]);
-    if (attr == null) {
-      throw new UnknownAttributeException(entityType, attrName);
-    }
-    EntityType entityTypeAtDepth;
-    for (int i = 1; i < attrTokens.length; ++i) {
-      entityTypeAtDepth = attr.getRefEntity();
-      attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
-      if (attr == null) {
-        throw new UnknownAttributeException(entityTypeAtDepth, attrName);
-      }
+  private Attribute getAttribute(String item, EntityType entityType) {
+    Attribute attribute = entityType.getAttribute(item);
+    if (attribute == null) {
+      throw new UnknownAttributeException(entityType, item);
     }
 
-    return attr;
+    AttributeType attributeType = attribute.getDataType();
+    if (attributeType == AttributeType.COMPOUND) {
+      throw new UnexpectedEnumException(attributeType);
+    }
+
+    return attribute;
   }
 }

@@ -1,7 +1,8 @@
 package org.molgenis.api.data.v3;
 
-import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
@@ -35,6 +36,28 @@ interface DataServiceV3 {
   Entity find(String entityTypeId, String entityId, Selection filter, Selection expand);
 
   /**
+   * Retrieves all entities matching a query.
+   *
+   * @param entityTypeId entity type identifier
+   * @param query query specifying which entities to find, or null
+   * @param filter selection describing the filter attributes
+   * @param expand selection describing the expansion attributes
+   * @param sort entities sort criteria
+   * @param size maximum number of entities to return
+   * @param number page number
+   * @return entities, never null
+   * @throws UnknownRepositoryException if no repository exists for the given entity type identifier
+   */
+  Entities findAll(
+      String entityTypeId,
+      @Nullable @CheckForNull Query query,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number);
+
+  /**
    * Update one entity.
    *
    * @param entityTypeId entity type identifier
@@ -65,23 +88,11 @@ interface DataServiceV3 {
   void delete(String entityTypeId, String entityId);
 
   /**
-   * Delete one entity.
+   * Deletes all entities matching a query.
    *
    * @param entityTypeId entity type identifier
-   * @param query query specifing which
+   * @param query query specifying which entities to delete, or null
    * @throws UnknownRepositoryException if no repository exists for the given entity type identifier
-   * @throws UnknownEntityException if no entity exists for the given entity identifier
    */
-  void delete(String entityTypeId, Query query);
-
-  List<Entity> find(
-      String entityTypeId,
-      Query q,
-      Sort sort,
-      Selection filter,
-      Selection expand,
-      int size,
-      int number);
-
-  int count(String entityTypeId, Query query);
+  void deleteAll(String entityTypeId, @Nullable @CheckForNull Query query);
 }

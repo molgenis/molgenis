@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.data.v3.model;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;

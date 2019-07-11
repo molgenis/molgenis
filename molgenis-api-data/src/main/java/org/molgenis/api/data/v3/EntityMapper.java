@@ -1,5 +1,7 @@
 package org.molgenis.api.data.v3;
 
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
 

@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.data.v3.model;
 
 import java.util.Optional;
 import javax.validation.constraints.Max;
@@ -6,7 +6,7 @@ import javax.validation.constraints.Min;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 
-public class EntitiesRequest extends BaseEntityRequest {
+public class ReadEntitiesRequest extends AbstractReadRequest {
   @Min(0)
   private int number = 0;
 
@@ -34,8 +34,8 @@ public class EntitiesRequest extends BaseEntityRequest {
     this.size = size;
   }
 
-  public Optional<Sort> getSort() {
-    return Optional.ofNullable(sort);
+  public Sort getSort() {
+    return sort != null ? sort : Sort.EMPTY_SORT;
   }
 
   public void setSort(Sort sort) {

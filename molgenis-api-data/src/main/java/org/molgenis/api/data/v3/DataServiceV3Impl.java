@@ -1,12 +1,12 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.api.data.v3.SortV3Mapper.map;
 import static org.molgenis.api.model.Selection.EMPTY_SELECTION;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.Query;
@@ -16,11 +16,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.stereotype.Service;
@@ -71,6 +71,38 @@ class DataServiceV3Impl implements DataServiceV3 {
     return entity;
   }
 
+  @Override
+  public Entities findAll(
+      String entityTypeId,
+      @Nullable @CheckForNull Query query,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+
+    Fetch fetch = toFetch(repository.getEntityType(), filter, expand);
+
+    // get entities
+    org.molgenis.data.Query<Entity> findQuery =
+        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    findQuery.fetch(fetch);
+    findQuery.offset(number * size);
+    findQuery.pageSize(size);
+    findQuery.sort(map(sort));
+    List<Entity> entities = repository.findAll(findQuery).collect(toList());
+
+    // get total entity count
+    org.molgenis.data.Query<Entity> countQuery =
+        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+    int count = Math.toIntExact(repository.count(countQuery));
+
+    return Entities.builder().setEntities(entities).setTotal(count).build();
+  }
+
   @Transactional
   @Override
   public void update(String entityTypeId, String entityId, Map<String, Object> requestValues) {
@@ -78,7 +110,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Entity entity = entityManagerV3.create(entityType); // what happens with auto values?
+    Entity entity = entityManagerV3.create(entityType); // TODO check what happens with auto values
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 
@@ -123,54 +155,11 @@ class DataServiceV3Impl implements DataServiceV3 {
 
   @Transactional
   @Override
-  public void delete(String entityTypeId, Query query) {
-    Repository<Entity> repo =
-        metaDataService
-            .getRepository(entityTypeId)
-            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
-    org.molgenis.data.Query molgenisQuery = queryMapperV3.map(query, repo);
+  public void deleteAll(String entityTypeId, @Nullable @CheckForNull Query query) {
+    Repository<Entity> repo = getRepository(entityTypeId);
+    org.molgenis.data.Query<Entity> molgenisQuery =
+        query != null ? queryMapperV3.map(query, repo) : new QueryImpl<>(repo);
     repo.delete(molgenisQuery.findAll());
-  }
-
-  @Override
-  public List<Entity> find(
-      String entityTypeId,
-      Query q,
-      Sort sort,
-      Selection filter,
-      Selection expand,
-      int size,
-      int number) {
-    Repository<Entity> repo =
-        metaDataService
-            .getRepository(entityTypeId)
-            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
-
-    Fetch fetch = toFetch(repo.getEntityType(), filter, expand);
-
-    org.molgenis.data.Query<Entity> query = queryMapperV3.map(q, repo);
-    query.fetch(fetch);
-    query.offset(number * size);
-    query.pageSize(size);
-
-    query.sort(map(sort));
-
-    return query.findAll().collect(Collectors.toList());
-  }
-
-  @Override
-  public int count(String entityTypeId, Query q) {
-    QueryV3Mapper queryV3Mapper = new QueryV3Mapper();
-    Repository<Entity> repo =
-        metaDataService
-            .getRepository(entityTypeId)
-            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
-    org.molgenis.data.Query<Entity> query = queryV3Mapper.map(q, repo);
-
-    query.offset(0);
-    query.pageSize(Integer.MAX_VALUE);
-
-    return Math.toIntExact(query.count());
   }
 
   private Repository<Entity> getRepository(String entityTypeId) {
@@ -184,6 +173,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     return EntityUtils.getTypedValue(entityId, idAttribute);
   }
 
+  // TODO move to FetchMapper
   private @CheckForNull @Nullable Fetch toFetch(
       EntityType entityType, Selection filter, Selection expand) {
     if (!filter.hasItems()) {

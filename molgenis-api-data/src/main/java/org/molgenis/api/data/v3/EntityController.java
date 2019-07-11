@@ -3,19 +3,20 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
+import org.molgenis.api.data.v3.model.DeleteEntityRequest;
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
+import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
+import org.molgenis.api.data.v3.model.ReadEntityRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
-import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +34,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping(EntityController.API_ENTITY_PATH)
 class EntityController extends ApiController {
-  private static final Logger LOG = LoggerFactory.getLogger(EntityController.class);
   private static final String API_ENTITY_ID = "entity";
   static final String API_ENTITY_PATH = ApiNamespace.API_PATH + '/' + API_ENTITY_ID;
 
@@ -61,7 +61,7 @@ class EntityController extends ApiController {
   }
 
   @GetMapping("/{entityTypeId}/{entityId}")
-  EntityResponse getEntity(@Valid EntityRequest entityRequest) {
+  EntityResponse getEntity(@Valid ReadEntityRequest entityRequest) {
     Selection filter = entityRequest.getFilter();
     Selection expand = entityRequest.getExpand();
 
@@ -99,43 +99,40 @@ class EntityController extends ApiController {
   @DeleteMapping("/{entityTypeId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void deleteEntities(@Valid DeleteEntitiesRequest deleteRequest) {
-    Query query = deleteRequest.getQ().orElse(new Query());
-    dataServiceV3.delete(deleteRequest.getEntityTypeId(), query);
+    Query query = deleteRequest.getQ().orElse(null);
+    dataServiceV3.deleteAll(deleteRequest.getEntityTypeId(), query);
   }
 
   @GetMapping("/{entityTypeId}")
-  EntitiesResponse getEntities(@Valid EntitiesRequest entitiesRequest) {
-    EntityCollection entityCollection = createEntityCollection(entitiesRequest);
-
+  EntitiesResponse getEntities(@Valid ReadEntitiesRequest entitiesRequest) {
+    String entityTypeId = entitiesRequest.getEntityTypeId();
     Selection filter = entitiesRequest.getFilter();
     Selection expand = entitiesRequest.getExpand();
+    int size = entitiesRequest.getSize();
+    int number = entitiesRequest.getNumber();
+
+    Entities entities =
+        dataServiceV3.findAll(
+            entityTypeId,
+            entitiesRequest.getQ().orElse(null),
+            filter,
+            expand,
+            entitiesRequest.getSort(),
+            size,
+            number);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(entities.getEntities())
+            .setPage(
+                Page.builder()
+                    .setOffset(size * number)
+                    .setPageSize(size)
+                    .setTotal(entities.getTotal())
+                    .build())
+            .build();
+
     return entityMapper.map(entityCollection, filter, expand);
-  }
-
-  private EntityCollection createEntityCollection(EntitiesRequest entitiesRequest) {
-    Query query = entitiesRequest.getQ().orElse(new Query());
-    Sort sort = entitiesRequest.getSort().orElse(Sort.create(Collections.emptyList()));
-    List<Entity> entities =
-        dataServiceV3.find(
-            entitiesRequest.getEntityTypeId(),
-            query,
-            sort,
-            entitiesRequest.getFilter(),
-            entitiesRequest.getExpand(),
-            entitiesRequest.getSize(),
-            entitiesRequest.getNumber());
-
-    int totalElements = dataServiceV3.count(entitiesRequest.getEntityTypeId(), query);
-
-    return EntityCollection.builder()
-        .setEntityTypeId(entitiesRequest.getEntityTypeId())
-        .setEntities(entities)
-        .setPage(
-            Page.builder()
-                .setOffset(entitiesRequest.getSize() * entitiesRequest.getNumber())
-                .setPageSize(entitiesRequest.getSize())
-                .setTotal(totalElements)
-                .build())
-        .build();
   }
 }
