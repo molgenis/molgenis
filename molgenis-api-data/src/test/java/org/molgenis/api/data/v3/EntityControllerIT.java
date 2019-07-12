@@ -117,7 +117,8 @@ public class EntityControllerIT extends AbstractApiTest {
 
   @Test
   public void testRetrieveResourceCollection() throws IOException {
-    String expectedJson = ResourceUtils.getString(getClass(), "retrieveResourceCollection.json");
+    String expectedJson =
+        TestResourceUtils.getRenderedString(getClass(), "retrieveResourceCollection.json");
 
     given()
         .get("/api/entity/v3_MyDataset")
@@ -129,7 +130,7 @@ public class EntityControllerIT extends AbstractApiTest {
   @Test
   public void testRetrieveResourceCollectionSortQuery() throws IOException {
     String expectedJson =
-        ResourceUtils.getString(getClass(), "retrieveResourceCollectionSortQuery.json");
+        TestResourceUtils.getRenderedString(getClass(), "retrieveResourceCollectionSortQuery.json");
 
     given()
         .get("/api/entity/v3_MyDataset?sort=-label&q=id=in=(1,2,3,4,5)")
@@ -200,7 +201,8 @@ public class EntityControllerIT extends AbstractApiTest {
   public void deleteResourceCollection() throws IOException {
     given().delete("/api/entity/v3_MyDataset").then().statusCode(NO_CONTENT.value());
 
-    String expectedJson = ResourceUtils.getString(getClass(), "deleteResourceCollection.json");
+    String expectedJson =
+        TestResourceUtils.getRenderedString(getClass(), "deleteResourceCollection.json");
 
     given()
         .get("/api/entity/v3_MyDataset")
@@ -216,7 +218,8 @@ public class EntityControllerIT extends AbstractApiTest {
         .then()
         .statusCode(NO_CONTENT.value());
 
-    String expectedJson = ResourceUtils.getString(getClass(), "deleteResourceCollectionQuery.json");
+    String expectedJson =
+        TestResourceUtils.getRenderedString(getClass(), "deleteResourceCollectionQuery.json");
 
     given()
         .get("/api/entity/v3_MyDataset")
