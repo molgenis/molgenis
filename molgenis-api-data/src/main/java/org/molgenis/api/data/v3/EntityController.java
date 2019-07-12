@@ -1,21 +1,22 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.api.data.v3.SortV3Mapper.map;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
+import org.molgenis.api.data.v3.model.DeleteEntityRequest;
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
+import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
+import org.molgenis.api.data.v3.model.ReadEntityRequest;
+import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,7 +61,7 @@ class EntityController extends ApiController {
   }
 
   @GetMapping("/{entityTypeId}/{entityId}")
-  EntityResponse getEntity(@Valid EntityRequest entityRequest) {
+  EntityResponse getEntity(@Valid ReadEntityRequest entityRequest) {
     Selection filter = entityRequest.getFilter();
     Selection expand = entityRequest.getExpand();
 
@@ -95,49 +96,43 @@ class EntityController extends ApiController {
     dataServiceV3.delete(deleteRequest.getEntityTypeId(), deleteRequest.getEntityId());
   }
 
-  // TODO refactor this proof-of-concept code
-  @GetMapping("/{entityTypeId}")
-  EntitiesResponse getEntities(@Valid EntitiesRequest entitiesRequest) {
-    EntityCollection entityCollection = createEntityCollection(entitiesRequest);
+  @DeleteMapping("/{entityTypeId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void deleteEntities(@Valid DeleteEntitiesRequest deleteRequest) {
+    Query query = deleteRequest.getQ().orElse(null);
+    dataServiceV3.deleteAll(deleteRequest.getEntityTypeId(), query);
+  }
 
+  @GetMapping("/{entityTypeId}")
+  EntitiesResponse getEntities(@Valid ReadEntitiesRequest entitiesRequest) {
+    String entityTypeId = entitiesRequest.getEntityTypeId();
     Selection filter = entitiesRequest.getFilter();
     Selection expand = entitiesRequest.getExpand();
+    int size = entitiesRequest.getSize();
+    int number = entitiesRequest.getNumber();
+
+    Entities entities =
+        dataServiceV3.findAll(
+            entityTypeId,
+            entitiesRequest.getQ().orElse(null),
+            filter,
+            expand,
+            entitiesRequest.getSort(),
+            size,
+            number);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(entities.getEntities())
+            .setPage(
+                Page.builder()
+                    .setOffset(size * number)
+                    .setPageSize(size)
+                    .setTotal(entities.getTotal())
+                    .build())
+            .build();
+
     return entityMapper.map(entityCollection, filter, expand);
-  }
-
-  // TODO refactor this proof-of-concept code
-  private EntityCollection createEntityCollection(EntitiesRequest entitiesRequest) {
-    Query<Entity> query = createQuery(entitiesRequest);
-    int offset = query.getOffset();
-    int pageSize = query.getPageSize();
-
-    List<Entity> entities = query.findAll().collect(toList());
-    long totalElements = query.offset(0).pageSize(Integer.MAX_VALUE).count();
-
-    return EntityCollection.builder()
-        .setEntityTypeId(entitiesRequest.getEntityTypeId())
-        .setEntities(entities)
-        .setPage(
-            Page.builder()
-                .setOffset(offset)
-                .setPageSize(pageSize)
-                .setTotal((int) totalElements) // FIXME cast
-                .build())
-        .build();
-  }
-
-  // TODO refactor this proof-of-concept code
-  private Query<Entity> createQuery(EntitiesRequest entitiesRequest) {
-    Query<Entity> query =
-        ApplicationContextProvider.getApplicationContext()
-            .getBean(DataService.class)
-            .query(entitiesRequest.getEntityTypeId())
-            .offset(entitiesRequest.getNumber() * entitiesRequest.getSize())
-            .pageSize(entitiesRequest.getSize());
-
-    entitiesRequest.getQ().ifPresent(query::search);
-    entitiesRequest.getSort().ifPresent(sort -> query.sort(map(sort)));
-
-    return query;
   }
 }

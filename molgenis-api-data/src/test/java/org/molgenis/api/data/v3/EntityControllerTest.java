@@ -1,5 +1,6 @@
 package org.molgenis.api.data.v3;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,9 +10,23 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import org.mockito.Mock;
+import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
+import org.molgenis.api.data.v3.model.DeleteEntityRequest;
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
+import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
+import org.molgenis.api.data.v3.model.ReadEntityRequest;
+import org.molgenis.api.model.Query;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
+import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,6 +37,7 @@ import org.testng.annotations.Test;
 public class EntityControllerTest extends AbstractMockitoTest {
   @Mock private DataServiceV3 dataServiceV3;
   @Mock private EntityMapper entityMapper;
+  @Mock private MessageSource messageSource;
   private EntityController entityController;
 
   @BeforeMethod
@@ -29,6 +45,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityController = new EntityController(dataServiceV3, entityMapper);
     RequestContextHolder.setRequestAttributes(
         new ServletRequestAttributes(new MockHttpServletRequest()));
+    MessageSourceHolder.setMessageSource(messageSource);
   }
 
   @SuppressWarnings("unchecked")
@@ -54,7 +71,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.FULL_SELECTION;
 
-    EntityRequest entityRequest = new EntityRequest();
+    ReadEntityRequest entityRequest = new ReadEntityRequest();
     entityRequest.setEntityTypeId(entityTypeId);
     entityRequest.setEntityId(entityId);
     entityRequest.setFilter(filter);
@@ -66,6 +83,40 @@ public class EntityControllerTest extends AbstractMockitoTest {
     EntityResponse entityResponse = mock(EntityResponse.class);
     when(entityMapper.map(entity, filter, expand)).thenReturn(entityResponse);
     assertEquals(entityController.getEntity(entityRequest), entityResponse);
+  }
+
+  @Test
+  public void testGetEntities() {
+    String entityTypeId = "MyEntityTypeId";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.FULL_SELECTION;
+    Query query = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    Sort sort = Sort.create("field", Direction.ASC);
+
+    ReadEntitiesRequest entityRequest = new ReadEntitiesRequest();
+    entityRequest.setEntityTypeId(entityTypeId);
+    entityRequest.setQ(query);
+    entityRequest.setSort(sort);
+    entityRequest.setFilter(filter);
+    entityRequest.setExpand(expand);
+    entityRequest.setSize(10);
+    entityRequest.setNumber(2);
+
+    Entities entities = Entities.create(emptyList(), 30);
+    when(dataServiceV3.findAll(entityTypeId, query, filter, expand, sort, 10, 2))
+        .thenReturn(entities);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(emptyList())
+            .setPage(Page.builder().setOffset(20).setPageSize(10).setTotal(30).build())
+            .build();
+
+    EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
+    when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
+
+    assertEquals(entityController.getEntities(entityRequest), entitiesResponse);
   }
 
   @SuppressWarnings("unchecked")
@@ -104,5 +155,22 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityController.deleteEntity(deleteEntityRequest);
 
     verify(dataServiceV3).delete(entityTypeId, entityId);
+  }
+
+  @Test
+  public void testDeleteEntities() {
+    String entityTypeId = "MyEntityTypeId";
+
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.MATCHES).setValue("value").build();
+
+    DeleteEntitiesRequest deleteEntitiesRequest = new DeleteEntitiesRequest();
+    deleteEntitiesRequest.setEntityTypeId(entityTypeId);
+    deleteEntitiesRequest.setQ(query);
+
+    entityController.deleteEntities(deleteEntitiesRequest);
+    QueryImpl molgenisQuery = new QueryImpl<>();
+    molgenisQuery.eq("test", "value");
+    verify(dataServiceV3).deleteAll(entityTypeId, query);
   }
 }

@@ -7,10 +7,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.api.model.Query;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
+import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
@@ -27,11 +35,12 @@ import org.testng.annotations.Test;
 public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
   @Mock private EntityManagerV3 entityServiceV3;
+  @Mock private QueryV3Mapper queryMapperV3;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    dataServiceV3Impl = new DataServiceV3Impl(metaDataService, entityServiceV3);
+    dataServiceV3Impl = new DataServiceV3Impl(metaDataService, entityServiceV3, queryMapperV3);
   }
 
   // TODO implement
@@ -103,18 +112,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     assertEquals(dataServiceV3Impl.find(entityTypeId, entityId, filter, expand), entity);
   }
 
-  @Test(expectedExceptions = UnknownRepositoryException.class)
-  public void testFindUnknownRepository() {
-    String entityTypeId = "MyEntityType";
-    String entityId = "MyId";
-    Selection filter = Selection.FULL_SELECTION;
-    Selection expand = Selection.EMPTY_SELECTION;
-
-    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
-
-    dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
-  }
-
   @SuppressWarnings("unchecked")
   @Test(expectedExceptions = UnknownEntityException.class)
   public void testFindUnknownEntity() {
@@ -137,6 +134,67 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
     dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void testFindUnknownRepository() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyId";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+
+    dataServiceV3Impl.find(entityTypeId, entityId, filter, expand);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testFindAll() {
+    String entityTypeId = "MyEntityType";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute idAttribute = mock(Attribute.class);
+    when(idAttribute.getName()).thenReturn("id");
+
+    Attribute refAttribute = mock(Attribute.class);
+    when(refAttribute.getName()).thenReturn("refAttr");
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getAtomicAttributes()).thenReturn(asList(idAttribute, refAttribute));
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+
+    Entity entity1 = mock(Entity.class);
+    Entity entity2 = mock(Entity.class);
+
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    when(repository.findAll(findAllQuery)).thenReturn(Stream.of(entity1, entity2));
+    org.molgenis.data.Query<Entity> countQuery = mock(org.molgenis.data.Query.class);
+    when(repository.count(countQuery)).thenReturn(100L);
+    when(queryMapperV3.map(q, repository)).thenReturn(findAllQuery).thenReturn(countQuery);
+    Sort sort = Sort.create("field", Direction.ASC);
+
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+
+    Entities actual = dataServiceV3Impl.findAll(entityTypeId, q, filter, expand, sort, 10, 1);
+
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void testFindAllUnknownRepositoryUnknownEntity() {
+    String entityTypeId = "MyEntityType";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+
+    dataServiceV3Impl.findAll(entityTypeId, null, filter, expand, Sort.EMPTY_SORT, 1, 1);
   }
 
   // TODO implement
@@ -202,5 +260,37 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
     dataServiceV3Impl.delete(entityTypeId, entityId);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testDeleteAll() {
+    String entityTypeId = "MyEntityType";
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+
+    Entity entity1 = mock(Entity.class);
+    Entity entity2 = mock(Entity.class);
+
+    Query query = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> molgenisQuery = mock(org.molgenis.data.Query.class);
+    when(queryMapperV3.map(query, repository)).thenReturn(molgenisQuery);
+
+    dataServiceV3Impl.deleteAll(entityTypeId, query);
+
+    ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
+    verify(repository).delete(captor.capture());
+    Stream<Entity> entityStream = captor.getValue();
+    entityStream.collect(Collectors.toList()).containsAll(Arrays.asList(entity1, entity2));
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void testDeleteAllUnknownEntityType() {
+    String entityTypeId = "MyEntityType";
+
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+
+    dataServiceV3Impl.deleteAll(entityTypeId, null);
   }
 }

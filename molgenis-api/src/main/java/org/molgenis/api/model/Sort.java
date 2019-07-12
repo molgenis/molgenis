@@ -1,5 +1,6 @@
 package org.molgenis.api.model;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import com.google.auto.value.AutoValue;
@@ -10,6 +11,8 @@ import org.molgenis.api.model.Sort.Order.Direction;
 
 @AutoValue
 public abstract class Sort {
+  public static final Sort EMPTY_SORT = Sort.create(emptyList());
+
   public abstract List<Order> getOrders();
 
   public static Sort create(String newItem) {

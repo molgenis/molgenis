@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.List;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.v3.EntityCollection.Page;
+import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;

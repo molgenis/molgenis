@@ -1,12 +1,17 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.data.v3.SortV3Mapper.map;
 import static org.molgenis.api.model.Selection.EMPTY_SELECTION;
 
+import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
@@ -15,6 +20,7 @@ import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.stereotype.Service;
@@ -24,10 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 class DataServiceV3Impl implements DataServiceV3 {
   private final MetaDataService metaDataService;
   private final EntityManagerV3 entityManagerV3;
+  private final QueryV3Mapper queryMapperV3;
 
-  DataServiceV3Impl(MetaDataService metaDataService, EntityManagerV3 entityManagerV3) {
+  DataServiceV3Impl(
+      MetaDataService metaDataService,
+      EntityManagerV3 entityManagerV3,
+      QueryV3Mapper queryMapperV3) {
     this.metaDataService = requireNonNull(metaDataService);
     this.entityManagerV3 = requireNonNull(entityManagerV3);
+    this.queryMapperV3 = requireNonNull(queryMapperV3);
   }
 
   @Transactional
@@ -60,6 +71,38 @@ class DataServiceV3Impl implements DataServiceV3 {
     return entity;
   }
 
+  @Override
+  public Entities findAll(
+      String entityTypeId,
+      @Nullable @CheckForNull Query query,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+
+    Fetch fetch = toFetch(repository.getEntityType(), filter, expand);
+
+    // get entities
+    org.molgenis.data.Query<Entity> findQuery =
+        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    findQuery.fetch(fetch);
+    findQuery.offset(number * size);
+    findQuery.pageSize(size);
+    findQuery.sort(map(sort));
+    List<Entity> entities = repository.findAll(findQuery).collect(toList());
+
+    // get total entity count
+    org.molgenis.data.Query<Entity> countQuery =
+        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+    int count = Math.toIntExact(repository.count(countQuery));
+
+    return Entities.builder().setEntities(entities).setTotal(count).build();
+  }
+
   @Transactional
   @Override
   public void update(String entityTypeId, String entityId, Map<String, Object> requestValues) {
@@ -67,7 +110,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Entity entity = entityManagerV3.create(entityType); // what happens with auto values?
+    Entity entity = entityManagerV3.create(entityType); // TODO check what happens with auto values
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 
@@ -110,6 +153,15 @@ class DataServiceV3Impl implements DataServiceV3 {
     repository.deleteById(typedEntityId);
   }
 
+  @Transactional
+  @Override
+  public void deleteAll(String entityTypeId, @Nullable @CheckForNull Query query) {
+    Repository<Entity> repo = getRepository(entityTypeId);
+    org.molgenis.data.Query<Entity> molgenisQuery =
+        query != null ? queryMapperV3.map(query, repo) : new QueryImpl<>(repo);
+    repo.delete(molgenisQuery.findAll());
+  }
+
   private Repository<Entity> getRepository(String entityTypeId) {
     return metaDataService
         .getRepository(entityTypeId)
@@ -121,6 +173,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     return EntityUtils.getTypedValue(entityId, idAttribute);
   }
 
+  // TODO move to FetchMapper
   private @CheckForNull @Nullable Fetch toFetch(
       EntityType entityType, Selection filter, Selection expand) {
     if (!filter.hasItems()) {

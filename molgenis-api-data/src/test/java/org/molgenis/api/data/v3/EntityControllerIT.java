@@ -116,11 +116,26 @@ public class EntityControllerIT extends AbstractApiTest {
   }
 
   @Test
-  public void testRetrieveResourceCollection() {
-    // 1. paging
-    // 2. links: first page and last page
-    // exc: max page size exceeded
-    throw new UnsupportedOperationException();
+  public void testRetrieveResourceCollection() throws IOException {
+    String expectedJson = ResourceUtils.getString(getClass(), "retrieveResourceCollection.json");
+
+    given()
+        .get("/api/entity/v3_MyDataset")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
+  }
+
+  @Test
+  public void testRetrieveResourceCollectionSortQuery() throws IOException {
+    String expectedJson =
+        ResourceUtils.getString(getClass(), "retrieveResourceCollectionSortQuery.json");
+
+    given()
+        .get("/api/entity/v3_MyDataset?sort=-label&q=id=in=(1,2,3,4,5)")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   @Test(dependsOnMethods = "testRetrieveResource")
@@ -181,10 +196,33 @@ public class EntityControllerIT extends AbstractApiTest {
     given().get("/api/entity/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
   }
 
-  // TODO implement
   @Test
-  public void deleteResourceCollection() {
-    throw new UnsupportedOperationException();
+  public void deleteResourceCollection() throws IOException {
+    given().delete("/api/entity/v3_MyDataset").then().statusCode(NO_CONTENT.value());
+
+    String expectedJson = ResourceUtils.getString(getClass(), "deleteResourceCollection.json");
+
+    given()
+        .get("/api/entity/v3_MyDataset")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
+  }
+
+  @Test
+  public void deleteResourceCollectionQuery() throws IOException {
+    given()
+        .delete("/api/entity/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")
+        .then()
+        .statusCode(NO_CONTENT.value());
+
+    String expectedJson = ResourceUtils.getString(getClass(), "deleteResourceCollectionQuery.json");
+
+    given()
+        .get("/api/entity/v3_MyDataset")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   private static void importData() {
