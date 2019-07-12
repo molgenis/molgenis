@@ -209,11 +209,6 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
           fileStore());
     }
 
-    //    @Bean
-    //    public GlobalControllerExceptionHandler globalControllerExceptionHandler() {
-    //      return new GlobalControllerExceptionHandler();
-    //    }
-
     @Bean
     public AppManagerService appManagerService() {
       return mock(AppManagerService.class);
@@ -238,15 +233,5 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
     public UserPermissionEvaluator userPermissionEvaluator() {
       return mock(UserPermissionEvaluator.class);
     }
-
-    //    @Bean
-    //    public FallbackExceptionHandler fallbackExceptionHandler() {
-    //      return new FallbackExceptionHandler();
-    //    }
-    //
-    //    @Bean
-    //    public SpringExceptionHandler springExceptionHandler() {
-    //      return new SpringExceptionHandler();
-    //    }
   }
 }
