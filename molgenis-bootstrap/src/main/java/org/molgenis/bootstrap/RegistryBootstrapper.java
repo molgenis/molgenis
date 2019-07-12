@@ -13,6 +13,7 @@ import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.script.core.ScriptRunner;
 import org.molgenis.script.core.ScriptRunnerRegistrar;
+import org.molgenis.web.exception.ExceptionResponseGeneratorRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -37,6 +38,7 @@ public class RegistryBootstrapper {
   private final ImportServiceRegistrar importServiceRegistrar;
   private final ScriptRunnerRegistrar scriptRunnerRegistrar;
   private final JobFactoryRegistrar jobFactoryRegistrar;
+  private final ExceptionResponseGeneratorRegistrar exceptionResponseGeneratorRegistrar;
 
   public RegistryBootstrapper(
       RepositoryCollectionBootstrapper repoCollectionBootstrapper,
@@ -47,7 +49,8 @@ public class RegistryBootstrapper {
       DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
       ImportServiceRegistrar importServiceRegistrar,
       ScriptRunnerRegistrar scriptRunnerRegistrar,
-      JobFactoryRegistrar jobFactoryRegistrar) {
+      JobFactoryRegistrar jobFactoryRegistrar,
+      ExceptionResponseGeneratorRegistrar exceptionResponseGeneratorRegistrar) {
     this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
     this.systemEntityTypeRegistrar = requireNonNull(systemEntityTypeRegistrar);
     this.systemPackageRegistrar = requireNonNull(systemPackageRegistrar);
@@ -59,6 +62,7 @@ public class RegistryBootstrapper {
     this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
     this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
     this.jobFactoryRegistrar = requireNonNull(jobFactoryRegistrar);
+    this.exceptionResponseGeneratorRegistrar = requireNonNull(exceptionResponseGeneratorRegistrar);
   }
 
   public void bootstrap(ContextRefreshedEvent event) {
@@ -97,5 +101,9 @@ public class RegistryBootstrapper {
     LOG.trace("Registering job factories ...");
     jobFactoryRegistrar.register(event);
     LOG.trace("Registered job factories");
+
+    LOG.trace("Registering exception response generators ...");
+    exceptionResponseGeneratorRegistrar.register(event.getApplicationContext());
+    LOG.trace("Registered exception response generators");
   }
 }

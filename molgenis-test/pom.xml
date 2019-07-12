@@ -62,5 +62,9 @@
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
   </dependencies>
 </project>

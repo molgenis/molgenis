@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -21,7 +20,7 @@ import org.testng.annotations.Test;
 
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @TestPropertySource(properties = {"molgenis.version = 10.3.8"})
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonHttpMessageConverter.class})
 public class RootApiControllerTest extends AbstractTestNGSpringContextTests {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -46,8 +45,9 @@ public class RootApiControllerTest extends AbstractTestNGSpringContextTests {
             .andExpect(status().isOk())
             .andReturn();
     String actual = result.getResponse().getContentAsString();
+    // note: seconds/nanos instead of '2019-05-21T10:32:00Z' because of default spring converter
     String expected =
-        "{\"app\":{\"version\":\"versionString\",\"buildDate\":\"2019-05-21T10:32:00Z\"}}";
+        "{\"app\":{\"version\":\"versionString\",\"buildDate\":{\"seconds\":1558434720,\"nanos\":0}}}";
 
     assertEquals(actual, expected);
   }

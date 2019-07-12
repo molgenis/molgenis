@@ -66,6 +66,12 @@
           <targetOS>linux</targetOS>
           <mappings>
             <mapping>
+              <directory>/usr/local/share/molgenis</directory>
+              <filemode>770</filemode>
+              <username>molgenis</username>
+              <groupname>molgenis</groupname>
+            </mapping>
+            <mapping>
               <directory>/usr/local/share/molgenis/war</directory>
               <filemode>755</filemode>
               <username>molgenis</username>

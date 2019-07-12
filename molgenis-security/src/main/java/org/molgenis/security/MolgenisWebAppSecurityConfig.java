@@ -82,7 +82,6 @@ import org.springframework.security.web.header.writers.CacheControlHeadersWriter
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -138,7 +137,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     requestCache.setRequestMatcher(createWebRequestMatcher());
     http.requestCache().requestCache(requestCache);
 
-    http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
     // add default header options but use custom cache control header writer
     http.cors()
         .and()
@@ -425,12 +423,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
     return new AjaxAwareLoginUrlAuthenticationEntryPoint(MolgenisLoginController.URI);
-  }
-
-  @Bean
-  public InvalidSessionStrategy invalidSessionStrategy() {
-    return new AjaxAwareInvalidSessionStrategy(
-        MolgenisLoginController.URI + '?' + MolgenisLoginController.PARAM_SESSION_EXPIRED);
   }
 
   @Bean

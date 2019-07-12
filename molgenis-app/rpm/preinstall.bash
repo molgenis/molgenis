@@ -20,9 +20,6 @@ then
   echo "[INFO] Tomcat is installed"
   echo "[INFO] Add tomcat-user to molgenis-group to be able to write in MOLGENIS-homedir"
   usermod -g molgenis tomcat
-  echo "[INFO] Allow users other than the user molgenis to write in molgenis-homedir"
-  echo "[INFO] If they are part of the molgenis-group"
-  chmod -R 770 /home/molgenis
 fi
 
 echo "----------------------------------------"
