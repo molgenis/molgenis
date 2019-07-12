@@ -19,7 +19,7 @@ import java.io.IOException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
-import org.molgenis.util.ResourceUtils;
+import org.molgenis.test.TestResourceUtils;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.testng.annotations.AfterClass;
@@ -98,7 +98,7 @@ public class EntityControllerIT extends AbstractApiTest {
   // exc: no permission to read entity type
   @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResource() throws IOException {
-    String expectedJson = ResourceUtils.getString(getClass(), "retrieveResource.json");
+    String expectedJson = TestResourceUtils.getRenderedString(getClass(), "retrieveResource.json");
 
     given()
         .get("/api/entity/v3_MyDataset/25")
@@ -163,7 +163,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .then()
         .statusCode(NO_CONTENT.value());
 
-    String expectedJson = ResourceUtils.getString(getClass(), "updateResource.json");
+    String expectedJson = TestResourceUtils.getRenderedString(getClass(), "updateResource.json");
 
     given()
         .get("/api/entity/v3_MyDataset/25")
