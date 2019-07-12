@@ -161,6 +161,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @Test
   public void testCopyEntityType() {
     String targetPackageId = "target2";
+
     addTargetPackage(targetPackageId);
     ResourceIdentifier id = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
     TestProgress progress = new TestProgress();
