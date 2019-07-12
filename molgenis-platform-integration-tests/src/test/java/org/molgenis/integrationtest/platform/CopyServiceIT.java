@@ -198,7 +198,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
-  @Test(enabled = false) // FIXME: reenable this test when fixed to preform in a stable manner
+  @Test
   public void testCopyBoth() {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
@@ -212,7 +212,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
     waitForWorkToBeFinished(indexService, LOG);
-
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
