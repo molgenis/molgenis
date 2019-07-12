@@ -53,9 +53,9 @@ public class EntityControllerIT extends AbstractApiTest {
 
   @AfterClass
   public static void tearDownAfterClass() {
-    AbstractApiTest.tearDownAfterClass();
+    deleteData();
 
-    // deleteData();
+    AbstractApiTest.tearDownAfterClass();
   }
 
   // 1. location header
@@ -221,5 +221,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .extract()
         .path("status")
         .toString();
+  }
+
+  private static void deleteData() {
+    given().delete("/api/entity/sys_md_Package/v3").then().statusCode(NO_CONTENT.value());
   }
 }
