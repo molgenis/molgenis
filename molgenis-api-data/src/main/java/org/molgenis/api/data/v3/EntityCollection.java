@@ -21,6 +21,8 @@ abstract class EntityCollection {
     return getEntities().size();
   }
 
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   abstract static class Builder {
 
@@ -69,6 +71,8 @@ abstract class EntityCollection {
       return new AutoValue_EntityCollection_Page.Builder();
     }
 
+    @SuppressWarnings(
+        "squid:S1610") // Abstract classes without fields should be converted to interfaces
     @AutoValue.Builder
     abstract static class Builder {
 
