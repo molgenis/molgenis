@@ -198,7 +198,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
-  @Test
+  @Test(enabled = false) // FIXME: reenable this test when fixed to preform in a stable manner
   public void testCopyBoth() {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
