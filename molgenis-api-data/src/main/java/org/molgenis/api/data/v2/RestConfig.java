@@ -23,7 +23,7 @@ public class RestConfig implements WebMvcConfigurer {
   @Override
   public void addFormatters(FormatterRegistry registry) {
     registry.addConverter(attributeFilterConverter());
-    registry.addConverter(sort());
+    registry.addConverter(sortConverter());
     registry.addConverter(aggregateQueryRsqlConverter());
   }
 
@@ -33,7 +33,7 @@ public class RestConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public SortConverter sort() {
+  public SortConverter sortConverter() {
     return new SortConverter();
   }
 
