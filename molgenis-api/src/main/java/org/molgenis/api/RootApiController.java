@@ -10,6 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import org.molgenis.api.model.response.AppVersionResponse;
+import org.molgenis.api.model.response.OptionsResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
