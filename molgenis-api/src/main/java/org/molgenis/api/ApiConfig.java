@@ -1,12 +1,13 @@
 package org.molgenis.api;
 
-import static java.util.Objects.requireNonNull;
-
 import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.ComparisonOperator;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
+import java.util.HashSet;
+import java.util.Set;
 import org.molgenis.api.convert.QueryConverter;
 import org.molgenis.api.convert.QueryRsqlVisitor;
 import org.molgenis.api.convert.SortConverter;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -14,30 +15,30 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class ApiConfig implements WebMvcConfigurer {
-  private final RSQLParser rsqlParser;
-
-  public ApiConfig(RSQLParser rsqlParser) {
-    this.rsqlParser = requireNonNull(rsqlParser);
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping(ApiNamespace.API_PATH + "/**").allowedMethods("*");
   }
 
   @Override
   public void addFormatters(FormatterRegistry registry) {
     registry.addConverter(sortConverter());
-    registry.addConverter(query());
+    registry.addConverter(queryConverter());
   }
 
-  @Bean
-  public SortConverter sortConverter() {
+  private SortConverter sortConverter() {
     return new SortConverter();
   }
 
-  @Bean
-  public QueryConverter query() {
-    return new QueryConverter(rsqlParser, new QueryRsqlVisitor());
+  private QueryConverter queryConverter() {
+    return new QueryConverter(rsqlParser(), new QueryRsqlVisitor());
   }
 
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping(ApiNamespace.API_PATH + "/**").allowedMethods("*");
+  private RSQLParser rsqlParser() {
+    Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
+    operators.add(new ComparisonOperator("=q=", false));
+    operators.add(new ComparisonOperator("=like=", false));
+    operators.add(new ComparisonOperator("=notlike=", false));
+    return new RSQLParser(operators);
   }
 }
