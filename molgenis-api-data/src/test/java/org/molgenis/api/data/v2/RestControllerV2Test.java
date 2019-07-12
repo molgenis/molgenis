@@ -470,13 +470,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
     when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort)))
         .thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
 
-    Repository<Entity> repo = mock(Repository.class);
-
     when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
     when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
     when(dataService.findOneById(REF_REF_ENTITY_NAME, REF_REF_ENTITY_ID)).thenReturn(refRefEntity);
-    when(repo.getEntityType()).thenReturn(entityType);
-    when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
     when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
     when(dataService.getEntityType(REF_ENTITY_NAME)).thenReturn(refEntityType);
     when(dataService.getEntityType(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityType);
@@ -710,7 +706,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
     String unknownEntityTypeId = "unknown";
     doThrow(new UnknownEntityTypeException(unknownEntityTypeId))
         .when(dataService)
-        .getRepository(unknownEntityTypeId);
+        .getEntityType(unknownEntityTypeId);
 
     String expectedContent =
         readFile(
