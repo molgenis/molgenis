@@ -73,7 +73,6 @@ import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -811,27 +810,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(result, expectedResult);
   }
 
-  @WithMockUser(username = USERNAME_READ)
-  @Test(
-      groups = "readtest",
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:ADD_DATA entityTypeId:DataServiceItEntityType")
-  public void testAddNotAllowed() {
-    Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
-    dataService.add(entityType.getId(), entity);
-  }
-
-  @SuppressWarnings("deprecation")
-  @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "readtest",
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Value '0' for attribute 'ref_id_attr' is referenced by entity 'DataServiceItEntityType'.")
-  public void testDeleteReferencedEntity() {
-    dataService.delete(refEntityType.getId(), refEntities.get(0));
-  }
-
   @WithMockUser(username = USERNAME_WRITE)
   @Test(groups = "addtest", dependsOnGroups = "readtest")
   public void testAdd() {
@@ -943,9 +921,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     refEntities = entityTestHarness.createTestRefEntities(refEntityType, 3);
     dataService.add(refEntityType.getId(), refEntities.stream());
 
-    entityType =
-        entityTestHarness.createDynamicTestEntityType(refEntityType, "DataServiceItEntityType");
-    dataService.getMeta().createRepository(entityType);
     entities = entityTestHarness.createTestEntities(entityType, 3, refEntities).collect(toList());
     dataService.add(entityType.getId(), entities.stream());
 
