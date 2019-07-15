@@ -53,7 +53,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -70,7 +70,7 @@ import org.testng.annotations.Test;
     })
 @Transactional
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class CopyServiceIT extends AbstractTestNGSpringContextTests {
+public class CopyServiceIT extends AbstractTransactionalTestNGSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);
 
