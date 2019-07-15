@@ -54,6 +54,7 @@ import org.springframework.security.test.context.support.WithSecurityContextTest
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,6 +68,7 @@ import org.testng.annotations.Test;
       EntityTypeCopier.class,
       EntityTypeMetadataCopier.class
     })
+@Transactional
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
@@ -99,6 +101,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
           addTestEntityTypes();
           populatePermissions();
         });
+    waitForWorkToBeFinished(indexService, LOG);
   }
 
   @WithMockUser(username = USERNAME)
