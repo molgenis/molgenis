@@ -53,8 +53,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -68,9 +67,8 @@ import org.testng.annotations.Test;
       EntityTypeCopier.class,
       EntityTypeMetadataCopier.class
     })
-@Transactional
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class CopyServiceIT extends AbstractTransactionalTestNGSpringContextTests {
+public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);
 
@@ -101,7 +99,6 @@ public class CopyServiceIT extends AbstractTransactionalTestNGSpringContextTests
           addTestEntityTypes();
           populatePermissions();
         });
-    waitForWorkToBeFinished(indexService, LOG);
   }
 
   @WithMockUser(username = USERNAME)

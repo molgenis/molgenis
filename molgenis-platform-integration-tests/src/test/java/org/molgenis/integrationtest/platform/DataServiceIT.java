@@ -30,6 +30,7 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -83,7 +84,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -94,12 +95,9 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class DataServiceIT extends AbstractTransactionalTestNGSpringContextTests {
-
+public class DataServiceIT extends AbstractTestNGSpringContextTests {
   private static final String USERNAME_READ = "dataService-user-read";
   private static final String USERNAME_WRITE = "dataService-user-write";
-  public static final String DATA_SERVICE_IT_REF_ENTITY_TYPE = "DataServiceItRefEntityType";
-  public static final String DATA_SERVICE_IT_ENTITY_TYPE = "DataServiceItEntityType";
 
   private static EntityType entityType;
   private static EntityType refEntityType;
@@ -941,13 +939,13 @@ public class DataServiceIT extends AbstractTransactionalTestNGSpringContextTests
   }
 
   private void populateData() {
-    refEntityType = entityTestHarness.createDynamicRefEntityType(DATA_SERVICE_IT_REF_ENTITY_TYPE);
+    refEntityType = entityTestHarness.createDynamicRefEntityType("DataServiceItRefEntityType");
     dataService.getMeta().createRepository(refEntityType);
     refEntities = entityTestHarness.createTestRefEntities(refEntityType, 3);
     dataService.add(refEntityType.getId(), refEntities.stream());
 
     entityType =
-        entityTestHarness.createDynamicTestEntityType(refEntityType, DATA_SERVICE_IT_ENTITY_TYPE);
+        entityTestHarness.createDynamicTestEntityType(refEntityType, "DataServiceItEntityType");
     dataService.getMeta().createRepository(entityType);
     entities = entityTestHarness.createTestEntities(entityType, 3, refEntities).collect(toList());
     dataService.add(entityType.getId(), entities.stream());
@@ -1006,13 +1004,13 @@ public class DataServiceIT extends AbstractTransactionalTestNGSpringContextTests
 
   private void depopulate() {
     dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
-    dataService.delete(FILE_META, publicFile);
-    dataService.delete(FILE_META, secretFile);
     dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
     dataService.delete(refEntityTypeStatic.getId(), staticRefEntities.stream());
-
+    dataService.delete(FILE_META, publicFile);
+    dataService.delete(FILE_META, secretFile);
     try {
       indexJobScheduler.waitForAllIndicesStable();
+      dataService.deleteAll(INDEX_ACTION);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
