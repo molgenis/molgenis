@@ -1,6 +1,7 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -201,7 +202,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyBoth() {
+  public void testCopyBoth() throws InterruptedException {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
@@ -214,6 +215,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
     waitForWorkToBeFinished(indexService, LOG);
+    sleep(5000);
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
