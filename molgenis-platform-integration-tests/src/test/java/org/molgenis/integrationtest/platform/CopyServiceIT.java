@@ -1,7 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -25,7 +24,9 @@ import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
+import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -99,6 +100,9 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     runAsSystem(
         () -> {
           try {
+            dataService.deleteAll(IndexActionMetadata.INDEX_ACTION);
+            dataService.deleteAll(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
+            indexService.waitForAllIndicesStable();
             addPackages();
           } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -210,8 +214,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
-    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, PACKAGE_B);
-    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
+    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, PACKAGE_A);
+    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_B);
     TestProgress progress = new TestProgress();
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
@@ -305,7 +309,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
-    sleep(5000);
     waitForWorkToBeFinished(indexService, LOG);
   }
 
