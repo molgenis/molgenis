@@ -3,7 +3,7 @@ package org.molgenis.data.security.exception;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.UnknownDataException;
-import org.molgenis.i18n.test.exception.ExceptionMessageTest;
+import org.molgenis.util.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

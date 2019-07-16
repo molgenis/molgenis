@@ -26,7 +26,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.i18n.LanguageService;
+import org.molgenis.util.i18n.LanguageService;
 
 public class EntityTypeMapper {
   public static final ImmutableMap<String, String> ENTITIES_ATTRS;

@@ -78,7 +78,7 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-i18n</artifactId>
+      <artifactId>molgenis-util</artifactId>
       <type>test-jar</type>
       <version>${project.version}</version>
       <scope>test</scope>
