@@ -2,7 +2,7 @@ package org.molgenis.api.data.v2;
 
 import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
 import java.util.List;
 import java.util.stream.Collectors;
