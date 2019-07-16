@@ -98,7 +98,11 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   public void setUp() {
     runAsSystem(
         () -> {
-          addPackages();
+          try {
+            addPackages();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           addTestEntityTypes();
           populatePermissions();
         });
@@ -202,7 +206,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyBoth() throws InterruptedException {
+  public void testCopyBoth() {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
@@ -215,7 +219,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
     waitForWorkToBeFinished(indexService, LOG);
-    sleep(5000);
+
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
@@ -291,7 +295,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     runAsSystem(() -> dataService.deleteAll(PACKAGE, Stream.of(id)));
   }
 
-  private void addPackages() {
+  private void addPackages() throws InterruptedException {
     packageA = packageFactory.create(PACKAGE_A);
     packageA.setLabel("Package A");
 
@@ -301,7 +305,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
-
+    sleep(5000);
     waitForWorkToBeFinished(indexService, LOG);
   }
 
