@@ -94,7 +94,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   private Package packageB;
 
   @BeforeClass
-  public void setUp() {
+  public void setUp() throws InterruptedException {
     runAsSystem(
         () -> {
           addPackages();
@@ -103,11 +103,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
         });
 
     // somehow this is necessairy for stable test results
-    try {
-      sleep(100);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    sleep(100);
   }
 
   @WithMockUser(username = USERNAME)
