@@ -101,6 +101,13 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
           addTestEntityTypes();
           populatePermissions();
         });
+
+    // somehow this is necessairy for stable test results
+    try {
+      sleep(100);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @WithMockUser(username = USERNAME)
@@ -299,13 +306,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
-
-    // somehow this is necessairy for stable test results
-    try {
-      sleep(100);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
 
     waitForWorkToBeFinished(indexService, LOG);
   }
