@@ -260,7 +260,6 @@
             <additionalOptions>--allow-script-in-comments</additionalOptions>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>com.github.kongchen</groupId>
           <artifactId>swagger-maven-plugin</artifactId>
@@ -933,7 +932,6 @@
         <artifactId>jaxb-api</artifactId>
         <version>${jaxb-api.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
