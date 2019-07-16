@@ -100,8 +100,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
         () -> {
           try {
             addPackages();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
+          } catch (InterruptedException ex) {
+            ex.printStackTrace();
           }
           addTestEntityTypes();
           populatePermissions();
