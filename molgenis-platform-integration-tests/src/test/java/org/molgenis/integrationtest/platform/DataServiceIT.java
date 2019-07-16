@@ -30,7 +30,6 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
-import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -85,7 +84,6 @@ import org.springframework.security.test.context.support.WithSecurityContextTest
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -94,7 +92,6 @@ import org.testng.annotations.Test;
 @SuppressWarnings("groupsTestNG") // IntelliJ false positives
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
-@Transactional
 public class DataServiceIT extends AbstractTestNGSpringContextTests {
   private static final String USERNAME_READ = "dataService-user-read";
   private static final String USERNAME_WRITE = "dataService-user-write";
@@ -1010,7 +1007,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     dataService.delete(FILE_META, secretFile);
     try {
       indexJobScheduler.waitForAllIndicesStable();
-      dataService.deleteAll(INDEX_ACTION);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }

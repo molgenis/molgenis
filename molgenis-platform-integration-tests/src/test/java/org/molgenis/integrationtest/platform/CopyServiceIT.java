@@ -24,9 +24,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -56,7 +54,6 @@ import org.springframework.security.test.context.support.WithSecurityContextTest
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -71,7 +68,6 @@ import org.testng.annotations.Test;
       EntityTypeMetadataCopier.class
     })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-@Transactional
 public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);
@@ -99,14 +95,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   public void setUp() {
     runAsSystem(
         () -> {
-          try {
-            dataService.deleteAll(IndexActionMetadata.INDEX_ACTION);
-            dataService.deleteAll(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
-            indexService.waitForAllIndicesStable();
-            addPackages();
-          } catch (InterruptedException ex) {
-            ex.printStackTrace();
-          }
+          addPackages();
           addTestEntityTypes();
           populatePermissions();
         });
@@ -214,8 +203,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
-    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, PACKAGE_A);
-    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_B);
+    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, PACKAGE_B);
+    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
     TestProgress progress = new TestProgress();
 
     copyService.copy(asList(id1, id2), targetPackageId, progress);
@@ -223,7 +212,6 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     LOG.info("Copy job progress: {}/{}", progress.getProgress(), progress.getProgressMax());
     waitForWorkToBeFinished(indexService, LOG);
-
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
@@ -299,7 +287,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     runAsSystem(() -> dataService.deleteAll(PACKAGE, Stream.of(id)));
   }
 
-  private void addPackages() throws InterruptedException {
+  private void addPackages() {
     packageA = packageFactory.create(PACKAGE_A);
     packageA.setLabel("Package A");
 
@@ -309,6 +297,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
+
     waitForWorkToBeFinished(indexService, LOG);
   }
 
