@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class InvalidReferenceDataTypeException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP21";

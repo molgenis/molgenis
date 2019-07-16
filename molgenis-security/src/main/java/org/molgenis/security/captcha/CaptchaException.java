@@ -1,6 +1,8 @@
 package org.molgenis.security.captcha;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+import org.molgenis.util.exception.CodedRuntimeException;
+
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class CaptchaException extends Exception {
   private static final long serialVersionUID = 1L;

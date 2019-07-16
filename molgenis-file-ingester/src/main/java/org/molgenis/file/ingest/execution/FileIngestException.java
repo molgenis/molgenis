@@ -1,6 +1,8 @@
 package org.molgenis.file.ingest.execution;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+import org.molgenis.util.exception.CodedRuntimeException;
+
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class FileIngestException extends RuntimeException {
   private static final long serialVersionUID = 1L;

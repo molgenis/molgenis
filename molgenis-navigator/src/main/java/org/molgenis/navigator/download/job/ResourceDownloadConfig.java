@@ -6,9 +6,9 @@ import static org.molgenis.data.importer.emx.EmxFileExtensions.XLSX;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
+import org.molgenis.util.i18n.MessageSourceHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.i18n.LocaleContextHolder;

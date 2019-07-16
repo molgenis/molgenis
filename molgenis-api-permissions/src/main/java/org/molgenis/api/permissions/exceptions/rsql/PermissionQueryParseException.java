@@ -3,7 +3,7 @@ package org.molgenis.api.permissions.exceptions.rsql;
 import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class PermissionQueryParseException extends BadRequestException {

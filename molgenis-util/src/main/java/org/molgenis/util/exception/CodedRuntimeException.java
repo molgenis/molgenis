@@ -1,10 +1,10 @@
-package org.molgenis.i18n;
+package org.molgenis.util.exception;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.i18n.MessageSourceHolder.getMessageSource;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 import java.text.MessageFormat;
+import org.molgenis.util.i18n.MessageSourceHolder;
 
 /** {@link RuntimeException} with error code. */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
@@ -28,7 +28,7 @@ public abstract class CodedRuntimeException extends RuntimeException implements 
   @Override
   public String getLocalizedMessage() {
     try {
-      return getMessageSource()
+      return MessageSourceHolder.getMessageSource()
           .getMessage(
               getErrorCode(),
               getLocalizedMessageArguments(),

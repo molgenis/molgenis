@@ -3,9 +3,9 @@ package org.molgenis.jobs;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.JobExecution.Status;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class ActiveJobExecutionDeleteForbiddenException extends CodedRuntimeException {
   private static final String ERROR_CODE = "JOB01";

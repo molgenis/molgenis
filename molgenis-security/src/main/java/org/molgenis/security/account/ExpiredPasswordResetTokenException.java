@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.Instant;
 import org.molgenis.data.security.auth.PasswordResetToken;
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 @SuppressWarnings({"squid:MaximumInheritanceDepth"})
 class ExpiredPasswordResetTokenException extends BadRequestException {
