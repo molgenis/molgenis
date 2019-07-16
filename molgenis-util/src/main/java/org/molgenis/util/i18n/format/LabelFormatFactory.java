@@ -1,10 +1,10 @@
-package org.molgenis.i18n.format;
+package org.molgenis.util.i18n.format;
 
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.Locale;
-import org.molgenis.i18n.Labeled;
+import org.molgenis.util.i18n.Labeled;
 
 /**
  * {@link org.apache.commons.lang3.text.FormatFactory} for {@link Format}s that invoke and print the

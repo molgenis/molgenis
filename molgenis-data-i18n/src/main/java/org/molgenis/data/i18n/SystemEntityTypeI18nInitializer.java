@@ -8,7 +8,7 @@ import org.molgenis.data.i18n.model.L10nStringMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.i18n.LanguageService;
+import org.molgenis.util.i18n.LanguageService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.i18n.LanguageService.LANGUAGE_CODE_EN;
-import static org.molgenis.i18n.LanguageService.LANGUAGE_CODE_NL;
+import static org.molgenis.util.i18n.LanguageService.LANGUAGE_CODE_EN;
+import static org.molgenis.util.i18n.LanguageService.LANGUAGE_CODE_NL;
 import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;

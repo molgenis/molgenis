@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import java.util.Set;
 import org.molgenis.data.meta.SystemEntityType;

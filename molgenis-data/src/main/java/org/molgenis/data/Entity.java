@@ -3,7 +3,7 @@ package org.molgenis.data;
 import java.time.Instant;
 import java.time.LocalDate;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.i18n.Identifiable;
+import org.molgenis.util.i18n.Identifiable;
 
 /**
  * Entity is a data record which can contain a hash of attribute values. Attribute names are unique.

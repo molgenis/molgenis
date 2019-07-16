@@ -3,7 +3,7 @@ package org.molgenis.metadata.manager.service;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;

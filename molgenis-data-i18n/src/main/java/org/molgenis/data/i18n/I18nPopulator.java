@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.i18n.LanguageService;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.LanguageService;
 import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.springframework.stereotype.Component;
 
