@@ -2,7 +2,7 @@ package org.molgenis.data.security.auth;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 class UserSuModificationException extends CodedRuntimeException {
   private static final String ERROR_CODE = "DS18";

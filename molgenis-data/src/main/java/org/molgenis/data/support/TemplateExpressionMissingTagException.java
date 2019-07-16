@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 class TemplateExpressionMissingTagException extends CodedRuntimeException {
   private static final String ERROR_CODE = "D12d";

@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import org.mockito.Mock;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.exception.CodedRuntimeException;
 import org.springframework.security.core.Authentication;
 import org.testng.annotations.Test;
 

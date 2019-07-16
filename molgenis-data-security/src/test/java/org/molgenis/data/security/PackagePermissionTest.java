@@ -3,10 +3,10 @@ package org.molgenis.data.security;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Locale;
-import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
+import org.molgenis.util.i18n.MessageSourceHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

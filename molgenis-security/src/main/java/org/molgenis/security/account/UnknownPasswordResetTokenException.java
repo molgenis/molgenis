@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 @SuppressWarnings({"squid:MaximumInheritanceDepth"})
 class UnknownPasswordResetTokenException extends BadRequestException {

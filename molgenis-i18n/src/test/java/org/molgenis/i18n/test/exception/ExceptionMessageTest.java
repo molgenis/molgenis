@@ -3,10 +3,10 @@ package org.molgenis.i18n.test.exception;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Locale;
-import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.i18n.MessageSourceHolder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

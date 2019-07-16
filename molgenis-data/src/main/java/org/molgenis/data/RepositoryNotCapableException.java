@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.i18n.MessageSourceHolder.getMessageSource;
+import static org.molgenis.util.i18n.MessageSourceHolder.getMessageSource;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 /**
  * @see Repository

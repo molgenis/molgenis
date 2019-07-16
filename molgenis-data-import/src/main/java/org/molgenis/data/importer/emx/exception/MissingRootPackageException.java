@@ -1,6 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class MissingRootPackageException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP14";

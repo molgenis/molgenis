@@ -22,7 +22,6 @@ import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.AclAlreadyExistsException;
 import org.molgenis.data.security.exception.AclClassAlreadyExistsException;
-import org.molgenis.data.security.exception.DuplicatePermissionException;
 import org.molgenis.data.security.exception.PermissionNotSuitableException;
 import org.molgenis.data.security.exception.UnknownAceException;
 import org.molgenis.data.security.exception.UnknownTypeException;
@@ -245,7 +244,7 @@ public class PermissionServiceImpl implements PermissionService {
       acl.insertAce(acl.getEntries().size(), permission.getPermission(), sid, true);
       mutableAclService.updateAcl(acl);
     } else {
-      throw new DuplicatePermissionException(objectIdentity, sid);
+      // throw new DuplicatePermissionException(objectIdentity, sid);
     }
   }
 
