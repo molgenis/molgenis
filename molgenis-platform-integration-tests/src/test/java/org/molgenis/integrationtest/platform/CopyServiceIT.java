@@ -1,6 +1,7 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -58,6 +59,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("squid:S2925")
 @ContextConfiguration(
     classes = {
       PlatformITConfig.class,
@@ -297,6 +299,13 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
+
+    // somehow this is necessairy for stable test results
+    try {
+      sleep(100);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
 
     waitForWorkToBeFinished(indexService, LOG);
   }
