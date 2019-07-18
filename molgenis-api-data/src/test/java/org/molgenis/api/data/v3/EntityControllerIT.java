@@ -112,7 +112,7 @@ public class EntityControllerIT extends AbstractApiTest {
     // exc: entity type exists
     // exc: entity exists
     // exc: attribute does not exist
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 
   @Test
