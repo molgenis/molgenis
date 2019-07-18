@@ -56,6 +56,8 @@ public abstract class Sort {
       return new AutoValue_Sort_Order.Builder();
     }
 
+    @SuppressWarnings(
+        "squid:S1610") // Abstract classes without fields should be converted to interfaces
     @AutoValue.Builder
     public abstract static class Builder {
 
@@ -67,6 +69,8 @@ public abstract class Sort {
     }
   }
 
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   public abstract static class Builder {
 
