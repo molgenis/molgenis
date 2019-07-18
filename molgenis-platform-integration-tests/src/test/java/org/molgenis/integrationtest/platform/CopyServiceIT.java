@@ -103,7 +103,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
         });
 
     // somehow this is necessairy for stable test results
-    sleep(100);
+    sleep(1000);
   }
 
   @WithMockUser(username = USERNAME)
