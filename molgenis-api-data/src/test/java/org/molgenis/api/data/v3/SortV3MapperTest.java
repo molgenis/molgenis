@@ -24,7 +24,8 @@ public class SortV3MapperTest {
   @Test
   public void testMapNoOrder() {
     Sort sort = Sort.create(singletonList(Order.create("attr1")));
-    org.molgenis.data.Sort expected = new org.molgenis.data.Sort().on("attr1", org.molgenis.data.Sort.Direction.ASC);
+    org.molgenis.data.Sort expected =
+        new org.molgenis.data.Sort().on("attr1", org.molgenis.data.Sort.Direction.ASC);
     assertEquals(SortV3Mapper.map(sort), expected);
   }
 }

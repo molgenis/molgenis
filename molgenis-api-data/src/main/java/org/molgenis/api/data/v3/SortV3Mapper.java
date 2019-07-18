@@ -14,7 +14,8 @@ public class SortV3Mapper {
             order -> {
               Order.Direction direction = order.getDirection();
               newSort.on(
-                  order.getItem(), direction != null ? Direction.valueOf(direction.name()) : Direction.ASC);
+                  order.getItem(),
+                  direction != null ? Direction.valueOf(direction.name()) : Direction.ASC);
             });
     return newSort;
   }
