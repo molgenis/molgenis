@@ -3,7 +3,6 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.api.data.v3.SortV3Mapper.map;
-import static org.molgenis.api.model.Selection.EMPTY_SELECTION;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +29,17 @@ class DataServiceV3Impl implements DataServiceV3 {
   private final MetaDataService metaDataService;
   private final EntityManagerV3 entityManagerV3;
   private final QueryV3Mapper queryMapperV3;
+  private final FetchMapper fetchMapper;
 
   DataServiceV3Impl(
       MetaDataService metaDataService,
       EntityManagerV3 entityManagerV3,
-      QueryV3Mapper queryMapperV3) {
+      QueryV3Mapper queryMapperV3,
+      FetchMapper fetchMapper) {
     this.metaDataService = requireNonNull(metaDataService);
     this.entityManagerV3 = requireNonNull(entityManagerV3);
     this.queryMapperV3 = requireNonNull(queryMapperV3);
+    this.fetchMapper = requireNonNull(fetchMapper);
   }
 
   @Transactional
@@ -61,7 +62,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Fetch fetch = toFetch(entityType, filter, expand);
+    Fetch fetch = fetchMapper.toFetch(entityType, filter, expand);
 
     Entity entity = repository.findOneById(typedEntityId, fetch);
     if (entity == null) {
@@ -82,7 +83,7 @@ class DataServiceV3Impl implements DataServiceV3 {
       int number) {
     Repository<Entity> repository = getRepository(entityTypeId);
 
-    Fetch fetch = toFetch(repository.getEntityType(), filter, expand);
+    Fetch fetch = fetchMapper.toFetch(repository.getEntityType(), filter, expand);
 
     // get entities
     org.molgenis.data.Query<Entity> findQuery =
@@ -171,36 +172,5 @@ class DataServiceV3Impl implements DataServiceV3 {
   private Object toTypedEntityId(EntityType entityType, String entityId) {
     Attribute idAttribute = entityType.getIdAttribute();
     return EntityUtils.getTypedValue(entityId, idAttribute);
-  }
-
-  // TODO move to FetchMapper
-  private @CheckForNull @Nullable Fetch toFetch(
-      EntityType entityType, Selection filter, Selection expand) {
-    if (!filter.hasItems()) {
-      return null;
-    }
-
-    Fetch fetch = new Fetch();
-
-    Iterable<Attribute> attributes = entityType.getAtomicAttributes();
-    attributes.forEach(
-        attribute -> {
-          String attributeName = attribute.getName();
-
-          if (filter.hasItem(attributeName)) {
-            Fetch subFetch;
-            if (expand.hasItem(attributeName) && EntityTypeUtils.isReferenceType(attribute)) {
-              Selection subFilter = filter.getSelection(attributeName).orElse(EMPTY_SELECTION);
-              Selection subExpand = expand.getSelection(attributeName).orElse(EMPTY_SELECTION);
-              subFetch = toFetch(attribute.getRefEntity(), subFilter, subExpand);
-            } else {
-              subFetch = null;
-            }
-
-            fetch.field(attributeName, subFetch);
-          }
-        });
-
-    return fetch;
   }
 }
