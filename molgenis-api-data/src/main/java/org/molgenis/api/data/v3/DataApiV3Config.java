@@ -33,4 +33,9 @@ public class DataApiV3Config implements WebMvcConfigurer {
   public QueryV3Mapper queryV3Mapper() {
     return new QueryV3Mapper(rsqlValueParser);
   }
+
+  @Bean
+  public SortV3Mapper sortV3Mapper() {
+    return new SortV3Mapper();
+  }
 }

@@ -108,11 +108,18 @@ public class EntityControllerIT extends AbstractApiTest {
   }
 
   @Test
-  public void testRetrieveResourceSubResource() {
-    // exc: entity type exists
-    // exc: entity exists
-    // exc: attribute does not exist
-    throw new UnsupportedOperationException();
+  public void testRetrieveResourceSubResource() throws IOException {
+    // TODO: exc: entity type not exists
+    // TODO:  exc: entity not exists
+    // TODO:  exc: attribute does not exist
+    String expectedJson =
+        TestResourceUtils.getRenderedString(getClass(), "retrieveSubResourceCollection.json");
+
+    given()
+        .get("/api/entity/v3_MyDataset/1/myMref?q=id=in=(str1,str2)")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   @Test
@@ -197,7 +204,7 @@ public class EntityControllerIT extends AbstractApiTest {
     given().get("/api/entity/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
   }
 
-  @Test
+  @Test(dependsOnMethods = "testPartialUpdateResource")
   public void deleteResourceCollection() throws IOException {
     given().delete("/api/entity/v3_MyDataset").then().statusCode(NO_CONTENT.value());
 
@@ -211,7 +218,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test
+  @Test(dependsOnMethods = "testPartialUpdateResource")
   public void deleteResourceCollectionQuery() throws IOException {
     given()
         .delete("/api/entity/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")

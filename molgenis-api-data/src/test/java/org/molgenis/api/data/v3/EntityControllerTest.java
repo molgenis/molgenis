@@ -17,6 +17,7 @@ import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
 import org.molgenis.api.data.v3.model.ReadEntityRequest;
+import org.molgenis.api.data.v3.model.ReadSubResourceRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
@@ -117,6 +118,45 @@ public class EntityControllerTest extends AbstractMockitoTest {
     when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
 
     assertEquals(entityController.getEntities(entityRequest), entitiesResponse);
+  }
+
+  @Test
+  public void testGetField() {
+    String entityTypeId = "MyEntityTypeId";
+    String entityId = "EntityId";
+    String fieldId = "Field";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.FULL_SELECTION;
+    Query query = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    Sort sort = Sort.create("field", Direction.ASC);
+
+    ReadSubResourceRequest readSubResourceRequest = new ReadSubResourceRequest();
+    readSubResourceRequest.setEntityTypeId(entityTypeId);
+    readSubResourceRequest.setEntityId(entityId);
+    readSubResourceRequest.setFieldId(fieldId);
+    readSubResourceRequest.setQ(query);
+    readSubResourceRequest.setSort(sort);
+    readSubResourceRequest.setFilter(filter);
+    readSubResourceRequest.setExpand(expand);
+    readSubResourceRequest.setSize(10);
+    readSubResourceRequest.setNumber(2);
+
+    Entities entities = Entities.create(emptyList(), 30);
+    when(dataServiceV3.findSubresources(
+            entityTypeId, entityId, fieldId, query, filter, expand, sort, 10, 2))
+        .thenReturn(entities);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(emptyList())
+            .setPage(Page.builder().setOffset(20).setPageSize(10).setTotal(30).build())
+            .build();
+
+    EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
+    when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
+
+    assertEquals(entityController.getReferencedEntities(readSubResourceRequest), entitiesResponse);
   }
 
   @SuppressWarnings("unchecked")
