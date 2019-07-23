@@ -13,6 +13,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
 * [OpenJDK 11](https://adoptopenjdk.net/)
+* [HTTPD 2.4.x](https://httpd.apache.org/)
 * [Apache Tomcat v9.0.x](http://tomcat.apache.org/)
 * [PostgreSQL v11.1](https://www.postgresql.org/download/)
 * [Elasticsearch v5.5](https://www.elastic.co/downloads/elasticsearch)
@@ -22,7 +23,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 
 Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-9.0-doc/deployer-howto.html).
 
-Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice it will not work yet. This is because your database needs to be configured, and a single properties file needs to be set.
+Now that your Apache Tomcat is running and MOLGENIS backend is deployed, you will notice it will not work yet. This is because your database needs to be configured, and a single properties file needs to be set.
 
 ## Setting your molgenis-server.properties   
 The properties file supplies information to the application regarding the database URL, and the initial administrator password. To make it clear to Tomcat where to find your properties file, you have to edit the setenv.sh file in the apache-tomcat folder.
