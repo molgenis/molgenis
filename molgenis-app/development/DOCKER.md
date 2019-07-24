@@ -3,6 +3,7 @@ You can now functionally test the local build.
 
 We have several backend services which we run to debug and test the MOLGENIS backend webapp.
 
+## Deploy
 For mac, override the ```BACKEND``` property in the ```.env``` file with the following content:
 ```bash
 BACKEND=./backend-for-mac.conf
@@ -25,7 +26,7 @@ When you want to test integration with the frontend you can specify another fron
 FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
-For tags please check: https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags.
+For tags please check: https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags.,
 
 ## Testing
 Test your work at: <http://localhost>.
@@ -52,7 +53,7 @@ docker-compose down
 
 >note: also when you exited with ```CTRL+C```.
 
-When you are not sure that everything went the way it should be these commands will purge everything of your system:
+When you are not sure that everything went the way it should be, these commands will purge everything on your system:
 
 ```bash
 # delete volumes (not in use)
