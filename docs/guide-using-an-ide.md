@@ -161,7 +161,23 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost`
+* Setting your properties for the JVM
+  * Set the molgenis.home: `-Dmolgenis.home=<path to dir containing the data and molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost`
+  * And set the environment variables:
+  ```properties
+  molgenis.home=/opt/molgenis
+  opencpu.uri.host=opencpu
+  elasticsearch.transport.addresses=elasticsearch:9300
+  db_uri=jdbc:postgresql://postgres/molgenis
+  db_user=molgenis
+  db_password=molgenis
+  admin.password=admin
+  MINIO_BUCKET_NAME=molgenis
+  MINIO_ENDPOINT=http://minio:9000
+  MINIO_ACCESS_KEY=molgenis
+  MINIO_SECRET_KEY=molgenis
+  "CATALINA_OPTS=-Xmx1g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+  ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.
