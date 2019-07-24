@@ -26,7 +26,7 @@ When you want to test integration with the frontend you can specify another fron
 FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
-For tags please check: https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags.,
+For tags please check: [pull requests for frontend](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags)
 
 ## Testing
 Test your work at: <http://localhost>.
