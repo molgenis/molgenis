@@ -36,4 +36,4 @@ git checkout <tag name: see https://github.com/molgenis/molgenis/releases>
 ```
 
 ## Start MOLGENIS
-We use [IntelliJ](guide-using-an-ide.md) as IDE to run the code in.
+We use [IntelliJ](guide-using-an-ide-for-backend.md) as IDE to run the code in.

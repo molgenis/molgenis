@@ -48,7 +48,7 @@
   * [Developing MOLGENIS](guide-development.md)
   * [Developing frontend in MOLGENIS](guide-development-frontend.md)
   * [Developing Apps in MOLGENIS](guide-development-apps.md)
-  * [Using an IDE (Intellij)](guide-using-an-ide.md)
+  * [Using an IDE (Intellij)](guide-using-an-ide-for-backend.md)
   * [Technologies](guide-technologies.md)
   * [Dynamic decorators](guide-dynamic-decorators.md)
   * [Running the integration tests](guide-integration-tests.md)
