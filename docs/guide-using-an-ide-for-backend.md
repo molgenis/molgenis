@@ -174,7 +174,7 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
   MINIO_ENDPOINT=http://localhost:9000
   MINIO_ACCESS_KEY=molgenis
   MINIO_SECRET_KEY=molgenis
-  "CATALINA_OPTS=-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+  CATALINA_OPTS="-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
   ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
