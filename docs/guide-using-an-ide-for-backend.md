@@ -3,7 +3,11 @@
 A rough guide on how to develop MOLGENIS in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA Ultimate. Most of the time we use the latest IntelliJ version.
 
-**[Deploy backend services](guide-development.md)**
+Deploy the backend services using [docker-compose](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml). 
+
+You can spin it up by clicking right on the file and hit **Run 'development: Compose...'**. 
+
+> note: Please check: [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
 
 ## Get the MOLGENIS sourcecode
 * File, New, Project from version control, Git (or Github)
@@ -156,7 +160,8 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* Setting your environment variables:
+* Select the 'Startup/Connection' tab
+  Copy and paste these variables in the Environment variables area and select 'Pass environment variables' 
   ```properties
   molgenis.home=**your own version of the data dir**
   opencpu.uri.host=localhost
