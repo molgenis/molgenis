@@ -27,7 +27,13 @@
                       </div>
                     </div>
                     <div class="hr-sect">OR</div>
+                    <div class="row" style="padding-bottom: 1em;">
+                        <div class="col-md-12 text-center">
+                            <a href="#" data-toggle="collapse" data-target="#local-user"><small>Use a local user</small></a>
+                        </div>
+                    </div>
                 </#if>
+                    <div id="local-user" <#if authentication_oidc_clients?has_content>class="collapse"</#if>>
                     <form id="login-form" role="form" method="POST" action="/login">
                         <div class="form-group">
                             <input id="username-field" type="text" placeholder="Username" class="form-control"
@@ -57,6 +63,7 @@
                       </div>
                     </div>
                     </#if>
+                    </div>
                 </div>
             </div>
         </div>
