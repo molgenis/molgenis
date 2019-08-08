@@ -3,12 +3,6 @@
 A rough guide on how to develop MOLGENIS in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA Ultimate. Most of the time we use the latest IntelliJ version.
 
-Deploy the backend services using [docker-compose](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml). 
-
-You can spin it up by clicking right on the file and hit **Run 'development: Compose...'**. 
-
-> note: Please check: [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
-
 ## Get the MOLGENIS sourcecode
 * File, New, Project from version control, Git (or Github)
 * Pick `https://github.com/molgenis/molgenis.git` for the repository URL.
@@ -52,7 +46,6 @@ mvn fmt:format
 ```
 
 ## Use MOLGENIS file-templates
-
 * Make sure that your .idea project folder lives inside your 'molgenis' git project root! Only then will we be able to auto-share templates.
 * Goto 'New / Edit file templates' and switch from 'Default' to 'Project'-scope.
 * Restart IntelliJ after setting the .idea directory and changing the settings
@@ -156,26 +149,43 @@ public class PigeonEncounterFactory extends AbstractSystemEntityFactory<PigeonEn
 Sadly, it's not possible to generate multiple files from one template, so the Metadata and Factory classes have to be manually moved to separate files. (Tip: Set your cursor to the class name and use Refactor > Move... or press F6)
 
 
+## Deploy the backend services
+Before you execute your run configuration you need to have the following services available on localhost.
+- postgres 
+- minio
+- elasticsearch
+- frontend of MOLGENIS
+- opencpu
+
+For precise versions you can check: [the deployment file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml).
+
+> note: **IMPORTANT:** to switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
+
+You can spin it up by clicking right on the [docker-compose](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hit **Run 'development: Compose...'**. 
+
+> note: Please check: [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
+
 ## Deploy / Run in Tomcat server
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
+* Remove any JVM options. These will override the environment variables below.
 * Select the 'Startup/Connection' tab
-  Copy and paste these variables in the Environment variables area and select 'Pass environment variables' 
-  ```properties
-  molgenis.home=**your own version of the data dir**
-  opencpu.uri.host=localhost
-  elasticsearch.transport.addresses=localhost:9300
-  db_uri=jdbc:postgresql://localhost/molgenis
-  db_user=molgenis
-  db_password=molgenis
-  admin.password=admin
-  MINIO_BUCKET_NAME=molgenis
-  MINIO_ENDPOINT=http://localhost:9000
-  MINIO_ACCESS_KEY=molgenis
-  MINIO_SECRET_KEY=molgenis
-  CATALINA_OPTS="-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
-  ```
+  Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
+```properties
+molgenis.home=**your own version of the data dir**
+opencpu.uri.host=localhost
+elasticsearch.transport.addresses=localhost:9300
+db_uri=jdbc:postgresql://localhost/molgenis
+db_user=molgenis
+db_password=molgenis
+admin.password=admin
+MINIO_BUCKET_NAME=molgenis
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=molgenis
+MINIO_SECRET_KEY=molgenis
+CATALINA_OPTS="-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
 * Select the OpenJDK 11 JRE in the 'JRE' property
