@@ -148,11 +148,10 @@ public class PigeonEncounterFactory extends AbstractSystemEntityFactory<PigeonEn
 
 Sadly, it's not possible to generate multiple files from one template, so the Metadata and Factory classes have to be manually moved to separate files. (Tip: Set your cursor to the class name and use Refactor > Move... or press F6)
 
-
 ## Deploy the backend services
 Before you execute your run configuration you need to have the following services available on localhost.
 - postgres 
-- minio
+- minio 
 - elasticsearch
 - frontend of MOLGENIS
 - opencpu
@@ -161,17 +160,22 @@ For precise versions you can check: [the deployment file](https://github.com/mol
 
 > note: **IMPORTANT:** to switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
 
-You can spin it up by clicking right on the [docker-compose](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hit **Run 'development: Compose...'**. 
+> note: **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in you user directory.
 
-> note: Please check: [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
+You can spin it up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'development: Compose...'**.  
+
+> note: Please check [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
 
 ## Deploy / Run in Tomcat server
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* Remove any JVM options. These will override the environment variables below.
+* Remove any *JVM options*. These will override the environment variables below. 
+* In the "Open browser" change the URL to http://localhost *(this will open a browser and serve the frontend of MOLGENIS)*.
+* The tomcat-port needs to point at 8080. This is also defined in the ```.env```. 
 * Select the 'Startup/Connection' tab
   Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
+  Fill in your home-directory in the *molgenis.home*-key.
 ```properties
 molgenis.home=**your own version of the data dir**
 opencpu.uri.host=localhost
@@ -184,7 +188,7 @@ MINIO_BUCKET_NAME=molgenis
 MINIO_ENDPOINT=http://localhost:9000
 MINIO_ACCESS_KEY=molgenis
 MINIO_SECRET_KEY=molgenis
-CATALINA_OPTS="-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+CATALINA_OPTS=-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
 ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
@@ -197,13 +201,14 @@ CATALINA_OPTS="-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
 * Save the configuration
 * In the tool bar, select the `molgenis-app [exploded]` configuration and press the play button.
 
-This'll build and deploy MOLGENIS to tomcat and open it in the browser.
-Whenever you tab from MOLGENIS to the browser, all modified resources will be copied to the deployed exploded war.
+This'll build and deploy MOLGENIS to tomcat and open it in the browser. Whenever you tab from MOLGENIS to the browser, all modified resources will be copied to the deployed exploded war.
 A browser reload should display the changes.
 
+> note: Do the same for the *Debug* mode.
+
 > note: In some cases IntelliJ might not pick up all changes in the file system made during the
- build process. This may result in an error referencing a missing jar file. This can be fixed by
- selecting the 'Synchronize MOLGENIS' option from the project action menu.
+  build process. This may result in an error referencing a missing jar file. This can be fixed by
+  selecting the 'Synchronize MOLGENIS' option from the project action menu. 
 
 ## Security
 See also the [MOLGENIS Security settings](guide-security.md)
