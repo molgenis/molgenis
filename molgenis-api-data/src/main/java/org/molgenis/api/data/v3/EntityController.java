@@ -47,7 +47,7 @@ class EntityController extends ApiController {
   }
 
   @PostMapping("/{entityTypeId}")
-  ResponseEntity createEntity(
+  public ResponseEntity createEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody Map<String, Object> entityMap) {
     Entity entity = dataServiceV3.create(entityTypeId, entityMap);
@@ -61,7 +61,7 @@ class EntityController extends ApiController {
   }
 
   @GetMapping("/{entityTypeId}/{entityId}")
-  EntityResponse getEntity(@Valid ReadEntityRequest entityRequest) {
+  public EntityResponse getEntity(@Valid ReadEntityRequest entityRequest) {
     Selection filter = entityRequest.getFilter();
     Selection expand = entityRequest.getExpand();
 
@@ -74,7 +74,7 @@ class EntityController extends ApiController {
 
   @PutMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  void updateEntity(
+  public void updateEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("entityId") String entityId,
       @RequestBody Map<String, Object> entityMap) {
@@ -83,7 +83,7 @@ class EntityController extends ApiController {
 
   @PatchMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  void updatePartialEntity(
+  public void updatePartialEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("entityId") String entityId,
       @RequestBody Map<String, Object> entityMap) {
@@ -92,19 +92,19 @@ class EntityController extends ApiController {
 
   @DeleteMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  void deleteEntity(@Valid DeleteEntityRequest deleteRequest) {
+  public void deleteEntity(@Valid DeleteEntityRequest deleteRequest) {
     dataServiceV3.delete(deleteRequest.getEntityTypeId(), deleteRequest.getEntityId());
   }
 
   @DeleteMapping("/{entityTypeId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  void deleteEntities(@Valid DeleteEntitiesRequest deleteRequest) {
+  public void deleteEntities(@Valid DeleteEntitiesRequest deleteRequest) {
     Query query = deleteRequest.getQ().orElse(null);
     dataServiceV3.deleteAll(deleteRequest.getEntityTypeId(), query);
   }
 
   @GetMapping("/{entityTypeId}")
-  EntitiesResponse getEntities(@Valid ReadEntitiesRequest entitiesRequest) {
+  public EntitiesResponse getEntities(@Valid ReadEntitiesRequest entitiesRequest) {
     String entityTypeId = entitiesRequest.getEntityTypeId();
     Selection filter = entitiesRequest.getFilter();
     Selection expand = entitiesRequest.getExpand();
