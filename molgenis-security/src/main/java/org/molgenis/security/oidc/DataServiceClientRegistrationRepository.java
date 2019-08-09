@@ -3,7 +3,10 @@ package org.molgenis.security.oidc;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.ID_TOKEN_CLAIM_ROLE_PATH;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.oidc.model.OidcClient;
@@ -16,9 +19,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataServiceClientRegistrationRepository implements ClientRegistrationRepository {
+
   private static final String DEFAULT_REDIRECT_URI_TEMPLATE =
       "{baseUrl}/login/oauth2/code/{registrationId}";
-
   private final AuthenticationSettings authenticationSettings;
 
   public DataServiceClientRegistrationRepository(AuthenticationSettings authenticationSettings) {
@@ -42,6 +45,9 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
   }
 
   private ClientRegistration toClientRegistration(OidcClient oidcClient) {
+    Map<String, Object> providerConfigurationMetadata = new HashMap<>();
+    providerConfigurationMetadata.put(
+        ID_TOKEN_CLAIM_ROLE_PATH, oidcClient.getIdTokenClaimRolePath());
     return ClientRegistration.withRegistrationId(oidcClient.getRegistrationId())
         .authorizationGrantType(toAuthorizationGrantType(oidcClient))
         .authorizationUri(oidcClient.getAuthorizationUri())
@@ -55,6 +61,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
         .tokenUri(oidcClient.getTokenUri())
         .userInfoUri(oidcClient.getUserInfoUri())
         .userNameAttributeName(oidcClient.getUsernameAttributeName())
+        .providerConfigurationMetadata(providerConfigurationMetadata)
         .build();
   }
 

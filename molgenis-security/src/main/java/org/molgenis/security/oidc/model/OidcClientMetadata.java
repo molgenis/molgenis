@@ -34,6 +34,7 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String JWK_SET_URI = "jwkSetUri";
   static final String USER_INFO_URI = "userInfoUri";
   static final String USERNAME_ATTRIBUTE_NAME = "userNameAttributeName";
+  public static final String ID_TOKEN_CLAIM_ROLE_PATH = "idTokenClaimRolePath";
 
   private final OidcPackage oidcPackage;
 
@@ -80,6 +81,11 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDescription("Comma-separated set of scopes")
         .setNillable(false)
         .setDefaultValue("openid,email,profile");
+    addAttribute(ID_TOKEN_CLAIM_ROLE_PATH)
+        .setLabel("ID token claim role path")
+        .setDescription(
+            "JSON path expression to evaluate on the ID token claims to retrieve user roles")
+        .setNillable(true);
 
     Attribute providerDetailsAttribute =
         addAttribute(PROVIDER_DETAILS).setDataType(COMPOUND).setLabel("Provider details");
