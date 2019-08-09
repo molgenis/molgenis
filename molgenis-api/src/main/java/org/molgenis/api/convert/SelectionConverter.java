@@ -13,7 +13,7 @@ public class SelectionConverter implements Converter<String, Selection> {
     try {
       return new SelectionParser(source).parse();
     } catch (ParseException e) {
-      throw new RuntimeException(e); // TODO proper exception handling
+      throw new SelectionParseException(e);
     }
   }
 }

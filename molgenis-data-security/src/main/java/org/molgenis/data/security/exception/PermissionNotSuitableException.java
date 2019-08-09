@@ -2,7 +2,7 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class PermissionNotSuitableException extends BadRequestException {

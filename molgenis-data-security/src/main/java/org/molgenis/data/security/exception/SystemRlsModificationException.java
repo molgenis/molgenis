@@ -2,7 +2,7 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.ForbiddenException;
+import org.molgenis.util.exception.ForbiddenException;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SystemRlsModificationException extends ForbiddenException {

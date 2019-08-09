@@ -1,6 +1,6 @@
 package org.molgenis.api.data.v1;
 
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

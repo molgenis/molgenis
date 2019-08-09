@@ -23,7 +23,7 @@ public class QueryConverter implements Converter<String, Query> {
     try {
       node = rsqlParser.parse(source);
     } catch (RSQLParserException e) {
-      throw new RuntimeException(e); // FIXME: Coded
+      throw new QueryParseException(e);
     }
     return node.accept(rsqlVisitor);
   }

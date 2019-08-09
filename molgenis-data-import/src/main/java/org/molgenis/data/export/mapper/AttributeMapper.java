@@ -37,7 +37,7 @@ import java.util.Map.Entry;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.i18n.LanguageService;
+import org.molgenis.util.i18n.LanguageService;
 
 public class AttributeMapper {
 

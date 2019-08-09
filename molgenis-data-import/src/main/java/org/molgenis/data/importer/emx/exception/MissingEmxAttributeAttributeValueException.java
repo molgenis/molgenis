@@ -2,7 +2,7 @@ package org.molgenis.data.importer.emx.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class MissingEmxAttributeAttributeValueException extends CodedRuntimeException {
   private static final String ERROR_CODE = "IMP11";

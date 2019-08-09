@@ -13,6 +13,7 @@ public class TestProgress implements Progress {
   private static final String STARTED = "started";
   private int progress;
   private int progressMax;
+  private boolean finished = false;
   private String message;
   private String resultUrl;
 
@@ -68,6 +69,7 @@ public class TestProgress implements Progress {
 
   @Override
   public void success() {
+    finished = true;
     updateMessage(SUCCESS);
   }
 
@@ -141,5 +143,9 @@ public class TestProgress implements Progress {
         + resultUrl
         + '\''
         + '}';
+  }
+
+  public boolean isFinished() {
+    return finished;
   }
 }

@@ -16,8 +16,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.i18n.AllPropertiesMessageSource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

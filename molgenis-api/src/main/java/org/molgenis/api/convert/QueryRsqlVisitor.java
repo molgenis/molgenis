@@ -118,8 +118,7 @@ public class QueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Query> {
       case GREATER_THAN_OR_EQUAL_TO:
         value = arguments.get(0);
         if (value == null) {
-          // FIXME replace with coded exception
-          throw new RuntimeException("value can't be null");
+          throw new MissingRsqlValueException(operator);
         }
         break;
       case IN:
