@@ -46,7 +46,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   // TODO implement
   @Test
   public void testCreate() {
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 
   @SuppressWarnings("unchecked")
@@ -200,13 +200,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   // TODO implement
   @Test
   public void testUpdate() {
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 
   // TODO implement
   @Test
   public void testUpdatePartially() {
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 
   @SuppressWarnings("unchecked")
