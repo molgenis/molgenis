@@ -1,10 +1,9 @@
-package org.molgenis.i18n.test.exception;
+package org.molgenis.util.i18n;
 
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Objects;
-import org.molgenis.i18n.format.MessageFormatFactory;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.format.MessageFormatFactory;
 
 public class TestAllPropertiesMessageSource extends AllPropertiesMessageSource {
   private final MessageFormatFactory messageFormatFactory;

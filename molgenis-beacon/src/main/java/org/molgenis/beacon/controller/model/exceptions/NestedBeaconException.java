@@ -4,8 +4,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
+import org.molgenis.util.exception.CodedRuntimeException;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class NestedBeaconException extends BeaconException {
   private final String beaconId;

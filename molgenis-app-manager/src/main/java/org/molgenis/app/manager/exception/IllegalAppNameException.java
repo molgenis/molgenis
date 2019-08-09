@@ -3,7 +3,7 @@ package org.molgenis.app.manager.exception;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 /** Thrown when an app name contains illegal characters */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false

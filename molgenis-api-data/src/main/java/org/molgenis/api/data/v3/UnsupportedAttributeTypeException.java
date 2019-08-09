@@ -1,7 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 public class UnsupportedAttributeTypeException extends BadRequestException {
 

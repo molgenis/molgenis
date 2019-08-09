@@ -1,7 +1,7 @@
 package org.molgenis.web.exception;
 
 import java.util.Optional;
-import org.molgenis.i18n.ErrorCoded;
+import org.molgenis.util.exception.ErrorCoded;
 
 class ExceptionUtils {
   private ExceptionUtils() {}

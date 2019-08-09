@@ -41,7 +41,7 @@ public class QueryConverterTest extends AbstractMockitoTest {
     verify(rsqlVisitor).visit(node, null);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = QueryParseException.class)
   public void testCreateQueryParseException() {
     String rsqlQuery = "illegalQuery";
     queryConverter.convert(rsqlQuery);

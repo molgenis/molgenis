@@ -6,7 +6,7 @@ import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.Repository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,9 +24,9 @@ public class MolgenisRSQL {
     this.rsqlParser = requireNonNull(rsqlParser);
   }
 
-  public Query<Entity> createQuery(String rsql, EntityType entityType) {
+  public Query<Entity> createQuery(String rsql, Repository<Entity> repository) {
     Node rootNode = rsqlParser.parse(rsql);
-    MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityType);
+    MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(repository);
 
     return rootNode.accept(visitor);
   }

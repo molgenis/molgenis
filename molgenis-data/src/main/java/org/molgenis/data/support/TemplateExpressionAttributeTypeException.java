@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 class TemplateExpressionAttributeTypeException extends CodedRuntimeException {
   private static final String ERROR_CODE = "D12a";

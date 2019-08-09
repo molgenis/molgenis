@@ -18,7 +18,7 @@ public class SortConverterTest {
     Assert.assertEquals(sortConverter.convert("item"), Sort.create("item"));
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = SortParseException.class)
   public void testConvertParseException() {
     sortConverter.convert("+");
   }

@@ -26,7 +26,7 @@ public class SelectionConverterTest {
     assertEquals(selectionConverter.convert(""), Selection.FULL_SELECTION);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = SelectionParseException.class)
   public void testConvertParseException() {
     selectionConverter.convert("item,");
   }

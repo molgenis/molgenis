@@ -20,9 +20,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.util.i18n.LanguageService;
 
 public class EntityUtils {
   private EntityUtils() {}

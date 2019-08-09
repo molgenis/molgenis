@@ -1,6 +1,6 @@
 package org.molgenis.settings.controller;
 
-import org.molgenis.i18n.PropertiesMessageSource;
+import org.molgenis.util.i18n.PropertiesMessageSource;
 
 // @Configuration
 public class SettingsI18nConfig {

@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.util.exception.CodedRuntimeException;
 import org.molgenis.validation.ConstraintViolation;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class MolgenisValidationException extends MolgenisDataException {
   private static final long serialVersionUID = 1L;

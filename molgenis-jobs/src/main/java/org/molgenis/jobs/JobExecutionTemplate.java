@@ -3,7 +3,7 @@ package org.molgenis.jobs;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import org.molgenis.i18n.ErrorCoded;
+import org.molgenis.util.exception.ErrorCoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.i18n.LocaleContextHolder;

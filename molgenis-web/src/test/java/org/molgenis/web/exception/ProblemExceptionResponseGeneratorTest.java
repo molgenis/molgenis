@@ -7,8 +7,8 @@ import static org.molgenis.web.exception.ExceptionResponseType.PROBLEM;
 import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.exception.CodedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

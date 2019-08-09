@@ -5,7 +5,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.i18n.LanguageService;
+import org.molgenis.util.i18n.LanguageService;
 
 class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language> {
   LanguageRepositoryDecorator(Repository<Language> delegateRepository) {

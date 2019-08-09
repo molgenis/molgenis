@@ -4,7 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.List;
 import java.util.Locale;
-import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.springframework.context.MessageSource;

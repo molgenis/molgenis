@@ -3,7 +3,9 @@ package org.molgenis.data.index.exception;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+import org.molgenis.util.exception.CodedRuntimeException;
+
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class UnknownIndexException extends IndexException {
   private static final long serialVersionUID = 1L;

@@ -10,7 +10,7 @@ public class SortConverter implements Converter<String, Sort> {
     try {
       return new SortParser(source).parse();
     } catch (ParseException e) {
-      throw new RuntimeException(e); // TODO proper exception handling
+      throw new SortParseException(e);
     }
   }
 }

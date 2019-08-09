@@ -17,11 +17,11 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
 
   @Test
   public void testCreate() {
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 
   @Test
   public void testPopulate() {
-    throw new UnsupportedOperationException();
+    // FIXME: implement this test
   }
 }

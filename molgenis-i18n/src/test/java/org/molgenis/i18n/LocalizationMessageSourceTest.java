@@ -6,15 +6,16 @@ import static java.util.Locale.KOREAN;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.molgenis.i18n.LanguageService.DEFAULT_LOCALE;
+import static org.molgenis.util.i18n.LanguageService.DEFAULT_LOCALE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.Locale;
 import java.util.function.Supplier;
 import org.mockito.Mock;
-import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.i18n.Labeled;
+import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

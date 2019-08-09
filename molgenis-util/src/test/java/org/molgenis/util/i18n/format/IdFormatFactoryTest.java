@@ -1,12 +1,12 @@
-package org.molgenis.i18n.format;
+package org.molgenis.util.i18n.format;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.text.Format;
 import org.mockito.Mock;
-import org.molgenis.i18n.Identifiable;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.i18n.Identifiable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

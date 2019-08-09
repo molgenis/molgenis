@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.i18n.test.exception.ExceptionMessageTest;
+import org.molgenis.util.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

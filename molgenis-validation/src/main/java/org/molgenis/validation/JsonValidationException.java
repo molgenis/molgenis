@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import java.util.Set;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 /** Exception that lists one or more violations in a JSON object or schema. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false

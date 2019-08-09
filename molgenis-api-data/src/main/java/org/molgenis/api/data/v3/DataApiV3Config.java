@@ -35,6 +35,11 @@ public class DataApiV3Config implements WebMvcConfigurer {
   }
 
   @Bean
+  public FetchMapper fetchMapper() {
+    return new FetchMapper();
+  }
+
+  @Bean
   public SortV3Mapper sortV3Mapper() {
     return new SortV3Mapper();
   }
