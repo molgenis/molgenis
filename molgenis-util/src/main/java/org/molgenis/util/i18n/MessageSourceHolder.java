@@ -1,4 +1,4 @@
-package org.molgenis.i18n;
+package org.molgenis.util.i18n;
 
 import org.springframework.context.MessageSource;
 

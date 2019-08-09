@@ -20,7 +20,7 @@ public abstract class PageResponse {
   public static PageResponse create(int size, int totalElements, int totalPages, int number) {
     Preconditions.checkState(size >= 0, "Negative number of results on the page");
     Preconditions.checkState(totalElements >= 0, "Negative number of results in the system");
-    Preconditions.checkState(totalPages >= 0, "Negative nubmer of pages");
+    Preconditions.checkState(totalPages >= 0, "Negative number of pages");
     Preconditions.checkState(number >= 0, "Negative number of items");
     return new AutoValue_PageResponse(size, totalElements, totalPages, number);
   }

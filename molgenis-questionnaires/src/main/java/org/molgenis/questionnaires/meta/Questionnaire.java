@@ -1,8 +1,8 @@
 package org.molgenis.questionnaires.meta;
 
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.ATTR_STATUS;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

@@ -1,4 +1,4 @@
-package org.molgenis.i18n.properties;
+package org.molgenis.util.i18n;
 
 import static com.google.common.collect.Sets.newTreeSet;
 import static java.util.stream.Collectors.toList;
@@ -11,7 +11,6 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
-import org.molgenis.i18n.LanguageService;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /** A {@link ResourceBundleMessageSource} that can be queried for keys per basename. */

@@ -1,7 +1,7 @@
 package org.molgenis.i18n;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.i18n.LanguageService.DEFAULT_LOCALE;
+import static org.molgenis.util.i18n.LanguageService.DEFAULT_LOCALE;
 
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 

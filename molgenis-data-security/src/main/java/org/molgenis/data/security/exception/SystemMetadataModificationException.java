@@ -1,6 +1,6 @@
 package org.molgenis.data.security.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 /** Thrown when users try to modify system metadata. */
 public class SystemMetadataModificationException extends CodedRuntimeException {

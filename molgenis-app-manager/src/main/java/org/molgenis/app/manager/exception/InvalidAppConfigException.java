@@ -1,6 +1,6 @@
 package org.molgenis.app.manager.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class InvalidAppConfigException extends CodedRuntimeException {
   private static final String ERROR_CODE = "AM04";
