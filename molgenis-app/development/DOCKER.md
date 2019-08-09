@@ -76,7 +76,7 @@ There are a few clients you can use to access the docker services from your loca
 We use ```psql``` to access postgres and do database changes.
 
 ```bash
-psql -h localhost -p 5432 -U postgres -W
+psql -h localhost -p 5432 -U molgenis -W
 ``` 
 
 > note: **IMPORTANT:** In Docker the postgres user is non-existent. You have 1 superuser which is defined in the docker-compose (username: molgenis, password: molgenis).
