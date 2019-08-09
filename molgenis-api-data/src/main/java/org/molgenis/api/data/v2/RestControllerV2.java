@@ -661,10 +661,11 @@ public class RestControllerV2 {
       EntityCollectionRequestV2 request,
       HttpServletRequest httpRequest,
       boolean includeCategories) {
-    EntityType entityType = dataService.getEntityType(entityTypeId);
+    Repository<Entity> repository = dataService.getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
 
     Query<Entity> q =
-        request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();
+        request.getQ() != null ? request.getQ().createQuery(repository) : new QueryImpl<>();
     q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
     Fetch fetch =
         AttributeFilterToFetchConverter.convert(
