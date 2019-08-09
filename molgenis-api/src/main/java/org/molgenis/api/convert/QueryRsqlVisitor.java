@@ -96,8 +96,7 @@ public class QueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Query> {
         operator = MATCHES;
         break;
       default:
-        // FIXME replace with coded exception
-        throw new RuntimeException("Unknown RSQL query operator [" + symbol + "]");
+        throw new IllegalArgumentException("Unknown RSQL query operator [" + symbol + "]");
     }
     return operator;
   }

@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.api.model.Sort;
@@ -9,7 +10,6 @@ import org.molgenis.api.model.Sort.Order.Direction;
 import org.testng.annotations.Test;
 
 public class SortV3MapperTest {
-
   @Test
   public void testMap() {
     Sort sort =
@@ -18,6 +18,14 @@ public class SortV3MapperTest {
     org.molgenis.data.Sort expected = new org.molgenis.data.Sort();
     expected.on("attr1", org.molgenis.data.Sort.Direction.ASC);
     expected.on("attr2", org.molgenis.data.Sort.Direction.DESC);
+    assertEquals(SortV3Mapper.map(sort), expected);
+  }
+
+  @Test
+  public void testMapNoOrder() {
+    Sort sort = Sort.create(singletonList(Order.create("attr1")));
+    org.molgenis.data.Sort expected =
+        new org.molgenis.data.Sort().on("attr1", org.molgenis.data.Sort.Direction.ASC);
     assertEquals(SortV3Mapper.map(sort), expected);
   }
 }
