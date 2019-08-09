@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.springframework.security.config.oauth2.client.CommonOAuth2Provider.GOOGLE;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.EMAIL;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
 
   private MappedOidcUserService mappedOidcUserService;
   private ClientRegistration registration;
+  private ClientRegistration registrationWithRolesPath;
 
   @BeforeEach
   void setUpBeforeMethod() {
@@ -49,6 +52,13 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
         new MappedOidcUserService(delegate, oidcUserMapper, userDetailsService, dataService);
     registration =
         GOOGLE.getBuilder("google").clientId("clientId").clientSecret("clientSecret").build();
+    registrationWithRolesPath =
+        GOOGLE
+            .getBuilder("google")
+            .clientId("clientId")
+            .clientSecret("clientSecret")
+            .providerConfigurationMetadata(Map.of(CLAIMS_ROLE_PATH, "roles"))
+            .build();
   }
 
   @Test
@@ -68,6 +78,47 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(delegate.loadUser(oidcUserRequest)).thenReturn(oidcUser);
 
     when(oidcUserRequest.getClientRegistration()).thenReturn(registration);
+
+    when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, "google", OidcClient.class))
+        .thenReturn(oidcClient);
+    when(oidcClient.getEmailAttributeName()).thenReturn(EMAIL);
+    when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
+
+    var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
+
+    doReturn(molgenisRoles).when(userDetailsService).getAuthorities(user);
+    when(user.getUsername()).thenReturn("molgenis");
+
+    OidcUser result = mappedOidcUserService.loadUser(oidcUserRequest);
+
+    assertEquals("molgenis", result.getName());
+    assertEquals(molgenisRoles, result.getAuthorities());
+    assertEquals("user@example.org", result.getEmail());
+  }
+
+  @Test
+  void testLoadUserWithRolesClaim() {
+    Set<GrantedAuthority> tokenAuthorities = Set.of(new SimpleGrantedAuthority("USER"));
+    Set<? extends GrantedAuthority> molgenisRoles =
+        Set.of(
+            new SimpleGrantedAuthority("USER"),
+            new SimpleGrantedAuthority("ABCDE_EDITOR"),
+            new SimpleGrantedAuthority("ROLE_A"),
+            new SimpleGrantedAuthority("ROLE_B"));
+    Map<String, Object> claims =
+        Map.of(
+            SUB,
+            "d8995976-e8d8-4390-839b-007a382fc12b",
+            EMAIL,
+            "user@example.org",
+            "roles",
+            List.of("A", "B"));
+    when(oidcIdToken.getClaims()).thenReturn(claims);
+    OidcUser oidcUser = new DefaultOidcUser(tokenAuthorities, oidcIdToken);
+    when(delegate.loadUser(oidcUserRequest)).thenReturn(oidcUser);
+
+    when(oidcUserRequest.getClientRegistration()).thenReturn(registrationWithRolesPath);
 
     when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, "google", OidcClient.class))
         .thenReturn(oidcClient);

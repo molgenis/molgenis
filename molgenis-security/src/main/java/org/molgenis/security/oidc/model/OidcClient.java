@@ -2,6 +2,7 @@ package org.molgenis.security.oidc.model;
 
 import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_GRANT_TYPE;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_URI;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_AUTHENTICATION_METHOD;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_ID;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_NAME;
@@ -137,5 +138,9 @@ public class OidcClient extends StaticEntity {
 
   public String getEmailAttributeName() {
     return getString(EMAIL_ATTRIBUTE_NAME);
+  }
+
+  public String getClaimsRolePath() {
+    return getString(CLAIMS_ROLE_PATH);
   }
 }

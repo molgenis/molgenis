@@ -36,6 +36,7 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String USER_INFO_URI = "userInfoUri";
   static final String USERNAME_ATTRIBUTE_NAME = "userNameAttributeName";
   static final String EMAIL_ATTRIBUTE_NAME = "emailAttributeName";
+  public static final String CLAIMS_ROLE_PATH = "claimsRolePath";
 
   private final OidcPackage oidcPackage;
 
@@ -82,6 +83,11 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDescription("Comma-separated set of scopes")
         .setNillable(false)
         .setDefaultValue("openid,email,profile");
+    addAttribute(CLAIMS_ROLE_PATH)
+        .setLabel("Claims role path")
+        .setDescription(
+            "JSON path expression to evaluate on the joined ID token and user info claims to retrieve user roles")
+        .setNillable(true);
 
     Attribute providerDetailsAttribute =
         addAttribute(PROVIDER_DETAILS).setDataType(COMPOUND).setLabel("Provider details");
