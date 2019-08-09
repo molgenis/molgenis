@@ -9,7 +9,7 @@ public class ApiL10nConfig {
   public static final String NAMESPACE = "api";
 
   @Bean
-  public PropertiesMessageSource dataMessageSource() {
+  public PropertiesMessageSource apiMessageSource() {
     return new PropertiesMessageSource(NAMESPACE);
   }
 }
