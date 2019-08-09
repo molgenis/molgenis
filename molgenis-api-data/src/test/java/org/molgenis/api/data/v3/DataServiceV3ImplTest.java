@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +23,6 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -36,11 +34,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
   @Mock private EntityManagerV3 entityServiceV3;
   @Mock private QueryV3Mapper queryMapperV3;
+  @Mock private FetchMapper fetchMapper;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    dataServiceV3Impl = new DataServiceV3Impl(metaDataService, entityServiceV3, queryMapperV3);
+    dataServiceV3Impl =
+        new DataServiceV3Impl(metaDataService, entityServiceV3, queryMapperV3, fetchMapper);
   }
 
   // TODO implement
@@ -58,16 +58,15 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Selection expand = Selection.EMPTY_SELECTION;
 
     Attribute idAttribute = mock(Attribute.class);
-    when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
-    when(entityType.getAtomicAttributes()).thenReturn(Collections.singletonList(idAttribute));
 
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
     Fetch fetch = new Fetch().field("id");
+    when(fetchMapper.toFetch(entityType, filter, expand)).thenReturn(fetch);
 
     Entity entity = mock(Entity.class);
     when(repository.findOneById(entityId, fetch)).thenReturn(entity);
@@ -86,23 +85,15 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Selection expand = Selection.FULL_SELECTION;
 
     Attribute idAttribute = mock(Attribute.class);
-    when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
-
-    EntityType refEntityType = mock(EntityType.class);
-
-    Attribute refAttribute = mock(Attribute.class);
-    when(refAttribute.getName()).thenReturn("refAttr");
-    when(refAttribute.getDataType()).thenReturn(AttributeType.XREF);
-    when(refAttribute.getRefEntity()).thenReturn(refEntityType);
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
-    when(entityType.getAtomicAttributes()).thenReturn(asList(idAttribute, refAttribute));
 
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
     Fetch fetch = new Fetch().field("id").field("refAttr");
+    when(fetchMapper.toFetch(entityType, filter, expand)).thenReturn(fetch);
 
     Entity entity = mock(Entity.class);
     when(repository.findOneById(entityId, fetch)).thenReturn(entity);
@@ -121,12 +112,10 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Selection expand = Selection.EMPTY_SELECTION;
 
     Attribute idAttribute = mock(Attribute.class);
-    when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
-    when(entityType.getAtomicAttributes()).thenReturn(Collections.singletonList(idAttribute));
 
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
@@ -156,13 +145,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Selection expand = Selection.EMPTY_SELECTION;
 
     Attribute idAttribute = mock(Attribute.class);
-    when(idAttribute.getName()).thenReturn("id");
-
-    Attribute refAttribute = mock(Attribute.class);
-    when(refAttribute.getName()).thenReturn("refAttr");
-
     EntityType entityType = mock(EntityType.class);
-    when(entityType.getAtomicAttributes()).thenReturn(asList(idAttribute, refAttribute));
 
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
