@@ -1,6 +1,7 @@
 package org.molgenis.api.convert;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.CodedRuntimeException;
 
@@ -10,8 +11,7 @@ public class SelectionParseException extends CodedRuntimeException {
 
   public SelectionParseException(ParseException parseException) {
     super(ERROR_CODE);
-
-    this.parseException = parseException;
+    this.parseException = requireNonNull(parseException);
   }
 
   @Override
