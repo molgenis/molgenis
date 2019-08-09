@@ -10,7 +10,6 @@ import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -205,7 +204,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     EntityType refEntityType = mock(EntityType.class, "refEntityType");
     when(refEntityType.getId()).thenReturn(refEntityTypeId);
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
-    when(refEntityType.getAtomicAttributes()).thenReturn(Collections.singletonList(refIdAttribute));
 
     Attribute idAttribute = mock(Attribute.class, "id");
     when(idAttribute.getDataType()).thenReturn(STRING);
