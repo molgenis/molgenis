@@ -23,7 +23,7 @@
                     <div class="row">
                       <div class="col-md-12">
                     <#list authentication_oidc_clients as client>
-                        <a href="${client.requestUri}" class="btn btn-primary btn-block" role="button">
+                        <a href="${client.requestUri}" class="btn btn-primary btn-block" role="button" id="login-with-${client.registrationId}">
                             <!-- configure this label by adding a Localization value for security.oidc.client.${client.registrationId}.buttonText -->
                             <@spring.messageText "security.oidc.client.${client.registrationId}.buttonText" "With ${client.name}" />
                         </a>
@@ -33,7 +33,9 @@
                     <div class="row" style="padding-bottom: 1em; padding-top: 1em;">
                         <div class="col-md-12 text-center">
                             <!-- configure this label by updating the Localization value for security.login.local -->
-                            <a href="#" data-toggle="collapse" data-target="#local-user"><small><@spring.message "security.login.local"/></small></a>
+                            <a href="#" data-toggle="collapse" data-target="#local-user" role="button" id="login-local-user">
+                                <small><@spring.message "security.login.local"/></small>
+                            </a>
                         </div>
                     </div>
                 </#if>
