@@ -14,7 +14,7 @@ import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
 import org.molgenis.api.data.v3.model.ReadEntityRequest;
-import org.molgenis.api.data.v3.model.ReadSubResourceRequest;
+import org.molgenis.api.data.v3.model.ReadSubresourceRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
@@ -74,7 +74,7 @@ class EntityController extends ApiController {
   }
 
   @GetMapping("/{entityTypeId}/{entityId}/{fieldId}")
-  EntitiesResponse getReferencedEntities(@Valid ReadSubResourceRequest entitiesRequest) {
+  public EntitiesResponse getReferencedEntities(@Valid ReadSubresourceRequest entitiesRequest) {
     String entityTypeId = entitiesRequest.getEntityTypeId();
     String entityId = entitiesRequest.getEntityId();
     String fieldId = entitiesRequest.getFieldId();

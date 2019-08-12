@@ -1,6 +1,6 @@
 package org.molgenis.api.data.v3.model;
 
-public class ReadSubResourceRequest extends ReadEntitiesRequest {
+public class ReadSubresourceRequest extends ReadEntitiesRequest {
 
   private String entityId;
 

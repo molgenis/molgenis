@@ -13,6 +13,7 @@ import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -107,21 +108,33 @@ class DataServiceV3Impl implements DataServiceV3 {
     Fetch refFetch = new Fetch().field(refEntityType.getIdAttribute().getName());
     Fetch fetch = new Fetch().field(refAttribute.getName(), refFetch);
     Entity entity = repository.findOneById(typedEntityId, fetch);
+    if (entity == null) {
+      throw new UnknownEntityException(refEntityType, typedEntityId);
+    }
     List<Object> refEntityIds =
         StreamSupport.stream(entity.getEntities(attributeName).spliterator(), false)
-            .map(ref -> ref.getIdValue())
+            .map(Entity::getIdValue)
             .collect(toList());
 
     // Add 'in' query for the mref entity ID's
     Repository<Entity> refRepository = getRepository(refEntityType.getId());
     org.molgenis.data.Query<Entity> findQuery =
         query != null ? queryMapperV3.map(query, refRepository) : new QueryImpl<>(refRepository);
-    if (!findQuery.getRules().isEmpty()) {
-      findQuery.and();
-    }
-    findQuery.in(refEntityType.getIdAttribute().getName(), refEntityIds);
 
-    return getEntities(filter, expand, sort, size, number, refRepository, findQuery);
+    QueryImpl<Entity> q = new QueryImpl<>();
+    if (!findQuery.getRules().isEmpty()) {
+      q.nest();
+      for (QueryRule rule : findQuery.getRules()) {
+        q.addRule(rule);
+      }
+      q.unnest();
+      q.and();
+    }
+    if (!refEntityIds.isEmpty()) {
+      q.in(refEntityType.getIdAttribute().getName(), refEntityIds);
+    }
+
+    return getEntities(filter, expand, sort, size, number, refRepository, q);
   }
 
   @Override
@@ -151,14 +164,14 @@ class DataServiceV3Impl implements DataServiceV3 {
     Fetch fetch = fetchMapper.toFetch(repository.getEntityType(), filter, expand);
 
     // get entities
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(query);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(query);
     findQuery.fetch(fetch);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapperV3.map(sort));
     List<Entity> entities = repository.findAll(findQuery).collect(toList());
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(query);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(query);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
