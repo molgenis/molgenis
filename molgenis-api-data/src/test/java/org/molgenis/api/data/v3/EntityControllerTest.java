@@ -17,7 +17,7 @@ import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
 import org.molgenis.api.data.v3.model.ReadEntityRequest;
-import org.molgenis.api.data.v3.model.ReadSubResourceRequest;
+import org.molgenis.api.data.v3.model.ReadSubresourceRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
@@ -130,7 +130,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     Query query = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     Sort sort = Sort.create("field", Direction.ASC);
 
-    ReadSubResourceRequest readSubResourceRequest = new ReadSubResourceRequest();
+    ReadSubresourceRequest readSubResourceRequest = new ReadSubresourceRequest();
     readSubResourceRequest.setEntityTypeId(entityTypeId);
     readSubResourceRequest.setEntityId(entityId);
     readSubResourceRequest.setFieldId(fieldId);
