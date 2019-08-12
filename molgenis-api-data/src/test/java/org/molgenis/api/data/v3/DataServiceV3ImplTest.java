@@ -10,6 +10,7 @@ import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
