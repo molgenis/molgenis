@@ -286,7 +286,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     EntityType refEntityType = mock(EntityType.class, "refEntityType");
     when(refEntityType.getId()).thenReturn(refEntityTypeId);
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
-    when(refEntityType.getAtomicAttributes()).thenReturn(Collections.singletonList(refIdAttribute));
 
     Attribute idAttribute = mock(Attribute.class, "id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -370,7 +369,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     EntityType refEntityType = mock(EntityType.class, "refEntityType");
     when(refEntityType.getId()).thenReturn(refEntityTypeId);
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
-    when(refEntityType.getAtomicAttributes()).thenReturn(Collections.singletonList(refIdAttribute));
 
     Attribute idAttribute = mock(Attribute.class, "id");
     when(idAttribute.getDataType()).thenReturn(STRING);
