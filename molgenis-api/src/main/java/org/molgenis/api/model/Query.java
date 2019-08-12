@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.util.UnexpectedEnumException;
 
 @AutoValue
 public abstract class Query {
@@ -45,15 +46,17 @@ public abstract class Query {
   public abstract Object getValue();
 
   public String getStringValue() {
-    return (String) getValue(); // TODO check if operator matches
+    return (String) getValue();
   }
 
+  @SuppressWarnings("unchecked")
   public List<String> getStringListValue() {
-    return (List<String>) getValue(); // TODO check if operator matches
+    return (List<String>) getValue();
   }
 
+  @SuppressWarnings("unchecked")
   public List<Query> getQueryListValue() {
-    return (List<Query>) getValue(); // TODO check if operator matches
+    return (List<Query>) getValue();
   }
 
   public static Query create(String newItem, Operator newOperator, Object newValue) {
@@ -61,7 +64,6 @@ public abstract class Query {
   }
 
   public static Builder builder() {
-    // TODO assert that value type matches operator
     return new AutoValue_Query.Builder();
   }
 
@@ -76,6 +78,80 @@ public abstract class Query {
 
     public abstract Builder setValue(Object newValue);
 
-    public abstract Query build();
+    abstract Query autoBuild();
+
+    public Query build() {
+      Query query = autoBuild();
+      Operator operator = query.getOperator();
+      switch (operator) {
+        case EQUALS:
+        case NOT_EQUALS:
+        case CONTAINS:
+        case LESS_THAN:
+        case LESS_THAN_OR_EQUAL_TO:
+        case GREATER_THAN:
+        case GREATER_THAN_OR_EQUAL_TO:
+          validateItemStringOperator(query);
+          break;
+        case MATCHES:
+          validateStringOperator(query);
+          break;
+        case IN:
+        case NOT_IN:
+          validateStringListOperator(query);
+          break;
+        case AND:
+        case OR:
+          validateQueryListOperator(query);
+          break;
+        default:
+          throw new UnexpectedEnumException(operator);
+      }
+      return query;
+    }
+
+    private void validateItemStringOperator(Query query) {
+      if (query.getItem() == null) {
+        throw new IllegalStateException("query selector cannot be empty");
+      }
+      validateStringOperator(query);
+    }
+
+    private void validateStringOperator(Query query) {
+      Object stringValue = query.getValue();
+      if (stringValue != null && !(stringValue instanceof String)) {
+        throw new IllegalStateException("query value must be of type String");
+      }
+    }
+
+    private void validateStringListOperator(Query query) {
+      if (query.getItem() == null) {
+        throw new IllegalStateException("query selector cannot be empty");
+      }
+      Object listValueObject = query.getValue();
+      if (!(listValueObject instanceof List)) {
+        throw new IllegalStateException("query value must be of type List");
+      }
+      for (Object listValueItem : (List) listValueObject) {
+        if (listValueItem != null && !(listValueItem instanceof String)) {
+          throw new IllegalStateException("query list value must be of type String");
+        }
+      }
+    }
+
+    private void validateQueryListOperator(Query query) {
+      if (query.getItem() != null) {
+        throw new IllegalStateException();
+      }
+      Object queryValueObject = query.getValue();
+      if (!(queryValueObject instanceof List)) {
+        throw new IllegalStateException("query value must be of type List");
+      }
+      for (Object queryValueItem : (List) queryValueObject) {
+        if (!(queryValueItem instanceof Query)) {
+          throw new IllegalStateException("query list value must be of type Query");
+        }
+      }
+    }
   }
 }

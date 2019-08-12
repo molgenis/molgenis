@@ -186,7 +186,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Entity entity = entityManagerV3.create(entityType); // TODO check what happens with auto values
+    Entity entity = entityManagerV3.create(entityType);
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 
