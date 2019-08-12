@@ -7,6 +7,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
+import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginAttributes;
@@ -28,6 +31,7 @@ public class MolgenisInterceptorTest {
   private AppSettings appSettings;
   private AuthenticationSettings authenticationSettings;
   private MessageSource messageSource;
+  private OidcClient oidcClient;
   private Gson gson;
 
   @BeforeMethod
@@ -37,6 +41,7 @@ public class MolgenisInterceptorTest {
     appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
     authenticationSettings = mock(AuthenticationSettings.class);
     messageSource = mock(MessageSource.class);
+    oidcClient = mock(OidcClient.class);
     gson = new Gson();
   }
 
@@ -76,5 +81,42 @@ public class MolgenisInterceptorTest {
         environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
     assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
     assertSame(model.get(KEY_GSON), gson);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void postHandleWithOidcClient() throws Exception {
+    String environment = "development";
+    MolgenisInterceptor molgenisInterceptor =
+        new MolgenisInterceptor(
+            resourceFingerprintRegistry,
+            themeFingerprintRegistry,
+            appSettings,
+            authenticationSettings,
+            environment,
+            messageSource,
+            gson);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    Object handler = mock(Object.class);
+    ModelAndView modelAndView = new ModelAndView();
+
+    when(authenticationSettings.getOidcClients()).thenReturn(ImmutableList.of(oidcClient));
+    when(oidcClient.getRegistrationId()).thenReturn("registrationId");
+    when(oidcClient.getClientName()).thenReturn("clientName");
+
+    molgenisInterceptor.postHandle(request, response, handler, modelAndView);
+
+    Map<String, Object> model = modelAndView.getModel();
+    assertEquals(
+        model.get(PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS),
+        ImmutableList.of(
+            ImmutableMap.of(
+                "name",
+                "clientName",
+                "registrationId",
+                "registrationId",
+                "requestUri",
+                "/oauth2/authorization/registrationId")));
   }
 }

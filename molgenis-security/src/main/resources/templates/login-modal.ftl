@@ -1,3 +1,4 @@
+<#import "/spring.ftl" as spring/>
 <#-- Bootstrap login modal -->
 <div id="login-modal" class="modal" tabindex="0"<#if disableClose?? && disableClose == "true"><#else>
      tabindex="-1"</#if>
@@ -21,15 +22,18 @@
                 <#if authentication_oidc_clients?has_content>
                     <div class="row">
                       <div class="col-md-12">
-                    <#list authentication_oidc_clients as clientUrl, clientName>
-                        <a href="${clientUrl}" class="btn btn-primary btn-block" role="button">With ${clientName}</a>
+                    <#list authentication_oidc_clients as client>
+                        <a href="${client.requestUri}" class="btn btn-primary btn-block" role="button">
+                            <!-- configure this label by adding a Localization value for security.oidc.client.${client.registrationId}.buttonText -->
+                            <@spring.messageText "security.oidc.client.${client.registrationId}.buttonText" "With ${client.name}" />
+                        </a>
                     </#list>
                       </div>
                     </div>
-                    <div class="hr-sect">OR</div>
-                    <div class="row" style="padding-bottom: 1em;">
+                    <div class="row" style="padding-bottom: 1em; padding-top: 1em;">
                         <div class="col-md-12 text-center">
-                            <a href="#" data-toggle="collapse" data-target="#local-user"><small>Use a local user</small></a>
+                            <!-- configure this label by updating the Localization value for security.login.local -->
+                            <a href="#" data-toggle="collapse" data-target="#local-user"><small><@spring.message "security.login.local"/></small></a>
                         </div>
                     </div>
                 </#if>
