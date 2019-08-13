@@ -584,8 +584,7 @@ class PostgreSqlRepository extends AbstractRepository {
 
                 // update mrefs
                 List<Object> ids =
-                    entitiesBatch
-                        .stream()
+                    entitiesBatch.stream()
                         .map(entity -> getPostgreSqlValue(entity, idAttr))
                         .collect(toList());
                 for (Attribute attr : junctionTableAttrs) {
@@ -606,8 +605,7 @@ class PostgreSqlRepository extends AbstractRepository {
               .map(Entity::getIdValue)
               .collect(toSet());
       Object nonExistingEntityId =
-          entitiesBatch
-              .stream()
+          entitiesBatch.stream()
               .map(Entity::getIdValue)
               .filter(entityId -> !existingEntityIds.contains(entityId))
               .findFirst()

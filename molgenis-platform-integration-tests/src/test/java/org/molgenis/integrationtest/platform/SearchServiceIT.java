@@ -153,8 +153,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
 
     QueryRule finalDisMaxQuery =
         new QueryRule(
-            queryTerms
-                .stream()
+            queryTerms.stream()
                 .flatMap(
                     term ->
                         Stream.of(
@@ -175,8 +174,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertFalse(matchingAttributeIDs.contains("1"));
 
     List<Explanation> explanations =
-        attributeIds
-            .stream()
+        attributeIds.stream()
             .map(id -> explainService.explain(query, entityTypeDynamic, id))
             .collect(toList());
 
@@ -196,8 +194,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
       expandedQueryMap.put(term, "hypertension");
     }
     List<Set<ExplainedQueryString>> explanationStrings =
-        explanations
-            .stream()
+        explanations.stream()
             .map(
                 explanation ->
                     explainService.findQueriesFromExplanation(expandedQueryMap, explanation))

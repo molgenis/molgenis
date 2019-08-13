@@ -201,14 +201,14 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
       addAttribute(RECAPTCHA_PRIVATE_KEY)
           .setParent(recaptchaAttr)
           .setDataType(STRING)
-          .setNillable(true)
+          .setNullableExpression("$('" + RECAPTCHA_IS_ENABLED + "').eq(false).value()")
           .setLabel("Recaptcha secret")
           .setDescription(
               "The secret needed by the server to authenticate with the google servers");
       addAttribute(RECAPTCHA_PUBLIC_KEY)
           .setParent(recaptchaAttr)
           .setDataType(STRING)
-          .setNillable(true)
+          .setNullableExpression("$('" + RECAPTCHA_IS_ENABLED + "').eq(false).value()")
           .setLabel("Recaptcha site key")
           .setDescription(
               "The site key needed by the clients to authenticate with the google servers");

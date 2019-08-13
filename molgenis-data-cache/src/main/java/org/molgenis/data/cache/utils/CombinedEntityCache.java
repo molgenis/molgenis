@@ -46,10 +46,7 @@ public class CombinedEntityCache {
    * @param entityType the id of the entity whose entries are to be evicted
    */
   public void evictAll(EntityType entityType) {
-    cache
-        .asMap()
-        .keySet()
-        .stream()
+    cache.asMap().keySet().stream()
         .filter(e -> e.getEntityTypeId().equals(entityType.getId()))
         .forEach(cache::invalidate);
   }

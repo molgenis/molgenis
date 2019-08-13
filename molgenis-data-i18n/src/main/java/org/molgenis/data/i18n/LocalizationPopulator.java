@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
-import org.molgenis.i18n.LanguageService;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,8 +57,7 @@ public class LocalizationPopulator {
             .getExistingMessages(namespace, messageIds)
             .collect(toMap(L10nString::getMessageID, identity()));
     Map<String, L10nString> toAdd =
-        Sets.difference(messageIds, toUpdate.keySet())
-            .stream()
+        Sets.difference(messageIds, toUpdate.keySet()).stream()
             .map(msgId -> createL10nString(namespace, msgId))
             .collect(toMap(L10nString::getMessageID, identity()));
     Map<String, L10nString> all =

@@ -39,4 +39,6 @@ public interface ImportService extends Ordered {
       MetaDataService metaDataService,
       RepositoryCollection repositoryCollection,
       String defaultPackage);
+
+  MetadataAction getMetadataAction(RepositoryCollection source);
 }

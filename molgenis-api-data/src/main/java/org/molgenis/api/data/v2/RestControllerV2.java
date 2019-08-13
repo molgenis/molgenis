@@ -70,9 +70,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.validation.meta.NameValidator;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.util.i18n.LanguageService;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -151,7 +151,9 @@ public class RestControllerV2 {
     this.repoCopier = requireNonNull(repoCopier);
   }
 
+  /** @deprecated replaced with a call to '/api' with method 'OPTIONS' */
   @Autowired
+  @Deprecated
   @GetMapping("/version")
   public Map<String, String> getVersion(
       @Value("${molgenis.version:@null}") String molgenisVersion,
@@ -307,9 +309,7 @@ public class RestControllerV2 {
 
     try {
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
       final EntityCollectionBatchCreateResponseBodyV2 responseBody =
@@ -318,8 +318,7 @@ public class RestControllerV2 {
 
       // Add all entities
       if (ATTRIBUTE_META_DATA.equals(entityTypeId)) {
-        entities
-            .stream()
+        entities.stream()
             .map(attribute -> (Attribute) attribute)
             .forEach(attribute -> dataService.getMeta().addAttribute(attribute));
       } else {
@@ -353,11 +352,13 @@ public class RestControllerV2 {
   /**
    * Copy an entity.
    *
+   * @deprecated use the navigator in the ui to copy entities.
    * @param entityTypeId name of the entity that will be copied.
    * @param request CopyEntityRequestV2
    * @param response HttpServletResponse
    * @return String name of the new entity
    */
+  @Deprecated
   @Transactional
   @PostMapping(value = "copy/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public String copyEntity(
@@ -434,9 +435,7 @@ public class RestControllerV2 {
 
     try {
       List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
 
@@ -481,9 +480,7 @@ public class RestControllerV2 {
       }
 
       final List<Entity> entities =
-          request
-              .getEntities()
-              .stream()
+          request.getEntities().stream()
               .filter(e -> e.size() == 2)
               .map(e -> this.restService.toEntity(meta, e))
               .collect(toList());
@@ -516,7 +513,12 @@ public class RestControllerV2 {
     }
   }
 
-  /** Get all l10n resource strings in the language of the current user */
+  /**
+   * Get all l10n resource strings in the language of the current user
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
+   */
+  @Deprecated
   @GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
   public Map<String, String> getL10nStrings() {
     Map<String, String> translations = new HashMap<>();
@@ -532,7 +534,10 @@ public class RestControllerV2 {
   /**
    * Get the localization resource strings for a specific language and namespace. Will *not* provide
    * fallback values if the specified language is not available.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
    */
+  @Deprecated
   @GetMapping(
       value = "/i18n/{namespace}/{language}",
       produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
@@ -541,7 +546,12 @@ public class RestControllerV2 {
     return localizationService.getMessages(namespace, new Locale(language));
   }
 
-  /** Get a properties file to put on your classpath. */
+  /**
+   * Get a properties file to put on your classpath.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
+   */
+  @Deprecated
   @GetMapping(
       value = "/i18n/{namespace}_{language}.properties",
       produces = TEXT_PLAIN_VALUE + ";charset=UTF-8 ")
@@ -559,22 +569,24 @@ public class RestControllerV2 {
   /**
    * Registers missing message IDs. Used by XHR backend of i18next. User needs permissions on the
    * entity to add the values, otherwise they'll only be logged.
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
    */
+  @Deprecated
   @PostMapping("/i18n/{namespace}")
   @ResponseStatus(CREATED)
   public void registerMissingResourceStrings(
       @PathVariable String namespace, HttpServletRequest request) {
     Set<String> messageIDs =
-        request
-            .getParameterMap()
-            .entrySet()
-            .stream()
+        request.getParameterMap().entrySet().stream()
             .map(Map.Entry::getKey)
             .filter(id -> !id.equals(TIME_PARAM_NAME))
             .collect(toSet());
     localizationService.addMissingMessageIds(namespace, messageIDs);
   }
 
+  /** @deprecated use /api/v2/sys_L10nString endpoints */
+  @Deprecated
   @DeleteMapping("/i18n/{namespace}")
   @ResponseStatus(NO_CONTENT)
   public void deleteNamespace(@PathVariable String namespace) {
@@ -649,10 +661,11 @@ public class RestControllerV2 {
       EntityCollectionRequestV2 request,
       HttpServletRequest httpRequest,
       boolean includeCategories) {
-    EntityType entityType = dataService.getEntityType(entityTypeId);
+    Repository<Entity> repository = dataService.getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
 
     Query<Entity> q =
-        request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();
+        request.getQ() != null ? request.getQ().createQuery(repository) : new QueryImpl<>();
     q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
     Fetch fetch =
         AttributeFilterToFetchConverter.convert(

@@ -57,8 +57,7 @@ public class MagmaUnitConverter {
 
       if (unitName.contains("/")) {
         newUnitNames.addAll(
-            Arrays.asList(unitName.split("/"))
-                .stream()
+            Arrays.asList(unitName.split("/")).stream()
                 .map(UnitHelper::superscriptToNumber)
                 .map(unit -> unit.replaceAll("\\d+", ""))
                 .collect(Collectors.toSet()));

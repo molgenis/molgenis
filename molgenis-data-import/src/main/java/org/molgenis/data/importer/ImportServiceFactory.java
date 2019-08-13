@@ -34,8 +34,7 @@ public class ImportServiceFactory {
    */
   public ImportService getImportService(File file, RepositoryCollection source) {
     final Map<String, ImportService> importServicesMappedToExtensions = Maps.newHashMap();
-    importServices
-        .stream()
+    importServices.stream()
         .filter(importService -> importService.canImport(file, source))
         .forEach(
             importService -> {
@@ -77,8 +76,7 @@ public class ImportServiceFactory {
   }
 
   public Set<String> getSupportedFileExtensions() {
-    return importServices
-        .stream()
+    return importServices.stream()
         .flatMap(importService -> importService.getSupportedFileExtensions().stream())
         .collect(toSet());
   }

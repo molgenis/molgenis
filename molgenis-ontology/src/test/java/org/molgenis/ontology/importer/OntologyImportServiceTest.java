@@ -78,4 +78,10 @@ public class OntologyImportServiceTest extends AbstractMockitoTest {
     verify(targetRepository1).add(entityTypeId1Captor.capture());
     assertEquals(entityTypeId1Captor.getValue().collect(toList()), singletonList(entity1));
   }
+
+  @Test
+  public void getMetadataAction() {
+    RepositoryCollection source = mock(RepositoryCollection.class);
+    assertEquals(ontologyImportService.getMetadataAction(source), MetadataAction.IGNORE);
+  }
 }

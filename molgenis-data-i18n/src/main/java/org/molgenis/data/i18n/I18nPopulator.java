@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.model.LanguageFactory;
-import org.molgenis.i18n.LanguageService;
-import org.molgenis.i18n.PropertiesMessageSource;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.AllPropertiesMessageSource;
+import org.molgenis.util.i18n.LanguageService;
+import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,8 +45,7 @@ public class I18nPopulator {
   public void populateL10nStrings() {
     AllPropertiesMessageSource allPropertiesMessageSource = new AllPropertiesMessageSource();
     String[] namespaces =
-        localizationMessageSources
-            .stream()
+        localizationMessageSources.stream()
             .map(PropertiesMessageSource::getNamespace)
             .toArray(String[]::new);
     allPropertiesMessageSource.addMolgenisNamespaces(namespaces);

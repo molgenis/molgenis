@@ -11,7 +11,6 @@ import static org.testng.Assert.assertEquals;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -19,14 +18,12 @@ import org.testng.annotations.Test;
 
 public class AuthenticationSettingsImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
-  @Mock private EntityListenersService entityListenersService;
   private AuthenticationSettingsImpl authenticationSettingsImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     authenticationSettingsImpl = new AuthenticationSettingsImpl();
     authenticationSettingsImpl.setDataService(dataService);
-    authenticationSettingsImpl.setEntityListenersService(entityListenersService);
   }
 
   @Test

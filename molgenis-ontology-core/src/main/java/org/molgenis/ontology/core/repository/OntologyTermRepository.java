@@ -66,8 +66,7 @@ public class OntologyTermRepository {
   public List<OntologyTerm> findExcatOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize) {
     List<OntologyTerm> findOntologyTerms = findOntologyTerms(ontologyIds, terms, pageSize);
-    return findOntologyTerms
-        .stream()
+    return findOntologyTerms.stream()
         .filter(ontologyTerm -> isOntologyTermExactMatch(terms, ontologyTerm))
         .collect(Collectors.toList());
   }
@@ -281,8 +280,7 @@ public class OntologyTermRepository {
   private boolean qualifiedNodePath(String nodePath, Entity entity) {
     Iterable<Entity> nodePathEntities =
         entity.getEntities(OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH);
-    return Lists.newArrayList(nodePathEntities)
-        .stream()
+    return Lists.newArrayList(nodePathEntities).stream()
         .anyMatch(
             nodePathEntity -> {
               String childNodePath =

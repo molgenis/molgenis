@@ -139,8 +139,7 @@ public class InformationContentService {
   Map<String, Double> createWordIDF(String queryString, String ontologyIri) {
     Map<String, Double> wordFreqMap = new HashMap<>();
     Set<String> wordsInQueryString = createStemmedWordSet(queryString);
-    wordsInQueryString
-        .stream()
+    wordsInQueryString.stream()
         .forEach(
             word -> {
               Double wordIDF = null;
@@ -159,8 +158,7 @@ public class InformationContentService {
 
   public Set<String> createStemmedWordSet(String queryString) {
     Set<String> uniqueTerms =
-        Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
-            .stream()
+        Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)).stream()
             .filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term))
             .map(Stemmer::stem)
             .filter(StringUtils::isNotBlank)

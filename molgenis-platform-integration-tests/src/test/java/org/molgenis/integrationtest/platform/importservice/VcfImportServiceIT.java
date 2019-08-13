@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataAction.ADD;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import com.google.common.collect.ImmutableMap;
@@ -12,6 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -21,12 +23,14 @@ import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -245,6 +249,13 @@ public class VcfImportServiceIT extends ImportServiceIT {
     permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
     permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 
-    testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
+    Sid sid = createUserSid(requireNonNull(getCurrentUsername()));
+    for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            testPermissionService.createPermission(
+                Permission.create(entry.getKey(), sid, entry.getValue()));
+          });
+    }
   }
 }

@@ -59,16 +59,12 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService {
   private Attribute mapParamToAttribute(
       ScriptParameter param, Hits<ExplainedAttribute> attrMatches) {
 
-    return attrMatches
-        .getHits()
-        .stream()
+    return attrMatches.getHits().stream()
         .map(Hit::getResult)
         .filter(entry -> !entry.getExplainedQueryStrings().isEmpty())
         .filter(
             entry ->
-                entry
-                    .getExplainedQueryStrings()
-                    .stream()
+                entry.getExplainedQueryStrings().stream()
                     .allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
         .map(ExplainedAttribute::getAttribute)
         .findFirst()

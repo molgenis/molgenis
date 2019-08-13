@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["questionnaires/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 
 <@header css js version/>
@@ -19,8 +19,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/questionnaires/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/questionnaires/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/questionnaires/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/questionnaires/dist/css/app.css"/>
+
+<script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/manifest.js"></script>
+<script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/app.js"></script>
 
 <@footer version/>

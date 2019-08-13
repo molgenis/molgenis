@@ -10,8 +10,8 @@ import static org.molgenis.security.core.PermissionSet.WRITE;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
 import javax.annotation.PostConstruct;
-import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.security.core.PermissionRegistry;
+import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

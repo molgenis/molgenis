@@ -3,7 +3,7 @@ package org.molgenis.data.file;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 /** Thrown when unzipping a file fails. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false

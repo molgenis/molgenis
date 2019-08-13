@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -12,6 +13,7 @@ import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 import com.google.common.collect.Multimap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -226,13 +228,13 @@ public class EntityTypeValidator {
   }
 
   /**
-   * Validates the attributes owned by this entity: 1) validates that the parent entity doesn't have
-   * attributes with the same name 2) validates that this entity doesn't have attributes with the
-   * same name 3) validates that this entity has attributes defined at all
+   * Validates that this entity: <br>
+   * 1) has attributes defined at all <br>
+   * 2) doesn't have attributes with the same name (also in the parent entities)<br>
+   * 3) doesn't have attributes with a non-existing parent <br>
    *
    * @param entityType entity meta data
-   * @throws MolgenisValidationException if an attribute is owned by another entity or a parent
-   *     attribute has the same name
+   * @throws MolgenisValidationException if one of the above rules is violated
    */
   static void validateOwnAttributes(EntityType entityType) {
     // Validate that entity has attributes
@@ -259,6 +261,22 @@ public class EntityTypeValidator {
                         format(
                             "EntityType [%s] contains multiple attributes with name [%s]",
                             entityType.getId(), attrName)));
+              }
+            });
+
+    // Validate that all parent attributes actually exist
+    Set<String> attributeIds =
+        stream(entityType.getAllAttributes()).map(Attribute::getIdentifier).collect(toSet());
+    stream(entityType.getAllAttributes())
+        .filter(attr -> attr.getParent() != null)
+        .forEach(
+            attr -> {
+              if (!attributeIds.contains(attr.getParent().getIdentifier())) {
+                throw new MolgenisValidationException(
+                    new ConstraintViolation(
+                        format(
+                            "Attribute [%s] of EntityType [%s] has a non-existing parent attribute [%s]",
+                            attr.getName(), entityType.getId(), attr.getParent().getName())));
               }
             });
   }

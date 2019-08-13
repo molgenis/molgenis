@@ -1,7 +1,8 @@
 package org.molgenis.data.security.exception;
 
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class GroupNameNotAvailableException extends BadRequestException {
   private static final String ERROR_CODE = "DS16";
 

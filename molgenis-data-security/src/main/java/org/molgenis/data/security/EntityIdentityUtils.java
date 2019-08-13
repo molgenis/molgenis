@@ -6,7 +6,7 @@ import org.molgenis.util.UnexpectedEnumException;
 
 /** @see EntityIdentity */
 public class EntityIdentityUtils {
-  private static final String TYPE_PREFIX = "entity";
+  public static final String TYPE_PREFIX = "entity";
 
   private EntityIdentityUtils() {}
 

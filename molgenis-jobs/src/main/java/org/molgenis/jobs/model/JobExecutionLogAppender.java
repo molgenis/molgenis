@@ -11,7 +11,7 @@ public class JobExecutionLogAppender extends AppenderBase<ILoggingEvent> {
 
   private void createLayout() {
     layout = new PatternLayout();
-    layout.setPattern("%d{HH:mm:ss.SSS} - %msg%n%nopex");
+    layout.setPattern("%d{HH:mm:ss.SSS zzz} - %msg%n%nopex");
     layout.setContext(getContext());
     layout.start();
   }

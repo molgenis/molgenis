@@ -8,6 +8,7 @@ import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.security.core.SidUtils.getRoleName;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ANONYMOUS;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
@@ -87,6 +88,19 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     anonymousUser.setSuperuser(false);
     anonymousUser.setChangePassword(false);
 
+    // create anonymous role
+    Role anonymousRole = roleFactory.create();
+    anonymousRole.setName(getRoleName(AUTHORITY_ANONYMOUS));
+    anonymousRole.setLabel("Anonymous");
+    anonymousRole.setLabel("en", "Anonymous");
+    anonymousRole.setLabel("nl", "Anoniem");
+    anonymousRole.setDescription(
+        "Role for permissions granted to all users, including unauthenticated users.");
+    anonymousRole.setDescription(
+        "en", "Role for permissions granted to all users, including unauthenticated users.");
+    anonymousRole.setDescription(
+        "nl", "Rol voor alle gebruikers, inclusief ongeauthenticeerde gebruikers.");
+
     // create user role
     Role userRole = roleFactory.create();
     userRole.setName(getRoleName(AUTHORITY_USER));
@@ -96,6 +110,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     userRole.setDescription("All authenticated users are a member of this Role.");
     userRole.setDescription("en", "All authenticated users are a member of this role.");
     userRole.setDescription("nl", "Alle geauthenticeerde gebruikers hebben deze rol.");
+    userRole.setIncludes(ImmutableList.of(anonymousRole));
 
     Role viewer = roleFactory.create();
     viewer.setName(getRoleName(AUTHORITY_VIEWER));
@@ -150,6 +165,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     dataService.add(
         ROLE,
         Stream.of(
+            anonymousRole,
             userRole,
             aclTakeOwnership,
             aclModifyAuditing,

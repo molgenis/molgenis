@@ -170,8 +170,7 @@ public class AttributeUtils {
     EntityType refEntityType = attribute.getRefEntity();
     Attribute refIdAttribute = refEntityType.getIdAttribute();
     List<Object> idValues =
-        valuesAsString
-            .stream()
+        valuesAsString.stream()
             .map(idValueAsString -> getTypedValue(idValueAsString, refIdAttribute))
             .collect(toList());
     return entityReferenceCreator.getReferences(refEntityType, idValues);

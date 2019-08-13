@@ -3,7 +3,7 @@ package org.molgenis.security.account;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.security.auth.PasswordResetToken;
-import org.molgenis.i18n.BadRequestException;
+import org.molgenis.util.exception.BadRequestException;
 
 @SuppressWarnings({"squid:MaximumInheritanceDepth"})
 class InvalidPasswordResetTokenException extends BadRequestException {

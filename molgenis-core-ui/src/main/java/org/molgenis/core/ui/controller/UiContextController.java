@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiResponses;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,11 +20,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Api("UI Context")
 @Controller
-@RequestMapping(UiContextController.URI)
-public class UiContextController extends PluginController {
+@RequestMapping(UiContextController.ID)
+public class UiContextController {
 
   public static final String ID = "app-ui-context";
-  public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
   public static final String LOGIN_HREF = "/login";
   public static final String HELP_LINK_JSON =
@@ -41,7 +39,6 @@ public class UiContextController extends PluginController {
       CookieWallService cookieWallService,
       @Value("${molgenis.version}") String molgenisVersion,
       @Value("${molgenis.build.date}") String molgenisBuildDate) {
-    super(URI);
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
     this.molgenisVersion = requireNonNull(molgenisVersion);

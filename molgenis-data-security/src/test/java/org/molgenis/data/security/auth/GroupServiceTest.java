@@ -22,6 +22,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -344,5 +345,39 @@ public class GroupServiceTest extends AbstractMockitoTest {
     when(query.eq(GroupMetadata.NAME, "devs").findOne()).thenReturn(group);
     groupService.deleteGroup("devs");
     verify(dataService).delete(GroupMetadata.GROUP, group);
+  }
+
+  @Test
+  public void testUpdateExtendsRole() {
+    Role anonymousRole = mock(Role.class, "anonymous");
+    Role groupRole = mock(Role.class, "group");
+    Role groupEditorRole = mock(Role.class, "group editor");
+    Role includedRole = mock(Role.class, "included");
+    when(groupRole.getName()).thenReturn("viewer");
+    when(groupEditorRole.getName()).thenReturn("editor");
+    when(includedRole.getName()).thenReturn("included");
+    when(group.getRoles()).thenReturn(Arrays.asList(groupEditorRole, groupRole));
+    when(anonymousRole.getIncludes()).thenReturn(Arrays.asList(includedRole, groupRole));
+
+    groupService.updateExtendsRole(group, groupEditorRole, anonymousRole);
+    verify(anonymousRole).setIncludes(Arrays.asList(includedRole, groupEditorRole));
+    verify(dataService).update(ROLE, anonymousRole);
+  }
+
+  @Test
+  public void testRemoveExtendsRole() {
+    Role anonymousRole = mock(Role.class, "anonymous");
+    Role groupRole = mock(Role.class, "group");
+    Role groupEditorRole = mock(Role.class, "group editor");
+    Role includedRole = mock(Role.class, "included");
+    when(groupRole.getName()).thenReturn("viewer");
+    when(groupEditorRole.getName()).thenReturn("editor");
+    when(includedRole.getName()).thenReturn("included");
+    when(group.getRoles()).thenReturn(Arrays.asList(groupEditorRole, groupRole));
+    when(anonymousRole.getIncludes()).thenReturn(Arrays.asList(includedRole, groupRole));
+
+    groupService.removeExtendsRole(group, anonymousRole);
+    verify(anonymousRole).setIncludes(Arrays.asList(includedRole));
+    verify(dataService).update(ROLE, anonymousRole);
   }
 }

@@ -25,9 +25,9 @@
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
-        <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
-        <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"></script>
+        <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global-ui.js"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
@@ -73,7 +73,7 @@
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
         <#-- Include molgenis-menu css -->
-        <link rel="stylesheet" href="<@resource_href "/js/menu/context.css"/>" type="text/css">
+        <link rel="stylesheet" href="/@molgenis-ui/menu/dist/context.css" type="text/css">
 
     </#if>
 
@@ -88,7 +88,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
 
-<body>
+<body class="mg-page">
     <#if !(version??) || version == 1>
         <#-- Navbar menu -->
         <#if menu_id??>
@@ -119,13 +119,12 @@
 
         <#-- Include the Vue version of the molgenis menu  -->
         <div id="molgenis-site-menu"></div>
-
-        <script type=text/javascript src="<@resource_href "/js/menu/context.umd.js"/>"></script>
+        <script type=text/javascript src="/@molgenis-ui/menu/dist/context.umd.js"></script>
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid"
-     style="padding-top: <#if app_settings.logoTopHref??>${app_settings.logoTopMaxHeight + 60}<#elseif version gt 1>60</#if>px;">
+<div class="container-fluid mg-page-content"
+     style="padding-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 60}<#else>60</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -185,7 +184,7 @@
             <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
                 <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
                 <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
-                                 style="max-height: ${app_settings.logoTopMaxHeight}px"></a>
+                                 style="max-height: ${app_settings.logoTopMaxHeight}px;max-width: 90%;"></a>
             </header>
             </#if>
             <div class="navbar-header">

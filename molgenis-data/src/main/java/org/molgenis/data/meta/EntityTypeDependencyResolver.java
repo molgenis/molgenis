@@ -50,8 +50,7 @@ public class EntityTypeDependencyResolver {
     // EntityType doesn't have equals/hashcode methods, map to nodes first
     // ensure that nodes exist for all dependencies
     Set<EntityTypeNode> entityTypeNodes =
-        entityTypes
-            .stream()
+        entityTypes.stream()
             .map(EntityTypeNode::new)
             .flatMap(
                 node -> Stream.concat(Stream.of(node), expandEntityTypeDependencies(node).stream()))
@@ -71,8 +70,7 @@ public class EntityTypeDependencyResolver {
     } else {
       Map<String, EntityType> entityTypeMap =
           entityTypes.stream().collect(toMap(EntityType::getId, Function.identity()));
-      return resolvedEntityMetas
-          .stream()
+      return resolvedEntityMetas.stream()
           .filter(resolvedEntityMeta -> entityTypeMap.containsKey(resolvedEntityMeta.getId()))
           .collect(toList());
     }

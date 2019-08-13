@@ -2,7 +2,7 @@ package org.molgenis.data.security.exception;
 
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class IsAlreadyMemberException extends CodedRuntimeException {
   private static final String ERROR_CODE = "DS09";

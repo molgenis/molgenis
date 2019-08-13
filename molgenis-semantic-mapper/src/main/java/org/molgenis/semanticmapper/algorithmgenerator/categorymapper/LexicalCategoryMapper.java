@@ -37,8 +37,7 @@ public class LexicalCategoryMapper extends CategoryMapper {
 
     if (bestNGramScore < DEFAULT_THRESHOLD) {
       Optional<?> findFirst =
-          targetCategories
-              .stream()
+          targetCategories.stream()
               .map(targetCategory -> applyCustomRules(sourceCategory, targetCategory))
               .filter(Objects::nonNull)
               .sorted()
@@ -54,8 +53,7 @@ public class LexicalCategoryMapper extends CategoryMapper {
 
   public CategoryMatchQuality<?> applyCustomRules(
       Category sourceCategory, Category targetCategory) {
-    return rules
-        .stream()
+    return rules.stream()
         .map(rule -> rule.createCategoryMatchQuality(targetCategory, sourceCategory))
         .filter(CategoryMatchQuality::isRuleApplied)
         .sorted()

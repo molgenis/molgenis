@@ -2,9 +2,9 @@ package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
-class TemplateExpressionSyntaxException extends CodedRuntimeException {
+public class TemplateExpressionSyntaxException extends CodedRuntimeException {
   private static final String ERROR_CODE = "D12e";
 
   private final String expression;

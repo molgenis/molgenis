@@ -78,9 +78,7 @@ public class ImportWriter {
         .forEach(
             (key, value) ->
                 job.getEntityImportReport().addEntityCount(key, Math.toIntExact(value)));
-    groupedEntityTypes
-        .getNewEntityTypes()
-        .stream()
+    groupedEntityTypes.getNewEntityTypes().stream()
         .map(EntityType::getId)
         .forEach(job.getEntityImportReport()::addNewEntity);
     return job.report;
@@ -162,14 +160,12 @@ public class ImportWriter {
           }
 
           ImmutableCollection<EntityType> newEntityTypes =
-              entities
-                  .stream()
+              entities.stream()
                   .filter(entityType -> !existingEntityTypeMap.containsKey(entityType.getId()))
                   .collect(collectingAndThen(toList(), ImmutableList::copyOf));
 
           ImmutableCollection<EntityType> existingEntityTypes =
-              entities
-                  .stream()
+              entities.stream()
                   .filter(entityType -> existingEntityTypeMap.containsKey(entityType.getId()))
                   .collect(collectingAndThen(toList(), ImmutableList::copyOf));
 

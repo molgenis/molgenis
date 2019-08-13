@@ -85,13 +85,13 @@ public class GroupService {
     Package rootPackage = packageFactory.create(groupValue.getRootPackage());
 
     Map<String, Role> roles =
-        groupValue
-            .getRoles()
-            .stream()
+        groupValue.getRoles().stream()
             .map(roleFactory::create)
             .collect(toMap(Role::getName, identity()));
 
-    roles.values().forEach(role -> addIncludedRoles(role, roles, groupValue.getName()));
+    roles
+        .values()
+        .forEach(role -> addIncludedRolesBasedOnLabels(role, roles, groupValue.getName()));
 
     Group group = groupFactory.create(groupValue);
     group.setRootPackage(rootPackage);
@@ -154,7 +154,7 @@ public class GroupService {
   public void addMember(final Group group, final User user, final Role role) {
     ArrayList<Role> groupRoles = newArrayList(group.getRoles());
     Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-    boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(role.getName()));
+    boolean isGroupRole = isGroupRole(role, groupRoles);
 
     if (!isGroupRole) {
       throw new NotAValidGroupRoleException(role, group);
@@ -169,6 +169,10 @@ public class GroupService {
     roleMembershipService.addUserToRole(user, role);
   }
 
+  private boolean isGroupRole(Role role, ArrayList<Role> groupRoles) {
+    return groupRoles.stream().anyMatch(groupRole -> groupRole.getName().equals(role.getName()));
+  }
+
   @RunAsSystem
   public void removeMember(final Group group, final User user) {
     ArrayList<Role> groupRoles = newArrayList(group.getRoles());
@@ -179,8 +183,7 @@ public class GroupService {
   @RunAsSystem
   public void updateMemberRole(final Group group, final User member, final Role newRole) {
     ArrayList<Role> groupRoles = newArrayList(group.getRoles());
-    boolean isGroupRole =
-        groupRoles.stream().anyMatch(gr -> gr.getName().equals(newRole.getName()));
+    boolean isGroupRole = isGroupRole(newRole, groupRoles);
 
     if (!isGroupRole) {
       throw new NotAValidGroupRoleException(newRole, group);
@@ -207,14 +210,14 @@ public class GroupService {
 
   private RoleMembership findRoleMembership(User member, List<Role> groupRoles) {
     Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-    return memberships
-        .stream()
+    return memberships.stream()
         .filter(m -> m.getUser().getId().equals(member.getId()))
         .findFirst()
         .orElseThrow(() -> unknownMembershipForUser(member));
   }
 
-  private void addIncludedRoles(Role role, Map<String, Role> groupRoles, String groupName) {
+  private void addIncludedRolesBasedOnLabels(
+      Role role, Map<String, Role> groupRoles, String groupName) {
     List<Role> toInclude = newArrayList();
     Role defaultRole = findRoleNamed(role.getLabel().toUpperCase());
     toInclude.add(defaultRole);
@@ -243,5 +246,29 @@ public class GroupService {
             .findOne();
 
     dataService.delete(GroupMetadata.GROUP, group);
+  }
+
+  public void updateExtendsRole(Group group, Role groupRole, Role memberRole) {
+    List<Role> newIncludes = removeIncludedGroupRoles(group, memberRole);
+    if (!isGroupRole(groupRole, newArrayList(group.getRoles()))) {
+      throw new NotAValidGroupRoleException(groupRole, group);
+    }
+    newIncludes.add(groupRole);
+    memberRole.setIncludes(newIncludes);
+    dataService.update(ROLE, memberRole);
+  }
+
+  public void removeExtendsRole(Group group, Role memberRole) {
+    List<Role> newIncludes = removeIncludedGroupRoles(group, memberRole);
+    memberRole.setIncludes(newIncludes);
+    dataService.update(ROLE, memberRole);
+  }
+
+  private List<Role> removeIncludedGroupRoles(Group group, Role memberRole) {
+    ArrayList<Role> includes = newArrayList(memberRole.getIncludes());
+    ArrayList<Role> groupRoles = newArrayList(group.getRoles());
+    return includes.stream()
+        .filter(role -> !isGroupRole(role, groupRoles))
+        .collect(Collectors.toList());
   }
 }

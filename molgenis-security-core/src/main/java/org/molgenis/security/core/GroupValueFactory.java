@@ -29,8 +29,7 @@ public class GroupValueFactory {
     groupBuilder.setRootPackage(rootPackage);
 
     ImmutableList.Builder<RoleValue> rolesBuilder = groupBuilder.rolesBuilder();
-    roleLabels
-        .stream()
+    roleLabels.stream()
         .map(roleLabel -> createRoleValue(groupName, label, roleLabel))
         .forEach(rolesBuilder::add);
     return groupBuilder.build();

@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.i18n.Labeled;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.util.i18n.Labeled;
 
 /**
  * EntityType defines the structure and attributes of an Entity. Attributes are unique. Other
@@ -616,8 +616,15 @@ public class EntityType extends StaticEntity implements Labeled {
 
   public void removeAttribute(Attribute attr) {
     Map<String, Attribute> cachedOwnAttributes = getCachedOwnAttrs();
-    cachedOwnAttributes.remove(attr.getName());
+    removeAttributeRecursive(attr, cachedOwnAttributes);
     set(ATTRIBUTES, cachedOwnAttributes.values());
+  }
+
+  private void removeAttributeRecursive(Attribute attr, Map<String, Attribute> attributes) {
+    if (attr.getDataType() == COMPOUND) {
+      attr.getChildren().forEach(child -> removeAttributeRecursive(child, attributes));
+    }
+    attributes.remove(attr.getName());
   }
 
   /**
@@ -680,9 +687,7 @@ public class EntityType extends StaticEntity implements Labeled {
    */
   public Iterable<Attribute> getOwnAtomicAttributes() {
     return () ->
-        getCachedOwnAttrs()
-            .values()
-            .stream()
+        getCachedOwnAttrs().values().stream()
             .filter(attr -> attr.getDataType() != COMPOUND)
             .iterator();
   }

@@ -56,9 +56,7 @@ public class PluginPopulator {
 
   private Map<String, Plugin> getPlugins(ApplicationContext ctx) {
     Map<String, PluginController> pluginControllerMap = ctx.getBeansOfType(PluginController.class);
-    return pluginControllerMap
-        .values()
-        .stream()
+    return pluginControllerMap.values().stream()
         .map(this::createPlugin)
         .collect(toMap(Plugin::getId, Function.identity()));
   }

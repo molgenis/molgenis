@@ -1,6 +1,6 @@
 package org.molgenis.navigator.copy.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time

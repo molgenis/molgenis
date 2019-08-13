@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["navigator/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 <@header css js version/>
 
@@ -23,8 +23,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/navigator/dist/css/app.css"/>
+
+<script type=text/javascript src="/@molgenis-ui/navigator/dist/js/manifest.js"></script>
+<script type=text/javascript src="/@molgenis-ui/navigator/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/navigator/dist/js/app.js"></script>
 
 <@footer version/>

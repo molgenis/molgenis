@@ -84,9 +84,7 @@ public class InMemoryRepository implements Repository<Entity> {
       if (q.getRules().size() == 1) {
         QueryRule r = q.getRules().iterator().next();
         if (r.getOperator() == Operator.EQUALS) {
-          return entities
-              .entrySet()
-              .stream()
+          return entities.entrySet().stream()
               .map(
                   e -> {
                     if (e.getValue().get(r.getField()).equals(r.getValue())) {

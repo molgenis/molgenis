@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,10 +45,10 @@ public class SecurityUtilsTest {
   public void setUpBeforeMethod() {
     reset(authentication);
 
-    GrantedAuthority authority1 =
-        when(mock(GrantedAuthority.class).getAuthority()).thenReturn("authority1").getMock();
-    GrantedAuthority authority2 =
-        when(mock(GrantedAuthority.class).getAuthority()).thenReturn("authority2").getMock();
+    GrantedAuthority authority1 = mock(GrantedAuthority.class);
+    when(authority1.getAuthority()).thenReturn("authority1");
+    GrantedAuthority authority2 = mock(GrantedAuthority.class);
+    when(authority2.getAuthority()).thenReturn("authority2");
     userDetails = mock(UserDetails.class);
     when(userDetails.getUsername()).thenReturn("username");
     when(userDetails.getPassword()).thenReturn("encoded-password");
@@ -65,6 +67,10 @@ public class SecurityUtilsTest {
   @Test
   public void currentUserIsAuthenticated_true() {
     when(authentication.isAuthenticated()).thenReturn(true);
+    GrantedAuthority authorityUser = mock(GrantedAuthority.class);
+    when(authorityUser.getAuthority()).thenReturn(AUTHORITY_USER);
+    when((Collection<GrantedAuthority>) authentication.getAuthorities())
+        .thenReturn(Collections.singletonList(authorityUser));
     assertTrue(SecurityUtils.currentUserIsAuthenticated());
   }
 
@@ -77,10 +83,11 @@ public class SecurityUtilsTest {
   @SuppressWarnings("unchecked")
   @Test
   public void currentUserIsAuthenticated_falseAnonymous() {
-    when(authentication.isAuthenticated()).thenReturn(true);
-    GrantedAuthority authoritySu =
-        when(mock(GrantedAuthority.class).getAuthority()).thenReturn("ROLE_ANONYMOUS").getMock();
-    when((Collection<GrantedAuthority>) authentication.getAuthorities())
+    Authentication anonymousAuthentication = mock(AnonymousAuthenticationToken.class);
+    when(anonymousAuthentication.isAuthenticated()).thenReturn(true);
+    GrantedAuthority authoritySu = mock(GrantedAuthority.class);
+    when(authoritySu.getAuthority()).thenReturn("ROLE_ANONYMOUS");
+    when((Collection<GrantedAuthority>) anonymousAuthentication.getAuthorities())
         .thenReturn(Collections.singletonList(authoritySu));
     assertFalse(SecurityUtils.currentUserIsAuthenticated());
   }
@@ -94,8 +101,8 @@ public class SecurityUtilsTest {
   @SuppressWarnings("unchecked")
   @Test
   public void currentUserIsSu_true() {
-    GrantedAuthority authoritySu =
-        when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_SU).getMock();
+    GrantedAuthority authoritySu = mock(GrantedAuthority.class);
+    when(authoritySu.getAuthority()).thenReturn(AUTHORITY_SU);
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
         .thenReturn(Collections.singletonList(authoritySu));
     assertTrue(SecurityUtils.currentUserIsSu());
@@ -105,8 +112,8 @@ public class SecurityUtilsTest {
   @SuppressWarnings("unchecked")
   @Test
   public void currentUserIsSystemTrue() {
-    GrantedAuthority authoritySystem =
-        when(mock(GrantedAuthority.class).getAuthority()).thenReturn(ROLE_SYSTEM).getMock();
+    GrantedAuthority authoritySystem = mock(GrantedAuthority.class);
+    when(authoritySystem.getAuthority()).thenReturn(ROLE_SYSTEM);
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
         .thenReturn(Collections.singletonList(authoritySystem));
     assertTrue(SecurityUtils.currentUserIsSystem());

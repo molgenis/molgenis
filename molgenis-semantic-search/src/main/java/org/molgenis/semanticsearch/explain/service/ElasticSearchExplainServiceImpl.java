@@ -50,9 +50,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 
       if (matchedQueryRule.size() > 0) {
         Entry<String, Double> entry =
-            matchedQueryRule
-                .entrySet()
-                .stream()
+            matchedQueryRule.entrySet().stream()
                 .max(Comparator.comparingDouble(Entry::getValue))
                 .orElseThrow(
                     () ->

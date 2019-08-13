@@ -124,8 +124,7 @@ class PostgreSqlQueryGenerator {
         + " CHECK ("
         + getColumnName(attr)
         + " IN ("
-        + attr.getEnumOptions()
-            .stream()
+        + attr.getEnumOptions().stream()
             .map(enumOption -> '\'' + enumOption + '\'')
             .collect(joining(","))
         + "))";
@@ -319,8 +318,7 @@ class PostgreSqlQueryGenerator {
             .append(getTableName(entityType))
             .append(" FOR EACH ROW WHEN (");
     strBuilder.append(
-        readonlyTableAttrs
-            .stream()
+        readonlyTableAttrs.stream()
             .map(
                 attr ->
                     "OLD." + getColumnName(attr) + " IS DISTINCT FROM NEW." + getColumnName(attr))

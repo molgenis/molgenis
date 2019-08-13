@@ -198,9 +198,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     }
 
     Set<ConstraintViolation> constraintViolations =
-        entityTypeDependencyMap
-            .entrySet()
-            .stream()
+        entityTypeDependencyMap.entrySet().stream()
             .map(
                 entry -> {
                   String message;

@@ -325,9 +325,7 @@ public class MappingServiceImpl implements MappingService {
 
   private long applyMappingsToRepositories(
       MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress, int depth) {
-    return mappingTarget
-        .getEntityMappings()
-        .stream()
+    return mappingTarget.getEntityMappings().stream()
         .mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress, depth))
         .sum();
   }
@@ -371,8 +369,7 @@ public class MappingServiceImpl implements MappingService {
 
   private List<Entity> mapEntities(
       EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities, int depth) {
-    return entities
-        .stream()
+    return entities.stream()
         .map(
             sourceEntity ->
                 applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData, depth))

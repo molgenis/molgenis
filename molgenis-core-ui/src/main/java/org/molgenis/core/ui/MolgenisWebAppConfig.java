@@ -5,6 +5,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_MOLGENIS_UI;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
@@ -30,7 +31,6 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
@@ -39,6 +39,7 @@ import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.util.AppDataRootProvider;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.converter.CsvHttpMessageConverter;
@@ -65,7 +66,6 @@ import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecu
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -132,6 +132,10 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         .addResourceHandler(PATTERN_JS)
         .addResourceLocations("/js/", "classpath:/js/")
         .setCachePeriod(cachePeriod);
+    registry
+        .addResourceHandler(PATTERN_MOLGENIS_UI)
+        .addResourceLocations("/@molgenis-ui/", "classpath:/@molgenis-ui/")
+        .setCachePeriod(3600);
     registry
         .addResourceHandler(PATTERN_FONTS)
         .addResourceLocations("/fonts/", "classpath:/fonts/")
@@ -351,11 +355,5 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Bean
   public ApplicationContextProvider applicationContextProvider() {
     return new ApplicationContextProvider();
-  }
-
-  /** Introduced due to https://jira.spring.io/browse/SPR-16668 */
-  @Bean
-  public ForwardedHeaderTransformer forwardedHeaderTransformer() {
-    return new ForwardedHeaderTransformer();
   }
 }

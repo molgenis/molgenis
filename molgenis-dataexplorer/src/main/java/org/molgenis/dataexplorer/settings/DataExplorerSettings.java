@@ -86,7 +86,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
     private static final boolean DEFAULT_AGGREGATES_DISTINCT_SELECT = true;
 
     private static final boolean DEFAULT_SHOW_NAVIGATOR_LINK = true;
-    private static final boolean DEFAULT_USE_VUE_DATA_ROW_EDIT = false;
+    private static final boolean DEFAULT_USE_VUE_DATA_ROW_EDIT = true;
 
     public Meta() {
       super(ID);

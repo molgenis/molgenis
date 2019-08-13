@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>8.0.1-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-core-ui</artifactId>
   <packaging>jar</packaging>
@@ -187,7 +187,7 @@
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-i18n</artifactId>
+      <artifactId>molgenis-util</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

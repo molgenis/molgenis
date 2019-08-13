@@ -4,6 +4,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -46,21 +47,32 @@ public class ScheduledScriptConfig {
       @Override
       public Job<ScriptResult> createJob(ScriptJobExecution scriptJobExecution) {
         final String name = scriptJobExecution.getName();
-        final String parameterString = scriptJobExecution.getParameters();
         return progress -> {
-          Map<String, Object> params = new HashMap<>();
-          params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
-          params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
+          Map<String, Object> params = getParameterMap(scriptJobExecution);
           ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
           if (scriptResult.getOutputFile() != null) {
             scriptJobExecution.setResultUrl(
                 format("/files/%s", scriptResult.getOutputFile().getId()));
           }
-          progress.status(format("Script output:%n%s", scriptResult.getOutput()));
+          if (scriptResult.getOutput() != null) {
+            progress.status(format("Script output:%n%s", scriptResult.getOutput()));
+          } else {
+            progress.status(format("Script has no output."));
+          }
           return scriptResult;
         };
       }
     };
+  }
+
+  Map<String, Object> getParameterMap(ScriptJobExecution scriptJobExecution) {
+    Map<String, Object> params = new HashMap<>();
+    String parameterString = scriptJobExecution.getParameters();
+    if (!Strings.isNullOrEmpty(parameterString)) {
+      params.putAll(gson.fromJson(parameterString, MAP_TOKEN));
+    }
+    params.put("scriptJobExecutionId", scriptJobExecution.getIdValue());
+    return params;
   }
 
   @Lazy
@@ -79,7 +91,7 @@ public class ScheduledScriptConfig {
                 "properties",
                 of("name", of("type", "string"), "parameters", of("type", "string")),
                 "required",
-                ImmutableList.of("name", "parameters"))));
+                ImmutableList.of("name"))));
     result.setJobExecutionType(scriptJobExecutionMetadata);
     return result;
   }

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -150,18 +149,10 @@ public class AccountController {
         throw new CaptchaException("invalid captcha answer");
       }
       User user = toUser(registerRequest);
-      String activationUri;
-      if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host"))) {
-        activationUri =
-            ServletUriComponentsBuilder.fromCurrentRequest()
-                .replacePath(URI + "/activate")
-                .build()
-                .toUriString();
-      } else {
-        String scheme = request.getHeader("X-Forwarded-Proto");
-        if (scheme == null) scheme = request.getScheme();
-        activationUri = scheme + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
-      }
+      String activationUri =
+          ServletUriComponentsBuilder.fromCurrentRequest()
+              .replacePath(URI + "/activate")
+              .toUriString();
       accountService.createUser(user, activationUri);
 
       String successMessage =

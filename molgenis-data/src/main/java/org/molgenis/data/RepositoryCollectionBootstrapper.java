@@ -40,9 +40,7 @@ public class RepositoryCollectionBootstrapper {
 
     // set default repository collection
     RepositoryCollection defaultRepoCollection =
-        repoCollectionMap
-            .values()
-            .stream()
+        repoCollectionMap.values().stream()
             .filter(repoCollection -> repoCollection.getName().equals(defaultRepoCollectionName))
             .findFirst()
             .orElse(null);

@@ -102,10 +102,7 @@ public class L2Cache implements TransactionListener {
    */
   public List<Entity> getBatch(Repository<Entity> repository, Iterable<Object> ids) {
     try {
-      return getEntityCache(repository)
-          .getAll(ids)
-          .values()
-          .stream()
+      return getEntityCache(repository).getAll(ids).values().stream()
           .filter(Optional::isPresent)
           .map(Optional::get)
           .map(e -> entityHydration.hydrate(e, repository.getEntityType()))

@@ -1,7 +1,7 @@
 package org.molgenis.questionnaires.exception;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class QuestionnaireNotRowLevelSecuredException extends CodedRuntimeException {
   private static final String ERROR_CODE = "Q01";

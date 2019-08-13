@@ -17,8 +17,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.support.QueryImpl;
@@ -106,8 +106,7 @@ public class NegotiatorController extends PluginController {
       Function<Entity, String> getLabel = entity -> entity.getLabelValue().toString();
       disabledCollectionLabels = disabledCollections.stream().map(getLabel).collect(toList());
       enabledCollectionsLabels =
-          collectionEntities
-              .stream()
+          collectionEntities.stream()
               .filter(e -> !disabledCollections.contains(e))
               .map(getLabel)
               .collect(toList());
@@ -151,8 +150,7 @@ public class NegotiatorController extends PluginController {
     String expression = config.getString(ENABLED_EXPRESSION);
 
     List<Collection> nonDisabledCollectionEntities =
-        getCollectionEntities(request)
-            .stream()
+        getCollectionEntities(request).stream()
             .filter(entity -> expression == null || evaluateExpressionOnEntity(expression, entity))
             .map(entity -> getEntityCollection(entityConfig, entity))
             .collect(toList());
@@ -214,17 +212,16 @@ public class NegotiatorController extends PluginController {
   }
 
   private List<Entity> getCollectionEntities(NegotiatorRequest request) {
-    EntityType selectedEntityType = dataService.getEntityType(request.getEntityId());
+    Repository<Entity> repository = dataService.getRepository(request.getEntityId());
     Query<Entity> molgenisQuery =
-        rsqlQueryConverter.convert(request.getRsql()).createQuery(selectedEntityType);
-    return dataService.findAll(selectedEntityType.getId(), molgenisQuery).collect(toList());
+        rsqlQueryConverter.convert(request.getRsql()).createQuery(repository);
+    return molgenisQuery.findAll().collect(toList());
   }
 
   private List<Entity> getDisabledCollections(
       List<Entity> entities, NegotiatorEntityConfig config) {
     String expression = config.getString(ENABLED_EXPRESSION);
-    return entities
-        .stream()
+    return entities.stream()
         .filter(entity -> !evaluateExpressionOnEntity(expression, entity))
         .collect(Collectors.toList());
   }

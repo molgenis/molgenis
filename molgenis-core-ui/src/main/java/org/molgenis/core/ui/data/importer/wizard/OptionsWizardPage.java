@@ -196,8 +196,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
 
   /** @return sorted map of writable packages ids to package path label */
   private Map<String, String> getPackageSelection(List<Package> packages) {
-    return packages
-        .stream()
+    return packages.stream()
         .filter(this::isReadablePackage)
         .sorted(comparing(this::getPackagePathLabel))
         .collect(toLinkedMap(Package::getId, this::getPackagePathLabel));

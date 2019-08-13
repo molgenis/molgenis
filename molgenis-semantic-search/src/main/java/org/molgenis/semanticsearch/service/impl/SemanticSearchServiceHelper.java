@@ -68,24 +68,21 @@ public class SemanticSearchServiceHelper {
 
     if (searchTerms != null) {
       queryTerms.addAll(
-          searchTerms
-              .stream()
+          searchTerms.stream()
               .filter(StringUtils::isNotBlank)
               .map(this::processQueryString)
               .collect(Collectors.toList()));
     }
 
     // Handle tags with only one ontologyterm
-    ontologyTerms
-        .stream()
+    ontologyTerms.stream()
         .filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR))
         .forEach(ot -> queryTerms.addAll(parseOntologyTermQueries(ot)));
 
     QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
     // Handle tags with multiple ontologyterms
-    ontologyTerms
-        .stream()
+    ontologyTerms.stream()
         .filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR))
         .forEach(ot -> disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI())));
 
@@ -100,8 +97,7 @@ public class SemanticSearchServiceHelper {
    */
   public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms) {
     List<QueryRule> rules = new ArrayList<>();
-    queryTerms
-        .stream()
+    queryTerms.stream()
         .filter(StringUtils::isNotEmpty)
         .map(this::escapeCharsExcludingCaretChar)
         .forEach(
@@ -153,8 +149,7 @@ public class SemanticSearchServiceHelper {
    */
   public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm) {
     List<String> queryTerms =
-        getOtLabelAndSynonyms(ontologyTerm)
-            .stream()
+        getOtLabelAndSynonyms(ontologyTerm).stream()
             .map(this::processQueryString)
             .collect(Collectors.toList());
 
@@ -182,8 +177,7 @@ public class SemanticSearchServiceHelper {
       Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms) {
     Map<String, String> expandedQueryMap = new LinkedHashMap<>();
 
-    queryTerms
-        .stream()
+    queryTerms.stream()
         .filter(StringUtils::isNotBlank)
         .forEach(queryTerm -> expandedQueryMap.put(Stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
@@ -261,8 +255,7 @@ public class SemanticSearchServiceHelper {
 
   public String parseBoostQueryString(String queryString, double boost) {
     return StringUtils.join(
-        removeStopWords(queryString)
-            .stream()
+        removeStopWords(queryString).stream()
             .map(word -> word + CARET_CHARACTER + boost)
             .collect(Collectors.toSet()),
         SPACE_CHAR);

@@ -98,7 +98,7 @@ import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
-import org.molgenis.i18n.LanguageService;
+import org.molgenis.util.i18n.LanguageService;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
@@ -340,9 +340,7 @@ public class EmxMetadataParser implements MetadataParser {
       MyEntitiesValidationReport report,
       Map<String, EntityType> metaDataMap) {
     metaDataMap.values().forEach(entityTypeValidator::validate);
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->
@@ -352,18 +350,14 @@ public class EmxMetadataParser implements MetadataParser {
                             attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION)));
 
     // validate package/entity/attribute tags
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getPackage)
         .filter(Objects::nonNull)
         .forEach(aPackage -> aPackage.getTags().forEach(tagValidator::validate));
     metaDataMap
         .values()
         .forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
-    metaDataMap
-        .values()
-        .stream()
+    metaDataMap.values().stream()
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->

@@ -17,7 +17,7 @@ public abstract class ApiController {
    */
   public ApiController(String apiId, Integer apiVersion) {
     requireNonNull(apiId);
-    if (!API_ID_PATTERN.matcher(apiId).matches()) {
+    if (!apiId.isEmpty() && !API_ID_PATTERN.matcher(apiId).matches()) {
       throw new IllegalArgumentException("API identifier must match pattern [a-z]");
     }
     this.apiId = requireNonNull(apiId);

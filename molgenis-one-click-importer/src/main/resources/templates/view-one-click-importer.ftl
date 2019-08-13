@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["molgenis-one-click-importer/app.css"]>
+<#assign css = []>
 <#assign version = 2>
 
 <@header css js version/>
@@ -21,8 +21,10 @@
     }
 </script>
 
-<script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/manifest.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/vendor.js"/>"></script>
-<script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/app.js"/>"></script>
+<link rel="stylesheet" href="/@molgenis-ui/one-click-importer/dist/css/app.css"/>
+
+<script type=text/javascript src="/@molgenis-ui/one-click-importer/dist/js/manifest.js"></script>
+<script type=text/javascript src="/@molgenis-ui/one-click-importer/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/one-click-importer/dist/js/app.js"></script>
 
 <@footer version/>

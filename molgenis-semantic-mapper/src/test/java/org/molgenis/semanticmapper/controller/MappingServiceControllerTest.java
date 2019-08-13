@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
@@ -579,7 +580,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
+  public void testGetSemanticSearchAttributeMappingRelevantAttributes() {
     Map<String, String> requestBody =
         ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
     MappingProject mappingProject = mock(MappingProject.class);
@@ -609,6 +610,37 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 Hits.create(
                     Hit.create(
                         ExplainedAttribute.create(stringAttribute, emptySet(), false), 1f))));
+    assertEquals(
+        controller.getSemanticSearchAttributeMapping(requestBody),
+        singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
+  }
+
+  @Test
+  public void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
+    Map<String, String> requestBody =
+        ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
+    MappingProject mappingProject = mock(MappingProject.class);
+    when(mappingService.getMappingProject("id0")).thenReturn(mappingProject);
+    MappingTarget mappingTarget = mock(MappingTarget.class);
+    EntityMapping entityMapping = mock(EntityMapping.class);
+    EntityType targetEntityType = mock(EntityType.class);
+    when(entityMapping.getTargetEntityType()).thenReturn(targetEntityType);
+    EntityType sourceEntityType = mock(EntityType.class);
+    Attribute stringAttribute =
+        when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(stringAttribute.getName()).thenReturn("stringAttribute");
+    Attribute compoundAttribute =
+        when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+    when(compoundAttribute.getName()).thenReturn("compoundAttribute");
+    when(sourceEntityType.getAtomicAttributes())
+        .thenReturn(asList(stringAttribute, compoundAttribute));
+    when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
+    when(mappingTarget.getMappingForSource("source0")).thenReturn(entityMapping);
+    when(mappingProject.getMappingTarget("target0")).thenReturn(mappingTarget);
+    Multimap<Relation, OntologyTerm> multiMap = ArrayListMultimap.create();
+    when(ontologyTagService.getTagsForAttribute(targetEntityType, null)).thenReturn(multiMap);
+    when(semanticSearchService.findAttributes(sourceEntityType, targetEntityType, null, emptySet()))
+        .thenReturn(AttributeSearchResults.create(stringAttribute, Hits.create(emptyList())));
     assertEquals(
         controller.getSemanticSearchAttributeMapping(requestBody),
         singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));

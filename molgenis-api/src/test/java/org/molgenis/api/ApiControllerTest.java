@@ -25,6 +25,13 @@ public class ApiControllerTest {
     assertEquals(apiController.getApiVersion(), apiVersion);
   }
 
+  @Test
+  public void testGetApiVersionEmpty() {
+    int apiVersion = 2;
+    ApiController apiController = new ApiController("", apiVersion) {};
+    assertEquals(apiController.getApiVersion(), apiVersion);
+  }
+
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testGetApiVersionIllegalVersion() {
     int apiVersion = -1;

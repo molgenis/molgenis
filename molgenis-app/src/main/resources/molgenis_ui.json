@@ -111,11 +111,6 @@
       "items": [
         {
           "type": "plugin",
-          "id": "indexmanager",
-          "label": "Index manager"
-        },
-        {
-          "type": "plugin",
           "id": "logmanager",
           "label": "Log manager"
         },

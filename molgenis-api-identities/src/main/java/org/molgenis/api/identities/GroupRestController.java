@@ -54,10 +54,11 @@ public class GroupRestController {
   public static final String USER = "/user";
 
   @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
-  private static final String SECURITY_API_PATH = ApiNamespace.API_PATH + "/identities/v1";
+  private static final String SECURITY_API_PATH = ApiNamespace.API_PATH + "/identities";
 
   static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
   private static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
+  private static final String ROLE_EXTEND_END_POINT = GROUP_END_POINT + "/{groupName}/role";
   private static final String GROUP_PERMISSION_END_POINT =
       GROUP_END_POINT + "/{groupName}/permission";
   static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
@@ -139,9 +140,7 @@ public class GroupRestController {
   })
   @ResponseBody
   public List<GroupResponse> getGroups() {
-    return groupService
-        .getGroups()
-        .stream()
+    return groupService.getGroups().stream()
         .filter(
             group ->
                 userPermissionEvaluator.hasPermission(
@@ -157,9 +156,7 @@ public class GroupRestController {
       @PathVariable(value = "groupName") String groupName) {
     checkGroupPermission(groupName, GroupPermission.VIEW_MEMBERSHIP);
     Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
-    return roleMembershipService
-        .getMemberships(Lists.newArrayList(roles))
-        .stream()
+    return roleMembershipService.getMemberships(Lists.newArrayList(roles)).stream()
         .map(GroupMemberResponse::fromEntity)
         .collect(Collectors.toList());
   }
@@ -229,6 +226,49 @@ public class GroupRestController {
     groupService.updateMemberRole(group, member, newRole);
   }
 
+  @PutMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
+  @ApiOperation(value = "Change group role extension", response = ResponseEntity.class)
+  @Transactional
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ApiResponses({
+    @ApiResponse(code = 204, message = "Updated membership role", response = ResponseEntity.class)
+  })
+  public void updateExtends(
+      @PathVariable(value = "groupName") String groupName,
+      @PathVariable(value = "roleName") String roleName,
+      @RequestBody UpdateIncludeCommand updateExtendsCommand) {
+    checkGroupPermission(groupName, GroupPermission.UPDATE_MEMBERSHIP);
+    final Group group = groupService.getGroup(groupName);
+    final String groupRoleName = updateExtendsCommand.getRole();
+    final Role includingRole = roleService.getRole(roleName);
+    final Role groupRole = roleService.getRole(groupRoleName);
+
+    groupService.updateExtendsRole(group, groupRole, includingRole);
+  }
+
+  @DeleteMapping(ROLE_EXTEND_END_POINT + "/{roleName}")
+  @ApiOperation(
+      value = "Remove extension from a grouprole from a role",
+      response = ResponseEntity.class)
+  @Transactional
+  @ApiResponses({
+    @ApiResponse(
+        code = 204,
+        message = "Group role extension removed from role",
+        response = ResponseEntity.class)
+  })
+  public ResponseEntity removeExtends(
+      @PathVariable(value = "groupName") String groupName,
+      @PathVariable(value = "roleName") String includingRoleName) {
+    checkGroupPermission(groupName, GroupPermission.REMOVE_MEMBERSHIP);
+    final Group group = groupService.getGroup(groupName);
+    final Role includingRole = roleService.getRole(includingRoleName);
+
+    groupService.removeExtendsRole(group, includingRole);
+
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping(GROUP_END_POINT + "/{groupName}/role")
   @ApiOperation(value = "Get group roles", response = Collection.class)
   @ResponseBody
@@ -247,9 +287,7 @@ public class GroupRestController {
   @ResponseBody
   @PreAuthorize("hasAnyRole('SU', 'MANAGER')")
   public Collection<UserResponse> getUsers() {
-    return userService
-        .getUsers()
-        .stream()
+    return userService.getUsers().stream()
         .filter(u -> !u.getUsername().equals("anonymous"))
         .map(UserResponse::fromEntity)
         .collect(Collectors.toList());
@@ -271,9 +309,7 @@ public class GroupRestController {
   }
 
   private String getManagerRoleName(GroupValue groupValue) {
-    return groupValue
-        .getRoles()
-        .stream()
+    return groupValue.getRoles().stream()
         .filter(role -> role.getLabel().equals(GroupService.MANAGER))
         .map(RoleValue::getName)
         .findFirst()

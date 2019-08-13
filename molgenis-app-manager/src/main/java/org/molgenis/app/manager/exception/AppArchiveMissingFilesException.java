@@ -3,7 +3,7 @@ package org.molgenis.app.manager.exception;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class AppArchiveMissingFilesException extends CodedRuntimeException {
   private static final String ERROR_CODE = "AM02";

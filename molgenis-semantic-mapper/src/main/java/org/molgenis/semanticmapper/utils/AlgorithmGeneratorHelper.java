@@ -25,8 +25,7 @@ public class AlgorithmGeneratorHelper {
       while (matcher.find()) {
         attributeNames.add(matcher.group(1));
       }
-      return attributeNames
-          .stream()
+      return attributeNames.stream()
           .map(sourceEntityType::getAttribute)
           .filter(Objects::nonNull)
           .collect(Collectors.toSet());

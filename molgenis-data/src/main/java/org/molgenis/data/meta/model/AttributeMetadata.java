@@ -383,8 +383,7 @@ public class AttributeMetadata extends SystemEntityType {
 
     // Use the valid ID attribute types to constuct the validation expression
     List<String> typeExpressions =
-        getValidIdAttributeTypes()
-            .stream()
+        getValidIdAttributeTypes().stream()
             .map(attributeType -> "$('" + TYPE + "').eq('" + getValueString(attributeType) + "')")
             .collect(Collectors.toList());
 

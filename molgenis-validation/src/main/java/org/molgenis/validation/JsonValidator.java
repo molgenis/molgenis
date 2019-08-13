@@ -42,9 +42,7 @@ public class JsonValidator {
       schema.validate(new JSONObject(json));
     } catch (ValidationException validationException) {
       throw new JsonValidationException(
-          validationException
-              .getAllMessages()
-              .stream()
+          validationException.getAllMessages().stream()
               .map(ConstraintViolation::new)
               .collect(toSet()));
     }

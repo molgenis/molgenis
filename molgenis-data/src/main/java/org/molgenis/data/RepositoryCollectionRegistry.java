@@ -22,9 +22,7 @@ public class RepositoryCollectionRegistry {
   }
 
   public Stream<RepositoryCollection> getRepositoryCollections() {
-    return repoCollectionMap
-        .values()
-        .stream()
+    return repoCollectionMap.values().stream()
         .map(repoCollectionDecoratorFactory::createDecoratedRepositoryCollection);
   }
 

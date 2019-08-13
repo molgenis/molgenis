@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>8.0.1-SNAPSHOT</version>
+  <version>8.2.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.4.RELEASE</version>
+    <version>2.1.7.RELEASE</version>
   </parent>
   <packaging>pom</packaging>
 
@@ -140,7 +140,7 @@
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
-    <fmt-maven-plugin.version>2.7</fmt-maven-plugin.version>
+    <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.18</checkstyle.version>
     <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
@@ -260,7 +260,6 @@
             <additionalOptions>--allow-script-in-comments</additionalOptions>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>com.github.kongchen</groupId>
           <artifactId>swagger-maven-plugin</artifactId>
@@ -933,7 +932,6 @@
         <artifactId>jaxb-api</artifactId>
         <version>${jaxb-api.version}</version>
       </dependency>
-
       <dependency>
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
@@ -973,6 +971,7 @@
   <modules>
     <module>molgenis-amazon-bucket</module>
     <module>molgenis-api</module>
+    <module>molgenis-api-permissions</module>
     <module>molgenis-api-data</module>
     <module>molgenis-api-fair</module>
     <module>molgenis-api-files</module>

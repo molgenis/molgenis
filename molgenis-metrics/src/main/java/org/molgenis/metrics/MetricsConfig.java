@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class MetricsConfig {
 
   @Bean
-  public MeterRegistry meterRegistry() {
+  public PrometheusMeterRegistry meterRegistry() {
     return new PrometheusMeterRegistry(DEFAULT);
   }
 

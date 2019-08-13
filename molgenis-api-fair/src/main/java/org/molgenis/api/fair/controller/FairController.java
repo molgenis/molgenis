@@ -36,7 +36,7 @@ public class FairController {
   private final DataService dataService;
   private final EntityModelWriter entityModelWriter;
 
-  public FairController(DataService dataService, EntityModelWriter entityModelWriter) {
+  FairController(DataService dataService, EntityModelWriter entityModelWriter) {
     this.dataService = requireNonNull(dataService);
     this.entityModelWriter = requireNonNull(entityModelWriter);
   }

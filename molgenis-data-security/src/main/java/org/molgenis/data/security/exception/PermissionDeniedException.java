@@ -1,6 +1,6 @@
 package org.molgenis.data.security.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public abstract class PermissionDeniedException extends CodedRuntimeException {
   public PermissionDeniedException(String errorCode) {

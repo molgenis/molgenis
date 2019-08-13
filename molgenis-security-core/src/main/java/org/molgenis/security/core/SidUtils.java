@@ -19,7 +19,6 @@ public class SidUtils {
   /** @return security identity for the current security context, never <tt>null</tt>. */
   public static Sid createSecurityContextSid() {
     Sid sid;
-
     if (SecurityUtils.currentUserIsSystem()) {
       sid = createSystemSid();
     } else if (SecurityUtils.currentUserIsAnonymous()) {

@@ -51,9 +51,7 @@ public class MappingTarget {
   }
 
   public Set<String> getMissingTargetAttributeNames() {
-    return entityMappings
-        .values()
-        .stream()
+    return entityMappings.values().stream()
         .flatMap(EntityMapping::getMissingTargetAttributeNames)
         .collect(Collectors.toSet());
   }

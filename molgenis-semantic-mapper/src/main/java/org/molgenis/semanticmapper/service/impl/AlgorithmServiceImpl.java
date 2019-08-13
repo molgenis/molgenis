@@ -225,8 +225,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
         Collection<Object> valueIds = (Collection<Object>) value;
 
         convertedValue =
-            valueIds
-                .stream()
+            valueIds.stream()
                 .map(
                     valueId ->
                         entityManager.getReference(

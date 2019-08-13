@@ -144,8 +144,7 @@ public class DefaultValuePopulator {
 
   private List<Entity> convertMref(Attribute attr, String idValuesAsString) {
     List<String> valuesAsString = ListEscapeUtils.toList(idValuesAsString);
-    return valuesAsString
-        .stream()
+    return valuesAsString.stream()
         .map(refValueAsString -> convertRef(attr, refValueAsString))
         .collect(toList());
   }

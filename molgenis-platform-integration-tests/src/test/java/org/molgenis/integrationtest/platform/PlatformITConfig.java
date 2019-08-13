@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform;
 
 import static org.mockito.Mockito.mock;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
@@ -19,6 +20,10 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.permission.DataPermissionConfig;
+import org.molgenis.data.security.permission.EntityHelper;
+import org.molgenis.data.security.permission.PermissionServiceImpl;
+import org.molgenis.data.security.permission.UserRoleTools;
+import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.JsonTestConfig;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
@@ -30,11 +35,12 @@ import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
+import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
-import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.PermissionServiceImpl;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -147,8 +153,14 @@ in org.molgenis.data and subpackages from included modules
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
   @Autowired private PlatformBootstrapper platformBootstrapper;
-
   @Autowired private MutableAclService mutableAclService;
+  @Autowired private PermissionInheritanceResolver inheritanceResolver;
+  @Autowired private ObjectIdentityService objectIdentityService;
+  @Autowired private DataService dataService;
+  @Autowired private MutableAclClassService mutableAclClassService;
+  @Autowired private UserRoleTools userRoleTools;
+  @Autowired private EntityHelper entityHelper;
+  @Autowired private UserPermissionEvaluator userPermissionEvaluator;
 
   @Override
   public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -156,8 +168,17 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
   }
 
   @Bean
-  public PermissionService permissionService() {
-    return new RunAsSystemPermissionService(new PermissionServiceImpl(mutableAclService));
+  public RunAsSystemPermissionService permissionService() {
+    return new RunAsSystemPermissionService(
+        new PermissionServiceImpl(
+            mutableAclService,
+            inheritanceResolver,
+            objectIdentityService,
+            dataService,
+            mutableAclClassService,
+            userRoleTools,
+            entityHelper,
+            userPermissionEvaluator));
   }
 
   @Bean

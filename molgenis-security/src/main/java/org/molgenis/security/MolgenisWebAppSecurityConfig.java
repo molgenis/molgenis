@@ -4,6 +4,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_MOLGENIS_UI;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
@@ -17,6 +18,7 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.exception.WebAppSecurityConfigException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.oidc.DataServiceClientRegistrationRepository;
 import org.molgenis.security.oidc.MappedOidcUserService;
@@ -80,7 +82,6 @@ import org.springframework.security.web.header.writers.CacheControlHeadersWriter
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -89,7 +90,9 @@ import org.springframework.web.servlet.LocaleResolver;
 
 @Import(DataServiceClientRegistrationRepository.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
+
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
+  private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
 
   @Autowired private DataService dataService;
 
@@ -120,7 +123,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
                 new AntPathRequestMatcher(PATTERN_CSS),
                 new AntPathRequestMatcher(PATTERN_JS),
                 new AntPathRequestMatcher(PATTERN_IMG),
-                new AntPathRequestMatcher(PATTERN_FONTS)));
+                new AntPathRequestMatcher(PATTERN_FONTS),
+                new AntPathRequestMatcher(PATTERN_MOLGENIS_UI)));
 
     DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter =
         new DelegatingRequestMatcherHeaderWriter(matcher, new CacheControlHeadersWriter());
@@ -133,7 +137,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     requestCache.setRequestMatcher(createWebRequestMatcher());
     http.requestCache().requestCache(requestCache);
 
-    http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
     // add default header options but use custom cache control header writer
     http.cors()
         .and()
@@ -196,11 +199,13 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers(PATTERN_FONTS)
         .permitAll()
+        .antMatchers(PATTERN_MOLGENIS_UI)
+        .permitAll()
         .antMatchers("/html/**")
         .permitAll()
         .antMatchers("/plugin/void/**")
         .permitAll()
-        .antMatchers("/plugin/app-ui-context")
+        .antMatchers("/app-ui-context/**")
         .permitAll()
         .antMatchers("/api/**")
         .permitAll()
@@ -248,15 +253,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .addLogoutHandler(
             (req, res, auth) -> {
               if (req.getSession(false) != null
-                  && req.getSession().getAttribute("continueWithUnsupportedBrowser") != null) {
-                req.setAttribute("continueWithUnsupportedBrowser", true);
+                  && req.getSession().getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                req.setAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER, true);
               }
             })
         .logoutSuccessHandler(
             (req, res, auth) -> {
               StringBuilder logoutSuccessUrl = new StringBuilder("/");
-              if (req.getAttribute("continueWithUnsupportedBrowser") != null) {
-                logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+              if (req.getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER) != null) {
+                logoutSuccessUrl.append("?" + CONTINUE_WITH_UNSUPPORTED_BROWSER + "=true");
               }
               SimpleUrlLogoutSuccessHandler logoutSuccessHandler =
                   new SimpleUrlLogoutSuccessHandler();
@@ -289,6 +294,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers(PATTERN_CSS)
         .antMatchers(PATTERN_IMG)
         .antMatchers(PATTERN_JS)
+        .antMatchers(PATTERN_MOLGENIS_UI)
         .antMatchers(PATTERN_FONTS);
   }
 
@@ -404,7 +410,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
       authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
       auth.authenticationProvider(authenticationProvider);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WebAppSecurityConfigException(e);
     }
   }
 
@@ -417,12 +423,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public LoginUrlAuthenticationEntryPoint authenticationEntryPoint() {
     return new AjaxAwareLoginUrlAuthenticationEntryPoint(MolgenisLoginController.URI);
-  }
-
-  @Bean
-  public InvalidSessionStrategy invalidSessionStrategy() {
-    return new AjaxAwareInvalidSessionStrategy(
-        MolgenisLoginController.URI + '?' + MolgenisLoginController.PARAM_SESSION_EXPIRED);
   }
 
   @Bean

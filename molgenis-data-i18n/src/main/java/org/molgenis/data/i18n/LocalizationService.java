@@ -68,8 +68,7 @@ public class LocalizationService implements MessageResolution {
    */
   @RunAsSystem
   public Map<String, String> getMessages(String namespace, Locale locale) {
-    return getL10nStrings(namespace)
-        .stream()
+    return getL10nStrings(namespace).stream()
         .filter(e -> e.getString(locale) != null)
         .collect(toMap(L10nString::getMessageID, e -> e.getString(locale)));
   }
@@ -114,8 +113,7 @@ public class LocalizationService implements MessageResolution {
     Set<String> toAdd = Sets.difference(messageIDs, alreadyPresent);
     if (!toAdd.isEmpty()) {
       Stream<L10nString> entities =
-          toAdd
-              .stream()
+          toAdd.stream()
               .map(key -> l10nStringFactory.create(key).setMessageID(key))
               .map(l -> l.setNamespace(namespace));
       dataService.add(L10N_STRING, entities);

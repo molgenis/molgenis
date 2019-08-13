@@ -37,7 +37,9 @@
                     $('#message-panel .panel-heading').text(importRun.status == 'FINISHED' ? 'Import success' : 'Import failed');
 
                     if (importRun.message !== null) {
-                        $('#message').html(importRun.message);
+                        // workaround for https://github.com/molgenis/molgenis/issues/8521
+                        var message = importRun.message.replace('<unknown>', '&lt;unknown&gt;')
+                        $('#message').html(message);
                     }
 
                     $('.next').removeClass('disabled');

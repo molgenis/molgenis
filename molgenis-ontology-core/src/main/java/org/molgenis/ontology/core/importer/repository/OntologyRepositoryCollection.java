@@ -230,9 +230,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
    * @return {@link List} of created synonym {@link Entity}s
    */
   private List<OntologyTermSynonym> createSynonyms(OWLClass ontologyTerm) {
-    return loader
-        .getSynonyms(ontologyTerm)
-        .stream()
+    return loader.getSynonyms(ontologyTerm).stream()
         .map(this::createSynonym)
         .collect(Collectors.toList());
   }
@@ -260,9 +258,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
    * @return List of created {@link Entity}s.
    */
   private List<OntologyTermDynamicAnnotation> createDynamicAnnotations(OWLClass term) {
-    return loader
-        .getDatabaseIds(term)
-        .stream()
+    return loader.getDatabaseIds(term).stream()
         .map(this::createDynamicAnnotation)
         .collect(Collectors.toList());
   }

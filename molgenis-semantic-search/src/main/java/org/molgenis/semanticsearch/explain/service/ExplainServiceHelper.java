@@ -66,8 +66,7 @@ public class ExplainServiceHelper {
       }
     } else if (description.startsWith(Options.MAX_OF.toString())) {
       Explanation maxExplanation =
-          newArrayList(explanation.getDetails())
-              .stream()
+          newArrayList(explanation.getDetails()).stream()
               .max(
                   (explanation1, explanation2) ->
                       Float.compare(explanation1.getValue(), explanation2.getValue()))
@@ -84,8 +83,7 @@ public class ExplainServiceHelper {
 
   private String extractMatchedWords(Explanation[] explanations) {
     List<String> collect =
-        newArrayList(explanations)
-            .stream()
+        newArrayList(explanations).stream()
             .map(explanation -> getMatchedWord(explanation.getDescription()))
             .collect(Collectors.toList());
     return StringUtils.join(collect, ' ');

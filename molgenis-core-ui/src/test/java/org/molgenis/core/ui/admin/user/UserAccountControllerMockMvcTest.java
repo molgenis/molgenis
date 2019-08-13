@@ -10,9 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Locale;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.web.converter.GsonConfig;
-import org.molgenis.web.exception.FallbackExceptionHandler;
-import org.molgenis.web.exception.GlobalControllerExceptionHandler;
-import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.access.AccessDeniedException;
@@ -43,10 +40,6 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
         MockMvcBuilders.standaloneSetup(userAccountController)
             .setLocaleResolver(localeResolver)
             .setMessageConverters(gsonHttpMessageConverter)
-            .setControllerAdvice(
-                new GlobalControllerExceptionHandler(),
-                new FallbackExceptionHandler(),
-                new SpringExceptionHandler())
             .build();
   }
 

@@ -482,8 +482,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
     // update changed attributes
     List<String> updatedAttrNames =
-        sharedAttrNames
-            .stream()
+        sharedAttrNames.stream()
             .filter(
                 attrName ->
                     !EntityUtils.equals(attrsMap.get(attrName), existingAttrsMap.get(attrName)))

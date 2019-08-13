@@ -44,6 +44,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -64,6 +65,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.permission.PermissionService;
+import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
@@ -71,11 +74,11 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -984,12 +987,18 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
     readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
     readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
-    permissionService.grant(readerPermissions, SidUtils.createUserSid(USERNAME_READ));
+    grant(readerPermissions, SidUtils.createUserSid(USERNAME_READ));
 
     Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
     editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
     editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
-    permissionService.grant(editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
+    grant(editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
+  }
+
+  private void grant(Map<ObjectIdentity, PermissionSet> editorPermissions, Sid sid) {
+    for (Entry<ObjectIdentity, PermissionSet> entry : editorPermissions.entrySet()) {
+      permissionService.createPermission(Permission.create(entry.getKey(), sid, entry.getValue()));
+    }
   }
 
   private void depopulate() {
