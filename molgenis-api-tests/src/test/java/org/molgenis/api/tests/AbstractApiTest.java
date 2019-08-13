@@ -22,17 +22,17 @@ public abstract class AbstractApiTest {
    * </pre>
    */
   protected static void setUpBeforeClass() {
-    String restTestHost = System.getProperty("REST_TEST_HOST");
+    String restTestHost = System.getenv("REST_TEST_HOST");
     if (restTestHost == null) {
       throw new IllegalArgumentException("System property 'REST_TEST_HOST' undefined");
     }
     RestAssured.baseURI = restTestHost;
 
-    String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
+    String restTestAdminName = System.getenv("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
       throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_NAME' undefined");
     }
-    String restTestAdminPw = System.getProperty("REST_TEST_ADMIN_PW");
+    String restTestAdminPw = System.getenv("REST_TEST_ADMIN_PW");
     if (restTestAdminPw == null) {
       throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_PW' undefined");
     }
