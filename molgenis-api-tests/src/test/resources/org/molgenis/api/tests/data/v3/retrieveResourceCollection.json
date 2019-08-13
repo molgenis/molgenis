@@ -648,7 +648,7 @@
       },
       "data": {
         "myBool": true,
-        "myDate": "2019-07-09",
+        "myDate": "${autoDate}",
         "myMref": {
           "links": {
             "self": "http://localhost:8080/api/entity/v3_MyDataset/24/myMref"

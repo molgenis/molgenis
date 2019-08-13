@@ -16,6 +16,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.restassured.RestAssured;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
@@ -126,7 +128,10 @@ public class EntityControllerIT extends AbstractApiTest {
   @Test
   public void testRetrieveResourceCollection() throws IOException {
     String expectedJson =
-        TestResourceUtils.getRenderedString(getClass(), "retrieveResourceCollection.json");
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "retrieveResourceCollection.json",
+            Collections.singletonMap("autoDate", LocalDate.now().toString()));
 
     given()
         .get("/api/entity/v3_MyDataset")
@@ -205,7 +210,7 @@ public class EntityControllerIT extends AbstractApiTest {
     given().get("/api/entity/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
   }
 
-  @Test(dependsOnMethods = "testPartialUpdateResource")
+  @Test(dependsOnMethods = "deleteResourceCollectionQuery")
   public void deleteResourceCollection() throws IOException {
     given().delete("/api/entity/v3_MyDataset").then().statusCode(NO_CONTENT.value());
 
@@ -219,7 +224,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testPartialUpdateResource")
+  @Test(dependsOnMethods = "deleteResource")
   public void deleteResourceCollectionQuery() throws IOException {
     given()
         .delete("/api/entity/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")
@@ -227,7 +232,10 @@ public class EntityControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
 
     String expectedJson =
-        TestResourceUtils.getRenderedString(getClass(), "deleteResourceCollectionQuery.json");
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "deleteResourceCollectionQuery.json",
+            Collections.singletonMap("autoDate", LocalDate.now().toString()));
 
     given()
         .get("/api/entity/v3_MyDataset")

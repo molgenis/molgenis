@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/entity/v3_MyDataset"
+    "self": "http://localhost:8080/api/entity/v3_MyDataset/1/myMref"
   },
   "items": [
     {
