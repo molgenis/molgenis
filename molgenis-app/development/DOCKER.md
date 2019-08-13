@@ -23,7 +23,7 @@ Run the stack by executing:
 docker-compose up (-d when you want to run deamon mode)
 ```
 
-Alternatively you can right-click the file in IntelliJ
+Alternatively you can right-click the file in IntelliJ. **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```. 
 
 When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the ```.env``` file.
 
