@@ -390,7 +390,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     doReturn(entity).when(repository).findOneById(entityId, fetch);
 
     Repository<Entity> refRepository = mock(Repository.class);
-    when(refRepository.getEntityType()).thenReturn(refEntityType);
 
     Sort sort = Sort.create("field", Direction.ASC);
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
@@ -406,10 +405,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
-    when(refRepository.findAll(findQuery)).thenReturn(Stream.empty());
-    when(refRepository.count(countQuery)).thenReturn(100L);
     when(queryMapperV3.map(q, refRepository)).thenReturn(findAllQuery).thenReturn(countQuery);
-    when(sortMapperV3.map(sort)).thenReturn(dataSort);
 
     doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
     doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
@@ -419,7 +415,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
     assertEquals(
-        actual, Entities.builder().setEntities(Collections.emptyList()).setTotal(100).build());
+        actual, Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build());
   }
 
   @SuppressWarnings("unchecked")

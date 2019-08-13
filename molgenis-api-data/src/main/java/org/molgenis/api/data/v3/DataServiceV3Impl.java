@@ -3,6 +3,7 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
@@ -130,11 +131,15 @@ class DataServiceV3Impl implements DataServiceV3 {
       q.unnest();
       q.and();
     }
+
+    Entities result;
     if (!refEntityIds.isEmpty()) {
       q.in(refEntityType.getIdAttribute().getName(), refEntityIds);
+      result = getEntities(filter, expand, sort, size, number, refRepository, q);
+    } else {
+      result = Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build();
     }
-
-    return getEntities(filter, expand, sort, size, number, refRepository, q);
+    return result;
   }
 
   @Override

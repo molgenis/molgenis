@@ -107,7 +107,7 @@ class EntityController extends ApiController {
                     .build())
             .build();
 
-    return entityMapper.map(entityCollection, filter, expand);
+    return entityMapper.map(entityTypeId, entityId, fieldId, entityCollection, filter, expand);
   }
 
   @PutMapping("/{entityTypeId}/{entityId}")

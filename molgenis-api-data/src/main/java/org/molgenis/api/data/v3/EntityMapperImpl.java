@@ -11,6 +11,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.EntitiesResponse;
+import org.molgenis.api.data.v3.model.EntitiesResponse.Builder;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.response.LinksResponse;
@@ -26,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityMapperImpl implements EntityMapper {
+
   private static final int MAX_DEPTH = 2;
 
   @Override
@@ -41,6 +43,30 @@ public class EntityMapperImpl implements EntityMapper {
     URI self = createEntitiesResponseUri(entityCollection.getEntityTypeId());
     LinksResponse linksResponse = LinksResponse.create(null, self, null);
 
+    setPageResponse(entityCollection, builder);
+
+    return builder.setLinks(linksResponse).build();
+  }
+
+  @Override
+  public EntitiesResponse map(
+      String entityTypeId,
+      String entityId,
+      String attributeName,
+      EntityCollection entityCollection,
+      Selection filter,
+      Selection expand) {
+    EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
+
+    URI self = createReferenceEntityResponseUri(entityTypeId, entityId, attributeName);
+    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+
+    setPageResponse(entityCollection, builder);
+
+    return builder.setLinks(linksResponse).build();
+  }
+
+  private void setPageResponse(EntityCollection entityCollection, Builder builder) {
     Page page = entityCollection.getPage();
     if (page != null) {
       PageResponse pageResponse =
@@ -53,8 +79,6 @@ public class EntityMapperImpl implements EntityMapper {
               page.getOffset() / page.getPageSize());
       builder.setPage(pageResponse);
     }
-
-    return builder.setLinks(linksResponse).build();
   }
 
   private EntityResponse mapRecursive(
@@ -206,6 +230,18 @@ public class EntityMapperImpl implements EntityMapper {
         .replacePath(null)
         .path(EntityController.API_ENTITY_PATH)
         .pathSegment(entityTypeId)
+        .build()
+        .toUri();
+  }
+
+  private URI createReferenceEntityResponseUri(
+      String entityTypeId, String entityId, String attributeName) {
+    return ServletUriComponentsBuilder.fromCurrentRequestUri()
+        .replacePath(null)
+        .path(EntityController.API_ENTITY_PATH)
+        .pathSegment(entityTypeId)
+        .pathSegment(entityId)
+        .pathSegment(attributeName)
         .build()
         .toUri();
   }
