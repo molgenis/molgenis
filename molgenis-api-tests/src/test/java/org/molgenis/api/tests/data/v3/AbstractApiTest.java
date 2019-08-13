@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.tests.data.v3;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
