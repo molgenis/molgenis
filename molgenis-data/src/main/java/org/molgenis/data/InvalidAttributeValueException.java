@@ -8,7 +8,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 
 public class InvalidAttributeValueException extends CodedRuntimeException {
 
-  private static final String ERROR_CODE = "D15";
+  private static final String ERROR_CODE = "D16";
   private final Attribute attribute;
   private final Object expectedType;
 
@@ -43,6 +43,9 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
+    return new Object[] {
+      attribute.getName(), attribute.getDataType(), new DefaultMessageSourceResolvable(expectedType)
+    };
     return new Object[] {attribute.getName(), attribute.getDataType(), expectedType};
   }
 }
