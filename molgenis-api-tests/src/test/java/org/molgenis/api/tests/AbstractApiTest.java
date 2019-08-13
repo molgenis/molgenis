@@ -6,6 +6,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import org.molgenis.api.tests.utils.RestTestUtils;
 
 public abstract class AbstractApiTest {
   private static String ADMIN_TOKEN;
@@ -24,17 +25,17 @@ public abstract class AbstractApiTest {
   protected static void setUpBeforeClass() {
     String restTestHost = System.getenv("REST_TEST_HOST");
     if (restTestHost == null) {
-      throw new IllegalArgumentException("System property 'REST_TEST_HOST' undefined");
+      restTestHost = RestTestUtils.DEFAULT_HOST;
     }
     RestAssured.baseURI = restTestHost;
 
     String restTestAdminName = System.getenv("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
-      throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_NAME' undefined");
+      restTestAdminName = RestTestUtils.DEFAULT_ADMIN_NAME;
     }
     String restTestAdminPw = System.getenv("REST_TEST_ADMIN_PW");
     if (restTestAdminPw == null) {
-      throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_PW' undefined");
+      restTestAdminPw = RestTestUtils.DEFAULT_ADMIN_PW;
     }
 
     ADMIN_TOKEN = login(restTestAdminName, restTestAdminPw);
