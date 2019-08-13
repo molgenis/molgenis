@@ -19,6 +19,7 @@ import java.io.IOException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
+import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.test.TestResourceUtils;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;

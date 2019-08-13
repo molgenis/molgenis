@@ -1,4 +1,4 @@
-package org.molgenis.api.tests.data.v3;
+package org.molgenis.api.tests;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
@@ -22,19 +22,19 @@ public abstract class AbstractApiTest {
    * </pre>
    */
   protected static void setUpBeforeClass() {
-    String restTestHost = System.getProperty("API_TEST_HOST");
+    String restTestHost = System.getProperty("REST_TEST_HOST");
     if (restTestHost == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_HOST' undefined");
+      throw new IllegalArgumentException("System property 'REST_TEST_HOST' undefined");
     }
     RestAssured.baseURI = restTestHost;
 
-    String restTestAdminName = System.getProperty("API_TEST_ADMIN_NAME");
+    String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_ADMIN_NAME' undefined");
+      throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_NAME' undefined");
     }
-    String restTestAdminPw = System.getProperty("API_TEST_ADMIN_PW");
+    String restTestAdminPw = System.getProperty("REST_TEST_ADMIN_PW");
     if (restTestAdminPw == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_ADMIN_PW' undefined");
+      throw new IllegalArgumentException("System property 'REST_TEST_ADMIN_PW' undefined");
     }
 
     ADMIN_TOKEN = login(restTestAdminName, restTestAdminPw);
