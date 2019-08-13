@@ -167,13 +167,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
@@ -242,14 +242,14 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
@@ -323,7 +323,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     org.molgenis.data.Query<Entity> findAllQuery = new QueryImpl<>();
     findAllQuery.eq("field1", "value1").or().eq("field2", "value2");
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl();
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>();
     findQuery.nest().eq("field1", "value1").or().eq("field2", "value2").unnest().and();
     findQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
     findQuery.fetch(fetch);
@@ -331,7 +331,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl();
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>();
     countQuery.nest().eq("field1", "value1").or().eq("field2", "value2").unnest().and();
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
@@ -395,13 +395,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
@@ -457,13 +457,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
@@ -500,13 +500,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
@@ -540,13 +540,13 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
     org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
-    org.molgenis.data.Query<Entity> findQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
     findQuery.fetch(fetch);
     findQuery.offset(10);
     findQuery.pageSize(10);
     findQuery.sort(dataSort);
 
-    org.molgenis.data.Query<Entity> countQuery = new QueryImpl(findAllQuery);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
 
