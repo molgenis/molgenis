@@ -154,7 +154,8 @@ public class EntityControllerTest extends AbstractMockitoTest {
             .build();
 
     EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
-    when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
+    when(entityMapper.map("MyEntityTypeId", "EntityId", "Field", entityCollection, filter, expand))
+        .thenReturn(entitiesResponse);
 
     assertEquals(entityController.getReferencedEntities(readSubResourceRequest), entitiesResponse);
   }
