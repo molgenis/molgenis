@@ -10,12 +10,14 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
 
   private static final String ERROR_CODE = "D15";
   private final Attribute attribute;
-  private final String expectedType;
+  private final Object expectedType;
 
-  public InvalidAttributeValueException(Attribute attribute, String expectedTypeName) {
+  // TODO: javadoc
+  public InvalidAttributeValueException(Attribute attribute, String expectedTypeKey) {
     super(ERROR_CODE);
     this.attribute = requireNonNull(attribute);
-    this.expectedType = requireNonNull(expectedTypeName);
+    requireNonNull(expectedTypeKey);
+    this.expectedType = new DefaultMessageSourceResolvable(expectedTypeKey);
   }
 
   public InvalidAttributeValueException(Attribute attribute, Class expectedType) {
@@ -29,15 +31,11 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
   public String getMessage() {
     return String.format(
         "attribute:%s datatype:%s expected value type:%s",
-        attribute.getName(),
-        attribute.getDataType(),
-        new DefaultMessageSourceResolvable(expectedType));
+        attribute.getName(), attribute.getDataType(), expectedType);
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {
-      attribute.getName(), attribute.getDataType(), new DefaultMessageSourceResolvable(expectedType)
-    };
+    return new Object[] {attribute.getName(), attribute.getDataType(), expectedType};
   }
 }
