@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 
 public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
-  @Mock private EntityManagerV3 entityServiceV3;
+  @Mock private EntityManagerV3 entityManagerV3;
   @Mock private QueryV3Mapper queryMapperV3;
   @Mock private SortV3Mapper sortMapperV3;
   @Mock private FetchMapper fetchMapper;
@@ -46,14 +46,30 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @BeforeMethod
   public void setUpBeforeMethod() {
     dataServiceV3Impl =
-        new DataServiceV3Impl(
-            metaDataService, entityServiceV3, queryMapperV3, sortMapperV3, fetchMapper);
+        new DataServiceV3Impl(metaDataService, entityManagerV3, queryMapperV3, fetchMapper);
   }
 
-  // TODO implement
   @Test
   public void testCreate() {
-    // FIXME: implement this test
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(repository).add(entity);
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void testCreateUnknownRepo() {
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.empty());
+
+    dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value"));
   }
 
   @SuppressWarnings("unchecked")
@@ -151,7 +167,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.EMPTY_SELECTION;
 
-    Attribute idAttribute = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
 
     Repository<Entity> repository = mock(Repository.class);
@@ -567,16 +582,70 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.findAll(entityTypeId, null, filter, expand, Sort.EMPTY_SORT, 1, 1);
   }
 
-  // TODO implement
   @Test
   public void testUpdate() {
-    // FIXME: implement this test
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+
+    dataServiceV3Impl.update("entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(entity).setIdValue("entityId");
+    verify(repository).update(entity);
   }
 
-  // TODO implement
   @Test
   public void testUpdatePartially() {
-    // FIXME: implement this test
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(repository.findOneById("entityId")).thenReturn(entity);
+
+    dataServiceV3Impl.updatePartial(
+        "entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(entity).setIdValue("entityId");
+    verify(repository).update(entity);
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testUpdatePartiallyUnknownEntity() {
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(repository.findOneById("entityId")).thenReturn(null);
+
+    dataServiceV3Impl.updatePartial(
+        "entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
   }
 
   @SuppressWarnings("unchecked")
