@@ -13,6 +13,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -24,6 +25,7 @@ import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -110,6 +112,14 @@ public class TwoFactorAuthenticationAPIIT {
     testUserToken = response.extract().path("token");
   }
 
+  @AfterMethod
+  public void tearDownAfterMethod() {
+
+    // disable 2fa after each method instead of after each class due to
+    // https://github.com/cbeust/testng/issues/952
+    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+  }
+
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     // Clean up permissions
@@ -117,9 +127,6 @@ public class TwoFactorAuthenticationAPIIT {
 
     // Clean up Token for user
     cleanupUserToken(testUserToken);
-
-    // Disable two factor authentication
-    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
   }
 
   /**
@@ -134,6 +141,10 @@ public class TwoFactorAuthenticationAPIIT {
         .contentType(APPLICATION_JSON)
         .body(state.getLabel())
         .when()
-        .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+        .log()
+        .ifValidationFails()
+        .put("api/v1/sys_set_auth/auth/sign_in_2fa")
+        .then()
+        .statusCode(OK.value());
   }
 }
