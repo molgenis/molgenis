@@ -3,7 +3,7 @@
 travis_wait
 
 # run the integration tests
-./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet \
+mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet \
   -Dmaven.test.redirectTestOutputToFile=true \
   -Dit_db_user=postgres \
   -Dit_db_password=molgenis \
