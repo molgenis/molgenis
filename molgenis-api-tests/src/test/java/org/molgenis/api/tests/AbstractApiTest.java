@@ -28,6 +28,7 @@ public abstract class AbstractApiTest {
       restTestHost = RestTestUtils.DEFAULT_HOST;
     }
     RestAssured.baseURI = restTestHost;
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
     String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
@@ -59,27 +60,19 @@ public abstract class AbstractApiTest {
   protected static RequestSpecification given() {
     return RestAssured.given()
         .header("x-molgenis-token", ADMIN_TOKEN)
-        .accept(APPLICATION_JSON_VALUE)
-        .log()
-        .ifValidationFails();
+        .accept(APPLICATION_JSON_VALUE);
   }
 
   private static String login(String username, String password) {
-    try {
-      return RestAssured.given()
-          .contentType(APPLICATION_JSON_VALUE)
-          .accept(APPLICATION_JSON_VALUE)
-          .body(format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password))
-          .log()
-          .ifValidationFails()
-          .post("/api/v1/login")
-          .then()
-          .statusCode(OK.value())
-          .extract()
-          .path("token");
-    } catch (Exception e) {
-      throw new RuntimeException(RestAssured.baseURI, e);
-    }
+    return RestAssured.given()
+        .contentType(APPLICATION_JSON_VALUE)
+        .accept(APPLICATION_JSON_VALUE)
+        .body(format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password))
+        .post("/api/v1/login")
+        .then()
+        .statusCode(OK.value())
+        .extract()
+        .path("token");
   }
 
   private static void logout() {
