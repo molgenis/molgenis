@@ -66,18 +66,18 @@ public abstract class AbstractApiTest {
 
   private static String login(String username, String password) {
     try {
-    return RestAssured.given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .accept(APPLICATION_JSON_VALUE)
-        .body(format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password))
-        .log()
-        .ifValidationFails()
-        .post("/api/v1/login")
-        .then()
-        .statusCode(OK.value())
-        .extract()
-        .path("token");
-    } catch(Exception e) {
+      return RestAssured.given()
+          .contentType(APPLICATION_JSON_VALUE)
+          .accept(APPLICATION_JSON_VALUE)
+          .body(format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password))
+          .log()
+          .ifValidationFails()
+          .post("/api/v1/login")
+          .then()
+          .statusCode(OK.value())
+          .extract()
+          .path("token");
+    } catch (Exception e) {
       throw new RuntimeException(RestAssured.baseURI, e);
     }
   }
