@@ -25,7 +25,6 @@ import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -73,51 +72,55 @@ public class TwoFactorAuthenticationAPIIT {
   public void test2faEnforced() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
 
-    Gson gson = new Gson();
-    Map<String, String> loginBody = new HashMap<>();
-    loginBody.put("username", testUsername);
-    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+    try {
+      Gson gson = new Gson();
+      Map<String, String> loginBody = new HashMap<>();
+      loginBody.put("username", testUsername);
+      loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-    given()
-        .contentType(APPLICATION_JSON)
-        .body(gson.toJson(loginBody))
-        .when()
-        .post(PATH + "login")
-        .then()
-        .statusCode(UNAUTHORIZED)
-        .body(
-            "errors.message[0]",
-            Matchers.equalTo(
-                "Login using /api/v1/login is disabled, two factor authentication is enabled"));
+      given()
+          .contentType(APPLICATION_JSON)
+          .body(gson.toJson(loginBody))
+          .when()
+          .post(PATH + "login")
+          .then()
+          .statusCode(UNAUTHORIZED)
+          .body(
+              "errors.message[0]",
+              Matchers.equalTo(
+                  "Login using /api/v1/login is disabled, two factor authentication is enabled"));
+    } finally {
+      // disable 2fa in finally clause instead of after each method due to
+      // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
+      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+    }
   }
 
   @Test
   public void test2faEnabled() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
 
-    Gson gson = new Gson();
-    Map<String, String> loginBody = new HashMap<>();
-    loginBody.put("username", testUsername);
-    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+    try {
+      Gson gson = new Gson();
+      Map<String, String> loginBody = new HashMap<>();
+      loginBody.put("username", testUsername);
+      loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-    ValidatableResponse response =
-        given()
-            .contentType(APPLICATION_JSON)
-            .body(gson.toJson(loginBody))
-            .when()
-            .post(PATH + "login")
-            .then()
-            .statusCode(OKE);
+      ValidatableResponse response =
+          given()
+              .contentType(APPLICATION_JSON)
+              .body(gson.toJson(loginBody))
+              .when()
+              .post(PATH + "login")
+              .then()
+              .statusCode(OKE);
 
-    testUserToken = response.extract().path("token");
-  }
-
-  @AfterMethod
-  public void tearDownAfterMethod() {
-
-    // disable 2fa after each method instead of after each class due to
-    // https://github.com/cbeust/testng/issues/952
-    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+      testUserToken = response.extract().path("token");
+    } finally {
+      // disable 2fa in finally clause instead of after each method due to
+      // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
+      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+    }
   }
 
   @AfterClass(alwaysRun = true)
