@@ -1,11 +1,11 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/entity/v3_MyDataset"
+    "self": "${baseUri}/api/entity/v3_MyDataset"
   },
   "items": [
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/5"
+        "self": "${baseUri}/api/entity/v3_MyDataset/5"
       },
       "data": {
         "myBool": true,
@@ -18,12 +18,12 @@
         "myText": "Text 5",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/5"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/5"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/5/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/5/myMref"
           }
         },
         "myComputed": "static",
@@ -33,7 +33,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/6"
+        "self": "${baseUri}/api/entity/v3_MyDataset/6"
       },
       "data": {
         "myBool": true,
@@ -46,12 +46,12 @@
         "myText": "Text 6",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/6"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/6"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/6/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/6/myMref"
           }
         },
         "myComputed": "static",
@@ -61,7 +61,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/7"
+        "self": "${baseUri}/api/entity/v3_MyDataset/7"
       },
       "data": {
         "myBool": true,
@@ -74,12 +74,12 @@
         "myText": "Text 7",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/7"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/7"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/7/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/7/myMref"
           }
         },
         "myComputed": "static",
@@ -89,7 +89,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/8"
+        "self": "${baseUri}/api/entity/v3_MyDataset/8"
       },
       "data": {
         "myBool": true,
@@ -102,12 +102,12 @@
         "myText": "Text 8",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/8"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/8"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/8/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/8/myMref"
           }
         },
         "myComputed": "static",
@@ -117,7 +117,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/9"
+        "self": "${baseUri}/api/entity/v3_MyDataset/9"
       },
       "data": {
         "myBool": true,
@@ -130,12 +130,12 @@
         "myText": "Text 9",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/9"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/9"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/9/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/9/myMref"
           }
         },
         "myComputed": "static",
@@ -145,7 +145,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/10"
+        "self": "${baseUri}/api/entity/v3_MyDataset/10"
       },
       "data": {
         "myBool": true,
@@ -158,12 +158,12 @@
         "myText": "Text 10",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/10"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/10"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/10/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/10/myMref"
           }
         },
         "myComputed": "static",
@@ -173,7 +173,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/11"
+        "self": "${baseUri}/api/entity/v3_MyDataset/11"
       },
       "data": {
         "myBool": true,
@@ -186,12 +186,12 @@
         "myText": "Text 11",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/1"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/1"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/11/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/11/myMref"
           }
         },
         "myComputed": "static",
@@ -201,7 +201,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/12"
+        "self": "${baseUri}/api/entity/v3_MyDataset/12"
       },
       "data": {
         "myBool": true,
@@ -214,12 +214,12 @@
         "myText": "Text 12",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/2"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/2"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/12/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/12/myMref"
           }
         },
         "myComputed": "static",
@@ -229,7 +229,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/13"
+        "self": "${baseUri}/api/entity/v3_MyDataset/13"
       },
       "data": {
         "myBool": false,
@@ -242,12 +242,12 @@
         "myText": "Text 13",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/3"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/3"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/13/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/13/myMref"
           }
         },
         "myComputed": "static",
@@ -257,7 +257,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/14"
+        "self": "${baseUri}/api/entity/v3_MyDataset/14"
       },
       "data": {
         "myBool": false,
@@ -270,12 +270,12 @@
         "myText": "Text 14",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/4"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/4"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/14/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/14/myMref"
           }
         },
         "myComputed": "static",
@@ -285,7 +285,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/15"
+        "self": "${baseUri}/api/entity/v3_MyDataset/15"
       },
       "data": {
         "myBool": false,
@@ -298,12 +298,12 @@
         "myText": "Text 15",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/5"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/5"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/15/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/15/myMref"
           }
         },
         "myComputed": "static",
@@ -313,7 +313,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/16"
+        "self": "${baseUri}/api/entity/v3_MyDataset/16"
       },
       "data": {
         "myBool": false,
@@ -326,12 +326,12 @@
         "myText": "Text 16",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/6"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/6"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/16/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/16/myMref"
           }
         },
         "myComputed": "static",
@@ -341,7 +341,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/17"
+        "self": "${baseUri}/api/entity/v3_MyDataset/17"
       },
       "data": {
         "myBool": false,
@@ -354,12 +354,12 @@
         "myText": "Text 17",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/7"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/7"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/17/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/17/myMref"
           }
         },
         "myComputed": "static",
@@ -369,7 +369,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/18"
+        "self": "${baseUri}/api/entity/v3_MyDataset/18"
       },
       "data": {
         "myBool": false,
@@ -382,12 +382,12 @@
         "myText": "Text 18",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/8"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/8"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/18/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/18/myMref"
           }
         },
         "myComputed": "static",
@@ -397,7 +397,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/19"
+        "self": "${baseUri}/api/entity/v3_MyDataset/19"
       },
       "data": {
         "myBool": false,
@@ -410,12 +410,12 @@
         "myText": "Text 19",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/9"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/9"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/19/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/19/myMref"
           }
         },
         "myComputed": "static",
@@ -425,7 +425,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/20"
+        "self": "${baseUri}/api/entity/v3_MyDataset/20"
       },
       "data": {
         "myBool": false,
@@ -438,12 +438,12 @@
         "myText": "Text 20",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/10"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/10"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/20/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/20/myMref"
           }
         },
         "myComputed": "static",
@@ -453,7 +453,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/21"
+        "self": "${baseUri}/api/entity/v3_MyDataset/21"
       },
       "data": {
         "myBool": false,
@@ -466,12 +466,12 @@
         "myText": "Text 21",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/1"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/1"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/21/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/21/myMref"
           }
         },
         "myComputed": "static",
@@ -481,7 +481,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/22"
+        "self": "${baseUri}/api/entity/v3_MyDataset/22"
       },
       "data": {
         "myBool": false,
@@ -494,12 +494,12 @@
         "myText": "Text 22",
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/2"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/2"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/22/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/22/myMref"
           }
         },
         "myComputed": "static",
@@ -509,7 +509,7 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/23"
+        "self": "${baseUri}/api/entity/v3_MyDataset/23"
       },
       "data": {
         "myBool": false,
@@ -522,7 +522,7 @@
         "myText": "Text 23",
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/23/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/23/myMref"
           }
         },
         "myComputed": "static",
@@ -532,14 +532,14 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/24"
+        "self": "${baseUri}/api/entity/v3_MyDataset/24"
       },
       "data": {
         "myBool": true,
         "myDate": "${autoDate}",
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/24/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/24/myMref"
           }
         },
         "myComputed": "static",
