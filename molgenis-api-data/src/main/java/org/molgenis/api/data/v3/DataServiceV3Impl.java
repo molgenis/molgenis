@@ -2,10 +2,11 @@ package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.api.data.v3.SortV3Mapper.map;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.Query;
@@ -13,13 +14,16 @@ import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,16 +33,19 @@ class DataServiceV3Impl implements DataServiceV3 {
   private final MetaDataService metaDataService;
   private final EntityManagerV3 entityManagerV3;
   private final QueryV3Mapper queryMapperV3;
+  private final SortV3Mapper sortMapperV3;
   private final FetchMapper fetchMapper;
 
   DataServiceV3Impl(
       MetaDataService metaDataService,
       EntityManagerV3 entityManagerV3,
       QueryV3Mapper queryMapperV3,
+      SortV3Mapper sortMapperV3,
       FetchMapper fetchMapper) {
     this.metaDataService = requireNonNull(metaDataService);
     this.entityManagerV3 = requireNonNull(entityManagerV3);
     this.queryMapperV3 = requireNonNull(queryMapperV3);
+    this.sortMapperV3 = requireNonNull(sortMapperV3);
     this.fetchMapper = requireNonNull(fetchMapper);
   }
 
@@ -72,6 +79,69 @@ class DataServiceV3Impl implements DataServiceV3 {
     return entity;
   }
 
+  @Transactional(readOnly = true)
+  @Override
+  public Entities findSubresources(
+      String entityTypeId,
+      String entityId,
+      String attributeName,
+      @Nullable @CheckForNull Query query,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number) {
+    Repository<Entity> repository = getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
+    Object typedEntityId = toTypedEntityId(entityType, entityId);
+
+    // Check if the attribute is suitable for this endpoint
+    Attribute refAttribute = entityType.getAttribute(attributeName);
+    if (refAttribute == null) {
+      throw new UnknownAttributeException(entityType, attributeName);
+    }
+    if (!EntityTypeUtils.isMultipleReferenceType(refAttribute)) {
+      throw new UnsupportedAttributeTypeException(refAttribute);
+    }
+
+    // get the mref ID's for this entity
+    EntityType refEntityType = refAttribute.getRefEntity();
+    Fetch refFetch = new Fetch().field(refEntityType.getIdAttribute().getName());
+    Fetch fetch = new Fetch().field(refAttribute.getName(), refFetch);
+    Entity entity = repository.findOneById(typedEntityId, fetch);
+    if (entity == null) {
+      throw new UnknownEntityException(refEntityType, typedEntityId);
+    }
+    List<Object> refEntityIds =
+        StreamSupport.stream(entity.getEntities(attributeName).spliterator(), false)
+            .map(Entity::getIdValue)
+            .collect(toList());
+
+    // Add 'in' query for the mref entity ID's
+    Repository<Entity> refRepository = getRepository(refEntityType.getId());
+    org.molgenis.data.Query<Entity> findQuery =
+        query != null ? queryMapperV3.map(query, refRepository) : new QueryImpl<>(refRepository);
+
+    QueryImpl<Entity> q = new QueryImpl<>();
+    if (!findQuery.getRules().isEmpty()) {
+      q.nest();
+      for (QueryRule rule : findQuery.getRules()) {
+        q.addRule(rule);
+      }
+      q.unnest();
+      q.and();
+    }
+
+    Entities result;
+    if (!refEntityIds.isEmpty()) {
+      q.in(refEntityType.getIdAttribute().getName(), refEntityIds);
+      result = getEntities(filter, expand, sort, size, number, refRepository, q);
+    } else {
+      result = Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build();
+    }
+    return result;
+  }
+
   @Override
   public Entities findAll(
       String entityTypeId,
@@ -82,21 +152,31 @@ class DataServiceV3Impl implements DataServiceV3 {
       int size,
       int number) {
     Repository<Entity> repository = getRepository(entityTypeId);
+    org.molgenis.data.Query<Entity> findQuery =
+        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
 
+    return getEntities(filter, expand, sort, size, number, repository, findQuery);
+  }
+
+  private Entities getEntities(
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number,
+      Repository<Entity> repository,
+      org.molgenis.data.Query<Entity> query) {
     Fetch fetch = fetchMapper.toFetch(repository.getEntityType(), filter, expand);
 
     // get entities
-    org.molgenis.data.Query<Entity> findQuery =
-        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(query);
     findQuery.fetch(fetch);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(map(sort));
+    findQuery.sort(sortMapperV3.map(sort));
     List<Entity> entities = repository.findAll(findQuery).collect(toList());
 
-    // get total entity count
-    org.molgenis.data.Query<Entity> countQuery =
-        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(query);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
@@ -111,7 +191,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
-    Entity entity = entityManagerV3.create(entityType); // TODO check what happens with auto values
+    Entity entity = entityManagerV3.create(entityType);
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 

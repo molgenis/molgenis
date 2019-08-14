@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/entity/v3_MyDataset"
+    "self": "${baseUri}/api/entity/v3_MyDataset"
   },
   "items": [],
   "page": {
