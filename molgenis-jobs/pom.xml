@@ -42,11 +42,6 @@
       <artifactId>molgenis-security</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-util</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <!-- third party dependencies -->
     <dependency>
       <groupId>com.google.code.findbugs</groupId>

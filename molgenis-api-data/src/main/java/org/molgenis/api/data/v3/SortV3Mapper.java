@@ -5,9 +5,9 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 
 public class SortV3Mapper {
-  private SortV3Mapper() {}
+  SortV3Mapper() {}
 
-  public static Sort map(org.molgenis.api.model.Sort sort) {
+  public Sort map(org.molgenis.api.model.Sort sort) {
     Sort newSort = new Sort();
     sort.getOrders()
         .forEach(

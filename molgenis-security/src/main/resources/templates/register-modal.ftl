@@ -117,6 +117,12 @@
 </div>
 
 <#if isRecaptchaEnabled!false>
+    <style>
+        /* work around to have google recaptcha badge 'work' in combination with modal background */
+        .grecaptcha-badge {
+            z-index: 1050;
+        }
+    </style>
     <script src='https://www.google.com/recaptcha/api.js?render=${recaptchaPublicKey!''}'></script>
 </#if>
 

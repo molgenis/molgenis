@@ -1,7 +1,7 @@
 language: java
 jdk: openjdk11
-# Xenial dist needed for postgresql version 11
-dist: xenial
+# Ubuntu 18.04 LTS
+dist: bionic
 # Caches downloaded libraries between builds
 cache:
   yarn: true
@@ -21,10 +21,8 @@ sudo: required
 before_install:
   - .ci/services/install-minio-6.sh
   - .ci/services/install-postgres-11.sh
-  # Use wrapper script to install fixed maven version
-  - mvn -N io.takari:maven:wrapper -Dmaven=3.6.0
 install:
-  - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
+  - mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144

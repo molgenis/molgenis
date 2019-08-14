@@ -13,6 +13,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
+import static org.springframework.http.HttpStatus.OK;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -71,43 +72,55 @@ public class TwoFactorAuthenticationAPIIT {
   public void test2faEnforced() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
 
-    Gson gson = new Gson();
-    Map<String, String> loginBody = new HashMap<>();
-    loginBody.put("username", testUsername);
-    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+    try {
+      Gson gson = new Gson();
+      Map<String, String> loginBody = new HashMap<>();
+      loginBody.put("username", testUsername);
+      loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-    given()
-        .contentType(APPLICATION_JSON)
-        .body(gson.toJson(loginBody))
-        .when()
-        .post(PATH + "login")
-        .then()
-        .statusCode(UNAUTHORIZED)
-        .body(
-            "errors.message[0]",
-            Matchers.equalTo(
-                "Login using /api/v1/login is disabled, two factor authentication is enabled"));
+      given()
+          .contentType(APPLICATION_JSON)
+          .body(gson.toJson(loginBody))
+          .when()
+          .post(PATH + "login")
+          .then()
+          .statusCode(UNAUTHORIZED)
+          .body(
+              "errors.message[0]",
+              Matchers.equalTo(
+                  "Login using /api/v1/login is disabled, two factor authentication is enabled"));
+    } finally {
+      // disable 2fa in finally clause instead of after each method due to
+      // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
+      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+    }
   }
 
   @Test
   public void test2faEnabled() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
 
-    Gson gson = new Gson();
-    Map<String, String> loginBody = new HashMap<>();
-    loginBody.put("username", testUsername);
-    loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
+    try {
+      Gson gson = new Gson();
+      Map<String, String> loginBody = new HashMap<>();
+      loginBody.put("username", testUsername);
+      loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
-    ValidatableResponse response =
-        given()
-            .contentType(APPLICATION_JSON)
-            .body(gson.toJson(loginBody))
-            .when()
-            .post(PATH + "login")
-            .then()
-            .statusCode(OKE);
+      ValidatableResponse response =
+          given()
+              .contentType(APPLICATION_JSON)
+              .body(gson.toJson(loginBody))
+              .when()
+              .post(PATH + "login")
+              .then()
+              .statusCode(OKE);
 
-    testUserToken = response.extract().path("token");
+      testUserToken = response.extract().path("token");
+    } finally {
+      // disable 2fa in finally clause instead of after each method due to
+      // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
+      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+    }
   }
 
   @AfterClass(alwaysRun = true)
@@ -117,9 +130,6 @@ public class TwoFactorAuthenticationAPIIT {
 
     // Clean up Token for user
     cleanupUserToken(testUserToken);
-
-    // Disable two factor authentication
-    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
   }
 
   /**
@@ -134,6 +144,10 @@ public class TwoFactorAuthenticationAPIIT {
         .contentType(APPLICATION_JSON)
         .body(state.getLabel())
         .when()
-        .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+        .log()
+        .ifValidationFails()
+        .put("api/v1/sys_set_auth/auth/sign_in_2fa")
+        .then()
+        .statusCode(OK.value());
   }
 }

@@ -2,9 +2,11 @@ package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.Arrays;
@@ -22,11 +24,13 @@ import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,13 +39,15 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
   @Mock private EntityManagerV3 entityManagerV3;
   @Mock private QueryV3Mapper queryMapperV3;
+  @Mock private SortV3Mapper sortMapperV3;
   @Mock private FetchMapper fetchMapper;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     dataServiceV3Impl =
-        new DataServiceV3Impl(metaDataService, entityManagerV3, queryMapperV3, fetchMapper);
+        new DataServiceV3Impl(
+            metaDataService, entityManagerV3, queryMapperV3, sortMapperV3, fetchMapper);
   }
 
   @Test
@@ -170,13 +176,27 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     Entity entity1 = mock(Entity.class);
     Entity entity2 = mock(Entity.class);
 
+    Sort sort = Sort.create("field", Direction.ASC);
+
+    Fetch fetch = new Fetch().field("id", new Fetch().field("refAttr"));
+
     Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
     org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
-    when(repository.findAll(findAllQuery)).thenReturn(Stream.of(entity1, entity2));
-    org.molgenis.data.Query<Entity> countQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    when(repository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
     when(repository.count(countQuery)).thenReturn(100L);
     when(queryMapperV3.map(q, repository)).thenReturn(findAllQuery).thenReturn(countQuery);
-    Sort sort = Sort.create("field", Direction.ASC);
+    when(sortMapperV3.map(sort)).thenReturn(dataSort);
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
@@ -184,6 +204,372 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     assertEquals(
         actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testFindField() {
+    String entityTypeId = "MyEntityType";
+    String refEntityTypeId = "refEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute refIdAttribute = mock(Attribute.class, "mrefId");
+    when(refIdAttribute.getName()).thenReturn("id");
+
+    EntityType refEntityType = mock(EntityType.class, "refEntityType");
+    when(refEntityType.getId()).thenReturn(refEntityTypeId);
+    when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    Attribute mrefAttribute = mock(Attribute.class, "mref");
+    when(mrefAttribute.getName()).thenReturn("MyField");
+    when(mrefAttribute.getDataType()).thenReturn(MREF);
+    when(mrefAttribute.getRefEntity()).thenReturn(refEntityType);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(mrefAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    Entity entity = mock(Entity.class);
+    doReturn(entity).when(repository).findOneById(entityId, fetch);
+
+    Repository<Entity> refRepository = mock(Repository.class);
+    when(refRepository.getEntityType()).thenReturn(refEntityType);
+
+    Entity entity1 = mock(Entity.class);
+    doReturn("entity1").when(entity1).getIdValue();
+    Entity entity2 = mock(Entity.class);
+    doReturn("entity2").when(entity2).getIdValue();
+    Entity entity3 = mock(Entity.class);
+    doReturn("entity3").when(entity3).getIdValue();
+
+    doReturn(Arrays.asList(entity1, entity2, entity3)).when(entity).getEntities("MyField");
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    when(queryMapperV3.map(q, refRepository)).thenReturn(findAllQuery).thenReturn(countQuery);
+    countQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
+    when(refRepository.count(countQuery)).thenReturn(100L);
+    when(refRepository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
+    when(sortMapperV3.map(sort)).thenReturn(dataSort);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+    doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
+
+    Entities actual =
+        dataServiceV3Impl.findSubresources(
+            entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
+
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testFindFieldWithQuery() {
+    String entityTypeId = "MyEntityType";
+    String refEntityTypeId = "refEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute refIdAttribute = mock(Attribute.class, "mrefId");
+    when(refIdAttribute.getName()).thenReturn("id");
+
+    EntityType refEntityType = mock(EntityType.class, "refEntityType");
+    when(refEntityType.getId()).thenReturn(refEntityTypeId);
+    when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    Attribute mrefAttribute = mock(Attribute.class, "mref");
+    when(mrefAttribute.getName()).thenReturn("MyField");
+    when(mrefAttribute.getDataType()).thenReturn(MREF);
+    when(mrefAttribute.getRefEntity()).thenReturn(refEntityType);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(mrefAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    Entity entity = mock(Entity.class);
+    doReturn(entity).when(repository).findOneById(entityId, fetch);
+
+    Repository<Entity> refRepository = mock(Repository.class);
+    when(refRepository.getEntityType()).thenReturn(refEntityType);
+
+    Entity entity1 = mock(Entity.class);
+    doReturn("entity1").when(entity1).getIdValue();
+    Entity entity2 = mock(Entity.class);
+    doReturn("entity2").when(entity2).getIdValue();
+    Entity entity3 = mock(Entity.class);
+    doReturn("entity3").when(entity3).getIdValue();
+
+    doReturn(Arrays.asList(entity1, entity2, entity3)).when(entity).getEntities("MyField");
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = new QueryImpl<>();
+    findAllQuery.eq("field1", "value1").or().eq("field2", "value2");
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>();
+    findQuery.nest().eq("field1", "value1").or().eq("field2", "value2").unnest().and();
+    findQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>();
+    countQuery.nest().eq("field1", "value1").or().eq("field2", "value2").unnest().and();
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    when(queryMapperV3.map(q, refRepository)).thenReturn(findAllQuery).thenReturn(countQuery);
+    countQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
+    when(refRepository.count(countQuery)).thenReturn(100L);
+    when(refRepository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
+    when(sortMapperV3.map(sort)).thenReturn(dataSort);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+    doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
+
+    Entities actual =
+        dataServiceV3Impl.findSubresources(
+            entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
+
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testFindFieldNoEntities() {
+    String entityTypeId = "MyEntityType";
+    String refEntityTypeId = "refEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute refIdAttribute = mock(Attribute.class, "mrefId");
+    when(refIdAttribute.getName()).thenReturn("id");
+
+    EntityType refEntityType = mock(EntityType.class, "refEntityType");
+    when(refEntityType.getId()).thenReturn(refEntityTypeId);
+    when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    Attribute mrefAttribute = mock(Attribute.class, "mref");
+    when(mrefAttribute.getName()).thenReturn("MyField");
+    when(mrefAttribute.getDataType()).thenReturn(MREF);
+    when(mrefAttribute.getRefEntity()).thenReturn(refEntityType);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(mrefAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    Entity entity = mock(Entity.class);
+    doReturn(entity).when(repository).findOneById(entityId, fetch);
+
+    Repository<Entity> refRepository = mock(Repository.class);
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    when(queryMapperV3.map(q, refRepository)).thenReturn(findAllQuery).thenReturn(countQuery);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+    doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
+
+    Entities actual =
+        dataServiceV3Impl.findSubresources(
+            entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
+
+    assertEquals(
+        actual, Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testFindFieldUnknownEntity() {
+    String entityTypeId = "MyEntityType";
+    String refEntityTypeId = "refEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute refIdAttribute = mock(Attribute.class, "mrefId");
+    when(refIdAttribute.getName()).thenReturn("id");
+
+    EntityType refEntityType = mock(EntityType.class, "refEntityType");
+    when(refEntityType.getId()).thenReturn(refEntityTypeId);
+    when(refEntityType.getIdAttribute()).thenReturn(refIdAttribute);
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    Attribute mrefAttribute = mock(Attribute.class, "mref");
+    when(mrefAttribute.getName()).thenReturn("MyField");
+    when(mrefAttribute.getDataType()).thenReturn(MREF);
+    when(mrefAttribute.getRefEntity()).thenReturn(refEntityType);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(mrefAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    doReturn(null).when(repository).findOneById(entityId, fetch);
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+
+    dataServiceV3Impl.findSubresources(
+        entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
+  public void testFindFieldUnsupportedAttributeType() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    Attribute mrefAttribute = mock(Attribute.class, "mref");
+    when(mrefAttribute.getDataType()).thenReturn(STRING);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(mrefAttribute);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+
+    dataServiceV3Impl.findSubresources(
+        entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expectedExceptions = UnknownAttributeException.class)
+  public void testFindFieldUnknownAttributeException() {
+    String entityTypeId = "MyEntityType";
+    String entityId = "MyEntity";
+    String fieldId = "MyField";
+    Selection filter = Selection.FULL_SELECTION;
+    Selection expand = Selection.EMPTY_SELECTION;
+
+    Attribute idAttribute = mock(Attribute.class, "id");
+    when(idAttribute.getDataType()).thenReturn(STRING);
+
+    EntityType entityType = mock(EntityType.class, "entityType");
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+    when(entityType.getAttribute(fieldId)).thenReturn(null);
+
+    Repository<Entity> repository = mock(Repository.class);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Fetch fetch = new Fetch().field("MyField", new Fetch().field("id"));
+
+    Sort sort = Sort.create("field", Direction.ASC);
+    Query q = Query.builder().setOperator(Operator.MATCHES).setValue("value").build();
+    org.molgenis.data.Query<Entity> findAllQuery = mock(org.molgenis.data.Query.class);
+    org.molgenis.data.Sort dataSort = mock(org.molgenis.data.Sort.class);
+    org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(findAllQuery);
+    findQuery.fetch(fetch);
+    findQuery.offset(10);
+    findQuery.pageSize(10);
+    findQuery.sort(dataSort);
+
+    org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(findAllQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+
+    doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
+
+    dataServiceV3Impl.findSubresources(
+        entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
   }
 
   @Test(expectedExceptions = UnknownRepositoryException.class)
