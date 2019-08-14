@@ -23,17 +23,17 @@ public abstract class AbstractApiTest {
    * </pre>
    */
   protected static void setUpBeforeClass() {
-    String restTestHost = System.getenv("REST_TEST_HOST");
+    String restTestHost = System.getProperty("REST_TEST_HOST");
     if (restTestHost == null) {
       restTestHost = RestTestUtils.DEFAULT_HOST;
     }
     RestAssured.baseURI = restTestHost;
 
-    String restTestAdminName = System.getenv("REST_TEST_ADMIN_NAME");
+    String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
       restTestAdminName = RestTestUtils.DEFAULT_ADMIN_NAME;
     }
-    String restTestAdminPw = System.getenv("REST_TEST_ADMIN_PW");
+    String restTestAdminPw = System.getProperty("REST_TEST_ADMIN_PW");
     if (restTestAdminPw == null) {
       restTestAdminPw = RestTestUtils.DEFAULT_ADMIN_PW;
     }
