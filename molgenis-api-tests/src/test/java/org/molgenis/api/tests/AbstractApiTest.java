@@ -65,6 +65,7 @@ public abstract class AbstractApiTest {
   }
 
   private static String login(String username, String password) {
+    try {
     return RestAssured.given()
         .contentType(APPLICATION_JSON_VALUE)
         .accept(APPLICATION_JSON_VALUE)
@@ -76,6 +77,9 @@ public abstract class AbstractApiTest {
         .statusCode(OK.value())
         .extract()
         .path("token");
+    } catch(Exception e) {
+      throw new RuntimeException(RestAssured.baseURI, e);
+    }
   }
 
   private static void logout() {
