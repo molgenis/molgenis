@@ -22,5 +22,5 @@
     <appender-ref ref="jobExecutionLogAppender"/>
     <appender-ref ref="Sentry" />
   </logger>
-  <logger name="org.molgenis.i18n.properties.AllPropertiesMessageSource" level="ERROR"/>
+  <logger name="org.molgenis.util.i18n.AllPropertiesMessageSource" level="ERROR"/>
 </configuration>

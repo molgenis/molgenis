@@ -3,7 +3,6 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.api.convert.SelectionConverter;
-import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.molgenis.web.rsql.RSQLValueParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +13,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Import(RSQLValueParser.class)
 @Configuration
 public class DataApiV3Config implements WebMvcConfigurer {
-  public static final String NAMESPACE = "api-data";
   private final RSQLValueParser rsqlValueParser;
 
   public DataApiV3Config(RSQLValueParser rsqlValueParser) {
@@ -42,7 +40,7 @@ public class DataApiV3Config implements WebMvcConfigurer {
   }
 
   @Bean
-  public PropertiesMessageSource apiMessageSource() {
-    return new PropertiesMessageSource(NAMESPACE);
+  public SortV3Mapper sortV3Mapper() {
+    return new SortV3Mapper();
   }
 }

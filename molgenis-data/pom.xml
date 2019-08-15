@@ -35,11 +35,6 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-util</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-security-core</artifactId>
       <version>${project.version}</version>
     </dependency>

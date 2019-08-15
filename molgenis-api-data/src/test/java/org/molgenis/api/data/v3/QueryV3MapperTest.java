@@ -235,7 +235,6 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
     String value1 = "value1";
     Query query =
         Query.builder()
-            .setItem("test")
             .setOperator(Operator.AND)
             .setValue(
                 asList(
@@ -257,7 +256,6 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
     String value1 = "value1";
     Query query =
         Query.builder()
-            .setItem("test")
             .setOperator(Operator.OR)
             .setValue(
                 asList(

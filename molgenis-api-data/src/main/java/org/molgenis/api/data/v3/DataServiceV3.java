@@ -9,6 +9,7 @@ import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Data API v3 CRUD operations. */
 interface DataServiceV3 {
@@ -34,6 +35,18 @@ interface DataServiceV3 {
    * @throws UnknownEntityException if no entity exists for the given entity identifier
    */
   Entity find(String entityTypeId, String entityId, Selection filter, Selection expand);
+
+  @Transactional(readOnly = true)
+  Entities findSubresources(
+      String entityTypeId,
+      String entityId,
+      String attributeName,
+      @Nullable @CheckForNull Query query,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number);
 
   /**
    * Retrieves all entities matching a query.
