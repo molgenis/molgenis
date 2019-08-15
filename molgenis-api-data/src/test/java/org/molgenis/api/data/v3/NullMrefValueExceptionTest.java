@@ -30,10 +30,6 @@ public class NullMrefValueExceptionTest extends ExceptionMessageTest {
       "en",
       "Null value is not allowed for attribute 'attributeName' of type MREF, use an empty list instead."
     };
-    Object[] nlParams = {
-      "nl",
-      "Null waarde is niet toegestaan voor attribuut 'attributeName' met type MREF, gebruik in plaats daarvan een lege lijst."
-    };
-    return new Object[][] {enParams, nlParams};
+    return new Object[][] {enParams};
   }
 }

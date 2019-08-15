@@ -7,7 +7,7 @@ import org.molgenis.util.exception.CodedRuntimeException;
 
 public class NullMrefValueException extends CodedRuntimeException {
 
-  private static final String ERROR_CODE = "DAPI1";
+  private static final String ERROR_CODE = "DAPI02";
   private final Attribute attribute;
 
   protected NullMrefValueException(Attribute attribute) {
