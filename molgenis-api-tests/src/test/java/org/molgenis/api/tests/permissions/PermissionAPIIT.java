@@ -1,16 +1,12 @@
 package org.molgenis.api.tests.permissions;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.permissions.PermissionsController.OBJECTS;
 import static org.molgenis.api.permissions.PermissionsController.TYPES;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
@@ -18,13 +14,13 @@ import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFileWithoutPac
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.util.Arrays;
 import org.molgenis.api.permissions.PermissionsController;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
@@ -37,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class PermissionAPIIT {
+public class PermissionAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(PermissionAPIIT.class);
   private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
 
@@ -48,13 +44,8 @@ public class PermissionAPIIT {
 
   @BeforeClass
   public void beforeClass() {
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-    String adminPassword =
-        Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
-    String adminUsername = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-
-    adminToken = login(adminUsername, adminPassword);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
     testUserName = "api_v2_test_user" + System.currentTimeMillis();
     testUserName2 = "api_v2_test2_user" + System.currentTimeMillis();
@@ -79,7 +70,7 @@ public class PermissionAPIIT {
             .put(RoleMetadata.ROLE, READ)
             .put(RoleMembershipMetadata.ROLE_MEMBERSHIP, READ)
             .build());
-    testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+    testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
   @BeforeMethod
@@ -101,16 +92,11 @@ public class PermissionAPIIT {
      **/
     String create = "{permissions:[{permission:READ,user:" + testUserName + "}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
         .post(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     String response1 =
         "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
@@ -119,9 +105,6 @@ public class PermissionAPIIT {
 
     Response actual =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
@@ -133,16 +116,11 @@ public class PermissionAPIIT {
 
     String update = "{permissions:[{permission:WRITE,user:" + testUserName + "}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(update)
         .patch(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
         .then()
-        .statusCode(204)
-        .log()
-        .all();
+        .statusCode(204);
 
     String response2 =
         "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
@@ -150,9 +128,6 @@ public class PermissionAPIIT {
             + "}], id=perm1_entity1, label=entity1}}";
     Response actual2 =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
@@ -164,24 +139,16 @@ public class PermissionAPIIT {
 
     String delete = "{user:" + testUserName + "}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
         .delete(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
         .then()
-        .statusCode(204)
-        .log()
-        .all();
+        .statusCode(204);
 
     String response3 =
         "{data={permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}}";
     Response actual3 =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
             .then()
             .statusCode(200)
@@ -205,16 +172,11 @@ public class PermissionAPIIT {
      **/
     String create = "{permissions:[{permission:READ,user:" + testUserName + "}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
         .post(PermissionsController.BASE_URI + "/package/perm1")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     String response =
         "{data={permissions=[{permission=WRITEMETA, user=admin}, {user="
@@ -224,9 +186,6 @@ public class PermissionAPIIT {
 
     Response actual =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1?inheritance=true")
             .then()
             .statusCode(200)
@@ -245,9 +204,6 @@ public class PermissionAPIIT {
             + "id=perm1_entity1, label=entity1}}";
     Response actual2 =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(
                 PermissionsController.BASE_URI
                     + "/entityType/perm1_entity1?q=user=="
@@ -277,16 +233,11 @@ public class PermissionAPIIT {
             + testUserName
             + ",permission:READMETA}]}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
         .post(PermissionsController.BASE_URI + "/entityType")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     String request =
         "{objects:[{objectId:perm1_entity2,permissions:[{user:"
@@ -297,16 +248,11 @@ public class PermissionAPIIT {
             + testUserName
             + ",permission:WRITEMETA}]}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(request)
         .patch(PermissionsController.BASE_URI + "/entityType")
         .then()
-        .statusCode(204)
-        .log()
-        .all();
+        .statusCode(204);
 
     String response1 =
         "{objects=[{permissions=[{permission=READ, user="
@@ -327,9 +273,6 @@ public class PermissionAPIIT {
 
     Response actual =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(
                 PermissionsController.BASE_URI
                     + "/entityType?q=user=in=("
@@ -349,30 +292,17 @@ public class PermissionAPIIT {
   @Test
   public void testCreateAcls() {
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .post(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/1")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .post(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/2")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     Response actual =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5")
             .then()
             .statusCode(200)
@@ -385,20 +315,12 @@ public class PermissionAPIIT {
   @Test
   public void testEnableRLS() {
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .post(PermissionsController.BASE_URI + "/" + TYPES + "/entity-perm2_entity4")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     Response actual =
         given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, adminToken)
             .get(PermissionsController.BASE_URI + "/" + TYPES + "/")
             .then()
             .statusCode(200)
@@ -416,14 +338,9 @@ public class PermissionAPIIT {
   @Test
   public void testSuitablePermissions() {
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .get(PermissionsController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta")
         .then()
         .statusCode(200)
-        .log()
-        .all()
         .body(equalTo("{\"data\":[\"READ\",\"WRITE\"]}"));
   }
 
@@ -436,44 +353,29 @@ public class PermissionAPIIT {
      **/
     String create = "{permissions:[{permission:READ,user:" + testUserName + "}]}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(create)
         .post(PermissionsController.BASE_URI + "/entityType/perm1_entity2")
         .then()
-        .statusCode(201)
-        .log()
-        .all();
+        .statusCode(201);
 
     String response =
         "{\"data\":{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"permissions\":[{\"user\":\""
             + testUserName
             + "\",\"permission\":\"READ\"}]}}";
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(PermissionsController.BASE_URI + "/entityType/perm1_entity2?q=user==" + testUserName)
         .then()
         .statusCode(200)
-        .log()
-        .all()
         .body(equalTo(response));
 
     String delete = "{user:" + testUserName + "}";
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON)
         .body(delete)
         .delete(PermissionsController.BASE_URI + "/entityType/perm1_entity2")
         .then()
-        .statusCode(204)
-        .log()
-        .all();
+        .statusCode(204);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -484,9 +386,10 @@ public class PermissionAPIIT {
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     cleanupUserToken(testUserToken);
-    cleanupUserToken(adminToken);
 
     removeRightsForUser(adminToken, testUserName);
     removeRightsForUser(adminToken, testUserName2);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 }
