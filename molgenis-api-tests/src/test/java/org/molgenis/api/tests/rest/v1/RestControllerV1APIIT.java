@@ -3,7 +3,6 @@ package org.molgenis.api.tests.rest.v1;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
@@ -13,23 +12,20 @@ import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.getFileContents;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntity;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** Tests each endpoint of the V1 Rest Api through http calls */
-public class RestControllerV1APIIT {
+public class RestControllerV1APIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV1APIIT.class);
 
   private String testUserName;
@@ -59,22 +55,8 @@ public class RestControllerV1APIIT {
 
   @BeforeClass
   public void beforeClass() {
-    LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
-    RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
-    LOG.info("baseURI: " + RestAssured.baseURI);
-
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-    String adminUserName =
-        Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
-    LOG.info("adminUserName: " + adminUserName);
-
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-    String adminPassword =
-        Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
-    LOG.info("adminPassword: " + adminPassword);
-
-    adminToken = login(adminUserName, adminPassword);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
     LOG.info("Importing Test data");
     RestTestUtils.createPackage(adminToken, "base");
@@ -107,37 +89,27 @@ public class RestControllerV1APIIT {
             .put("base_APITest4", WRITEMETA)
             .put("base_ApiTestFile", WRITEMETA)
             .build());
-    testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+    testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
   @Test
   public void testEntityExists() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(TEXT_PLAIN)
         .when()
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/exist")
         .then()
-        .log()
-        .all()
         .statusCode(200)
         .body(equalTo("true"));
   }
 
   @Test
   public void testEntityNotExists() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(TEXT_PLAIN)
         .when()
         .get(API_V1 + "sys_NonExistingEntity/exist")
         .then()
-        .log()
-        .all()
         .statusCode(200)
         .body(equalTo("false"));
   }
@@ -145,165 +117,115 @@ public class RestControllerV1APIIT {
   @Test
   public void testGetEntityType() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .when()
             .get(API_V1 + "V1_API_TypeTestRefAPIV1/meta")
-            .then()
-            .log()
-            .all();
+            .then();
     validateGetEntityType(response);
   }
 
   @Test
   public void testGetEntityTypePost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/meta?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateGetEntityType(response);
   }
 
   @Test
   public void testRetrieveEntityAttributeMeta() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .when()
             .get(API_V1 + "V1_API_TypeTestRefAPIV1/meta/value")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
   @Test
   public void testRetrieveEntityAttributeMetaPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/meta/value?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
   @Test
   public void testRetrieveEntity() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .when()
             .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntity(response);
   }
 
   @Test
   public void testRetrieveEntityPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntity(response);
   }
 
   @Test
   public void testRetrieveEntityAttribute() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .when()
             .get(API_V1 + "V1_API_TypeTestAPIV1/1/xxref_value")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityAttribute(response);
   }
 
   @Test
   public void testRetrieveEntityAttributePost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .body("{}")
             .when()
             .post(API_V1 + "V1_API_TypeTestAPIV1/1/xxref_value?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityAttribute(response);
   }
 
   @Test
   public void testRetrieveEntityCollectionResponse() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .when()
             .get(API_V1 + "V1_API_Items")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityCollectionResponse(response);
   }
 
   @Test
   public void testRetrieveEntityCollectionResponsePost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .contentType(APPLICATION_JSON)
             .body("{}")
             .when()
             .post(API_V1 + "V1_API_Items?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityCollectionResponse(response);
   }
 
@@ -315,17 +237,13 @@ public class RestControllerV1APIIT {
     contents = contents.replaceAll("\\r\\n", "\n").replaceAll("\\r", "\n");
 
     String response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
+            .accept("text/csv")
             .contentType(TEXT_CSV)
             .when()
             .get(API_V1 + "csv/V1_API_Items")
             .then()
             .contentType("text/csv")
-            .log()
-            .all()
             .statusCode(200)
             .extract()
             .asString();
@@ -334,28 +252,18 @@ public class RestControllerV1APIIT {
 
   @Test
   public void testCreateFromFormPost() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
         .formParam("label", "label6")
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body(
             "href",
@@ -365,16 +273,11 @@ public class RestControllerV1APIIT {
             "label",
             equalTo("label6"));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .when()
         .delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
   }
 
@@ -383,30 +286,20 @@ public class RestControllerV1APIIT {
     URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
     File file = new File(new URI(resourceUrl.toString()).getPath());
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType("multipart/form-data")
         .multiPart("id", "6")
         .multiPart(file)
         .when()
         .post(API_V1 + "base_ApiTestFile")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .when()
         .get(API_V1 + "base_ApiTestFile/6")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body(
             "href",
@@ -425,29 +318,19 @@ public class RestControllerV1APIIT {
     entityMap.put("value", "ref6");
     entityMap.put("label", "label6");
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(entityMap)
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1")
         .then()
-        .log()
-        .all()
         .statusCode(201);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .when()
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(200)
         .body(
             "href",
@@ -457,15 +340,7 @@ public class RestControllerV1APIIT {
             "label",
             equalTo("label6"));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
-        .delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
-        .then()
-        .log()
-        .all()
-        .statusCode(204);
+    given(testUserToken).delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6").then().statusCode(204);
   }
 
   @Test
@@ -473,40 +348,25 @@ public class RestControllerV1APIIT {
     Map<String, Object> parameters = newHashMap();
     parameters.put("value", "ref1");
     parameters.put("label", "label900");
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(parameters)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("label", equalTo("label900"));
 
     parameters.put("label", "label1");
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(parameters)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
   }
 
@@ -515,141 +375,86 @@ public class RestControllerV1APIIT {
     Map<String, Object> parameters = newHashMap();
     parameters.put("value", "ref1");
     parameters.put("label", "label900");
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(parameters)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("label", equalTo("label900"));
 
     parameters.put("label", "label1");
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(parameters)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
   }
 
   @Test
   public void testUpdateAttributePut() {
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label900")
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("label", equalTo("label900"));
 
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label1")
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
   }
 
   @Test
   public void testUpdateAttributePutWithEmptyValue() {
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V1 + "V1_API_TypeTestAPIV1/1/xstringnillable")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestAPIV1/1/xstringnillable")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("xstringnillable", nullValue());
   }
 
   @Test
   public void testUpdateAttribute() {
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label900")
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("label", equalTo("label900"));
 
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label1")
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1/label?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
   }
 
@@ -658,30 +463,20 @@ public class RestControllerV1APIIT {
     URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
     File file = new File(new URI(resourceUrl.toString()).getPath());
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType("multipart/form-data")
         .multiPart("id", "1")
         .multiPart(file)
         .when()
         .post(API_V1 + "base_ApiTestFile/1?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .when()
         .get(API_V1 + "base_ApiTestFile/1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body(
             "href",
@@ -694,91 +489,56 @@ public class RestControllerV1APIIT {
 
   @Test
   public void testUpdateFromFormPost() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref1")
         .formParam("label", "label900")
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("label", equalTo("label900"));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref1")
         .formParam("label", "label1")
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref1?_method=PUT")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
   }
 
   @Test
   public void testDelete() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
         .formParam("label", "label6")
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("value", equalTo("ref6"), "label", equalTo("label6"));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .delete(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NOT_FOUND)
         .body("errors[0].code", equalTo("D02"))
         .body(
@@ -788,49 +548,29 @@ public class RestControllerV1APIIT {
 
   @Test
   public void testDeletePost() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
         .formParam("label", "label6")
         .when()
         .post(API_V1 + "V1_API_TypeTestRefAPIV1")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("value", equalTo("ref6"), "label", equalTo("label6"));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .post(API_V1 + "V1_API_TypeTestRefAPIV1/ref6?_method=DELETE")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "V1_API_TypeTestRefAPIV1/ref6")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NOT_FOUND)
         .body("errors[0].code", equalTo("D02"))
         .body(
@@ -840,105 +580,54 @@ public class RestControllerV1APIIT {
 
   @Test
   public void testDeleteAll() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(40));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
-        .delete(API_V1 + "base_APITest1")
-        .then()
-        .log()
-        .all()
-        .statusCode(NO_CONTENT);
+    given(testUserToken).delete(API_V1 + "base_APITest1").then().statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest1")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(0));
   }
 
   @Test
   public void testDeleteAllPost() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest2")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(40));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .post(API_V1 + "base_APITest2?_method=DELETE")
         .then()
-        .log()
-        .all()
         .statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest2")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(0));
   }
 
   @Test
   public void testDeleteMeta() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest3")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(40));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .delete(API_V1 + "base_APITest3/meta")
-        .then()
-        .log()
-        .all()
-        .statusCode(NO_CONTENT);
+    given().delete(API_V1 + "base_APITest3/meta").then().statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest3")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NOT_FOUND)
         .body("errors[0].code", equalTo("D01"))
         .body("errors[0].message", equalTo("Unknown entity type 'base_APITest3'."));
@@ -946,35 +635,17 @@ public class RestControllerV1APIIT {
 
   @Test
   public void testDeleteMetaPost() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest4")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("total", equalTo(40));
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
-        .post(API_V1 + "base_APITest4/meta?_method=DELETE")
-        .then()
-        .log()
-        .all()
-        .statusCode(NO_CONTENT);
+    given().post(API_V1 + "base_APITest4/meta?_method=DELETE").then().statusCode(NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V1 + "base_APITest4")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NOT_FOUND)
         .body("errors[0].code", equalTo("D01"))
         .body("errors[0].message", equalTo("Unknown entity type 'base_APITest4'."));
@@ -1160,5 +831,7 @@ public class RestControllerV1APIIT {
 
     // Clean up Token for user
     cleanupUserToken(testUserToken);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 }
