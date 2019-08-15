@@ -17,10 +17,8 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -224,10 +222,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(refEntityType.getIdAttribute()).thenReturn(refAttribute);
 
-    List<Object> arg = new ArrayList<>();
-    arg.addAll(Arrays.asList(1, 2, 3));
-
-    // FIXME: any()...
+    // 'any()' because the getReferences gets passed a lambda
     when(entityManager.getReferences(eq(refEntityType), any()))
         .thenReturn(Arrays.asList(refEntity1, refEntity2, refEntity3));
 
