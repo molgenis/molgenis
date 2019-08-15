@@ -147,6 +147,22 @@ public class EntityControllerIT extends AbstractApiTest {
   }
 
   @Test
+  public void testRetrieveResourceCollectionFilterExpand() throws IOException {
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "retrieveResourceCollectionFilterExpand.json",
+            ImmutableMap.of(
+                "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
+
+    given()
+        .get("/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&number=1&size=5")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
+  }
+
+  @Test
   public void testRetrieveResourceCollectionSortQuery() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
