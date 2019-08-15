@@ -1,0 +1,535 @@
+openapi: 3.0.1
+info:
+  title: MOLGENIS data & metadata API
+  description: RESTful API to create/read/update/delete data and metadata.
+  version: 3.0.0-SNAPSHOT
+  license:
+    name: "GNU LGPLv3"
+    url: "https://www.gnu.org/licenses/lgpl-3.0.en.html"
+tags:
+- name: "Batch"
+  description: Combines multiple API calls in one HTTP request
+- name: "Data"
+  description: Create, read, update and delete data
+- name: "Metadata"
+  description: Create, read, update and delete metadata
+- name: "Aggregates"
+  description: Retrieve aggregated data
+servers:
+  - url: http://localhost:8080/api/data
+paths:
+  /$batch:
+    post:
+      tags:
+        - "Batch"
+      summary: Performs multiple individual requests in a single request
+      requestBody:
+        description: Series of individual requests
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequest'
+      responses:
+        '207':
+          description: Multi-Status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+  /data/{resourceTypeId}:
+    get:
+      tags:
+        - "Data"
+      summary: Retrieves a list of resources
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkResourceCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+          - "Data"
+      summary: Creates a resource.
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceCreate'
+            example:
+              label: 'updated label'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+          - "Data"
+      summary: Delete resources
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/query'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+  /data/{resourceTypeId}/{resourceId}:
+    get:
+      tags:
+          - "Data"
+      summary: Retrieves a resource
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+          - "Data"
+      summary: Updates a resource with the specified attributes
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdate'
+            example:
+              label: 'updated label'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+          - "Data"
+      summary: Updates a resource
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdate'
+            example:
+              label: 'label'
+              description: 'updated description'
+              parent: 1
+              children: [2, 3]
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+          - "Data"
+      summary: Deletes a resource.
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+  /data/{resourceTypeId}/{resourceId}/{fieldId}:
+    get:
+      tags:
+          - "Data"
+      summary: Retrieves a list of sub-resources for a resource field
+      parameters:
+        - $ref: '#/components/parameters/resourceTypeId'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/fieldId'
+        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkResourceCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':          
+          $ref: '#/components/responses/InternalServerError'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-molgenis-token
+  parameters:
+    resourceTypeId:
+      name: resourceTypeId
+      description: Resource type identifier
+      in: path
+      required: true
+      schema:
+        type: string
+      example: Node
+    resourceId:
+      name: resourceId
+      description: Resource identifier
+      in: path
+      required: true
+      schema:
+        type: string
+      example: 1
+    fieldId:
+      name: fieldId
+      description: Field identifier
+      in: path
+      required: true
+      schema:
+        type: string
+      example: label
+    number:
+      name: number
+      description: Page number
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    size:
+      name: size
+      description: Page size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    sort:
+      name: sort
+      description: Sort order
+      in: query
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: string
+      example: id,+label,-description
+    filter:
+      name: filter
+      description: Fields to return
+      in: query
+      required: false
+      schema:
+        type: string
+      example: id,label
+    expand:
+      name: expand
+      description: Fields to expands
+      in: query
+      required: false
+      schema:
+        type: string
+      example: child
+    query:
+      name: q
+      description: Query. [RSQL expression](https://github.com/jirutka/rsql-parser) where operator is '==' (equal to), '!=' (not equal to), '=lt=' or '<' (less than), '=le=' or '<=' (less than or equal to), '=gt=' or '>' (greater than), '=ge=' or '>=' (greater than or equal to), '=like=' (contains) or '=q=' (matches).
+      in: query
+      required: false
+      schema:
+        type: string
+      example: label=q=node
+  schemas:
+    Links:
+      type: object
+      properties:
+        previous:
+          type: string
+          format: uri
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+      required:
+        - self
+      example:
+        previous: https://my.molgenis.org/api/data/Node?number=0
+        self: https://my.molgenis.org/api/data/Node?number=1
+        next: https://my.molgenis.org/api/data/Node?number=2
+    Page:
+      type: object
+      properties:
+        size:
+          type: number
+          minimum: 0
+        totalElements:
+          type: number
+          minimum: 0
+        totalPages:
+          type: number
+          minimum: 0
+        number:
+          type: number
+          minimum: 0
+      required:
+        - size
+        - totalElements
+        - totalPages
+        - number
+      example:
+        size: 20
+        totalElements: 100
+        totalPages: 5
+        number: 1
+    Resource:
+      type: object
+      properties:
+        href:
+          type: string
+        data:
+          $ref: "#/components/schemas/ResourceData"
+    ResourceData:
+      type: object
+      example:
+        id: 0
+        parent: https://my.molgenis.org/api/data/Node/1
+        children: https://my.molgenis.org/api/data/Node/0/children
+    ResourceCreate:
+      type: object
+      example:
+        parent: 1
+        children: [2,3]
+    ResourceUpdate:
+      type: object
+      example:
+        id: 0
+        parent: 1
+        children: [2,3]
+    ResourceCollection:
+      type: object
+      properties:
+        links:
+          $ref: "#/components/schemas/Links"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Resource"
+        page:
+          $ref: "#/components/schemas/Page"
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description:
+            An absolute URI that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+        title:
+          type: string
+          description:
+            A short, summary of the problem type. Written in english and readable for engineers 
+            (usually not suited for non technical stakeholders and not localized)
+          example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description:
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description:
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Connection to database timed out
+        instance:
+          type: string
+          format: uri
+          description: |
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+        errorCode:
+            type: string
+            description:
+                The MOLGENIS error code for the thrown exception.
+    BatchRequest:
+      type: object
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: "#/components/schemas/Request"
+      required:
+        - requests
+    Request:
+      type: object
+      properties:
+        id:
+          type: string
+        method:
+          type: string
+        headers:
+          type: object
+        url:
+          type: string
+        body:
+          type: object
+      required:
+        - id
+        - method
+        - url
+    BatchResponse:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Response"
+      required:
+        - responses
+    Response:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: number
+        headers:
+          type: object
+        body:
+          type: object
+      required:
+        - id
+        - method
+        - url
+  responses:
+    OkResource:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Resource'
+    OkResourceCollection:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceCollection'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Created:
+      description: Created
+    NoContent:
+      description: No Content
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+security:
+  - ApiKeyAuth: []
