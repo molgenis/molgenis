@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,7 @@ import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryNotCapableException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
@@ -54,6 +56,11 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Test
   public void testCreate() {
     // FIXME: implement this test
+  }
+
+  @Test(expectedExceptions = RepositoryNotCapableException.class)
+  public void testCreateMetadataNotCapable() {
+    dataServiceV3Impl.create("sys_md_EntityType", emptyMap());
   }
 
   @SuppressWarnings("unchecked")
@@ -573,10 +580,20 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     // FIXME: implement this test
   }
 
+  @Test(expectedExceptions = RepositoryNotCapableException.class)
+  public void testUpdateMetadataNotCapable() {
+    dataServiceV3Impl.update("sys_md_Attribute", "myAttributeId", emptyMap());
+  }
+
   // TODO implement
   @Test
   public void testUpdatePartially() {
     // FIXME: implement this test
+  }
+
+  @Test(expectedExceptions = RepositoryNotCapableException.class)
+  public void testUpdatePartiallyMetadataNotCapable() {
+    dataServiceV3Impl.updatePartial("sys_md_EntityType", "myEntityTypeId", emptyMap());
   }
 
   @SuppressWarnings("unchecked")
@@ -632,6 +649,11 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.delete(entityTypeId, entityId);
   }
 
+  @Test(expectedExceptions = RepositoryNotCapableException.class)
+  public void testDeleteMetadataNotCapable() {
+    dataServiceV3Impl.delete("sys_md_Attribute", "myAttributeId");
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void testDeleteAll() {
@@ -662,5 +684,10 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
 
     dataServiceV3Impl.deleteAll(entityTypeId, null);
+  }
+
+  @Test(expectedExceptions = RepositoryNotCapableException.class)
+  public void testDeleteAllMetadataNotCapable() {
+    dataServiceV3Impl.deleteAll("sys_md_Attribute", mock(Query.class));
   }
 }

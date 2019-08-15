@@ -2,6 +2,9 @@ package org.molgenis.api.data.v3;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryNotCapableException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
@@ -244,6 +248,10 @@ class DataServiceV3Impl implements DataServiceV3 {
   }
 
   private Repository<Entity> getRepository(String entityTypeId) {
+    if (entityTypeId.equals(ENTITY_TYPE_META_DATA) || entityTypeId.equals(ATTRIBUTE_META_DATA)) {
+      throw new RepositoryNotCapableException(entityTypeId, WRITABLE);
+    }
+
     return metaDataService
         .getRepository(entityTypeId)
         .orElseThrow(() -> new UnknownRepositoryException(entityTypeId));
