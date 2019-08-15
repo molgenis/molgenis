@@ -1,20 +1,13 @@
 package org.molgenis.api.tests.beacon;
 
-import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.molgenis.api.tests.utils.RestTestUtils.BAD_REQUEST;
 import static org.molgenis.api.tests.utils.RestTestUtils.CREATED;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_HOST;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntities;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntityFromTable;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
@@ -27,6 +20,7 @@ import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.beacon.controller.BeaconController;
 import org.slf4j.Logger;
@@ -35,9 +29,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
-import org.testng.util.Strings;
 
-public class BeaconAPIIT {
+public class BeaconAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(BeaconAPIIT.class);
 
   // User credentials
@@ -68,20 +61,9 @@ public class BeaconAPIIT {
    */
   @BeforeClass
   public void beforeClass() {
-    LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
-    baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
-    LOG.info("baseURI: " + baseURI);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-    String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-    LOG.info("adminUserName: " + adminUserName);
-
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-    String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
-    LOG.info("adminPassword: " + adminPassword);
-
-    adminToken = login(adminUserName, adminPassword);
     testUsername = "beacon_test_user" + System.currentTimeMillis();
     createUser(adminToken, testUsername, BEACON_TEST_USER_PASSWORD);
 
@@ -94,15 +76,10 @@ public class BeaconAPIIT {
     beaconOrganisations.put("entities", Lists.newArrayList(beaconOrganisation));
 
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beaconOrganisations))
         .post("/api/v2/" + SYS_BEACONS_BEACON_ORGANIZATION)
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
     Map<String, List<Map<String, String>>> beaconDatasets = Maps.newHashMap();
@@ -114,15 +91,10 @@ public class BeaconAPIIT {
     beaconDatasets.put("entities", Lists.newArrayList(beaconDataset));
 
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beaconDatasets))
         .post("/api/v2/" + SYS_BEACONS_BEACON_DATASET)
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
     Map<String, List<Map<String, Object>>> beacons = Maps.newHashMap();
@@ -134,15 +106,10 @@ public class BeaconAPIIT {
     beacons.put("entities", Lists.newArrayList(beacon));
 
     given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, adminToken)
         .contentType(APPLICATION_JSON_VALUE)
         .body(gson.toJson(beacons))
         .post("/api/v2/" + SYS_BEACON)
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
     setGrantedRepositoryPermissions(
@@ -159,45 +126,32 @@ public class BeaconAPIIT {
             .put(BEACON_SET, READ)
             .build());
 
-    userToken = login(testUsername, BEACON_TEST_USER_PASSWORD);
+    userToken = RestTestUtils.login(testUsername, BEACON_TEST_USER_PASSWORD);
   }
 
   @Test
   public void testBeaconList() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, userToken)
+    given(userToken)
         .when()
         .get(BeaconController.URI + "/list")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("id", hasItem(MY_FIRST_BEACON));
   }
 
   @Test
   public void testGetBeaconById() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, userToken)
+    given(userToken)
         .when()
         .get(BeaconController.URI + "/" + MY_FIRST_BEACON)
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("id", equalTo(MY_FIRST_BEACON));
   }
 
   @Test
   public void testGetQueryBeaconById() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, userToken)
+    given(userToken)
         .when()
         .get(
             BeaconController.URI
@@ -205,36 +159,26 @@ public class BeaconAPIIT {
                 + MY_FIRST_BEACON
                 + "/query?referenceName=7&start=130148888&referenceBases=A&alternateBases=C")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("exists", equalTo(true));
   }
 
   @Test
   public void testGetQueryBeaconByIdUnknownBeacon() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, userToken)
+    given(userToken)
         .when()
         .get(
             BeaconController.URI
                 + "/MyFirstBeaco/query?referenceName=7&start=130148888&referenceBases=A&alternateBases=C")
         .then()
-        .log()
-        .all()
         .statusCode(BAD_REQUEST)
         .body("error.message", equalTo("Unknown beacon [MyFirstBeaco]"));
   }
 
   @Test
   public void testPostQueryBeaconById() {
-    given()
-        .log()
-        .all()
+    given(userToken)
         .contentType(APPLICATION_JSON_VALUE)
-        .header(X_MOLGENIS_TOKEN, userToken)
         .when()
         .body(
             "{\n"
@@ -245,19 +189,14 @@ public class BeaconAPIIT {
                 + "}")
         .post(BeaconController.URI + "/MyFirstBeacon/query")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body("beaconId", equalTo(MY_FIRST_BEACON));
   }
 
   @Test
   public void testPostQueryBeaconByIdUnknownBeacon() {
-    given()
-        .log()
-        .all()
+    given(userToken)
         .contentType(APPLICATION_JSON_VALUE)
-        .header(X_MOLGENIS_TOKEN, userToken)
         .when()
         .body(
             "{\n"
@@ -268,8 +207,6 @@ public class BeaconAPIIT {
                 + "}")
         .post(BeaconController.URI + "/MyFirst/query")
         .then()
-        .log()
-        .all()
         .statusCode(BAD_REQUEST)
         .body("error.message", equalTo("Unknown beacon [MyFirst]"));
   }
@@ -287,5 +224,7 @@ public class BeaconAPIIT {
 
     // Clean up permissionsr
     removeRightsForUser(adminToken, testUsername);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 }
