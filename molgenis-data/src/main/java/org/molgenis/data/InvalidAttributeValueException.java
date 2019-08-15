@@ -12,7 +12,10 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
   private final Attribute attribute;
   private final Object expectedType;
 
-  // TODO: javadoc
+  /**
+   * @param attribute the attribute for which the exception occurred.
+   * @param expectedTypeKey a resolvable message source key for the expetected value type.
+   */
   public InvalidAttributeValueException(Attribute attribute, String expectedTypeKey) {
     super(ERROR_CODE);
     this.attribute = requireNonNull(attribute);
@@ -20,6 +23,10 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
     this.expectedType = new DefaultMessageSourceResolvable(expectedTypeKey);
   }
 
+  /**
+   * @param attribute the attribute for which the exception occurred.
+   * @param expectedType the expected class of the value.
+   */
   public InvalidAttributeValueException(Attribute attribute, Class expectedType) {
     super(ERROR_CODE);
     this.attribute = requireNonNull(attribute);
