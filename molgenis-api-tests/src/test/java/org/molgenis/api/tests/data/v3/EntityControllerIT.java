@@ -156,7 +156,8 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get("/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&number=1&size=5")
+        .get(
+            "/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&number=1&size=5")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
