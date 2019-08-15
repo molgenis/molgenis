@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Import(RSQLValueParser.class)
 @Configuration
 public class DataApiV3Config implements WebMvcConfigurer {
+  public static final String NAMESPACE = "api-data";
   private final RSQLValueParser rsqlValueParser;
 
   public DataApiV3Config(RSQLValueParser rsqlValueParser) {

@@ -133,7 +133,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
                   .iterator();
       entities = entityManager.getReferences(refEntityType, typedIds);
     } else {
-      throw new InvalidAttributeValueException(attribute, "empty list");
+      throw new NullMrefValueException(attribute);
     }
     return entities;
   }

@@ -1,8 +1,7 @@
-package org.molgenis.data;
+package org.molgenis.api.data.v3;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.LONG;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.exception.ExceptionMessageTest;
@@ -10,10 +9,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class InvalidAtrtibuteValueExceptionTest extends ExceptionMessageTest {
+public class NullMrefValueExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
-    messageSource.addMolgenisNamespaces("data");
+    messageSource.addMolgenisNamespaces("api-data");
   }
 
   @Test(dataProvider = "languageMessageProvider")
@@ -21,9 +20,7 @@ public class InvalidAtrtibuteValueExceptionTest extends ExceptionMessageTest {
   public void testGetLocalizedMessage(String lang, String message) {
     Attribute attribute = mock(Attribute.class);
     when(attribute.getName()).thenReturn("attributeName");
-    when(attribute.getDataType()).thenReturn(LONG);
-    assertExceptionMessageEquals(
-        new InvalidAttributeValueException(attribute, "number"), lang, message);
+    assertExceptionMessageEquals(new NullMrefValueException(attribute), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
@@ -31,11 +28,11 @@ public class InvalidAtrtibuteValueExceptionTest extends ExceptionMessageTest {
   public Object[][] languageMessageProvider() {
     Object[] enParams = {
       "en",
-      "Invalid value for attribute 'attributeName' of type 'LONG', the value should be a number."
+      "Null value is not allowed for attribute 'attributeName' of type MREF, use an empty list instead."
     };
     Object[] nlParams = {
       "nl",
-      "Ongeldige waarde voor attribuut 'attributeName' van type 'LONG', waarde zou een nummer moeten zijn."
+      "Null waarde is niet toegestaan voor attribuut 'attributeName' met type MREF, gebruik in plaats daarvan een lege lijst."
     };
     return new Object[][] {enParams, nlParams};
   }
