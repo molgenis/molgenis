@@ -2,6 +2,8 @@ package org.molgenis.api.data.v3.model;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.util.AutoGson;
@@ -11,6 +13,9 @@ import org.molgenis.util.AutoGson;
 public abstract class EntitiesResponse {
   public abstract LinksResponse getLinks();
 
+  // can be null when selecting zero attributes (e.g. for referenced entities)
+  @Nullable
+  @CheckForNull
   public abstract List<EntityResponse> getItems();
 
   public abstract PageResponse getPage();
