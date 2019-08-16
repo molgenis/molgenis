@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: MOLGENIS data & metadata API
   description: RESTful API to create/read/update/delete data and metadata.
-  version: 3.0.0-SNAPSHOT
+  version: 3.0.0
   license:
     name: "GNU LGPLv3"
     url: "https://www.gnu.org/licenses/lgpl-3.0.en.html"
@@ -275,7 +275,7 @@ components:
       schema:
         type: integer
         minimum: 1
-        maximum: 100
+        maximum: 10000
         default: 20
     sort:
       name: sort
