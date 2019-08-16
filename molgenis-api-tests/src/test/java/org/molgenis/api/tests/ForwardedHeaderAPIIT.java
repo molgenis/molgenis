@@ -34,8 +34,6 @@ public class ForwardedHeaderAPIIT {
   public void getWithForwardedProtocol() {
     Response response =
         given()
-            .log()
-            .uri()
             .header("X-Forwarded-Proto", "https")
             .when()
             .get("molgenis.R")

@@ -34,6 +34,7 @@
   * [Creating themes](guide-creating-themes.md)
 * Interoperability
   * [Swagger specification](guide-swagger.md)
+  * [Data API](guide-api-data.md)
   * [REST api v1](guide-api-rest.md)
   * [REST api v2](guide-api-rest2.md)    
   * [Files api](guide-api-files.md)

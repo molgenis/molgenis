@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.tests;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
@@ -6,9 +6,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.molgenis.api.tests.utils.RestTestUtils;
 
-public abstract class AbstractApiTest {
-  private static String ADMIN_TOKEN;
+public abstract class AbstractApiTests {
+  protected static final ThreadLocal<String> ADMIN_TOKENS = new ThreadLocal<>();;
 
   /**
    * Subclasses most call this method:
@@ -22,22 +25,24 @@ public abstract class AbstractApiTest {
    * </pre>
    */
   protected static void setUpBeforeClass() {
-    String restTestHost = System.getProperty("API_TEST_HOST");
+    String restTestHost = System.getProperty("REST_TEST_HOST");
     if (restTestHost == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_HOST' undefined");
+      restTestHost = RestTestUtils.DEFAULT_HOST;
     }
     RestAssured.baseURI = restTestHost;
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
-    String restTestAdminName = System.getProperty("API_TEST_ADMIN_NAME");
+    String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_ADMIN_NAME' undefined");
+      restTestAdminName = RestTestUtils.DEFAULT_ADMIN_NAME;
     }
-    String restTestAdminPw = System.getProperty("API_TEST_ADMIN_PW");
+    String restTestAdminPw = System.getProperty("REST_TEST_ADMIN_PW");
     if (restTestAdminPw == null) {
-      throw new IllegalArgumentException("System property 'API_TEST_ADMIN_PW' undefined");
+      restTestAdminPw = RestTestUtils.DEFAULT_ADMIN_PW;
     }
 
-    ADMIN_TOKEN = login(restTestAdminName, restTestAdminPw);
+    String adminToken = login(restTestAdminName, restTestAdminPw);
+    ADMIN_TOKENS.set(adminToken);
   }
 
   /**
@@ -55,12 +60,20 @@ public abstract class AbstractApiTest {
     logout();
   }
 
+  protected static String getAdminToken() {
+    return ADMIN_TOKENS.get();
+  }
+
   protected static RequestSpecification given() {
-    return RestAssured.given()
-        .header("x-molgenis-token", ADMIN_TOKEN)
-        .accept(APPLICATION_JSON_VALUE)
-        .log()
-        .ifValidationFails();
+    return given(getAdminToken());
+  }
+
+  protected static RequestSpecification given(@Nullable @CheckForNull String token) {
+    RequestSpecification requestSpecification = RestAssured.given();
+    if (token != null) {
+      requestSpecification = requestSpecification.header("x-molgenis-token", token);
+    }
+    return requestSpecification.accept(APPLICATION_JSON_VALUE);
   }
 
   private static String login(String username, String password) {
@@ -68,8 +81,6 @@ public abstract class AbstractApiTest {
         .contentType(APPLICATION_JSON_VALUE)
         .accept(APPLICATION_JSON_VALUE)
         .body(format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password))
-        .log()
-        .ifValidationFails()
         .post("/api/v1/login")
         .then()
         .statusCode(OK.value())

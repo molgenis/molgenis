@@ -391,12 +391,8 @@ public class RestTestUtils {
           .params(params)
           .param("username", username)
           .when()
-          .log()
-          .all()
           .post(PermissionManagerController.URI + "/update/entityclass/user")
           .then()
-          .log()
-          .all()
           .statusCode(OKE);
     }
   }
@@ -424,12 +420,8 @@ public class RestTestUtils {
           .params(params)
           .param("username", username)
           .when()
-          .log()
-          .all()
           .post(PermissionManagerController.URI + "/update/package/user")
           .then()
-          .log()
-          .all()
           .statusCode(OKE);
     }
   }

@@ -14,6 +14,7 @@ import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.data.v3.model.ReadEntitiesRequest;
 import org.molgenis.api.data.v3.model.ReadEntityRequest;
+import org.molgenis.api.data.v3.model.ReadSubresourceRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
 import org.molgenis.data.Entity;
@@ -70,6 +71,43 @@ class EntityController extends ApiController {
             entityRequest.getEntityTypeId(), entityRequest.getEntityId(), filter, expand);
 
     return entityMapper.map(entity, filter, expand);
+  }
+
+  @GetMapping("/{entityTypeId}/{entityId}/{fieldId}")
+  public EntitiesResponse getReferencedEntities(@Valid ReadSubresourceRequest entitiesRequest) {
+    String entityTypeId = entitiesRequest.getEntityTypeId();
+    String entityId = entitiesRequest.getEntityId();
+    String fieldId = entitiesRequest.getFieldId();
+    Selection filter = entitiesRequest.getFilter();
+    Selection expand = entitiesRequest.getExpand();
+    int size = entitiesRequest.getSize();
+    int number = entitiesRequest.getNumber();
+
+    Entities entities =
+        dataServiceV3.findSubresources(
+            entityTypeId,
+            entityId,
+            fieldId,
+            entitiesRequest.getQ().orElse(null),
+            filter,
+            expand,
+            entitiesRequest.getSort(),
+            size,
+            number);
+
+    EntityCollection entityCollection =
+        EntityCollection.builder()
+            .setEntityTypeId(entityTypeId)
+            .setEntities(entities.getEntities())
+            .setPage(
+                Page.builder()
+                    .setOffset(size * number)
+                    .setPageSize(size)
+                    .setTotal(entities.getTotal())
+                    .build())
+            .build();
+
+    return entityMapper.map(entityTypeId, entityId, fieldId, entityCollection, filter, expand);
   }
 
   @PutMapping("/{entityTypeId}/{entityId}")
