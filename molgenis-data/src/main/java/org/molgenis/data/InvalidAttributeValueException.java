@@ -43,9 +43,6 @@ public class InvalidAttributeValueException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {
-      attribute.getName(), attribute.getDataType(), new DefaultMessageSourceResolvable(expectedType)
-    };
     return new Object[] {attribute.getName(), attribute.getDataType(), expectedType};
   }
 }

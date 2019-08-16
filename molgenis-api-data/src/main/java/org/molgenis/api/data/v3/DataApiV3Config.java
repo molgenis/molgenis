@@ -3,7 +3,6 @@ package org.molgenis.api.data.v3;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.api.convert.SelectionConverter;
-import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.molgenis.web.rsql.RSQLValueParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -48,7 +48,8 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @BeforeMethod
   public void setUpBeforeMethod() {
     dataServiceV3Impl =
-        new DataServiceV3Impl(metaDataService, entityManagerV3, queryMapperV3, fetchMapper);
+        new DataServiceV3Impl(
+            metaDataService, entityManagerV3, queryMapperV3, sortMapperV3, fetchMapper);
   }
 
   @Test
