@@ -81,7 +81,7 @@ class EntityController extends ApiController {
     Selection filter = entitiesRequest.getFilter();
     Selection expand = entitiesRequest.getExpand();
     int size = entitiesRequest.getSize();
-    int number = entitiesRequest.getNumber();
+    int page = entitiesRequest.getPage();
 
     Entities entities =
         dataServiceV3.findSubresources(
@@ -93,7 +93,7 @@ class EntityController extends ApiController {
             expand,
             entitiesRequest.getSort(),
             size,
-            number);
+            page);
 
     EntityCollection entityCollection =
         EntityCollection.builder()
@@ -101,7 +101,7 @@ class EntityController extends ApiController {
             .setEntities(entities.getEntities())
             .setPage(
                 Page.builder()
-                    .setOffset(size * number)
+                    .setOffset(size * page)
                     .setPageSize(size)
                     .setTotal(entities.getTotal())
                     .build())
@@ -147,7 +147,7 @@ class EntityController extends ApiController {
     Selection filter = entitiesRequest.getFilter();
     Selection expand = entitiesRequest.getExpand();
     int size = entitiesRequest.getSize();
-    int number = entitiesRequest.getNumber();
+    int page = entitiesRequest.getPage();
 
     Entities entities =
         dataServiceV3.findAll(
@@ -157,7 +157,7 @@ class EntityController extends ApiController {
             expand,
             entitiesRequest.getSort(),
             size,
-            number);
+            page);
 
     EntityCollection entityCollection =
         EntityCollection.builder()
@@ -165,7 +165,7 @@ class EntityController extends ApiController {
             .setEntities(entities.getEntities())
             .setPage(
                 Page.builder()
-                    .setOffset(size * number)
+                    .setOffset(size * page)
                     .setPageSize(size)
                     .setTotal(entities.getTotal())
                     .build())

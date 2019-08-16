@@ -157,7 +157,7 @@ public class EntityControllerIT extends AbstractApiTest {
 
     given()
         .get(
-            "/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&number=1&size=5")
+            "/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&page=1&size=5")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));

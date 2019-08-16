@@ -44,7 +44,7 @@ paths:
       summary: Retrieves a list of resources
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
-        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
@@ -210,7 +210,7 @@ paths:
         - $ref: '#/components/parameters/resourceTypeId'
         - $ref: '#/components/parameters/resourceId'
         - $ref: '#/components/parameters/fieldId'
-        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
@@ -258,8 +258,8 @@ components:
       schema:
         type: string
       example: label
-    number:
-      name: number
+    page:
+      name: page
       description: Page number
       in: query
       required: false
