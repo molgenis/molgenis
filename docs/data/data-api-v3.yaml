@@ -333,10 +333,13 @@ components:
     Resource:
       type: object
       properties:
-        href:
-          type: string
+        links:
+          $ref: "#/components/schemas/Links"
         data:
           $ref: "#/components/schemas/ResourceData"
+      required:
+        - links
+        - data
     ResourceData:
       type: object
       example:
@@ -365,6 +368,10 @@ components:
             $ref: "#/components/schemas/Resource"
         page:
           $ref: "#/components/schemas/Page"
+      required:
+        - links
+        - items
+        - page
     Problem:
       type: object
       properties:
@@ -409,38 +416,6 @@ components:
           type: string
           description:
             The MOLGENIS error code for the thrown exception.
-    Request:
-      type: object
-      properties:
-        id:
-          type: string
-        method:
-          type: string
-        headers:
-          type: object
-        url:
-          type: string
-        body:
-          type: object
-      required:
-        - id
-        - method
-        - url
-    Response:
-      type: object
-      properties:
-        id:
-          type: string
-        status:
-          type: number
-        headers:
-          type: object
-        body:
-          type: object
-      required:
-        - id
-        - method
-        - url
   responses:
     OkResource:
       description: OK
