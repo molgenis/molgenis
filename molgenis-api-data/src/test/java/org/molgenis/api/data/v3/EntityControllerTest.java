@@ -101,7 +101,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     entityRequest.setFilter(filter);
     entityRequest.setExpand(expand);
     entityRequest.setSize(10);
-    entityRequest.setNumber(2);
+    entityRequest.setPage(2);
 
     Entities entities = Entities.create(emptyList(), 30);
     when(dataServiceV3.findAll(entityTypeId, query, filter, expand, sort, 10, 2))
@@ -139,7 +139,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
     readSubResourceRequest.setFilter(filter);
     readSubResourceRequest.setExpand(expand);
     readSubResourceRequest.setSize(10);
-    readSubResourceRequest.setNumber(2);
+    readSubResourceRequest.setPage(2);
 
     Entities entities = Entities.create(emptyList(), 30);
     when(dataServiceV3.findSubresources(

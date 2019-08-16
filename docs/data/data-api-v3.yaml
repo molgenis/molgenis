@@ -7,36 +7,11 @@ info:
     name: "GNU LGPLv3"
     url: "https://www.gnu.org/licenses/lgpl-3.0.en.html"
 tags:
-- name: "Batch"
-  description: Combines multiple API calls in one HTTP request
-- name: "Data"
-  description: Create, read, update and delete data
-- name: "Metadata"
-  description: Create, read, update and delete metadata
-- name: "Aggregates"
-  description: Retrieve aggregated data
+  - name: "Data"
+    description: Create, read, update and delete data
 servers:
   - url: http://localhost:8080/api/data
 paths:
-  /$batch:
-    post:
-      tags:
-        - "Batch"
-      summary: Performs multiple individual requests in a single request
-      requestBody:
-        description: Series of individual requests
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BatchRequest'
-      responses:
-        '207':
-          description: Multi-Status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BatchResponse'
   /data/{resourceTypeId}:
     get:
       tags:
@@ -44,7 +19,7 @@ paths:
       summary: Retrieves a list of resources
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
-        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
@@ -59,11 +34,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-          - "Data"
+        - "Data"
       summary: Creates a resource.
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -85,11 +60,11 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-          - "Data"
+        - "Data"
       summary: Delete resources
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -103,12 +78,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /data/{resourceTypeId}/{resourceId}:
     get:
       tags:
-          - "Data"
+        - "Data"
       summary: Retrieves a resource
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -124,11 +99,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
-          - "Data"
+        - "Data"
       summary: Updates a resource with the specified attributes
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -151,11 +126,11 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-          - "Data"
+        - "Data"
       summary: Updates a resource
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -181,11 +156,11 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-          - "Data"
+        - "Data"
       summary: Deletes a resource.
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
@@ -199,18 +174,18 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /data/{resourceTypeId}/{resourceId}/{fieldId}:
     get:
       tags:
-          - "Data"
+        - "Data"
       summary: Retrieves a list of sub-resources for a resource field
       parameters:
         - $ref: '#/components/parameters/resourceTypeId'
         - $ref: '#/components/parameters/resourceId'
         - $ref: '#/components/parameters/fieldId'
-        - $ref: '#/components/parameters/number'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
@@ -225,7 +200,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
@@ -258,8 +233,8 @@ components:
       schema:
         type: string
       example: label
-    number:
-      name: number
+    page:
+      name: page
       description: Page number
       in: query
       required: false
@@ -405,7 +380,7 @@ components:
         title:
           type: string
           description:
-            A short, summary of the problem type. Written in english and readable for engineers 
+            A short, summary of the problem type. Written in english and readable for engineers
             (usually not suited for non technical stakeholders and not localized)
           example: Service Unavailable
         status:
@@ -431,18 +406,9 @@ components:
             An absolute URI that identifies the specific occurrence of the problem.
             It may or may not yield further information if dereferenced.
         errorCode:
-            type: string
-            description:
-                The MOLGENIS error code for the thrown exception.
-    BatchRequest:
-      type: object
-      properties:
-        requests:
-          type: array
-          items:
-            $ref: "#/components/schemas/Request"
-      required:
-        - requests
+          type: string
+          description:
+            The MOLGENIS error code for the thrown exception.
     Request:
       type: object
       properties:
@@ -460,15 +426,6 @@ components:
         - id
         - method
         - url
-    BatchResponse:
-      type: object
-      properties:
-        responses:
-          type: array
-          items:
-            $ref: "#/components/schemas/Response"
-      required:
-        - responses
     Response:
       type: object
       properties:

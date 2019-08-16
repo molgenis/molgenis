@@ -8,7 +8,7 @@ import org.molgenis.api.model.Sort;
 
 public class ReadEntitiesRequest extends AbstractReadRequest {
   @Min(0)
-  private int number = 0;
+  private int page = 0;
 
   /**
    * Using a large size might cause: - server request timeouts - out of memory issues - browser
@@ -22,12 +22,12 @@ public class ReadEntitiesRequest extends AbstractReadRequest {
 
   private Query q;
 
-  public int getNumber() {
-    return number;
+  public int getPage() {
+    return page;
   }
 
-  public void setNumber(int number) {
-    this.number = number;
+  public void setPage(int page) {
+    this.page = page;
   }
 
   public int getSize() {
