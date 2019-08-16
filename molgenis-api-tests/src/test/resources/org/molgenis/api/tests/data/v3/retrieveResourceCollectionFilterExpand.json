@@ -1,26 +1,26 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/entity/v3_MyDataset"
+    "self": "${baseUri}/api/entity/v3_MyDataset"
   },
   "items": [
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/6"
+        "self": "${baseUri}/api/entity/v3_MyDataset/6"
       },
       "data": {
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/6"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/6"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/6/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/6/myMref"
           },
           "items": [
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str1"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str1"
               },
               "data": {
                 "id": "str1"
@@ -34,22 +34,22 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/7"
+        "self": "${baseUri}/api/entity/v3_MyDataset/7"
       },
       "data": {
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/7"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/7"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/7/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/7/myMref"
           },
           "items": [
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str1"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str1"
               },
               "data": {
                 "id": "str1"
@@ -57,7 +57,7 @@
             },
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str2"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str2"
               },
               "data": {
                 "id": "str2"
@@ -65,7 +65,7 @@
             },
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str3"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str3"
               },
               "data": {
                 "id": "str3"
@@ -79,22 +79,22 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/8"
+        "self": "${baseUri}/api/entity/v3_MyDataset/8"
       },
       "data": {
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/8"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/8"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/8/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/8/myMref"
           },
           "items": [
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str1"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str1"
               },
               "data": {
                 "id": "str1"
@@ -108,22 +108,22 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/9"
+        "self": "${baseUri}/api/entity/v3_MyDataset/9"
       },
       "data": {
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/9"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/9"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/9/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/9/myMref"
           },
           "items": [
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str1"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str1"
               },
               "data": {
                 "id": "str1"
@@ -131,7 +131,7 @@
             },
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str2"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str2"
               },
               "data": {
                 "id": "str2"
@@ -139,7 +139,7 @@
             },
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str3"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str3"
               },
               "data": {
                 "id": "str3"
@@ -153,22 +153,22 @@
     },
     {
       "links": {
-        "self": "http://localhost:8080/api/entity/v3_MyDataset/10"
+        "self": "${baseUri}/api/entity/v3_MyDataset/10"
       },
       "data": {
         "myXref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyNumbers/10"
+            "self": "${baseUri}/api/entity/v3_MyNumbers/10"
           }
         },
         "myMref": {
           "links": {
-            "self": "http://localhost:8080/api/entity/v3_MyDataset/10/myMref"
+            "self": "${baseUri}/api/entity/v3_MyDataset/10/myMref"
           },
           "items": [
             {
               "links": {
-                "self": "http://localhost:8080/api/entity/v3_MyStrings/str1"
+                "self": "${baseUri}/api/entity/v3_MyStrings/str1"
               },
               "data": {
                 "id": "str1"
