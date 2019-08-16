@@ -1,19 +1,16 @@
 package org.molgenis.api.tests.importpublicdata;
 
-import static io.restassured.RestAssured.given;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
 import com.google.common.base.Strings;
-import io.restassured.RestAssured;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** Regression test that should be run on the build server. */
-public class ImportPublicDataIT {
+public class ImportPublicDataIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(ImportPublicDataIT.class);
 
   private String adminToken;
@@ -32,21 +29,8 @@ public class ImportPublicDataIT {
 
   @BeforeClass
   public void beforeClass() {
-    LOG.info("Read environment variables");
-    String envHost = getExpectedEnvVariable("REST_TEST_HOST");
-    RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
-    LOG.info("baseURI: " + RestAssured.baseURI);
-
-    String envAdminName = getExpectedEnvVariable("REST_TEST_ADMIN_NAME");
-    String adminUserName =
-        Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
-    LOG.info("adminUserName: " + adminUserName);
-
-    String envAdminPW = getExpectedEnvVariable("REST_TEST_ADMIN_PW");
-    String adminPassword =
-        Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
-
-    adminToken = login(adminUserName, adminPassword);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
     LOG.info("Importing Test data");
 
@@ -108,18 +92,7 @@ public class ImportPublicDataIT {
   @Test
   public void testDataWasUploaded() {
     testUrls.forEach(
-        testUrl ->
-            given()
-                .log()
-                .all()
-                .header(X_MOLGENIS_TOKEN, adminToken)
-                .contentType("text/plain")
-                .when()
-                .get(testUrl)
-                .then()
-                .log()
-                .all()
-                .statusCode(200));
+        testUrl -> given().contentType("text/plain").when().get(testUrl).then().statusCode(200));
   }
 
   @AfterClass(alwaysRun = true)
@@ -129,5 +102,7 @@ public class ImportPublicDataIT {
     }
 
     RestTestUtils.removeEntities(adminToken, entitiesToRemove);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 }

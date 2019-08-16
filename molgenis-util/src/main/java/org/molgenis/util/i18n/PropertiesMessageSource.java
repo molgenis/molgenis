@@ -1,4 +1,4 @@
-package org.molgenis.i18n;
+package org.molgenis.util.i18n;
 
 /**
  * If you want localization messages for a namespace to be picked up by the populator, you need to

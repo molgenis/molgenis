@@ -70,9 +70,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.validation.meta.NameValidator;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.util.i18n.LanguageService;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -661,10 +661,11 @@ public class RestControllerV2 {
       EntityCollectionRequestV2 request,
       HttpServletRequest httpRequest,
       boolean includeCategories) {
-    EntityType entityType = dataService.getEntityType(entityTypeId);
+    Repository<Entity> repository = dataService.getRepository(entityTypeId);
+    EntityType entityType = repository.getEntityType();
 
     Query<Entity> q =
-        request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();
+        request.getQ() != null ? request.getQ().createQuery(repository) : new QueryImpl<>();
     q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
     Fetch fetch =
         AttributeFilterToFetchConverter.convert(

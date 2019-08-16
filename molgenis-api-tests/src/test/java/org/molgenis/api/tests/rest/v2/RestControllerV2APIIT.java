@@ -1,7 +1,6 @@
 package org.molgenis.api.tests.rest.v2;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.restassured.RestAssured.given;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.CREATED;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
@@ -9,10 +8,8 @@ import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntities;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntity;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeImportJobs;
@@ -22,12 +19,11 @@ import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedPackagePermis
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEMX;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.collections.Maps.newHashMap;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +36,7 @@ import java.util.Properties;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
@@ -47,7 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** Tests each endpoint of the V2 Rest Api through http calls */
-public class RestControllerV2APIIT {
+public class RestControllerV2APIIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(RestControllerV2APIIT.class);
 
   private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
@@ -67,22 +64,8 @@ public class RestControllerV2APIIT {
 
   @BeforeClass
   public void beforeClass() {
-    LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
-    RestAssured.baseURI = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_HOST : envHost;
-    LOG.info("baseURI: " + RestAssured.baseURI);
-
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-    String adminUserName =
-        Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
-    LOG.info("adminUserName: " + adminUserName);
-
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-    String adminPassword =
-        Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
-    LOG.info("adminPassword: " + adminPassword);
-
-    adminToken = login(adminUserName, adminPassword);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
     LOG.info("Importing Test data");
     uploadEMX(adminToken, V2_TEST_FILE);
@@ -118,7 +101,7 @@ public class RestControllerV2APIIT {
         testUserName,
         ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
 
-    testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+    testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
   @Test(enabled = false) // TODO
@@ -134,59 +117,35 @@ public class RestControllerV2APIIT {
   @Test
   public void testRetrieveEntity() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1").then();
     validateRetrieveEntityWithoutAttributeFilter(response);
   }
 
   @Test
   public void testRetrieveEntityPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET").then();
     validateRetrieveEntityWithoutAttributeFilter(response);
   }
 
   @Test
   public void testRetrieveEntityWithAttributeFilter() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .param("attrs", newArrayList("label"))
             .get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityWithAttributeFilter(response);
   }
 
   @Test
   public void testRetrieveEntityIncludingCategories() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .param("includeCategories", newArrayList("true"))
             .param("attrs", newArrayList("xcategorical_value"))
             .get(API_V2 + "V2_API_TypeTestAPIV2/1")
-            .then()
-            .log()
-            .all();
+            .then();
     response.statusCode(OKE);
     response.body(
         "_meta.attributes[0].categoricalOptions.id", Matchers.hasItems("ref1", "ref2", "ref3"));
@@ -195,16 +154,11 @@ public class RestControllerV2APIIT {
   @Test
   public void testRetrieveEntityExcludingCategoriesResultsInNoCategoricalOptions() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .param("includeCategories", newArrayList("false"))
             .param("attrs", newArrayList("xcategorical_value"))
             .get(API_V2 + "V2_API_TypeTestAPIV2/1")
-            .then()
-            .log()
-            .all();
+            .then();
     response.statusCode(OKE);
     response.body("_meta.attributes[0].categoricalOptions", Matchers.nullValue());
   }
@@ -212,15 +166,10 @@ public class RestControllerV2APIIT {
   @Test
   public void testRetrieveEntityWithoutSettingCategoriesResultsInNoCategoricalOptions() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .param("attrs", newArrayList("xcategorical_value"))
             .get(API_V2 + "V2_API_TypeTestAPIV2/1")
-            .then()
-            .log()
-            .all();
+            .then();
     response.statusCode(OKE);
     response.body("_meta.attributes[0].categoricalOptions", Matchers.nullValue());
   }
@@ -228,38 +177,23 @@ public class RestControllerV2APIIT {
   @Test
   public void testRetrieveEntityWithAttributeFilterPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .param("attrs", newArrayList("label"))
             .post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET")
-            .then()
-            .log()
-            .all();
+            .then();
     validateRetrieveEntityWithAttributeFilter(response);
   }
 
   @Test
   public void testDeleteEntity() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .delete(API_V2 + "base_v2APITest1/ref1")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "base_v2APITest1")
         .then()
-        .log()
-        .all()
         .body(
             "total",
             Matchers.equalTo(4),
@@ -277,82 +211,44 @@ public class RestControllerV2APIIT {
   public void testDeleteEntityCollection() {
     Map<String, List<String>> requestBody = newHashMap();
     requestBody.put("entityIds", newArrayList("ref1", "ref2", "ref3", "ref4"));
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(requestBody)
         .delete(API_V2 + "base_v2APITest2")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "base_v2APITest2")
         .then()
-        .log()
-        .all()
         .body("total", Matchers.equalTo(1), "items[0].value", Matchers.equalTo("ref5"));
   }
 
   @Test
   public void testRetrieveEntityCollection() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(API_V2 + "V2_API_TypeTestRefAPIV2")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2").then();
     validateRetrieveEntityCollection(response);
   }
 
   @Test
   public void testRetrieveEntityCollectionPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .post(API_V2 + "V2_API_TypeTestRefAPIV2?_method=GET")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2?_method=GET").then();
     validateRetrieveEntityCollection(response);
   }
 
   @Test
   public void testRetrieveEntityAttributeMeta() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value").then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
   @Test
   public void testRetrieveEntityAttributeMetaPost() {
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .post(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value?_method=GET")
-            .then()
-            .log()
-            .all();
+        given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value?_method=GET").then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
@@ -381,16 +277,11 @@ public class RestControllerV2APIIT {
 
     jsonObject.put("entities", entities);
 
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .body(jsonObject.toJSONString())
         .contentType(APPLICATION_JSON)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V2 + "V2_API_TypeTestAPIV2")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED)
         .body(
             "location",
@@ -406,25 +297,15 @@ public class RestControllerV2APIIT {
     Map<String, String> request = newHashMap();
     request.put("newEntityName", "base_CopiedEntity");
 
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(request)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .post(API_V2 + "copy/base_APICopyTest")
-        .then()
-        .log()
-        .all();
+        .then();
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "base_CopiedEntity")
         .then()
-        .log()
-        .all()
         .body(
             "href",
             Matchers.equalTo("/api/v2/base_CopiedEntity"),
@@ -446,16 +327,11 @@ public class RestControllerV2APIIT {
 
     request.put("entities", newArrayList(entity));
 
-    given()
-        .log()
-        .all()
+    given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body(request)
-        .header(X_MOLGENIS_TOKEN, testUserToken)
         .put(API_V2 + "V2_API_TypeTestRefAPIV2")
         .then()
-        .log()
-        .all()
         .statusCode(OKE);
   }
 
@@ -468,41 +344,20 @@ public class RestControllerV2APIIT {
     //			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response)
     // throws Exception
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
-        .put(API_V2 + "base_v2APITest1/label")
-        .then()
-        .log()
-        .all()
-        .statusCode(OKE);
+    given(testUserToken).put(API_V2 + "base_v2APITest1/label").then().statusCode(OKE);
   }
 
   @Test
   public void testGetI18nStrings() {
-    ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(API_V2 + "i18n")
-            .then()
-            .log()
-            .all();
+    ValidatableResponse response = given(testUserToken).get(API_V2 + "i18n").then();
     validateGetI18nStrings(response);
   }
 
   @Test
   public void testGetL10nStrings() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "i18n/form/en")
         .then()
-        .log()
-        .all()
         .statusCode(OKE)
         .body(
             "form_number_control_placeholder",
@@ -530,14 +385,10 @@ public class RestControllerV2APIIT {
   @Test
   public void testGetL10nProperties() throws IOException {
     String response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
+            .accept(TEXT_PLAIN_VALUE)
             .get(API_V2 + "i18n/form_en.properties")
             .then()
-            .log()
-            .all()
             .contentType("text/plain;charset=UTF-8")
             .statusCode(OKE)
             .extract()
@@ -555,26 +406,16 @@ public class RestControllerV2APIIT {
 
   @Test
   public void testRegisterMissingResourceStrings() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .contentType("application/x-www-form-urlencoded;charset=UTF-8")
         .formParam("my_test_key", "test")
         .post(API_V2 + "i18n/apiv2test")
         .then()
-        .log()
-        .all()
         .statusCode(CREATED);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
         .then()
-        .log()
-        .all()
         .body(
             "items[0].msgid",
             Matchers.equalTo("my_test_key"),
@@ -584,24 +425,14 @@ public class RestControllerV2APIIT {
 
   @Test(dependsOnMethods = "testRegisterMissingResourceStrings")
   public void testDeleteNamespace() {
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .delete(API_V2 + "i18n/apiv2test")
         .then()
-        .log()
-        .all()
         .statusCode(RestTestUtils.NO_CONTENT);
 
-    given()
-        .log()
-        .all()
-        .header(X_MOLGENIS_TOKEN, testUserToken)
+    given(testUserToken)
         .get(API_V2 + "sys_L10nString?q=namespace==apiv2test")
         .then()
-        .log()
-        .all()
         .body("total", Matchers.equalTo(0));
   }
 
@@ -1035,5 +866,7 @@ public class RestControllerV2APIIT {
 
     // Clean up Token for user
     cleanupUserToken(testUserToken);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 }

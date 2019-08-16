@@ -2,7 +2,7 @@ package org.molgenis.metadata.manager.mapper;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

@@ -1,6 +1,6 @@
 package org.molgenis.validation.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class LocalhostNotAllowedException extends CodedRuntimeException {
   private static final String ERROR_CODE = "V04";

@@ -1,4 +1,4 @@
-package org.molgenis.i18n.format;
+package org.molgenis.util.i18n.format;
 
 import com.google.common.collect.ImmutableMap;
 import java.text.MessageFormat;

@@ -56,7 +56,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.molgenis.i18n.Labeled;
+import org.molgenis.util.i18n.Labeled;
 
 /** Attribute defines the properties of an entity. Synonyms: feature, column, data item. */
 public class Attribute extends StaticEntity implements Labeled {

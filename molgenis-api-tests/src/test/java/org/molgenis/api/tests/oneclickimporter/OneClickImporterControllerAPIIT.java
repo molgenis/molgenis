@@ -1,26 +1,19 @@
 package org.molgenis.api.tests.oneclickimporter;
 
 import static com.google.common.io.Resources.getResource;
-import static io.restassured.RestAssured.baseURI;
-import static io.restassured.RestAssured.given;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
-import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_HOST;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
-import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
-import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntities;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeImportJobs;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
@@ -29,9 +22,9 @@ import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedPackagePermis
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedPluginPermissions;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -45,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
@@ -55,7 +49,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-public class OneClickImporterControllerAPIIT {
+public class OneClickImporterControllerAPIIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(OneClickImporterControllerAPIIT.class);
 
   private String oneClickImporterTestUsername;
@@ -76,20 +70,8 @@ public class OneClickImporterControllerAPIIT {
 
   @BeforeClass
   public void beforeClass() {
-    LOG.info("Read environment variables");
-    String envHost = System.getProperty("REST_TEST_HOST");
-    baseURI = Strings.isNullOrEmpty(envHost) ? DEFAULT_HOST : envHost;
-    LOG.info("baseURI: " + baseURI);
-
-    String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-    String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-    LOG.info("adminUserName: " + adminUserName);
-
-    String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-    String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
-    LOG.info("adminPassword: " + adminPassword);
-
-    adminToken = login(adminUserName, adminPassword);
+    AbstractApiTests.setUpBeforeClass();
+    adminToken = AbstractApiTests.getAdminToken();
 
     RestTestUtils.createPackage(adminToken, "base");
 
@@ -114,7 +96,8 @@ public class OneClickImporterControllerAPIIT {
         ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
     setGrantedPluginPermissions(adminToken, oneClickImporterTestUsername, "one-click-importer");
 
-    testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
+    testUserToken =
+        RestTestUtils.login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
   }
 
   @Test
@@ -133,15 +116,11 @@ public class OneClickImporterControllerAPIIT {
 
     // Post the file to be imported
     ValidatableResponse response =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
+            .accept(TEXT_HTML_VALUE)
             .multiPart(file)
             .post(OneClickImporterController.URI + "/upload")
             .then()
-            .log()
-            .all()
             .statusCode(OKE);
 
     // Verify the post returns a job url
@@ -149,17 +128,7 @@ public class OneClickImporterControllerAPIIT {
     assertTrue(jobUrl.startsWith("/api/v2/sys_job_OneClickImportJobExecution/"));
 
     String jobStatus =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(jobUrl)
-            .then()
-            .log()
-            .all()
-            .statusCode(OKE)
-            .extract()
-            .path("status");
+        given(testUserToken).get(jobUrl).then().statusCode(OKE).extract().path("status");
 
     List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS");
     assertTrue(validJobStats.contains(jobStatus));
@@ -175,13 +144,7 @@ public class OneClickImporterControllerAPIIT {
 
     // Extract the id of the entity created by the import
     ValidatableResponse completedJobResponse =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
-            .get(jobUrl)
-            .then()
-            .statusCode(OKE);
+        given(testUserToken).get(jobUrl).then().statusCode(OKE);
 
     JsonArray entityTypeId =
         new Gson()
@@ -199,14 +162,9 @@ public class OneClickImporterControllerAPIIT {
 
     // Get the entity value to check the import
     ValidatableResponse entityResponse =
-        given()
-            .log()
-            .all()
-            .header(X_MOLGENIS_TOKEN, testUserToken)
+        given(testUserToken)
             .get(API_V2 + entityId + "?attrs=~id,first_name,last_name,full_name,UMCG_employee,Age")
-            .then()
-            .log()
-            .all();
+            .then();
     entityResponse.statusCode(OKE);
 
     JSONAssert.assertEquals(
@@ -231,11 +189,12 @@ public class OneClickImporterControllerAPIIT {
 
     // Clean up Token for user
     cleanupUserToken(testUserToken);
+
+    AbstractApiTests.tearDownAfterClass();
   }
 
   private String pollJobForStatus(String jobUrl) {
-    String status =
-        given().header(X_MOLGENIS_TOKEN, testUserToken).get(jobUrl).then().extract().path("status");
+    String status = given(testUserToken).get(jobUrl).then().extract().path("status");
     LOG.info("Import job status : {}", status);
     return status;
   }

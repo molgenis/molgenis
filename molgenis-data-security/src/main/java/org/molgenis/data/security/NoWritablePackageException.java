@@ -1,6 +1,6 @@
 package org.molgenis.data.security;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class NoWritablePackageException extends CodedRuntimeException {
   private static final String ERROR_CODE = "DS07";

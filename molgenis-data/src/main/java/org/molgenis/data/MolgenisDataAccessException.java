@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+import org.molgenis.util.exception.CodedRuntimeException;
+
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class MolgenisDataAccessException extends RuntimeException {
   private static final long serialVersionUID = 4738825795930038340L;

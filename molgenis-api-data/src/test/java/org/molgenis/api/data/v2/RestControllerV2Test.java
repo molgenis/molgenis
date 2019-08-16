@@ -105,10 +105,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.i18n.MessageSourceHolder;
-import org.molgenis.i18n.format.MessageFormatFactory;
-import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.util.i18n.MessageSourceHolder;
+import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
+import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.molgenis.validation.ConstraintViolation;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -471,9 +471,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
     when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort)))
         .thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
 
+    Repository<Entity> repo = mock(Repository.class);
+
     when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
     when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
     when(dataService.findOneById(REF_REF_ENTITY_NAME, REF_REF_ENTITY_ID)).thenReturn(refRefEntity);
+    when(repo.getEntityType()).thenReturn(entityType);
+    when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
     when(dataService.getEntityType(ENTITY_NAME)).thenReturn(entityType);
     when(dataService.getEntityType(REF_ENTITY_NAME)).thenReturn(refEntityType);
     when(dataService.getEntityType(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityType);
@@ -705,7 +709,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
     String unknownEntityTypeId = "unknown";
     doThrow(new UnknownEntityTypeException(unknownEntityTypeId))
         .when(dataService)
-        .getEntityType(unknownEntityTypeId);
+        .getRepository(unknownEntityTypeId);
 
     String expectedContent =
         readFile(

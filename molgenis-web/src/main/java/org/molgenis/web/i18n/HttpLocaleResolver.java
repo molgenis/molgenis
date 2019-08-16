@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.i18n.LanguageService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.LocaleResolver;
 
