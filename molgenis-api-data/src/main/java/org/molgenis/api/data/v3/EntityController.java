@@ -35,7 +35,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping(EntityController.API_ENTITY_PATH)
 class EntityController extends ApiController {
-  private static final String API_ENTITY_ID = "entity";
+  private static final String API_ENTITY_ID = "data";
   static final String API_ENTITY_PATH = ApiNamespace.API_PATH + '/' + API_ENTITY_ID;
 
   private final DataServiceV3 dataServiceV3;

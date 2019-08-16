@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "${baseUri}/api/entity/v3_MyDataset/25"
+    "self": "${baseUri}/api/data/v3_MyDataset/25"
   },
   "data": {
     "myBool": false,
@@ -13,7 +13,7 @@
     "myText": "Text 25b",
     "myMref": {
       "links": {
-        "self": "${baseUri}/api/entity/v3_MyDataset/25/myMref"
+        "self": "${baseUri}/api/data/v3_MyDataset/25/myMref"
       }
     },
     "myComputed": "static",

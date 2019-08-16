@@ -61,7 +61,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
 
     ResponseEntity responseEntity = entityController.createEntity(entityTypeId, entityMap);
     ResponseEntity<Object> expectedResponseEntity =
-        ResponseEntity.created(new URI("http://localhost/api/entity/MyEntityTypeId/MyId")).build();
+        ResponseEntity.created(new URI("http://localhost/api/data/MyEntityTypeId/MyId")).build();
     assertEquals(responseEntity, expectedResponseEntity);
   }
 
