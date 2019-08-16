@@ -80,11 +80,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.create("sys_md_EntityType", emptyMap());
   }
 
-  @Test(expectedExceptions = MetadataAccessException.class)
-  public void testCreateMetadataNotCapable() {
-    dataServiceV3Impl.create("sys_md_EntityType", emptyMap());
-  }
-
   @SuppressWarnings("unchecked")
   @Test
   public void testFind() {
@@ -623,11 +618,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.update("sys_md_Attribute", "myAttributeId", emptyMap());
   }
 
-  @Test(expectedExceptions = MetadataAccessException.class)
-  public void testUpdateMetadataNotCapable() {
-    dataServiceV3Impl.update("sys_md_Attribute", "myAttributeId", emptyMap());
-  }
-
   @Test
   public void testUpdatePartially() {
     Repository<Entity> repository = mock(Repository.class);
@@ -669,11 +659,6 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     dataServiceV3Impl.updatePartial(
         "entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
-  }
-
-  @Test(expectedExceptions = MetadataAccessException.class)
-  public void testUpdatePartiallyMetadataNotCapable() {
-    dataServiceV3Impl.updatePartial("sys_md_EntityType", "myEntityTypeId", emptyMap());
   }
 
   @Test(expectedExceptions = MetadataAccessException.class)
