@@ -2,8 +2,6 @@ package org.molgenis.api.data.v3.model;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.util.AutoGson;
@@ -13,12 +11,8 @@ import org.molgenis.util.AutoGson;
 public abstract class EntitiesResponse {
   public abstract LinksResponse getLinks();
 
-  @Nullable
-  @CheckForNull
   public abstract List<EntityResponse> getItems();
 
-  @Nullable
-  @CheckForNull
   public abstract PageResponse getPage();
 
   public static EntitiesResponse create(LinksResponse newLinks) {

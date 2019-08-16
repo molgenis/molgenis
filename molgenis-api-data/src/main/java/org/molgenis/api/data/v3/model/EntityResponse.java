@@ -2,8 +2,6 @@ package org.molgenis.api.data.v3.model;
 
 import com.google.auto.value.AutoValue;
 import java.util.Map;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.util.AutoGson;
 
@@ -12,8 +10,6 @@ import org.molgenis.util.AutoGson;
 public abstract class EntityResponse {
   public abstract LinksResponse getLinks();
 
-  @Nullable
-  @CheckForNull
   public abstract Map<String, Object> getData();
 
   public static EntityResponse create(LinksResponse newLinks, Map<String, Object> newData) {

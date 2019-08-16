@@ -1,10 +1,11 @@
 package org.molgenis.api.data.v3.model;
 
+import javax.validation.constraints.NotNull;
+
 public class ReadSubresourceRequest extends ReadEntitiesRequest {
+  @NotNull private String entityId;
 
-  private String entityId;
-
-  private String fieldId;
+  @NotNull private String fieldId;
 
   public String getEntityId() {
     return entityId;
