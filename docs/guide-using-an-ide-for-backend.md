@@ -160,9 +160,9 @@ For precise versions you can check: [the deployment file](https://github.com/mol
 
 > note: **IMPORTANT:** to switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
 
-> note: **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in you user directory.
+> note: **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in your user directory.
 
-You can spin it up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'development: Compose...'**.  
+You can spin it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'development: Compose...'**.  
 
 > note: Please check [running backend services for MOLGENIS](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/DOCKER.md)
 
