@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.InvalidAttributeValueException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
@@ -67,16 +68,16 @@ class EntityManagerV3Impl implements EntityManagerV3 {
         value = convertMref(attribute, requestValue);
         break;
       case DATE:
-        value = convertDate(requestValue);
+        value = convertDate(attribute, requestValue);
         break;
       case DATE_TIME:
-        value = convertDateTime(requestValue);
+        value = convertDateTime(attribute, requestValue);
         break;
       case DECIMAL:
-        value = convertDecimal(requestValue);
+        value = convertDecimal(attribute, requestValue);
         break;
       case INT:
-        value = convertInt(requestValue);
+        value = convertInt(attribute, requestValue);
         break;
       case LONG:
         value = convertLong(attribute, requestValue);
@@ -117,7 +118,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     Iterable<Entity> entities;
     if (requestValue != null) {
       if (!(requestValue instanceof Iterable<?>)) {
-        throw new RuntimeException("not a list"); // TODO
+        throw new InvalidAttributeValueException(attribute, Iterable.class);
       }
       Iterable<?> requestValueList = (Iterable<?>) requestValue;
 
@@ -132,16 +133,16 @@ class EntityManagerV3Impl implements EntityManagerV3 {
                   .iterator();
       entities = entityManager.getReferences(refEntityType, typedIds);
     } else {
-      throw new RuntimeException("value not an empty list");
+      throw new NullMrefValueException(attribute);
     }
     return entities;
   }
 
-  private LocalDate convertDate(Object requestValue) {
+  private LocalDate convertDate(Attribute attribute, Object requestValue) {
     LocalDate localDate;
     if (requestValue != null) {
       if (!(requestValue instanceof String)) {
-        throw new RuntimeException("not a string"); // TODO
+        throw new InvalidAttributeValueException(attribute, String.class);
       }
       localDate = parseLocalDate((String) requestValue);
     } else {
@@ -150,11 +151,11 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     return localDate;
   }
 
-  private Instant convertDateTime(Object requestValue) {
+  private Instant convertDateTime(Attribute attribute, Object requestValue) {
     Instant instant;
     if (requestValue != null) {
       if (!(requestValue instanceof String)) {
-        throw new RuntimeException("not a string"); // TODO
+        throw new InvalidAttributeValueException(attribute, String.class);
       }
       instant = parseInstant((String) requestValue);
     } else {
@@ -163,7 +164,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     return instant;
   }
 
-  private Double convertDecimal(Object requestValue) {
+  private Double convertDecimal(Attribute attribute, Object requestValue) {
     Double doubleValue;
     if (requestValue != null) {
       if (requestValue instanceof Double) {
@@ -171,7 +172,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         doubleValue = ((Number) requestValue).doubleValue();
       } else {
-        throw new RuntimeException("not a number"); // TODO
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       doubleValue = null;
@@ -179,7 +180,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
     return doubleValue;
   }
 
-  private Integer convertInt(Object requestValue) {
+  private Integer convertInt(Attribute attribute, Object requestValue) {
     Integer integerValue;
     if (requestValue != null) {
       if (requestValue instanceof Integer) {
@@ -187,7 +188,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         integerValue = ((Number) requestValue).intValue();
       } else {
-        throw new RuntimeException("not a number"); // TODO
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       integerValue = null;
@@ -203,7 +204,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         longValue = ((Number) requestValue).longValue();
       } else {
-        throw new RuntimeException("not a number"); // TODO
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       longValue = null;

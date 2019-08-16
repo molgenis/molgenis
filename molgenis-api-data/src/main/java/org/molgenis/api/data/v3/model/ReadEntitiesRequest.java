@@ -11,12 +11,8 @@ public class ReadEntitiesRequest extends AbstractReadRequest {
   private int number = 0;
 
   /**
-   * Using a large size might cause:
-   * - server request timeouts
-   * - out of memory issues
-   * - browser request timeouts
-   * - too large payloads
-   * - connection exhaustion affecting other users
+   * Using a large size might cause: - server request timeouts - out of memory issues - browser
+   * request timeouts - too large payloads - connection exhaustion affecting other users
    */
   @Min(1)
   @Max(10000)
