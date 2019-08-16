@@ -172,7 +172,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         doubleValue = ((Number) requestValue).doubleValue();
       } else {
-        throw new InvalidAttributeValueException(attribute, "number");
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       doubleValue = null;
@@ -188,7 +188,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         integerValue = ((Number) requestValue).intValue();
       } else {
-        throw new InvalidAttributeValueException(attribute, "number");
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       integerValue = null;
@@ -204,7 +204,7 @@ class EntityManagerV3Impl implements EntityManagerV3 {
       } else if (requestValue instanceof Number) {
         longValue = ((Number) requestValue).longValue();
       } else {
-        throw new InvalidAttributeValueException(attribute, "number");
+        throw new InvalidAttributeValueException(attribute, "value.type.number");
       }
     } else {
       longValue = null;

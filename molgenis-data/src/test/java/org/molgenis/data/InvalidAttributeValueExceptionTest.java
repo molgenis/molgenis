@@ -23,7 +23,7 @@ public class InvalidAttributeValueExceptionTest extends ExceptionMessageTest {
     when(attribute.getName()).thenReturn("attributeName");
     when(attribute.getDataType()).thenReturn(LONG);
     assertExceptionMessageEquals(
-        new InvalidAttributeValueException(attribute, "number"), lang, message);
+        new InvalidAttributeValueException(attribute, "value.type.number"), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
