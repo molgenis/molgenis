@@ -112,7 +112,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test
+  @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResourceSubResource() throws IOException {
     // TODO: exc: entity type not exists
     // TODO:  exc: entity not exists
@@ -130,7 +130,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test
+  @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResourceCollection() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -146,7 +146,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test
+  @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResourceCollectionFilterExpand() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -163,7 +163,7 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test
+  @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResourceCollectionSortQuery() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -178,7 +178,14 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testRetrieveResource")
+  @Test(
+      dependsOnMethods = {
+        "testRetrieveResource",
+        "testRetrieveResourceSubResource",
+        "testRetrieveResourceCollection",
+        "testRetrieveResourceCollectionFilterExpand",
+        "testRetrieveResourceCollectionSortQuery"
+      })
   public void testUpdateResource() throws IOException {
     JSONArray jsonArray = new JSONArray();
 
