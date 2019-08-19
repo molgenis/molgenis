@@ -37,11 +37,24 @@ public class EntityMapperImpl implements EntityMapper {
 
   @Override
   public EntitiesResponse map(
-      EntityCollection entityCollection, Selection filter, Selection expand) {
+      EntityCollection entityCollection,
+      Selection filter,
+      Selection expand,
+      int size,
+      int number,
+      int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createEntitiesResponseUri(entityCollection.getEntityTypeId());
-    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+    URI self = createEntitiesResponseUri();
+    URI previous = null;
+    URI next = null;
+    if (number > 0) {
+      previous = createEntitiesResponseUri(number - 1);
+    }
+    if ((number * size) + size < total) {
+      next = createEntitiesResponseUri(number + 1);
+    }
+    LinksResponse linksResponse = LinksResponse.create(previous, self, next);
 
     setPageResponse(entityCollection, builder);
 
@@ -55,11 +68,22 @@ public class EntityMapperImpl implements EntityMapper {
       String attributeName,
       EntityCollection entityCollection,
       Selection filter,
-      Selection expand) {
+      Selection expand,
+      int size,
+      int number,
+      int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createReferenceEntityResponseUri(entityTypeId, entityId, attributeName);
-    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+    URI self = createEntitiesResponseUri();
+    URI previous = null;
+    URI next = null;
+    if (number > 0) {
+      previous = createEntitiesResponseUri(number - 1);
+    }
+    if ((number * size) + size < total) {
+      next = createEntitiesResponseUri(number + 1);
+    }
+    LinksResponse linksResponse = LinksResponse.create(previous, self, next);
 
     setPageResponse(entityCollection, builder);
 
@@ -225,23 +249,13 @@ public class EntityMapperImpl implements EntityMapper {
         : Selection.EMPTY_SELECTION;
   }
 
-  private URI createEntitiesResponseUri(String entityTypeId) {
-    return ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(null)
-        .path(EntityController.API_ENTITY_PATH)
-        .pathSegment(entityTypeId)
-        .build()
-        .toUri();
+  private URI createEntitiesResponseUri() {
+    return ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
   }
 
-  private URI createReferenceEntityResponseUri(
-      String entityTypeId, String entityId, String attributeName) {
-    return ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(null)
-        .path(EntityController.API_ENTITY_PATH)
-        .pathSegment(entityTypeId)
-        .pathSegment(entityId)
-        .pathSegment(attributeName)
+  private URI createEntitiesResponseUri(int pageNumber) {
+    return ServletUriComponentsBuilder.fromCurrentRequest()
+        .replaceQueryParam("page", pageNumber)
         .build()
         .toUri();
   }

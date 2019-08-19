@@ -17,6 +17,7 @@ import org.molgenis.api.data.v3.model.ReadEntityRequest;
 import org.molgenis.api.data.v3.model.ReadSubresourceRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,6 +83,7 @@ class EntityController extends ApiController {
     Selection expand = entitiesRequest.getExpand();
     int size = entitiesRequest.getSize();
     int page = entitiesRequest.getPage();
+    Sort sort = entitiesRequest.getSort();
 
     Entities entities =
         dataServiceV3.findSubresources(
@@ -91,7 +93,7 @@ class EntityController extends ApiController {
             entitiesRequest.getQ().orElse(null),
             filter,
             expand,
-            entitiesRequest.getSort(),
+            sort,
             size,
             page);
 
@@ -107,7 +109,16 @@ class EntityController extends ApiController {
                     .build())
             .build();
 
-    return entityMapper.map(entityTypeId, entityId, fieldId, entityCollection, filter, expand);
+    return entityMapper.map(
+        entityTypeId,
+        entityId,
+        fieldId,
+        entityCollection,
+        filter,
+        expand,
+        size,
+        page,
+        entities.getTotal());
   }
 
   @PutMapping("/{entityTypeId}/{entityId}")
@@ -148,16 +159,11 @@ class EntityController extends ApiController {
     Selection expand = entitiesRequest.getExpand();
     int size = entitiesRequest.getSize();
     int page = entitiesRequest.getPage();
+    Sort sort = entitiesRequest.getSort();
 
     Entities entities =
         dataServiceV3.findAll(
-            entityTypeId,
-            entitiesRequest.getQ().orElse(null),
-            filter,
-            expand,
-            entitiesRequest.getSort(),
-            size,
-            page);
+            entityTypeId, entitiesRequest.getQ().orElse(null), filter, expand, sort, size, page);
 
     EntityCollection entityCollection =
         EntityCollection.builder()
@@ -171,6 +177,6 @@ class EntityController extends ApiController {
                     .build())
             .build();
 
-    return entityMapper.map(entityCollection, filter, expand);
+    return entityMapper.map(entityCollection, filter, expand, size, page, entities.getTotal());
   }
 }
