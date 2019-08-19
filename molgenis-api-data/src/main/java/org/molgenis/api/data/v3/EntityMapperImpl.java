@@ -2,18 +2,22 @@ package org.molgenis.api.data.v3;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.convert.UrlParameterUtils.createUrlParamString;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntitiesResponse.Builder;
 import org.molgenis.api.data.v3.model.EntityResponse;
+import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -37,11 +41,32 @@ public class EntityMapperImpl implements EntityMapper {
 
   @Override
   public EntitiesResponse map(
-      EntityCollection entityCollection, Selection filter, Selection expand) {
+      EntityCollection entityCollection,
+      Selection filter,
+      Selection expand,
+      Optional<Query> query,
+      Sort sort,
+      int size,
+      int number,
+      int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createEntitiesResponseUri(entityCollection.getEntityTypeId());
-    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+    URI self =
+        createEntitiesResponseUri(
+            entityCollection.getEntityTypeId(), filter, expand, sort, size, number, query);
+    URI previous = null;
+    URI next = null;
+    if (number > 1) {
+      previous =
+          createEntitiesResponseUri(
+              entityCollection.getEntityTypeId(), filter, expand, sort, size, number - 1, query);
+    }
+    if ((number * size) + size < total) {
+      next =
+          createEntitiesResponseUri(
+              entityCollection.getEntityTypeId(), filter, expand, sort, size, number + 1, query);
+    }
+    LinksResponse linksResponse = LinksResponse.create(previous, self, next);
 
     setPageResponse(entityCollection, builder);
 
@@ -55,10 +80,17 @@ public class EntityMapperImpl implements EntityMapper {
       String attributeName,
       EntityCollection entityCollection,
       Selection filter,
-      Selection expand) {
+      Selection expand,
+      Optional<Query> query,
+      Sort sort,
+      int size,
+      int number,
+      int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createReferenceEntityResponseUri(entityTypeId, entityId, attributeName);
+    URI self =
+        createReferenceEntityResponseUri(
+            entityTypeId, entityId, attributeName, filter, expand, sort, size, number, query);
     LinksResponse linksResponse = LinksResponse.create(null, self, null);
 
     setPageResponse(entityCollection, builder);
@@ -225,23 +257,44 @@ public class EntityMapperImpl implements EntityMapper {
         : Selection.EMPTY_SELECTION;
   }
 
-  private URI createEntitiesResponseUri(String entityTypeId) {
+  private URI createEntitiesResponseUri(
+      String entityTypeId,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number,
+      Optional<Query> query) {
+    String urlParams = createUrlParamString(filter, expand, sort, size, number, query);
     return ServletUriComponentsBuilder.fromCurrentRequestUri()
         .replacePath(null)
         .path(EntityController.API_ENTITY_PATH)
         .pathSegment(entityTypeId)
+        .query(urlParams)
         .build()
         .toUri();
   }
 
   private URI createReferenceEntityResponseUri(
-      String entityTypeId, String entityId, String attributeName) {
+      String entityTypeId,
+      String entityId,
+      String attributeName,
+      Selection filter,
+      Selection expand,
+      Sort sort,
+      int size,
+      int number,
+      Optional<Query> query) {
+
+    String urlParams = createUrlParamString(filter, expand, sort, size, number, query);
+
     return ServletUriComponentsBuilder.fromCurrentRequestUri()
         .replacePath(null)
         .path(EntityController.API_ENTITY_PATH)
         .pathSegment(entityTypeId)
         .pathSegment(entityId)
         .pathSegment(attributeName)
+        .query(urlParams)
         .build()
         .toUri();
   }

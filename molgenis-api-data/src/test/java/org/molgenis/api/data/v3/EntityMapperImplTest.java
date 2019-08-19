@@ -37,11 +37,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.EntitiesResponse;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
+import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -316,10 +318,11 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", null))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .build();
 
@@ -328,8 +331,17 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setEntityTypeId("EntityType")
             .setEntities(singletonList(entity))
             .build();
+
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION),
+        entityMapper.map(
+            entityCollection,
+            FULL_SELECTION,
+            FULL_SELECTION,
+            Optional.empty(),
+            Sort.EMPTY_SORT,
+            10,
+            1,
+            100),
         expectedEntitiesResponse);
   }
 
@@ -352,15 +364,24 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", "string"))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, EMPTY_SELECTION),
+        entityMapper.map(
+            entityCollection,
+            FULL_SELECTION,
+            EMPTY_SELECTION,
+            Optional.empty(),
+            Sort.EMPTY_SORT,
+            10,
+            1,
+            100),
         expectedEntitiesResponse);
   }
 
@@ -399,15 +420,24 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", expectedRefEntitiesResponse))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION),
+        entityMapper.map(
+            entityCollection,
+            FULL_SELECTION,
+            FULL_SELECTION,
+            Optional.empty(),
+            Sort.EMPTY_SORT,
+            10,
+            1,
+            100),
         expectedEntitiesResponse);
   }
 

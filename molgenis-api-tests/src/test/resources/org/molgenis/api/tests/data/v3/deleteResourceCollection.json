@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "${baseUri}/api/data/v3_MyDataset"
+    "self": "${baseUri}/api/data/v3_MyDataset?size=100&page=0"
   },
   "items": [],
   "page": {

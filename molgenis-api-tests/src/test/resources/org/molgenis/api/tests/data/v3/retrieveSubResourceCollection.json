@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "${baseUri}/api/data/v3_MyDataset/1/myMref"
+    "self": "${baseUri}/api/data/v3_MyDataset/1/myMref?q=id=in=str1,str2&size=100&page=0"
   },
   "items": [
     {

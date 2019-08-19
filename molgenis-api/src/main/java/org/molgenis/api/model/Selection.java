@@ -24,6 +24,10 @@ public class Selection {
     this.itemSelections = unmodifiableMap(new HashMap<>(itemSelections));
   }
 
+  public Map<String, Selection> getItemSelections() {
+    return itemSelections;
+  }
+
   public boolean hasItems() {
     boolean hasItems;
     if (itemSelections == null) {

@@ -1,6 +1,6 @@
 {
   "links": {
-    "self": "${baseUri}/api/data/v3_MyDataset"
+    "self": "${baseUri}/api/data/v3_MyDataset?q=id=in=1,2,3,4,5&size=100&sort=-label&page=0"
   },
   "items": [
     {

@@ -9,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
@@ -115,7 +116,8 @@ public class EntityControllerTest extends AbstractMockitoTest {
             .build();
 
     EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
-    when(entityMapper.map(entityCollection, filter, expand)).thenReturn(entitiesResponse);
+    when(entityMapper.map(entityCollection, filter, expand, Optional.of(query), sort, 10, 2, 30))
+        .thenReturn(entitiesResponse);
 
     assertEquals(entityController.getEntities(entityRequest), entitiesResponse);
   }
@@ -154,7 +156,18 @@ public class EntityControllerTest extends AbstractMockitoTest {
             .build();
 
     EntitiesResponse entitiesResponse = mock(EntitiesResponse.class);
-    when(entityMapper.map("MyEntityTypeId", "EntityId", "Field", entityCollection, filter, expand))
+    when(entityMapper.map(
+            "MyEntityTypeId",
+            "EntityId",
+            "Field",
+            entityCollection,
+            filter,
+            expand,
+            Optional.of(query),
+            sort,
+            10,
+            2,
+            30))
         .thenReturn(entitiesResponse);
 
     assertEquals(entityController.getReferencedEntities(readSubResourceRequest), entitiesResponse);
