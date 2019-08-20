@@ -54,6 +54,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
   @Test
   public void testCreate() {
+    @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
@@ -83,7 +84,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testFind() {
-    String entityTypeId = "MyEntityType";
+    String entityTypeId = "sys_md_EntityType";
     String entityId = "MyId";
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.EMPTY_SELECTION;
@@ -592,6 +593,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
   @Test
   public void testUpdate() {
+    @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
@@ -620,6 +622,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
   @Test
   public void testUpdatePartially() {
+    @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
@@ -644,6 +647,7 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
 
   @Test(expectedExceptions = UnknownEntityException.class)
   public void testUpdatePartiallyUnknownEntity() {
+    @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     Attribute idAttribute = mock(Attribute.class);
