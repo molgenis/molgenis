@@ -11,7 +11,7 @@ You now should have a Project called 'molgenis' with a module for each maven mod
 
 ## Set the project JDK
 Open File, Project Structure. For the entire project:
-* (Add and) select Java 8 JDK.
+* (Add and) select Java 11 JDK.
 * Set language level to Java 8.
 
 ## Create maven run configuration
@@ -149,11 +149,11 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
 
 ## Deploy the backend services
 Before you execute your run configuration you need to have the following services available on localhost.
-- postgres 
-- minio 
-- elasticsearch
+- postgres 11.1
+- minio v6
+- elasticsearch 5.5.3
 - frontend of MOLGENIS
-- opencpu
+- opencpu 2.1.x
 
 For precise versions you can check: [the deployment file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml).
 
