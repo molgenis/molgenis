@@ -1,25 +1,48 @@
 # Developing in IntelliJ with Docker
-We have several backend services which we run to debug and test the MOLGENIS backend webapps (check: ).
+We have several backend services which we run to debug and test the MOLGENIS backend webapp.
+* [OpenJDK 11](https://adoptopenjdk.net/)
+* [Apache Tomcat v9.0.x](http://tomcat.apache.org/) 
+* [PostgreSQL v11.1](https://www.postgresql.org/)
+* [Elasticsearch v5.5](https://www.elastic.co/)	
+* [Minio v6](https://minio.io/)	
+* Optional: [OpenCPU 2.1](https://www.opencpu.org) and [R 3.5.x](https://www.r-project.org/) (enables R scripting feature)	
+* Optional: [Python 3.6](https://www.python.org) (enables Python scripting feature)
+
+> **IMPORTANT:** to switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
 
 ## Deploy
+You first need to configure the specifics for your OS.
+
+**For Mac**
+Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-mac
+
 For mac, override the ```BACKEND``` property in the ```.env``` file with the following content:
 ```bash
 BACKEND=./backend-for-mac.conf
 ```
 
-For windows, override the ```BACKEND``` property in the ```.env``` file with the following content:
+**For Windows**
+Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows
+
+Override the ```BACKEND``` property in the ```.env``` file with the following content:
 ```bash
 BACKEND=./backend-for-windows.conf
 ```
 
-Run the stack by executing:
+> **IMPORTANT**: Go to Windows Docker Desktop App and check ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
+
+### Run
+You can spin it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'development: Compose...'**.
+
+> **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
+
+Alternatively you can run the stack by executing on the cli:
 
 ```bash
 docker-compose up (-d when you want to run deamon mode)
-```
+``` 
 
-Alternatively you can right-click the file in IntelliJ. **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```. 
-
+### Test
 When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the ```.env``` file.
 
 ```bash
@@ -27,6 +50,8 @@ FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
 For tags please check: [pull requests for frontend](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags)
+
+> **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in your user directory.
 
 ## Testing
 Test your work at: <http://localhost>.
