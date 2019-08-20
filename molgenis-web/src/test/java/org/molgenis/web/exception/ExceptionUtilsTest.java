@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
 import java.util.Optional;
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 import org.testng.annotations.Test;
 
 public class ExceptionUtilsTest {

@@ -48,6 +48,7 @@ URL: none
 Query: none
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |200 Ok | Success |
@@ -97,7 +98,7 @@ Response:
       }
   ]
 }
-   ```
+```
 
 ### Getting all suitable permissions for a resource type
 ##### Endpoint
@@ -108,6 +109,7 @@ GET https://molgenis.mydomain.example/api/permissions/types/permissions/{typeId}
 URL: TypeId as described in the [parameters section](##Parameters)
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |200 Ok | Success |
@@ -131,7 +133,7 @@ Response:
        "WRITE"
    ]
 }
-   ```
+```
 
 ### Creating a new resource type in the system (Row level securing an entity type)
 
@@ -147,6 +149,7 @@ POST https://molgenis.mydomain.example/api/permissions/types/{typeId}
 URL: 'typeId' as described in the [parameters section](##Parameters)
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |201 Created | Type created |
@@ -172,6 +175,7 @@ DELETE https://molgenis.mydomain.example/api/permissions/types/{typeId}
 URL: 'typeId' as described in the [parameters section](##Parameters)
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |204 No content| Type removed |
@@ -195,6 +199,7 @@ URL:
 - 'identifier' as described in the [parameters section](##Parameters)
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |201 Created | access control list created |
@@ -207,7 +212,9 @@ URL:
 Add an ACL for 'Patient1' in _entity_ type 'hospital_neurology_patients'.
 
 Request:
-```POST https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients/Patient1```
+```
+POST https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients/Patient1
+```
 
 ### Getting all objects of a type
 ##### Endpoint
@@ -261,7 +268,7 @@ Response:
         }
     ]
 }
-   ```
+```
 
 ## Retrieving permissions for users and roles
 
@@ -277,7 +284,9 @@ URL:
 Query: 
 - Optional: [Query for user or role](##Query for user or role)
 - Optional: 'inheritance' as described in the [parameters section](##Parameters)
+
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |200 Ok | Success |
@@ -338,7 +347,7 @@ Response:
        ]
    }
  }
-   ```
+```
 The neurologist and the nurse inherit their READ permissions from the their "NEUROLOGY" role, while the reception inherits the READ permission from the READ permission they have on the parent package "hospital" of the "hospital_neurology" package.
 
 ### Getting permissions for one or more users and/or roles for a resource type
@@ -354,7 +363,9 @@ Query:
 - Optional: 'inheritance' as described in the [parameters section](##Parameters)
 - Optional: 'page' as described in the [parameters section](##Parameters)
 - Optional: 'pageSize' as described in the [parameters section](##Parameters)
+
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |200 Ok |  |
@@ -371,7 +382,9 @@ The page object is only returned if the request contained paging parameters
 
 ##### Example
 Request:
-```https://molgenis.mydomain.example/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10```
+```
+https://molgenis.mydomain.example/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10
+```
 Response:
 ```
 {
@@ -424,6 +437,7 @@ Query:
 [Query for user or role](##Query for user or role)
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |200 Ok | Success |
@@ -439,7 +453,10 @@ The user and role of a permission can be absent if permission is only derived fr
 
 ##### Example 
 Request:
-```https://molgenis.mydomain.example/api/permissions?q=user==Cardiologist&inheritance=true```
+```
+https://molgenis.mydomain.example/api/permissions?q=user==Cardiologist&inheritance=true
+```
+
 Response:
 ```
 {
@@ -577,6 +594,7 @@ POST https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |201 No content | permissions created |
@@ -589,7 +607,8 @@ The endpoint expects a list of permissions, each permission should contain a 'pe
 URL:
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
 Body:
-```{
+```
+{
    	permissions:[{
    		permission:READ,
    		role:CARDIOLOGY
@@ -598,7 +617,7 @@ Body:
    		user:Cardiologist
    	}]
    }
-   ```
+```
 
 ### Create permissions for one or more users and/or roles for resources of a certain type
 ```
@@ -609,6 +628,7 @@ POST https://molgenis.mydomain.example/api/permissions/{typeId}")
 The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
 
 ##### Response 
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |201 No content | permissions created |
@@ -657,6 +677,7 @@ Request:
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
 
 ##### Response
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |204 No content | permissions updated |
@@ -677,7 +698,7 @@ Body:
    		user:Cardiologist
    	}]
    }
-   ```
+```
 
 ### Update permissions for one or more users and/or roles for resources of a certain type
 ```
@@ -688,6 +709,7 @@ PATCH https://molgenis.mydomain.example/api/permissions/{typeId}")
 The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
 
 ##### Response 
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |204 No content | permissions updated |
@@ -739,6 +761,7 @@ a json object with either a ['user' or a 'role'](##Query for user or role) field
 The field takes a single user or role. 
 
 ##### Response: 
+
 | Status code         | Description                                                                       |
 |---------------------|-----------------------------------------------------------------------------------|
 |204 No content | Permission deleted |

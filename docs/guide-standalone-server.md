@@ -92,7 +92,7 @@ CREATE USER molgenis WITH PASSWORD 'molgenis';
 GRANT ALL PRIVILEGES ON SCHEMA molgenis TO molgenis;
 ```
 
-In the ```pg_bha.conf``` You need to update to these lines:
+In the ```pg_hba.conf``` You need to update to these lines:
 
 ```bash
 # TYPE  DATABASE        USER            ADDRESS                 METHOD

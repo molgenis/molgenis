@@ -96,7 +96,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-i18n</artifactId>
+            <artifactId>molgenis-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
             <type>test-jar</type>

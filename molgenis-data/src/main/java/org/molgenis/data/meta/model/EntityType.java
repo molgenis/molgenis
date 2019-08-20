@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.i18n.Labeled;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.util.i18n.Labeled;
 
 /**
  * EntityType defines the structure and attributes of an Entity. Attributes are unique. Other

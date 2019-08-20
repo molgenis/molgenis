@@ -1,6 +1,6 @@
 package org.molgenis.data.importer.emx.exception;
 
-import org.molgenis.i18n.test.exception.ExceptionMessageTest;
+import org.molgenis.util.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

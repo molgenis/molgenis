@@ -35,11 +35,6 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-i18n</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-security-core</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -83,7 +78,7 @@
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-i18n</artifactId>
+      <artifactId>molgenis-util</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

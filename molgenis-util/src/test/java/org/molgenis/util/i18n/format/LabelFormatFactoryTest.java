@@ -1,4 +1,4 @@
-package org.molgenis.i18n.format;
+package org.molgenis.util.i18n.format;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -6,8 +6,8 @@ import static org.testng.Assert.assertEquals;
 import java.text.Format;
 import java.util.Locale;
 import org.mockito.Mock;
-import org.molgenis.i18n.Labeled;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.i18n.Labeled;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

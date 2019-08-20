@@ -1,6 +1,8 @@
 package org.molgenis.jobs;
 
-/** @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException} */
+import org.molgenis.util.exception.CodedRuntimeException;
+
+/** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
 public class JobExecutionException extends RuntimeException {
   /** */

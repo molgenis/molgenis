@@ -7,7 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
 import java.util.List;
 import org.molgenis.data.DataService;

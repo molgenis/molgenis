@@ -1,4 +1,4 @@
-package org.molgenis.i18n;
+package org.molgenis.util.exception;
 
 public abstract class BadRequestException extends CodedRuntimeException {
 

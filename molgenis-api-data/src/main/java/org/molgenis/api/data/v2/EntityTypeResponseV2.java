@@ -4,7 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static org.molgenis.api.data.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
 import com.google.common.collect.Iterables;
 import java.util.List;

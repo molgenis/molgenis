@@ -2,8 +2,8 @@ package org.molgenis.swagger.controller;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.swagger.controller.SwaggerController.URI;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import javax.servlet.http.HttpServletResponse;
 import org.molgenis.data.meta.AttributeType;

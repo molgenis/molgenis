@@ -2,7 +2,7 @@ package org.molgenis.app.manager.exception;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class CouldNotDeleteAppException extends CodedRuntimeException {
   private static final String ERROR_CODE = "AM09";
