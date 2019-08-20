@@ -86,10 +86,10 @@ public class EntityControllerIT extends AbstractApiTest {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(jsonObject.toJSONString())
-        .post("/api/entity/v3_MyDataset")
+        .post("/api/data/v3_MyDataset")
         .then()
         .statusCode(CREATED.value())
-        .header(LOCATION, RestAssured.baseURI + "/api/entity/v3_MyDataset/25");
+        .header(LOCATION, RestAssured.baseURI + "/api/data/v3_MyDataset/25");
   }
 
   // 1. filter (basic? multiple? nested?)
@@ -106,7 +106,7 @@ public class EntityControllerIT extends AbstractApiTest {
             getClass(), "retrieveResource.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/entity/v3_MyDataset/25")
+        .get("/api/data/v3_MyDataset/25")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -124,7 +124,7 @@ public class EntityControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/entity/v3_MyDataset/1/myMref?q=id=in=(str1,str2)")
+        .get("/api/data/v3_MyDataset/1/myMref?q=id=in=(str1,str2)")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -140,7 +140,7 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get("/api/entity/v3_MyDataset")
+        .get("/api/data/v3_MyDataset")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -156,8 +156,7 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get(
-            "/api/entity/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&page=1&size=5")
+        .get("/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&page=1&size=5")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -172,7 +171,7 @@ public class EntityControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/entity/v3_MyDataset?sort=-label&q=id=in=(1,2,3,4,5)")
+        .get("/api/data/v3_MyDataset?sort=-label&q=id=in=(1,2,3,4,5)")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -206,7 +205,7 @@ public class EntityControllerIT extends AbstractApiTest {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(jsonObject.toJSONString())
-        .put("/api/entity/v3_MyDataset/25")
+        .put("/api/data/v3_MyDataset/25")
         .then()
         .statusCode(NO_CONTENT.value());
 
@@ -215,7 +214,7 @@ public class EntityControllerIT extends AbstractApiTest {
             getClass(), "updateResource.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/entity/v3_MyDataset/25")
+        .get("/api/data/v3_MyDataset/25")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -229,11 +228,11 @@ public class EntityControllerIT extends AbstractApiTest {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(jsonObject.toJSONString())
-        .patch("/api/entity/v3_MyDataset/25")
+        .patch("/api/data/v3_MyDataset/25")
         .then()
         .statusCode(NO_CONTENT.value());
     given()
-        .get("/api/entity/v3_MyDataset/25")
+        .get("/api/data/v3_MyDataset/25")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body("data.myString", Matchers.equalTo("String 25 - updated partially"));
@@ -241,13 +240,13 @@ public class EntityControllerIT extends AbstractApiTest {
 
   @Test(dependsOnMethods = "testPartialUpdateResource")
   public void deleteResource() {
-    given().delete("/api/entity/v3_MyDataset/25").then().statusCode(NO_CONTENT.value());
-    given().get("/api/entity/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
+    given().delete("/api/data/v3_MyDataset/25").then().statusCode(NO_CONTENT.value());
+    given().get("/api/data/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
   }
 
   @Test(dependsOnMethods = "deleteResourceCollectionQuery")
   public void deleteResourceCollection() throws IOException {
-    given().delete("/api/entity/v3_MyDataset").then().statusCode(NO_CONTENT.value());
+    given().delete("/api/data/v3_MyDataset").then().statusCode(NO_CONTENT.value());
 
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -256,7 +255,7 @@ public class EntityControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/entity/v3_MyDataset")
+        .get("/api/data/v3_MyDataset")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -265,7 +264,7 @@ public class EntityControllerIT extends AbstractApiTest {
   @Test(dependsOnMethods = "deleteResource")
   public void deleteResourceCollectionQuery() throws IOException {
     given()
-        .delete("/api/entity/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")
+        .delete("/api/data/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")
         .then()
         .statusCode(NO_CONTENT.value());
 
@@ -277,7 +276,7 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get("/api/entity/v3_MyDataset")
+        .get("/api/data/v3_MyDataset")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -320,6 +319,6 @@ public class EntityControllerIT extends AbstractApiTest {
   }
 
   private static void deleteData() {
-    given().delete("/api/entity/sys_md_Package/v3").then().statusCode(NO_CONTENT.value());
+    given().delete("/api/data/sys_md_Package/v3").then().statusCode(NO_CONTENT.value());
   }
 }

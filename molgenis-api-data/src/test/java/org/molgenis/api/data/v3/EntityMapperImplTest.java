@@ -76,7 +76,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(BOOL);
     doReturn(true).when(entity).getBoolean("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -101,11 +101,11 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(attributeType);
     doReturn(refEntity).when(entity).getEntity("attr");
 
-    URI refSelf = new URI("http://localhost/api/entity/RefEntityType/refId0");
+    URI refSelf = new URI("http://localhost/api/data/RefEntityType/refId0");
     EntityResponse expectedRefEntityResponse =
         EntityResponse.builder().setLinks(LinksResponse.create(null, refSelf, null)).build();
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -129,11 +129,11 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(attributeType);
     doReturn(emptyList()).when(entity).getEntities("attr");
 
-    URI refSelf = new URI("http://localhost/api/entity/EntityType/id0/attr");
+    URI refSelf = new URI("http://localhost/api/data/EntityType/id0/attr");
     EntitiesResponse expectedRefEntitiesResponse =
         EntitiesResponse.builder().setLinks(LinksResponse.create(null, refSelf, null)).build();
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -148,7 +148,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(DATE);
     doReturn(LocalDate.of(2019, 4, 30)).when(entity).getLocalDate("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -163,7 +163,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(DATE_TIME);
     doReturn(Instant.ofEpochMilli(1561010330984L)).when(entity).getInstant("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -178,7 +178,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(DECIMAL);
     doReturn(3.14).when(entity).getDouble("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -206,7 +206,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(attributeType);
     doReturn("string").when(entity).getString("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -221,7 +221,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(INT);
     doReturn(123).when(entity).getInt("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -236,7 +236,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(LONG);
     doReturn(Long.MAX_VALUE).when(entity).getLong("attr");
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -261,7 +261,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     doReturn("string0").when(entity).getString("attr0");
     doReturn("string1").when(entity).getString(("attr1"));
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -281,18 +281,18 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     doReturn(refRefEntity).when(refEntity).getEntity("attr");
     doReturn(refEntity).when(entity).getEntity("attr");
 
-    URI refRefSelf = new URI("http://localhost/api/entity/RefRefEntityType/refRefId0");
+    URI refRefSelf = new URI("http://localhost/api/data/RefRefEntityType/refRefId0");
     EntityResponse expectedRefRefEntityResponse =
         EntityResponse.builder().setLinks(LinksResponse.create(null, refRefSelf, null)).build();
 
-    URI refSelf = new URI("http://localhost/api/entity/RefEntityType/refId0");
+    URI refSelf = new URI("http://localhost/api/data/RefEntityType/refId0");
     EntityResponse expectedRefEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, refSelf, null))
             .setData(singletonMap("attr", expectedRefRefEntityResponse))
             .build();
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
@@ -309,14 +309,14 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
     Entity entity = createMockEntity(XREF);
     doReturn(null).when(entity).getEntity("attr");
 
-    URI entitySelf = new URI("http://localhost/api/entity/EntityType/id0");
+    URI entitySelf = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, entitySelf, null))
             .setData(singletonMap("attr", null))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/entity/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesSelf, null))
@@ -345,14 +345,14 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setPage(Page.builder().setOffset(0).setPageSize(1).setTotal(2).build())
             .build();
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
             .setData(singletonMap("attr", "string"))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/entity/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesSelf, null))
@@ -378,28 +378,28 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setPage(Page.builder().setOffset(0).setPageSize(1).setTotal(2).build())
             .build();
 
-    URI refSelf = new URI("http://localhost/api/entity/RefEntityType/refId0");
+    URI refSelf = new URI("http://localhost/api/data/RefEntityType/refId0");
     EntityResponse expectedRefEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, refSelf, null))
             .setData(singletonMap("attr", "refString"))
             .build();
 
-    URI entitiesRefSelf = new URI("http://localhost/api/entity/EntityType/id0/attr");
+    URI entitiesRefSelf = new URI("http://localhost/api/data/EntityType/id0/attr");
     EntitiesResponse expectedRefEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesRefSelf, null))
             .setItems(singletonList(expectedRefEntityResponse))
             .build();
 
-    URI self = new URI("http://localhost/api/entity/EntityType/id0");
+    URI self = new URI("http://localhost/api/data/EntityType/id0");
     EntityResponse expectedEntityResponse =
         EntityResponse.builder()
             .setLinks(LinksResponse.create(null, self, null))
             .setData(singletonMap("attr", expectedRefEntitiesResponse))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/entity/EntityType");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesSelf, null))

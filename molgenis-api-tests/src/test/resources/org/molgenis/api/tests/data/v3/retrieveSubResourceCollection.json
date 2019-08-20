@@ -1,11 +1,11 @@
 {
   "links": {
-    "self": "${baseUri}/api/entity/v3_MyDataset/1/myMref"
+    "self": "${baseUri}/api/data/v3_MyDataset/1/myMref"
   },
   "items": [
     {
       "links": {
-        "self": "${baseUri}/api/entity/v3_MyStrings/str1"
+        "self": "${baseUri}/api/data/v3_MyStrings/str1"
       },
       "data": {
         "id": "str1",
@@ -14,7 +14,7 @@
     },
     {
       "links": {
-        "self": "${baseUri}/api/entity/v3_MyStrings/str2"
+        "self": "${baseUri}/api/data/v3_MyStrings/str2"
       },
       "data": {
         "id": "str2",
