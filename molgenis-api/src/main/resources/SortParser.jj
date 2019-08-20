@@ -18,8 +18,7 @@ class SortParser {
   PARSER_END(SortParser)
 
 TOKEN: {
-    <ASCENDING: "+">
-  | <DESCENDING: "-">
+    <DESCENDING: "-">
 	| <#LETTER: ["a"-"z","A"-"Z"]>
   |	<#DIGIT: ["0"-"9"]>
   |	<UNDERSCORE: "_">
@@ -77,18 +76,11 @@ private Direction direction() : {
   Direction direction;
 } {
   (
-    direction = directionAscending()
-  | direction = directionDescending()
+   direction = directionDescending()
   )
   {
     return direction;
   }
-}
-
-private Direction directionAscending() : {
-} {
-  <ASCENDING>
-  { return Direction.ASC; }
 }
 
 private Direction directionDescending() : {

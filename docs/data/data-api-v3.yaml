@@ -261,7 +261,7 @@ components:
       explode: false
       schema:
         type: string
-      example: id,+label,-description
+      example: id,label,-description
     filter:
       name: filter
       description: Fields to return
