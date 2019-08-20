@@ -318,8 +318,8 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", null))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
-    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=0");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=1");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
@@ -340,7 +340,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             Optional.empty(),
             Sort.EMPTY_SORT,
             10,
-            1,
+            0,
             100),
         expectedEntitiesResponse);
   }
@@ -364,11 +364,12 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", "string"))
             .build();
 
+    URI entitiesPrevious = new URI("http://localhost/api/data/EntityType?size=10&page=0");
     URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
     URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
+            .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
@@ -420,8 +421,8 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", expectedRefEntitiesResponse))
             .build();
 
-    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=1");
-    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=2");
+    URI entitiesSelf = new URI("http://localhost/api/data/EntityType?size=10&page=0");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?size=10&page=1");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(null, entitiesSelf, entitiesNext))
@@ -436,7 +437,7 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             Optional.empty(),
             Sort.EMPTY_SORT,
             10,
-            1,
+            0,
             100),
         expectedEntitiesResponse);
   }

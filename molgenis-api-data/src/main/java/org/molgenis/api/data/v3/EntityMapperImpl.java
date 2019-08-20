@@ -56,7 +56,7 @@ public class EntityMapperImpl implements EntityMapper {
             entityCollection.getEntityTypeId(), filter, expand, sort, size, number, query);
     URI previous = null;
     URI next = null;
-    if (number > 1) {
+    if (number > 0) {
       previous =
           createEntitiesResponseUri(
               entityCollection.getEntityTypeId(), filter, expand, sort, size, number - 1, query);
