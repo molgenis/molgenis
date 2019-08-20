@@ -29,21 +29,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-// TODO decide which test cases to move to controller unit test class
-// 0. check api tests of v1 and v2 and include relevant test cases
-// 1. all data types (except html/hyperlink etc.)
-// 2. null values
-// 3. computed (for update/create)
-// 4. mappedBy (for update/create)
-// 5. compounds
-// 6. abstract: abstract entity types + concrete entity types that extend from abstract entity type
-// 7. transactions
-// 8. exceptions (including security)
-// 9. different identifier data types (also for references)
-// 10. request zero-items case
-// 11. error codes
-// 12. encoding entity type identifiers, entity identifiers etc.
-// 13 de REST hack
 public class EntityControllerIT extends AbstractApiTest {
   private static final Logger LOG = getLogger(EntityControllerIT.class);
 
@@ -61,8 +46,6 @@ public class EntityControllerIT extends AbstractApiTest {
     AbstractApiTest.tearDownAfterClass();
   }
 
-  // 1. location header
-  // exc: already exists
   @Test
   public void testCreateResource() {
     JSONArray jsonArray = new JSONArray();
@@ -92,13 +75,6 @@ public class EntityControllerIT extends AbstractApiTest {
         .header(LOCATION, RestAssured.baseURI + "/api/data/v3_MyDataset/25");
   }
 
-  // 1. filter (basic? multiple? nested?)
-  // 2. expand
-  // 3. query
-  // 4. sort
-  // exc: entity type does not exist
-  // exc: entity does not exist
-  // exc: no permission to read entity type
   @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResource() throws IOException {
     String expectedJson =
@@ -114,9 +90,6 @@ public class EntityControllerIT extends AbstractApiTest {
 
   @Test(dependsOnMethods = "testCreateResource")
   public void testRetrieveResourceSubResource() throws IOException {
-    // TODO: exc: entity type not exists
-    // TODO:  exc: entity not exists
-    // TODO:  exc: attribute does not exist
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
