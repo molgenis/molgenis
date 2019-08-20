@@ -39,6 +39,11 @@ class DataServiceV3Impl implements DataServiceV3 {
   private final SortV3Mapper sortMapperV3;
   private final FetchMapper fetchMapper;
 
+  private enum OperationType {
+    READ,
+    MODIFY
+  }
+
   DataServiceV3Impl(
       MetaDataService metaDataService,
       EntityManagerV3 entityManagerV3,
@@ -55,7 +60,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional
   @Override
   public Entity create(String entityTypeId, Map<String, Object> requestValues) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.MODIFY);
     EntityType entityType = repository.getEntityType();
 
     Entity entity = entityManagerV3.create(entityType);
@@ -68,7 +73,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional(readOnly = true)
   @Override
   public Entity find(String entityTypeId, String entityId, Selection filter, Selection expand) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.READ);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
@@ -94,7 +99,7 @@ class DataServiceV3Impl implements DataServiceV3 {
       Sort sort,
       int size,
       int number) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.READ);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
@@ -121,7 +126,7 @@ class DataServiceV3Impl implements DataServiceV3 {
             .collect(toList());
 
     // Add 'in' query for the mref entity ID's
-    Repository<Entity> refRepository = getRepository(refEntityType.getId());
+    Repository<Entity> refRepository = getRepository(refEntityType.getId(), OperationType.READ);
     org.molgenis.data.Query<Entity> findQuery =
         query != null ? queryMapperV3.map(query, refRepository) : new QueryImpl<>(refRepository);
 
@@ -154,7 +159,7 @@ class DataServiceV3Impl implements DataServiceV3 {
       Sort sort,
       int size,
       int number) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.READ);
     org.molgenis.data.Query<Entity> findQuery =
         query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
 
@@ -190,7 +195,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional
   @Override
   public void update(String entityTypeId, String entityId, Map<String, Object> requestValues) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.MODIFY);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
@@ -205,7 +210,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Override
   public void updatePartial(
       String entityTypeId, String entityId, Map<String, Object> requestValues) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.MODIFY);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
@@ -223,7 +228,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional
   @Override
   public void delete(String entityTypeId, String entityId) {
-    Repository<Entity> repository = getRepository(entityTypeId);
+    Repository<Entity> repository = getRepository(entityTypeId, OperationType.MODIFY);
     EntityType entityType = repository.getEntityType();
     Object typedEntityId = toTypedEntityId(entityType, entityId);
 
@@ -240,14 +245,16 @@ class DataServiceV3Impl implements DataServiceV3 {
   @Transactional
   @Override
   public void deleteAll(String entityTypeId, @Nullable @CheckForNull Query query) {
-    Repository<Entity> repo = getRepository(entityTypeId);
+    Repository<Entity> repo = getRepository(entityTypeId, OperationType.MODIFY);
     org.molgenis.data.Query<Entity> molgenisQuery =
         query != null ? queryMapperV3.map(query, repo) : new QueryImpl<>(repo);
     repo.delete(molgenisQuery.findAll());
   }
 
-  private Repository<Entity> getRepository(String entityTypeId) {
-    if (entityTypeId.equals(ENTITY_TYPE_META_DATA) || entityTypeId.equals(ATTRIBUTE_META_DATA)) {
+  private Repository<Entity> getRepository(String entityTypeId, OperationType operation) {
+    if (operation == OperationType.MODIFY
+        && (entityTypeId.equals(ENTITY_TYPE_META_DATA)
+            || entityTypeId.equals(ATTRIBUTE_META_DATA))) {
       throw new MetadataAccessException();
     }
 
