@@ -13,10 +13,12 @@ import org.molgenis.util.AutoGson;
 public abstract class EntitiesResponse {
   public abstract LinksResponse getLinks();
 
+  // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
   @CheckForNull
   public abstract List<EntityResponse> getItems();
 
+  // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
   @CheckForNull
   public abstract PageResponse getPage();
