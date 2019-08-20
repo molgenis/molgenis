@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.data.DataAlreadyExistsException;
+import org.molgenis.data.DataConstraintViolationException;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.exception.PermissionDeniedException;
 import org.molgenis.util.exception.BadRequestException;
@@ -39,7 +40,7 @@ public class GlobalControllerExceptionHandler extends SpringExceptionHandler {
     return logAndHandleException(e, CONFLICT, handlerMethod);
   }
 
-  @ExceptionHandler(BadRequestException.class)
+  @ExceptionHandler({BadRequestException.class, DataConstraintViolationException.class})
   public Object handleBadRequestException(Exception e, HandlerMethod handlerMethod) {
     return logAndHandleException(e, BAD_REQUEST, handlerMethod);
   }
