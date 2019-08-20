@@ -1,10 +1,5 @@
 # Developing in IntelliJ with Docker
-We have several backend services which we run to debug and test the MOLGENIS backend webapp.
-- postgres
-- minio
-- elasticsearch
-- opencpu
-- frontend of MOLGENIS
+We have several backend services which we run to debug and test the MOLGENIS backend webapps (check: ).
 
 ## Deploy
 For mac, override the ```BACKEND``` property in the ```.env``` file with the following content:
@@ -44,7 +39,7 @@ To debug:
 # show running containers
 docker ps
 # show logging of specific container
-docker logs #container id#
+docker logs #container id#1`
 # exec into a running container
 docker exec -it #container id# bash
 ```
@@ -79,7 +74,7 @@ We use ```psql``` to access postgres and do database changes.
 psql -h localhost -p 5432 -U molgenis -W
 ``` 
 
-> note: **IMPORTANT:** In Docker the postgres user is non-existent. You have 1 superuser which is defined in the docker-compose (username: molgenis, password: molgenis).
+> **IMPORTANT:** In Docker the postgres user is non-existent. You have 1 superuser which is defined in the docker-compose (username: molgenis, password: molgenis).
 >  
 > There is only 1 scheme as well. This won't allow you to drop the database on the container. 
 >

@@ -132,8 +132,8 @@
     <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
     <!-- if profiles are inactive, set these props to use local infrastructure -->
     <it_db_name>molgenis_test</it_db_name>
-    <it_db_user>molgenis</it_db_user>
-    <it_db_password>molgenis</it_db_password>
+    <it_db_user>postgres</it_db_user>
+    <it_db_password>postgres</it_db_password>
     <it_db_port>5432</it_db_port>
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>

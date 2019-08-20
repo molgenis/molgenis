@@ -7,7 +7,7 @@ The components needed to run MOLGENIS locally are:
 
 ![MOLGENIS components](images/install/molgenis_architecture.svg?raw=true)
 
->note: You can download, install and use MOLGENIS for free under license [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+> You can download, install and use MOLGENIS for free under license [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.en.html).
 
 You can spin up a fully configured backend with [docker-compose](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml). You can obtain it here: [install docker-compose](https://docs.docker.com/compose/install/).  
 
