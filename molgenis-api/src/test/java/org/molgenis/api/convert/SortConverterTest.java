@@ -20,6 +20,6 @@ public class SortConverterTest {
 
   @Test(expectedExceptions = SortParseException.class)
   public void testConvertParseException() {
-    sortConverter.convert("+");
+    sortConverter.convert("-");
   }
 }
