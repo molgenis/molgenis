@@ -56,6 +56,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.ValueReferencedException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.file.model.FileMeta;
@@ -73,7 +74,6 @@ import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -825,9 +825,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME_WRITE)
   @Test(
       groups = "readtest",
-      expectedExceptions = MolgenisValidationException.class,
+      expectedExceptions = ValueReferencedException.class,
       expectedExceptionsMessageRegExp =
-          "Value '0' for attribute 'ref_id_attr' is referenced by entity 'DataServiceItEntityType'.")
+          "entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0")
   public void testDeleteReferencedEntity() {
     dataService.delete(refEntityType.getId(), refEntities.get(0));
   }
