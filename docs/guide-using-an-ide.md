@@ -8,7 +8,7 @@ JetBrains on an open source license. Most of the time we use the latest IntelliJ
 
 ## Set the maven home dir in IntelliJ
 * Open Preferences, Build Execution Deployment, Maven
-* Set the home dir to where your >= 3.1.0 maven installation lives.
+* Set the home dir to where your >= 3.6.0 maven installation lives.
 
 ## Get the molgenis sourcecode
 * File, New, Project from version control, Git (or Github)
@@ -19,8 +19,8 @@ You now should have a Project called molgenis with a module for each maven modul
 
 ## Set the project JDK
 Open File, Project Structure. For the entire project:
-* (Add and) select Java 8 JDK.
-* Set language level to Java 8.
+* (Add and) select Java 11 JDK.
+* Set language level to Java 11.
 
 ## Create maven run configuration
 For normal operation, IntelliJ can compile the sources for you. But some classes get
