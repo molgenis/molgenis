@@ -39,6 +39,11 @@ public class IsEqualJson extends BaseMatcher<String> {
     return new IsEqualJson(expected);
   }
 
+  @Factory
+  public static IsEqualJson isEqualJson(String expected, JSONCompareMode jsonCompareMode) {
+    return new IsEqualJson(expected, jsonCompareMode);
+  }
+
   private boolean matches(String expectedStr, Object actual) throws JSONException {
     if (actual == null && expectedStr == null) {
       return true;
