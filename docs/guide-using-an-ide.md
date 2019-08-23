@@ -8,7 +8,7 @@ JetBrains on an open source license. Most of the time we use the latest IntelliJ
 
 ## Set the maven home dir in IntelliJ
 * Open Preferences, Build Execution Deployment, Maven
-* Set the home dir to where your >= 3.1.0 maven installation lives.
+* Set the home dir to where your >= 3.6.0 maven installation lives.
 
 ## Get the molgenis sourcecode
 * File, New, Project from version control, Git (or Github)
