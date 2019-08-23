@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.EntitiesResponse;
@@ -306,6 +307,13 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
 
   @Test
   public void testMapEntityRefNull() throws URISyntaxException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    when(request.getRequestURI()).thenReturn("/api/data/EntityType");
+    when(request.getScheme()).thenReturn("http");
+    when(request.getServerName()).thenReturn("localhost");
+    when(request.getServerPort()).thenReturn(80);
+
     Entity entity = createMockEntity(XREF);
     doReturn(null).when(entity).getEntity("attr");
 
@@ -316,10 +324,12 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", null))
             .build();
 
+    URI entitiesPrevious = new URI("http://localhost/api/data/EntityType?page=0");
     URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .build();
 
@@ -328,13 +338,21 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setEntityTypeId("EntityType")
             .setEntities(singletonList(entity))
             .build();
+
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION),
+        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100),
         expectedEntitiesResponse);
   }
 
   @Test
   public void testMapEntityCollection() throws URISyntaxException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    when(request.getRequestURI()).thenReturn("/api/data/EntityType");
+    when(request.getScheme()).thenReturn("http");
+    when(request.getServerName()).thenReturn("localhost");
+    when(request.getServerPort()).thenReturn(80);
+
     Entity entity = createMockEntity(STRING);
     doReturn("string").when(entity).getString("attr");
 
@@ -352,20 +370,29 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", "string"))
             .build();
 
+    URI entitiesPrevious = new URI("http://localhost/api/data/EntityType?page=0");
     URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, EMPTY_SELECTION),
+        entityMapper.map(entityCollection, FULL_SELECTION, EMPTY_SELECTION, 10, 1, 100),
         expectedEntitiesResponse);
   }
 
   @Test
   public void testMapEntityCollectionExpand() throws URISyntaxException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    when(request.getRequestURI()).thenReturn("/api/data/EntityType");
+    when(request.getScheme()).thenReturn("http");
+    when(request.getServerName()).thenReturn("localhost");
+    when(request.getServerPort()).thenReturn(80);
+
     Entity refEntity = createMockEntity(STRING, "RefEntityType", "refId0");
     Entity entity = createMockEntity(MREF);
     doReturn("refString").when(refEntity).getString("attr");
@@ -399,15 +426,17 @@ public class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", expectedRefEntitiesResponse))
             .build();
 
+    URI entitiesPrevious = new URI("http://localhost/api/data/EntityType?page=0");
     URI entitiesSelf = new URI("http://localhost/api/data/EntityType");
+    URI entitiesNext = new URI("http://localhost/api/data/EntityType?page=2");
     EntitiesResponse expectedEntitiesResponse =
         EntitiesResponse.builder()
-            .setLinks(LinksResponse.create(null, entitiesSelf, null))
+            .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION),
+        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100),
         expectedEntitiesResponse);
   }
 

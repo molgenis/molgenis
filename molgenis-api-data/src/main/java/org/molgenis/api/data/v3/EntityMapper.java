@@ -8,13 +8,11 @@ import org.molgenis.data.Entity;
 public interface EntityMapper {
   EntityResponse map(Entity entity, Selection filter, Selection expand);
 
-  EntitiesResponse map(EntityCollection entityCollection, Selection filter, Selection expand);
-
   EntitiesResponse map(
-      String entityTypeId,
-      String entityId,
-      String attributeName,
       EntityCollection entityCollection,
       Selection filter,
-      Selection expand);
+      Selection expand,
+      int size,
+      int number,
+      int total);
 }

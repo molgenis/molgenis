@@ -129,7 +129,7 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get("/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&page=1&size=5")
+        .get("/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=1")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -237,7 +237,7 @@ public class EntityControllerIT extends AbstractApiTest {
   @Test(dependsOnMethods = "deleteResource")
   public void deleteResourceCollectionQuery() throws IOException {
     given()
-        .delete("/api/data/v3_MyDataset?q=label=in=('Row 1','Row 2','Row 3','Row 4')")
+        .delete("/api/data/v3_MyDataset?q=label=in=('Row%201','Row%202','Row%203','Row%204')")
         .then()
         .statusCode(NO_CONTENT.value());
 

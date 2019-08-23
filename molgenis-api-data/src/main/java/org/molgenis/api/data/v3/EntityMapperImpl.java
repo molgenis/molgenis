@@ -21,8 +21,8 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.web.support.ServletUriComponentsBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
@@ -37,29 +37,24 @@ public class EntityMapperImpl implements EntityMapper {
 
   @Override
   public EntitiesResponse map(
-      EntityCollection entityCollection, Selection filter, Selection expand) {
-    EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
-
-    URI self = createEntitiesResponseUri(entityCollection.getEntityTypeId());
-    LinksResponse linksResponse = LinksResponse.create(null, self, null);
-
-    setPageResponse(entityCollection, builder);
-
-    return builder.setLinks(linksResponse).build();
-  }
-
-  @Override
-  public EntitiesResponse map(
-      String entityTypeId,
-      String entityId,
-      String attributeName,
       EntityCollection entityCollection,
       Selection filter,
-      Selection expand) {
+      Selection expand,
+      int size,
+      int number,
+      int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createReferenceEntityResponseUri(entityTypeId, entityId, attributeName);
-    LinksResponse linksResponse = LinksResponse.create(null, self, null);
+    URI self = createEntitiesResponseUri();
+    URI previous = null;
+    URI next = null;
+    if (number > 0) {
+      previous = createEntitiesResponseUri(number - 1);
+    }
+    if ((number * size) + size < total) {
+      next = createEntitiesResponseUri(number + 1);
+    }
+    LinksResponse linksResponse = LinksResponse.create(previous, self, next);
 
     setPageResponse(entityCollection, builder);
 
@@ -225,29 +220,20 @@ public class EntityMapperImpl implements EntityMapper {
         : Selection.EMPTY_SELECTION;
   }
 
-  private URI createEntitiesResponseUri(String entityTypeId) {
-    return ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(null)
-        .path(EntityController.API_ENTITY_PATH)
-        .pathSegment(entityTypeId)
-        .build()
-        .toUri();
-  }
-
-  private URI createReferenceEntityResponseUri(
-      String entityTypeId, String entityId, String attributeName) {
-    return ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(null)
-        .path(EntityController.API_ENTITY_PATH)
-        .pathSegment(entityTypeId)
-        .pathSegment(entityId)
-        .pathSegment(attributeName)
-        .build()
-        .toUri();
-  }
-
   private URI createEntityResponseUri(Entity entity) {
     return createEntityResponseUri(entity, null);
+  }
+
+  private URI createEntitiesResponseUri() {
+    return createEntitiesResponseUri(null);
+  }
+
+  private URI createEntitiesResponseUri(Integer pageNumber) {
+    UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
+    if (pageNumber != null) {
+      builder.replaceQueryParam("page", pageNumber);
+    }
+    return builder.build().toUri();
   }
 
   private URI createEntityResponseUri(Entity entity, @Nullable @CheckForNull String attributeName) {

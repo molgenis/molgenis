@@ -60,7 +60,8 @@ public abstract class AbstractApiTest {
   protected static RequestSpecification given() {
     return RestAssured.given()
         .header("x-molgenis-token", ADMIN_TOKEN)
-        .accept(APPLICATION_JSON_VALUE);
+        .accept(APPLICATION_JSON_VALUE)
+        .urlEncodingEnabled(false);
   }
 
   private static String login(String username, String password) {

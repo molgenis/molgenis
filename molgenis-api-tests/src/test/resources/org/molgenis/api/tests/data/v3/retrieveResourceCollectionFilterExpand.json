@@ -1,6 +1,8 @@
 {
   "links": {
-    "self": "${baseUri}/api/data/v3_MyDataset"
+    "previous": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=0",
+    "self": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=1",
+    "next": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=2"
   },
   "items": [
     {
