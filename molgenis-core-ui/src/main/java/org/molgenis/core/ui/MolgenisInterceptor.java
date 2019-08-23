@@ -2,8 +2,8 @@ package org.molgenis.core.ui;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_SIGN_UP;
@@ -14,8 +14,10 @@ import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTR
 import static org.molgenis.web.PluginAttributes.KEY_THEME_FINGERPRINT_REGISTRY;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,13 +97,17 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
     return environmentAttributes;
   }
 
-  private Map<String, String> getOidcClients() {
-    return stream(authenticationSettings.getOidcClients())
-        .collect(
-            toLinkedMap(this::getOidcClientAuthorizationRequestUri, OidcClient::getClientName));
+  private List<Map<String, String>> getOidcClients() {
+    return stream(authenticationSettings.getOidcClients()).map(this::clientAsMap).collect(toList());
   }
 
-  private String getOidcClientAuthorizationRequestUri(OidcClient oidcClient) {
-    return DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + '/' + oidcClient.getRegistrationId();
+  private Map<String, String> clientAsMap(OidcClient client) {
+    return ImmutableMap.of(
+        "name",
+        client.getClientName(),
+        "registrationId",
+        client.getRegistrationId(),
+        "requestUri",
+        DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + '/' + client.getRegistrationId());
   }
 }
