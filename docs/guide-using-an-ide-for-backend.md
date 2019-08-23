@@ -2,6 +2,10 @@
 A rough guide on how to develop MOLGENIS in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA Ultimate. Most of the time we use the latest IntelliJ version.
 
+## Set the maven home dir in IntelliJ
+* Open Preferences, Build Execution Deployment, Maven
+* Set the home dir to where your >= 3.6.0 maven installation lives.
+
 ## Get the MOLGENIS sourcecode
 * File, New, Project from version control, Git (or Github)
 * Pick `https://github.com/molgenis/molgenis.git` for the repository URL.
@@ -12,7 +16,7 @@ You now should have a Project called 'molgenis' with a module for each maven mod
 ## Set the project JDK
 Open File, Project Structure. For the entire project:
 * (Add and) select Java 11 JDK.
-* Set language level to Java 8.
+* Set language level to Java 11.
 
 ## Create maven run configuration
 For normal operation, IntelliJ can compile the sources for you. But some classes get

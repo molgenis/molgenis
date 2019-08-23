@@ -119,15 +119,15 @@
     <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
     <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
-    <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
-    <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
+    <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
+    <minify-maven-plugin.version>1.7.6</minify-maven-plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <jsdoc3-maven-plugin.version>1.1.0</jsdoc3-maven-plugin.version>
     <release-maven-plugin.version>2.5.3</release-maven-plugin.version>
-    <reproducible-build-maven-plugin.version>0.7</reproducible-build-maven-plugin.version>
+    <reproducible-build-maven-plugin.version>0.10</reproducible-build-maven-plugin.version>
 
     <!-- Integration test properties -->
-    <cargo-plugin.version>1.6.6</cargo-plugin.version>
+    <cargo-plugin.version>1.7.7</cargo-plugin.version>
     <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
     <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
     <!-- if profiles are inactive, set these props to use local infrastructure -->
@@ -139,9 +139,9 @@
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
-    <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.18</checkstyle.version>
-    <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
+    <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     <sentry.version>1.7.5</sentry.version>
     <sentry-logback.version>1.7.14</sentry-logback.version>
   </properties>
@@ -203,9 +203,9 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
           <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
+            <release>11</release>
             <compilerArgs>
               <arg>-Xlint:all,-deprecation</arg>
             </compilerArgs>
@@ -214,6 +214,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
           <configuration>
             <archive>
               <manifest>
@@ -230,6 +231,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin.version}</version>
           <executions>
             <!-- copy generated resources to target folder -->
             <execution>
@@ -253,6 +255,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
           <configuration>
             <doclint>none</doclint>
             <additionalOptions>--allow-script-in-comments</additionalOptions>
@@ -276,13 +279,16 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
           <configuration>
             <skip>${skipUTs}</skip>
+            <argLine>--illegal-access=permit</argLine>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-maven-plugin.version}</version>
           <executions>
             <execution>
               <id>reserve-network-port</id>
@@ -341,6 +347,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe-plugin.version}</version>
           <configuration>
             <argLine>${failsafe.argLine}</argLine>
           </configuration>
@@ -561,6 +568,19 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.6</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
           <execution>
             <id>enforce-banned-dependencies</id>
             <goals>
