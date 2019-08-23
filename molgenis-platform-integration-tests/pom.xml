@@ -30,6 +30,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>sql-maven-plugin</artifactId>
+            <version>${sql-maven-plugin.version}</version>
             <configuration>
               <skip>${skipITs}</skip>
             </configuration>
@@ -66,6 +67,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
+            <version>${build-helper-maven-plugin.version}</version>
             <executions>
               <execution>
                 <id>reserve-network-port</id>
@@ -80,6 +82,7 @@
           <plugin>
             <groupId>com.github.alexcojocaru</groupId>
             <artifactId>elasticsearch-maven-plugin</artifactId>
+            <version>${elasticsearch-maven-plugin.version}</version>
             <configuration>
               <skip>${skipITs}</skip>
             </configuration>
