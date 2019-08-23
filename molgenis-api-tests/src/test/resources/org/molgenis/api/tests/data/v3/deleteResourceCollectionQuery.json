@@ -1,0 +1,557 @@
+{
+  "links": {
+    "self": "${baseUri}/api/data/v3_MyDataset"
+  },
+  "items": [
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/5"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-05",
+        "myDateTime": "2000-01-04T21:02:03Z",
+        "myDecimal": 5.1,
+        "myInt": 5,
+        "myLong": 3000000005,
+        "myString": "String 5",
+        "myText": "Text 5",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/5"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/5/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 5,
+        "label": "Row 5"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/6"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-06",
+        "myDateTime": "2000-01-05T21:02:03Z",
+        "myDecimal": 6.1,
+        "myInt": 6,
+        "myLong": 3000000006,
+        "myString": "String 6",
+        "myText": "Text 6",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/6"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/6/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 6,
+        "label": "Row 6"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/7"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-07",
+        "myDateTime": "2000-01-06T21:02:03Z",
+        "myDecimal": 7.1,
+        "myInt": 7,
+        "myLong": 3000000007,
+        "myString": "String 7",
+        "myText": "Text 7",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/7"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/7/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 7,
+        "label": "Row 7"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/8"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-08",
+        "myDateTime": "2000-01-07T21:02:03Z",
+        "myDecimal": 8.1,
+        "myInt": 8,
+        "myLong": 3000000008,
+        "myString": "String 8",
+        "myText": "Text 8",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/8"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/8/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 8,
+        "label": "Row 8"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/9"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-09",
+        "myDateTime": "2000-01-08T21:02:03Z",
+        "myDecimal": 9.1,
+        "myInt": 9,
+        "myLong": 3000000009,
+        "myString": "String 9",
+        "myText": "Text 9",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/9"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/9/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 9,
+        "label": "Row 9"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/10"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-10",
+        "myDateTime": "2000-01-09T21:02:03Z",
+        "myDecimal": 10.1,
+        "myInt": 10,
+        "myLong": 3000000010,
+        "myString": "String 10",
+        "myText": "Text 10",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/10"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/10/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 10,
+        "label": "Row 10"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/11"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-11",
+        "myDateTime": "2000-01-10T21:02:03Z",
+        "myDecimal": 11.1,
+        "myInt": 11,
+        "myLong": 3000000011,
+        "myString": "String 11",
+        "myText": "Text 11",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/1"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/11/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 11,
+        "label": "Row 11"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/12"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "2000-01-12",
+        "myDateTime": "2000-01-11T21:02:03Z",
+        "myDecimal": 12.1,
+        "myInt": 12,
+        "myLong": 3000000012,
+        "myString": "String 12",
+        "myText": "Text 12",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/2"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/12/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 12,
+        "label": "Row 12"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/13"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-13",
+        "myDateTime": "2000-01-12T21:02:03Z",
+        "myDecimal": 13.1,
+        "myInt": 13,
+        "myLong": 3000000013,
+        "myString": "String 13",
+        "myText": "Text 13",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/3"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/13/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 13,
+        "label": "Row 13"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/14"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-14",
+        "myDateTime": "2000-01-13T21:02:03Z",
+        "myDecimal": 14.1,
+        "myInt": 14,
+        "myLong": 3000000014,
+        "myString": "String 14",
+        "myText": "Text 14",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/4"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/14/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 14,
+        "label": "Row 14"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/15"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-15",
+        "myDateTime": "2000-01-14T21:02:03Z",
+        "myDecimal": 15.1,
+        "myInt": 15,
+        "myLong": 3000000015,
+        "myString": "String 15",
+        "myText": "Text 15",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/5"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/15/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 15,
+        "label": "Row 15"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/16"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-16",
+        "myDateTime": "2000-01-15T21:02:03Z",
+        "myDecimal": 16.1,
+        "myInt": 16,
+        "myLong": 3000000016,
+        "myString": "String 16",
+        "myText": "Text 16",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/6"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/16/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 16,
+        "label": "Row 16"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/17"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-17",
+        "myDateTime": "2000-01-16T21:02:03Z",
+        "myDecimal": 17.1,
+        "myInt": 17,
+        "myLong": 3000000017,
+        "myString": "String 17",
+        "myText": "Text 17",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/7"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/17/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 17,
+        "label": "Row 17"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/18"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-18",
+        "myDateTime": "2000-01-17T21:02:03Z",
+        "myDecimal": 18.1,
+        "myInt": 18,
+        "myLong": 3000000018,
+        "myString": "String 18",
+        "myText": "Text 18",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/8"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/18/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 18,
+        "label": "Row 18"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/19"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-19",
+        "myDateTime": "2000-01-18T21:02:03Z",
+        "myDecimal": 19.1,
+        "myInt": 19,
+        "myLong": 3000000019,
+        "myString": "String 19",
+        "myText": "Text 19",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/9"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/19/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 19,
+        "label": "Row 19"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/20"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-20",
+        "myDateTime": "2000-01-19T21:02:03Z",
+        "myDecimal": 20.1,
+        "myInt": 20,
+        "myLong": 3000000020,
+        "myString": "String 20",
+        "myText": "Text 20",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/10"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/20/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 20,
+        "label": "Row 20"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/21"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-21",
+        "myDateTime": "2000-01-20T21:02:03Z",
+        "myDecimal": 21.1,
+        "myInt": 21,
+        "myLong": 3000000021,
+        "myString": "String 21",
+        "myText": "Text 21",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/1"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/21/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 21,
+        "label": "Row 21"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/22"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-22",
+        "myDateTime": "2000-01-21T21:02:03Z",
+        "myDecimal": 22.1,
+        "myInt": 22,
+        "myLong": 3000000022,
+        "myString": "String 22",
+        "myText": "Text 22",
+        "myXref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyNumbers/2"
+          }
+        },
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/22/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 22,
+        "label": "Row 22"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/23"
+      },
+      "data": {
+        "myBool": false,
+        "myDate": "2000-01-23",
+        "myDateTime": "2000-01-22T21:02:03Z",
+        "myDecimal": 23.1,
+        "myInt": 23,
+        "myLong": 3000000023,
+        "myString": "String 23",
+        "myText": "Text 23",
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/23/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 23,
+        "label": "Row 23"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyDataset/24"
+      },
+      "data": {
+        "myBool": true,
+        "myDate": "${autoDate}",
+        "myMref": {
+          "links": {
+            "self": "${baseUri}/api/data/v3_MyDataset/24/myMref"
+          }
+        },
+        "myComputed": "static",
+        "id": 24,
+        "label": "Row 24"
+      }
+    }
+  ],
+  "page": {
+    "size": 20,
+    "totalElements": 20,
+    "totalPages": 1,
+    "number": 0
+  }
+}
