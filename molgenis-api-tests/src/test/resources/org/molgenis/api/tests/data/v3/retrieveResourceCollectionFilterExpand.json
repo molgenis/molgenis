@@ -1,8 +1,8 @@
 {
   "links": {
-    "previous": "${baseUri}/api/data/v3_MyDataset?filter=id%252Clabel%252CmyXref%252CmyMref%2528id%2529&expand=myMref&size=5&page=0",
-    "self": "${baseUri}/api/data/v3_MyDataset?filter=id%252Clabel%252CmyXref%252CmyMref%2528id%2529&expand=myMref&page=1&size=5",
-    "next": "${baseUri}/api/data/v3_MyDataset?filter=id%252Clabel%252CmyXref%252CmyMref%2528id%2529&expand=myMref&size=5&page=2"
+    "previous": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=0",
+    "self": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=1",
+    "next": "${baseUri}/api/data/v3_MyDataset?filter=id,label,myXref,myMref(id)&expand=myMref&size=5&page=2"
   },
   "items": [
     {

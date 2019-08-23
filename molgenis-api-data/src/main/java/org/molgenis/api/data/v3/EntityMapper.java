@@ -9,17 +9,6 @@ public interface EntityMapper {
   EntityResponse map(Entity entity, Selection filter, Selection expand);
 
   EntitiesResponse map(
-      String entityTypeId,
-      String entityId,
-      String fieldId,
-      EntityCollection entityCollection,
-      Selection filter,
-      Selection expand,
-      int size,
-      int number,
-      int total);
-
-  EntitiesResponse map(
       EntityCollection entityCollection,
       Selection filter,
       Selection expand,
