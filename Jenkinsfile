@@ -52,7 +52,7 @@ pipeline {
                             }
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
                             sh "mvn -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
-                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K -C ${GIT_COMMIT}"
+                            sh "curl -s https://codecov.io/bash | bash -v -s - -c -F unit -K -C ${GIT_COMMIT}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120"
                         }
                     }
