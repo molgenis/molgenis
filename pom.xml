@@ -78,7 +78,8 @@
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
     <!-- Java 11 support -->
     <rest-assured.version>3.3.0</rest-assured.version>
-
+    <maven-surefire-plugin.version>3.0.0.M3</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.0.0.M3</maven-failsafe-plugin.version>
     <!-- dependency versions not managed by parent pom -->
     <google.auto-value.version>1.4.1</google.auto-value.version>
     <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
