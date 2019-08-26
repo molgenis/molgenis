@@ -286,7 +286,7 @@
           <version>${maven-surefire-plugin.version}</version>
           <configuration>
             <skip>${skipUTs}</skip>
-            <argLine>--illegal-access=permit</argLine>
+            <argLine>@{argLine} --illegal-access=permit</argLine>
           </configuration>
         </plugin>
         <plugin>
