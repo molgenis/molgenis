@@ -74,7 +74,7 @@
     <elasticsearch.version>5.5.1</elasticsearch.version>
     <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
-    <mockito.version>3.0.6</mockito.version>
+    <mockito.version>3.0.0</mockito.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
     <!-- Java 11 support -->
