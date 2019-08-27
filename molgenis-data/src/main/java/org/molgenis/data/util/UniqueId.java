@@ -22,8 +22,6 @@ public class UniqueId {
         (byte) ((CLOCK_SEQ_AND_NODE >> 8) & 0xff),
         (byte) ((CLOCK_SEQ_AND_NODE) & 0xff),
       };
-  private final ThreadLocal<ByteBuffer> tlbb =
-      ThreadLocal.withInitial(() -> ByteBuffer.allocate(16));
 
   private volatile int seq;
   private volatile long lastTimestamp;
@@ -44,8 +42,7 @@ public class UniqueId {
         seq = 0;
       }
       seq++;
-      ByteBuffer bb = tlbb.get();
-      bb.rewind();
+      ByteBuffer bb = ByteBuffer.allocate(16);
       bb.putLong(time);
       bb.put(NODE);
       bb.putShort((short) seq);
