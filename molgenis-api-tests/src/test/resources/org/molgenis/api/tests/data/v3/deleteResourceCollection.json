@@ -1,0 +1,12 @@
+{
+  "links": {
+    "self": "${baseUri}/api/data/v3_MyDataset"
+  },
+  "items": [],
+  "page": {
+    "size": 0,
+    "totalElements": 0,
+    "totalPages": 0,
+    "number": 0
+  }
+}

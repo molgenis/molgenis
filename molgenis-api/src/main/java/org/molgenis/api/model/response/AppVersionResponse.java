@@ -1,4 +1,4 @@
-package org.molgenis.api;
+package org.molgenis.api.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.time.Instant;

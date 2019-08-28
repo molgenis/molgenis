@@ -1,10 +1,7 @@
 package org.molgenis.data.postgresql;
 
-import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
@@ -21,8 +18,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.DuplicateValueException;
+import org.molgenis.data.EntityTypeReferencedException;
+import org.molgenis.data.ErrorCodedDataAccessException;
+import org.molgenis.data.ExistingNullValueException;
+import org.molgenis.data.InvalidValueTypeException;
+import org.molgenis.data.ListValueAlreadyExistsException;
+import org.molgenis.data.ReadonlyValueException;
+import org.molgenis.data.UnknownEnumValueException;
+import org.molgenis.data.UnknownValueReferenceException;
+import org.molgenis.data.ValueAlreadyExistsException;
+import org.molgenis.data.ValueLengthExceededException;
+import org.molgenis.data.ValueReferencedException;
+import org.molgenis.data.ValueRequiredException;
 import org.molgenis.data.postgresql.identifier.AttributeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeDescription;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
@@ -49,7 +61,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       "Error translating postgres exception: ";
   private static final String ERROR_TRANSLATING_EXCEPTION_MSG = "Error translating exception";
   private final EntityTypeRegistry entityTypeRegistry;
-  private static final String TOKEN_UNKNOWN = "<unknown>";
 
   PostgreSqlExceptionTranslator(DataSource dataSource, EntityTypeRegistry entityTypeRegistry) {
     super(requireNonNull(dataSource));
@@ -57,90 +68,110 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
   }
 
   @Override
-  protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
-    DataAccessException dataAccessException = super.doTranslate(task, sql, ex);
-    if (dataAccessException == null) {
-      return doTranslate(ex);
+  @Nullable
+  @CheckForNull
+  protected DataAccessException doTranslate(
+      @Nonnull String task, @Nullable String sql, @Nonnull SQLException sqlException) {
+    DataAccessException translatedException;
+
+    DataAccessException dataAccessException = super.doTranslate(task, sql, sqlException);
+    if (dataAccessException != null) {
+      translatedException = doTranslate(dataAccessException, dataAccessException);
+    } else {
+      translatedException = doTranslate(sqlException, sqlException);
     }
-    return doTranslate(dataAccessException);
+
+    return translatedException;
   }
 
-  private MolgenisDataException doTranslate(DataAccessException dataAccessException) {
+  @Override
+  @Nullable
+  @CheckForNull
+  public DataAccessException doTranslate(TransactionException transactionException) {
+    DataAccessException translatedException;
+
+    Throwable cause = transactionException.getCause();
+    if (cause instanceof PSQLException) {
+      PSQLException psqlException = (PSQLException) cause;
+      String task = "commit transaction";
+      DataAccessException dataAccessException = super.doTranslate(task, null, psqlException);
+      if (dataAccessException != null) {
+        translatedException = doTranslate(transactionException, dataAccessException);
+      } else {
+        translatedException = doTranslate(transactionException, psqlException);
+      }
+    } else {
+      translatedException = null;
+    }
+
+    return translatedException;
+  }
+
+  private DataAccessException doTranslate(
+      Throwable sourceThrowable, DataAccessException dataAccessException) {
+    DataAccessException translatedException;
+
     Throwable cause = dataAccessException.getCause();
-    if (!(cause instanceof PSQLException)) {
-      throw new RuntimeException(
-          format("Unexpected exception class [%s]", cause.getClass().getSimpleName()));
+    if (cause instanceof PSQLException) {
+      translatedException = doTranslate(sourceThrowable, (PSQLException) cause);
+    } else {
+      translatedException = null;
     }
 
-    PSQLException pSqlException = (PSQLException) cause;
-    MolgenisDataException molgenisDataException = doTranslate(pSqlException);
-    if (molgenisDataException == null) {
-      molgenisDataException = new MolgenisDataException(dataAccessException);
-    }
-    return molgenisDataException;
+    return translatedException;
   }
 
-  private MolgenisDataException doTranslate(SQLException sqlException) {
+  private DataAccessException doTranslate(Throwable sourceThrowable, SQLException sqlException) {
+    SQLException relevantSqlException;
     if (sqlException instanceof BatchUpdateException) {
-      sqlException = sqlException.getNextException();
-    }
-    if (!(sqlException instanceof PSQLException)) {
-      LOG.error("", sqlException);
-      throw new RuntimeException(
-          format("Unexpected exception class [%s]", sqlException.getClass().getSimpleName()));
+      relevantSqlException = sqlException.getNextException();
+    } else {
+      relevantSqlException = sqlException;
     }
 
-    PSQLException pSqlException = (PSQLException) sqlException;
-    MolgenisDataException molgenisDataException = doTranslate(pSqlException);
-    if (molgenisDataException == null) {
-      molgenisDataException = new MolgenisDataException(sqlException);
+    DataAccessException translatedException;
+    if (relevantSqlException instanceof PSQLException) {
+      translatedException = doTranslate(sourceThrowable, (PSQLException) relevantSqlException);
+    } else {
+      translatedException = null;
     }
-    return molgenisDataException;
+    return translatedException;
   }
 
-  private MolgenisDataException doTranslate(PSQLException pSqlException) {
+  private DataAccessException doTranslate(Throwable sourceThrowable, PSQLException pSqlException) {
     switch (pSqlException.getSQLState()) {
       case "22001":
-        return translateValueTooLongViolation();
+        return translateValueTooLongViolation(sourceThrowable);
       case "22007": // invalid_datetime_format
       case "22P02": // not an integer exception
-        return translateInvalidIntegerException(pSqlException);
+        return translateInvalidIntegerException(sourceThrowable, pSqlException);
       case "23502": // not_null_violation
-        return translateNotNullViolation(pSqlException);
+        return translateNotNullViolation(sourceThrowable, pSqlException);
       case "23503": // foreign_key_violation
-        return translateForeignKeyViolation(pSqlException);
+        return translateForeignKeyViolation(sourceThrowable, pSqlException);
       case "23505": // unique_violation
-        return translateUniqueKeyViolation(pSqlException);
+        return translateUniqueKeyViolation(sourceThrowable, pSqlException);
       case "23514": // check_violation
-        return translateCheckConstraintViolation(pSqlException);
+        return translateCheckConstraintViolation(sourceThrowable, pSqlException);
       case "2BP01":
-        return translateDependentObjectsStillExist(pSqlException);
+        return translateDependentObjectsStillExist(sourceThrowable, pSqlException);
       case "42703":
-        return translateUndefinedColumnException(pSqlException);
+        return translateUndefinedColumnException(sourceThrowable, pSqlException);
       case PostgreSqlQueryGenerator.ERR_CODE_READONLY_VIOLATION:
-        return translateReadonlyViolation(pSqlException);
+        return translateReadonlyViolation(sourceThrowable, pSqlException);
       default:
         return null;
     }
   }
 
-  /**
-   * Package private for testability
-   *
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateValueTooLongViolation() {
-    ConstraintViolation constraintViolation = new ConstraintViolation(VALUE_TOO_LONG_MSG);
-    return new MolgenisValidationException(singleton(constraintViolation));
+  /** Package private for testability */
+  ValueLengthExceededException translateValueTooLongViolation(Throwable sourceThrowable) {
+    return new ValueLengthExceededException(sourceThrowable);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateReadonlyViolation(PSQLException pSqlException) {
+  /** Package private for testability */
+  ReadonlyValueException translateReadonlyViolation(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     Matcher matcher =
         Pattern.compile(
                 "Updating read-only column \"?(.*?)\"? of table \"?(.*?)\"? with id \\[(.*?)] is not allowed")
@@ -153,23 +184,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     String colName = matcher.group(1);
     String tableName = matcher.group(2);
     String id = matcher.group(3);
-    ConstraintViolation constraintViolation =
-        new ConstraintViolation(
-            format(
-                "Updating read-only attribute '%s' of entity '%s' with id '%s' is not allowed.",
-                tryGetAttributeName(tableName, colName).orElse(TOKEN_UNKNOWN),
-                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
-                id));
-    return new MolgenisValidationException(singleton(constraintViolation));
+
+    String attributeName = tryGetAttributeName(tableName, colName).orElse(null);
+    String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+    return new ReadonlyValueException(entityTypeId, attributeName, id, sourceThrowable);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateDependentObjectsStillExist(PSQLException pSqlException) {
+  /** Package private for testability */
+  EntityTypeReferencedException translateDependentObjectsStillExist(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String detail = serverErrorMessage.getDetail();
     Matcher matcher =
@@ -182,9 +205,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       String tableName = matcher.group(2);
       String dependentTableName = matcher.group(3);
 
-      String entityTypeName = tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN);
-      String dependentEntityTypeName =
-          tryGetEntityTypeName(dependentTableName).orElse(TOKEN_UNKNOWN);
+      String entityTypeName = tryGetEntityTypeName(tableName).orElse(null);
+      String dependentEntityTypeName = tryGetEntityTypeName(dependentTableName).orElse(null);
       Set<String> dependentTableNames =
           entityTypeDependencyMap.computeIfAbsent(
               dependentEntityTypeName, k -> new LinkedHashSet<>());
@@ -197,36 +219,12 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
     }
 
-    Set<ConstraintViolation> constraintViolations =
-        entityTypeDependencyMap.entrySet().stream()
-            .map(
-                entry -> {
-                  String message;
-                  if (entry.getValue().size() == 1) {
-                    message =
-                        format(
-                            "Cannot delete entity '%s' because entity '%s' depends on it.",
-                            entry.getKey(), entry.getValue().iterator().next());
-                  } else {
-                    message =
-                        format(
-                            "Cannot delete entity '%s' because entities '%s' depend on it.",
-                            entry.getKey(), entry.getValue().stream().collect(joining(", ")));
-                  }
-                  return new ConstraintViolation(message, null);
-                })
-            .collect(toCollection(LinkedHashSet::new));
-
-    return new MolgenisValidationException(constraintViolations);
+    return new EntityTypeReferencedException(entityTypeDependencyMap, sourceThrowable);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  static MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException) {
+  /** Package private for testability */
+  static InvalidValueTypeException translateInvalidIntegerException(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String message = serverErrorMessage.getMessage();
     Matcher matcher =
@@ -262,19 +260,12 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     }
     String value = matcher.group(2);
 
-    ConstraintViolation constraintViolation =
-        new ConstraintViolation(
-            format("Value [%s] of this entity attribute is not of type [%s].", value, type), null);
-    return new MolgenisValidationException(singleton(constraintViolation));
+    return new InvalidValueTypeException(value, type, sourceThrowable);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateNotNullViolation(PSQLException pSqlException) {
+  /** Package private for testability */
+  ErrorCodedDataAccessException translateNotNullViolation(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String tableName = serverErrorMessage.getTable();
     String message = serverErrorMessage.getMessage();
@@ -290,14 +281,10 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
           entityTypeRegistry.getEntityTypeDescription(tableName);
       entityTypeDescription.getAttributeDescriptionMap().get(columnName);
 
-      ConstraintViolation constraintViolation =
-          new ConstraintViolation(
-              format(
-                  "The attribute '%s' of entity '%s' can not be null.",
-                  tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                  tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
-              null);
-      return new MolgenisValidationException(singleton(constraintViolation));
+      String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+      String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+
+      return new ValueRequiredException(entityTypeId, attributeName, sourceThrowable);
     } else {
       // exception message when applying constraint on existing data
       matcher = Pattern.compile("column \"(.*?)\" contains null values").matcher(message);
@@ -307,24 +294,15 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       }
       String columnName = matcher.group(1);
 
-      ConstraintViolation constraintViolation =
-          new ConstraintViolation(
-              format(
-                  "The attribute '%s' of entity '%s' contains null values.",
-                  tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                  tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
-              null);
-      return new MolgenisValidationException(singleton(constraintViolation));
+      String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+      String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+      return new ExistingNullValueException(entityTypeId, attributeName, sourceThrowable);
     }
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateForeignKeyViolation(PSQLException pSqlException) {
+  /** Package private for testability */
+  ErrorCodedDataAccessException translateForeignKeyViolation(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String tableName = serverErrorMessage.getTable();
     String detailMessage = serverErrorMessage.getDetail();
@@ -340,31 +318,20 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     }
     String value = m.group(1);
 
-    String constraintViolationMessageTemplate;
-    String attrName;
+    String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+
     if (detailMessage.contains("still referenced from")) {
       // ERROR: update or delete on table "x" violates foreign key constraint "y" on table "z"
       // Detail: Key (k)=(v) is still referenced from table "x".
-      constraintViolationMessageTemplate =
-          "Value '%s' for attribute '%s' is referenced by entity '%s'.";
       String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
-      attrName = tryGetAttributeName(refTableName, colName).orElse(TOKEN_UNKNOWN);
+      String attrName = tryGetAttributeName(refTableName, colName).orElse(null);
+      return new ValueReferencedException(entityTypeId, attrName, value, sourceThrowable);
     } else {
       // ERROR: insert or update on table "x" violates foreign key constraint "y"
       // Detail: Key (k)=(v) is not present in table "z".
-      constraintViolationMessageTemplate =
-          "Unknown xref value '%s' for attribute '%s' of entity '%s'.";
-      attrName = tryGetAttributeName(tableName, colName).orElse(TOKEN_UNKNOWN);
+      String attrName = tryGetAttributeName(tableName, colName).orElse(null);
+      return new UnknownValueReferenceException(entityTypeId, attrName, value, sourceThrowable);
     }
-    ConstraintViolation constraintViolation =
-        new ConstraintViolation(
-            format(
-                constraintViolationMessageTemplate,
-                value,
-                attrName,
-                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
-            null);
-    return new MolgenisValidationException(singleton(constraintViolation));
   }
 
   private String getRefTableFromForeignKeyPsqlException(PSQLException pSqlException) {
@@ -380,13 +347,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     return messageMatcher.group(1);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException) {
+  /** Package private for testability */
+  ErrorCodedDataAccessException translateUniqueKeyViolation(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String tableName = serverErrorMessage.getTable();
     String detailMessage = serverErrorMessage.getDetail();
@@ -394,39 +357,26 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
         Pattern.compile("Key \\(\"?(.*?)\"?\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
     boolean matches = matcher.matches();
     if (matches) {
-      ConstraintViolation constraintViolation;
-
       // exception message when adding data that does not match constraint
       String[] columnNames = matcher.group(1).split(", ");
       if (columnNames.length == 1) {
         String columnName = columnNames[0];
         String value = matcher.group(2);
 
-        constraintViolation =
-            new ConstraintViolation(
-                format(
-                    "Duplicate value '%s' for unique attribute '%s' from entity '%s'.",
-                    value,
-                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
-                null);
+        String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+        String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+        return new ValueAlreadyExistsException(entityTypeId, attributeName, value, sourceThrowable);
       } else {
         String columnName = columnNames[columnNames.length - 1];
         String[] values = matcher.group(2).split(", ");
-        String idValue = values[0];
+        String entityId = values[0];
         String value = values[1];
 
-        constraintViolation =
-            new ConstraintViolation(
-                format(
-                    "Duplicate list value '%s' for attribute '%s' from entity '%s' with id '%s'.",
-                    value,
-                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
-                    idValue),
-                null);
+        String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+        String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+        return new ListValueAlreadyExistsException(
+            entityTypeId, attributeName, entityId, value, sourceThrowable);
       }
-      return new MolgenisValidationException(singleton(constraintViolation));
     } else {
       // exception message when applying constraint on existing data
       matcher =
@@ -437,15 +387,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
         String columnName = matcher.group(1);
         String value = matcher.group(2);
 
-        ConstraintViolation constraintViolation =
-            new ConstraintViolation(
-                format(
-                    "The attribute '%s' of entity '%s' contains duplicate value '%s'.",
-                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
-                    value),
-                null);
-        return new MolgenisValidationException(singleton(constraintViolation));
+        String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+        String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+        return new DuplicateValueException(entityTypeId, attributeName, value, sourceThrowable);
       } else {
         LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
         throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
@@ -453,52 +397,27 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     }
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
-  MolgenisValidationException translateCheckConstraintViolation(PSQLException pSqlException) {
+  /** Package private for testability */
+  UnknownEnumValueException translateCheckConstraintViolation(
+      Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String tableName = serverErrorMessage.getTable();
     String constraintName = serverErrorMessage.getConstraint();
     // constraint name: <tableName>_<columnName>_chk
     String columnName =
         constraintName.substring(tableName.length() + 1, constraintName.length() - 4);
-    ConstraintViolation constraintViolation =
-        new ConstraintViolation(
-            format(
-                "Unknown enum value for attribute '%s' of entity '%s'.",
-                tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
-                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
-            null);
-    return new MolgenisValidationException(singleton(constraintViolation));
+    String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
+    String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
+    return new UnknownEnumValueException(entityTypeId, attributeName, sourceThrowable);
   }
 
-  /**
-   * Package private for testability
-   *
-   * @param pSqlException PostgreSQL exception
-   * @return translated validation exception
-   */
+  /** Package private for testability */
   static MolgenisValidationException translateUndefinedColumnException(
-      PSQLException pSqlException) {
+      @SuppressWarnings("unused") Throwable sourceThrowable, PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String message = serverErrorMessage.getMessage(); // FIXME exposes internal message
     ConstraintViolation constraintViolation = new ConstraintViolation(message);
     return new MolgenisValidationException(singleton(constraintViolation));
-  }
-
-  @Override
-  public MolgenisDataException doTranslate(TransactionException transactionException) {
-    Throwable cause = transactionException.getCause();
-    if (!(cause instanceof PSQLException)) {
-      return null;
-    }
-
-    PSQLException pSqlException = (PSQLException) cause;
-    return doTranslate(pSqlException);
   }
 
   /** Tries to determine the entity type identifier for this table name */

@@ -1,0 +1,31 @@
+{
+  "links": {
+    "self": "${baseUri}/api/data/v3_MyDataset/1/myMref?q=id=in=(str1,str2)"
+  },
+  "items": [
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyStrings/str1"
+      },
+      "data": {
+        "id": "str1",
+        "label": "String #1"
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/data/v3_MyStrings/str2"
+      },
+      "data": {
+        "id": "str2",
+        "label": "String #2"
+      }
+    }
+  ],
+  "page": {
+    "size": 2,
+    "totalElements": 2,
+    "totalPages": 1,
+    "number": 0
+  }
+}

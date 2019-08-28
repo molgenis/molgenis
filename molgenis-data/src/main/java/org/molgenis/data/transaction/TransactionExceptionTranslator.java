@@ -1,6 +1,6 @@
 package org.molgenis.data.transaction;
 
-import org.molgenis.data.MolgenisDataException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
 
 /** Spring transaction exception translator */
@@ -12,5 +12,5 @@ public interface TransactionExceptionTranslator {
    * @return translated transaction exception or <code>null</code> if transaction could not be
    *     translated
    */
-  MolgenisDataException doTranslate(TransactionException transactionException);
+  DataAccessException doTranslate(TransactionException transactionException);
 }
