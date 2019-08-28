@@ -153,6 +153,11 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-meta</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api-metrics</artifactId>
       <version>${project.version}</version>
     </dependency>
