@@ -42,6 +42,8 @@
   </developers>
 
   <properties>
+    <java.version>11</java.version>
+
     <!-- authentication for release scm plugin -->
     <project.scm.id>github</project.scm.id>
 
@@ -203,13 +205,11 @@
             <configLocation>molgenis_checks.xml</configLocation>
           </configuration>
         </plugin>
-        <!-- use java 1.8 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
-            <release>11</release>
             <compilerArgs>
               <arg>-Xlint:all,-deprecation</arg>
             </compilerArgs>
