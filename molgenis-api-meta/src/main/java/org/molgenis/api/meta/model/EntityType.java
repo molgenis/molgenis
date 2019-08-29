@@ -24,7 +24,7 @@ public abstract class EntityType {
 
   public abstract EntityType getExtends();
 
-  public abstract List<Tag> getTags();
+  public abstract List<String> getTags();
 
   public abstract String getBackend();
 
@@ -55,7 +55,7 @@ public abstract class EntityType {
 
     public abstract Builder setExtends(EntityType entityType);
 
-    public abstract Builder setTags(List<Tag> tags);
+    public abstract Builder setTags(List<String> tags);
 
     public abstract Builder setBackend(String backend);
 

@@ -62,7 +62,7 @@ public abstract class Attribute {
 
   public abstract List<Attribute> getChildren();
 
-  public abstract List<Tag> getTags();
+  public abstract List<String> getTags();
 
   public abstract String getNullableExpression();
 
@@ -133,7 +133,7 @@ public abstract class Attribute {
 
     public abstract Builder setChildren(List<Attribute> children);
 
-    public abstract Builder setTags(List<Tag> tags);
+    public abstract Builder setTags(List<String> tags);
 
     public abstract Builder setNullableExpression(String nullableExpression);
 
