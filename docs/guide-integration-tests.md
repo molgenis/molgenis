@@ -30,11 +30,13 @@ docker-compose down
 ## In IntelliJ
 When developing, you can run the integration tests as usual.
 
+> **IMPORTANT:** make sure you have no MOLGENIS dev-env or other docker-compose stacks running. Check your "docker-tab" in IntelliJ or run ```docker ps``` on the commandline.
+
 Please boot the backend services with the docker-compose stack in the source-tree.
-* Navigate to molgenis-platform-integration-tests/development
+* Navigate to molgenis-platform-integration-tests/integ-test-env
 * **For Windows:** change in the ```.env``` file the backend to ```BACKEND=./backend-for-windows.conf```
 * Right click the ```docker-compose.yaml```
-* Click on *Run 'development: Compose...'*
+* Click on *Run 'integ-test-env: Compose...'*
 * Then click on the ```molgenis-platform-integration-tests``` module and click *Run --> All Tests (TestNG)*
 
 The code will not make any attempts to delete the integration test database and index.

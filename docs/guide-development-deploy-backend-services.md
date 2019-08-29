@@ -32,7 +32,7 @@ BACKEND=./backend-for-windows.conf
 > **IMPORTANT**: Go to Windows Docker Desktop App and check ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
 
 ### Run
-You can spin it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'development: Compose...'**.
+You can spin it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'dev-env: Compose...'**.
 
 > **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
 
