@@ -7,7 +7,7 @@ These are some instructions on how to run the integration tests on your develope
 To run the integration tests in MAVEN you need to boot the backend services.
 
 ```
-cd molgenis-platform-integration-tests/development;
+cd molgenis-platform-integration-tests/integ-test-env;
 docker-compose up -d;
 ```
 
@@ -25,7 +25,7 @@ When finished please execute:
 docker-compose down
 ```
 
-> **IMPORTANT:** this is another stack than the one in ```molgenis-app/development```. Do NOT run these at the same time.
+> **IMPORTANT:** this is another stack than the one in ```molgenis-app/dev-env```. Do NOT run these at the same time.
 
 ## In IntelliJ
 When developing, you can run the integration tests as usual.
