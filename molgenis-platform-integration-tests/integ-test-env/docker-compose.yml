@@ -35,8 +35,3 @@ services:
       MINIO_ACCESS_KEY: molgenis
       MINIO_SECRET_KEY: molgenis
     command: server /data
-
-  opencpu:
-    image: molgenis/opencpu:opencpu-release-2019-03-20_12-07-11
-    ports:
-      - 8004:8004
