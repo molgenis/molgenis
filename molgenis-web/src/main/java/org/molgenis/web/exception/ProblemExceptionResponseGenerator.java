@@ -5,13 +5,22 @@ import static java.util.stream.Collectors.toList;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
+import javax.validation.ConstraintViolation;
+import org.molgenis.util.exception.ErrorCoded;
+import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.web.exception.Problem.Builder;
+import org.molgenis.web.exception.Problem.Error;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Component
@@ -29,21 +38,21 @@ class ProblemExceptionResponseGenerator
 
     Builder builder =
         Problem.builder()
-            .setType(getProblemType())
+            .setType(getProblemType(exception))
             .setStatus(httpStatus.value())
             .setTitle(httpStatus.getReasonPhrase());
 
-    Optional<String> errorCode = ExceptionUtils.getErrorCode(exception);
-    if (errorCode.isPresent()) {
-      builder.setDetail(exception.getLocalizedMessage());
-      builder.setErrorCode(errorCode.get());
-    } else if (isDevEnvironment) {
-      // only expose exception messages for exceptions without error code in development environment
-      builder.setDetail(exception.getLocalizedMessage());
-    }
+    ExceptionUtils.getErrorCode(exception)
+        .ifPresent(
+            errorCode ->
+                builder.setErrorCode(errorCode).setDetail(exception.getLocalizedMessage()));
+
+    ExceptionUtils.getErrors(exception)
+        .ifPresent(errors -> builder.setErrors(createProblemErrors(errors)));
 
     if (isDevEnvironment) {
-      builder.setStackTrace(getStackTrace(exception));
+      // only expose exception messages for exceptions without error code in dev environment
+      builder.setDetail(exception.getLocalizedMessage()).setStackTrace(getStackTrace(exception));
     }
 
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -51,9 +60,84 @@ class ProblemExceptionResponseGenerator
     return new ResponseEntity<>(builder.build(), httpHeaders, httpStatus);
   }
 
-  private static URI getProblemType() {
+  private List<Problem.Error> createProblemErrors(Errors errors) {
+    Stream<Error> fieldErrors = errors.getFieldErrors().stream().map(this::createProblemError);
+    Stream<Error> globalErrors = errors.getGlobalErrors().stream().map(this::createProblemError);
+    return Stream.concat(fieldErrors, globalErrors).collect(toList());
+  }
+
+  private Problem.Error createProblemError(FieldError fieldError) {
+    Error.Builder builder = Error.builder();
+
+    buildProblemError(fieldError, builder);
+    builder.setField(fieldError.getField());
+
+    Object rejectedValue = fieldError.getRejectedValue();
+    if (rejectedValue != null) {
+      builder.setValue(rejectedValue.toString());
+    }
+
+    buildProblemError(fieldError, builder);
+
+    return builder.build();
+  }
+
+  private Problem.Error createProblemError(ObjectError objectError) {
+    Error.Builder builder = Error.builder();
+    buildProblemError(objectError, builder);
+    return builder.build();
+  }
+
+  private void buildProblemError(ObjectError objectError, Error.Builder builder) {
+    if (objectError.contains(ConstraintViolation.class)) {
+      buildProblemErrorConstraintViolation(objectError, builder);
+    } else if (objectError.contains(Throwable.class)) {
+      buildProblemErrorThrowable(objectError, builder);
+    } else {
+      builder.setDetail("An error occurred.");
+    }
+  }
+
+  private void buildProblemErrorThrowable(ObjectError objectError, Error.Builder builder) {
+    Throwable unwrappedThrowable = objectError.unwrap(Throwable.class);
+    ExceptionUtils.getErrorCodedCause(unwrappedThrowable)
+        .ifPresentOrElse(
+            throwable -> {
+              builder.setErrorCode(((ErrorCoded) throwable).getErrorCode());
+              builder.setDetail(throwable.getLocalizedMessage());
+            },
+            () -> builder.setDetail("An error occurred."));
+  }
+
+  private void buildProblemErrorConstraintViolation(
+      ObjectError objectError, Error.Builder builder) {
+    String detail = null;
+    String detailCode = null;
+
+    String[] codes = objectError.getCodes();
+    if (codes != null) {
+      MessageSource messageSource = MessageSourceHolder.getMessageSource();
+
+      for (String code : codes) {
+        String message =
+            messageSource.getMessage(
+                code, objectError.getArguments(), null, LocaleContextHolder.getLocale());
+        if (message != null && !message.equals('#' + code + '#')) {
+          detail = message;
+          detailCode = code;
+          break;
+        }
+      }
+    }
+
+    builder.setDetail(detail != null ? detail : objectError.getDefaultMessage());
+    builder.setErrorCode(detailCode != null ? detailCode : objectError.getCode());
+  }
+
+  private static URI getProblemType(Throwable throwable) {
+    String path = ExceptionUtils.hasErrors(throwable) ? "input-invalid" : "problem";
     return ServletUriComponentsBuilder.fromCurrentServletMapping()
-        .replacePath("problem")
+        .replacePath(path)
         .replaceQuery(null)
         .fragment(null)
         .build()
