@@ -71,7 +71,7 @@
     <skipUTs>${skipTests}</skipUTs>
 
     <!-- override dependency versions managed by parent pom -->
-    <elasticsearch.version>5.5.1</elasticsearch.version>
+    <elasticsearch.version>5.5.3</elasticsearch.version>
     <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
     <mockito.version>3.0.0</mockito.version>
