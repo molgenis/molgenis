@@ -1,21 +1,17 @@
-# Using an IDE (Intellij)
-
-A rough guide on how to develop molgenis in IntelliJ IDEA is described below.
-This was created using IntelliJ IDEA 2016.1 Ultimate, courteously provided to us by
-JetBrains on an open source license. Most of the time we use the latest IntelliJ version.
-
-**[Deploy backend services](guide-development.md)**
+# Using an IDE (Intellij) for development of MOLGENIS backend+
+A rough guide on how to develop MOLGENIS in IntelliJ IDEA is described below.
+This was created using IntelliJ IDEA Ultimate. Most of the time we use the latest IntelliJ version.
 
 ## Set the maven home dir in IntelliJ
 * Open Preferences, Build Execution Deployment, Maven
 * Set the home dir to where your >= 3.6.0 maven installation lives.
 
-## Get the molgenis sourcecode
+## Get the MOLGENIS sourcecode
 * File, New, Project from version control, Git (or Github)
 * Pick `https://github.com/molgenis/molgenis.git` for the repository URL.
 * In the Event log: Non-managed pom.xml file found. Choose "Add as Maven Project". (You'll also see 'JPA framework is detected'. Ignore that.)
 
-You now should have a Project called molgenis with a module for each maven module.
+You now should have a Project called 'molgenis' with a module for each maven module.
 
 ## Set the project JDK
 Open File, Project Structure. For the entire project:
@@ -30,7 +26,7 @@ generated so you'll need to run the maven build at least once.
 * Set the project location as run directory
 * Command line is `clean install`
 * In the tool bar, select the `molgenis[clean install]` configuration and press the play button.
-Molgenis now should compile and test. In particular the molgenis-core-ui module may take a while the first time it is run.
+MOLGENIS now should compile and test.
 
 ## Build in IntelliJ
 Build, Make project should work fine now and spew out no errors, only warnings.
@@ -53,8 +49,7 @@ mvn fmt:format
 ```
 
 ## Use MOLGENIS file-templates
-
-* Make sure that your .idea project folder lives inside your molgenis git project root! Only then will we be able to auto-share templates.
+* Make sure that your .idea project folder lives inside your 'molgenis' git project root! Only then will we be able to auto-share templates.
 * Goto 'New / Edit file templates' and switch from 'Default' to 'Project'-scope.
 * Restart IntelliJ after setting the .idea directory and changing the settings
 
@@ -156,14 +151,36 @@ public class PigeonEncounterFactory extends AbstractSystemEntityFactory<PigeonEn
 
 Sadly, it's not possible to generate multiple files from one template, so the Metadata and Factory classes have to be manually moved to separate files. (Tip: Set your cursor to the class name and use Refactor > Move... or press F6)
 
+## Deploy the backend services
+Check: [deploy backend services](guide-development-deploy-backend-services.md)
 
 ## Deploy / Run in Tomcat server
 * Run, Edit configurations..., `+`, Tomcat, Local.
 * Call it `molgenis-app [exploded]`
 * (Add and) select your Tomcat installation
-* VM options: `-Dmolgenis.home=<path to dir containing molgenis-server.properties> -Xmx4g -Des.discovery.zen.ping.multicast.enabled=false -Des.network.host=localhost`
+* Remove any *JVM options* that are MOLGENIS specific. These will override the environment variables below. 
+* In the "Open browser" change the URL to http://localhost *(this will open a browser and serve the frontend of MOLGENIS)*.
+* The tomcat-port needs to point at 8080. This is also defined in the ```.env```. 
+* Select the 'Startup/Connection' tab
+  Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
+  Fill in your home-directory in the *molgenis.home*-key.
+```properties
+molgenis.home=**your own version of the data dir**
+opencpu.uri.host=localhost
+elasticsearch.transport.addresses=localhost:9300
+db_uri=jdbc:postgresql://localhost/molgenis
+db_user=molgenis
+db_password=molgenis
+admin.password=admin
+MINIO_BUCKET_NAME=molgenis
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=molgenis
+MINIO_SECRET_KEY=molgenis
+CATALINA_OPTS=-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
+* Select the OpenJDK 11 JRE in the 'JRE' property
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.
 * Select On Update: Redeploy, don't ask (This is the action that will triggered when you press the blue reload button in the run view)
 * Select On frame deactivation: Update resources (This is the action that will be triggered whenever you tab out of IntelliJ)
@@ -172,38 +189,14 @@ Sadly, it's not possible to generate multiple files from one template, so the Me
 * Save the configuration
 * In the tool bar, select the `molgenis-app [exploded]` configuration and press the play button.
 
-This'll build and deploy molgenis to tomcat and open it in the browser.
-Whenever you tab from molgenis to the browser, all modified resources will be copied to the deployed exploded war.
+This'll build and deploy MOLGENIS to tomcat and open it in the browser. Whenever you tab from MOLGENIS to the browser, all modified resources will be copied to the deployed exploded war.
 A browser reload should display the changes.
 
-Note: In some cases InteliJ might not pick up all changes in the file system made during the
- build process. This may result in an error referencing a missing jar file. This can be fixed by
- selecting the 'Synchronize molgenis' option from the project action menu.
+> When you have 2 run configurations (e.g. run in debug and run normally) you need to apply the configuration displayed above.
+
+> In some cases IntelliJ might not pick up all changes in the file system made during the
+  build process. This may result in an error referencing a missing jar file. This can be fixed by
+  selecting the 'Synchronize MOLGENIS' option from the project action menu. 
 
 ## Security
 See also the [MOLGENIS Security settings](guide-security.md)
-
-## Webpack watch run configuration
-* Open molgenis-core-ui/target/classes/js.
-* Right-click the dist folder, Mark directory as..., cancel exclusion.
-* Open molgenis-core-ui/package.json
-* Select the scripts / watch key in the json configuration
-* Right-click it and select the NPM `create watch` option from the menu.
-* SaveIn the tool bar, select the npm `watch` configuration and press the play button to start webpack watch.
-
-Now, whenever you make changes to one or more JavaScript files, the corresponding js bundle file will get rebuilt by
-the npm watch task. Once it's built, tab out of IntelliJ to trigger a refresh of the exploded war.
-As soon as IntelliJ loses focus, you'll see a task progress bar in the bottom right corner of IntelliJ.
-Wait for that task to finish and then refresh the browser. The changes will be loaded.
-
-## Speed up building the project by skipping the javascript build
-
-Building the project can be sped up by not building the javascript. To skip building the javascript, use:
-
-`-Dskip.js=true`
-
-to the maven build command.
-
-* Note:
-    - If javascript was not already built, javascript will be missing and the application will not function properly.
-    - If changes were made to the javascript these changes will not be built into the application (as building will be skipped).
