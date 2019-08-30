@@ -1,4 +1,4 @@
-# Using an IDE (Intellij) for development of MOLGENIS backend+
+# Using an IDE (Intellij) for development of MOLGENIS backend
 A rough guide on how to develop MOLGENIS in IntelliJ IDEA is described below.
 This was created using IntelliJ IDEA Ultimate. Most of the time we use the latest IntelliJ version.
 
