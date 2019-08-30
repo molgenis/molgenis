@@ -92,7 +92,7 @@ export FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 
 To debug:
 
-```bash/powershell
+```bash/batch
 # show running containers
 docker ps
 # show logging of specific container
@@ -139,7 +139,7 @@ There are a few clients you can use to access the docker services from your loca
 ### Postgres
 We use ```psql``` to access postgres and do database changes.
 
-```bash/powershell
+```bash/batch
 psql -h localhost -p 5432 -U molgenis -W
 ``` 
 
