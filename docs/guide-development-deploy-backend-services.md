@@ -16,51 +16,83 @@ You first need to configure the specifics for your OS.
 **For Mac**
 Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-mac
 
-For mac, override the ```BACKEND``` property in the ```.env``` file with the following content:
-```bash
-BACKEND=./backend-for-mac.conf
-```
-
 **For Windows**
 Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows
-
-Override the ```BACKEND``` property in the ```.env``` file with the following content:
-```bash
-BACKEND=./backend-for-windows.conf
-```
 
 > **IMPORTANT**: Go to Windows Docker Desktop App and check ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
 
 ### Run
-You can spin it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and hitting **Run 'dev-env: Compose...'**.
+You can create it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and click on **Create 'dev-env: Compose...'**.
 
 > **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
 
+You need to add the following environments variables to the *Run configuration*:
+
+**For Windows**
+```env
+BACKEND=./backend-for-windows.conf
+FRONTEND=molgenis/molgenis-frontend:latest
+```
+
+**For Mac**
+```env
+BACKEND=./backend-for-mac.conf
+FRONTEND=molgenis/molgenis-frontend:latest
+```
+
 Alternatively you can run the stack by executing on the cli:
 
-```bash
-docker-compose up (-d when you want to run deamon mode)
+**For Windows**
+
+```batch
+molgenis-app/dev-env/docker-stack.bat start
 ``` 
 
-### Test
-When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the ```.env``` file.
+**For Mac**
 
 ```bash
+molgenis-app/dev-env/docker-stack.bash start
+``` 
+
+Test your work at: <http://localhost>.
+
+### Alternative configuration for testing purposes
+When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the environment variables.
+ 
+**For IntelliJ** 
+In the *Run configuration* override.
+
+```env
 FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
-For tags please check: [pull requests for frontend](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags)
+> For tags please check: [pull requests for frontend](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags)
 
+**For BATCH / BASH startup**
+
+Override:
+
+*For Windows*
+```batch
+@ECHO OFF
+...
+SET FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
+...
+```
+
+*For Mac*
+```bash
+#!/bin/bash
+...
+export FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
+...
+```
 > **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in your user directory.
-
-## Testing
-Test your work at: <http://localhost>.
-
-> note: you can see that the port number is not there. NGINX is resolving the frontend and will always be served on port 80. 
+> **NGINX**: you can see that the port number is not there. NGINX is resolving the frontend and will always be served on port 80. 
 
 To debug:
 
-```bash
+```bash/powershell
 # show running containers
 docker ps
 # show logging of specific container
@@ -72,21 +104,33 @@ docker exec -it #container id# bash
 ## Teardown
 Dont forget to stop the running services after use.
 
+**For Windows on cli**
+```batch
+docker-stack.bat shutdown
+```
+
+**For Mac on cli**
 ```bash
-docker-compose down
+docker-stack.bash shutdown
 ```
 
 >note: also when you exited with ```CTRL+C```.
 
+**In IntelliJ**
+
+Right-click within the Docker-service tab on *Compose: dev-env* and click on *Down*.
+
+### When all else fails
 When you are not sure that everything went the way it should be, these commands will purge everything on your system:
 
+**For Windows on cli**
+```batch
+docker-stack.bat terminate
+```
+
+**For Mac on cli**
 ```bash
-# delete volumes (not in use)
-docker volume prune
-# delete containers (not in use)
-docker container prune
-# delete image (not in use)
-docker image prune
+docker-stack.bash terminate
 ```
 
 ## Accessing services from host machine
@@ -95,7 +139,7 @@ There are a few clients you can use to access the docker services from your loca
 ### Postgres
 We use ```psql``` to access postgres and do database changes.
 
-```bash
+```bash/powershell
 psql -h localhost -p 5432 -U molgenis -W
 ``` 
 
