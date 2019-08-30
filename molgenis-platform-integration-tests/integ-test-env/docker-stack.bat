@@ -1,7 +1,5 @@
 @ECHO OFF
 
-SET BACKEND=./backend-for-windows.conf
-
 IF "%1"=="start" (
    docker-compose up -d
 ) ELSE (

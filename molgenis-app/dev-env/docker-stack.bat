@@ -1,5 +1,6 @@
 @ECHO OFF
 
+SET FRONTEND=molgenis/molgenis-frontend:latest
 SET BACKEND=./backend-for-windows.conf
 
 IF "%1"=="start" (
