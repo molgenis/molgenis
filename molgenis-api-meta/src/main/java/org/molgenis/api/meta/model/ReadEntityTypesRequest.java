@@ -4,7 +4,6 @@ import java.util.Optional;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import org.molgenis.api.model.Query;
-import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
 
 public class ReadEntityTypesRequest extends AbstractReadRequest {
@@ -22,10 +21,6 @@ public class ReadEntityTypesRequest extends AbstractReadRequest {
   private Sort sort;
 
   private Query q;
-
-  private Selection filter;
-
-  private Selection expand;
 
   public int getPage() {
     return page;
