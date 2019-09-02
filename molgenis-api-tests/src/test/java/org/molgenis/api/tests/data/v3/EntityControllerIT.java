@@ -161,8 +161,11 @@ public class EntityControllerIT extends AbstractApiTest {
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
 
     given()
-        .get("/api/data/v3_MyDataset?q=id=invalid=1&filter=id,label,myXref,myMref(id))&expand=myMref((id)&sort=--label&page=-1&size=50000")
-        .then().log().all()
+        .get(
+            "/api/data/v3_MyDataset?q=id=invalid=1&filter=id,label,myXref,myMref(id))&expand=myMref((id)&sort=--label&page=-1&size=50000")
+        .then()
+        .log()
+        .all()
         .statusCode(HttpStatus.BAD_REQUEST.value())
         .body(isEqualJson(expectedJson, JSONCompareMode.LENIENT));
   }
