@@ -35,9 +35,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(EntityController.API_ENTITY_PATH)
-class EntityController extends ApiController {
+public class EntityController extends ApiController {
   private static final String API_ENTITY_ID = "data";
-  static final String API_ENTITY_PATH = ApiNamespace.API_PATH + '/' + API_ENTITY_ID;
+  public static final String API_ENTITY_PATH = ApiNamespace.API_PATH + '/' + API_ENTITY_ID;
 
   private final DataServiceV3 dataServiceV3;
   private final EntityMapper entityMapper;
@@ -101,12 +101,6 @@ class EntityController extends ApiController {
         EntityCollection.builder()
             .setEntityTypeId(entityTypeId)
             .setEntities(entities.getEntities())
-            .setPage(
-                Page.builder()
-                    .setOffset(size * page)
-                    .setPageSize(size)
-                    .setTotal(entities.getTotal())
-                    .build())
             .build();
 
     return entityMapper.map(entityCollection, filter, expand, size, page, entities.getTotal());
