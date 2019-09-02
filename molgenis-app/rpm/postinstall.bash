@@ -2,6 +2,7 @@
 
 MOLGENIS_HOME=/usr/local/share/molgenis/
 
+ENVIRONMENT=production
 DB_USER=molgenis
 DB_PASSWORD=molgenis
 MAIL_USER=molgenis
@@ -33,7 +34,8 @@ echo "--------------------------------------------------"
 echo "[INFO] Determine if there is a molgenis-server.properties"
 if [[ ! -f ${MOLGENIS_HOME}/molgenis-server.properties ]]
 then
-  sed -e "s|__DB_USER__|${DB_USER}|" \
+  sed -e "s|__ENVIRONMENT__|${ENVIRONMENT}|" \
+      -e "s|__DB_USER__|${DB_USER}|" \
       -e "s|__DB_PASSWORD__|${DB_PASSWORD}|" \
       -e "s|__MAIL_USER__|${MAIL_USER}|" \
       -e "s|__MAIL_PASSWORD__|${MAIL_PASSWORD}|" \

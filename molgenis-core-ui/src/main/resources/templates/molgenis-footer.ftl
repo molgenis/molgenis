@@ -45,17 +45,32 @@
     <#-- VUE -->
     <div id="molgenis-footer"></div>
 
-    <script type=text/javascript>
-        window.molgenisFooter = {
-                <#if app_settings.footer??>additionalMessage: '${app_settings.footer}',</#if>
-                <#if molgenis_version??>version: '${molgenis_version}',</#if>
-                <#if molgenis_build_date??>buildDate: '${molgenis_build_date}',</#if>
-                <#if molgenis_app_version??>appVersion: '${molgenis_app_version}',</#if>
-        }
-    </script>
+    <script type="text/javascript" src="/@molgenis-ui/legacy-lib/dist/require.js"></script>
 
-    <#-- Include the Vue version of the molgenis footer  -->
-    <script type=text/javascript src="<@resource_href "/js/bootstrap-4/footer/molgenis-footer.js"/>"></script>
+    <script>
+      requirejs.config({
+        baseUrl: '/@molgenis-ui/legacy-lib/dist'
+      });
+
+      requirejs(["context.umd.min", "vue.min"], function(context, Vue) {
+        new Vue({
+          render: function(createElement) {
+            const propsData = {
+              props: {
+                molgenisFooter: {
+                  <#if app_settings.footer??>additionalMessage: '${app_settings.footer}', </#if>
+                  <#if molgenis_version??>version: '${molgenis_version}', </#if>
+                  <#if molgenis_build_date??>buildDate: '${molgenis_build_date}', </#if>
+                  <#if molgenis_app_version??>appVersion: '${molgenis_app_version}', </#if>
+                }
+              }
+            };
+            return createElement(context.default.FooterComponent, propsData);
+          }
+        }).$mount('#molgenis-footer');
+      });
+  </script>
+
 </#if>
 </body>
     <#if app_settings.trackingCodeFooter?has_content>
