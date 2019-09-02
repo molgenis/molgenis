@@ -31,13 +31,13 @@
       "errorCode": "Max",
       "field": "size",
       "value": "50000",
-      "detail": "moet kleiner of gelijk aan 10000 zijn"
+      "detail": "must be less than or equal to 10000"
     },
     {
       "errorCode": "Min",
       "field": "page",
       "value": "-1",
-      "detail": "moet groter of gelijk aan 0 zijn"
+      "detail": "must be greater than or equal to 0"
     }
   ]
 }
