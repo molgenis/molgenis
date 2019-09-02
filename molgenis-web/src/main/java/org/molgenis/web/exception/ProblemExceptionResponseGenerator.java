@@ -1,18 +1,17 @@
 package org.molgenis.web.exception;
 
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.validation.ConstraintViolation;
+import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.util.exception.ErrorCoded;
-import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.web.exception.Problem.Builder;
 import org.molgenis.web.exception.Problem.Error;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +25,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Component
 class ProblemExceptionResponseGenerator
     implements ExceptionResponseGenerator<ResponseEntity<Problem>> {
+
+  private final ContextMessageSource contextMessageSource;
+
+  ProblemExceptionResponseGenerator(ContextMessageSource contextMessageSource) {
+    this.contextMessageSource = requireNonNull(contextMessageSource);
+  }
 
   @Override
   public ExceptionResponseType getType() {
@@ -106,7 +111,10 @@ class ProblemExceptionResponseGenerator
               builder.setErrorCode(((ErrorCoded) throwable).getErrorCode());
               builder.setDetail(throwable.getLocalizedMessage());
             },
-            () -> builder.setDetail("An error occurred."));
+            () ->
+                builder.setDetail(
+                    contextMessageSource.getMessage(
+                        "org.molgenis.web.exception.ObjectError.generic")));
   }
 
   private void buildProblemErrorConstraintViolation(
@@ -116,12 +124,8 @@ class ProblemExceptionResponseGenerator
 
     String[] codes = objectError.getCodes();
     if (codes != null) {
-      MessageSource messageSource = MessageSourceHolder.getMessageSource();
-
       for (String code : codes) {
-        String message =
-            messageSource.getMessage(
-                code, objectError.getArguments(), null, LocaleContextHolder.getLocale());
+        String message = contextMessageSource.getMessage(code, objectError.getArguments());
         if (message != null && !message.equals('#' + code + '#')) {
           detail = message;
           detailCode = code;
