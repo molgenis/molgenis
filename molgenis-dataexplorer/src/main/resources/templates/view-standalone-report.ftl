@@ -3,7 +3,7 @@
 
 <@header css js/>
 
-<button class="btn btn-primary" id="view-full-dataset-btn">View all ${entityTypeLabel}</button>
+<button class="btn btn-primary" id="back-btn">Back</button>
 <hr>
 <#include viewName+".ftl">
 
@@ -13,5 +13,9 @@
     var entityTypeId = '${entityTypeId}'
     $('body').on('click', '#view-full-dataset-btn', function () {
         window.open(window.location.origin + molgenis.getContextUrl() + '?entity=' + entityTypeId, '_self')
+    })
+
+    $('#back-btn').click(function () {
+        window.history.back();
     })
 </script>
