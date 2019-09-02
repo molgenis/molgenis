@@ -10,11 +10,6 @@
 <@footer/>
 
 <script>
-    var entityTypeId = '${entityTypeId}'
-    $('body').on('click', '#view-full-dataset-btn', function () {
-        window.open(window.location.origin + molgenis.getContextUrl() + '?entity=' + entityTypeId, '_self')
-    })
-
     $('#back-btn').click(function () {
         window.history.back();
     })
