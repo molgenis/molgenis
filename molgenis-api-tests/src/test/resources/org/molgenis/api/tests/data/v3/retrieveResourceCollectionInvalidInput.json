@@ -1,0 +1,43 @@
+{
+  "type": "${baseUri}/input-invalid",
+  "title": "Bad Request",
+  "status": 400,
+  "errors": [
+    {
+      "errorCode": "API02",
+      "field": "expand",
+      "value": "myMref((id)",
+      "detail": "Unexpected token '(' while parsing the selection, line '1' position '7'."
+    },
+    {
+      "errorCode": "API02",
+      "field": "filter",
+      "value": "id,label,myXref,myMref(id))",
+      "detail": "Unexpected token ')' while parsing the selection, line '1' position '26'."
+    },
+    {
+      "errorCode": "API03",
+      "field": "q",
+      "value": "id=invalid=1",
+      "detail": "An error occurred while parsing the RSQL: 'cz.jirutka.rsql.parser.UnknownOperatorException: Unknown operator: =invalid='."
+    },
+    {
+      "errorCode": "API01",
+      "field": "sort",
+      "value": "--label",
+      "detail": "Unexpected token '-' while parsing the sort, line '1' position '1'."
+    },
+    {
+      "errorCode": "Max",
+      "field": "size",
+      "value": "50000",
+      "detail": "moet kleiner of gelijk aan 10000 zijn"
+    },
+    {
+      "errorCode": "Min",
+      "field": "page",
+      "value": "-1",
+      "detail": "moet groter of gelijk aan 0 zijn"
+    }
+  ]
+}

@@ -23,6 +23,7 @@ import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
 import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.test.TestResourceUtils;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.testng.annotations.AfterClass;
@@ -150,13 +151,30 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
+  @Test(dependsOnMethods = "testCreateResource")
+  public void testRetrieveResourceCollectionInvalidInput() throws IOException {
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "retrieveResourceCollectionInvalidInput.json",
+            ImmutableMap.of(
+                "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
+
+    given()
+        .get("/api/data/v3_MyDataset?q=id=invalid=1&filter=id,label,myXref,myMref(id))&expand=myMref((id)&sort=--label&page=-1&size=50000")
+        .then().log().all()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(isEqualJson(expectedJson, JSONCompareMode.LENIENT));
+  }
+
   @Test(
       dependsOnMethods = {
         "testRetrieveResource",
         "testRetrieveResourceSubResource",
         "testRetrieveResourceCollection",
         "testRetrieveResourceCollectionFilterExpand",
-        "testRetrieveResourceCollectionSortQuery"
+        "testRetrieveResourceCollectionSortQuery",
+        "testRetrieveResourceCollectionInvalidInput"
       })
   public void testUpdateResource() throws IOException {
     JSONArray jsonArray = new JSONArray();
