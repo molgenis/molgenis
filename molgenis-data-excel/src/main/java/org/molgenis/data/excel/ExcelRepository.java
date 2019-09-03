@@ -50,15 +50,13 @@ public class ExcelRepository extends AbstractRepository {
   private EntityType entityType;
 
   public ExcelRepository(
-      String fileName,
       Sheet sheet,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory) {
-    this(fileName, sheet, entityTypeFactory, attrMetaFactory, null);
+    this(sheet, entityTypeFactory, attrMetaFactory, null);
   }
 
   public ExcelRepository(
-      String fileName,
       Sheet sheet,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,

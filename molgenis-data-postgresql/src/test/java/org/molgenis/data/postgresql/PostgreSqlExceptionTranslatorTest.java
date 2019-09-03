@@ -486,7 +486,7 @@ class PostgreSqlExceptionTranslatorTest {
 
     Exception e =
         PostgreSqlExceptionTranslator.translateUndefinedColumnException(
-            mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals("Undefined column: 7 ERROR: column \"test\" does not exist", e.getMessage());
+            new PSQLException(serverErrorMessage));
+    assertEquals(e.getMessage(), "Undefined column: 7 ERROR: column \"test\" does not exist");
   }
 }

@@ -80,7 +80,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
       return null;
     }
 
-    return new ExcelRepository(name, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+    return new ExcelRepository(poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
   public int getNumberOfSheets() {
@@ -98,7 +98,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
     }
 
     return new ExcelRepository(
-        fileName, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+        poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
   public ExcelSheetWriter createWritable(

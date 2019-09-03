@@ -52,7 +52,7 @@ public class CsvRepository extends AbstractRepository {
         entityTypeFactory,
         attrMetaFactory,
         StringUtils.stripFilenameExtension(file.getName()),
-        null);
+        cellProcessors);
     this.separator = separator;
   }
 
@@ -66,7 +66,7 @@ public class CsvRepository extends AbstractRepository {
         entityTypeFactory,
         attrMetaFactory,
         StringUtils.stripFilenameExtension(file.getName()),
-        null);
+        cellProcessors);
   }
 
   public CsvRepository(
