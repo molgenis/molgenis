@@ -1,7 +1,6 @@
 package org.molgenis.api.data.v1;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.data.v1.RestController.BASE_URI;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -123,7 +122,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * @author erwin
  */
 @org.springframework.web.bind.annotation.RestController
-@RequestMapping(BASE_URI)
+@RequestMapping(RestController.BASE_URI)
 @Timed(value = "rest.v1", description = "Timing information for the REST API v1.", histogram = true)
 public class RestController {
   private static final Logger LOG = LoggerFactory.getLogger(RestController.class);

@@ -7,7 +7,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
@@ -78,7 +77,7 @@ import org.springframework.web.context.request.WebRequest;
 
 @Controller
 @Api("PermissionManager")
-@RequestMapping(URI)
+@RequestMapping(PermissionManagerController.URI)
 public class PermissionManagerController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 

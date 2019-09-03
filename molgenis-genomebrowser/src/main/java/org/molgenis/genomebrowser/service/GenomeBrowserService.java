@@ -3,7 +3,6 @@ package org.molgenis.genomebrowser.service;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata.GENOMEBROWSERSETTINGS;
-import static org.molgenis.genomebrowser.service.GenomeBrowserService.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.google.common.collect.Iterables;
@@ -34,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /** Service implements genomeBrowser specific business logic. */
 @Service
-@RequestMapping(URI)
+@RequestMapping(GenomeBrowserService.URI)
 public class GenomeBrowserService {
   public static final String URI = "/genomebrowser";
 
