@@ -4,30 +4,30 @@ public class UnitHelper {
   private UnitHelper() {}
 
   public static String superscriptToNumber(String str) {
-    str = str.replaceAll("⁰", "0");
-    str = str.replaceAll("¹", "1");
-    str = str.replaceAll("²", "2");
-    str = str.replaceAll("³", "3");
-    str = str.replaceAll("⁴", "4");
-    str = str.replaceAll("⁵", "5");
-    str = str.replaceAll("⁶", "6");
-    str = str.replaceAll("⁷", "7");
-    str = str.replaceAll("⁸", "8");
-    str = str.replaceAll("⁹", "9");
+    str = str.replace("⁰", "0");
+    str = str.replace("¹", "1");
+    str = str.replace("²", "2");
+    str = str.replace("³", "3");
+    str = str.replace("⁴", "4");
+    str = str.replace("⁵", "5");
+    str = str.replace("⁶", "6");
+    str = str.replace("⁷", "7");
+    str = str.replace("⁸", "8");
+    str = str.replace("⁹", "9");
     return str;
   }
 
   public static String numberToSuperscript(String str) {
-    str = str.replaceAll("0", "⁰");
-    str = str.replaceAll("1", "¹");
-    str = str.replaceAll("2", "²");
-    str = str.replaceAll("3", "³");
-    str = str.replaceAll("4", "⁴");
-    str = str.replaceAll("5", "⁵");
-    str = str.replaceAll("6", "⁶");
-    str = str.replaceAll("7", "⁷");
-    str = str.replaceAll("8", "⁸");
-    str = str.replaceAll("9", "⁹");
+    str = str.replace("0", "⁰");
+    str = str.replace("1", "¹");
+    str = str.replace("2", "²");
+    str = str.replace("3", "³");
+    str = str.replace("4", "⁴");
+    str = str.replace("5", "⁵");
+    str = str.replace("6", "⁶");
+    str = str.replace("7", "⁷");
+    str = str.replace("8", "⁸");
+    str = str.replace("9", "⁹");
     return str;
   }
 }
