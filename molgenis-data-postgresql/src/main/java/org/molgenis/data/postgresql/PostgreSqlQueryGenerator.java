@@ -773,7 +773,7 @@ class PostgreSqlQueryGenerator {
     switch (attributeType) {
       case BOOL:
         Boolean booleanDefaultValue = (Boolean) defaultTypedValue;
-        sqlDefaultValue = booleanDefaultValue ? "TRUE" : "FALSE";
+        sqlDefaultValue = Boolean.TRUE.equals(booleanDefaultValue) ? "TRUE" : "FALSE";
         break;
       case CATEGORICAL:
       case FILE:
@@ -967,8 +967,10 @@ class PostgreSqlQueryGenerator {
               Boolean bool = (Boolean) postgreSqlVal;
               //noinspection ConstantConditions (getPostgreSqlQueryValue() != null if r.getValue()
               // != null)
-              if (bool) predicate.append(" IS TRUE");
-              else predicate.append(" IS FALSE");
+              if (Boolean.TRUE.equals(bool)) {
+                predicate.append(" IS TRUE");
+              } else
+                predicate.append(" IS FALSE");
             } else {
               predicate.append(" =");
               predicate.append(" ? ");

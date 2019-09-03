@@ -106,7 +106,7 @@ public class JobScheduler {
       }
 
       // If not active, do not schedule it
-      if (!scheduledJob.getBoolean(ScheduledJobMetadata.ACTIVE)) {
+      if (!Boolean.TRUE.equals(scheduledJob.getBoolean(ScheduledJobMetadata.ACTIVE))) {
         return;
       }
 

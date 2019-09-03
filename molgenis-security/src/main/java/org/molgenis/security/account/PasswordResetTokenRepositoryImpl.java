@@ -37,7 +37,7 @@ class PasswordResetTokenRepositoryImpl implements PasswordResetTokenRepository {
   @Transactional
   @Override
   public String createToken(User user) {
-    if (!user.isActive()) {
+    if (!Boolean.TRUE.equals(user.isActive())) {
       throw new PasswordResetTokenCreationException();
     }
 

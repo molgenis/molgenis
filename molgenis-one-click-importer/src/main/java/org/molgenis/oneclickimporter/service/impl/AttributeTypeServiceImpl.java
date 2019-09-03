@@ -113,7 +113,7 @@ public class AttributeTypeServiceImpl implements AttributeTypeService {
         return TEXT;
       }
 
-      if (canValueBeUsedAsDate(value)) {
+      if (Boolean.TRUE.equals(canValueBeUsedAsDate(value))) {
         return DATE;
       }
     } else if (guess.equals(DECIMAL)) {

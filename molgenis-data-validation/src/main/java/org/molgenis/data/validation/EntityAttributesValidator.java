@@ -193,7 +193,8 @@ public class EntityAttributesValidator {
       List<Boolean> results =
           expressionValidator.resolveBooleanExpressions(nullableExpressions, entity);
       for (int i = 0; i < results.size(); i++) {
-        if (!results.get(i) && EntityUtils.isNullValue(entity, expressionAttributes.get(i))) {
+        if (!Boolean.TRUE.equals(results.get(i)) && EntityUtils
+            .isNullValue(entity, expressionAttributes.get(i))) {
           violations.add(
               createConstraintViolation(
                   entity,
@@ -224,7 +225,7 @@ public class EntityAttributesValidator {
       List<Boolean> results =
           expressionValidator.resolveBooleanExpressions(validationExpressions, entity);
       for (int i = 0; i < results.size(); i++) {
-        if (!results.get(i)) {
+        if (!Boolean.TRUE.equals(results.get(i))) {
           violations.add(
               createConstraintViolation(
                   entity,

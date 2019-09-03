@@ -17,13 +17,15 @@ class UserValidator {
   }
 
   private void validateAddOrUpdate(User user) {
-    if (user.isSuperuser() && !currentUserIsSuOrSystem()) {
+    if (Boolean.TRUE.equals(user.isSuperuser()) && !currentUserIsSuOrSystem()) {
       throw new UserSuModificationException(user);
     }
   }
 
   private void validateUpdate(User user, User updatedUser) {
-    if (!user.isSuperuser() && updatedUser.isSuperuser() && !currentUserIsSuOrSystem()) {
+    if (!Boolean.TRUE.equals(user.isSuperuser())
+        && updatedUser.isSuperuser()
+        && !currentUserIsSuOrSystem()) {
       throw new UserSuModificationException(user);
     }
   }
