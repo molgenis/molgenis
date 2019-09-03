@@ -50,9 +50,7 @@ public class ExcelRepository extends AbstractRepository {
   private EntityType entityType;
 
   public ExcelRepository(
-      Sheet sheet,
-      EntityTypeFactory entityTypeFactory,
-      AttributeFactory attrMetaFactory) {
+      Sheet sheet, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) {
     this(sheet, entityTypeFactory, attrMetaFactory, null);
   }
 

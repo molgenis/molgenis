@@ -97,8 +97,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
       return null;
     }
 
-    return new ExcelRepository(
-        poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+    return new ExcelRepository(poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
   public ExcelSheetWriter createWritable(

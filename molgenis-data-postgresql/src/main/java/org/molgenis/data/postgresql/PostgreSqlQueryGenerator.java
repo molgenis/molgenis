@@ -969,8 +969,9 @@ class PostgreSqlQueryGenerator {
               // != null)
               if (Boolean.TRUE.equals(bool)) {
                 predicate.append(" IS TRUE");
-              } else
+              } else {
                 predicate.append(" IS FALSE");
+              }
             } else {
               predicate.append(" =");
               predicate.append(" ? ");
