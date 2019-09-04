@@ -33,6 +33,7 @@ import org.molgenis.data.meta.MetadataAccessException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,13 +44,14 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private QueryV3Mapper queryMapperV3;
   @Mock private SortV3Mapper sortMapperV3;
   @Mock private FetchMapper fetchMapper;
+  @Mock private EntityValidator entityValidator;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     dataServiceV3Impl =
         new DataServiceV3Impl(
-            metaDataService, entityManagerV3, queryMapperV3, sortMapperV3, fetchMapper);
+            metaDataService, entityManagerV3, queryMapperV3, sortMapperV3, fetchMapper, entityValidator);
   }
 
   @Test

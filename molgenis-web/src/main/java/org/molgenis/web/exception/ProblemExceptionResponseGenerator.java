@@ -99,7 +99,7 @@ class ProblemExceptionResponseGenerator
     } else if (objectError.contains(Throwable.class)) {
       buildProblemErrorThrowable(objectError, builder);
     } else {
-      builder.setDetail("An error occurred.");
+      buildProblemErrorConstraintViolation(objectError, builder);
     }
   }
 
@@ -134,7 +134,13 @@ class ProblemExceptionResponseGenerator
       }
     }
 
-    builder.setDetail(detail != null ? detail : objectError.getDefaultMessage());
+    if (detail == null) {
+      detail = objectError.getDefaultMessage();
+      if (detail == null) {
+        detail = contextMessageSource.getMessage("org.molgenis.web.exception.ObjectError.generic");
+      }
+    }
+    builder.setDetail(detail);
     builder.setErrorCode(detailCode != null ? detailCode : objectError.getCode());
   }
 
