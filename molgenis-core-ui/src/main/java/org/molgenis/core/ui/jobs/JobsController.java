@@ -101,7 +101,7 @@ public class JobsController extends PluginController {
             e -> {
               Query<Entity> q =
                   dataService.query(e.getId()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
-              if (!Boolean.TRUE.equals(currentUser.isSuperuser())) {
+              if (!currentUser.isSuperuser()) {
                 q.and().eq(USER, currentUser.getUsername());
               }
               dataService.findAll(e.getId(), q).forEach(jobs::add);

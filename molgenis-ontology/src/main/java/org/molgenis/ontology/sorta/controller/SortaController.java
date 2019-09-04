@@ -199,7 +199,7 @@ public class SortaController extends PluginController {
       SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
       try {
         User currentUser = userAccountService.getCurrentUser();
-        if (Boolean.TRUE.equals(currentUser.isSuperuser())
+        if (currentUser.isSuperuser()
             || Objects.equal(sortaJobExecution.getUser().orElse(null), currentUser.getUsername())) {
           runAsSystem(
               () -> {
@@ -255,7 +255,7 @@ public class SortaController extends PluginController {
     SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
     if (sortaJobExecution != null) {
       User currentUser = userAccountService.getCurrentUser();
-      if (Boolean.TRUE.equals(currentUser.isSuperuser())
+      if (currentUser.isSuperuser()
           || Objects.equal(sortaJobExecution.getUser().orElse(null), currentUser.getUsername())) {
         runAsSystem(
             () -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));

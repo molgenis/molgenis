@@ -109,13 +109,7 @@ public class PermissionManagerController extends PluginController {
     model.addAttribute(
         "users",
         Lists.newArrayList(
-            getUsers().stream()
-                .filter(
-                    user -> {
-                      Boolean superuser = user.isSuperuser();
-                      return superuser == null || !superuser;
-                    })
-                .collect(Collectors.toList())));
+            getUsers().stream().filter(user -> !user.isSuperuser()).collect(Collectors.toList())));
     model.addAttribute("roles", getRoles());
     model.addAttribute("entityTypes", getEntityTypeDtos());
     return "view-permissionmanager";

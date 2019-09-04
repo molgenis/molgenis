@@ -113,7 +113,7 @@ public class AttributeTypeServiceImpl implements AttributeTypeService {
         return TEXT;
       }
 
-      if (Boolean.TRUE.equals(canValueBeUsedAsDate(value))) {
+      if (canValueBeUsedAsDate(value)) {
         return DATE;
       }
     } else if (guess.equals(DECIMAL)) {
@@ -208,7 +208,7 @@ public class AttributeTypeServiceImpl implements AttributeTypeService {
     }
   }
 
-  private Boolean canValueBeUsedAsDate(Object value) {
+  private boolean canValueBeUsedAsDate(Object value) {
     try {
       MolgenisDateFormat.parseLocalDate(value.toString());
     } catch (Exception e) {

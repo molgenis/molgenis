@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -52,7 +53,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
 
   @SuppressWarnings("StatementWithEmptyBody")
   @Test
-  void addCellProcessor_header() throws IOException {
+  public void addCellProcessorHeader() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
     when(processor.process("col1")).thenReturn("col1");
@@ -69,12 +70,38 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
 
   @SuppressWarnings("StatementWithEmptyBody")
   @Test
-  void addCellProcessor_data() throws IOException {
+  public void addCellProcessorData() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
     try (CsvRepository csvRepository =
         new CsvRepository(test, entityTypeFactory, attrMetaFactory, null)) {
       csvRepository.addCellProcessor(processor);
+      for (@SuppressWarnings("unused") Entity entity : csvRepository) {}
+      verify(processor).process("val1");
+      verify(processor).process("val2");
+    }
+  }
+
+  @SuppressWarnings("StatementWithEmptyBody")
+  @Test
+  public void addCellProcessorConstructor() throws IOException {
+    CellProcessor processor =
+        when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
+    try (CsvRepository csvRepository =
+        new CsvRepository(test, entityTypeFactory, attrMetaFactory, List.of(processor))) {
+      for (@SuppressWarnings("unused") Entity entity : csvRepository) {}
+      verify(processor).process("val1");
+      verify(processor).process("val2");
+    }
+  }
+
+  @SuppressWarnings("StatementWithEmptyBody")
+  @Test
+  public void addCellProcessorConstructor2() throws IOException {
+    CellProcessor processor =
+        when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
+    try (CsvRepository csvRepository =
+        new CsvRepository(test, entityTypeFactory, attrMetaFactory, List.of(processor), ',')) {
       for (@SuppressWarnings("unused") Entity entity : csvRepository) {}
       verify(processor).process("val1");
       verify(processor).process("val2");
@@ -133,7 +160,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iterator_noValues() throws IOException {
+  public void iteratorNoValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -142,7 +169,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iterator_emptyValues() throws IOException {
+  public void iteratorEmptyValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -152,7 +179,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iterator_tsv() throws IOException {
+  public void iteratorTsv() throws IOException {
     try (CsvRepository tsvRepository =
         new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = tsvRepository.iterator();
@@ -164,7 +191,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iterator_emptylines() throws IOException {
+  public void iteratorEmptyLines() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -176,7 +203,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iterator_emptylines_singlecol() throws IOException {
+  public void iteratorEmptyLinesSingleCol() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -192,7 +219,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void iteratorCaseSensitity() throws IOException {
+  public void iteratorCaseSensitivity() throws IOException {
     File csvFile = ResourceUtils.getFile("case-sensitivity.csv");
     try (CsvRepository csvRepository =
         new CsvRepository(csvFile, entityTypeFactory, attrMetaFactory, null)) {
