@@ -106,14 +106,15 @@ public class AttributeValidator {
     }
   }
 
-  void validateExpression(Attribute attr) {
-    if (attr.getExpression() != null) {
-      if (Arrays.asList(EMAIL, ENUM, HYPERLINK, SCRIPT, STRING, TEXT)
-          .contains(attr.getDataType())) {
-        // throws exception if invalid
-        TemplateExpressionEvaluator.getTemplate(attr);
-      }
+  private void validateExpression(Attribute attr) {
+    if (attr.getExpression() != null && isValidatable(attr)) {
+      // throws exception if invalid
+      TemplateExpressionEvaluator.getTemplate(attr);
     }
+  }
+
+  private static boolean isValidatable(Attribute attr) {
+    return Arrays.asList(EMAIL, ENUM, HYPERLINK, SCRIPT, STRING, TEXT).contains(attr.getDataType());
   }
 
   private static void validateParent(Attribute attr) {
