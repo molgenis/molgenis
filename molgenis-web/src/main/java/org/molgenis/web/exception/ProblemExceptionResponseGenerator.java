@@ -99,7 +99,7 @@ class ProblemExceptionResponseGenerator
     } else if (objectError.contains(Throwable.class)) {
       buildProblemErrorThrowable(objectError, builder);
     } else {
-      buildProblemErrorConstraintViolation(objectError, builder);
+      builder.setDetail("An error occurred.");
     }
   }
 
