@@ -18,6 +18,8 @@ import java.util.Map;
 public class TestResourceUtils {
   private static final Configuration CONFIGURATION = new Configuration(VERSION_2_3_21);
 
+  private TestResourceUtils() {}
+
   public static String getRenderedString(Class<?> contextClass, String resourceName)
       throws IOException {
     return getRenderedString(contextClass, resourceName, emptyMap());
