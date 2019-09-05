@@ -72,11 +72,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     Entity entity = entityManagerV3.create(entityType);
     entityManagerV3.populate(entityType, entity, requestValues);
 
-    EntityErrors entityErrors = new EntityErrors(entity);
-    entityValidator.validate(entity, entityErrors);
-    if (entityErrors.hasErrors()) {
-      throw new RepositoryConstraintViolationException(entityErrors);
-    }
+    validate(entity);
     repository.add(entity);
     return entity;
   }
@@ -214,6 +210,8 @@ class DataServiceV3Impl implements DataServiceV3 {
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 
+    validate(entity);
+
     repository.update(entity);
   }
 
@@ -232,6 +230,8 @@ class DataServiceV3Impl implements DataServiceV3 {
 
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
+
+    validate(entity);
 
     repository.update(entity);
   }
@@ -277,5 +277,13 @@ class DataServiceV3Impl implements DataServiceV3 {
   private Object toTypedEntityId(EntityType entityType, String entityId) {
     Attribute idAttribute = entityType.getIdAttribute();
     return EntityUtils.getTypedValue(entityId, idAttribute);
+  }
+
+  private void validate(Entity entity) {
+    EntityErrors entityErrors = new EntityErrors(entity);
+    entityValidator.validate(entity, entityErrors);
+    if (entityErrors.hasErrors()) {
+      throw new RepositoryConstraintViolationException(entityErrors);
+    }
   }
 }

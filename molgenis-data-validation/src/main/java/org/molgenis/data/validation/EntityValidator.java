@@ -17,8 +17,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+/**
+ * Spring validator for {@link Entity}.
+ *
+ * @see EntityAttributesValidator
+ */
 @Component
 public class EntityValidator implements Validator {
+  private static final String ERROR_CODE_NOT_NULL = "constraints.NotNull";
+  private static final String ERROR_CODE_ENUM = "constraints.Enum";
+  private static final String ERROR_CODE_NULLABLE_EXPRESSION = "constraints.NullableExpression";
+  private static final String ERROR_CODE_VALIDATION_EXPRESSION = "constraints.ValidationExpression";
+  private static final String ERROR_CODE_MAX_LENGTH = "constraints.MaxLength";
+  private static final String ERROR_CODE_NOT_EMPTY = "constraints.NotEmpty";
+  private static final String ERROR_CODE_RANGE = "constraints.Range";
+  private static final String ERROR_CODE_MIN = "constraints.Min";
+  private static final String ERROR_CODE_MAX = "constraints.Max";
+  private static final String ERROR_CODE_EMAIL = "constraints.Email";
+  private static final String ERROR_CODE_URI = "constraints.Uri";
 
   private final ExpressionValidator expressionValidator;
   private final EmailValidator emailValidator;
@@ -70,7 +86,7 @@ public class EntityValidator implements Validator {
     if (!enumOptions.contains(enumValue)) {
       errors.rejectValue(
           attribute.getName(),
-          "constraints.Enum",
+          ERROR_CODE_ENUM,
           new Object[] {String.join(", ", enumOptions)},
           null);
     }
@@ -86,7 +102,7 @@ public class EntityValidator implements Validator {
     if (!valid) {
       errors.rejectValue(
           attribute.getName(),
-          "constraints.NullableExpression",
+          ERROR_CODE_NULLABLE_EXPRESSION,
           new Object[] {nullableExpression},
           null);
     }
@@ -102,7 +118,7 @@ public class EntityValidator implements Validator {
     if (!valid) {
       errors.rejectValue(
           attribute.getName(),
-          "constraints.ValidationExpression",
+          ERROR_CODE_VALIDATION_EXPRESSION,
           new Object[] {validationExpression},
           null);
     }
@@ -126,7 +142,7 @@ public class EntityValidator implements Validator {
         String value = entity.getString(attribute);
         if (value != null && value.length() > maxLength) {
           errors.rejectValue(
-              attribute.getName(), "constraints.LengthMax", new Object[] {maxLength}, null);
+              attribute.getName(), ERROR_CODE_MAX_LENGTH, new Object[] {maxLength}, null);
         }
         break;
       case BOOL:
@@ -152,38 +168,64 @@ public class EntityValidator implements Validator {
       return;
     }
 
+    boolean valid;
+    String errorCode;
+
     AttributeType attributeType = attribute.getDataType();
     switch (attributeType) {
       case BOOL:
+        valid = entity.getBoolean(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
       case CATEGORICAL:
+      case FILE:
+      case XREF:
+        valid = entity.getEntity(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
       case DATE:
+        valid = entity.getLocalDate(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
       case DATE_TIME:
+        valid = entity.getInstant(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
       case DECIMAL:
+        valid = entity.getDouble(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
       case EMAIL:
       case ENUM:
-      case FILE:
       case HTML:
       case HYPERLINK:
-      case INT:
-      case LONG:
       case SCRIPT:
       case STRING:
       case TEXT:
-      case XREF:
-        if (entity.get(attribute) == null) {
-          errors.rejectValue(attribute.getName(), "constraints.NotNull", null, null);
-        }
+        valid = entity.getString(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
+      case INT:
+        valid = entity.getInt(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
+        break;
+      case LONG:
+        valid = entity.getLong(attribute) != null;
+        errorCode = ERROR_CODE_NOT_NULL;
         break;
       case CATEGORICAL_MREF:
       case MREF:
       case ONE_TO_MANY:
-        if (Iterables.isEmpty(entity.getEntities(attribute))) {
-          errors.rejectValue(attribute.getName(), "constraints.NotEmpty", null, null);
-        }
+        valid = !Iterables.isEmpty(entity.getEntities(attribute));
+        errorCode = ERROR_CODE_NOT_EMPTY;
         break;
       case COMPOUND:
       default:
         throw new UnexpectedEnumException(attributeType);
+    }
+
+    if(!valid) {
+      errors.rejectValue(attribute.getName(), errorCode, null, null);
     }
   }
 
@@ -238,14 +280,14 @@ public class EntityValidator implements Validator {
     Long max = range.getMax();
     if (min != null && max != null) {
       if (value < min || value > max) {
-        errors.rejectValue(attribute.getName(), "constraints.Range", new Object[] {min, max}, null);
+        errors.rejectValue(attribute.getName(), ERROR_CODE_RANGE, new Object[] {min, max}, null);
       }
     } else if (min != null) {
       if (value < min) {
-        errors.rejectValue(attribute.getName(), "constraints.Min", new Object[] {min}, null);
+        errors.rejectValue(attribute.getName(), ERROR_CODE_MIN, new Object[] {min}, null);
       }
     } else if (max != null && value > max) {
-      errors.rejectValue(attribute.getName(), "constraints.Max", new Object[] {max}, null);
+      errors.rejectValue(attribute.getName(), ERROR_CODE_MAX, new Object[] {max}, null);
     }
   }
 
@@ -261,7 +303,7 @@ public class EntityValidator implements Validator {
 
     boolean valid = emailValidator.isValid(emailValue, null);
     if (!valid) {
-      errors.rejectValue(attribute.getName(), "constraints.Email", null, null);
+      errors.rejectValue(attribute.getName(), ERROR_CODE_EMAIL, null, null);
     }
   }
 
@@ -278,7 +320,7 @@ public class EntityValidator implements Validator {
     try {
       new URI(hyperlinkValue);
     } catch (URISyntaxException e) {
-      errors.rejectValue(attribute.getName(), "constraints.Uri", null, null);
+      errors.rejectValue(attribute.getName(), ERROR_CODE_URI, null, null);
     }
   }
 }

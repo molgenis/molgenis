@@ -3,6 +3,9 @@ package org.molgenis.api.data.v3;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,7 +37,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.RepositoryConstraintViolationException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.validation.Errors;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -86,6 +91,30 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Test(expectedExceptions = MetadataAccessException.class)
   public void testCreateMetadataNotCapable() {
     dataServiceV3Impl.create("sys_md_EntityType", emptyMap());
+  }
+
+  @Test(expectedExceptions = RepositoryConstraintViolationException.class)
+  public void testCreateInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+    doAnswer(
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+    dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(repository).add(entity);
   }
 
   @SuppressWarnings("unchecked")
@@ -627,6 +656,39 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     dataServiceV3Impl.update("sys_md_Attribute", "myAttributeId", emptyMap());
   }
 
+  @Test(expectedExceptions = RepositoryConstraintViolationException.class)
+  public void testUpdateInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+
+    doAnswer(
+        answer -> {
+          Errors errors = answer.getArgument(1);
+          errors.reject("MyErrorCode");
+          return null;
+        })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+
+    dataServiceV3Impl.update("entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(entity).setIdValue("entityId");
+    verify(repository).update(entity);
+  }
+
   @Test
   public void testUpdatePartially() {
     @SuppressWarnings("unchecked")
@@ -675,6 +737,40 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Test(expectedExceptions = MetadataAccessException.class)
   public void testUpdatePartiallyMetadataNotCapable() {
     dataServiceV3Impl.updatePartial("sys_md_EntityType", "myEntityTypeId", emptyMap());
+  }
+
+  @Test(expectedExceptions = RepositoryConstraintViolationException.class)
+  public void testUpdatePartiallyInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(repository.findOneById("entityId")).thenReturn(entity);
+
+    doAnswer(
+        answer -> {
+          Errors errors = answer.getArgument(1);
+          errors.reject("MyErrorCode");
+          return null;
+        })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+
+    dataServiceV3Impl.updatePartial(
+        "entityTypeId", "entityId", Collections.singletonMap("attr", "value"));
+
+    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
+    verify(entity).setIdValue("entityId");
+    verify(repository).update(entity);
   }
 
   @SuppressWarnings("unchecked")
