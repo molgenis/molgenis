@@ -24,7 +24,7 @@ public class ServletUriComponentsBuilderTest {
     when(request.getServerPort()).thenReturn(80);
 
     assertEquals(
-        ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString(),
+        DecodingServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString(),
         "http://localhost/api/data/EntityType");
   }
 
@@ -44,7 +44,7 @@ public class ServletUriComponentsBuilderTest {
     when(request.getParameterMap()).thenReturn(params);
 
     assertEquals(
-        ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString(),
+        DecodingServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString(),
         "http://localhost/api/data/EntityType?query=a==b,c=in=('d e','f g','h i')&j==k&page=1&attr=#CHROM,POS,REF,ALT");
   }
 }
