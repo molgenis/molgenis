@@ -10,7 +10,7 @@ public class ScriptsI18nConfig {
   public static final String NAMESPACE = "scripts";
 
   @Bean
-  public PropertiesMessageSource ScriptsI18nMessageSource() {
+  public PropertiesMessageSource scriptsI18nMessageSource() {
     return new PropertiesMessageSource(NAMESPACE);
   }
 }
