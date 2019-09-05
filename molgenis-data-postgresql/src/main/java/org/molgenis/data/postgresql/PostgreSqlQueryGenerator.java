@@ -973,7 +973,7 @@ class PostgreSqlQueryGenerator {
               }
               //noinspection ConstantConditions (getPostgreSqlQueryValue() != null if r.getValue()
               // != null)
-              if (bool) {
+              if (Boolean.TRUE.equals(bool)) {
                 predicate.append(" IS TRUE");
               } else {
                 predicate.append(" IS FALSE");

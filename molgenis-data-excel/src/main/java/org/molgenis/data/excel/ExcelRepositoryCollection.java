@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ExcelRepositoryCollection extends FileRepositoryCollection {
   private static final String REPOSITORY_COLLECTION_NAME = "EXCEL";
 
-  private final String fileName;
   private final Workbook workbook;
 
   private EntityTypeFactory entityTypeFactory;
@@ -46,13 +45,12 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
 
   public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors)
       throws IOException, MolgenisInvalidFormatException {
-    this(file.getName(), new FileInputStream(file), cellProcessors);
+    this(new FileInputStream(file), cellProcessors);
   }
 
-  public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
+  public ExcelRepositoryCollection(InputStream in, CellProcessor... cellProcessors)
       throws IOException {
     super(ExcelFileExtensions.getExcel(), cellProcessors);
-    this.fileName = name;
     workbook = WorkbookFactory.create(in);
   }
 

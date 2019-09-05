@@ -29,7 +29,7 @@ class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest {
   @BeforeEach
   void beforeMethod() throws MolgenisInvalidFormatException, IOException {
     is = getClass().getResourceAsStream("/test.xls");
-    excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
+    excelRepositoryCollection = new ExcelRepositoryCollection(is);
     excelRepositoryCollection.setEntityTypeFactory(entityTypeFactory);
     excelRepositoryCollection.setAttributeFactory(attrMetaFactory);
   }
