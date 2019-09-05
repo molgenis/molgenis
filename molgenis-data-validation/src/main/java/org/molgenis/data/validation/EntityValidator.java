@@ -224,7 +224,7 @@ public class EntityValidator implements Validator {
         throw new UnexpectedEnumException(attributeType);
     }
 
-    if(!valid) {
+    if (!valid) {
       errors.rejectValue(attribute.getName(), errorCode, null, null);
     }
   }

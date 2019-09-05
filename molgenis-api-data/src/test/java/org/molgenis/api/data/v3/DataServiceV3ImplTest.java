@@ -674,11 +674,11 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(entityManagerV3.create(entityType)).thenReturn(entity);
 
     doAnswer(
-        answer -> {
-          Errors errors = answer.getArgument(1);
-          errors.reject("MyErrorCode");
-          return null;
-        })
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
         .when(entityValidator)
         .validate(eq(entity), any(Errors.class));
 
@@ -757,11 +757,11 @@ public class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(repository.findOneById("entityId")).thenReturn(entity);
 
     doAnswer(
-        answer -> {
-          Errors errors = answer.getArgument(1);
-          errors.reject("MyErrorCode");
-          return null;
-        })
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
         .when(entityValidator)
         .validate(eq(entity), any(Errors.class));
 
