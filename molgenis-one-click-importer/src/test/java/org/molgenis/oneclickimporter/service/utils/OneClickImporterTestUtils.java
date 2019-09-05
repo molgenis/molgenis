@@ -34,8 +34,7 @@ public class OneClickImporterTestUtils {
     return csvService.buildLinesFromFile(file);
   }
 
-  public static File loadFile(Class<?> clazz, String fileName)
-      throws IOException, InvalidFormatException, URISyntaxException {
+  public static File loadFile(Class<?> clazz, String fileName) throws URISyntaxException {
     URL resourceUrl = Resources.getResource(clazz, fileName);
     return new File(new URI(resourceUrl.toString()).getPath());
   }

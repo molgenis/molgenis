@@ -302,8 +302,7 @@ public class RestControllerV2 {
   public EntityCollectionBatchCreateResponseBodyV2 createEntities(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -363,8 +362,7 @@ public class RestControllerV2 {
   public String copyEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid CopyEntityRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     // No repo
     if (!dataService.hasRepository(entityTypeId))
       throw new UnknownEntityTypeException(entityTypeId);
@@ -428,8 +426,7 @@ public class RestControllerV2 {
   public synchronized void updateEntities(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -464,8 +461,7 @@ public class RestControllerV2 {
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {

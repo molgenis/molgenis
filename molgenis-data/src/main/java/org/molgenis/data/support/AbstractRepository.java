@@ -9,7 +9,6 @@ import static com.google.common.collect.Streams.stream;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -62,7 +61,7 @@ public abstract class AbstractRepository implements Repository<Entity> {
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() {}
 
   @Override
   public long count(Query<Entity> q) {

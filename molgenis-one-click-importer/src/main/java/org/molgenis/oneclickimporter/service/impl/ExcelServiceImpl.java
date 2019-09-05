@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -22,8 +21,7 @@ public class ExcelServiceImpl implements ExcelService {
   private static final Logger LOG = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
   @Override
-  public List<Sheet> buildExcelSheetsFromFile(File file)
-      throws IOException, InvalidFormatException, EmptySheetException {
+  public List<Sheet> buildExcelSheetsFromFile(File file) throws EmptySheetException {
     List<Sheet> sheets = newArrayList();
     try (Workbook workbook = WorkbookFactory.create(file)) {
       int numberOfSheets = workbook.getNumberOfSheets();
