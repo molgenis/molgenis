@@ -1,4 +1,4 @@
-package org.molgenis.script.controller;
+package org.molgenis.script;
 
 import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.springframework.context.annotation.Bean;
