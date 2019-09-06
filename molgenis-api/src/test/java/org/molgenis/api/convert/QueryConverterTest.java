@@ -46,4 +46,10 @@ public class QueryConverterTest extends AbstractMockitoTest {
     String rsqlQuery = "illegalQuery";
     queryConverter.convert(rsqlQuery);
   }
+
+  @Test(expectedExceptions = UnknownQueryOperatorException.class, expectedExceptionsMessageRegExp = "operator:=illegalOperator=")
+  public void testCreateQueryUnknownQueryOperatorException() {
+    String rsqlQuery = "item=illegalOperator=value";
+    queryConverter.convert(rsqlQuery);
+  }
 }

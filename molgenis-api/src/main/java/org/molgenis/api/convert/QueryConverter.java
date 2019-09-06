@@ -4,7 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
+import cz.jirutka.rsql.parser.UnknownOperatorException;
 import cz.jirutka.rsql.parser.ast.Node;
+import javax.annotation.Nonnull;
 import org.molgenis.api.model.Query;
 import org.springframework.core.convert.converter.Converter;
 
@@ -18,12 +20,18 @@ public class QueryConverter implements Converter<String, Query> {
   }
 
   @Override
-  public Query convert(String source) {
+  public Query convert(@Nonnull String source) {
     Node node;
     try {
       node = rsqlParser.parse(source);
     } catch (RSQLParserException e) {
-      throw new QueryParseException(e);
+      Throwable cause = e.getCause();
+      if (cause instanceof UnknownOperatorException) {
+        String operator = ((UnknownOperatorException) cause).getOperator();
+        throw new UnknownQueryOperatorException(operator);
+      } else {
+        throw new QueryParseException(e);
+      }
     }
     return node.accept(rsqlVisitor);
   }
