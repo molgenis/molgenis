@@ -22,6 +22,15 @@ public class QueryParseException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {parseException.getLocalizedMessage()};
+    Throwable cause = parseException.getCause();
+
+    // remove token 'cz.jirutka.rsql.parser.TokenMgrError' from localized exception message
+    // use getClass() instead of instanceof because cz.jirutka.rsql.parser.TokenMgrError is package
+    // private
+    String localizedMessage =
+        cause.getClass().getName().equals("cz.jirutka.rsql.parser.TokenMgrError")
+            ? cause.getLocalizedMessage()
+            : parseException.getLocalizedMessage();
+    return new Object[] {localizedMessage};
   }
 }
