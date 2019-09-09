@@ -6,7 +6,7 @@ import javax.validation.constraints.Min;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 
-public class ReadEntityTypesRequest {
+public class ReadAttributesRequest {
   @Min(0)
   private int page = 0;
 
@@ -21,6 +21,8 @@ public class ReadEntityTypesRequest {
   private Sort sort;
 
   private Query q;
+
+  private String entityTypeId;
 
   public int getPage() {
     return page;
@@ -52,5 +54,13 @@ public class ReadEntityTypesRequest {
 
   public void setQ(Query q) {
     this.q = q;
+  }
+
+  public String getEntityTypeId() {
+    return entityTypeId;
+  }
+
+  public void setEntityTypeId(String entityTypeId) {
+    this.entityTypeId = entityTypeId;
   }
 }

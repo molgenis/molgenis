@@ -7,13 +7,13 @@ import java.util.List;
 import org.molgenis.api.data.v3.FetchMapper;
 import org.molgenis.api.data.v3.SortV3Mapper;
 import org.molgenis.api.model.Query;
-import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
@@ -41,8 +41,7 @@ public class MetadataServiceImpl {
     this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
   }
 
-  public EntityTypes findEntityTypes(
-      Query query, Selection filter, Selection expand, Sort sort, int size, int number) {
+  public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
     Repository<org.molgenis.data.meta.model.EntityType> repository =
         metadataService
             .getRepository(
@@ -50,15 +49,15 @@ public class MetadataServiceImpl {
                 org.molgenis.data.meta.model.EntityType.class)
             .orElseThrow(
                 () -> new UnknownRepositoryException(EntityTypeMetadata.ENTITY_TYPE_META_DATA));
-    Fetch fetch = fetchMapper.toFetch(repository.getEntityType(), filter, expand);
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
-        query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
+        query != null
+            ? (org.molgenis.data.Query<EntityType>) queryMapper.map(query, repository)
+            : new QueryImpl<>(repository);
 
     // get entities
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> findQuery =
         new QueryImpl<>(molgenisQuery);
-    findQuery.fetch(fetch);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapperV3.map(sort));
@@ -74,20 +73,62 @@ public class MetadataServiceImpl {
     return EntityTypes.builder().setEntityTypes(entityTypes).setTotal(count).build();
   }
 
-  public EntityType findEntityType(String identifier, Selection filter, Selection expand) {
+  public EntityType findEntityType(String identifier) {
     Repository<EntityType> repository =
         metadataService
             .getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)
             .orElseThrow(
                 () -> new UnknownRepositoryException(EntityTypeMetadata.ENTITY_TYPE_META_DATA));
 
-    Fetch fetch = fetchMapper.toFetch(entityTypeMetadata, filter, expand);
-
-    EntityType entityType = repository.findOneById(identifier, fetch);
+    EntityType entityType = repository.findOneById(identifier);
     if (entityType == null) {
-      throw new UnknownEntityException(EntityTypeMetadata.ENTITY_TYPE_META_DATA, identifier);
+      throw new UnknownEntityTypeException(identifier);
     }
 
     return entityType;
+  }
+
+  public Attributes findAttributes(
+      String entityTypeId, Query query, Sort sort, int size, int number) {
+    Repository<org.molgenis.data.meta.model.Attribute> repository =
+        metadataService
+            .getRepository(
+                AttributeMetadata.ATTRIBUTE_META_DATA, org.molgenis.data.meta.model.Attribute.class)
+            .orElseThrow(
+                () -> new UnknownRepositoryException(AttributeMetadata.ATTRIBUTE_META_DATA));
+
+    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> molgenisQuery =
+        query != null
+            ? (org.molgenis.data.Query<Attribute>) queryMapper.map(query, repository)
+            : new QueryImpl<>(repository);
+
+    boolean nest = !molgenisQuery.getRules().isEmpty();
+    if (nest) {
+      molgenisQuery.and();
+      molgenisQuery.nest();
+    }
+    molgenisQuery.eq(AttributeMetadata.ENTITY, entityTypeId);
+    if (nest) {
+      molgenisQuery.unnest();
+    }
+    // get entities
+    org.molgenis.data.Query<Attribute> findQuery = new QueryImpl<>(molgenisQuery);
+    findQuery.offset(number * size);
+    findQuery.pageSize(size);
+    findQuery.sort(sortMapperV3.map(sort));
+    List<org.molgenis.data.meta.model.Attribute> attributes =
+        repository.findAll(findQuery).collect(toList());
+
+    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> countQuery =
+        new QueryImpl<>(molgenisQuery);
+    countQuery.offset(0);
+    countQuery.pageSize(Integer.MAX_VALUE);
+    int count = Math.toIntExact(repository.count(countQuery));
+
+    return Attributes.builder().setAttributes(attributes).setTotal(count).build();
+  }
+
+  public Attribute findAttribute(String entityTypeId, String attributeId) {
+    return null;
   }
 }

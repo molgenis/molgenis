@@ -1,7 +1,6 @@
 package org.molgenis.api.meta.model;
 
 import com.google.auto.value.AutoValue;
-import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
@@ -16,9 +15,9 @@ public abstract class AttributeResponse {
   // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
   @CheckForNull
-  public abstract Map<String, Object> getData();
+  public abstract Attribute getData();
 
-  public static AttributeResponse create(LinksResponse linksResponse, Map<String, Object> newData) {
+  public static AttributeResponse create(LinksResponse linksResponse, Attribute newData) {
     return builder().setLink(linksResponse).setData(newData).build();
   }
 
@@ -33,7 +32,7 @@ public abstract class AttributeResponse {
 
     public abstract Builder setLink(LinksResponse linksResponse);
 
-    public abstract Builder setData(Map<String, Object> newData);
+    public abstract Builder setData(Attribute newData);
 
     public abstract AttributeResponse build();
   }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeType;
@@ -23,13 +24,14 @@ class QueryMapper {
     this.rsqlValueParser = requireNonNull(rsqlValueParser);
   }
 
-  public org.molgenis.data.Query<EntityType> map(Query query, Repository<EntityType> repository) {
-    QueryImpl<EntityType> entityQuery = new QueryImpl<>(repository);
+  public org.molgenis.data.Query<? extends Entity> map(
+      Query query, Repository<? extends Entity> repository) {
+    QueryImpl<? extends Entity> entityQuery = new QueryImpl<>(repository);
     map(query, entityQuery, repository.getEntityType());
     return entityQuery;
   }
 
-  private void map(Query query, QueryImpl<EntityType> entityQuery, EntityType entityType) {
+  private void map(Query query, QueryImpl<? extends Entity> entityQuery, EntityType entityType) {
     Operator operator = query.getOperator();
     switch (operator) {
       case EQUALS:

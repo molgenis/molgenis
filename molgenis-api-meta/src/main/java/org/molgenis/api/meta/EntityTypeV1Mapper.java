@@ -3,6 +3,7 @@ package org.molgenis.api.meta;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
 import java.net.URI;
@@ -11,11 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import org.molgenis.api.meta.model.Attribute.Builder;
 import org.molgenis.api.meta.model.AttributeResponse;
+import org.molgenis.api.meta.model.AttributesResponse;
 import org.molgenis.api.meta.model.EntityTypeResponse;
 import org.molgenis.api.meta.model.EntityTypesResponse;
-import org.molgenis.api.model.Selection;
+import org.molgenis.api.meta.model.I18nResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -23,7 +25,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.web.support.ServletUriComponentsBuilder;
@@ -43,16 +44,10 @@ public class EntityTypeV1Mapper {
     this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
   }
 
-  public EntityTypesResponse map(
-      EntityTypes entityTypes,
-      Selection filter,
-      Selection expand,
-      int size,
-      int number,
-      int total) {
+  public EntityTypesResponse map(EntityTypes entityTypes, int size, int number, int total) {
     List<EntityTypeResponse> results = new ArrayList<>();
     for (EntityType entityType : entityTypes.getEntityTypes()) {
-      results.add(mapInternal(entityType, filter, expand));
+      results.add(mapInternal(entityType));
     }
 
     return EntityTypesResponse.create(
@@ -61,60 +56,42 @@ public class EntityTypeV1Mapper {
         PageResponse.create(size, entityTypes.getTotal(), entityTypes.getTotal() / size, number));
   }
 
-  private EntityTypeResponse mapInternal(
-      EntityType entityType, Selection filter, Selection expand) {
-    Map<String, Object> entityTypeMap = new HashMap<>();
-    for (String attr : entityTypeMetadata.getAttributeNames()) {
-      switch (attr) {
-        case EntityTypeMetadata.ATTRIBUTES:
-          setValue(
-              entityTypeMap,
-              ATTRIBUTES,
-              mapAttributes(
-                  entityType.getAllAttributes(),
-                  filter.getSelection(ATTRIBUTES).orElse(Selection.EMPTY_SELECTION),
-                  expand.hasItem(ATTRIBUTES)),
-              filter);
-          break;
-        case EntityTypeMetadata.EXTENDS:
-          setValue(
-              entityTypeMap,
-              EntityTypeMetadata.EXTENDS,
-              entityType.getExtends() != null
-                  ? mapInternal(entityType.getExtends(), filter, expand)
-                  : null,
-              filter);
-          break;
-        case EntityTypeMetadata.PACKAGE:
-          Package pack = entityType.getPackage();
-          URI packageURI = pack != null ? createEntityResponseUri(pack):null;
-          setValue(
-              entityTypeMap,
-              EntityTypeMetadata.PACKAGE,
-              LinksResponse.create(null, packageURI, null),
-              filter);
-          break;
-        case EntityTypeMetadata.TAGS:
-          setValue(
-              entityTypeMap,
-              EntityTypeMetadata.TAGS,
-              StreamSupport.stream(entityType.getTags().spliterator(), false)
-                  .map(this::mapTag)
-                  .collect(Collectors.toList()),
-              filter);
-          break;
-        default:
-          setValue(entityTypeMap, attr, entityType.get(attr), filter);
-      }
-    }
+  private EntityTypeResponse mapInternal(EntityType entityType) {
+    org.molgenis.api.meta.model.EntityType.Builder builder =
+        org.molgenis.api.meta.model.EntityType.builder();
+    builder.setId(entityType.getId());
+    builder.setPackage_(
+        entityType.getPackage() != null ? createEntityResponseUri(entityType.getPackage()) : null);
+    builder.setLabel(getI18nEntityTypeLabel(entityType));
+    builder.setDescription(getI18nEntityTypeDesc(entityType));
+    builder.setAttributes(mapInternal(entityType.getOwnAtomicAttributes()));
+    builder.setLabelAttribute(getLabelAttribute(entityType));
+    builder.setIdAttribute(getIdAttribute(entityType));
+    builder.setAbstract_(entityType.isAbstract());
+    builder.setExtends(
+        entityType.getExtends() != null ? mapInternal(entityType.getExtends()) : null);
+    builder.setBackend(entityType.getBackend());
+    builder.setIndexingDepth(entityType.getIndexingDepth());
 
-    return EntityTypeResponse.create(entityType.getId(), createLinksResponse(), entityTypeMap);
+    return EntityTypeResponse.create(entityType.getId(), createLinksResponse(), builder.build());
   }
 
-  private void setValue(Map<String, Object> valueMap, String attr, Object value, Selection filter) {
-    if (filter.hasItem(attr) || !filter.hasItems()) {
-      valueMap.put(attr, value);
+  private String getIdAttribute(EntityType entityType) {
+    for (Attribute attribute : entityType.getOwnAllAttributes()) {
+      if (attribute.isIdAttribute()) {
+        return attribute.getIdValue().toString();
+      }
     }
+    return null;
+  }
+
+  private String getLabelAttribute(EntityType entityType) {
+    for (Attribute attribute : entityType.getOwnAllAttributes()) {
+      if (attribute.isLabelAttribute()) {
+        return attribute.getIdValue().toString();
+      }
+    }
+    return null;
   }
 
   private LinksResponse createLinksResponse() {
@@ -122,72 +99,91 @@ public class EntityTypeV1Mapper {
     return LinksResponse.create(null, self, null);
   }
 
-  private List<AttributeResponse> mapAttributes(
-      Iterable<org.molgenis.data.meta.model.Attribute> allAttributes,
-      Selection filter,
-      boolean expand) {
+  AttributesResponse mapAttributes(Attributes attributes, int size, int number, int total) {
+    return AttributesResponse.create(
+        createLinksResponse(number, size, total),
+        attributes.getAttributes().stream()
+            .map(attr -> mapAttribute(attr))
+            .collect(Collectors.toList()),
+        PageResponse.create(size, attributes.getTotal(), attributes.getTotal() / size, number));
+  }
+
+  private List<AttributeResponse> mapInternal(
+      Iterable<org.molgenis.data.meta.model.Attribute> allAttributes) {
     List<AttributeResponse> result = new ArrayList<>();
     for (Attribute attr : allAttributes) {
-      Map<String, Object> attrMap = null;
-      if (expand) {
-        attrMap = getFilteredAttributeMap(filter, attr);
-      }
-      result.add(
-          AttributeResponse.create(
-              LinksResponse.create(null, createAttributeResponseUri(attr), null),
-              new HashMap<>(attrMap)));
+      result.add(mapAttribute(attr));
     }
     return result;
   }
 
-  private Map<String, Object> getFilteredAttributeMap(Selection filter, Attribute attr) {
-    Map<String, Object> attrMap;
-    attrMap = new HashMap<>();
-    for (String attrAttr : attributeMetadata.getAttributeNames()) {
-      switch (attrAttr) {
-        case AttributeMetadata.REF_ENTITY_TYPE:
-          if (EntityTypeUtils.isReferenceType(attr)) {
-            setValue(
-                attrMap,
-                AttributeMetadata.REF_ENTITY_TYPE,
-                createEntityResponseUri(attr.getRefEntity()),
-                filter);
-          }
-          break;
-        case AttributeMetadata.PARENT:
-          Attribute parent = attr.getParent();
-          URI parentURI = parent != null ? createAttributeResponseUri(parent) : null;
-          setValue(
-              attrMap,
-              AttributeMetadata.PARENT,
-              parentURI,
-              filter);
-          break;
-        case AttributeMetadata.CHILDREN:
-          setValue(
-              attrMap,
-              AttributeMetadata.CHILDREN,
-              StreamSupport.stream(attr.getChildren().spliterator(), false)
-                  .map(this::createEntityResponseUri)
-                  .collect(Collectors.toList()),
-              filter);
-          break;
-        case AttributeMetadata.TAGS:
-          setValue(
-              attrMap,
-              AttributeMetadata.TAGS,
-              StreamSupport.stream(attr.getTags().spliterator(), false)
-                  .map(this::createEntityResponseUri)
-                  .collect(Collectors.toList()),
-              filter);
-          break;
-        case AttributeMetadata.ENTITY:
-          break;
-        default:
-          setValue(attrMap, attrAttr, attr.get(attrAttr), filter);
-      }
+  AttributeResponse mapAttribute(Attribute attr) {
+    org.molgenis.api.meta.model.Attribute attribute = mapInternal(attr);
+    return AttributeResponse.create(
+        LinksResponse.create(null, createAttributeResponseUri(attr), null), attribute);
+  }
+
+  private org.molgenis.api.meta.model.Attribute mapInternal(Attribute attr) {
+    Builder builder = org.molgenis.api.meta.model.Attribute.builder();
+    builder.setId(attr.getIdentifier());
+    builder.setName(attr.getName());
+    builder.setSequenceNr(attr.getSequenceNumber());
+    builder.setType(attr.getDataType());
+    builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
+    if (EntityTypeUtils.isReferenceType(attr)) {
+      builder.setRefEntityType(map(attr.getRefEntity()));
     }
-    return attrMap;
+    builder.setCascadeDelete(attr.getCascadeDelete());
+    builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy()) : null);
+    builder.setOrderBy(attr.getOrderBy());
+    builder.setLabel(getI18nAttrLabel(attr));
+    builder.setDescription(getI18nAttrDesc(attr));
+    builder.setNullable(attr.isNillable());
+    builder.setAuto(attr.isAuto());
+    builder.setVisible(attr.isVisible());
+    builder.setUnique(attr.isUnique());
+    builder.setReadOnly(attr.isReadOnly());
+    builder.setAggregatable(attr.isAggregatable());
+    builder.setExpression(attr.getExpression());
+    builder.setEnumOptions(attr.getEnumOptions().toString());
+    builder.setRangeMin(attr.getRangeMin());
+    builder.setRangeMax(attr.getRangeMax());
+    builder.setParentAttributeId(
+        attr.getParent() != null ? attr.getParent().getIdentifier() : null);
+    builder.setNullableExpression(attr.getNullableExpression());
+    builder.setVisibleExpression(attr.getVisibleExpression());
+    builder.setValidationExpression(attr.getValidationExpression());
+    builder.setDefaultValue(attr.getDefaultValue());
+
+    return builder.build();
+  }
+
+  private I18nResponse getI18nAttrLabel(Attribute attr) {
+    String defaultValue = attr.getLabel();
+    Map<String, String> translations = new HashMap<>();
+    getLanguageCodes().forEach(code -> translations.put(code, attr.getLabel(code)));
+    return I18nResponse.create(defaultValue, translations);
+  }
+
+  private I18nResponse getI18nAttrDesc(Attribute attr) {
+    String defaultValue = attr.getDescription();
+    Map<String, String> translations = new HashMap<>();
+    getLanguageCodes().forEach(code -> translations.put(code, attr.getDescription(code)));
+    return I18nResponse.create(defaultValue, translations);
+  }
+
+  private I18nResponse getI18nEntityTypeLabel(EntityType entityType) {
+    String defaultValue = entityType.getLabel();
+    Map<String, String> translations = new HashMap<>();
+    getLanguageCodes().forEach(code -> translations.put(code, entityType.getLabel(code)));
+    return I18nResponse.create(defaultValue, translations);
+  }
+
+  private I18nResponse getI18nEntityTypeDesc(EntityType entityType) {
+    String defaultValue = entityType.getDescription();
+    Map<String, String> translations = new HashMap<>();
+    getLanguageCodes().forEach(code -> translations.put(code, entityType.getDescription(code)));
+    return I18nResponse.create(defaultValue, translations);
   }
 
   private LinksResponse createLinksResponse(int number, int size, int total) {
@@ -241,7 +237,7 @@ public class EntityTypeV1Mapper {
     return uriComponentsBuilder.build().toUri();
   }
 
-  public EntityTypeResponse map(EntityType entityType, Selection filter, Selection expand) {
-    return mapInternal(entityType, filter, expand);
+  public EntityTypeResponse map(EntityType entityType) {
+    return mapInternal(entityType);
   }
 }

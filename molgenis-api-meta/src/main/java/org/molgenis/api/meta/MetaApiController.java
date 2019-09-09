@@ -5,12 +5,16 @@ import static java.util.Objects.requireNonNull;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
+import org.molgenis.api.meta.model.AttributeResponse;
+import org.molgenis.api.meta.model.AttributesResponse;
 import org.molgenis.api.meta.model.EntityTypeResponse;
 import org.molgenis.api.meta.model.EntityTypesResponse;
+import org.molgenis.api.meta.model.ReadAttributeRequest;
+import org.molgenis.api.meta.model.ReadAttributesRequest;
 import org.molgenis.api.meta.model.ReadEntityTypeRequest;
 import org.molgenis.api.meta.model.ReadEntityTypesRequest;
-import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,27 +37,48 @@ class MetaApiController extends ApiController {
 
   @GetMapping("/")
   public EntityTypesResponse getEntityTypes(@Valid ReadEntityTypesRequest entitiesRequest) {
-    Selection filter = entitiesRequest.getFilter();
-    Selection expand = entitiesRequest.getExpand();
     int size = entitiesRequest.getSize();
     int page = entitiesRequest.getPage();
     Sort sort = entitiesRequest.getSort();
 
     EntityTypes entityTypes =
-        metadataService.findEntityTypes(
-            entitiesRequest.getQ().orElse(null), filter, expand, sort, size, page);
+        metadataService.findEntityTypes(entitiesRequest.getQ().orElse(null), sort, size, page);
 
-    return entityTypeMapper.map(entityTypes, filter, expand, size, page, entityTypes.getTotal());
+    return entityTypeMapper.map(entityTypes, size, page, entityTypes.getTotal());
   }
 
   @GetMapping("/{entityTypeId}")
   public EntityTypeResponse getEntityType(@Valid ReadEntityTypeRequest readEntityTypeRequest) {
-    Selection filter = readEntityTypeRequest.getFilter();
-    Selection expand = readEntityTypeRequest.getExpand();
 
-    EntityType entityType =
-        metadataService.findEntityType(readEntityTypeRequest.getEntityTypeId(), filter, expand);
+    EntityType entityType = metadataService.findEntityType(readEntityTypeRequest.getEntityTypeId());
 
-    return entityTypeMapper.map(entityType, filter, expand);
+    return entityTypeMapper.map(entityType);
+  }
+
+  @GetMapping("/{entityTypeId}/attributes")
+  public AttributesResponse getAttributes(@Valid ReadAttributesRequest readAttributesRequest) {
+    int size = readAttributesRequest.getSize();
+    int page = readAttributesRequest.getPage();
+    Sort sort = readAttributesRequest.getSort();
+
+    Attributes attributes =
+        metadataService.findAttributes(
+            readAttributesRequest.getEntityTypeId(),
+            readAttributesRequest.getQ().orElse(null),
+            sort,
+            size,
+            page);
+
+    return entityTypeMapper.mapAttributes(attributes, size, page, attributes.getTotal());
+  }
+
+  @GetMapping("/{entityTypeId}/attributes/{attributeId}")
+  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
+
+    Attribute attribute =
+        metadataService.findAttribute(
+            readAttributeRequest.getEntityTypeId(), readAttributeRequest.getAttributeId());
+
+    return entityTypeMapper.mapAttribute(attribute);
   }
 }
