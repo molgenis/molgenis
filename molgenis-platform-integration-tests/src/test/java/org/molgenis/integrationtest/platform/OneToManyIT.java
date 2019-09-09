@@ -5,6 +5,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.OneToManyTestHarness.ATTR_AUTHOR;
 import static org.molgenis.data.OneToManyTestHarness.ATTR_BOOKS;
 import static org.molgenis.data.OneToManyTestHarness.ATTR_CHILDREN;
@@ -32,7 +33,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -43,6 +43,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
@@ -58,6 +63,7 @@ import org.molgenis.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,17 +73,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class OneToManyIT extends AbstractTestNGSpringContextTests {
+public class OneToManyIT extends AbstractMockitoSpringContextTests {
   private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
   private static final String USERNAME = "onetomany-user";
 
@@ -85,13 +86,13 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   @Autowired private OneToManyTestHarness oneToManyTestHarness;
   @Autowired private DataService dataService;
 
-  @BeforeClass
+  @BeforeEach
   public void setUp() {
     populateUserPermissions();
     waitForWorkToBeFinished(indexService, LOG);
   }
 
-  @AfterMethod
+  @AfterEach
   public void afterMethod() {
     runAsSystem(
         () -> {
@@ -108,7 +109,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+  @ParameterizedTest
+  @MethodSource("allTestCaseDataProvider")
   public void testAuthorAndBookInsert(TestCaseType testCase) {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 
@@ -151,7 +153,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+  @Test
   public void testPersonInsert(TestCaseType testCase) {
     List<Entity> persons = importPersons(testCase);
 
@@ -176,7 +178,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testL1SingleEntityUpdate() {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
@@ -212,7 +214,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testL1StreamingEntityUpdate() {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
@@ -248,7 +250,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testL1EntitySingleEntityDelete() {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
@@ -271,7 +273,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testL1EntityStreamingEntityDelete() {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(XREF_NULLABLE);
     try {
@@ -294,7 +296,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+  @Test
   public void testUpdateAuthorValue(TestCaseType testCase) {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
     String bookName = authorsAndBooks.getBookMetaData().getId();
@@ -326,7 +328,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+  @Test
   public void testUpdateParentValue(TestCaseType testCase) {
     List<Entity> persons = importPersons(testCase);
     String personName = persons.get(0).getEntityType().getId();
@@ -366,7 +368,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testUpdateAuthorOrderAscending() {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(ASCENDING_ORDER);
     String bookName = authorsAndBooks.getBookMetaData().getId();
@@ -391,7 +393,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testUpdateAuthorOrderDescending() {
 
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(DESCENDING_ORDER);
@@ -417,7 +419,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testUpdateParentOrderAscending() {
     List<Entity> persons = importPersons(ASCENDING_ORDER);
     String personName = persons.get(0).getEntityType().getId();
@@ -442,7 +444,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testUpdateParentOrderDescending() {
     List<Entity> persons = importPersons(DESCENDING_ORDER);
     String personName = persons.get(0).getEntityType().getId();
@@ -497,8 +499,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
   }
 
   /** Serves all test case numbers. */
-  @DataProvider(name = "allTestCaseDataProvider")
-  private Object[][] allTestCaseDataProvider() {
+  private static Object[][] allTestCaseDataProvider() {
     return new Object[][] {{XREF_NULLABLE}, {XREF_REQUIRED}, {ASCENDING_ORDER}, {DESCENDING_ORDER}};
   }
 

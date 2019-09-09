@@ -1,15 +1,19 @@
 package org.molgenis.core.ui;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.springframework.web.servlet.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownPluginException;
@@ -19,10 +23,8 @@ import org.molgenis.web.menu.MenuReaderService;
 import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.springframework.ui.Model;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisMenuControllerTest extends AbstractMockitoTest {
+class MolgenisMenuControllerTest extends AbstractMockitoTest {
   private MolgenisMenuController molgenisMenuController;
 
   @Mock private DataService dataService;
@@ -32,8 +34,8 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   @Mock private HttpServletRequest request;
   private Menu menu;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     molgenisMenuController =
         new MolgenisMenuController(menuReaderService, "1.2.3", "2019-01-02 01:11 UTC", dataService);
 
@@ -46,7 +48,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testForwardDefaultMenuPlugin() {
+  void testForwardDefaultMenuPlugin() {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
     when(dataService.findOneById(PLUGIN, "home", Plugin.class)).thenReturn(plugin);
     when(plugin.getPath()).thenReturn("home");
@@ -61,15 +63,17 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
     verifyNoMoreInteractions(model);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void testForwardDefaultMenuPluginNoMenu() {
+  @Test
+  void testForwardDefaultMenuPluginNoMenu() {
     when(menuReaderService.getMenu()).thenReturn(Optional.empty());
 
-    molgenisMenuController.forwardDefaultMenuDefaultPlugin(model);
+    assertThrows(
+        RuntimeException.class,
+        () -> molgenisMenuController.forwardDefaultMenuDefaultPlugin(model));
   }
 
   @Test
-  public void testForwardDefaultMenuPluginNoPermissions() {
+  void testForwardDefaultMenuPluginNoPermissions() {
     when(menuReaderService.getMenu()).thenReturn(menu.filter(it -> false).map(Menu.class::cast));
 
     assertEquals(molgenisMenuController.forwardDefaultMenuDefaultPlugin(model), "forward:/login");
@@ -79,7 +83,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testForwardSpecificMenuDefaultPlugin() {
+  void testForwardSpecificMenuDefaultPlugin() {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
     when(dataService.findOneById(PLUGIN, "themes", Plugin.class)).thenReturn(plugin);
     when(plugin.getPath()).thenReturn("themes");
@@ -94,15 +98,17 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
     verifyNoMoreInteractions(model);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void testForwardSpecificMenuDoesNotExist() {
+  @Test
+  void testForwardSpecificMenuDoesNotExist() {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
 
-    molgenisMenuController.forwardMenuDefaultPlugin("nonexisting", model);
+    assertThrows(
+        RuntimeException.class,
+        () -> molgenisMenuController.forwardMenuDefaultPlugin("nonexisting", model));
   }
 
   @Test
-  public void testForwardSpecificMenuNoPermissionsForwardsToVoidController() {
+  void testForwardSpecificMenuNoPermissionsForwardsToVoidController() {
     Optional<Menu> admin =
         menu.filter(it -> ImmutableList.of("admin", "").contains(it.getId())).map(Menu.class::cast);
     when(menuReaderService.getMenu()).thenReturn(admin);
@@ -120,7 +126,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testForwardSpecificMenuSpecificPluginDoesNotCheckMenu() {
+  void testForwardSpecificMenuSpecificPluginDoesNotCheckMenu() {
     when(dataService.findOneById(PLUGIN, "permissions", Plugin.class)).thenReturn(plugin);
     when(plugin.getPath()).thenReturn("permissions");
     when(request.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
@@ -137,17 +143,20 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
     verifyNoMoreInteractions(model);
   }
 
-  @Test(
-      expectedExceptions = UnknownPluginException.class,
-      expectedExceptionsMessageRegExp = "id:pluginA")
-  public void testGetForwardPluginUriUnknownPlugin() {
+  @Test
+  void testGetForwardPluginUriUnknownPlugin() {
     String pluginId = "pluginA";
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(null);
-    molgenisMenuController.getForwardPluginUri(pluginId, null, null);
+
+    Exception exception =
+        assertThrows(
+            UnknownPluginException.class,
+            () -> molgenisMenuController.getForwardPluginUri(pluginId, null, null));
+    assertThat(exception.getMessage()).containsPattern("id:pluginA");
   }
 
   @Test
-  public void testGetForwardPluginUri() {
+  void testGetForwardPluginUri() {
     String pluginId = "pluginB";
     when(plugin.getPath()).thenReturn("app/test");
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
@@ -158,7 +167,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetForwardPluginPathRemainder() {
+  void testGetForwardPluginPathRemainder() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
     when(plugin.getPath()).thenReturn(pluginPath);
@@ -169,7 +178,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetForwardPluginUriQueryString() {
+  void testGetForwardPluginUriQueryString() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
     when(plugin.getPath()).thenReturn(pluginPath);
@@ -180,7 +189,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetForwardPluginUriQueryStringEmpty() {
+  void testGetForwardPluginUriQueryStringEmpty() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
     when(plugin.getPath()).thenReturn(pluginPath);
@@ -191,7 +200,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetForwardAppPlugin() {
+  void testGetForwardAppPlugin() {
     String pluginId = "app-pluginId";
     String pluginPath = "pluginPath";
     when(plugin.getPath()).thenReturn(pluginPath);
@@ -202,7 +211,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testVoidController() {
+  void testVoidController() {
     assertEquals(new MolgenisMenuController.VoidPluginController().init(), "view-void");
   }
 }

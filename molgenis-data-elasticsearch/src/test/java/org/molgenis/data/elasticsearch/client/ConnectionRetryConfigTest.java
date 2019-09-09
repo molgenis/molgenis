@@ -1,10 +1,10 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.elasticsearch.client.Client;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -24,11 +26,9 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.backoff.SleepingBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = ConnectionRetryConfig.class)
-public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests {
+class ConnectionRetryConfigTest extends AbstractMockitoSpringContextTests {
   @Autowired RetryTemplate retryTemplate;
 
   @Autowired SleepingBackOffPolicy<ExponentialBackOffPolicy> backOffPolicy;
@@ -38,7 +38,7 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests 
   private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   @Test
-  public void testInterruptFailingTries() throws Exception {
+  void testInterruptFailingTries() throws Exception {
     Future<Client> result =
         executorService.submit(
             () -> {
@@ -60,7 +60,7 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests 
   }
 
   @Test
-  public void testBackOffPolicyIsExponential() {
+  void testBackOffPolicyIsExponential() {
     List<Long> sleeps = newArrayList();
     ExponentialBackOffPolicy fakeBackOff = this.backOffPolicy.withSleeper(sleeps::add);
     BackOffContext context = fakeBackOff.start(null);
@@ -75,14 +75,14 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests 
   }
 
   @Test
-  public void testRetryPolicyInterrupted() {
+  void testRetryPolicyInterrupted() {
     RetryContext context = retryPolicy.open(null);
     retryPolicy.registerThrowable(context, new InterruptedException("Going down"));
     assertFalse(retryPolicy.canRetry(context));
   }
 
   @Test
-  public void testRetryPolicyMolgenisDataException() {
+  void testRetryPolicyMolgenisDataException() {
     RetryContext context = retryPolicy.open(null);
     retryPolicy.registerThrowable(context, new MolgenisDataException("Failed to connect"));
     assertTrue(retryPolicy.canRetry(context));

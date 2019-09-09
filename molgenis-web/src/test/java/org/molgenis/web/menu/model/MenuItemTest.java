@@ -1,21 +1,21 @@
 package org.molgenis.web.menu.model;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class MenuItemTest {
+class MenuItemTest {
 
   @Test
-  public void itemWithParams() {
+  void itemWithParams() {
     MenuItem menuItem = MenuItem.create("id", "label", "params");
     assertEquals(menuItem.getParams(), "params");
     assertEquals(menuItem.getUrl(), "id?params");
   }
 
   @Test
-  public void itemWithOutParams() {
+  void itemWithOutParams() {
     MenuItem menuItem = MenuItem.create("id", "label");
     assertNull(menuItem.getParams());
     assertEquals(menuItem.getUrl(), "id");

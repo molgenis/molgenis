@@ -2,15 +2,19 @@ package org.molgenis.data.security.owned;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.core.PermissionSet.WRITE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -28,10 +32,8 @@ import org.springframework.security.acls.domain.AuditLogger;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.MutableAclService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OwnershipDecoratorTest extends AbstractMockitoTest {
+class OwnershipDecoratorTest extends AbstractMockitoTest {
 
   private OwnershipDecoratorFactory ownershipDecoratorFactory;
 
@@ -46,8 +48,8 @@ public class OwnershipDecoratorTest extends AbstractMockitoTest {
   private OwnershipDecorator ownershipDecorator;
   private JsonValidator validator = new JsonValidator();
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     ownershipDecoratorFactory = new OwnershipDecoratorFactory(new Gson(), mutableAclService);
     ownershipDecorator =
         (OwnershipDecorator)
@@ -56,7 +58,7 @@ public class OwnershipDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAdd() {
+  void testAdd() {
     EntityIdentity entityIdentity = new EntityIdentity("MyQuestionnaire", "id");
     when(entity.getString("owner")).thenReturn("username");
     when(entity.getIdValue()).thenReturn("id");
@@ -80,7 +82,7 @@ public class OwnershipDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddStream() {
+  void testAddStream() {
     EntityIdentity entityIdentity = new EntityIdentity("MyQuestionnaire", "id");
     when(entity.getString("owner")).thenReturn("username");
     when(entity.getIdValue()).thenReturn("id");
@@ -105,40 +107,44 @@ public class OwnershipDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetFactorySchema() {
+  void testGetFactorySchema() {
     validator.validate("{ownerAttribute: 'owner'}", ownershipDecoratorFactory.getSchema());
   }
 
-  @Test(
-      expectedExceptions = JsonValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "violations: #: required key \\[ownerAttribute\\] not found")
-  public void testFactorySchemaChecksForOwnerAttribute() {
-    validator.validate("{}", ownershipDecoratorFactory.getSchema());
-  }
-
-  @Test(
-      expectedExceptions = JsonValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "violations: #/ownerAttribute: expected type: String, found: Integer")
-  public void testFactorySchemaChecksOwnerAttributeType() {
-    validator.validate("{ownerAttribute: 1}", ownershipDecoratorFactory.getSchema());
+  @Test
+  void testFactorySchemaChecksForOwnerAttribute() {
+    Exception exception =
+        assertThrows(
+            JsonValidationException.class,
+            () -> validator.validate("{}", ownershipDecoratorFactory.getSchema()));
+    assertThat(exception.getMessage())
+        .containsPattern("violations: #: required key \\[ownerAttribute\\] not found");
   }
 
   @Test
-  public void testGetFactoryDescription() {
+  void testFactorySchemaChecksOwnerAttributeType() {
+    Exception exception =
+        assertThrows(
+            JsonValidationException.class,
+            () -> validator.validate("{ownerAttribute: 1}", ownershipDecoratorFactory.getSchema()));
+    assertThat(exception.getMessage())
+        .containsPattern("violations: #/ownerAttribute: expected type: String, found: Integer");
+  }
+
+  @Test
+  void testGetFactoryDescription() {
     assertEquals(
         ownershipDecoratorFactory.getDescription(),
         "When entities are added to the decorated repository, their owner is set to the value of the ownerAttribute.");
   }
 
   @Test
-  public void testGetFactoryLabel() {
+  void testGetFactoryLabel() {
     assertEquals(ownershipDecoratorFactory.getLabel(), "Ownership decorator");
   }
 
   @Test
-  public void testGetFactoryId() {
+  void testGetFactoryId() {
     assertEquals(ownershipDecoratorFactory.getId(), "ownership");
   }
 }

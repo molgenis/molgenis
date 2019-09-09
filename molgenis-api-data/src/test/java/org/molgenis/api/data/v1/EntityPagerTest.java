@@ -1,14 +1,14 @@
 package org.molgenis.api.data.v1;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class EntityPagerTest {
+class EntityPagerTest {
 
   @Test
-  public void getNextStart() {
+  void getNextStart() {
     EntityPager pager = new EntityPager(10, 15, null, null);
     assertEquals(pager.getNextStart(), Integer.valueOf(25));
 
@@ -23,7 +23,7 @@ public class EntityPagerTest {
   }
 
   @Test
-  public void getPrevStart() {
+  void getPrevStart() {
     EntityPager pager = new EntityPager(10, 15, null, null);
     assertEquals(pager.getPrevStart(), Integer.valueOf(0));
 

@@ -2,14 +2,16 @@ package org.molgenis.ontology.roc;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -26,11 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {InformationContentServiceTest.Config.class})
-public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
+class InformationContentServiceTest extends AbstractMolgenisSpringTest {
   @Autowired private OntologyFactory ontologyFactory;
 
   private DataService dataService = Mockito.mock(DataService.class);
@@ -38,17 +38,17 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
       new InformationContentService(dataService);
 
   @Test
-  public void createStemmedWordSet() {
+  void createStemmedWordSet() {
     Set<String> actualStemmedWordSet =
         informationContentService.createStemmedWordSet("hearing-impairment_eye ball");
     Set<String> expectedStemmedWordSet = Sets.newHashSet("hear", "impair", "ey", "ball");
 
-    Assert.assertEquals(actualStemmedWordSet.size(), expectedStemmedWordSet.size());
+    assertEquals(actualStemmedWordSet.size(), expectedStemmedWordSet.size());
     assertTrue(expectedStemmedWordSet.containsAll(actualStemmedWordSet));
   }
 
   @Test
-  public void createWordIDF() {
+  void createWordIDF() {
     String ontologyIri = "http://www.molgenis.org";
 
     Ontology ontology = ontologyFactory.create();
@@ -92,12 +92,12 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     Map<String, Double> expectedWordIDF =
         informationContentService.createWordIDF("hearing impairment", ontologyIri);
 
-    Assert.assertEquals(expectedWordIDF.get("hear").intValue(), 2);
-    Assert.assertEquals(expectedWordIDF.get("impair").intValue(), 3);
+    assertEquals(expectedWordIDF.get("hear").intValue(), 2);
+    assertEquals(expectedWordIDF.get("impair").intValue(), 3);
   }
 
   @Test
-  public void redistributedNGramScore() {
+  void redistributedNGramScore() {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
@@ -141,12 +141,12 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
 
     Map<String, Double> redistributedNGramScore =
         informationContentService.redistributedNGramScore("hearing impairment", ontologyIri);
-    Assert.assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
-    Assert.assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
+    assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
+    assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
   }
 
   @Test
-  public void redistributedNGramScoreEmptyQuery() {
+  void redistributedNGramScoreEmptyQuery() {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
@@ -166,7 +166,7 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void redistributedNGramScoreSingleWord() {
+  void redistributedNGramScoreSingleWord() {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
@@ -201,5 +201,5 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import(OntologyTestConfig.class)
-  public static class Config {}
+  static class Config {}
 }

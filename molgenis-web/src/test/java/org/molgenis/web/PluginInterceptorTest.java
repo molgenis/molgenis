@@ -1,13 +1,17 @@
 package org.molgenis.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.menu.MenuReaderService;
@@ -18,18 +22,15 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PluginInterceptorTest {
+class PluginInterceptorTest {
   private MenuReaderService menuReaderService;
   private UserPermissionEvaluator permissionService;
   private Authentication authentication;
   private SecurityContext previousContext;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     menuReaderService = mock(MenuReaderService.class);
     when(menuReaderService.getMenu()).thenReturn(Optional.of(mock(Menu.class)));
     permissionService = mock(UserPermissionEvaluator.class);
@@ -42,18 +43,18 @@ public class PluginInterceptorTest {
     SecurityContextHolder.setContext(testContext);
   }
 
-  @AfterMethod
-  public void tearDownAfterMethod() {
+  @AfterEach
+  void tearDownAfterMethod() {
     SecurityContextHolder.setContext(previousContext);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void MolgenisPluginInterceptor() {
-    new PluginInterceptor(null, null);
+  @Test
+  void MolgenisPluginInterceptor() {
+    assertThrows(NullPointerException.class, () -> new PluginInterceptor(null, null));
   }
 
   @Test
-  public void preHandle() {
+  void preHandle() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = createMolgenisPluginController(uri);
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -68,7 +69,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void preHandle_hasContextUrl() {
+  void preHandle_hasContextUrl() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = createMolgenisPluginController(uri);
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -85,7 +86,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle() {
+  void postHandle() {
     PluginInterceptor molgenisPluginInterceptor =
         new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
@@ -99,7 +100,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle_pluginIdExists() {
+  void postHandle_pluginIdExists() {
     PluginInterceptor molgenisPluginInterceptor =
         new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
@@ -114,7 +115,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandlePluginidWithQueryString() {
+  void postHandlePluginidWithQueryString() {
     PluginInterceptor molgenisPluginInterceptor =
         new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "plugin_id_test";
@@ -136,7 +137,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle_authenticated() {
+  void postHandle_authenticated() {
     boolean isAuthenticated = true;
     when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
@@ -156,7 +157,7 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle_notAuthenticated() {
+  void postHandle_notAuthenticated() {
     boolean isAuthenticated = false;
     when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 

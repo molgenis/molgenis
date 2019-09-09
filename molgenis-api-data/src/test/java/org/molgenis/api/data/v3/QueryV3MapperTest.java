@@ -1,11 +1,14 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
@@ -19,25 +22,23 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.rsql.RSQLValueParser;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class QueryV3MapperTest extends AbstractMockitoTest {
+class QueryV3MapperTest extends AbstractMockitoTest {
   @Mock private RSQLValueParser rsqlValueParser;
   private QueryV3Mapper queryMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     queryMapper = new QueryV3Mapper(rsqlValueParser);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testQueryV3Mapper() {
-    new QueryV3Mapper(null);
+  @Test
+  void testQueryV3Mapper() {
+    assertThrows(NullPointerException.class, () -> new QueryV3Mapper(null));
   }
 
   @Test
-  public void testMapEquals() {
+  void testMapEquals() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.EQUALS).setValue(value).build();
@@ -52,7 +53,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapEqualsNull() {
+  void testMapEqualsNull() {
     Query query = Query.builder().setItem("test").setOperator(Operator.EQUALS).build();
 
     Attribute attribute = mock(Attribute.class);
@@ -63,7 +64,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapNotEquals() {
+  void testMapNotEquals() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.NOT_EQUALS).setValue(value).build();
@@ -79,7 +80,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapIn() {
+  void testMapIn() {
     String value0 = "value0";
     String value1 = "value1";
     Query query =
@@ -102,7 +103,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapNotIn() {
+  void testMapNotIn() {
     String value0 = "value0";
     String value1 = "value1";
     Query query =
@@ -125,7 +126,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapMatches() {
+  void testMapMatches() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.MATCHES).setValue(value).build();
@@ -138,7 +139,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapMatchesAllAttributes() {
+  void testMapMatchesAllAttributes() {
     String value = "value";
     Query query = Query.builder().setOperator(Operator.MATCHES).setValue(value).build();
 
@@ -149,7 +150,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapContains() {
+  void testMapContains() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.CONTAINS).setValue(value).build();
@@ -162,7 +163,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapLessThan() {
+  void testMapLessThan() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.LESS_THAN).setValue(value).build();
@@ -177,7 +178,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapLessThanOrEqualTo() {
+  void testMapLessThanOrEqualTo() {
     String value = "value";
     Query query =
         Query.builder()
@@ -196,7 +197,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapGreaterThan() {
+  void testMapGreaterThan() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.GREATER_THAN).setValue(value).build();
@@ -211,7 +212,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapGreaterThanOrEqualTo() {
+  void testMapGreaterThanOrEqualTo() {
     String value = "value";
     Query query =
         Query.builder()
@@ -230,7 +231,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapAnd() {
+  void testMapAnd() {
     String value0 = "value0";
     String value1 = "value1";
     Query query =
@@ -251,7 +252,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapOr() {
+  void testMapOr() {
     String value0 = "value0";
     String value1 = "value1";
     Query query =
@@ -271,8 +272,8 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
         new QueryImpl<>(repository).nest().search(value0).or().search(value1).unnest());
   }
 
-  @Test(expectedExceptions = UnknownAttributeException.class)
-  public void testMapEqualsUnknownAttribute() {
+  @Test
+  void testMapEqualsUnknownAttribute() {
     String value = "value";
     Query query =
         Query.builder()
@@ -286,11 +287,11 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     when(repository.getEntityType()).thenReturn(entityType);
 
-    queryMapper.map(query, repository);
+    assertThrows(UnknownAttributeException.class, () -> queryMapper.map(query, repository));
   }
 
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testMapCompoundAttribute() {
+  @Test
+  void testMapCompoundAttribute() {
     String value = "value";
     Query query =
         Query.builder().setItem("test").setOperator(Operator.EQUALS).setValue(value).build();
@@ -298,7 +299,7 @@ public class QueryV3MapperTest extends AbstractMockitoTest {
     Attribute attribute = mock(Attribute.class);
     Repository<Entity> repository = createMockRepository(attribute, AttributeType.COMPOUND);
 
-    queryMapper.map(query, repository);
+    assertThrows(UnexpectedEnumException.class, () -> queryMapper.map(query, repository));
   }
 
   private Repository<Entity> createMockRepository(Attribute attribute) {

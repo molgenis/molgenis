@@ -4,6 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,10 +16,10 @@ import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.ALGORITH
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.IDENTIFIER;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.SOURCE_ATTRIBUTES;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.TARGET_ATTRIBUTE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -45,8 +47,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
       MappingConfig.class,
       OntologyConfig.class
     })
-public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
+class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -66,7 +66,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   @Autowired private IdGenerator idGenerator;
 
   @Test
-  public void testGetAttributeMappings() {
+  void testGetAttributeMappings() {
     Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
     List<Attribute> sourceAttributes = newArrayList();
 
@@ -99,7 +99,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
     List<Attribute> sourceAttributes = newArrayList();
 
@@ -128,12 +128,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
     assertEquals(expectedAttrMappings.size(), result.size());
     for (int i = 0; i < expectedAttrMappings.size(); ++i) {
-      Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
+      assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
     }
   }
 
   @Test
-  public void testInsert() {
+  void testInsert() {
     Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
     List<Attribute> sourceAttributes = newArrayList();
     targetAttribute.setDataType(STRING);
@@ -163,13 +163,13 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
     assertEquals(expectedAttrMappings.size(), result.size());
     for (int i = 0; i < expectedAttrMappings.size(); ++i) {
-      Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
+      assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
     }
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/7831
   @Test
-  public void testGetAttributeMappingsUnknownSourceAndTargetEntityType() {
+  void testGetAttributeMappingsUnknownSourceAndTargetEntityType() {
     String identifier = "identifier";
     String targetAttribute = "targetAttribute";
     String algorithm = "algorithm";
@@ -191,7 +191,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   }
 
   @Test
-  public void testGetAlgorithmSourceAttributes() {
+  void testGetAlgorithmSourceAttributes() {
     Entity attributeMappingEntity = mock(Entity.class);
     String sourceAttributes = "attr0,attr1";
     when(attributeMappingEntity.getString("sourceAttributes")).thenReturn(sourceAttributes);
@@ -207,7 +207,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   }
 
   @Test
-  public void testGetAlgorithmSourceAttributesNone() {
+  void testGetAlgorithmSourceAttributesNone() {
     Entity attributeMappingEntity = mock(Entity.class);
     EntityType sourceEntityType = mock(EntityType.class);
     assertEquals(
@@ -217,7 +217,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   }
 
   @Test
-  public void testGetAlgorithmSourceAttributesUnknownAttribute() {
+  void testGetAlgorithmSourceAttributesUnknownAttribute() {
     Entity attributeMappingEntity = mock(Entity.class);
     String sourceAttributes = "unknownAttr,attr0";
     when(attributeMappingEntity.getString("sourceAttributes")).thenReturn(sourceAttributes);
@@ -233,7 +233,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 
   @Configuration
   @Import(MapperTestConfig.class)
-  public static class Config {
+  static class Config {
 
     @Autowired private AttributeMappingMetadata attrMappingMeta;
 
@@ -278,7 +278,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     }
 
     @Bean
-    public OntologyTagService ontologyTagService() {
+    OntologyTagService ontologyTagService() {
       return mock(OntologyTagService.class);
     }
 

@@ -5,6 +5,8 @@ import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,12 +14,13 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Sort;
@@ -33,10 +36,8 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
 import org.molgenis.metadata.manager.model.EditorSort;
 import org.molgenis.metadata.manager.model.EditorTagIdentifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AttributeMapperTest {
+class AttributeMapperTest {
   @Mock private AttributeFactory attributeFactory;
   @Mock private TagMapper tagMapper;
   @Mock private EntityTypeReferenceMapper entityTypeReferenceMapper;
@@ -45,8 +46,8 @@ public class AttributeMapperTest {
 
   private AttributeMapper attributeMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     attributeMapper =
         new AttributeMapper(
@@ -57,13 +58,14 @@ public class AttributeMapperTest {
             sortMapper);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testAttributeMapper() {
-    new AttributeMapper(null, null, null, null, null);
+  @Test
+  void testAttributeMapper() {
+    assertThrows(
+        NullPointerException.class, () -> new AttributeMapper(null, null, null, null, null));
   }
 
   @Test
-  public void testCreateEditorAttribute() {
+  void testCreateEditorAttribute() {
     String id = "id";
     Integer sequenceNumber = 0;
     Attribute attribute = mock(Attribute.class);
@@ -116,7 +118,7 @@ public class AttributeMapperTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testToAttributes() {
+  void testToAttributes() {
     String id = "id";
     String name = "name";
     String type = "string";
@@ -306,7 +308,7 @@ public class AttributeMapperTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testToEditorAttributes() {
+  void testToEditorAttributes() {
     String id = "id";
     String name = "name";
     String type = "categoricalmref";
@@ -425,7 +427,7 @@ public class AttributeMapperTest {
   }
 
   @Test
-  public void testRemoveCompoundOrphans() {
+  void testRemoveCompoundOrphans() {
     EditorAttributeIdentifier removedParentId = mock(EditorAttributeIdentifier.class);
     EditorAttribute attrOther = mock(EditorAttribute.class);
 

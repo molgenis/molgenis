@@ -19,26 +19,26 @@ import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPer
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class RestControllerIT extends AbstractApiTests {
+class RestControllerIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
 
   // Request parameters
   private static final String PATH = "api/v1/";
 
   // User credentials
-  private String testUsername;
+  private static String testUsername;
   private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
-  private String testUserToken;
-  private String adminToken;
+  private static String testUserToken;
+  private static String adminToken;
 
   /**
    * Pass down system properties via the mvn commandline argument
@@ -46,8 +46,8 @@ public class RestControllerIT extends AbstractApiTests {
    * <p>example: mvn test -Dtest="RestControllerIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl"
    * -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
    */
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -68,7 +68,7 @@ public class RestControllerIT extends AbstractApiTests {
   }
 
   @Test
-  public void getWithoutTokenNotAllowed() {
+  void getWithoutTokenNotAllowed() {
     // @formatter:off
     ValidatableResponse response;
 
@@ -91,13 +91,13 @@ public class RestControllerIT extends AbstractApiTests {
   }
 
   @Test
-  public void getWithTokenIsAllowed() {
+  void getWithTokenIsAllowed() {
     getWithToken("sys_FreemarkerTemplate", this.testUserToken).statusCode(200);
     getWithToken("sys_scr_ScriptType", this.testUserToken).statusCode(200);
   }
 
   @Test
-  public void deleteNonExistingEntity() {
+  void deleteNonExistingEntity() {
     given(testUserToken)
         .when()
         .delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
@@ -106,7 +106,7 @@ public class RestControllerIT extends AbstractApiTests {
   }
 
   @Test
-  public void deleteWithoutWritePermissionFails() {
+  void deleteWithoutWritePermissionFails() {
     // @formatter:off
     given(testUserToken)
         .when()
@@ -121,14 +121,14 @@ public class RestControllerIT extends AbstractApiTests {
   }
 
   @Test
-  public void logoutWithoutTokenFails() {
+  void logoutWithoutTokenFails() {
     // @formatter:off
     given(null).when().post(PATH + "logout").then().statusCode(BAD_REQUEST);
     // @formatter:on
   }
 
   @Test
-  public void logoutWithToken() {
+  void logoutWithToken() {
     // @formatter:off
     given(testUserToken).when().post(PATH + "logout").then().statusCode(OKE);
 
@@ -161,7 +161,7 @@ public class RestControllerIT extends AbstractApiTests {
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6575
   @Test
-  public void testRetrieveResourceWithFileExtensionIdNotFound() {
+  void testRetrieveResourceWithFileExtensionIdNotFound() {
     // @formatter:off
     given(testUserToken)
         .when()
@@ -177,7 +177,7 @@ public class RestControllerIT extends AbstractApiTests {
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6731
   @Test
-  public void testRetrieveSystemEntityTypeNotAllowed() {
+  void testRetrieveSystemEntityTypeNotAllowed() {
     // @formatter:off
     given(null)
         .when()
@@ -193,7 +193,7 @@ public class RestControllerIT extends AbstractApiTests {
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6731
   @Test
-  public void testRetrieveSystemEntityType() {
+  void testRetrieveSystemEntityType() {
     // @formatter:off
     given(testUserToken)
         .when()
@@ -216,8 +216,8 @@ public class RestControllerIT extends AbstractApiTests {
     // @formatter:on
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Clean up permissions
     removeRightsForUser(adminToken, testUsername);
 

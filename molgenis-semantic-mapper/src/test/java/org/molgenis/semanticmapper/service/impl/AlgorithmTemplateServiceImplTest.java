@@ -2,17 +2,19 @@ package org.molgenis.semanticmapper.service.impl;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 import static org.molgenis.script.core.ScriptMetadata.TYPE;
 import static org.molgenis.script.core.ScriptParameterMetadata.SCRIPT_PARAMETER;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -39,8 +41,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = AlgorithmTemplateServiceImplTest.Config.class)
 public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest {
@@ -59,7 +59,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
   private Script script0;
   private String param0Name = "param0", param1Name = "param1";
 
-  @BeforeMethod
+  @BeforeEach
   public void setUpBeforeMethod() {
     ScriptParameter param0 = scriptParameterFactory.create();
     param0.setName(param0Name);

@@ -2,33 +2,33 @@ package org.molgenis.data.util;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Package;
-import org.testng.annotations.Test;
 
-public class PackageUtilsTest {
+class PackageUtilsTest {
 
   @Test
-  public void isSystemPackageFalse() {
+  void isSystemPackageFalse() {
     Package package_ = mock(Package.class);
     when(package_.getId()).thenReturn("notSystem");
     assertFalse(PackageUtils.isSystemPackage(package_));
   }
 
   @Test
-  public void isSystemPackageTrue() {
+  void isSystemPackageTrue() {
     Package package_ = mock(Package.class);
     when(package_.getId()).thenReturn(PACKAGE_SYSTEM);
     assertTrue(PackageUtils.isSystemPackage(package_));
   }
 
   @Test
-  public void isSystemPackageTrueNested() {
+  void isSystemPackageTrueNested() {
     Package rootPackage_ = mock(Package.class);
     when(rootPackage_.getId()).thenReturn(PACKAGE_SYSTEM);
 
@@ -39,7 +39,7 @@ public class PackageUtilsTest {
   }
 
   @Test
-  public void testContains() {
+  void testContains() {
     Package packageA = mock(Package.class);
     Package packageAa = mock(Package.class);
     Package packageAb = mock(Package.class);
@@ -52,7 +52,7 @@ public class PackageUtilsTest {
   }
 
   @Test
-  public void testNotContains() {
+  void testNotContains() {
     Package packageA = mock(Package.class);
     Package packageAa = mock(Package.class);
     Package packageAb = mock(Package.class);
@@ -65,7 +65,7 @@ public class PackageUtilsTest {
   }
 
   @Test
-  public void testContainsIsItself() {
+  void testContainsIsItself() {
     Package packageA = mock(Package.class);
 
     assertTrue(PackageUtils.contains(packageA, packageA));

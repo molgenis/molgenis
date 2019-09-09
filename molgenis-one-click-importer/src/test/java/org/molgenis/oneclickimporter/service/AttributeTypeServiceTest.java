@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -9,17 +10,16 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.oneclickimporter.service.impl.AttributeTypeServiceImpl;
-import org.testng.annotations.Test;
 
-public class AttributeTypeServiceTest {
+class AttributeTypeServiceTest {
   AttributeTypeService attributeTypeService = new AttributeTypeServiceImpl();
 
   @Test
-  public void guessBasicTypes() {
+  void guessBasicTypes() {
     List<Object> columnValues = newArrayList(1, 2, 3);
     assertEquals(attributeTypeService.guessAttributeType(columnValues), INT);
 
@@ -40,7 +40,7 @@ public class AttributeTypeServiceTest {
   }
 
   @Test
-  public void guessTypesWithNullValues() {
+  void guessTypesWithNullValues() {
     List<Object> columnValues = newArrayList(null, null, null);
     assertEquals(attributeTypeService.guessAttributeType(columnValues), STRING);
 
@@ -55,7 +55,7 @@ public class AttributeTypeServiceTest {
   }
 
   @Test
-  public void guessTypesWithMixedValues() {
+  void guessTypesWithMixedValues() {
     List<Object> columnValues = newArrayList(1, "2", null);
     assertEquals(attributeTypeService.guessAttributeType(columnValues), STRING);
 
@@ -76,7 +76,7 @@ public class AttributeTypeServiceTest {
   }
 
   @Test
-  public void guessEnrichedTypes() {
+  void guessEnrichedTypes() {
     List<Object> columnValues =
         newArrayList(
             "This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. This is a very long string. ",

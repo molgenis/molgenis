@@ -5,15 +5,15 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -46,12 +48,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = L2CacheTest.Config.class)
-public class L2CacheTest extends AbstractMolgenisSpringTest {
+class L2CacheTest extends AbstractMolgenisSpringTest {
   private L2Cache l2Cache;
 
   @Autowired private EntityHydration entityHydration;
@@ -69,12 +68,12 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
   private List<Entity> testEntities;
   private EntityType emd;
 
-  public L2CacheTest() {
+  L2CacheTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  void beforeMethod() {
     EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
     emd = entityTestHarness.createDynamicTestEntityType(refEntityType);
     List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 2);
@@ -88,10 +87,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
         .thenReturn(newArrayList(refEntities.get(0)));
     when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("1"))))
         .thenReturn(newArrayList(refEntities.get(1)));
-  }
 
-  @BeforeMethod
-  public void beforeMethod() {
     when(repository.getEntityType()).thenReturn(emd);
     when(repository.getName()).thenReturn(emd.getId());
 
@@ -100,7 +96,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAfterCommitTransactionRemovesCacheForDirtyRepository() {
+  void testAfterCommitTransactionRemovesCacheForDirtyRepository() {
     // load the entity through the cache
     Entity entity2 = testEntities.get(2);
     when(repository.findOneById("2")).thenReturn(entity2);
@@ -130,7 +126,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAfterCommitTransactionRemovesEntityForDirtyEntity() {
+  void testAfterCommitTransactionRemovesEntityForDirtyEntity() {
     Entity entity2 = testEntities.get(2);
     Entity entity3 = testEntities.get(3);
     when(repository.findOneById("2")).thenReturn(entity2);
@@ -169,7 +165,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetStringIdCachesLoadedData() {
+  void testGetStringIdCachesLoadedData() {
     Entity entity2 = testEntities.get(2);
     when(repository.findOneById("2")).thenReturn(entity2);
 
@@ -182,23 +178,25 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
     verify(repository, times(1)).findOneById("2");
   }
 
-  @Test(expectedExceptions = UncheckedExecutionException.class)
-  public void testGetStringIdLoaderThrowsException() {
+  @Test
+  void testGetStringIdLoaderThrowsException() {
     when(repository.findOneById("2"))
         .thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
-    l2Cache.get(repository, "2");
+    assertThrows(UncheckedExecutionException.class, () -> l2Cache.get(repository, "2"));
   }
 
   @SuppressWarnings("unchecked")
-  @Test(expectedExceptions = UncheckedExecutionException.class)
-  public void testGetBatchIdLoaderThrowsException() {
+  @Test
+  void testGetBatchIdLoaderThrowsException() {
     when(repository.findAll(any(Stream.class)))
         .thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
-    l2Cache.getBatch(repository, newArrayList("1", "2"));
+    assertThrows(
+        UncheckedExecutionException.class,
+        () -> l2Cache.getBatch(repository, newArrayList("1", "2")));
   }
 
   @Test
-  public void testFindAll() {
+  void testFindAll() {
     when(repository.findAll(idStreamCaptor.capture())).thenReturn(testEntities.stream());
     List<Entity> result = l2Cache.getBatch(repository, newArrayList("0", "1", "2", "3"));
     Map<Object, Entity> retrievedEntities =
@@ -211,15 +209,15 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({EntityHydration.class, TestHarnessConfig.class})
-  public static class Config {
+  static class Config {
     @Mock private EntityManager entityManager;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return entityManager;
     }
   }

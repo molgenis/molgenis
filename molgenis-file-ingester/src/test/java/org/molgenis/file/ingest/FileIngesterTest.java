@@ -1,5 +1,6 @@
 package org.molgenis.file.ingest;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,6 +8,8 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 
 import java.io.File;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
@@ -28,11 +31,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {FileIngesterTest.Config.class})
-public class FileIngesterTest extends AbstractMolgenisSpringTest {
+class FileIngesterTest extends AbstractMolgenisSpringTest {
   @Autowired private FileIngester fileIngester;
 
   @Autowired private FileStoreDownload fileStoreDownloadMock;
@@ -54,15 +55,15 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest {
 
   private Progress progress;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
     importServiceMock = mock(ImportService.class);
     progress = mock(Progress.class);
   }
 
   @Test
-  public void ingest() {
+  void ingest() {
     when(fileStoreDownloadMock.downloadFile(url, identifier, entityTypeId + ".csv")).thenReturn(f);
     when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
         .thenReturn(fileRepositoryCollectionMock);
@@ -78,21 +79,23 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest {
     verify(dataService).add("sys_FileMeta", fileMeta);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void ingestError() {
+  @Test
+  void ingestError() {
     Exception e = new RuntimeException();
     when(fileStoreDownloadMock.downloadFile(url, identifier, entityTypeId + ".csv")).thenThrow(e);
 
-    fileIngester.ingest(entityTypeId, url, "CSV", identifier, progress);
+    assertThrows(
+        RuntimeException.class,
+        () -> fileIngester.ingest(entityTypeId, url, "CSV", identifier, progress));
   }
 
   @Configuration
   @Import({UserTestConfig.class, FileIngestTestConfig.class})
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
     @Bean
-    public FileIngester fileIngester() {
+    FileIngester fileIngester() {
       return new FileIngester(
           fileStoreDownload(),
           importServiceFactory(),
@@ -102,22 +105,22 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public FileStoreDownload fileStoreDownload() {
+    FileStoreDownload fileStoreDownload() {
       return mock(FileStoreDownload.class);
     }
 
     @Bean
-    public ImportServiceFactory importServiceFactory() {
+    ImportServiceFactory importServiceFactory() {
       return mock(ImportServiceFactory.class);
     }
 
     @Bean
-    public FileRepositoryCollectionFactory fileRepositoryCollectionFactory() {
+    FileRepositoryCollectionFactory fileRepositoryCollectionFactory() {
       return mock(FileRepositoryCollectionFactory.class);
     }
 
     @Bean
-    public FileMetaFactory fileMetaFactory() {
+    FileMetaFactory fileMetaFactory() {
       FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
       when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
       return fileMetaFactory;

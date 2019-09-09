@@ -1,19 +1,18 @@
 package org.molgenis.data.cache.l1;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
@@ -22,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -44,11 +45,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
-public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
+class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
 
   private EntityType authorMetaData;
@@ -81,12 +80,12 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Captor private ArgumentCaptor<Stream<EntityKey>> entityKeysCaptor;
 
-  public L1CacheRepositoryDecoratorTest() {
+  L1CacheRepositoryDecoratorTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     authorMetaData = entityTypeFactory.create(authorEntityName);
     bookMetaData = entityTypeFactory.create(bookEntityName);
 
@@ -126,7 +125,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAdd() {
+  void testAdd() {
     l1CacheRepositoryDecorator.add(author);
     verify(l1Cache).put(authorEntityName, author);
     verify(l1Cache).evict(entityKeysCaptor.capture());
@@ -138,7 +137,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAddWithStreamOfEntities() {
+  void testAddWithStreamOfEntities() {
     l1CacheRepositoryDecorator.add(Stream.of(author));
 
     verify(authorRepository).add(entitiesCaptor.capture());
@@ -149,7 +148,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     l1CacheRepositoryDecorator.delete(author);
     verify(l1Cache).putDeletion(create(author));
     verify(l1Cache).evict(entityKeysCaptor.capture());
@@ -162,7 +161,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     l1CacheRepositoryDecorator.deleteById(authorID);
     verify(l1Cache).putDeletion(create(author));
     verify(l1Cache).evictAll(bookMetaData);
@@ -170,7 +169,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDeleteByStreamOfEntities() {
+  void testDeleteByStreamOfEntities() {
     l1CacheRepositoryDecorator.delete(Stream.of(author));
 
     verify(authorRepository).delete(entitiesCaptor.capture());
@@ -181,7 +180,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     l1CacheRepositoryDecorator.deleteAll();
     verify(l1Cache).evictAll(authorMetaData);
     verify(l1Cache).evictAll(bookMetaData);
@@ -189,7 +188,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDeleteAllByStreamOfIds() {
+  void testDeleteAllByStreamOfIds() {
     l1CacheRepositoryDecorator.deleteAll(Stream.of(authorID));
 
     verify(authorRepository).deleteAll(entityIdsCaptor.capture());
@@ -200,7 +199,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     l1CacheRepositoryDecorator.update(author);
     verify(l1Cache).put(authorEntityName, author);
     verify(authorRepository).update(author);
@@ -209,7 +208,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testUpdateWithStreamOfEntities() {
+  void testUpdateWithStreamOfEntities() {
     l1CacheRepositoryDecorator.update(Stream.of(author));
 
     verify(authorRepository).update(entitiesCaptor.capture());
@@ -220,7 +219,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindOneByIdReturnsEntity() {
+  void testFindOneByIdReturnsEntity() {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData))
         .thenReturn(Optional.of(CacheHit.of(author)));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
@@ -230,7 +229,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindOneByIdReturnsEmptyCacheHit() {
+  void testFindOneByIdReturnsEmptyCacheHit() {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData))
         .thenReturn(Optional.of(CacheHit.empty()));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
@@ -240,7 +239,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindOneByIdReturnsNull() {
+  void testFindOneByIdReturnsNull() {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertNull(actualEntity);
@@ -249,7 +248,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindAllByStreamOfIdsEntityNotPresentInCache() {
+  void testFindAllByStreamOfIdsEntityNotPresentInCache() {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
     when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
     when(authorRepository.findAll(entityIdsCaptor.capture()))
@@ -266,7 +265,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindAllByStreamOfIdsOneCachedOneMissing() {
+  void testFindAllByStreamOfIdsOneCachedOneMissing() {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData))
         .thenReturn(Optional.of(CacheHit.of(author)));
     when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
@@ -284,15 +283,15 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Mock private EntityManager entityManager;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return entityManager;
     }
   }

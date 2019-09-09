@@ -8,6 +8,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,18 +22,19 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.LinkedHashMultimap;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.stream.Stream;
 import javax.script.ScriptException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -71,12 +73,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = AlgorithmServiceImplIT.Config.class)
-public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
+class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -91,29 +90,28 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
   @Autowired private AlgorithmTemplateService algorithmTemplateService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(algorithmTemplateService.find(any())).thenReturn(Stream.empty());
   }
 
   @Test
-  public void testGetSourceAttributeNames() {
+  void testGetSourceAttributeNames() {
     assertEquals(algorithmService.getSourceAttributeNames("$('id')"), singletonList("id"));
   }
 
   @Test
-  public void testGetSourceAttributeNamesNoQuotes() {
+  void testGetSourceAttributeNamesNoQuotes() {
     assertEquals(algorithmService.getSourceAttributeNames("$(id)"), singletonList("id"));
   }
 
   @Test
-  public void testDeepReference() {
+  void testDeepReference() {
     assertEquals(
         algorithmService.getSourceAttributeNames("$(gender.label)"), singletonList("gender"));
   }
 
-  @DataProvider(name = "testApplyProvider")
-  public Object[][] testApplyProvider() {
+  static Object[][] testApplyProvider() {
     String april20DMY = "2017-04-20";
     LocalDate april20 = LocalDate.parse(april20DMY);
     Instant april20defaultTimezone = april20.atStartOfDay(systemDefault()).toInstant();
@@ -199,8 +197,9 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     };
   }
 
-  @Test(dataProvider = "testApplyProvider")
-  public void testApply(
+  @ParameterizedTest
+  @MethodSource("testApplyProvider")
+  void testApply(
       AttributeType sourceAttributeType,
       Object sourceAttributeValue,
       String algorithm,
@@ -225,7 +224,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetAgeScript() throws ParseException {
+  void testGetAgeScript() {
     String idAttrName = "id";
     EntityType entityType = entityTypeFactory.create("LL");
     entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
@@ -244,7 +243,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetXrefScript() throws ParseException {
+  void testGetXrefScript() {
     // xref entities
     EntityType entityTypeXref = entityTypeFactory.create("xrefEntity1");
     entityTypeXref.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
@@ -282,7 +281,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAttrXref() {
+  void testAttrXref() {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -309,7 +308,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAttrMref() {
+  void testAttrMref() {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -341,7 +340,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testApplyMref() throws ParseException {
+  void testApplyMref() {
     String refEntityName = "refEntity";
     String refEntityIdAttrName = "id";
     String refEntityLabelAttrName = "label";
@@ -396,7 +395,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testApplyMrefNillable() throws ParseException {
+  void testApplyMrefNillable() {
     String refEntityName = "refEntity";
     String refEntityIdAttrName = "id";
     String refEntityLabelAttrName = "label";
@@ -438,7 +437,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreateAttributeMappingIfOnlyOneMatch() {
+  void testCreateAttributeMappingIfOnlyOneMatch() {
     EntityType targetEntityType = entityTypeFactory.create("target");
     Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
     targetAttribute.setDescription("height");
@@ -481,7 +480,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated() {
+  void testWhenSourceDoesNotMatchThenNoMappingGetsCreated() {
     EntityType targetEntityType = entityTypeFactory.create("target");
     Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
     targetAttribute.setDescription("height");
@@ -505,11 +504,11 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping);
 
-    assertNull(mapping.getAttributeMapping("targetHeight"));
+    org.junit.jupiter.api.Assertions.assertNull(mapping.getAttributeMapping("targetHeight"));
   }
 
   @Test
-  public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated() {
+  void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated() {
     EntityType targetEntityType = entityTypeFactory.create("target");
     Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
     targetAttribute.setDescription("height");
@@ -552,31 +551,31 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import(UserTestConfig.class)
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
     @Bean
-    public SemanticSearchService semanticSearchService() {
+    SemanticSearchService semanticSearchService() {
       return mock(SemanticSearchService.class);
     }
 
     @Bean
-    public UnitResolver unitResolver() {
+    UnitResolver unitResolver() {
       return new UnitResolverImpl(ontologyService());
     }
 
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return mock(EntityManager.class);
     }
 
     @Bean
-    public JsMagmaScriptEvaluator jsScriptEvaluator() throws ScriptException, IOException {
+    JsMagmaScriptEvaluator jsScriptEvaluator() throws ScriptException, IOException {
       return new JsMagmaScriptEvaluator(new NashornScriptEngine());
     }
 
     @Bean
-    public AlgorithmService algorithmService() throws ScriptException, IOException {
+    AlgorithmService algorithmService() throws ScriptException, IOException {
       return new AlgorithmServiceImpl(
           semanticSearchService(),
           algorithmGeneratorService(),
@@ -585,17 +584,17 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public AlgorithmTemplateService algorithmTemplateService() {
+    AlgorithmTemplateService algorithmTemplateService() {
       return mock(AlgorithmTemplateServiceImpl.class);
     }
 
     @Bean
-    public OntologyService ontologyService() {
+    OntologyService ontologyService() {
       return mock(OntologyService.class);
     }
 
     @Bean
-    public TagRepository tagRepository() {
+    TagRepository tagRepository() {
       return mock(TagRepository.class);
     }
 
@@ -605,12 +604,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public OntologyTagService ontologyTagService() {
+    OntologyTagService ontologyTagService() {
       return mock(OntologyTagService.class);
     }
 
     @Bean
-    public AlgorithmGeneratorService algorithmGeneratorService() {
+    AlgorithmGeneratorService algorithmGeneratorService() {
       return new AlgorithmGeneratorServiceImpl(
           dataService, unitResolver(), algorithmTemplateService());
     }

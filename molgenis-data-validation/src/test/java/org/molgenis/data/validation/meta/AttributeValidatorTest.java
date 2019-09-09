@@ -1,6 +1,10 @@
 package org.molgenis.data.validation.meta;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,9 +21,12 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -34,34 +41,33 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.TemplateExpressionSyntaxException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class AttributeValidatorTest {
+class AttributeValidatorTest {
   private AttributeValidator attributeValidator;
   private DataService dataService;
   private EntityManager entityManager;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     dataService = mock(DataService.class);
     entityManager = mock(EntityManager.class);
     attributeValidator = new AttributeValidator(dataService, entityManager);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.")
-  public void validateAttributeInvalidName() {
+  @Test
+  void validateAttributeInvalidName() {
     Attribute attr = makeMockAttribute("invalid.name");
-    attributeValidator.validate(attr, ADD);
+    @SuppressWarnings("deprecation")
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class, () -> attributeValidator.validate(attr, ADD));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Invalid characters in: \\[invalid.name\\] Only letters \\(a-z, A-Z\\), digits \\(0-9\\), underscores \\(_\\) and hashes \\(#\\) are allowed.");
   }
 
   @Test
-  public void validateMappedByValidEntity() {
+  void validateMappedByValidEntity() {
     String entityTypeId = "entityTypeId";
     EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute attr = makeMockAttribute("attrName");
@@ -75,11 +81,8 @@ public class AttributeValidatorTest {
     attributeValidator.validate(attr, ADD);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityTypeId\\].")
-  public void validateMappedByInvalidEntity() {
+  @Test
+  void validateMappedByInvalidEntity() {
     String entityTypeId = "entityTypeId";
     EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute attr = makeMockAttribute("attrName");
@@ -90,14 +93,16 @@ public class AttributeValidatorTest {
     when(mappedByAttr.getDataType()).thenReturn(XREF);
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-    attributeValidator.validate(attr, ADD);
+    @SuppressWarnings("deprecation")
+    Exception exception =
+        assertThrows(MolgenisDataException.class, () -> attributeValidator.validate(attr, ADD));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityTypeId\\].");
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].")
-  public void validateMappedByInvalidDataType() {
+  @Test
+  void validateMappedByInvalidDataType() {
     String entityTypeId = "entityTypeId";
     EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute attr = makeMockAttribute("attrName");
@@ -108,11 +113,16 @@ public class AttributeValidatorTest {
     when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
-    attributeValidator.validate(attr, ADD);
+    @SuppressWarnings("deprecation")
+    Exception exception =
+        assertThrows(MolgenisDataException.class, () -> attributeValidator.validate(attr, ADD));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].");
   }
 
   @Test
-  public void validateOrderByValid() {
+  void validateOrderByValid() {
     String entityTypeId = "entityTypeId";
     EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute attr = makeMockAttribute("attrName");
@@ -127,11 +137,8 @@ public class AttributeValidatorTest {
     attributeValidator.validate(attr, ADD);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Unknown entity \\[entityTypeId\\] attribute \\[fail\\] referred to by entity \\[test\\] attribute \\[attrName\\] sortBy \\[fail,ASC\\]")
-  public void validateOrderByInvalidRefAttribute() {
+  @Test
+  void validateOrderByInvalidRefAttribute() {
     String entityTypeId = "entityTypeId";
     EntityType refEntity = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute attr = makeMockAttribute("attrName");
@@ -146,32 +153,40 @@ public class AttributeValidatorTest {
     when(attr.getMappedBy()).thenReturn(mappedByAttr);
     when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
     when(attr.getOrderBy()).thenReturn(new Sort("fail", ASC));
-    attributeValidator.validate(attr, ADD);
+    @SuppressWarnings("deprecation")
+    Exception exception =
+        assertThrows(MolgenisDataException.class, () -> attributeValidator.validate(attr, ADD));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Unknown entity \\[entityTypeId\\] attribute \\[fail\\] referred to by entity \\[test\\] attribute \\[attrName\\] sortBy \\[fail,ASC\\]");
   }
 
-  @Test(
-      dataProvider = "disallowedTransitionProvider",
-      expectedExceptions = MolgenisDataException.class)
-  public void testDisallowedTransition(Attribute currentAttr, Attribute newAttr) {
+  @SuppressWarnings("deprecation")
+  @ParameterizedTest
+  @MethodSource("disallowedTransitionProvider")
+  void testDisallowedTransition(Attribute currentAttr, Attribute newAttr) {
     when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
         .thenReturn(currentAttr);
-    attributeValidator.validate(newAttr, ValidationMode.UPDATE);
+    assertThrows(
+        MolgenisDataException.class,
+        () -> attributeValidator.validate(newAttr, ValidationMode.UPDATE));
   }
 
-  @Test(dataProvider = "allowedTransitionProvider")
-  public void testAllowedTransition(Attribute currentAttr, Attribute newAttr) {
+  @ParameterizedTest
+  @MethodSource("allowedTransitionProvider")
+  void testAllowedTransition(Attribute currentAttr, Attribute newAttr) {
     when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
         .thenReturn(currentAttr);
   }
 
   @Test
-  public void testDefaultValueDate() {
+  void testDefaultValueDate() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.DATE);
     try {
       attributeValidator.validateDefaultValue(attr, true);
-      Assert.fail();
+      fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
           actual.getCause().getMessage(),
@@ -180,7 +195,7 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueDateValid() {
+  void testDefaultValueDateValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("2016-01-01");
     when(attr.getDataType()).thenReturn(AttributeType.DATE);
@@ -188,13 +203,13 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueDateTime() {
+  void testDefaultValueDateTime() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
     try {
       attributeValidator.validateDefaultValue(attr, true);
-      Assert.fail();
+      fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
           actual.getCause().getMessage(),
@@ -203,7 +218,7 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueDateTimeValid() {
+  void testDefaultValueDateTimeValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("2016-10-10T12:00:10+0000");
     when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
@@ -211,20 +226,20 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueHyperlink() {
+  void testDefaultValueHyperlink() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test^");
     when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
     try {
       attributeValidator.validateDefaultValue(attr, true);
-      Assert.fail();
+      fail();
     } catch (MolgenisDataException actual) {
       assertEquals(actual.getMessage(), "Default value [test^] is not a valid hyperlink.");
     }
   }
 
   @Test
-  public void testDefaultValueHyperlinkValid() {
+  void testDefaultValueHyperlinkValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("http://www.molgenis.org");
     when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
@@ -232,14 +247,14 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueEnum() {
+  void testDefaultValueEnum() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
     when(attr.getDataType()).thenReturn(AttributeType.ENUM);
     try {
       attributeValidator.validateDefaultValue(attr, true);
-      Assert.fail();
+      fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
           actual.getMessage(),
@@ -248,7 +263,7 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultValueEnumValid() {
+  void testDefaultValueEnumValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("b");
     when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
@@ -256,48 +271,55 @@ public class AttributeValidatorTest {
     attributeValidator.validateDefaultValue(attr, true);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[INT\\]")
-  public void testDefaultValueInt1() {
+  @Test
+  void testDefaultValueInt1() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
-    attributeValidator.validateDefaultValue(attr, true);
-    Assert.fail();
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> attributeValidator.validateDefaultValue(attr, true));
+    assertThat(exception.getMessage())
+        .containsPattern("Invalid default value \\[test\\] for data type \\[INT\\]");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Invalid default value \\[1.0\\] for data type \\[INT\\]")
-  public void testDefaultValueInt2() {
+  @Test
+  void testDefaultValueInt2() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("1.0");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
-    attributeValidator.validateDefaultValue(attr, true);
-    Assert.fail();
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> attributeValidator.validateDefaultValue(attr, true));
+    assertThat(exception.getMessage())
+        .containsPattern("Invalid default value \\[1.0\\] for data type \\[INT\\]");
   }
 
   @Test
-  public void testDefaultValueIntValid() {
+  void testDefaultValueIntValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("123456");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Invalid default value \\[test\\] for data type \\[LONG\\]")
-  public void testDefaultValueLong() {
+  @Test
+  void testDefaultValueLong() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.LONG);
-    attributeValidator.validateDefaultValue(attr, true);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> attributeValidator.validateDefaultValue(attr, true));
+    assertThat(exception.getMessage())
+        .containsPattern("Invalid default value \\[test\\] for data type \\[LONG\\]");
   }
 
   @Test
-  public void testDefaultValueLongValid() {
+  void testDefaultValueLongValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("123456");
     when(attr.getDataType()).thenReturn(AttributeType.LONG);
@@ -305,7 +327,7 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultXrefSkipEntityReferenceValidation() {
+  void testDefaultXrefSkipEntityReferenceValidation() {
     String refEntityTypeId = "refEntityTypeId";
     String refIdAttributeName = "refIdAttributeName";
 
@@ -325,7 +347,7 @@ public class AttributeValidatorTest {
   }
 
   @Test
-  public void testDefaultXref() {
+  void testDefaultXref() {
     String refEntityTypeId = "refEntityTypeId";
     String refIdAttributeName = "refIdAttributeName";
 
@@ -356,10 +378,8 @@ public class AttributeValidatorTest {
     attributeValidator.validateDefaultValue(attr, true);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Default value \\[entityId\\] refers to an unknown entity")
-  public void testDefaultXrefInvalid() {
+  @Test
+  void testDefaultXrefInvalid() {
     String refEntityTypeId = "refEntityTypeId";
     String refIdAttributeName = "refIdAttributeName";
 
@@ -387,13 +407,16 @@ public class AttributeValidatorTest {
 
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
-    attributeValidator.validateDefaultValue(attr, true);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> attributeValidator.validateDefaultValue(attr, true));
+    assertThat(exception.getMessage())
+        .containsPattern("Default value \\[entityId\\] refers to an unknown entity");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "ID attribute update not allowed")
-  public void testUpdateIdAttribute() {
+  @Test
+  void testUpdateIdAttribute() {
     String attributeId = "attributeId";
     String attributeName = "attributeName";
 
@@ -409,10 +432,13 @@ public class AttributeValidatorTest {
 
     when(dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class))
         .thenReturn(currentAttribute);
-    attributeValidator.validate(attribute, ValidationMode.UPDATE);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> attributeValidator.validate(attribute, ValidationMode.UPDATE));
+    assertThat(exception.getMessage()).containsPattern("ID attribute update not allowed");
   }
 
-  @DataProvider(name = "allowedTransitionProvider")
   private static Object[][] allowedTransitionProvider() {
     Attribute currentAttr1 = makeMockAttribute("attr1");
     Attribute currentAttr2 = makeMockAttribute("attr2");
@@ -433,7 +459,6 @@ public class AttributeValidatorTest {
     };
   }
 
-  @DataProvider(name = "disallowedTransitionProvider")
   private static Object[][] disallowedTransitionProvider() {
     Attribute currentAttr1 = makeMockAttribute("attr1");
     Attribute currentAttr2 = makeMockAttribute("attr2");
@@ -454,16 +479,18 @@ public class AttributeValidatorTest {
     };
   }
 
-  @Test(expectedExceptions = TemplateExpressionSyntaxException.class)
-  public void testTemplateExpressionInvalid() {
+  @Test
+  void testTemplateExpressionInvalid() {
     Attribute attr = makeMockAttribute("name");
     when(attr.getExpression()).thenReturn("test");
     when(attr.getDataType()).thenReturn(STRING);
-    attributeValidator.validate(attr, ADD_SKIP_ENTITY_VALIDATION);
+    assertThrows(
+        TemplateExpressionSyntaxException.class,
+        () -> attributeValidator.validate(attr, ADD_SKIP_ENTITY_VALIDATION));
   }
 
   @Test
-  public void testTemplateExpressionValid() {
+  void testTemplateExpressionValid() {
     Attribute attr = makeMockAttribute("name");
     when(attr.getExpression()).thenReturn("{template:xref.id}");
     when(attr.getDataType()).thenReturn(STRING);

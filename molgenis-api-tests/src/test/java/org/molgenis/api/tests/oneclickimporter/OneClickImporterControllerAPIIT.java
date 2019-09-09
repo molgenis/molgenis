@@ -7,6 +7,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
@@ -23,7 +24,6 @@ import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedPluginPermiss
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -38,21 +38,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
-import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
+import org.molgenis.util.ResourceUtils;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
-public class OneClickImporterControllerAPIIT extends AbstractApiTests {
+class OneClickImporterControllerAPIIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(OneClickImporterControllerAPIIT.class);
 
-  private String oneClickImporterTestUsername;
+  private static String oneClickImporterTestUsername;
   private static final String ONE_CLICK_IMPORTER_TEST_USER_PASSWORD =
       "one_click_importer_test_user_password";
   private static final String API_V2 = "api/v2/";
@@ -60,16 +59,16 @@ public class OneClickImporterControllerAPIIT extends AbstractApiTests {
   private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
   private static final String ONE_CLICK_IMPORT_CSV_FILE = "/OneClickImport_complex-valid.csv";
 
-  private String testUserToken;
-  private String adminToken;
+  private static String testUserToken;
+  private static String adminToken;
 
   // Fields to store created entity ids from import test, used during cleanup to remove the entities
-  private List<String> importedEntities = new ArrayList<>();
-  private List<String> importPackages = new ArrayList<>();
-  private List<String> importJobIds = new ArrayList<>();
+  private static List<String> importedEntities = new ArrayList<>();
+  private static List<String> importPackages = new ArrayList<>();
+  private static List<String> importJobIds = new ArrayList<>();
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -101,17 +100,17 @@ public class OneClickImporterControllerAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testOneClickImportExcelFile() throws IOException, URISyntaxException {
+  void testOneClickImportExcelFile() throws IOException, URISyntaxException {
     oneClickImportTest(ONE_CLICK_IMPORT_EXCEL_FILE);
   }
 
   @Test
-  public void testOneClickImportCsvFile() throws IOException, URISyntaxException {
+  void testOneClickImportCsvFile() throws IOException, URISyntaxException {
     oneClickImportTest(ONE_CLICK_IMPORT_CSV_FILE);
   }
 
   private void oneClickImportTest(String fileToImport) throws URISyntaxException, IOException {
-    URL resourceUrl = getResource(RestControllerV2APIIT.class, fileToImport);
+    URL resourceUrl = getResource(OneClickImporterControllerAPIIT.class, fileToImport);
     File file = new File(new URI(resourceUrl.toString()).getPath());
 
     // Post the file to be imported
@@ -168,13 +167,13 @@ public class OneClickImporterControllerAPIIT extends AbstractApiTests {
     entityResponse.statusCode(OKE);
 
     JSONAssert.assertEquals(
-        Files.readFile(getClass().getResourceAsStream("users.json")),
+        ResourceUtils.getString(getClass(), "/users.json"),
         entityResponse.extract().body().asString(),
         false);
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Clean up created entities
     removeEntities(adminToken, importedEntities);
 

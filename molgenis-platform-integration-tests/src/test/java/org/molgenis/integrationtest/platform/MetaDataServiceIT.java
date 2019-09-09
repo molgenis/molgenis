@@ -6,6 +6,11 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL_MREF;
@@ -40,10 +45,6 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -51,6 +52,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -77,6 +84,7 @@ import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
@@ -84,16 +92,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
+@TestMethodOrder(OrderAnnotation.class)
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
+public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "metaDataService-user";
 
   private static final String ENTITY_TYPE_ID = "metaDataServiceEntityType";
@@ -117,21 +122,22 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   private Package packNoPermission;
   private Package packPermission;
 
-  @BeforeClass
-  public void setUpBeforeClass() throws InterruptedException {
+  @BeforeEach
+  public void setUpBeforeEach() throws InterruptedException {
     // bootstrapper has finished but indexing of bootstrapped data might be in progress
     indexJobScheduler.waitForAllIndicesStable();
 
     runAsSystem(this::populate);
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  public void tearDownAfterEach() {
     runAsSystem(this::depopulate);
   }
 
   @WithMockUser(username = USERNAME)
   @Test
+  @Order(1)
   public void testUpdateEntityType() {
     EntityType updatedEntityType =
         metaDataService
@@ -186,6 +192,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @Test
+  @Order(2)
   public void testUpdateEntityTypeXrefMrefChange() {
     EntityType updatedEntityType =
         metaDataService
@@ -207,6 +214,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @Test
+  @Order(3)
   public void testUpdateEntityTypeMrefXrefChange() {
     EntityType updatedEntityType =
         metaDataService
@@ -227,10 +235,8 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Attribute data type update from \\[INT\\] to \\[DATE_TIME\\] not allowed, allowed types are \\[BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF\\]")
+  @Test
+  @Order(4)
   public void testUpdateEntityTypeNotAllowed() {
     EntityType updatedEntityType =
         metaDataService
@@ -238,12 +244,18 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
     ;
     updatedEntityType.getAttribute(ATTR_COMPOUND_CHILD_INT).setDataType(DATE_TIME);
-    metaDataService.updateEntityType(updatedEntityType);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class, () -> metaDataService.updateEntityType(updatedEntityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Attribute data type update from \\[INT\\] to \\[DATE_TIME\\] not allowed, allowed types are \\[BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF\\]");
   }
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = PackagePermissionDeniedException.class)
+  @Test
+  @Order(5)
   public void testCreateNoPackagePermission() {
     EntityType entityType =
         entityTypeFactory
@@ -259,12 +271,14 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
             .setDataType(STRING)
             .setIdAttribute(true)
             .setNillable(false));
-    metaDataService.createRepository(entityType);
+    assertThrows(
+        PackagePermissionDeniedException.class, () -> metaDataService.createRepository(entityType));
   }
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = NullPackageNotSuException.class)
+  @Test
+  @Order(6)
   public void testCreateNullPermission() {
     EntityType entityType =
         entityTypeFactory.create(ENTITY_TYPE_2).setLabel("label").setBackend("PostgreSQL");
@@ -276,12 +290,14 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
             .setDataType(STRING)
             .setIdAttribute(true)
             .setNillable(false));
-    metaDataService.createRepository(entityType);
+    assertThrows(
+        NullPackageNotSuException.class, () -> metaDataService.createRepository(entityType));
   }
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
   @Test
+  @Order(7)
   public void testCreatePermission() {
     EntityType entityType =
         entityTypeFactory
@@ -302,7 +318,8 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(dependsOnMethods = {"testUpdateEntityType", "testUpdateEntityTypeNotAllowed"})
+  @Test
+  @Order(8)
   public void testAddAttribute() {
     EntityType entityType =
         metaDataService
@@ -322,7 +339,8 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(dependsOnMethods = {"testAddAttribute"})
+  @Test
+  @Order(9)
   public void testUpdateAttribute() {
     EntityType entityType =
         metaDataService
@@ -343,7 +361,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(dependsOnMethods = {"testUpdateAttribute"})
+  @Order(10)
   public void testDeleteAttribute() {
     EntityType entityType =
         metaDataService
@@ -358,7 +376,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
             .getEntityType(ENTITY_TYPE_ID)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
     ;
-    assertNull(updatedEntityType.getAttribute("newAttribute"));
+    org.junit.jupiter.api.Assertions.assertNull(updatedEntityType.getAttribute("newAttribute"));
   }
 
   private void populate() {

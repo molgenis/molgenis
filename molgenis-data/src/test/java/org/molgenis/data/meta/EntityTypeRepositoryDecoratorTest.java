@@ -5,6 +5,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -15,10 +18,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -29,11 +33,9 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @SuppressWarnings("deprecation")
-public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
+class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   private final String entityTypeId1 = "EntityType1";
   private final String entityTypeId2 = "EntityType2";
 
@@ -47,15 +49,15 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
   @Mock private RepositoryCollection repositoryCollection;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     repo =
         new EntityTypeRepositoryDecorator(
             delegateRepository, dataService, entityTypeDependencyResolver);
   }
 
   @Test
-  public void addWithKnownBackend() {
+  void addWithKnownBackend() {
     when(entityType1.getId()).thenReturn(entityTypeId1);
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.getBackend(entityType1)).thenReturn(repositoryCollection);
@@ -64,21 +66,20 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(delegateRepository).add(entityType1);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = "Unknown backend \\[backend\\]")
-  public void addWithUnknownBackend() {
+  @Test
+  void addWithUnknownBackend() {
     when(entityType1.getId()).thenReturn(entityTypeId1);
     String backend = "backend";
     when(entityType1.getBackend()).thenReturn(backend);
     when(dataService.getMeta()).thenReturn(metaDataService);
 
-    repo.add(entityType1);
+    Exception exception = assertThrows(MolgenisDataException.class, () -> repo.add(entityType1));
+    assertThat(exception.getMessage()).containsPattern("Unknown backend \\[backend\\]");
     verify(delegateRepository).add(entityType1);
   }
 
   @Test
-  public void delete() {
+  void delete() {
     String backend = "backend";
     when(entityType1.getBackend()).thenReturn(backend);
     when(dataService.getMeta()).thenReturn(metaDataService);
@@ -104,7 +105,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void deleteAbstract() {
+  void deleteAbstract() {
     when(entityType1.isAbstract()).thenReturn(true);
     Attribute attr0 = mock(Attribute.class);
     when(attr0.getChildren()).thenReturn(emptyList());
@@ -122,7 +123,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void addRemoveAttributeAbstractEntityType() {
+  void addRemoveAttributeAbstractEntityType() {
     when(entityType1.getId()).thenReturn(entityTypeId1);
     when(entityType2.getId()).thenReturn(entityTypeId2);
     String entityTypeId3 = "EntityType3";
@@ -167,7 +168,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void updateConcreteEntityType() {
+  void updateConcreteEntityType() {
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.getBackend(entityType1)).thenReturn(repositoryCollection);
 
@@ -184,7 +185,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void deleteEntityTypesWithOneToMany() {
+  void deleteEntityTypesWithOneToMany() {
     String backend = "backend";
     when(entityType1.getId()).thenReturn(entityTypeId1);
     when(entityType1.getBackend()).thenReturn(backend);

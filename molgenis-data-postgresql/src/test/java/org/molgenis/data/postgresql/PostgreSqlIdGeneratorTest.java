@@ -1,33 +1,34 @@
 package org.molgenis.data.postgresql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PostgreSqlIdGeneratorTest {
+class PostgreSqlIdGeneratorTest {
   private PostgreSqlIdGenerator postgreSqlIdGenerator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     postgreSqlIdGenerator = new PostgreSqlIdGenerator(32);
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testTableIdGenerator() {
-    new PostgreSqlIdGenerator(5);
+  @Test
+  void testTableIdGenerator() {
+    assertThrows(IllegalArgumentException.class, () -> new PostgreSqlIdGenerator(5));
   }
 
-  @DataProvider(name = "generateIdEntityTypeProvider")
-  public static Iterator<Object[]> generateIdEntityTypeProvider() {
+  static Iterator<Object[]> generateIdEntityTypeProvider() {
     List<Object[]> dataList = new ArrayList<>(4);
     dataList.add(new Object[] {"myEntity", "myEntity#061f7aef"});
     dataList.add(new Object[] {"my_Entity", "my_Entity#4581e195"});
@@ -37,16 +38,16 @@ public class PostgreSqlIdGeneratorTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "generateIdEntityTypeProvider")
-  public void testGenerateIdEntityType(String entityTypeId, String expectedId) {
+  @ParameterizedTest
+  @MethodSource("generateIdEntityTypeProvider")
+  void testGenerateIdEntityType(String entityTypeId, String expectedId) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     String id = postgreSqlIdGenerator.generateId(entityType);
     assertEquals(id, expectedId);
   }
 
-  @DataProvider(name = "generateIdAttributeTypeProvider")
-  public static Iterator<Object[]> generateIdAttributeProvider() {
+  static Iterator<Object[]> generateIdAttributeProvider() {
     List<Object[]> dataList = new ArrayList<>(4);
     dataList.add(new Object[] {"abcdef", "myAttr", "myAttr"});
     dataList.add(new Object[] {"fabcde", "myAttr", "myAttr"});
@@ -59,8 +60,9 @@ public class PostgreSqlIdGeneratorTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "generateIdAttributeTypeProvider")
-  public void testGenerateIdAttribute(String attrId, String attrName, String expectedId) {
+  @ParameterizedTest
+  @MethodSource("generateIdAttributeProvider")
+  void testGenerateIdAttribute(String attrId, String attrName, String expectedId) {
     Attribute attr = mock(Attribute.class);
     when(attr.getIdentifier()).thenReturn(attrId);
     when(attr.getName()).thenReturn(attrName);

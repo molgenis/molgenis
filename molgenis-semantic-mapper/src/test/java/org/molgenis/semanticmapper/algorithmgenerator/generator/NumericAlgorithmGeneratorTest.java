@@ -2,13 +2,15 @@ package org.molgenis.semanticmapper.algorithmgenerator.generator;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -22,11 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = NumericAlgorithmGeneratorTest.Config.class)
-public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
+class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -45,8 +45,8 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
 
   private Attribute sourceAttribute1;
 
-  @BeforeMethod
-  public void setup() {
+  @BeforeEach
+  void setup() {
     when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
         .thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 
@@ -69,7 +69,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generate() {
+  void generate() {
     String generate =
         numericAlgorithmGenerator.generate(
             targetAttribute, asList(sourceAttribute), targetEntityType, sourceEntityType);
@@ -88,7 +88,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateUnitConversionAlgorithm() {
+  void generateUnitConversionAlgorithm() {
     String generateUnitConversionAlgorithm =
         numericAlgorithmGenerator.generateUnitConversionAlgorithm(
             targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
@@ -97,7 +97,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void isSuitable() {
+  void isSuitable() {
     Attribute stringAttribute = attrMetaFactory.create().setName("source_string");
     assertTrue(
         numericAlgorithmGenerator.isSuitable(targetAttribute, singletonList(sourceAttribute)));
@@ -107,19 +107,19 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public UnitResolver unitResolver() {
+    UnitResolver unitResolver() {
       return new UnitResolverImpl(ontologyService());
     }
 
     @Bean
-    public OntologyService ontologyService() {
+    OntologyService ontologyService() {
       return mock(OntologyService.class);
     }
 
     @Bean
-    public NumericAlgorithmGenerator numericAlgorithmGenerator() {
+    NumericAlgorithmGenerator numericAlgorithmGenerator() {
       return new NumericAlgorithmGenerator(unitResolver());
     }
   }

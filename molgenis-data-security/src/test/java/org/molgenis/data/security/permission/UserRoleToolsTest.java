@@ -1,11 +1,11 @@
 package org.molgenis.data.security.permission;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -33,43 +35,41 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class UserRoleToolsTest extends AbstractMockitoTest {
+class UserRoleToolsTest extends AbstractMockitoTest {
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   @Mock DataService dataService;
   @Mock UserService userService;
 
   private UserRoleTools userRoleTools;
 
-  @BeforeMethod
+  @BeforeEach
   private void setUpBeforeMethod() {
     this.userRoleTools = new UserRoleTools(userService, dataService, userPermissionEvaluator);
   }
 
   @Test
-  public void testGetUser() {
+  void testGetUser() {
     assertEquals(UserRoleTools.getUsername(new PrincipalSid("test")).get(), "test");
   }
 
   @Test
-  public void testGetRole() {
+  void testGetRole() {
     assertEquals(UserRoleTools.getRolename(new GrantedAuthoritySid("ROLE_test")).get(), "test");
   }
 
   @Test
-  public void testGetNameRole() {
+  void testGetNameRole() {
     assertEquals(UserRoleTools.getName(new GrantedAuthoritySid("ROLE_test")), "test");
   }
 
   @Test
-  public void testGetName() {
+  void testGetName() {
     assertEquals(UserRoleTools.getName(new PrincipalSid("test")), "test");
   }
 
   @Test
-  public void testGetRolesForSid() {
+  void testGetRolesForSid() {
     User molgenisUser = mock(User.class);
     when(molgenisUser.getId()).thenReturn("user");
     when(userService.getUser("user")).thenReturn(molgenisUser);
@@ -109,7 +109,7 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetInheritedPermissions() {
+  void testGetInheritedPermissions() {
     User molgenisUser = mock(User.class);
     when(molgenisUser.getId()).thenReturn("user");
     when(userService.getUser("user")).thenReturn(molgenisUser);
@@ -168,7 +168,7 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetAllAvailableSids() {
+  void testGetAllAvailableSids() {
     User user = mock(User.class);
     when(user.getUsername()).thenReturn("username");
     doReturn(true)
@@ -192,7 +192,7 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetSids() {
+  void testGetSids() {
     List<Sid> expected =
         Arrays.asList(
             new PrincipalSid("user1"),
@@ -219,7 +219,7 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSortSids() {
+  void testSortSids() {
     Sid sid1 = new PrincipalSid("b");
     Sid sid2 = new PrincipalSid("a");
     Sid sid3 = new GrantedAuthoritySid("ROLE_b");
@@ -230,7 +230,7 @@ public class UserRoleToolsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetRoles() {
+  void testGetRoles() {
     Sid sid1 = new GrantedAuthoritySid("ROLE_a");
     Sid sid2 = new GrantedAuthoritySid("ROLE_b");
     LinkedList expected = new LinkedList<>();

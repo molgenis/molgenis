@@ -47,7 +47,7 @@ public class TestResourceUtils {
    * dependency issues.
    */
   @SuppressWarnings("UnstableApiUsage")
-  private static String getString(Class<?> contextClass, String resourceName) throws IOException {
+  public static String getString(Class<?> contextClass, String resourceName) throws IOException {
     URL resourceUrl = Resources.getResource(contextClass, resourceName);
     return Resources.toString(resourceUrl, UTF_8);
   }

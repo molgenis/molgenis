@@ -1,29 +1,29 @@
 package org.molgenis.semanticmapper.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.measure.unit.Unit;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class MagmaUnitConverterTest {
+class MagmaUnitConverterTest {
   MagmaUnitConverter unitConverter = new MagmaUnitConverter();
 
   @Test
-  public void convertUnit() {
-    Assert.assertEquals(
-        unitConverter.convertUnit(Unit.valueOf("kg"), Unit.valueOf("g")), ".div(1000.0)");
-    Assert.assertEquals(
-        unitConverter.convertUnit(Unit.valueOf("m"), Unit.valueOf("cm")), ".div(100.0)");
-    Assert.assertEquals(
+  void convertUnit() {
+    assertEquals(unitConverter.convertUnit(Unit.valueOf("kg"), Unit.valueOf("g")), ".div(1000.0)");
+    assertEquals(unitConverter.convertUnit(Unit.valueOf("m"), Unit.valueOf("cm")), ".div(100.0)");
+    assertEquals(
         unitConverter.convertUnit(Unit.valueOf("kg/m²"), Unit.valueOf("g")), ".div(1000.0)");
-    Assert.assertEquals(
+    assertEquals(
         unitConverter.convertUnit(Unit.valueOf("kg/m²"), Unit.valueOf("cm")), ".div(100.0)");
   }
 
   @Test
-  public void findCompositeUnitNames() {
+  void findCompositeUnitNames() {
     Set<String> findCompositeUnitNames = unitConverter.findCompositeUnitNames("kg/m²");
-    Assert.assertTrue(Sets.newHashSet("kg", "m", "kg/m²").containsAll(findCompositeUnitNames));
+    assertTrue(Sets.newHashSet("kg", "m", "kg/m²").containsAll(findCompositeUnitNames));
   }
 }

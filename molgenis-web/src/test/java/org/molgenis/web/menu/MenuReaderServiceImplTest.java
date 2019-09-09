@@ -1,15 +1,18 @@
 package org.molgenis.web.menu;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.plugin.model.PluginIdentity;
@@ -21,19 +24,17 @@ import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {GsonConfig.class})
-public class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
+class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
   @Autowired private Gson gson;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
   @Mock private AppSettings appSettings;
   private MenuReaderServiceImpl menuReaderService;
   private Menu menu;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     MenuItem p30 = MenuItem.create("p3_0", "lbl");
     MenuItem p31 = MenuItem.create("p3_1", "lbl");
 
@@ -48,13 +49,13 @@ public class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
     this.menuReaderService = new MenuReaderServiceImpl(appSettings, gson, userPermissionEvaluator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void MenuReaderServiceImpl() {
-    new MenuReaderServiceImpl(null, null, null);
+  @Test
+  void MenuReaderServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new MenuReaderServiceImpl(null, null, null));
   }
 
   @Test
-  public void findMenuItemPath() {
+  void findMenuItemPath() {
     String menuString = gson.toJson(menu);
     when(appSettings.getMenu()).thenReturn(menuString);
     when(userPermissionEvaluator.hasPermission(
@@ -70,7 +71,7 @@ public class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getMenu() {
+  void getMenu() {
     when(appSettings.getMenu())
         .thenReturn(
             "{\n"

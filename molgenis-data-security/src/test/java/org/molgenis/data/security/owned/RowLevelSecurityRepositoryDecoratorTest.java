@@ -5,6 +5,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
@@ -13,13 +17,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityPermission.READ;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -36,7 +40,7 @@ import org.molgenis.data.security.exception.EntityPermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
@@ -45,13 +49,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {RowLevelSecurityRepositoryDecoratorTest.Config.class})
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class RowLevelSecurityRepositoryDecoratorTest
-    extends AbstractMockitoTestNGSpringContextTests {
+class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 
   @Mock private Repository<Entity> delegateRepository;
@@ -59,21 +60,23 @@ public class RowLevelSecurityRepositoryDecoratorTest
   @Mock private MutableAclService mutableAclService;
   private RowLevelSecurityRepositoryDecorator rowLevelSecurityRepositoryDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     rowLevelSecurityRepositoryDecorator =
         new RowLevelSecurityRepositoryDecorator(
             delegateRepository, userPermissionEvaluator, mutableAclService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testRowLevelSecurityRepositoryDecorator() {
-    new RowLevelSecurityRepositoryDecorator(null, null, null);
+  @Test
+  void testRowLevelSecurityRepositoryDecorator() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new RowLevelSecurityRepositoryDecorator(null, null, null));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testAdd() {
+  void testAdd() {
     Entity entity = getEntityMock();
     MutableAcl acl = mock(MutableAcl.class);
     when(mutableAclService.createAcl(new EntityIdentity(entity))).thenReturn(acl);
@@ -86,7 +89,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testAddStream() {
+  void testAddStream() {
     Entity entity = getEntityMock();
     MutableAcl acl = mock(MutableAcl.class);
     when(mutableAclService.createAcl(new EntityIdentity(entity))).thenReturn(acl);
@@ -101,19 +104,21 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(
-      expectedExceptions = EntityAlreadyExistsException.class,
-      expectedExceptionsMessageRegExp = "type:entityTypeId id:entityId")
-  public void testAddAlreadyExists() {
+  @Test
+  void testAddAlreadyExists() {
     Entity entity = getEntityMock();
     when(mutableAclService.createAcl(new EntityIdentity(entity)))
         .thenThrow(new AlreadyExistsException(""));
 
-    rowLevelSecurityRepositoryDecorator.add(entity);
+    Exception exception =
+        assertThrows(
+            EntityAlreadyExistsException.class,
+            () -> rowLevelSecurityRepositoryDecorator.add(entity));
+    assertThat(exception.getMessage()).containsPattern("type:entityTypeId id:entityId");
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     Entity entity = getEntityMock();
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.UPDATE))
         .thenReturn(true);
@@ -121,18 +126,19 @@ public class RowLevelSecurityRepositoryDecoratorTest
     verify(delegateRepository).update(entity);
   }
 
-  @Test(
-      expectedExceptions = EntityPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp =
-          "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
-  public void testUpdatePermissionDenied() {
+  @Test
+  void testUpdatePermissionDenied() {
     Entity entity = getEntityMock();
-    rowLevelSecurityRepositoryDecorator.update(entity);
-    verify(delegateRepository, times(0)).update(entity);
+    Exception exception =
+        assertThrows(
+            EntityPermissionDeniedException.class,
+            () -> rowLevelSecurityRepositoryDecorator.update(entity));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:UPDATE entityTypeId:entityTypeId entityId:entityId");
   }
 
   @Test
-  public void testUpdateStream() {
+  void testUpdateStream() {
     Entity entity = getEntityMock();
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.UPDATE))
         .thenReturn(true);
@@ -144,22 +150,24 @@ public class RowLevelSecurityRepositoryDecoratorTest
     assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
   }
 
-  @Test(
-      expectedExceptions = EntityPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp =
-          "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
-  public void testUpdateStreamPermissionDenied() {
+  @SuppressWarnings("unchecked")
+  @Test
+  void testUpdateStreamPermissionDenied() {
     Entity entity = getEntityMock();
-    rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
+    doAnswer(answer -> answer.getArgument(0, Stream.class).count())
+        .when(delegateRepository)
+        .update(any(Stream.class));
 
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(delegateRepository).update(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), emptyList());
+    Exception exception =
+        assertThrows(
+            EntityPermissionDeniedException.class,
+            () -> rowLevelSecurityRepositoryDecorator.update(Stream.of(entity)));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:UPDATE entityTypeId:entityTypeId entityId:entityId");
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     Entity entity = getEntityMock();
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.DELETE))
         .thenReturn(true);
@@ -168,18 +176,20 @@ public class RowLevelSecurityRepositoryDecoratorTest
     verify(mutableAclService).deleteAcl(new EntityIdentity(entity), true);
   }
 
-  @Test(
-      expectedExceptions = EntityPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp =
-          "permission:DELETE entityTypeId:entityTypeId entityId:entityId")
-  public void testDeletePermissionDenied() {
+  @Test
+  void testDeletePermissionDenied() {
     Entity entity = getEntityMock();
-    rowLevelSecurityRepositoryDecorator.delete(entity);
-    verify(delegateRepository, times(0)).delete(entity);
+
+    Exception exception =
+        assertThrows(
+            EntityPermissionDeniedException.class,
+            () -> rowLevelSecurityRepositoryDecorator.delete(entity));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:DELETE entityTypeId:entityTypeId entityId:entityId");
   }
 
   @Test
-  public void testDeleteStream() {
+  void testDeleteStream() {
     Entity entity = getEntityMock();
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.DELETE))
         .thenReturn(true);
@@ -193,7 +203,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testDeleteStreamPermissionDenied() {
+  void testDeleteStreamPermissionDenied() {
     Entity entity = getEntityMock();
     rowLevelSecurityRepositoryDecorator.delete(Stream.of(entity));
 
@@ -205,7 +215,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -219,7 +229,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testDeleteByIdPermissionDenied() {
+  void testDeleteByIdPermissionDenied() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -231,7 +241,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     EntityType entityType =
         when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
     Entity permittedEntity =
@@ -260,7 +270,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteAllPermissionDenied() {
+  void testDeleteAllPermissionDenied() {
     EntityType entityType =
         when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
     Entity permittedEntity =
@@ -285,7 +295,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testDeleteAllStream() {
+  void testDeleteAllStream() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -303,7 +313,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testDeleteAllStreamPermissionDenied() {
+  void testDeleteAllStreamPermissionDenied() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -318,7 +328,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOneById() {
+  void testFindOneById() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -331,7 +341,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOneByIdPermissionDenied() {
+  void testFindOneByIdPermissionDenied() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -340,7 +350,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOneByIdFetch() {
+  void testFindOneByIdFetch() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -354,7 +364,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOneByIdFetchPermissionDenied() {
+  void testFindOneByIdFetchPermissionDenied() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -364,7 +374,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOne() {
+  void testFindOne() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -375,7 +385,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindOnePermissionDenied() {
+  void testFindOnePermissionDenied() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -385,7 +395,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindAllQuery() {
+  void testFindAllQuery() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -398,7 +408,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testFindAllQueryPermissionDenied() {
+  void testFindAllQueryPermissionDenied() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -409,7 +419,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testFindAllStream() {
+  void testFindAllStream() {
     Object entityId = "entityId";
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
@@ -421,7 +431,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testFindAllStreamPermissionDenied() {
+  void testFindAllStreamPermissionDenied() {
     Object entityId = "entityId";
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
@@ -432,7 +442,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testFindAllStreamFetch() {
+  void testFindAllStreamFetch() {
     Object entityId = "entityId";
     Entity entity = getEntityMock();
     Fetch fetch = mock(Fetch.class);
@@ -446,7 +456,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testFindAllStreamFetchPermissionDenied() {
+  void testFindAllStreamFetchPermissionDenied() {
     Object entityId = "entityId";
     Entity entity = getEntityMock();
     Fetch fetch = mock(Fetch.class);
@@ -458,7 +468,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testCount() {
+  void testCount() {
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
@@ -468,7 +478,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testCountPermissionDenied() {
+  void testCountPermissionDenied() {
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
@@ -476,7 +486,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testCountQuery() {
+  void testCountQuery() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -488,7 +498,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testCountQueryPermissionDenied() {
+  void testCountQueryPermissionDenied() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = getEntityMock();
@@ -498,7 +508,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testIterator() {
+  void testIterator() {
     Entity entity = getEntityMock();
     when(delegateRepository.iterator()).thenReturn(singletonList(entity).iterator());
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
@@ -507,7 +517,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @Test
-  public void testIteratorPermissionDenied() {
+  void testIteratorPermissionDenied() {
     Entity entity = getEntityMock();
     when(delegateRepository.iterator()).thenReturn(singletonList(entity).iterator());
     assertEquals(newArrayList(rowLevelSecurityRepositoryDecorator.iterator()), emptyList());
@@ -515,7 +525,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testForEachBatched() {
+  void testForEachBatched() {
     Entity entity = getEntityMock();
     Fetch fetch = mock(Fetch.class);
     List<Entity> actualEntities = new ArrayList<>();
@@ -533,7 +543,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testForEachBatchedPermissionDenied() {
+  void testForEachBatchedPermissionDenied() {
     Entity entity = getEntityMock();
     Fetch fetch = mock(Fetch.class);
     List<Entity> actualEntities = new ArrayList<>();
@@ -550,7 +560,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
   @WithMockUser(username = USERNAME, roles = "SU")
   @Test
-  public void testAggregate() {
+  void testAggregate() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResponse = mock(AggregateResult.class);
     when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResponse);
@@ -558,10 +568,12 @@ public class RowLevelSecurityRepositoryDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void testAggregatePermissionDenied() {
+  @Test
+  void testAggregatePermissionDenied() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
-    rowLevelSecurityRepositoryDecorator.aggregate(aggregateQuery);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> rowLevelSecurityRepositoryDecorator.aggregate(aggregateQuery));
   }
 
   private Entity getEntityMock() {

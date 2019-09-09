@@ -1,14 +1,16 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.DeleteEntitiesRequest;
@@ -32,17 +34,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityControllerTest extends AbstractMockitoTest {
+class EntityControllerTest extends AbstractMockitoTest {
   @Mock private DataServiceV3 dataServiceV3;
   @Mock private EntityMapper entityMapper;
   @Mock private MessageSource messageSource;
   private EntityController entityController;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityController = new EntityController(dataServiceV3, entityMapper);
     RequestContextHolder.setRequestAttributes(
         new ServletRequestAttributes(new MockHttpServletRequest()));
@@ -51,7 +51,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testCreateEntity() throws URISyntaxException {
+  void testCreateEntity() throws URISyntaxException {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyId";
     Map<String, Object> entityMap = mock(Map.class);
@@ -66,7 +66,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetEntity() {
+  void testGetEntity() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyId";
     Selection filter = Selection.FULL_SELECTION;
@@ -87,7 +87,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetEntities() {
+  void testGetEntities() {
     String entityTypeId = "MyEntityTypeId";
     Selection filter = Selection.FULL_SELECTION;
     Selection expand = Selection.FULL_SELECTION;
@@ -122,7 +122,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetField() {
+  void testGetField() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "EntityId";
     String fieldId = "Field";
@@ -163,7 +163,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testUpdateEntity() {
+  void testUpdateEntity() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyId";
 
@@ -175,7 +175,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testUpdatePartialEntity() {
+  void testUpdatePartialEntity() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyId";
 
@@ -186,7 +186,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteEntity() {
+  void testDeleteEntity() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyId";
 
@@ -200,7 +200,7 @@ public class EntityControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteEntities() {
+  void testDeleteEntities() {
     String entityTypeId = "MyEntityTypeId";
 
     Query query =

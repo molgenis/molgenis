@@ -1,9 +1,10 @@
 package org.molgenis.data.meta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.SystemEntityTestUtils.getRandomString;
-import static org.testng.Assert.*;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;

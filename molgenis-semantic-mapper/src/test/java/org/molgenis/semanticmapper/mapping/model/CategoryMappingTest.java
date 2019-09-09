@@ -1,11 +1,11 @@
 package org.molgenis.semanticmapper.mapping.model;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class CategoryMappingTest {
+class CategoryMappingTest {
   private CategoryMapping<String, String> mapping =
       CategoryMapping.create("blah", ImmutableMap.of("Human", "1", "Orc", "2"));
 
@@ -25,7 +25,7 @@ public class CategoryMappingTest {
       CategoryMapping.create("blah", ImmutableMap.of("Human", "1", "Orc", "2"), "3", null);
 
   @Test
-  public void testCreateFromAlgorithm() {
+  void testCreateFromAlgorithm() {
     assertEquals(CategoryMapping.create(mapping.getAlgorithm()), mapping);
     assertEquals(
         CategoryMapping.create(mappingWithNullValueInMap.getAlgorithm()),
@@ -40,7 +40,7 @@ public class CategoryMappingTest {
   }
 
   @Test
-  public void testGetAlgorithm() {
+  void testGetAlgorithm() {
     assertEquals(mapping.getAlgorithm(), "$('blah').map({\"Human\":\"1\",\"Orc\":\"2\"}).value();");
 
     assertEquals(

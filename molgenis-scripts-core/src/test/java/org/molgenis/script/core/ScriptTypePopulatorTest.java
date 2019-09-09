@@ -3,6 +3,7 @@ package org.molgenis.script.core;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -10,23 +11,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.script.core.ScriptTypeMetadata.SCRIPT_TYPE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ScriptTypePopulatorTest {
+class ScriptTypePopulatorTest {
   private ScriptTypePopulator scriptTypePopulator;
   private ScriptRunnerFactory scriptRunnerFactory;
   private DataService dataService;
   private ScriptTypeFactory scriptTypeFactory;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     scriptRunnerFactory = mock(ScriptRunnerFactory.class);
     dataService = mock(DataService.class);
     scriptTypeFactory = mock(ScriptTypeFactory.class);
@@ -35,7 +35,7 @@ public class ScriptTypePopulatorTest {
   }
 
   @Test
-  public void populate() throws Exception {
+  void populate() throws Exception {
     String scriptRunner0Name = "scriptRunner0";
     ScriptRunner scriptRunner0 =
         when(mock(ScriptRunner.class).getName()).thenReturn(scriptRunner0Name).getMock();
@@ -61,7 +61,7 @@ public class ScriptTypePopulatorTest {
   // regression test for https://github.com/molgenis/molgenis/issues/5168
   @SuppressWarnings("unchecked")
   @Test
-  public void populateNoChanges() throws Exception {
+  void populateNoChanges() throws Exception {
     String scriptRunner0Name = "scriptRunner0";
     ScriptRunner scriptRunner0 =
         when(mock(ScriptRunner.class).getName()).thenReturn(scriptRunner0Name).getMock();

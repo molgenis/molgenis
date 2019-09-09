@@ -4,13 +4,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -33,6 +32,9 @@ import com.google.common.collect.Multimap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
@@ -81,14 +83,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
+class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   private static final String USERNAME = "MyUsername";
 
   @Autowired private EntityTypeFactory entityTypeFactory;
@@ -138,28 +136,24 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   private MockMvc mockMvc;
   private SecurityContext previousContext;
 
-  public MappingServiceControllerTest() {
+  MappingServiceControllerTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeClass
-  public void beforeClass() {
-    initMocks(this);
+  @AfterEach
+  void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
+  }
+
+  @BeforeEach
+  void beforeTest() {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", null);
     authentication.setAuthenticated(true);
     testContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(testContext);
-  }
 
-  @AfterClass
-  public void tearDownAfterClass() {
-    SecurityContextHolder.setContext(previousContext);
-  }
-
-  @BeforeMethod
-  public void beforeTest() {
     user = when(mock(User.class).getUsername()).thenReturn(USERNAME).getMock();
 
     hop = entityTypeFactory.create("HOP");
@@ -200,7 +194,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void itShouldUpdateExistingAttributeMappingWhenSaving() throws Exception {
+  void itShouldUpdateExistingAttributeMappingWhenSaving() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
@@ -226,7 +220,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void itShouldCreateNewAttributeMappingWhenSavingIfNonePresent() throws Exception {
+  void itShouldCreateNewAttributeMappingWhenSavingIfNonePresent() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
@@ -258,7 +252,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void itShouldRemoveEmptyAttributeMappingsWhenSaving() throws Exception {
+  void itShouldRemoveEmptyAttributeMappingsWhenSaving() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
@@ -281,7 +275,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getFirstAttributeMappingInfo_age() throws Exception {
+  void getFirstAttributeMappingInfo_age() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     MvcResult result =
         mockMvc
@@ -302,7 +296,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getFirstAttributeMappingInfo_dob() throws Exception {
+  void getFirstAttributeMappingInfo_dob() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     mappingProject
         .getMappingTarget("HOP")
@@ -329,7 +323,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testIsNewEntityReturnsTrueIfEntityIsNew() throws Exception {
+  void testIsNewEntityReturnsTrueIfEntityIsNew() throws Exception {
     MockHttpServletResponse response =
         mockMvc
             .perform(
@@ -347,7 +341,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testIsNewEntityReturnsFalseIfEntityExists() throws Exception {
+  void testIsNewEntityReturnsFalseIfEntityExists() throws Exception {
     when(dataService.hasEntityType("it_emx_test_TypeTest")).thenReturn(true);
     when(dataService.getEntityType("it_emx_test_TypeTest")).thenReturn(mock(EntityType.class));
     MockHttpServletResponse response =
@@ -366,7 +360,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getFirstAttributeMappingInfo_none() throws Exception {
+  void getFirstAttributeMappingInfo_none() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
     mappingProject
         .getMappingTarget("HOP")
@@ -397,7 +391,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testScheduleMappingJobUnknownMappingProjectId() throws Exception {
+  void testScheduleMappingJobUnknownMappingProjectId() throws Exception {
     mockMvc
         .perform(
             post(URI + "/map")
@@ -412,7 +406,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testScheduleMappingJobUnknownPackage() throws Exception {
+  void testScheduleMappingJobUnknownPackage() throws Exception {
     when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
     mockMvc
@@ -429,7 +423,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testScheduleMappingJobSystemPackage() throws Exception {
+  void testScheduleMappingJobSystemPackage() throws Exception {
     when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
     Package systemPackage = mock(Package.class);
     when(systemPackage.getId()).thenReturn("sys");
@@ -449,7 +443,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testMap() throws Exception {
+  void testMap() throws Exception {
     when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
     Package aPackage = mock(Package.class);
     when(aPackage.getId()).thenReturn("base");
@@ -487,7 +481,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreateIntegratedEntity() throws Exception {
+  void testCreateIntegratedEntity() throws Exception {
     when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
     when(mappingJobExecution.getIdValue()).thenReturn("mappingJobExecution");
     when(mappingJobExecutionMetadata.getId()).thenReturn("mappingJobExecutionMetadata");
@@ -521,7 +515,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testViewMappingProject() {
+  void testViewMappingProject() {
     when(mappingService.getMappingProject("hop hop hop")).thenReturn(mappingProject);
     when(dataService.getEntityTypeIds()).thenReturn(Stream.of("LifeLines", "entity1", "entity2"));
     when(mappingService.getCompatibleEntityTypes(hop))
@@ -561,7 +555,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAutoGenerateAlgorithms() {
+  void testAutoGenerateAlgorithms() {
     EntityType test = entityTypeFactory.create("TEST");
     Attribute idAttr = attrMetaFactory.create().setName("id").setDataType(INT);
     test.addAttribute(idAttr);
@@ -580,7 +574,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetSemanticSearchAttributeMappingRelevantAttributes() {
+  void testGetSemanticSearchAttributeMappingRelevantAttributes() {
     Map<String, String> requestBody =
         ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
     MappingProject mappingProject = mock(MappingProject.class);
@@ -616,7 +610,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
+  void testGetSemanticSearchAttributeMappingNoRelevantAttributes() {
     Map<String, String> requestBody =
         ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source", "source0");
     MappingProject mappingProject = mock(MappingProject.class);
@@ -647,7 +641,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAddEntityMapping() {
+  void testAddEntityMapping() {
     String mappingProjectId = "MyMappingProjectId";
     MappingProject mappingProject = mock(MappingProject.class);
     when(mappingService.getMappingProject(mappingProjectId)).thenReturn(mappingProject);
@@ -673,7 +667,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testAddEntityMappingCopyAlgorithms() {
+  void testAddEntityMappingCopyAlgorithms() {
     String mappingProjectId = "MyMappingProjectId";
     MappingProject mappingProject = mock(MappingProject.class);
     when(mappingService.getMappingProject(mappingProjectId)).thenReturn(mappingProject);

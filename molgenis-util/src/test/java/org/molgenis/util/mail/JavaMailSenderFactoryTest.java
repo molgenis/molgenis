@@ -1,22 +1,23 @@
 package org.molgenis.util.mail;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Properties;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
+class JavaMailSenderFactoryTest extends AbstractMockitoTest {
   private JavaMailSenderFactory javaMailSenderFactory;
   @Mock private MailSettings mailSettings;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     when(mailSettings.getHost()).thenReturn("host");
     when(mailSettings.getPort()).thenReturn(1234);
     when(mailSettings.getUsername()).thenReturn("username");
@@ -31,7 +32,7 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateMailSenderWithDefaultProperties() {
+  void testCreateMailSenderWithDefaultProperties() {
     JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
 
     assertEquals(actual.getHost(), "host");
@@ -51,7 +52,7 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
 
   // regression test for https://github.com/molgenis/molgenis/issues/6516
   @Test
-  public void testCreateMailSenderWithoutUsernamePassword() {
+  void testCreateMailSenderWithoutUsernamePassword() {
     JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
 
     assertEquals(actual.getHost(), "host");
@@ -64,7 +65,7 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateMailSenderWithSpecifiedProperties() {
+  void testCreateMailSenderWithSpecifiedProperties() {
     final Properties javaMailProps = new Properties();
     javaMailProps.put("mail.debug", "true"); // specify
     javaMailProps.put("mail.smtp.starttls.enable", "false"); // override
@@ -84,10 +85,12 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
     assertEquals(actualProperties.getProperty("mail.debug"), "true");
   }
 
-  @Test(
-      expectedExceptions = IllegalStateException.class,
-      expectedExceptionsMessageRegExp = "Unable to ping to host")
-  public void testValidateConnectionInvalidConnection() {
-    javaMailSenderFactory.validateConnection(mailSettings);
+  @Test
+  void testValidateConnectionInvalidConnection() {
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> javaMailSenderFactory.validateConnection(mailSettings));
+    assertEquals("Unable to ping to host", exception.getMessage());
   }
 }

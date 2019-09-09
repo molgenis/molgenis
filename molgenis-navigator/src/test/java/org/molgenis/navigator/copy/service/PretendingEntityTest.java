@@ -2,7 +2,9 @@ package org.molgenis.navigator.copy.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,17 +12,17 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class PretendingEntityTest extends AbstractMockitoTest {
+class PretendingEntityTest extends AbstractMockitoTest {
 
   @Test
-  public void testPretendingEntityIsNotCopy() {
+  void testPretendingEntityIsNotCopy() {
     Entity entity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("oldId");
@@ -32,7 +34,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPretendingEntityIsCopy() {
+  void testPretendingEntityIsCopy() {
     Entity entity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("oldId");
@@ -46,7 +48,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSingleReferenceIsCopy() {
+  void testSingleReferenceIsCopy() {
     Entity entity = mock(Entity.class);
     Entity refEntity = mock(Entity.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -63,7 +65,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSingleReferenceIsNotCopy() {
+  void testSingleReferenceIsNotCopy() {
     Entity entity = mock(Entity.class);
     Entity refEntity = mock(Entity.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -78,7 +80,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMultiReferenceIsCopy() {
+  void testMultiReferenceIsCopy() {
     Entity entity = mock(Entity.class);
     Entity refEntity1 = mock(Entity.class);
     Entity refEntity2 = mock(Entity.class);
@@ -98,7 +100,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMultiReferenceIsNotCopy() {
+  void testMultiReferenceIsNotCopy() {
     Entity entity = mock(Entity.class);
     Entity refEntity1 = mock(Entity.class);
     Entity refEntity2 = mock(Entity.class);
@@ -116,7 +118,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testTypedReferenceIsFileMeta() {
+  void testTypedReferenceIsFileMeta() {
     Entity entity = mock(Entity.class);
     FileMeta refEntity = mock(FileMeta.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -133,7 +135,7 @@ public class PretendingEntityTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testTypedMultiReferenceFileMeta() {
+  void testTypedMultiReferenceFileMeta() {
     Entity entity = mock(Entity.class);
     FileMeta refEntity1 = mock(FileMeta.class);
     FileMeta refEntity2 = mock(FileMeta.class);
@@ -153,23 +155,27 @@ public class PretendingEntityTest extends AbstractMockitoTest {
     assertEquals(actualRefEntities.get(1).getEntityType(), refEntityTypeCopy);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
-  public void testTypedReferenceIsNotFileMeta() {
+  @Test
+  void testTypedReferenceIsNotFileMeta() {
     Entity entity = mock(Entity.class);
 
     PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
-    pretendingEntity.getEntity("ref", Plugin.class);
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> pretendingEntity.getEntity("ref", Plugin.class));
+    assertThat(exception.getMessage()).containsPattern("Can't return typed pretending entities");
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
-  public void testTypedMultiReferenceNotFileMeta() {
+  @Test
+  void testTypedMultiReferenceNotFileMeta() {
     Entity entity = mock(Entity.class);
 
     PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
-    pretendingEntity.getEntities("ref", Plugin.class);
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> pretendingEntity.getEntities("ref", Plugin.class));
+    assertThat(exception.getMessage()).containsPattern("Can't return typed pretending entities");
   }
 }

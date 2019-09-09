@@ -1,25 +1,27 @@
 package org.molgenis.api.convert;
 
-import org.molgenis.api.model.Sort;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SortConverterTest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.molgenis.api.model.Sort;
+
+class SortConverterTest {
   private SortConverter sortConverter;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     sortConverter = new SortConverter();
   }
 
   @Test
-  public void testConvert() {
-    Assert.assertEquals(sortConverter.convert("item"), Sort.create("item"));
+  void testConvert() {
+    assertEquals(sortConverter.convert("item"), Sort.create("item"));
   }
 
-  @Test(expectedExceptions = SortParseException.class)
-  public void testConvertParseException() {
-    sortConverter.convert("-");
+  @Test
+  void testConvertParseException() {
+    assertThrows(SortParseException.class, () -> sortConverter.convert("-"));
   }
 }

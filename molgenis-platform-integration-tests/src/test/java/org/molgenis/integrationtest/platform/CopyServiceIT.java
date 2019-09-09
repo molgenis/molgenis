@@ -6,12 +6,12 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -21,6 +21,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -44,6 +48,7 @@ import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.navigator.util.ResourceCollector;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +58,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -68,7 +69,7 @@ import org.testng.annotations.Test;
       EntityTypeMetadataCopier.class
     })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class CopyServiceIT extends AbstractTestNGSpringContextTests {
+class CopyServiceIT extends AbstractMockitoSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);
 
@@ -91,8 +92,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   private Package packageA;
   private Package packageB;
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     runAsSystem(
         () -> {
           addPackages();
@@ -104,7 +105,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyPackage() {
+  void testCopyPackage() {
     String targetPackageId = "target1";
     addTargetPackage(targetPackageId);
 
@@ -159,7 +160,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyEntityType() {
+  void testCopyEntityType() {
     String targetPackageId = "target2";
     addTargetPackage(targetPackageId);
     ResourceIdentifier id = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
@@ -195,10 +196,10 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     return () -> progress.getProgress() == progress.getProgressMax();
   }
 
+  @Disabled // FIXME: reenable this test when fixed to preform in a stable manner
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
-  @Test(enabled = false) // FIXME: reenable this test when fixed to preform in a stable manner
-  public void testCopyBoth() {
+  void testCopyBoth() {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
@@ -301,8 +302,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     waitForWorkToBeFinished(indexService, LOG);
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  void tearDownAfterClass() {
     runAsSystem(() -> dataService.deleteAll(PACKAGE, Stream.of(PACKAGE_A)));
     waitForWorkToBeFinished(indexService, LOG);
   }

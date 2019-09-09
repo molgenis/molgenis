@@ -1,13 +1,15 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -38,11 +40,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {EntityMappingRepositoryImplTest.Config.class, MappingConfig.class})
-public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
+class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -58,7 +58,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
   private static final String AUTO_ID = "1";
 
   @Test
-  public void testToEntityMappings() {
+  void testToEntityMappings() {
     Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
     List<Attribute> sourceAttributes = Lists.newArrayList();
     EntityType sourceEntityType = entityTypeFactory.create("source");
@@ -102,7 +102,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testUpsert() {
+  void testUpsert() {
     Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
     List<Attribute> sourceAttributes = Lists.newArrayList();
     EntityType sourceEntityType = entityTypeFactory.create("source");
@@ -141,14 +141,14 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
     entityMappingEntity.set(EntityMappingMetadata.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
     entityMappingEntities.add(entityMappingEntity);
 
-    Assert.assertTrue(
+    assertTrue(
         EntityUtils.equals(
             entityMappingRepository.upsert(entityMappings).get(0), entityMappingEntities.get(0)));
   }
 
   @Configuration
   @Import(MapperTestConfig.class)
-  public static class Config {
+  static class Config {
 
     @Autowired private AttributeMappingMetadata attrMappingMeta;
 
@@ -198,7 +198,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
     }
 
     @Bean
-    public OntologyTagService ontologyTagService() {
+    OntologyTagService ontologyTagService() {
       return Mockito.mock(OntologyTagService.class);
     }
 

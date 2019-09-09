@@ -3,6 +3,7 @@ package org.molgenis.ontology.core.repository;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
@@ -11,42 +12,35 @@ import static org.molgenis.ontology.core.meta.OntologyMetadata.ID;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_IRI;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_NAME;
-import static org.molgenis.ontology.core.meta.OntologyMetadata.SIMPLE_NAME;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = OntologyRepositoryTest.Config.class)
-public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
+class OntologyRepositoryTest extends AbstractMockitoSpringContextTests {
   @Autowired private DataService dataService;
 
   @Autowired private OntologyRepository ontologyRepository;
 
   private org.molgenis.ontology.core.meta.Ontology ontologyEntity;
 
-  @BeforeTest
-  public void beforeTest() {
+  @Test
+  void testGetOntologies() {
     ontologyEntity = mock(org.molgenis.ontology.core.meta.Ontology.class);
     when(ontologyEntity.getString(ID)).thenReturn("1");
     when(ontologyEntity.getString(ONTOLOGY_IRI)).thenReturn("http://www.ontology.com/test");
     when(ontologyEntity.getString(ONTOLOGY_NAME)).thenReturn("testOntology");
-    when(ontologyEntity.getString(SIMPLE_NAME)).thenReturn("test");
-  }
 
-  @Test
-  public void testGetOntologies() {
     when(dataService.findAll(eq(ONTOLOGY))).thenReturn(Stream.of(ontologyEntity));
     List<Ontology> ontologies = ontologyRepository.getOntologies().collect(toList());
     assertEquals(
@@ -54,7 +48,12 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testGetOntologiesList() {
+  void testGetOntologiesList() {
+    ontologyEntity = mock(org.molgenis.ontology.core.meta.Ontology.class);
+    when(ontologyEntity.getString(ID)).thenReturn("1");
+    when(ontologyEntity.getString(ONTOLOGY_IRI)).thenReturn("http://www.ontology.com/test");
+    when(ontologyEntity.getString(ONTOLOGY_NAME)).thenReturn("testOntology");
+
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> idCaptor = ArgumentCaptor.forClass(Stream.class);
     when(dataService.findAll(
@@ -68,7 +67,12 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testGetOntology() {
+  void testGetOntology() {
+    ontologyEntity = mock(org.molgenis.ontology.core.meta.Ontology.class);
+    when(ontologyEntity.getString(ID)).thenReturn("1");
+    when(ontologyEntity.getString(ONTOLOGY_IRI)).thenReturn("http://www.ontology.com/test");
+    when(ontologyEntity.getString(ONTOLOGY_NAME)).thenReturn("testOntology");
+
     @SuppressWarnings("unchecked")
     Query<org.molgenis.ontology.core.meta.Ontology> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(ONTOLOGY, org.molgenis.ontology.core.meta.Ontology.class))
@@ -81,14 +85,14 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return mock(DataService.class);
     }
 
     @Bean
-    public OntologyRepository ontologyRepository() {
+    OntologyRepository ontologyRepository() {
       return new OntologyRepository();
     }
   }

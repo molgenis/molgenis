@@ -1,5 +1,6 @@
 package org.molgenis.security.login;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -13,13 +14,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Collections;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,29 +30,26 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class})
-public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTests {
+class MolgenisLoginControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private MolgenisLoginController molgenisLoginController;
 
   private MockMvc mockMvc;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     mockMvc = MockMvcBuilders.standaloneSetup(molgenisLoginController).build();
   }
 
   @Test
-  public void getLoginPage() throws Exception {
+  void getLoginPage() throws Exception {
     this.mockMvc
         .perform(get("/login"))
         .andExpect(status().isOk())
@@ -57,7 +57,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Test
-  public void getLoginErrorPageSessionExpired() throws Exception {
+  void getLoginErrorPageSessionExpired() throws Exception {
     this.mockMvc
         .perform(get("/login").param("expired", ""))
         .andExpect(status().isOk())
@@ -66,7 +66,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Test
-  public void getLoginErrorPage() throws Exception {
+  void getLoginErrorPage() throws Exception {
     this.mockMvc
         .perform(get("/login").param("error", ""))
         .andExpect(status().isOk())
@@ -75,7 +75,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Test
-  public void getLoginPageNoSession() throws Exception {
+  void getLoginPageNoSession() {
     MolgenisLoginController controller = new MolgenisLoginController();
 
     Model model = mock(Model.class);
@@ -87,7 +87,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Test
-  public void getLoginPageAuthenticated() throws Exception {
+  void getLoginPageAuthenticated() {
     MolgenisLoginController controller = new MolgenisLoginController();
 
     Model model = mock(Model.class);
@@ -110,7 +110,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Test
-  public void getLoginPageExpired() throws Exception {
+  void getLoginPageExpired() {
     MolgenisLoginController controller = new MolgenisLoginController();
 
     Model model = mock(Model.class);
@@ -131,9 +131,9 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
   }
 
   @Configuration
-  public static class Config extends WebMvcConfigurerAdapter {
+  static class Config extends WebMvcConfigurerAdapter {
     @Bean
-    public MolgenisLoginController molgenisLoginController() {
+    MolgenisLoginController molgenisLoginController() {
       return new MolgenisLoginController();
     }
   }

@@ -1,20 +1,20 @@
 package org.molgenis.data.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.Test;
 
-public class BatchingQueryResultTest {
+class BatchingQueryResultTest {
   @Test
-  public void getBatch() {
+  void getBatch() {
     final int batchSize = 2;
     BatchingQueryResult<Entity> bqr = new DummyBatchingQueryResult(batchSize);
     assertEquals(Iterables.size(bqr), 4);

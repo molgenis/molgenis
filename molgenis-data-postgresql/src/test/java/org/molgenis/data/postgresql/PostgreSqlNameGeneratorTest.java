@@ -1,20 +1,20 @@
 package org.molgenis.data.postgresql;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PostgreSqlNameGeneratorTest {
-  @DataProvider(name = "getTableNameEntityTypeProvider")
-  public static Iterator<Object[]> getTableNameEntityTypeProvider() {
+class PostgreSqlNameGeneratorTest {
+  static Iterator<Object[]> getTableNameEntityTypeProvider() {
     return newArrayList(
             new Object[] {"entityTypeId", "\"entityTypeId#c34894ba\""},
             new Object[] {
@@ -24,15 +24,15 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getTableNameEntityTypeProvider")
-  public void testGetTableNameEntityType(String entityTypeId, String expectedTableName) {
+  @ParameterizedTest
+  @MethodSource("getTableNameEntityTypeProvider")
+  void testGetTableNameEntityType(String entityTypeId, String expectedTableName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     assertEquals(PostgreSqlNameGenerator.getTableName(entityType), expectedTableName);
   }
 
-  @DataProvider(name = "getTableNameEntityTypeBooleanProvider")
-  public static Iterator<Object[]> getTableNameEntityTypeBooleanProvider() {
+  static Iterator<Object[]> getTableNameEntityTypeBooleanProvider() {
     return newArrayList(
             new Object[] {"entityTypeId", true, "\"entityTypeId#c34894ba\""},
             new Object[] {"entityTypeId", false, "entityTypeId#c34894ba"},
@@ -49,8 +49,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getTableNameEntityTypeBooleanProvider")
-  public void testGetTableNameEntityTypeBoolean(
+  @ParameterizedTest
+  @MethodSource("getTableNameEntityTypeBooleanProvider")
+  void testGetTableNameEntityTypeBoolean(
       String entityTypeId, boolean quoteIdentifiers, String expectedTableName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
@@ -58,8 +59,7 @@ public class PostgreSqlNameGeneratorTest {
         PostgreSqlNameGenerator.getTableName(entityType, quoteIdentifiers), expectedTableName);
   }
 
-  @DataProvider(name = "getJunctionTableNameProvider")
-  public static Iterator<Object[]> getJunctionTableNameProvider() {
+  static Iterator<Object[]> getJunctionTableNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", true, "\"entity#6844280e_attr\""},
             new Object[] {
@@ -89,8 +89,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getJunctionTableNameProvider")
-  public void testGetJunctionTableName(
+  @ParameterizedTest
+  @MethodSource("getJunctionTableNameProvider")
+  void testGetJunctionTableName(
       String entityTypeId,
       String attrName,
       boolean quotedIdentifiers,
@@ -105,8 +106,7 @@ public class PostgreSqlNameGeneratorTest {
         expectedJunctionTableName);
   }
 
-  @DataProvider(name = "getJunctionTableIndexNameProvider")
-  public static Iterator<Object[]> getJunctionTableIndexNameProvider() {
+  static Iterator<Object[]> getJunctionTableIndexNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", "idxAttr", "\"entity#6844280e_attr_idxAttr_idx\""},
             new Object[] {
@@ -136,8 +136,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getJunctionTableIndexNameProvider")
-  public void testGetJunctionTableIndexName(
+  @ParameterizedTest
+  @MethodSource("getJunctionTableIndexNameProvider")
+  void testGetJunctionTableIndexName(
       String entityTypeId,
       String attrName,
       String indexAttrName,
@@ -155,8 +156,7 @@ public class PostgreSqlNameGeneratorTest {
         expectedJunctionTableName);
   }
 
-  @DataProvider(name = "getColumnNameProvider")
-  public static Iterator<Object[]> getColumnNameProvider() {
+  static Iterator<Object[]> getColumnNameProvider() {
     return newArrayList(
             new Object[] {"attrName", "\"attrName\""},
             new Object[] {"attr-name", "\"attrname#69363cb7\""},
@@ -167,16 +167,16 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getColumnNameProvider")
-  public void testGetColumnName(String attrName, String expectedColumnName) {
+  @ParameterizedTest
+  @MethodSource("getColumnNameProvider")
+  void testGetColumnName(String attrName, String expectedColumnName) {
     Attribute attr = mock(Attribute.class);
     when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
     when(attr.getName()).thenReturn(attrName);
     assertEquals(PostgreSqlNameGenerator.getColumnName(attr), expectedColumnName);
   }
 
-  @DataProvider(name = "getColumnNameBooleanProvider")
-  public static Iterator<Object[]> getColumnNameBooleanProvider() {
+  static Iterator<Object[]> getColumnNameBooleanProvider() {
     return newArrayList(
             new Object[] {"attrName", false, "attrName"},
             new Object[] {"attr-name", false, "attrname#69363cb7"},
@@ -195,9 +195,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getColumnNameBooleanProvider")
-  public void testGetColumnName(
-      String attrName, boolean quoteIdentifiers, String expectedColumnName) {
+  @ParameterizedTest
+  @MethodSource("getColumnNameBooleanProvider")
+  void testGetColumnName(String attrName, boolean quoteIdentifiers, String expectedColumnName) {
     Attribute attr = mock(Attribute.class);
     when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
     when(attr.getName()).thenReturn(attrName);
@@ -205,14 +205,13 @@ public class PostgreSqlNameGeneratorTest {
   }
 
   @Test
-  public void testGetJunctionTableOrderColumnName() {
+  void testGetJunctionTableOrderColumnName() {
     assertEquals(
         PostgreSqlNameGenerator.getJunctionTableOrderColumnName(),
         '"' + JUNCTION_TABLE_ORDER_ATTR_NAME + '"');
   }
 
-  @DataProvider(name = "getFilterColumnNameProvider")
-  public static Iterator<Object[]> getFilterColumnNameProvider() {
+  static Iterator<Object[]> getFilterColumnNameProvider() {
     return newArrayList(
             new Object[] {"attrName", 0, "\"attrName_filter0\""},
             new Object[] {"attr-name", 1, "\"attrname#69363cb7_filter1\""},
@@ -229,8 +228,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getFilterColumnNameProvider")
-  public void testGetFilterColumnName(String attrName, int filterIndex, String expectedColumnName) {
+  @ParameterizedTest
+  @MethodSource("getFilterColumnNameProvider")
+  void testGetFilterColumnName(String attrName, int filterIndex, String expectedColumnName) {
     Attribute attr = mock(Attribute.class);
     when(attr.getIdentifier()).thenReturn("9876543210-9876543210-9876543210");
     when(attr.getName()).thenReturn(attrName);
@@ -238,8 +238,7 @@ public class PostgreSqlNameGeneratorTest {
         PostgreSqlNameGenerator.getFilterColumnName(attr, filterIndex), expectedColumnName);
   }
 
-  @DataProvider(name = "getPrimaryKeyNameProvider")
-  public static Iterator<Object[]> getPrimaryKeyNameProvider() {
+  static Iterator<Object[]> getPrimaryKeyNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", "\"entity#6844280e_attr_pkey\""},
             new Object[] {
@@ -260,9 +259,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getPrimaryKeyNameProvider")
-  public void testGetPrimaryKeyName(
-      String entityTypeId, String attrName, String expectedPrimaryKeyName) {
+  @ParameterizedTest
+  @MethodSource("getPrimaryKeyNameProvider")
+  void testGetPrimaryKeyName(String entityTypeId, String attrName, String expectedPrimaryKeyName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     Attribute attr = mock(Attribute.class);
@@ -272,8 +271,7 @@ public class PostgreSqlNameGeneratorTest {
         PostgreSqlNameGenerator.getPrimaryKeyName(entityType, attr), expectedPrimaryKeyName);
   }
 
-  @DataProvider(name = "getForeignKeyNameProvider")
-  public static Iterator<Object[]> getForeignKeyNameProvider() {
+  static Iterator<Object[]> getForeignKeyNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", "\"entity#6844280e_attr_fkey\""},
             new Object[] {
@@ -294,9 +292,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getForeignKeyNameProvider")
-  public void testGetForeignKeyName(
-      String entityTypeId, String attrName, String expectedForeignKeyName) {
+  @ParameterizedTest
+  @MethodSource("getForeignKeyNameProvider")
+  void testGetForeignKeyName(String entityTypeId, String attrName, String expectedForeignKeyName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     Attribute attr = mock(Attribute.class);
@@ -306,8 +304,7 @@ public class PostgreSqlNameGeneratorTest {
         PostgreSqlNameGenerator.getForeignKeyName(entityType, attr), expectedForeignKeyName);
   }
 
-  @DataProvider(name = "getUniqueKeyNameProvider")
-  public static Iterator<Object[]> getUniqueKeyNameProvider() {
+  static Iterator<Object[]> getUniqueKeyNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", "\"entity#6844280e_attr_key\""},
             new Object[] {
@@ -328,9 +325,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getUniqueKeyNameProvider")
-  public void testGetUniqueKeyName(
-      String entityTypeId, String attrName, String expectedUniqueKeyName) {
+  @ParameterizedTest
+  @MethodSource("getUniqueKeyNameProvider")
+  void testGetUniqueKeyName(String entityTypeId, String attrName, String expectedUniqueKeyName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     Attribute attr = mock(Attribute.class);
@@ -339,8 +336,7 @@ public class PostgreSqlNameGeneratorTest {
     assertEquals(PostgreSqlNameGenerator.getUniqueKeyName(entityType, attr), expectedUniqueKeyName);
   }
 
-  @DataProvider(name = "getCheckConstraintNameProvider")
-  public static Iterator<Object[]> getCheckConstraintNameProvider() {
+  static Iterator<Object[]> getCheckConstraintNameProvider() {
     return newArrayList(
             new Object[] {"entity", "attr", "\"entity#6844280e_attr_chk\""},
             new Object[] {
@@ -361,8 +357,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getCheckConstraintNameProvider")
-  public void testGetCheckConstraintName(
+  @ParameterizedTest
+  @MethodSource("getCheckConstraintNameProvider")
+  void testGetCheckConstraintName(
       String entityTypeId, String attrName, String expectedCheckConstraintName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
@@ -374,8 +371,7 @@ public class PostgreSqlNameGeneratorTest {
         expectedCheckConstraintName);
   }
 
-  @DataProvider(name = "getFunctionValidateUpdateNameProvider")
-  public static Iterator<Object[]> getFunctionValidateUpdateNameProvider() {
+  static Iterator<Object[]> getFunctionValidateUpdateNameProvider() {
     return newArrayList(
             new Object[] {"entityTypeId", "\"validate_update_entityTypeId#c34894ba\""},
             new Object[] {
@@ -385,8 +381,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getFunctionValidateUpdateNameProvider")
-  public void testGetFunctionValidateUpdateName(
+  @ParameterizedTest
+  @MethodSource("getFunctionValidateUpdateNameProvider")
+  void testGetFunctionValidateUpdateName(
       String entityTypeId, String expectedFunctionValidateUpdateName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
@@ -395,8 +392,7 @@ public class PostgreSqlNameGeneratorTest {
         expectedFunctionValidateUpdateName);
   }
 
-  @DataProvider(name = "getUpdateTriggerNameProvider")
-  public static Iterator<Object[]> getUpdateTriggerNameProvider() {
+  static Iterator<Object[]> getUpdateTriggerNameProvider() {
     return newArrayList(
             new Object[] {"entityTypeId", "\"update_trigger_entityTypeId#c34894ba\""},
             new Object[] {
@@ -406,8 +402,9 @@ public class PostgreSqlNameGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getUpdateTriggerNameProvider")
-  public void testGetUpdateTriggerName(String entityTypeId, String expectedUpdateTriggerName) {
+  @ParameterizedTest
+  @MethodSource("getUpdateTriggerNameProvider")
+  void testGetUpdateTriggerName(String entityTypeId, String expectedUpdateTriggerName) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     assertEquals(

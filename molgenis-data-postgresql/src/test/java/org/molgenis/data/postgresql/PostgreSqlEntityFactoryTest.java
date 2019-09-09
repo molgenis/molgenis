@@ -2,36 +2,36 @@ package org.molgenis.data.postgresql;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import java.sql.Array;
 import java.sql.ResultSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PostgreSqlEntityFactoryTest {
+class PostgreSqlEntityFactoryTest {
   private PostgreSqlEntityFactory postgreSqlEntityFactory;
   private EntityManager entityManager;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityManager = mock(EntityManager.class);
     postgreSqlEntityFactory = new PostgreSqlEntityFactory(entityManager);
   }
 
   @Test
-  public void createRowMapperOneToMany() throws Exception {
+  void createRowMapperOneToMany() throws Exception {
     Attribute refIdAttr = mock(Attribute.class);
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -64,7 +64,7 @@ public class PostgreSqlEntityFactoryTest {
   }
 
   @Test
-  public void createRowMapperOneToManyIntegerIds() throws Exception {
+  void createRowMapperOneToManyIntegerIds() throws Exception {
     Attribute refIdAttr = mock(Attribute.class);
     when(refIdAttr.getDataType()).thenReturn(AttributeType.INT);
 
@@ -97,7 +97,7 @@ public class PostgreSqlEntityFactoryTest {
   }
 
   @Test
-  public void createRowMapperXref() throws Exception {
+  void createRowMapperXref() throws Exception {
     Attribute refIdAttr = mock(Attribute.class);
     when(refIdAttr.getDataType()).thenReturn(STRING);
 

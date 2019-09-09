@@ -1,6 +1,8 @@
 package org.molgenis.security.token;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -9,8 +11,9 @@ import static org.molgenis.data.security.auth.TokenMetadata.TOKEN;
 import static org.molgenis.data.security.auth.TokenMetadata.TOKEN_ATTR;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -21,17 +24,15 @@ import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataServiceTokenServiceTest {
+class DataServiceTokenServiceTest {
   private DataServiceTokenService tokenService;
   private TokenGenerator tokenGenerator;
   private DataService dataService;
   private UserDetailsService userDetailsService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     tokenGenerator = mock(TokenGenerator.class);
     dataService = mock(DataService.class);
     userDetailsService = mock(UserDetailsService.class);
@@ -42,7 +43,7 @@ public class DataServiceTokenServiceTest {
   }
 
   @Test
-  public void findUserByToken() {
+  void findUserByToken() {
     User user = mock(User.class);
     when(user.getUsername()).thenReturn("admin");
     Token token = mock(Token.class);
@@ -63,8 +64,8 @@ public class DataServiceTokenServiceTest {
     assertEquals(tokenService.findUserByToken("token"), userDetails);
   }
 
-  @Test(expectedExceptions = UnknownTokenException.class)
-  public void findUserByTokenExpired() {
+  @Test
+  void findUserByTokenExpired() {
     Token token = mock(Token.class);
     when(token.getToken()).thenReturn("token");
     when(token.isExpired()).thenReturn(true);
@@ -75,11 +76,11 @@ public class DataServiceTokenServiceTest {
     when(q.findOne()).thenReturn(token);
     when(dataService.query(TOKEN, Token.class)).thenReturn(q);
 
-    tokenService.findUserByToken("token");
+    assertThrows(UnknownTokenException.class, () -> tokenService.findUserByToken("token"));
   }
 
   @Test
-  public void generateAndStoreToken() {
+  void generateAndStoreToken() {
     User user = mock(User.class);
 
     @SuppressWarnings("unchecked")
@@ -98,7 +99,7 @@ public class DataServiceTokenServiceTest {
   }
 
   @Test
-  public void removeToken() {
+  void removeToken() {
     Token token = mock(Token.class);
     when(token.getToken()).thenReturn("token");
 

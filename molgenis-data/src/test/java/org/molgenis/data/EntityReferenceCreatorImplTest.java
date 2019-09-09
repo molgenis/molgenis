@@ -1,39 +1,40 @@
 package org.molgenis.data;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityReferenceCreatorImplTest {
+class EntityReferenceCreatorImplTest {
   private DataService dataService;
   private EntityReferenceCreatorImpl entityManagerImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     dataService = mock(DataService.class);
     EntityFactoryRegistry entityFactoryRegistry = mock(EntityFactoryRegistry.class);
     entityManagerImpl = new EntityReferenceCreatorImpl(dataService, entityFactoryRegistry);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void EntityReferenceCreatorImpl() {
-    new EntityReferenceCreatorImpl(null, null);
+  @Test
+  void EntityReferenceCreatorImpl() {
+    assertThrows(NullPointerException.class, () -> new EntityReferenceCreatorImpl(null, null));
   }
 
   @Test
-  public void getReference() {
+  void getReference() {
     String entityTypeId = "entity";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
@@ -54,7 +55,7 @@ public class EntityReferenceCreatorImplTest {
   }
 
   @Test
-  public void getReferences() {
+  void getReferences() {
     String entityTypeId = "entity";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();

@@ -1,23 +1,24 @@
 package org.molgenis.security.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.testng.annotations.Test;
 
-public class MolgenisPasswordEncoderTest {
+class MolgenisPasswordEncoderTest {
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void MolgenisPasswordEncoder() {
-    new MolgenisPasswordEncoder(null);
+  @Test
+  void MolgenisPasswordEncoder() {
+    assertThrows(IllegalArgumentException.class, () -> new MolgenisPasswordEncoder(null));
   }
 
   @Test
-  public void encode() {
+  void encode() {
     String password = "password";
     String encodedPassword = "encoded-password";
     BCryptPasswordEncoder bCryptPasswordEncoder = mock(BCryptPasswordEncoder.class);
@@ -27,7 +28,7 @@ public class MolgenisPasswordEncoderTest {
   }
 
   @Test
-  public void matches() {
+  void matches() {
     String password = "password";
     String encodedPassword = "encoded-password";
     BCryptPasswordEncoder bCryptPasswordEncoder = mock(BCryptPasswordEncoder.class);
@@ -37,7 +38,7 @@ public class MolgenisPasswordEncoderTest {
   }
 
   @Test
-  public void matches_noMatch() {
+  void matches_noMatch() {
     String password = "password";
     String encodedPassword = "encoded-password";
     BCryptPasswordEncoder bCryptPasswordEncoder = mock(BCryptPasswordEncoder.class);

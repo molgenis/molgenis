@@ -1,31 +1,31 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.model.Selection;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class FetchMapperTest extends AbstractMockitoTest {
+class FetchMapperTest extends AbstractMockitoTest {
   private FetchMapper fetchMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     fetchMapper = new FetchMapper();
   }
 
   @Test
-  public void testToFetch() {
+  void testToFetch() {
     EntityType entityType = mock(EntityType.class);
     Attribute attribute = mock(Attribute.class);
     when(attribute.getName()).thenReturn("test");
@@ -41,7 +41,7 @@ public class FetchMapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testToFetchEmpty() {
+  void testToFetchEmpty() {
     EntityType entityType = mock(EntityType.class);
     Attribute attribute = mock(Attribute.class);
     when(attribute.getName()).thenReturn("test");

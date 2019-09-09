@@ -1,28 +1,28 @@
 package org.molgenis.data.csv;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.testng.annotations.Test;
 
-public class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
+class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException {
+  void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException {
     File csvFile = new ClassPathResource("testdata.csv").getFile();
     CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
     repo.setEntityTypeFactory(entityTypeFactory);
@@ -34,7 +34,7 @@ public class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException {
+  void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException {
     File zip = File.createTempFile("file", ".zip");
     try (FileOutputStream fos = new FileOutputStream(zip)) {
       fos.write(

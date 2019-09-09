@@ -1,16 +1,17 @@
 package org.molgenis.dataexplorer.negotiator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.gson.Gson;
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = GsonConfig.class)
-public class NegotiatorQueryTest extends AbstractTestNGSpringContextTests {
+class NegotiatorQueryTest extends AbstractMockitoSpringContextTests {
   @Autowired private Gson gson;
 
   private NegotiatorQuery negotiatorQuery =
@@ -19,12 +20,12 @@ public class NegotiatorQueryTest extends AbstractTestNGSpringContextTests {
   private String json = "{\"URL\":\"url\",\"collections\":[],\"humanReadable\":\"humanReadable\"}";
 
   @Test
-  public void testSerialization() {
-    Assert.assertEquals(gson.toJson(negotiatorQuery), json);
+  void testSerialization() {
+    assertEquals(gson.toJson(negotiatorQuery), json);
   }
 
   @Test
-  public void testDeserialization() {
-    Assert.assertEquals(gson.fromJson(json, NegotiatorQuery.class), negotiatorQuery);
+  void testDeserialization() {
+    assertEquals(gson.fromJson(json, NegotiatorQuery.class), negotiatorQuery);
   }
 }

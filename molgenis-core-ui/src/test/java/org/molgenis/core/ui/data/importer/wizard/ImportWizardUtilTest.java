@@ -4,15 +4,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.testng.annotations.Test;
 
-public class ImportWizardUtilTest {
+class ImportWizardUtilTest {
 
   @Test
-  public void testHandleException() {
+  void testHandleException() {
     Exception exception =
         when(mock(Exception.class).getLocalizedMessage()).thenReturn("message").getMock();
     ImportWizard importWizard = mock(ImportWizard.class);

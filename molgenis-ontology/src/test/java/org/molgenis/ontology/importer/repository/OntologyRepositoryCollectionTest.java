@@ -4,6 +4,10 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
@@ -11,10 +15,6 @@ import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetad
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata.ONTOLOGY_TERM_NODE_PATH;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -42,11 +44,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {OntologyRepositoryCollectionTest.Config.class})
-public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest {
+class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest {
   @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory;
 
   private Repository<Entity> ontologyRepository;
@@ -55,9 +55,8 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   private Repository<Entity> ontologyTermSynonymRepository;
   private Repository<Entity> ontologyTermRepository;
 
-  @BeforeMethod
-  public void beforeMethod()
-      throws IOException, OWLOntologyCreationException, NoSuchMethodException {
+  @BeforeEach
+  void beforeMethod() throws IOException, OWLOntologyCreationException, NoSuchMethodException {
 
     // ontology repository collection is not spring managed, see FileRepositoryCollectionFactory
     File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
@@ -77,7 +76,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   }
 
   @Test
-  public void ontologyRepositoryIterator() throws OWLOntologyCreationException {
+  void ontologyRepositoryIterator() throws OWLOntologyCreationException {
     Iterator<Entity> i = ontologyRepository.iterator();
     assertTrue(i.hasNext());
     Entity entity = i.next();
@@ -87,8 +86,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   }
 
   @Test
-  public void ontologyTermDynamicAnnotationRepositoryIterator()
-      throws OWLOntologyCreationException {
+  void ontologyTermDynamicAnnotationRepositoryIterator() throws OWLOntologyCreationException {
 
     Iterator<Entity> i = ontologyTermDynamicAnnotationRepository.iterator();
     assertTrue(i.hasNext());
@@ -123,7 +121,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   }
 
   @Test
-  public void ontologyTermNodePathRepositoryIterator() throws OWLOntologyCreationException {
+  void ontologyTermNodePathRepositoryIterator() throws OWLOntologyCreationException {
     Iterator<Entity> i = ontologyTermNodePathRepository.iterator();
     assertTrue(i.hasNext());
     Entity entity = i.next();
@@ -180,7 +178,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   }
 
   @Test
-  public void ontologyTermSynonymRepositoryIterator() throws OWLOntologyCreationException {
+  void ontologyTermSynonymRepositoryIterator() throws OWLOntologyCreationException {
 
     Iterator<Entity> i = ontologyTermSynonymRepository.iterator();
     assertTrue(i.hasNext());
@@ -235,7 +233,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
   }
 
   @Test
-  public void ontologyTermRepositoryIterator() throws OWLOntologyCreationException {
+  void ontologyTermRepositoryIterator() throws OWLOntologyCreationException {
     Entity entityOntology = ontologyRepository.iterator().next();
 
     Iterator<Entity> i = ontologyTermRepository.iterator();
@@ -486,9 +484,9 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 
   @Configuration
   @Import(OntologyTestConfig.class)
-  public static class Config {
+  static class Config {
     @Bean
-    public IdGenerator idGenerator() {
+    IdGenerator idGenerator() {
       IdGenerator idGenerator = mock(IdGenerator.class);
       when(idGenerator.generateId()).thenAnswer((invocation) -> UUID.randomUUID().toString());
       return idGenerator;

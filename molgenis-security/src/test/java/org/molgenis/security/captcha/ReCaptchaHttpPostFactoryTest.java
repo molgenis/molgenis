@@ -1,23 +1,23 @@
 package org.molgenis.security.captcha;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
 import org.apache.http.client.methods.HttpPost;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ReCaptchaHttpPostFactoryTest {
+class ReCaptchaHttpPostFactoryTest {
 
   private ReCaptchaHttpPostFactory factory = new ReCaptchaHttpPostFactory();
 
   @Test
-  public void testHttpPostCreate() {
+  void testHttpPostCreate() {
     HttpPost post = factory.create("http://verify.test.org");
     assertEquals(post.getURI(), URI.create("http://verify.test.org"));
   }
 
   @Test
-  public void testHttpPostCreateEmptyURI() {
+  void testHttpPostCreateEmptyURI() {
     factory.create("");
   }
 }

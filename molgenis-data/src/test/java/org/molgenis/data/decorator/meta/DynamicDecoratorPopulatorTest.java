@@ -3,6 +3,8 @@ package org.molgenis.data.decorator.meta;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -12,11 +14,11 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -24,10 +26,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
+class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
   @Mock private DynamicRepositoryDecoratorRegistry registry;
   @Mock private DataService dataService;
   @Mock private DynamicDecorator existingDecorator;
@@ -40,13 +40,13 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
 
   private DynamicDecoratorPopulator populator;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     populator = new DynamicDecoratorPopulator(dataService, registry, dynamicDecoratorFactory);
   }
 
   @Test
-  public void testPopulate() {
+  void testPopulate() {
     when(existingDecorator.getId()).thenReturn("id1");
     when(removedDecorator.getId()).thenReturn("id2");
     when(newDecorator.getId()).thenReturn("id3");
@@ -85,7 +85,7 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRemoveReferences() {
+  void testRemoveReferences() {
     List<Object> idsToRemove = asList("id1", "id3");
     DecoratorConfiguration config = mock(DecoratorConfiguration.class);
     DecoratorParameters params1 = mock(DecoratorParameters.class);
@@ -102,7 +102,7 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRemoveReferenceAndDeleteConfiguration() {
+  void testRemoveReferenceAndDeleteConfiguration() {
     List<Object> idsToRemove = asList("id1", "id2", "id3");
     DecoratorConfiguration config = mock(DecoratorConfiguration.class);
     when(config.getIdValue()).thenReturn("configId");

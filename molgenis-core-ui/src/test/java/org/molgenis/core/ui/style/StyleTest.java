@@ -1,12 +1,12 @@
 package org.molgenis.core.ui.style;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class StyleTest {
+class StyleTest {
   @Test
-  public void createLocal() {
+  void createLocal() {
     assertEquals(Style.createLocal("bootstrap.min.css").getName(), "bootstrap");
     assertEquals(Style.createLocal("bootstrap-yeti.min.css").getName(), "yeti");
     assertEquals(Style.createLocal("mystyle.css").getName(), "mystyle");

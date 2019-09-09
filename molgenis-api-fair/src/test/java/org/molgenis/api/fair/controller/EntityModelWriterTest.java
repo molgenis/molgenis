@@ -4,10 +4,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -23,6 +23,8 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
@@ -33,10 +35,8 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.semanticsearch.service.TagService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityModelWriterTest extends AbstractMockitoTest {
+class EntityModelWriterTest extends AbstractMockitoTest {
   @Mock private TagService<LabeledResource, LabeledResource> tagService;
   @Mock private Entity objectEntity;
   @Mock private Entity refEntity;
@@ -50,13 +50,13 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   private SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void beforeMethod() throws DatatypeConfigurationException {
+  @BeforeEach
+  void beforeMethod() throws DatatypeConfigurationException {
     writer = new EntityModelWriter(tagService, valueFactory);
   }
 
   @Test
-  public void testCreateRfdModelStringAttribute() {
+  void testCreateRfdModelStringAttribute() {
     List<Attribute> attributeList = singletonList(attr1);
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
@@ -84,7 +84,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelIntAttribute() {
+  void testCreateRfdModelIntAttribute() {
     List<Attribute> attributeList = singletonList(attr2);
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
@@ -112,7 +112,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelXREF() {
+  void testCreateRfdModelXREF() {
     List<Attribute> attributeList = singletonList(attr3);
     List<String> refAttributeList = singletonList("refAttr");
 
@@ -145,7 +145,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelMREF() {
+  void testCreateRfdModelMREF() {
     List<Attribute> attributeList = singletonList(attribute);
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
@@ -174,7 +174,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelBOOL() {
+  void testCreateRfdModelBOOL() {
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -205,8 +205,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelDATE() {
-    // public Model createRdfModel(String subjectIRI, Entity objectEntity)
+  void testCreateRfdModelDATE() {
+    // Model createRdfModel(String subjectIRI, Entity objectEntity)
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -238,8 +238,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelDATETIME() {
-    // public Model createRdfModel(String subjectIRI, Entity objectEntity)
+  void testCreateRfdModelDATETIME() {
+    // Model createRdfModel(String subjectIRI, Entity objectEntity)
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -271,8 +271,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelDECIMAL() {
-    // public Model createRdfModel(String subjectIRI, Entity objectEntity)
+  void testCreateRfdModelDECIMAL() {
+    // Model createRdfModel(String subjectIRI, Entity objectEntity)
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -304,8 +304,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelLONG() {
-    // public Model createRdfModel(String subjectIRI, Entity objectEntity)
+  void testCreateRfdModelLONG() {
+    // Model createRdfModel(String subjectIRI, Entity objectEntity)
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -337,7 +337,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelSTRINGKeywords() {
+  void testCreateRfdModelSTRINGKeywords() {
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -372,8 +372,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateRfdModelNullValuePlusHyperlink() {
-    // public Model createRdfModel(String subjectIRI, Entity objectEntity)
+  void testCreateRfdModelNullValuePlusHyperlink() {
+    // Model createRdfModel(String subjectIRI, Entity objectEntity)
     Entity objectEntity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -411,7 +411,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddStatementsForEntityType() {
+  void testAddStatementsForEntityType() {
     Model model = new LinkedHashModel();
     Resource subject = valueFactory.createIRI("http://example.org/subject");
     LabeledResource object = new LabeledResource("http://example.org/object", "object");

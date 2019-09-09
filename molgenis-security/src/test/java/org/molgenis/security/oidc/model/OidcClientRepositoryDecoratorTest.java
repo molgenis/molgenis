@@ -1,35 +1,36 @@
 package org.molgenis.security.oidc.model;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.security.oidc.ResettableOAuth2AuthorizedClientService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
+class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<OidcClient> delegateRepository;
   @Mock private ResettableOAuth2AuthorizedClientService oAuth2AuthorizedClientService;
 
   private OidcClientRepositoryDecorator oidcClientRepositoryDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     this.oidcClientRepositoryDecorator =
         new OidcClientRepositoryDecorator(delegateRepository, oAuth2AuthorizedClientService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testOidcClientRepositoryDecorator() {
-    new OidcClientRepositoryDecorator(null, null);
+  @Test
+  void testOidcClientRepositoryDecorator() {
+    assertThrows(NullPointerException.class, () -> new OidcClientRepositoryDecorator(null, null));
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     OidcClient oidcClient = mock(OidcClient.class);
     oidcClientRepositoryDecorator.update(oidcClient);
     verify(delegateRepository).update(oidcClient);
@@ -37,7 +38,7 @@ public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdateStream() {
+  void testUpdateStream() {
     @SuppressWarnings("unchecked")
     Stream<OidcClient> oidcClientStream = mock(Stream.class);
     oidcClientRepositoryDecorator.update(oidcClientStream);
@@ -46,7 +47,7 @@ public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     OidcClient oidcClient = mock(OidcClient.class);
     oidcClientRepositoryDecorator.delete(oidcClient);
     verify(delegateRepository).delete(oidcClient);
@@ -54,7 +55,7 @@ public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     String oidcClientId = "oidcClientId";
     oidcClientRepositoryDecorator.deleteById(oidcClientId);
     verify(delegateRepository).deleteById(oidcClientId);
@@ -62,14 +63,14 @@ public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     oidcClientRepositoryDecorator.deleteAll();
     verify(delegateRepository).deleteAll();
     verify(oAuth2AuthorizedClientService).reset();
   }
 
   @Test
-  public void testDeleteStream() {
+  void testDeleteStream() {
     @SuppressWarnings("unchecked")
     Stream<OidcClient> oidcClientStream = mock(Stream.class);
     oidcClientRepositoryDecorator.delete(oidcClientStream);
@@ -78,7 +79,7 @@ public class OidcClientRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAllStream() {
+  void testDeleteAllStream() {
     @SuppressWarnings("unchecked")
     Stream<Object> oidcClientIdStream = mock(Stream.class);
     oidcClientRepositoryDecorator.deleteAll(oidcClientIdStream);

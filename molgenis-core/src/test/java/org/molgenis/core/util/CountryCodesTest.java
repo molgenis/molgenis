@@ -1,17 +1,17 @@
 package org.molgenis.core.util;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class CountryCodesTest {
+class CountryCodesTest {
   @Test
-  public void testGetString() {
+  void testGetString() {
     assertEquals(CountryCodes.get("NL"), "Netherlands");
   }
 
   @Test
-  public void testGet() {
+  void testGet() {
     assertEquals(CountryCodes.get().size(), 250);
   }
 }

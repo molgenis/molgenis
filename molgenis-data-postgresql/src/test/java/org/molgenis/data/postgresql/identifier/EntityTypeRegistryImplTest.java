@@ -1,6 +1,8 @@
 package org.molgenis.data.postgresql.identifier;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
@@ -10,18 +12,16 @@ import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_
 import static org.springframework.transaction.support.TransactionSynchronizationManager.bindResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.getResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   @Mock private Attribute stringAttr;
@@ -34,7 +34,7 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   private EntityTypeRegistryImpl entityTypeRegistryImpl;
   private EntityTypeDescription entityTypeDescription;
 
-  @BeforeMethod
+  @BeforeEach
   public void setUpBeforeMethod() {
     entityTypeRegistryImpl = new EntityTypeRegistryImpl(transactionManager);
 
@@ -62,7 +62,7 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.registerEntityType(entityType);
   }
 
-  @AfterMethod
+  @AfterEach
   public void afterMethod() {
     if (getResource(TRANSACTION_ID_RESOURCE_NAME) != null) {
       unbindResource(TRANSACTION_ID_RESOURCE_NAME);

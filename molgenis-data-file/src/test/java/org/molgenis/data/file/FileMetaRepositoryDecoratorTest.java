@@ -2,14 +2,18 @@ package org.molgenis.data.file;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Query;
@@ -19,10 +23,8 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
+class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<FileMeta> delegateRepository;
 
   @Mock private FileStore fileStore;
@@ -30,19 +32,20 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
 
   private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     fileMetaRepositoryDecorator =
         new FileMetaRepositoryDecorator(delegateRepository, fileStore, blobStore);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testAppRepositoryDecorator() {
-    new FileMetaRepositoryDecorator(null, null, null);
+  @Test
+  void testAppRepositoryDecorator() {
+    assertThrows(
+        NullPointerException.class, () -> new FileMetaRepositoryDecorator(null, null, null));
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     FileMeta fileMeta = getMockFileMeta("id");
     fileMetaRepositoryDecorator.delete(fileMeta);
     verify(delegateRepository).delete(fileMeta);
@@ -50,7 +53,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteStream() {
+  void testDeleteStream() {
     FileMeta fileMeta0 = getMockFileMeta("id0");
     FileMeta fileMeta1 = getMockFileMeta("id1");
     fileMetaRepositoryDecorator.delete(Stream.of(fileMeta0, fileMeta1));
@@ -63,7 +66,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     FileMeta fileMeta = getMockFileMeta("id");
     when(delegateRepository.findOneById("id")).thenReturn(fileMeta);
     fileMetaRepositoryDecorator.deleteById("id");
@@ -71,10 +74,8 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(fileStore).delete("id");
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_file_FileMeta id:id attribute:idAttribute")
-  public void testDeleteByIdUnknownId() {
+  @Test
+  void testDeleteByIdUnknownId() {
     Attribute idAttribute =
         when(mock(Attribute.class).getName()).thenReturn("idAttribute").getMock();
     EntityType entityType =
@@ -82,12 +83,16 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
     when(delegateRepository.getEntityType()).thenReturn(entityType);
     when(delegateRepository.findOneById("id")).thenReturn(null);
-    fileMetaRepositoryDecorator.deleteById("id");
+    Exception exception =
+        assertThrows(
+            UnknownEntityException.class, () -> fileMetaRepositoryDecorator.deleteById("id"));
+    assertThat(exception.getMessage())
+        .containsPattern("type:sys_file_FileMeta id:id attribute:idAttribute");
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     FileMeta fileMeta0 = getMockFileMeta("id0");
     FileMeta fileMeta1 = getMockFileMeta("id1");
     when(delegateRepository.findAll(any(Query.class))).thenReturn(Stream.of(fileMeta0, fileMeta1));
@@ -98,7 +103,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAllStream() {
+  void testDeleteAllStream() {
     FileMeta fileMeta0 = getMockFileMeta("id0");
     FileMeta fileMeta1 = getMockFileMeta("id1");
     doReturn(fileMeta0).when(delegateRepository).findOneById("id0");
@@ -113,7 +118,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteBlobStore() {
+  void testDeleteBlobStore() {
     FileMeta fileMeta = getMockFileMeta("id");
     when(fileMeta.getUrl()).thenReturn("/api/files/v1/id?alt=media");
     fileMetaRepositoryDecorator.delete(fileMeta);

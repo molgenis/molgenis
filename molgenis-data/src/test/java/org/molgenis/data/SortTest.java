@@ -1,56 +1,56 @@
 package org.molgenis.data;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class SortTest {
+class SortTest {
   @Test
-  public void sortSingleAttrDefault() {
+  void sortSingleAttrDefault() {
     Sort sort = new Sort("attr");
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.ASC);
   }
 
   @Test
-  public void sortSingleAttrAsc() {
+  void sortSingleAttrAsc() {
     Sort sort = new Sort("attr", Sort.Direction.ASC);
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.ASC);
   }
 
   @Test
-  public void sortSingleAttrDesc() {
+  void sortSingleAttrDesc() {
     Sort sort = new Sort("attr", Sort.Direction.DESC);
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.DESC);
   }
 
   @Test
-  public void sortSingleAttrBuilderDefault() {
+  void sortSingleAttrBuilderDefault() {
     Sort sort = new Sort().on("attr");
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.ASC);
   }
 
   @Test
-  public void sortSingleAttrBuilderAsc() {
+  void sortSingleAttrBuilderAsc() {
     Sort sort = new Sort().on("attr", Sort.Direction.ASC);
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.ASC);
   }
 
   @Test
-  public void sortSingleAttrBuilderDesc() {
+  void sortSingleAttrBuilderDesc() {
     Sort sort = new Sort().on("attr", Sort.Direction.DESC);
     assertEquals(sort.iterator().next().getAttr(), "attr");
     assertEquals(sort.iterator().next().getDirection(), Sort.Direction.DESC);
   }
 
   @Test
-  public void sortMultipleAttrDefault() {
+  void sortMultipleAttrDefault() {
     Sort sort = new Sort(Arrays.asList(new Sort.Order("attr0"), new Sort.Order("attr1")));
     Iterator<Sort.Order> it = sort.iterator();
     assertEquals(it.next(), new Sort.Order("attr0"));
@@ -58,7 +58,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrAsc() {
+  void sortMultipleAttrAsc() {
     Sort sort =
         new Sort(
             Arrays.asList(
@@ -70,7 +70,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrDesc() {
+  void sortMultipleAttrDesc() {
     Sort sort =
         new Sort(
             Arrays.asList(
@@ -82,7 +82,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrAscAndDesc() {
+  void sortMultipleAttrAscAndDesc() {
     Sort sort =
         new Sort(
             Arrays.asList(
@@ -94,7 +94,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrBuilderDefault() {
+  void sortMultipleAttrBuilderDefault() {
     Sort sort = new Sort().on("attr0").on("attr1");
     Iterator<Sort.Order> it = sort.iterator();
     assertEquals(it.next(), new Sort.Order("attr0"));
@@ -102,7 +102,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrBuilderAsc() {
+  void sortMultipleAttrBuilderAsc() {
     Sort sort = new Sort().on("attr0", Sort.Direction.ASC).on("attr1", Sort.Direction.ASC);
     Iterator<Sort.Order> it = sort.iterator();
     assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.ASC));
@@ -110,7 +110,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrBuilderDesc() {
+  void sortMultipleAttrBuilderDesc() {
     Sort sort = new Sort().on("attr0", Sort.Direction.DESC).on("attr1", Sort.Direction.DESC);
     Iterator<Sort.Order> it = sort.iterator();
     assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.DESC));
@@ -118,7 +118,7 @@ public class SortTest {
   }
 
   @Test
-  public void sortMultipleAttrBuilderAscAndDesc() {
+  void sortMultipleAttrBuilderAscAndDesc() {
     Sort sort = new Sort().on("attr0", Sort.Direction.ASC).on("attr1", Sort.Direction.DESC);
     Iterator<Sort.Order> it = sort.iterator();
     assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.ASC));

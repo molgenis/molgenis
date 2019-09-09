@@ -1,11 +1,14 @@
 package org.molgenis.security;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -13,28 +16,27 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest {
+class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest {
   @Mock private SecurityContextRepository tokenSecurityContextRepository;
   @Mock private SecurityContextRepository defaultSecurityContextRepository;
   private TokenAwareSecurityContextRepository tokenAwareSecurityContextRepository;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     tokenAwareSecurityContextRepository =
         new TokenAwareSecurityContextRepository(
             tokenSecurityContextRepository, defaultSecurityContextRepository);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testTokenAwareSecurityContextRepository() {
-    new TokenAwareSecurityContextRepository(null, null);
+  @Test
+  void testTokenAwareSecurityContextRepository() {
+    assertThrows(
+        NullPointerException.class, () -> new TokenAwareSecurityContextRepository(null, null));
   }
 
   @Test
-  public void testLoadContext() {
+  void testLoadContext() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
     HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response);
@@ -44,7 +46,7 @@ public class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest
   }
 
   @Test
-  public void testLoadContextTokenRequest() {
+  void testLoadContextTokenRequest() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setParameter("molgenis-token", "my_token");
     MockHttpServletResponse response = new MockHttpServletResponse();
@@ -55,7 +57,7 @@ public class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest
   }
 
   @Test
-  public void testSaveContext() {
+  void testSaveContext() {
     SecurityContext securityContext = mock(SecurityContext.class);
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
@@ -64,7 +66,7 @@ public class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest
   }
 
   @Test
-  public void testSaveContextTokenRequest() {
+  void testSaveContextTokenRequest() {
     SecurityContext securityContext = mock(SecurityContext.class);
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setParameter("molgenis-token", "my_token");
@@ -74,14 +76,14 @@ public class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest
   }
 
   @Test
-  public void testContainsContext() {
+  void testContainsContext() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     when(defaultSecurityContextRepository.containsContext(request)).thenReturn(true);
     assertTrue(tokenAwareSecurityContextRepository.containsContext(request));
   }
 
   @Test
-  public void testContainsContextTokenRequest() {
+  void testContainsContextTokenRequest() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setParameter("molgenis-token", "my_token");
     when(tokenSecurityContextRepository.containsContext(request)).thenReturn(true);

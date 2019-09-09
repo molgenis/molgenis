@@ -1,5 +1,6 @@
 package org.molgenis.genomebrowser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,22 +9,21 @@ import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.CH
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.POS;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.REF;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class GenomeBrowserTrackTest extends AbstractMockitoTestNGSpringContextTests {
+public class GenomeBrowserTrackTest extends AbstractMockitoSpringContextTests {
   @Test
   public void testToTrack() {
     EntityType entity = mock(EntityType.class);

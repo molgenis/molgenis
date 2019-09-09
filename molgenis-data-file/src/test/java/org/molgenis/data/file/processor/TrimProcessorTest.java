@@ -1,16 +1,18 @@
 package org.molgenis.data.file.processor;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TrimProcessorTest {
+import org.junit.jupiter.api.Test;
+
+class TrimProcessorTest {
   @Test
-  public void process() {
-    Assert.assertEquals(new TrimProcessor().process(" val "), "val");
+  void process() {
+    assertEquals(new TrimProcessor().process(" val "), "val");
   }
 
   @Test
-  public void processNull() {
-    Assert.assertNull(new TrimProcessor().process(null));
+  void processNull() {
+    assertNull(new TrimProcessor().process(null));
   }
 }

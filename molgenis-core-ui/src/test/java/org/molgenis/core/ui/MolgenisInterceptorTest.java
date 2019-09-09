@@ -1,11 +1,12 @@
 package org.molgenis.core.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.security.oidc.model.OidcClient;
@@ -22,10 +25,8 @@ import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginAttributes;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.ModelAndView;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisInterceptorTest {
+class MolgenisInterceptorTest {
   private ResourceFingerprintRegistry resourceFingerprintRegistry;
   private ThemeFingerprintRegistry themeFingerprintRegistry;
   private AppSettings appSettings;
@@ -34,8 +35,8 @@ public class MolgenisInterceptorTest {
   private OidcClient oidcClient;
   private Gson gson;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     resourceFingerprintRegistry = mock(ResourceFingerprintRegistry.class);
     themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
     appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
@@ -45,14 +46,16 @@ public class MolgenisInterceptorTest {
     gson = new Gson();
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void MolgenisInterceptor() {
-    new MolgenisInterceptor(null, null, null, null, null, null, null);
+  @Test
+  void MolgenisInterceptor() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new MolgenisInterceptor(null, null, null, null, null, null, null));
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void postHandle() throws Exception {
+  void postHandle() throws Exception {
     String environment = "development";
     MolgenisInterceptor molgenisInterceptor =
         new MolgenisInterceptor(
@@ -85,7 +88,7 @@ public class MolgenisInterceptorTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void postHandleWithOidcClient() throws Exception {
+  void postHandleWithOidcClient() throws Exception {
     String environment = "development";
     MolgenisInterceptor molgenisInterceptor =
         new MolgenisInterceptor(

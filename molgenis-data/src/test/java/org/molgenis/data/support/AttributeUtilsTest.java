@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -21,21 +22,19 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.util.AttributeUtils;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class AttributeUtilsTest {
-  @DataProvider(name = "isIdAttributeTypeAllowedProvider")
-  public static Iterator<Object[]> isIdAttributeTypeAllowedProvider() {
+class AttributeUtilsTest {
+  static Iterator<Object[]> isIdAttributeTypeAllowedProvider() {
     return Arrays.asList(
             new Object[] {BOOL, false},
             new Object[] {CATEGORICAL, false},
@@ -59,15 +58,14 @@ public class AttributeUtilsTest {
         .iterator();
   }
 
-  @Test(dataProvider = "isIdAttributeTypeAllowedProvider")
-  public void isIdAttributeTypeAllowed(AttributeType attrType, boolean validIdAttrType)
-      throws Exception {
+  @ParameterizedTest
+  @MethodSource("isIdAttributeTypeAllowedProvider")
+  void isIdAttributeTypeAllowed(AttributeType attrType, boolean validIdAttrType) {
     Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(attrType).getMock();
     assertEquals(AttributeUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
   }
 
-  @DataProvider(name = "getI18nAttributeNameProvider")
-  public static Iterator<Object[]> getI18nAttributeNameProvider() {
+  static Iterator<Object[]> getI18nAttributeNameProvider() {
     List<Object[]> dataList = new ArrayList<>();
     dataList.add(new Object[] {"lang", "en", "langEn"});
     dataList.add(new Object[] {"lang", "En", "langEn"});
@@ -75,8 +73,9 @@ public class AttributeUtilsTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "getI18nAttributeNameProvider")
-  public void testGetI18nAttributeName(String attrName, String languageCode, String i18nAttrName) {
+  @ParameterizedTest
+  @MethodSource("getI18nAttributeNameProvider")
+  void testGetI18nAttributeName(String attrName, String languageCode, String i18nAttrName) {
     assertEquals(AttributeUtils.getI18nAttributeName(attrName, languageCode), i18nAttrName);
   }
 

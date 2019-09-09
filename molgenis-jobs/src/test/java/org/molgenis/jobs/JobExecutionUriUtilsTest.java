@@ -1,26 +1,26 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JobExecutionUriUtilsTest {
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+class JobExecutionUriUtilsTest {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
   }
 
   @Test
-  public void testGetUriPath() {
+  void testGetUriPath() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("MyJobExecutionEntityType");
     JobExecution jobExecution = mock(JobExecution.class);

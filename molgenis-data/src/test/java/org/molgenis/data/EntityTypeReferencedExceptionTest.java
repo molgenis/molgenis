@@ -1,26 +1,28 @@
 package org.molgenis.data;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class EntityTypeReferencedExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class EntityTypeReferencedExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     Map<String, Set<String>> entityTypeDependencyMap =
         ImmutableMap.of(
             "MyEntityType0",
@@ -34,7 +36,7 @@ public class EntityTypeReferencedExceptionTest extends ExceptionMessageTest {
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     Map<String, Set<String>> entityTypeDependencyMap =
         ImmutableMap.of(
             "MyEntityType0",
@@ -48,9 +50,7 @@ public class EntityTypeReferencedExceptionTest extends ExceptionMessageTest {
         "dependencies:MyEntityType0=MyRefEntityType0,MyRefEntityType1;MyEntityType1=MyRefEntityType2");
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en",

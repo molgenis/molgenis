@@ -1,16 +1,15 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.meta.AttributeType.EMAIL;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -249,8 +248,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
                 () ->
                     new UnknownEntityException(
                         EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId()));
-    assertNull(afterRemoveEntityType.getAttribute(compound.getName()));
-    assertNull(afterRemoveEntityType.getAttribute(compoundChild.getName()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        afterRemoveEntityType.getAttribute(compound.getName()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        afterRemoveEntityType.getAttribute(compoundChild.getName()));
 
     EntityType attributeMetadata =
         metaDataService

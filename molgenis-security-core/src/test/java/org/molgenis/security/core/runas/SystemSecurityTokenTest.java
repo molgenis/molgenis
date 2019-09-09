@@ -1,17 +1,17 @@
 package org.molgenis.security.core.runas;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.testng.annotations.Test;
 
-public class SystemSecurityTokenTest {
+class SystemSecurityTokenTest {
   @Test
-  public void testGetAuthorities() {
+  void testGetAuthorities() {
     ImmutableList<SimpleGrantedAuthority> expectedAuthorities =
         ImmutableList.of(
             new SimpleGrantedAuthority("ROLE_SYSTEM"),
@@ -22,17 +22,17 @@ public class SystemSecurityTokenTest {
   }
 
   @Test
-  public void testGetCredentials() {
+  void testGetCredentials() {
     assertNull(SystemSecurityToken.getInstance().getCredentials());
   }
 
   @Test
-  public void testGetPrincipal() {
+  void testGetPrincipal() {
     assertTrue(SystemSecurityToken.getInstance().getPrincipal() instanceof SystemPrincipal);
   }
 
   @Test
-  public void testIsAuthenticated() {
+  void testIsAuthenticated() {
     assertTrue(SystemSecurityToken.getInstance().isAuthenticated());
   }
 }

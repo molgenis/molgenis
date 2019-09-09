@@ -1,6 +1,10 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -10,13 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -34,10 +38,8 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
+class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   @Mock private UserService userService;
   @Mock private RoleMembershipFactory roleMembershipFactory;
   @Mock private DataService dataService;
@@ -52,15 +54,15 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
 
   private RoleMembershipServiceImpl roleMembershipService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     roleMembershipService =
         new RoleMembershipServiceImpl(
             userService, roleMembershipFactory, dataService, userMetadata, roleMetadata);
   }
 
   @Test
-  public void addUserToRole() {
+  void addUserToRole() {
     String username = "henk";
     User user = mock(User.class);
     when(userService.getUser(username)).thenReturn(user);
@@ -85,10 +87,8 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     assertTrue(Duration.between(Instant.now(), instantCaptor.getValue()).getSeconds() < 1);
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_sec_Role id:GCC_DELETER attribute:name")
-  public void addUserToNonExistingRole() {
+  @Test
+  void addUserToNonExistingRole() {
     Attribute roleNameAttr = mock(Attribute.class);
     when(roleNameAttr.getName()).thenReturn("name");
     when(roleMetadata.getAttribute(RoleMetadata.NAME)).thenReturn(roleNameAttr);
@@ -104,13 +104,16 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
     when(query.eq(RoleMetadata.NAME, rolename).findOne()).thenReturn(null);
 
-    roleMembershipService.addUserToRole(username, rolename);
+    Exception exception =
+        assertThrows(
+            UnknownEntityException.class,
+            () -> roleMembershipService.addUserToRole(username, rolename));
+    assertThat(exception.getMessage())
+        .containsPattern("type:sys_sec_Role id:GCC_DELETER attribute:name");
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_sec_User id:henk attribute:username")
-  public void addNonExistingUserToRole() {
+  @Test
+  void addNonExistingUserToRole() {
     Attribute userNameAttr = mock(Attribute.class);
     when(userNameAttr.getName()).thenReturn("username");
     when(userMetadata.getAttribute(USERNAME)).thenReturn(userNameAttr);
@@ -119,18 +122,23 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     String username = "henk";
     when(userService.getUser(username)).thenReturn(null);
 
-    roleMembershipService.addUserToRole(username, "GCC_MANAGER");
+    Exception exception =
+        assertThrows(
+            UnknownEntityException.class,
+            () -> roleMembershipService.addUserToRole(username, "GCC_MANAGER"));
+    assertThat(exception.getMessage())
+        .containsPattern("type:sys_sec_User id:henk attribute:username");
   }
 
   @Test
-  public void testRemoveMembership() {
+  void testRemoveMembership() {
     roleMembershipService.removeMembership(roleMembership);
 
     verify(dataService).delete(ROLE_MEMBERSHIP, roleMembership);
   }
 
   @Test
-  public void testUpdateMembership() {
+  void testUpdateMembership() {
     when(roleMembership.getId()).thenReturn("membershipId");
     when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class))
         .thenReturn(roleMembership);
@@ -141,17 +149,19 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     verify(dataService).update(ROLE_MEMBERSHIP, roleMembership);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testUpdateMembershipNotAMember() {
+  @Test
+  void testUpdateMembershipNotAMember() {
     when(roleMembership.getId()).thenReturn("membershipId");
     when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class))
         .thenReturn(null);
 
-    roleMembershipService.updateMembership(roleMembership, editor);
+    assertThrows(
+        UnknownEntityException.class,
+        () -> roleMembershipService.updateMembership(roleMembership, editor));
   }
 
   @Test
-  public void testGetMemberships() {
+  void testGetMemberships() {
     Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
     Fetch userFetch = new Fetch().field(UserMetadata.USERNAME).field(UserMetadata.ID);
     Fetch fetch =

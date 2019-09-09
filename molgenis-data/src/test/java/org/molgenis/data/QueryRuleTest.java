@@ -1,46 +1,46 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.QueryRule.Operator;
-import org.testng.annotations.Test;
 
-public class QueryRuleTest {
+class QueryRuleTest {
   @Test
-  public void equals() {
+  void equals() {
     QueryRule q1 = new QueryRule("field", EQUALS, "test");
     QueryRule q2 = new QueryRule("field", EQUALS, "test");
     assertTrue(q1.equals(q2));
   }
 
   @Test
-  public void equalsWithDifferentOperator() {
+  void equalsWithDifferentOperator() {
     QueryRule q1 = new QueryRule("field", EQUALS, "test");
     QueryRule q2 = new QueryRule("field", SEARCH, "test");
     assertFalse(q1.equals(q2));
   }
 
   @Test
-  public void equalsWithDifferentValues() {
+  void equalsWithDifferentValues() {
     QueryRule q1 = new QueryRule("field", EQUALS, "test1");
     QueryRule q2 = new QueryRule("field", EQUALS, "test2");
     assertFalse(q1.equals(q2));
   }
 
   @Test
-  public void equalsWithDifferentFields() {
+  void equalsWithDifferentFields() {
 
     QueryRule q1 = new QueryRule("field1", EQUALS, "test");
     QueryRule q2 = new QueryRule("field2", EQUALS, "test");
@@ -48,13 +48,13 @@ public class QueryRuleTest {
   }
 
   @Test
-  public void valuesForRangeOperator() {
+  void valuesForRangeOperator() {
     QueryRule qr = new QueryRule("field", RANGE, Arrays.asList(10, 10));
     assertEquals(qr.getValue(), Arrays.asList(10, 10));
   }
 
   @Test
-  public void equalsWithNestedRules() {
+  void equalsWithNestedRules() {
     QueryRule q = new QueryRule();
     assertNotNull(q.getNestedRules());
     assertTrue(q.getNestedRules().isEmpty());
@@ -66,7 +66,7 @@ public class QueryRuleTest {
   }
 
   @Test
-  public void equalsEntityId() {
+  void equalsEntityId() {
     Entity valueEntity = mock(Entity.class);
     when(valueEntity.getIdValue()).thenReturn("1");
     String valueId = "1";
@@ -77,7 +77,7 @@ public class QueryRuleTest {
   }
 
   @Test
-  public void equalsInEntity() {
+  void equalsInEntity() {
     Entity entity1 = mock(Entity.class);
     Entity entity2 = mock(Entity.class);
 

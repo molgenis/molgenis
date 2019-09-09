@@ -1,42 +1,42 @@
 package org.molgenis.data.file.processor;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class MissingValueProcessorTest {
+class MissingValueProcessorTest {
   @Test
-  public void processNull() {
+  void processNull() {
     assertEquals(new MissingValueProcessor("unknown", false).process(null), "unknown");
   }
 
   @Test
-  public void processNull_processEmpty() {
+  void processNull_processEmpty() {
     assertEquals(new MissingValueProcessor("unknown", true).process(null), "unknown");
   }
 
   @Test
-  public void processEmpty() {
+  void processEmpty() {
     assertEquals(new MissingValueProcessor("unknown", true).process(""), "unknown");
   }
 
   @Test
-  public void processEmpty_processEmpty() {
+  void processEmpty_processEmpty() {
     assertEquals(new MissingValueProcessor("unknown", false).process(""), "");
   }
 
   @Test
-  public void process() {
+  void process() {
     assertEquals(new MissingValueProcessor("unknown", true).process("value"), "value");
   }
 
   @Test
-  public void process_processEmpty() {
+  void process_processEmpty() {
     assertEquals(new MissingValueProcessor("unknown", true).process("value"), "value");
   }
 
   @Test
-  public void equals() {
+  void equals() {
     assertEquals(
         new MissingValueProcessor("unknown", true), new MissingValueProcessor("unknown", true));
   }

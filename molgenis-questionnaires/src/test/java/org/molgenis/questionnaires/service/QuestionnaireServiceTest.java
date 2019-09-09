@@ -1,5 +1,7 @@
 package org.molgenis.questionnaires.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -9,12 +11,14 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.molgenis.core.ui.controller.StaticContentService;
@@ -38,11 +42,8 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class QuestionnaireServiceTest extends AbstractMockitoTest {
+class QuestionnaireServiceTest extends AbstractMockitoTest {
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private DataService dataService;
 
@@ -64,8 +65,8 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
 
   private static final String QUESTIONNAIRE_ID = "test_quest";
 
-  @BeforeMethod
-  public void setupBeforeClass() {
+  @BeforeEach
+  void setupBeforeClass() {
     TestAllPropertiesMessageSource messageSource =
         new TestAllPropertiesMessageSource(new MessageFormatFactory());
     messageSource.addMolgenisNamespaces("questionnaire");
@@ -81,13 +82,13 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
             mutableAclClassService);
   }
 
-  @AfterClass
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     MessageSourceHolder.setMessageSource(null);
   }
 
   @Test
-  public void testGetQuestionnaires() {
+  void testGetQuestionnaires() {
     // =========== Setup ===========
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
@@ -111,7 +112,7 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testStartQuestionnaire() {
+  void testStartQuestionnaire() {
     // =========== Setup ===========
     EntityType entityType = mock(EntityType.class);
     when(mutableAclClassService.getAclClassTypes())
@@ -141,8 +142,8 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
     verify(dataService).add(QUESTIONNAIRE_ID, questionnaire);
   }
 
-  @Test(expectedExceptions = QuestionnaireNotRowLevelSecuredException.class)
-  public void testStartQuestionnaireNoRowLevelSecurity() {
+  @Test
+  void testStartQuestionnaireNoRowLevelSecurity() {
     // =========== Setup ===========
     EntityType entityType = mock(EntityType.class);
 
@@ -151,11 +152,13 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
     when(dataService.getEntityType(QUESTIONNAIRE_ID)).thenReturn(entityType);
 
     // =========== Test ===========
-    questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
+    assertThrows(
+        QuestionnaireNotRowLevelSecuredException.class,
+        () -> questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID));
   }
 
   @Test
-  public void testStartQuestionnaireAlreadyOpen() {
+  void testStartQuestionnaireAlreadyOpen() {
     // =========== Setup ===========
     Entity entity = mock(Entity.class);
     when(dataService.query(QUESTIONNAIRE_ID).eq(OWNER_USERNAME, null).findOne()).thenReturn(entity);
@@ -174,7 +177,7 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetQuestionnaireSubmissionTextDefault() {
+  void testGetQuestionnaireSubmissionTextDefault() {
     String key = QUESTIONNAIRE_ID + "_submissionText";
     when(staticContentService.getContent(key)).thenReturn(null);
 
@@ -187,7 +190,7 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetQuestionnaireSubmissionText() {
+  void testGetQuestionnaireSubmissionText() {
     String key = QUESTIONNAIRE_ID + "_submissionText";
     when(staticContentService.getContent(key)).thenReturn("My awesome submission text");
 

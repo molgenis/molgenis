@@ -4,6 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
@@ -14,16 +16,15 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -52,8 +53,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
 public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
@@ -80,7 +79,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
+  @BeforeEach
   public void beforeMethod() {
     config.resetMocks();
     indexJobService = new IndexJobService(dataService, indexService, entityTypeFactory);
@@ -378,7 +377,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     @Mock private MetaDataService mds;
 
     public Config() {
-      initMocks(this);
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean

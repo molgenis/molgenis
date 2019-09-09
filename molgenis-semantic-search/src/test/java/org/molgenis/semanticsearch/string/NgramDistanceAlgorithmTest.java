@@ -1,12 +1,12 @@
 package org.molgenis.semanticsearch.string;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class NgramDistanceAlgorithmTest {
+class NgramDistanceAlgorithmTest {
   @Test
-  public void calculateScore() {
+  void calculateScore() {
     assertEquals(NGramDistanceAlgorithm.stringMatching("hypertensive", "hypertensive"), 100.0);
 
     assertEquals(
@@ -20,7 +20,7 @@ public class NgramDistanceAlgorithmTest {
   }
 
   @Test
-  public void createNGrams() {
+  void createNGrams() {
     assertEquals(
         NGramDistanceAlgorithm.createNGrams("hypertensions", true).toString(),
         "{hy=1, te=1, s$=1, rt=1, pe=1, ns=1, yp=1, en=1, ^h=1, er=1}");

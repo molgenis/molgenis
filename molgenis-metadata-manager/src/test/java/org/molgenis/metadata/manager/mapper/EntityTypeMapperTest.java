@@ -2,18 +2,22 @@ package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.MolgenisDataException;
@@ -29,10 +33,8 @@ import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.model.EditorTagIdentifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeMapperTest {
+class EntityTypeMapperTest {
   @Mock private EntityTypeFactory entityTypeFactory;
 
   @Mock private AttributeMapper attributeMapper;
@@ -47,8 +49,8 @@ public class EntityTypeMapperTest {
 
   private EntityTypeMapper entityTypeMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     EntityTypeMetadata entityTypeMetadata = mock(EntityTypeMetadata.class);
     when(entityTypeFactory.getEntityType()).thenReturn(entityTypeMetadata);
@@ -62,13 +64,14 @@ public class EntityTypeMapperTest {
             entityTypeParentMapper);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testEntityTypeMapper() {
-    new EntityTypeMapper(null, null, null, null, null, null);
+  @Test
+  void testEntityTypeMapper() {
+    assertThrows(
+        NullPointerException.class, () -> new EntityTypeMapper(null, null, null, null, null, null));
   }
 
   @Test
-  public void testToEntityType() {
+  void testToEntityType() {
     String id = "id";
     String label = "label";
     String i18nLabelLangEn = "en";
@@ -159,20 +162,22 @@ public class EntityTypeMapperTest {
     verifyNoMoreInteractions(entityType);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = "ID attribute for EntityType \\[test\\] cannot be null")
-  public void testToEntityTypeWithoutIdAttribute() {
+  @Test
+  void testToEntityTypeWithoutIdAttribute() {
     EditorEntityType editorEntityType = mock(EditorEntityType.class);
     when(editorEntityType.getIdAttribute()).thenReturn(null);
     when(editorEntityType.getLabelAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
     when(editorEntityType.getLabel()).thenReturn("test");
-    entityTypeMapper.toEntityType(editorEntityType);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class, () -> entityTypeMapper.toEntityType(editorEntityType));
+    assertThat(exception.getMessage())
+        .containsPattern("ID attribute for EntityType \\[test\\] cannot be null");
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testToEditorEntityType() {
+  void testToEditorEntityType() {
     String id = "id";
     String label = "label";
     String i18nLabelLangEn = "en";
@@ -265,7 +270,7 @@ public class EntityTypeMapperTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testCreateEditorEntityType() {
+  void testCreateEditorEntityType() {
     String id = "id";
     String backend = "backend";
 

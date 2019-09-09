@@ -1,9 +1,12 @@
 package org.molgenis.bootstrap;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
@@ -18,10 +21,8 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.exception.ExceptionResponseGeneratorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RegistryBootstrapperTest extends AbstractMockitoTest {
+class RegistryBootstrapperTest extends AbstractMockitoTest {
   @Mock private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
   @Mock private SystemEntityTypeRegistrar systemEntityTypeRegistrar;
   @Mock private SystemPackageRegistrar systemPackageRegistrar;
@@ -37,8 +38,8 @@ public class RegistryBootstrapperTest extends AbstractMockitoTest {
   @Mock private ExceptionResponseGeneratorRegistrar exceptionResponseGeneratorRegistrar;
   private RegistryBootstrapper registryBootstrapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     registryBootstrapper =
         new RegistryBootstrapper(
             repoCollectionBootstrapper,
@@ -53,13 +54,15 @@ public class RegistryBootstrapperTest extends AbstractMockitoTest {
             exceptionResponseGeneratorRegistrar);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testRegistryBootstrapper() {
-    new RegistryBootstrapper(null, null, null, null, null, null, null, null, null, null);
+  @Test
+  void testRegistryBootstrapper() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new RegistryBootstrapper(null, null, null, null, null, null, null, null, null, null));
   }
 
   @Test
-  public void testBootstrap() {
+  void testBootstrap() {
     ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
     ApplicationContext applicationContext = mock(ApplicationContext.class);
     when(event.getApplicationContext()).thenReturn(applicationContext);

@@ -2,6 +2,10 @@ package org.molgenis.data;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
@@ -12,27 +16,24 @@ import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SHOULD;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class QueryUtilsTest {
+class QueryUtilsTest {
   private Query<Entity> query;
   private QueryRule rule3;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     query = mock(Query.class);
 
     QueryRule rule1 = mock(QueryRule.class);
@@ -52,34 +53,34 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void containsAnyOperator() {
+  void containsAnyOperator() {
     assertTrue(QueryUtils.containsAnyOperator(query, EnumSet.of(DIS_MAX, FUZZY_MATCH)));
   }
 
   @Test
-  public void notContainsAnyOperator() {
+  void notContainsAnyOperator() {
     assertFalse(
         QueryUtils.containsAnyOperator(query, EnumSet.of(FUZZY_MATCH, GREATER_EQUAL, SHOULD)));
   }
 
   @Test
-  public void containsOperator() {
+  void containsOperator() {
     assertTrue(QueryUtils.containsOperator(query, DIS_MAX));
   }
 
   @Test
-  public void notContainsOperator() {
+  void notContainsOperator() {
     assertFalse(QueryUtils.containsOperator(query, FUZZY_MATCH));
   }
 
   @Test
-  public void emptyQuery() {
+  void emptyQuery() {
     assertFalse(
         QueryUtils.containsAnyOperator(new QueryImpl<>(), EnumSet.allOf(QueryRule.Operator.class)));
   }
 
   @Test
-  public void nestedQueryRules() {
+  void nestedQueryRules() {
     QueryRule nestedRule = mock(QueryRule.class);
     when(nestedRule.getOperator()).thenReturn(EQUALS);
     when(rule3.getNestedRules()).thenReturn(Lists.newArrayList(nestedRule));
@@ -88,7 +89,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void notContainsComputedAttributes() {
+  void notContainsComputedAttributes() {
     EntityType entityType = mock(EntityType.class);
 
     @SuppressWarnings("unchecked")
@@ -116,7 +117,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void containsComputedAttribute() {
+  void containsComputedAttribute() {
     EntityType entityType = mock(EntityType.class);
 
     @SuppressWarnings("unchecked")
@@ -144,7 +145,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void containsComputedAttributeNested() {
+  void containsComputedAttributeNested() {
     String refAttrName = "refAttr";
     String attrName = "attr";
     String queryRuleField = refAttrName + '.' + attrName;
@@ -162,7 +163,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void containsNestedComputedAttributes() {
+  void containsNestedComputedAttributes() {
     EntityType entityType = mock(EntityType.class);
 
     @SuppressWarnings("unchecked")
@@ -203,7 +204,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void testGetQueryRuleAttribute() throws Exception {
+  void testGetQueryRuleAttribute() {
     String attrName = "attr";
     QueryRule queryRule = mock(QueryRule.class);
     when(queryRule.getField()).thenReturn(attrName);
@@ -213,18 +214,20 @@ public class QueryUtilsTest {
     assertEquals(QueryUtils.getQueryRuleAttribute(queryRule, entityType), attr);
   }
 
-  @Test(expectedExceptions = UnknownAttributeException.class)
-  public void testGetQueryRuleAttributeUnknown() throws Exception {
+  @Test
+  void testGetQueryRuleAttributeUnknown() {
     String attrName = "unknownAttr";
     QueryRule queryRule = mock(QueryRule.class);
     when(queryRule.getField()).thenReturn(attrName);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getAttribute(attrName)).thenReturn(null);
-    QueryUtils.getQueryRuleAttribute(queryRule, entityType);
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> QueryUtils.getQueryRuleAttribute(queryRule, entityType));
   }
 
   @Test
-  public void testGetQueryRuleAttributeNested() throws Exception {
+  void testGetQueryRuleAttributeNested() {
     String refAttrName = "refAttr";
     String attrName = "attr";
     String queryRuleField = refAttrName + '.' + attrName;
@@ -240,8 +243,8 @@ public class QueryUtilsTest {
     assertEquals(QueryUtils.getQueryRuleAttribute(queryRule, entityType), attr);
   }
 
-  @Test(expectedExceptions = UnknownAttributeException.class)
-  public void testGetQueryRuleAttributeNestedUnknown() throws Exception {
+  @Test
+  void testGetQueryRuleAttributeNestedUnknown() {
     String refAttrName = "refAttr";
     String attrName = "unknownAttr";
     String queryRuleField = refAttrName + '.' + attrName;
@@ -253,11 +256,13 @@ public class QueryUtilsTest {
     when(refEntity.getAttribute(attrName)).thenReturn(null);
     when(refAttr.getRefEntity()).thenReturn(refEntity);
     when(entityType.getAttribute(refAttrName)).thenReturn(refAttr);
-    QueryUtils.getQueryRuleAttribute(queryRule, entityType);
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> QueryUtils.getQueryRuleAttribute(queryRule, entityType));
   }
 
   @Test
-  public void containsNestedQueryRuleFieldTrue() {
+  void containsNestedQueryRuleFieldTrue() {
     @SuppressWarnings("unchecked")
     Query<Entity> q = mock(Query.class);
     QueryRule nestedQueryRule0 = mock(QueryRule.class);
@@ -271,7 +276,7 @@ public class QueryUtilsTest {
   }
 
   @Test
-  public void containsNestedQueryRuleFieldFalse() {
+  void containsNestedQueryRuleFieldFalse() {
     @SuppressWarnings("unchecked")
     Query<Entity> q = mock(Query.class);
     QueryRule nestedQueryRule0 = mock(QueryRule.class);

@@ -1,30 +1,30 @@
 package org.molgenis.web;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
-import org.testng.annotations.Test;
 
-public class ErrorMessageResponseTest {
+class ErrorMessageResponseTest {
 
   @Test
-  public void ErrorMessageResponse() {
+  void ErrorMessageResponse() {
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse();
     assertEquals(errorMessageResponse.getErrors(), Collections.emptyList());
   }
 
   @Test
-  public void ErrorMessageResponseErrorMessage() {
+  void ErrorMessageResponseErrorMessage() {
     ErrorMessage errorMessage = new ErrorMessage("message");
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse(errorMessage);
     assertEquals(errorMessageResponse.getErrors(), Collections.singletonList(errorMessage));
   }
 
   @Test
-  public void ErrorMessageResponseListErrorMessage() {
+  void ErrorMessageResponseListErrorMessage() {
     List<ErrorMessage> errorMessages =
         Arrays.asList(new ErrorMessage("message1"), new ErrorMessage("message2"));
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse(errorMessages);
@@ -32,7 +32,7 @@ public class ErrorMessageResponseTest {
   }
 
   @Test
-  public void addErrorMessage() {
+  void addErrorMessage() {
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse();
     ErrorMessage errorMessage1 = new ErrorMessage("message1");
     ErrorMessage errorMessage2 = new ErrorMessage("message2");
@@ -44,7 +44,7 @@ public class ErrorMessageResponseTest {
   }
 
   @Test
-  public void addErrorMessages() {
+  void addErrorMessages() {
     ErrorMessage errorMessage1 = new ErrorMessage("message1");
     ErrorMessage errorMessage2 = new ErrorMessage("message2");
     List<ErrorMessage> errorMessages1 = Arrays.asList(errorMessage1, errorMessage2);

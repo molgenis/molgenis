@@ -1,15 +1,17 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ListEscapeUtilsTest {
+class ListEscapeUtilsTest {
 
   @Test
-  public void toListString() {
+  void toListString() {
     assertEquals(ListEscapeUtils.toList("a"), Collections.singletonList("a"));
     assertEquals(ListEscapeUtils.toList("a,b,c"), Arrays.asList("a", "b", "c"));
 
@@ -24,23 +26,23 @@ public class ListEscapeUtilsTest {
     assertEquals(ListEscapeUtils.toList(",b,c"), Arrays.asList("", "b", "c"));
 
     assertEquals(ListEscapeUtils.toList(""), Collections.emptyList());
-    assertEquals(ListEscapeUtils.toList(null), null);
+    assertNull(ListEscapeUtils.toList(null));
   }
 
   @Test
-  public void toListStringcharchar() {
+  void toListStringcharchar() {
     assertEquals(ListEscapeUtils.toString(Arrays.asList("a", "b", "c"), ',', '/'), "a,b,c");
     assertEquals(ListEscapeUtils.toString(Collections.singletonList("a,b,c"), ',', '/'), "a/,b/,c");
     assertEquals(ListEscapeUtils.toString(Collections.singletonList("/"), ',', '/'), "//");
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void toListStringcharchar_exception() {
-    ListEscapeUtils.toList("", 'a', 'a');
+  @Test
+  void toListStringcharchar_exception() {
+    assertThrows(IllegalArgumentException.class, () -> ListEscapeUtils.toList("", 'a', 'a'));
   }
 
   @Test
-  public void toStringList() {
+  void toStringList() {
     assertEquals("a", ListEscapeUtils.toString(Collections.singletonList("a")));
     assertEquals("a,b,c", ListEscapeUtils.toString(Arrays.asList("a", "b", "c")));
 
@@ -63,14 +65,16 @@ public class ListEscapeUtilsTest {
   }
 
   @Test
-  public void toStringListcharchar() {
+  void toStringListcharchar() {
     assertEquals("a,b,c", ListEscapeUtils.toString(Arrays.asList("a", "b", "c"), ',', '/'));
     assertEquals("a/,b/,c", ListEscapeUtils.toString(Collections.singletonList("a,b,c"), ',', '/'));
     assertEquals("//", ListEscapeUtils.toString(Collections.singletonList("/"), ',', '/'));
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void toStringListcharchar_exception() {
-    ListEscapeUtils.toString(Collections.emptyList(), 'a', 'a');
+  @Test
+  void toStringListcharchar_exception() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> ListEscapeUtils.toString(Collections.emptyList(), 'a', 'a'));
   }
 }

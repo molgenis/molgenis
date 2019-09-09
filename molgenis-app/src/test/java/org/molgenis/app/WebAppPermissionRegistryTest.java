@@ -1,13 +1,14 @@
 package org.molgenis.app;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.molgenis.security.core.PermissionSet.READ;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.PermissionSet;
@@ -15,7 +16,6 @@ import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.testng.annotations.Test;
 
 public class WebAppPermissionRegistryTest {
 

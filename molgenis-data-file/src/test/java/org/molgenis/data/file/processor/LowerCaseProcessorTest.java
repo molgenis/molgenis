@@ -1,16 +1,18 @@
 package org.molgenis.data.file.processor;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class LowerCaseProcessorTest {
+import org.junit.jupiter.api.Test;
+
+class LowerCaseProcessorTest {
   @Test
-  public void process() {
-    Assert.assertEquals(new LowerCaseProcessor().process("A"), "a");
+  void process() {
+    assertEquals(new LowerCaseProcessor().process("A"), "a");
   }
 
   @Test
-  public void processNull() {
-    Assert.assertNull(new LowerCaseProcessor().process(null));
+  void processNull() {
+    assertNull(new LowerCaseProcessor().process(null));
   }
 }

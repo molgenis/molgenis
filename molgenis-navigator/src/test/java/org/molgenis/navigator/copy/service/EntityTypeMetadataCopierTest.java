@@ -1,6 +1,7 @@
 package org.molgenis.navigator.copy.service;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -12,30 +13,29 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.Progress;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeMetadataCopierTest extends AbstractMockitoTest {
+class EntityTypeMetadataCopierTest extends AbstractMockitoTest {
 
   @Mock private AttributeFactory attributeFactory;
   private EntityTypeMetadataCopier copier;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     copier = new EntityTypeMetadataCopier(attributeFactory);
   }
 
   @Test
-  public void testCopy() {
+  void testCopy() {
     EntityType entityType = mock(EntityType.class);
     EntityType entityTypeMeta = mockEntityTypeMetadata();
     when(entityType.getEntityType()).thenReturn(entityTypeMeta);

@@ -2,12 +2,15 @@ package org.molgenis.navigator.util;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
@@ -17,22 +20,20 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ResourceCollectorTest extends AbstractMockitoTest {
+class ResourceCollectorTest extends AbstractMockitoTest {
 
   @Mock private MetaDataService metaDataService;
 
   private ResourceCollector resourceCollector;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     resourceCollector = new ResourceCollector(metaDataService);
   }
 
   @Test
-  public void testGet() {
+  void testGet() {
     EntityType entityType1 = mock(EntityType.class);
     EntityType entityType2 = mock(EntityType.class);
     EntityType entityType3 = mock(EntityType.class);
@@ -79,19 +80,19 @@ public class ResourceCollectorTest extends AbstractMockitoTest {
     assertEquals(collection.getPackages(), asList(package1, package2));
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class)
-  public void testGetUnknownEntityType() {
+  @Test
+  void testGetUnknownEntityType() {
     ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "entity1");
     when(metaDataService.getEntityType("entity1")).thenReturn(Optional.empty());
 
-    resourceCollector.get(singletonList(id1));
+    assertThrows(UnknownEntityTypeException.class, () -> resourceCollector.get(singletonList(id1)));
   }
 
-  @Test(expectedExceptions = UnknownPackageException.class)
-  public void testGetUnknownPackage() {
+  @Test
+  void testGetUnknownPackage() {
     ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, "package1");
     when(metaDataService.getPackage("package1")).thenReturn(Optional.empty());
 
-    resourceCollector.get(singletonList(id1));
+    assertThrows(UnknownPackageException.class, () -> resourceCollector.get(singletonList(id1)));
   }
 }

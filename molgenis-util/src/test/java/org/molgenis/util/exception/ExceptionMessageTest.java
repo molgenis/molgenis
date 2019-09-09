@@ -1,43 +1,38 @@
 package org.molgenis.util.exception;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Locale;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.AllPropertiesMessageSource;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 
 public abstract class ExceptionMessageTest extends AbstractMockitoTest {
   private MessageFormatFactory messageFormatFactory = new MessageFormatFactory();
   protected AllPropertiesMessageSource messageSource;
 
-  @BeforeMethod
+  @BeforeEach
   public void exceptionMessageTestBeforeMethod() {
     messageSource = new TestAllPropertiesMessageSource(messageFormatFactory);
     MessageSourceHolder.setMessageSource(messageSource);
   }
 
   /**
-   * Parameterized test case. Overrides must be annotated with {@link org.testng.annotations.Test}
-   * and set the name of the {@link org.testng.annotations.DataProvider}.
+   * Parameterized test case. Overrides must be annotated with {@link Test} and set the name of the
+   * {@link MethodSource}.
    *
    * @param language message language
    * @param message expected exception message
    */
   @SuppressWarnings("unused")
-  public abstract void testGetLocalizedMessage(String language, String message);
-
-  /**
-   * {@link org.testng.annotations.DataProvider} for @link{{@link #testGetLocalizedMessage(String,
-   * String)}}. Overrides must annotate this method with {@link
-   * org.testng.annotations.DataProvider}.
-   */
-  public abstract Object[][] languageMessageProvider();
+  protected abstract void testGetLocalizedMessage(String language, String message);
 
   /** Asserts that localized exception messages match. */
   protected static void assertExceptionMessageEquals(Exception e, String language, String message) {
@@ -49,7 +44,7 @@ public abstract class ExceptionMessageTest extends AbstractMockitoTest {
     }
   }
 
-  @AfterMethod
+  @AfterEach
   public void exceptionMessageTestAfterMethod() {
     MessageSourceHolder.setMessageSource(null);
   }

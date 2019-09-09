@@ -2,7 +2,7 @@ package org.molgenis.integrationtest.platform.export;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.List;
 import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -30,10 +32,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.Test;
 
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {
       PlatformITConfig.class,
@@ -44,7 +46,7 @@ import org.testng.annotations.Test;
     })
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContextTests {
+public class EmxExportServiceIT {
 
   private static final String USERNAME = "emx_user";
   private static final String ROLE_SU = "SU";

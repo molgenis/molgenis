@@ -3,6 +3,11 @@ package org.molgenis.dataexplorer.negotiator;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -11,15 +16,14 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.BIOBANK_ID;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.COLLECTION_ID;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.ENABLED_EXPRESSION;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -45,11 +49,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
-public class NegotiatorControllerTest {
+class NegotiatorControllerTest {
   private NegotiatorController negotiatorController;
 
   @Mock private RestTemplate restTemplate;
@@ -67,8 +69,8 @@ public class NegotiatorControllerTest {
 
   @Captor private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
 
     /* Negotiator config mock */
@@ -112,7 +114,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testValidateNegotiatorExport() {
+  void testValidateNegotiatorExport() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -137,10 +139,8 @@ public class NegotiatorControllerTest {
     assertEquals(actual, expected);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = "No negotiator configuration found for the selected entity")
-  public void testValidateNegotiatorExportNoConfig() {
+  @Test
+  void testValidateNegotiatorExportNoConfig() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -159,11 +159,16 @@ public class NegotiatorControllerTest {
             NegotiatorEntityConfig.class))
         .thenReturn(null);
 
-    negotiatorController.validateNegotiatorExport(request);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> negotiatorController.validateNegotiatorExport(request));
+    assertThat(exception.getMessage())
+        .containsPattern("No negotiator configuration found for the selected entity");
   }
 
   @Test
-  public void testValidateNegotiatorExportEmptyCollections() {
+  void testValidateNegotiatorExportEmptyCollections() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -188,7 +193,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testValidateNegotiatorExportContainsDisabledCollections() {
+  void testValidateNegotiatorExportContainsDisabledCollections() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -226,7 +231,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testValidateNegotiatorExportAllCollectionsAreDisabled() {
+  void testValidateNegotiatorExportAllCollectionsAreDisabled() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -257,7 +262,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testExportToNegotiator() {
+  void testExportToNegotiator() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -279,10 +284,8 @@ public class NegotiatorControllerTest {
     assertEquals(actual, expected);
   }
 
-  @Test(
-      expectedExceptions = IllegalStateException.class,
-      expectedExceptionsMessageRegExp = "Negotiator config URL can't be null")
-  public void testExportToNegotiatorMissingNegotiatorURL() {
+  @Test
+  void testExportToNegotiatorMissingNegotiatorURL() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
             "http://molgenis.org",
@@ -297,14 +300,14 @@ public class NegotiatorControllerTest {
     when(restTemplate.postForLocation(eq("http://directory.com"), queryCaptor.capture()))
         .thenReturn(URI.create("http://directory.com/request/1280"));
 
-    String actual = negotiatorController.exportToNegotiator(request);
-    String expected = "http://directory.com/request/1280";
-
-    assertEquals(actual, expected);
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class, () -> negotiatorController.exportToNegotiator(request));
+    assertThat(exception.getMessage()).containsPattern("Negotiator config URL can't be null");
   }
 
   @Test
-  public void testShowButtonNoPermissionsOnPlugin() {
+  void testShowButtonNoPermissionsOnPlugin() {
     when(permissionService.hasPermission(
             new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN))
         .thenReturn(false);
@@ -312,7 +315,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testShowButton() {
+  void testShowButton() {
     when(permissionService.hasPermission(
             new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN))
         .thenReturn(true);
@@ -320,7 +323,7 @@ public class NegotiatorControllerTest {
   }
 
   @Test
-  public void testShowButtonPermissionsOnPluginNoConfig() {
+  void testShowButtonPermissionsOnPluginNoConfig() {
     when(permissionService.hasPermission(
             new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN))
         .thenReturn(false);

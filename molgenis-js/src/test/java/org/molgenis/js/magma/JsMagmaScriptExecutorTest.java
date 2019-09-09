@@ -1,14 +1,16 @@
 package org.molgenis.js.magma;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -17,23 +19,21 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JsMagmaScriptExecutorTest extends AbstractMockitoTest {
+class JsMagmaScriptExecutorTest extends AbstractMockitoTest {
   @Mock private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
   @Mock private EntityTypeFactory entityTypeFactory;
   @Mock private AttributeFactory attributeFactory;
   private JsMagmaScriptExecutor jsMagmaScriptExecutor;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     jsMagmaScriptExecutor =
         new JsMagmaScriptExecutor(jsMagmaScriptEvaluator, entityTypeFactory, attributeFactory);
   }
 
   @Test
-  public void testExecuteScript() {
+  void testExecuteScript() {
     String entityId = "entity";
     String attributeName = "myAttribute";
     String attributeValue = "value";

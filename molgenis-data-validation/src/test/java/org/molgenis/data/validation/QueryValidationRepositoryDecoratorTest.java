@@ -1,28 +1,29 @@
 package org.molgenis.data.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class QueryValidationRepositoryDecoratorTest {
+class QueryValidationRepositoryDecoratorTest {
   private QueryValidationRepositoryDecorator<Entity> queryValidationRepositoryDecorator;
   private EntityType entityType;
   private Repository<Entity> delegateRepository;
   private QueryValidator queryValidator;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = mock(Repository.class);
     entityType = mock(EntityType.class);
     when(delegateRepository.getEntityType()).thenReturn(entityType);
@@ -31,13 +32,14 @@ public class QueryValidationRepositoryDecoratorTest {
         new QueryValidationRepositoryDecorator<>(delegateRepository, queryValidator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testQueryValidationRepositoryDecorator() {
-    new QueryValidationRepositoryDecorator<>(null, null);
+  @Test
+  void testQueryValidationRepositoryDecorator() {
+    assertThrows(
+        NullPointerException.class, () -> new QueryValidationRepositoryDecorator<>(null, null));
   }
 
   @Test
-  public void testCountQueryValid() {
+  void testCountQueryValid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     long count = 123L;
@@ -46,18 +48,19 @@ public class QueryValidationRepositoryDecoratorTest {
     verify(queryValidator).validate(query, entityType);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testCountQueryInvalid() {
+  @Test
+  void testCountQueryInvalid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     doThrow(mock(MolgenisValidationException.class))
         .when(queryValidator)
         .validate(query, entityType);
-    queryValidationRepositoryDecorator.count(query);
+    assertThrows(
+        MolgenisValidationException.class, () -> queryValidationRepositoryDecorator.count(query));
   }
 
   @Test
-  public void testFindAllQueryValid() {
+  void testFindAllQueryValid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     @SuppressWarnings("unchecked")
@@ -67,18 +70,19 @@ public class QueryValidationRepositoryDecoratorTest {
     verify(queryValidator).validate(query, entityType);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testFindAllQueryInvalid() {
+  @Test
+  void testFindAllQueryInvalid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     doThrow(mock(MolgenisValidationException.class))
         .when(queryValidator)
         .validate(query, entityType);
-    queryValidationRepositoryDecorator.findAll(query);
+    assertThrows(
+        MolgenisValidationException.class, () -> queryValidationRepositoryDecorator.findAll(query));
   }
 
   @Test
-  public void testFindOneQueryValid() {
+  void testFindOneQueryValid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     Entity entity = mock(Entity.class);
@@ -87,13 +91,14 @@ public class QueryValidationRepositoryDecoratorTest {
     verify(queryValidator).validate(query, entityType);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testFindOneQueryInvalid() {
+  @Test
+  void testFindOneQueryInvalid() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     doThrow(mock(MolgenisValidationException.class))
         .when(queryValidator)
         .validate(query, entityType);
-    queryValidationRepositoryDecorator.findOne(query);
+    assertThrows(
+        MolgenisValidationException.class, () -> queryValidationRepositoryDecorator.findOne(query));
   }
 }

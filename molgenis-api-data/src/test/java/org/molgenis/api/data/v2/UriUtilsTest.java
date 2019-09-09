@@ -1,32 +1,32 @@
 package org.molgenis.api.data.v2;
 
 import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collection;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class UriUtilsTest {
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+class UriUtilsTest {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setServletPath("/myservlet");
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
   }
 
   @Test
-  public void testCreateEntityCollectionUriPath() {
+  void testCreateEntityCollectionUriPath() {
     String entityTypeId = "MyEntityTypeId";
     assertEquals(
         UriUtils.createEntityCollectionUriPath(entityTypeId), "/myservlet/api/v2/MyEntityTypeId");
   }
 
   @Test
-  public void testCreateEntityTypeMetadataUriPath() {
+  void testCreateEntityTypeMetadataUriPath() {
     String entityTypeId = "MyEntityTypeId";
     // expected: no meta path segment
     assertEquals(
@@ -34,7 +34,7 @@ public class UriUtilsTest {
   }
 
   @Test
-  public void testCreateEntityTypeMetadataAttributeUriPath() {
+  void testCreateEntityTypeMetadataAttributeUriPath() {
     String entityTypeId = "MyEntityTypeId";
     String attributeName = "MyAttribute";
     assertEquals(
@@ -43,7 +43,7 @@ public class UriUtilsTest {
   }
 
   @Test
-  public void testCreateEntityUriPath() {
+  void testCreateEntityUriPath() {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyEntityId";
     assertEquals(
@@ -52,7 +52,7 @@ public class UriUtilsTest {
   }
 
   @Test
-  public void testCreateEntityAttributeUriPath() {
+  void testCreateEntityAttributeUriPath() {
     String entityTypeId = "MyEntityTypeId";
     String attributeName = "MyAttribute";
     String entityId = "MyEntityId";
@@ -62,7 +62,7 @@ public class UriUtilsTest {
   }
 
   @Test
-  public void testCreateEntityAttributeUriPathEncoding() {
+  void testCreateEntityAttributeUriPathEncoding() {
     String entityTypeId = "/\\?=;*";
     String attributeName = "/\\?=;*";
     String entityId = "/\\?=;*";
@@ -72,7 +72,7 @@ public class UriUtilsTest {
   }
 
   @Test
-  public void testCreateEntitiesUriPath() {
+  void testCreateEntitiesUriPath() {
     String entityTypeId = "MyEntityTypeId";
     String idAttributeName = "MyIdAttribute";
     Collection<String> entityIds = asList("MyEntityId0", "MyEntityId1");

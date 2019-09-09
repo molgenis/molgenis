@@ -2,13 +2,13 @@ package org.molgenis.integrationtest.platform;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +16,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -46,12 +50,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {
       PlatformITConfig.class,
@@ -61,7 +63,7 @@ import org.testng.annotations.Test;
     })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
-public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContextTests {
+public class DynamicDecoratorIT {
   private static final Logger LOG = LoggerFactory.getLogger(DynamicDecoratorIT.class);
 
   private static final String USERNAME = "dynamic-decorator-user";
@@ -80,7 +82,7 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
   private DynamicDecorator addingDynamicDecorator;
   private DynamicDecorator postfixDynamicDecorator;
 
-  @BeforeClass
+  @BeforeEach
   public void setUp() {
     refEntityTypeDynamic =
         testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
@@ -168,7 +170,7 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
     assertEquals(12, entity.getInt("int_attr").intValue());
   }
 
-  @AfterClass
+  @AfterEach
   public void tearDownAfterClass() {
     runAsSystem(
         () -> {

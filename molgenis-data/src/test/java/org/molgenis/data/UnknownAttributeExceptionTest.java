@@ -3,18 +3,18 @@ package org.molgenis.data;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class UnknownAttributeExceptionTest extends ExceptionMessageTest {
+class UnknownAttributeExceptionTest extends ExceptionMessageTest {
   @Mock private EntityType entityType;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
     when(entityType.getLabel(any()))
         .then(
@@ -24,16 +24,15 @@ public class UnknownAttributeExceptionTest extends ExceptionMessageTest {
             }));
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new UnknownAttributeException(entityType, "MyAttribute"), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "Unknown attribute 'MyAttribute' of entity type 'MyEntityType'."};
     Object[] nlParams = {
       "nl", "Onbekend attribuut 'MyAttribute' van entiteitsoort 'MijnEntiteitSoort'."

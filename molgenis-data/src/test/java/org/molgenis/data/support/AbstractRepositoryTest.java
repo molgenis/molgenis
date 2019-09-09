@@ -1,11 +1,12 @@
 package org.molgenis.data.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -25,13 +28,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
-public class AbstractRepositoryTest {
-  private AbstractRepository abstractRepository;
-  private EntityType entityType;
+class AbstractRepositoryTest {
+  private static AbstractRepository abstractRepository;
+  private static EntityType entityType;
 
   @Captor private ArgumentCaptor<Stream<Entity>> addStreamCaptor;
 
@@ -39,8 +39,8 @@ public class AbstractRepositoryTest {
 
   @Captor private ArgumentCaptor<Stream<Object>> objectStreamCaptor;
 
-  @BeforeTest
-  public void beforeTest() {
+  @BeforeEach
+  void beforeMethod() {
     MockitoAnnotations.initMocks(this);
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
     entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
@@ -65,34 +65,32 @@ public class AbstractRepositoryTest {
             });
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
-    Mockito.reset(abstractRepository);
+  @Test
+  void addStream() {
+    assertThrows(UnsupportedOperationException.class, () -> abstractRepository.add(Stream.empty()));
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void addStream() {
-    abstractRepository.add(Stream.empty());
+  @Test
+  void deleteStream() {
+    assertThrows(
+        UnsupportedOperationException.class, () -> abstractRepository.delete(Stream.empty()));
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void deleteStream() {
-    abstractRepository.delete(Stream.empty());
+  @Test
+  void updateStream() {
+    assertThrows(
+        UnsupportedOperationException.class, () -> abstractRepository.update(Stream.empty()));
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void updateStream() {
-    abstractRepository.update(Stream.empty());
-  }
-
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void findOneObjectFetch() {
-    abstractRepository.findOneById(0, new Fetch());
+  @Test
+  void findOneObjectFetch() {
+    assertThrows(
+        UnsupportedOperationException.class, () -> abstractRepository.findOneById(0, new Fetch()));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void findAllStream() {
+  void findAllStream() {
     Object id0 = "id0";
     Object id1 = "id1";
     Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
@@ -109,7 +107,7 @@ public class AbstractRepositoryTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void findAllStreamFetch() {
+  void findAllStreamFetch() {
     Fetch fetch = new Fetch();
     Object id0 = "id0";
     Object id1 = "id1";
@@ -129,7 +127,7 @@ public class AbstractRepositoryTest {
   // Mockito
 
   @Test
-  public void testUpsertBatch() {
+  void testUpsertBatch() {
     Object id0 = "id0";
     Object id1 = "id1";
     Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();

@@ -1,22 +1,23 @@
 package org.molgenis.data.index.job;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -39,12 +40,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {IndexJobSchedulerTest.Config.class, IndexTestConfig.class})
-public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
+class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
   @Autowired private DataService dataService;
 
   @Autowired private TransactionManager transactionManager;
@@ -67,19 +65,14 @@ public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Autowired private Config config;
 
-  @BeforeClass
-  public void setUp() throws Exception {
-    verify(transactionManager).addTransactionListener(molgenisTransactionListener);
-  }
-
-  @BeforeMethod
-  public void beforeMethod() throws Exception {
+  @BeforeEach
+  void beforeMethod() throws Exception {
     config.resetMocks();
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() throws Exception {
+  void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() throws Exception {
     when(dataService.findOneById(INDEX_ACTION_GROUP, "abcde")).thenReturn(null);
 
     indexJobScheduler.scheduleIndexJob("abcde");
@@ -88,7 +81,7 @@ public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCleanupJobExecutions() throws Exception {
+  void testCleanupJobExecutions() throws Exception {
     when(dataService.getRepository(INDEX_JOB_EXECUTION)).thenReturn(repository);
     when(repository.query()).thenReturn(new QueryImpl<>(repository));
     when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
@@ -111,7 +104,7 @@ public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({IndexConfig.class, IndexActionRegisterServiceImpl.class})
-  public static class Config {
+  static class Config {
     @Mock private JobExecutor jobExecutor;
 
     @Mock private MailSender mailSender;
@@ -120,8 +113,8 @@ public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 
     @Mock private IndexService indexService;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     private void resetMocks() {
@@ -129,22 +122,22 @@ public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public JobExecutor jobExecutor() {
+    JobExecutor jobExecutor() {
       return jobExecutor;
     }
 
     @Bean
-    public IndexService indexService() {
+    IndexService indexService() {
       return indexService;
     }
 
     @Bean
-    public TransactionManager molgenisTransactionManager() {
+    TransactionManager molgenisTransactionManager() {
       return transactionManager;
     }
 
     @Bean
-    public MailSender mailSender() {
+    MailSender mailSender() {
       return mailSender;
     }
   }

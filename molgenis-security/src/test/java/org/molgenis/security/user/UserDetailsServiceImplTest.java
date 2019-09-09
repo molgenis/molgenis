@@ -1,6 +1,9 @@
 package org.molgenis.security.user;
 
-import static java.util.Collections.singletonList;
+import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -8,12 +11,13 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -27,10 +31,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class UserDetailsServiceImplTest extends AbstractMockitoTest {
+class UserDetailsServiceImplTest extends AbstractMockitoTest {
   @Mock private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
   @Mock private DataService dataService;
   @Mock private User user;
@@ -40,19 +42,19 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
 
   private UserDetailsServiceImpl userDetailsServiceImpl;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     userDetailsServiceImpl = new UserDetailsServiceImpl(dataService, grantedAuthoritiesMapper);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testUserDetailsService() {
-    new UserDetailsServiceImpl(null, null);
+  @Test
+  void testUserDetailsService() {
+    assertThrows(NullPointerException.class, () -> new UserDetailsServiceImpl(null, null));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLoadUserByUsernameSuperuser() {
+  void testLoadUserByUsernameSuperuser() {
     String username = "user";
     when(user.getUsername()).thenReturn(username);
     when(user.getPassword()).thenReturn("pw");
@@ -75,7 +77,7 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
     Collection<GrantedAuthority> mappedAuthorities =
-        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+        singleton(new SimpleGrantedAuthority("ROLE_MAPPED"));
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
@@ -86,7 +88,7 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLoadUserByUsernameNonSuperuser() {
+  void testLoadUserByUsernameNonSuperuser() {
     String username = "user";
     User user = mock(User.class);
     when(user.getUsername()).thenReturn(username);
@@ -108,7 +110,7 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
     Collection<GrantedAuthority> mappedAuthorities =
-        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+        singleton(new SimpleGrantedAuthority("ROLE_MAPPED"));
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
@@ -119,7 +121,7 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLoadUserByUsernameAnonymous() {
+  void testLoadUserByUsernameAnonymous() {
     String username = "anonymous";
     when(user.getUsername()).thenReturn(username);
     when(user.getPassword()).thenReturn("pw");
@@ -141,7 +143,7 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
     Collection<GrantedAuthority> mappedAuthorities =
-        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+        singleton(new SimpleGrantedAuthority("ROLE_MAPPED"));
     when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
         .thenReturn((Collection) mappedAuthorities);
 
@@ -150,16 +152,18 @@ public class UserDetailsServiceImplTest extends AbstractMockitoTest {
     assertEquals(userDetails.getAuthorities(), mappedAuthorities);
   }
 
-  @Test(
-      expectedExceptions = UsernameNotFoundException.class,
-      expectedExceptionsMessageRegExp = "unknown user 'unknownUser'")
-  public void testLoadUserByUsernameUnknownUser() {
+  @Test
+  void testLoadUserByUsernameUnknownUser() {
     String username = "unknownUser";
     @SuppressWarnings("unchecked")
     Query<User> userQuery = mock(Query.class, RETURNS_SELF);
     doReturn(userQuery).when(dataService).query(USER, User.class);
     when(userQuery.eq(USERNAME, username).findOne()).thenReturn(null);
 
-    userDetailsServiceImpl.loadUserByUsername(username);
+    Exception exception =
+        assertThrows(
+            UsernameNotFoundException.class,
+            () -> userDetailsServiceImpl.loadUserByUsername(username));
+    assertThat(exception.getMessage()).containsPattern("unknown user 'unknownUser'");
   }
 }

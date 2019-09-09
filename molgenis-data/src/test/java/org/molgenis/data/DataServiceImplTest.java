@@ -4,26 +4,27 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataServiceImplTest {
+class DataServiceImplTest {
   private final List<String> entityTypeIds = asList("Entity1", "Entity2", "Entity3");
   private Repository<Entity> repo1;
   private Repository<Entity> repo2;
@@ -32,8 +33,8 @@ public class DataServiceImplTest {
   private MetaDataService metaDataService;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     dataService = new DataServiceImpl();
     repo1 = when(mock(Repository.class).getName()).thenReturn("Entity1").getMock();
 
@@ -57,20 +58,20 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void testHasEntityTypeTrue() {
+  void testHasEntityTypeTrue() {
     String entityTypeId = "MyEntityTypeId";
     when(metaDataService.hasEntityType(entityTypeId)).thenReturn(true);
     assertTrue(dataService.hasEntityType(entityTypeId));
   }
 
   @Test
-  public void testHasEntityTypeFalse() {
+  void testHasEntityTypeFalse() {
     String entityTypeId = "MyEntityTypeId";
     assertFalse(dataService.hasEntityType(entityTypeId));
   }
 
   @Test
-  public void testGetEntityType() {
+  void testGetEntityType() {
     String entityTypeId = "MyEntityTypeId";
     EntityType entityType = mock(EntityType.class);
     when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
@@ -78,62 +79,62 @@ public class DataServiceImplTest {
     assertEquals(dataService.getEntityType(entityTypeId), entityType);
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class)
-  public void testGetEntityTypeUnknownEntityType() {
+  @Test
+  void testGetEntityTypeUnknownEntityType() {
     String entityTypeId = "MyEntityTypeId";
     when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.empty());
-    dataService.getEntityType(entityTypeId);
+    assertThrows(UnknownEntityTypeException.class, () -> dataService.getEntityType(entityTypeId));
   }
 
   @Test
-  public void addStream() {
+  void addStream() {
     Stream<Entity> entities = Stream.empty();
     dataService.add("Entity1", entities);
     verify(repo1, times(1)).add(entities);
   }
 
   @Test
-  public void updateStream() {
+  void updateStream() {
     Stream<Entity> entities = Stream.empty();
     dataService.update("Entity1", entities);
     verify(repo1, times(1)).update(entities);
   }
 
   @Test
-  public void deleteStream() {
+  void deleteStream() {
     Stream<Entity> entities = Stream.empty();
     dataService.delete("Entity1", entities);
     verify(repo1, times(1)).delete(entities);
   }
 
   @Test
-  public void deleteAllStream() {
+  void deleteAllStream() {
     Stream<Object> entityIds = Stream.empty();
     dataService.deleteAll("Entity1", entityIds);
     verify(repo1, times(1)).deleteAll(entityIds);
   }
 
   @Test
-  public void getEntityNames() {
+  void getEntityNames() {
     assertEquals(
         dataService.getEntityTypeIds().collect(toList()), asList("Entity1", "Entity2", "Entity3"));
   }
 
   @Test
-  public void hasRepositoryTrue() {
+  void hasRepositoryTrue() {
     String entityTypeId = "MyEntityTypeId";
     when(metaDataService.hasRepository(entityTypeId)).thenReturn(true);
     assertTrue(dataService.hasRepository(entityTypeId));
   }
 
   @Test
-  public void hasRepositoryFalse() {
+  void hasRepositoryFalse() {
     String entityTypeId = "MyEntityTypeId";
     assertFalse(dataService.hasRepository(entityTypeId));
   }
 
   @Test
-  public void getRepository() {
+  void getRepository() {
     String entityTypeId = "MyEntityTypeId";
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
@@ -141,23 +142,23 @@ public class DataServiceImplTest {
     assertEquals(dataService.getRepository(entityTypeId), repository);
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class)
-  public void getRepositoryUnknownEntityType() {
+  @Test
+  void getRepositoryUnknownEntityType() {
     String entityTypeId = "MyEntityTypeId";
     when(metaDataService.getRepository(entityTypeId))
         .thenThrow(new UnknownEntityTypeException(entityTypeId));
-    dataService.getRepository(entityTypeId);
-  }
-
-  @Test(expectedExceptions = UnknownRepositoryException.class)
-  public void getRepositoryUnknownRepository() {
-    String entityTypeId = "MyEntityTypeId";
-    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
-    dataService.getRepository(entityTypeId);
+    assertThrows(UnknownEntityTypeException.class, () -> dataService.getRepository(entityTypeId));
   }
 
   @Test
-  public void findOneStringObjectFetch() {
+  void getRepositoryUnknownRepository() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+    assertThrows(UnknownRepositoryException.class, () -> dataService.getRepository(entityTypeId));
+  }
+
+  @Test
+  void findOneStringObjectFetch() {
     Object id = 0;
     Fetch fetch = new Fetch();
     Entity entity = mock(Entity.class);
@@ -167,7 +168,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findOneStringObjectFetchEntityNull() {
+  void findOneStringObjectFetchEntityNull() {
     Object id = 0;
     Fetch fetch = new Fetch();
     when(repo1.findOneById(id, fetch)).thenReturn(null);
@@ -176,7 +177,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findOneStringObjectFetchClass() {
+  void findOneStringObjectFetchClass() {
     Object id = 0;
     Fetch fetch = new Fetch();
     Class<Entity> clazz = Entity.class;
@@ -189,7 +190,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findOneStringObjectFetchClassEntityNull() {
+  void findOneStringObjectFetchClassEntityNull() {
     Object id = 0;
     Fetch fetch = new Fetch();
     Class<Entity> clazz = Entity.class;
@@ -200,7 +201,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStringStream() {
+  void findAllStringStream() {
     Object id0 = "id0";
     Stream<Object> ids = Stream.of(id0);
     Entity entity0 = mock(Entity.class);
@@ -210,7 +211,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStringStreamClass() {
+  void findAllStringStreamClass() {
     Object id0 = "id0";
     Stream<Object> ids = Stream.of(id0);
     Entity entity0 = mock(Entity.class);
@@ -222,7 +223,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStringStreamFetch() {
+  void findAllStringStreamFetch() {
     Object id0 = "id0";
     Stream<Object> ids = Stream.of(id0);
     Entity entity0 = mock(Entity.class);
@@ -233,7 +234,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStringStreamFetchClass() {
+  void findAllStringStreamFetchClass() {
     Object id0 = "id0";
     Stream<Object> ids = Stream.of(id0);
     Entity entity0 = mock(Entity.class);
@@ -246,7 +247,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStreamString() {
+  void findAllStreamString() {
     Entity entity0 = mock(Entity.class);
     when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = dataService.findAll("Entity1");
@@ -254,7 +255,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStreamStringClass() {
+  void findAllStreamStringClass() {
     Class<Entity> clazz = Entity.class;
     Entity entity0 = mock(Entity.class);
     when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
@@ -264,7 +265,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStreamStringQuery() {
+  void findAllStreamStringQuery() {
     Entity entity0 = mock(Entity.class);
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
@@ -274,7 +275,7 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void findAllStreamStringQueryClass() {
+  void findAllStreamStringQueryClass() {
     Class<Entity> clazz = Entity.class;
     Entity entity0 = mock(Entity.class);
     @SuppressWarnings("unchecked")

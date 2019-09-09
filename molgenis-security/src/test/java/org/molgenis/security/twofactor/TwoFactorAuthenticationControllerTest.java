@@ -1,12 +1,16 @@
 package org.molgenis.security.twofactor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.TwoFactorAuthenticationController.ATTRIBUTE_2FA_SECRET_KEY;
-import static org.testng.Assert.assertEquals;
 
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProviderImpl;
@@ -18,60 +22,57 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.molgenis.settings.AppSettings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = {TwoFactorAuthenticationControllerTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringContextTests {
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SecurityTestExecutionListeners
+class TwoFactorAuthenticationControllerTest {
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";
 
-  @Autowired private AppSettings appSettings;
-  @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
-  @Autowired private TwoFactorAuthenticationController twoFactorAuthenticationController;
-  @Autowired private TwoFactorAuthenticationProvider twoFactorAuthenticationProvider;
-  @Autowired private OtpService otpService;
+  @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;
+  @Mock private TwoFactorAuthenticationProvider twoFactorAuthenticationProvider;
+  @Mock private OtpService otpService;
+  private TwoFactorAuthenticationController twoFactorAuthenticationController;
 
-  @BeforeMethod
-  public void setUp() {
-    Mockito.reset(twoFactorAuthenticationService, otpService, twoFactorAuthenticationProvider);
+  @BeforeEach
+  void setUpBeforeEach() {
+    twoFactorAuthenticationController =
+        new TwoFactorAuthenticationController(
+            twoFactorAuthenticationProvider,
+            twoFactorAuthenticationService,
+            new RecoveryAuthenticationProviderImpl(mock(RecoveryService.class)),
+            otpService);
   }
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void activationExceptionTest() {
+  void activationExceptionTest() {
     when(twoFactorAuthenticationService.generateSecretKey()).thenReturn("secretKey");
-    when(appSettings.getTitle()).thenReturn("MOLGENIS");
     Model model = new ExtendedModelMap();
     String viewTemplate = twoFactorAuthenticationController.activation(model);
     assertEquals(viewTemplate, "view-2fa-activation-modal");
   }
 
   @Test
-  public void configuredExceptionTest() {
+  void configuredExceptionTest() {
     String viewTemplate = twoFactorAuthenticationController.configured();
     assertEquals(viewTemplate, "view-2fa-configured-modal");
   }
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void authenticateExceptionTest() {
+  void authenticateExceptionTest() {
     String secretKey = "secretKey";
     String verificationCode = "123456";
-    when(appSettings.getTitle()).thenReturn("MOLGENIS");
     TwoFactorAuthenticationToken authToken =
         new TwoFactorAuthenticationToken(verificationCode, null);
     when(twoFactorAuthenticationProvider.authenticate(authToken))
@@ -89,7 +90,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
   }
 
   @Test
-  public void validateVerificationCodeAndAuthenticateExceptionTest() {
+  void validateVerificationCodeAndAuthenticateExceptionTest() {
     String verificationCode = "123456";
     Model model = new ExtendedModelMap();
     TwoFactorAuthenticationToken authToken =
@@ -102,7 +103,7 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void testRecoverAccount() {
+  void testRecoverAccount() {
     String recoveryCodeId = "123456";
     Model model = new ExtendedModelMap();
     String viewTemplate = twoFactorAuthenticationController.recoverAccount(model, recoveryCodeId);
@@ -111,25 +112,22 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void activationTest() {
+  void activationTest() {
     Model model = new ExtendedModelMap();
     when(twoFactorAuthenticationService.generateSecretKey()).thenReturn("secret");
-    when(appSettings.getTitle()).thenReturn("TEST MOLGENIS");
     String viewTemplate = twoFactorAuthenticationController.activation(model);
     assertEquals(viewTemplate, "view-2fa-activation-modal");
   }
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void authenticateTest() {
+  void authenticateTest() {
     String secretKey = "secretKey";
     String verificationCode = "123456";
-    when(appSettings.getTitle()).thenReturn("MOLGENIS");
     Model model = new ExtendedModelMap();
     TwoFactorAuthenticationToken authToken =
         new TwoFactorAuthenticationToken(verificationCode, secretKey);
     Authentication authentication = mock(Authentication.class);
-    when(otpService.tryVerificationCode(verificationCode, secretKey)).thenReturn(true);
     when(twoFactorAuthenticationProvider.authenticate(authToken)).thenReturn(authentication);
 
     String viewTemplate =
@@ -140,39 +138,39 @@ public class TwoFactorAuthenticationControllerTest extends AbstractTestNGSpringC
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public TwoFactorAuthenticationService twoFactorAuthenticationService() {
+    TwoFactorAuthenticationService twoFactorAuthenticationService() {
       return mock(TwoFactorAuthenticationServiceImpl.class);
     }
 
     @Bean
-    public OtpService otpService() {
+    OtpService otpService() {
       return mock(OtpService.class);
     }
 
     @Bean
-    public RecoveryService recoveryService() {
+    RecoveryService recoveryService() {
       return mock(RecoveryService.class);
     }
 
     @Bean
-    public TwoFactorAuthenticationProvider twoFactorAuthenticationProvider() {
+    TwoFactorAuthenticationProvider twoFactorAuthenticationProvider() {
       return mock(TwoFactorAuthenticationProvider.class);
     }
 
     @Bean
-    public RecoveryAuthenticationProvider recoveryAuthenticationProvider() {
+    RecoveryAuthenticationProvider recoveryAuthenticationProvider() {
       return new RecoveryAuthenticationProviderImpl(recoveryService());
     }
 
     @Bean
-    public AppSettings appSettings() {
+    AppSettings appSettings() {
       return mock(AppSettings.class);
     }
 
     @Bean
-    public TwoFactorAuthenticationController twoFactorAuthenticationController() {
+    TwoFactorAuthenticationController twoFactorAuthenticationController() {
       return new TwoFactorAuthenticationController(
           twoFactorAuthenticationProvider(),
           twoFactorAuthenticationService(),

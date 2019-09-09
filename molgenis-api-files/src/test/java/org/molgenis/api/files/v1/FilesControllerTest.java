@@ -1,5 +1,9 @@
 package org.molgenis.api.files.v1;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -7,12 +11,12 @@ import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
 import static org.molgenis.data.security.EntityTypePermission.DELETE_DATA;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.files.FilesService;
 import org.molgenis.data.file.model.FileMeta;
@@ -23,26 +27,24 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class FilesControllerTest extends AbstractMockitoTest {
+class FilesControllerTest extends AbstractMockitoTest {
   @Mock private FilesService filesApiService;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
   private FilesController filesApiController;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     filesApiController = new FilesController(filesApiService, userPermissionEvaluator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testFilesApiController() {
-    new FilesController(null, null);
+  @Test
+  void testFilesApiController() {
+    assertThrows(NullPointerException.class, () -> new FilesController(null, null));
   }
 
   @Test
-  public void testCreateFile() throws ExecutionException, InterruptedException {
+  void testCreateFile() throws ExecutionException, InterruptedException {
     when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(FILE_META), ADD_DATA))
         .thenReturn(true);
 
@@ -74,23 +76,28 @@ public class FilesControllerTest extends AbstractMockitoTest {
     assertNotNull(fileResponseResponseEntity.getHeaders().getLocation());
   }
 
-  @Test(expectedExceptions = EntityTypePermissionDeniedException.class)
-  public void testCreateFileNotPermitted() {
+  @Test
+  void testCreateFileNotPermitted() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    filesApiController.createFile(httpServletRequest);
-  }
-
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = "Media type 'multipart/form-data' not supported")
-  public void testCreateFileFromForm() {
-    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-    when(httpServletRequest.getContentType()).thenReturn("multipart/form-data");
-    filesApiController.createFileFromForm(httpServletRequest);
+    assertThrows(
+        EntityTypePermissionDeniedException.class,
+        () -> filesApiController.createFile(httpServletRequest));
   }
 
   @Test
-  public void testReadFile() {
+  void testCreateFileFromForm() {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+    when(httpServletRequest.getContentType()).thenReturn("multipart/form-data");
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> filesApiController.createFileFromForm(httpServletRequest));
+    assertThat(exception.getMessage())
+        .containsPattern("Media type 'multipart/form-data' not supported");
+  }
+
+  @Test
+  void testReadFile() {
     when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(FILE_META), READ_DATA))
         .thenReturn(true);
 
@@ -116,14 +123,15 @@ public class FilesControllerTest extends AbstractMockitoTest {
     assertEquals(fileResponse, expectedFileResponse);
   }
 
-  @Test(expectedExceptions = EntityTypePermissionDeniedException.class)
-  public void testReadFileNotPermitted() {
+  @Test
+  void testReadFileNotPermitted() {
     String fileId = "MyId";
-    filesApiController.readFile(fileId);
+    assertThrows(
+        EntityTypePermissionDeniedException.class, () -> filesApiController.readFile(fileId));
   }
 
   @Test
-  public void testDownloadFile() {
+  void testDownloadFile() {
     when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(FILE_META), READ_DATA))
         .thenReturn(true);
 
@@ -134,14 +142,15 @@ public class FilesControllerTest extends AbstractMockitoTest {
     assertEquals(filesApiController.downloadFile(fileId), responseEntity);
   }
 
-  @Test(expectedExceptions = EntityTypePermissionDeniedException.class)
-  public void testDownloadFileNotPermitted() {
+  @Test
+  void testDownloadFileNotPermitted() {
     String fileId = "MyId";
-    filesApiController.downloadFile(fileId);
+    assertThrows(
+        EntityTypePermissionDeniedException.class, () -> filesApiController.downloadFile(fileId));
   }
 
   @Test
-  public void testDeleteFile() {
+  void testDeleteFile() {
     when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(FILE_META), DELETE_DATA))
         .thenReturn(true);
 
@@ -150,9 +159,10 @@ public class FilesControllerTest extends AbstractMockitoTest {
     verify(filesApiService).delete(fileId);
   }
 
-  @Test(expectedExceptions = EntityTypePermissionDeniedException.class)
-  public void testDeleteFileNotPermitted() {
+  @Test
+  void testDeleteFileNotPermitted() {
     String fileId = "MyId";
-    filesApiController.deleteFile(fileId);
+    assertThrows(
+        EntityTypePermissionDeniedException.class, () -> filesApiController.deleteFile(fileId));
   }
 }

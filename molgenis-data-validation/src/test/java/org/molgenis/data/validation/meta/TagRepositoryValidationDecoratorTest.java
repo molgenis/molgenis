@@ -2,43 +2,45 @@ package org.molgenis.data.validation.meta;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /** Created by Dennis on 11/24/2016. */
-public class TagRepositoryValidationDecoratorTest {
+class TagRepositoryValidationDecoratorTest {
 
   private TagRepositoryValidationDecorator tagRepositoryValidationDecorator;
   private Repository<Tag> delegateRepository;
   private TagValidator tagValidator;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = mock(Repository.class);
     tagValidator = mock(TagValidator.class);
     tagRepositoryValidationDecorator =
         new TagRepositoryValidationDecorator(delegateRepository, tagValidator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void tagRepositoryValidationDecorator() {
-    new TagRepositoryValidationDecorator(null, null);
+  @Test
+  void tagRepositoryValidationDecorator() {
+    assertThrows(
+        NullPointerException.class, () -> new TagRepositoryValidationDecorator(null, null));
   }
 
   @Test
-  public void testUpdateValid() throws Exception {
+  void testUpdateValid() {
     Tag tag = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag);
     tagRepositoryValidationDecorator.update(tag);
@@ -46,15 +48,17 @@ public class TagRepositoryValidationDecoratorTest {
     verify(delegateRepository).update(tag);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testUpdateInvalid() throws Exception {
+  @SuppressWarnings("deprecation")
+  @Test
+  void testUpdateInvalid() {
     Tag tag = mock(Tag.class);
     doThrow(mock(MolgenisValidationException.class)).when(tagValidator).validate(tag);
-    tagRepositoryValidationDecorator.update(tag);
+    assertThrows(
+        MolgenisValidationException.class, () -> tagRepositoryValidationDecorator.update(tag));
   }
 
   @Test
-  public void testAddValid() throws Exception {
+  void testAddValid() {
     Tag tag = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag);
     tagRepositoryValidationDecorator.add(tag);
@@ -62,15 +66,17 @@ public class TagRepositoryValidationDecoratorTest {
     verify(delegateRepository).add(tag);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testAddInValid() throws Exception {
+  @SuppressWarnings("deprecation")
+  @Test
+  void testAddInValid() {
     Tag tag = mock(Tag.class);
     doThrow(mock(MolgenisValidationException.class)).when(tagValidator).validate(tag);
-    tagRepositoryValidationDecorator.add(tag);
+    assertThrows(
+        MolgenisValidationException.class, () -> tagRepositoryValidationDecorator.add(tag));
   }
 
   @Test
-  public void testUpdateStreamValid() throws Exception {
+  void testUpdateStreamValid() {
     Tag tag0 = mock(Tag.class);
     Tag tag1 = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag0);
@@ -84,8 +90,9 @@ public class TagRepositoryValidationDecoratorTest {
     verify(tagValidator).validate(tag1);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testUpdateStreamInvalid() throws Exception {
+  @SuppressWarnings("deprecation")
+  @Test
+  void testUpdateStreamInvalid() {
     Tag tag0 = mock(Tag.class);
     Tag tag1 = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag0);
@@ -94,11 +101,12 @@ public class TagRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(tagCaptor.capture());
-    tagCaptor.getValue().count(); // consume stream
+    assertThrows(
+        MolgenisValidationException.class, () -> tagCaptor.getValue().count()); // consume stream
   }
 
   @Test
-  public void testAddStreamValid() throws Exception {
+  void testAddStreamValid() {
     Tag tag0 = mock(Tag.class);
     Tag tag1 = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag0);
@@ -112,8 +120,8 @@ public class TagRepositoryValidationDecoratorTest {
     verify(tagValidator).validate(tag1);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void testAddStreamInvalid() throws Exception {
+  @Test
+  void testAddStreamInvalid() {
     Tag tag0 = mock(Tag.class);
     Tag tag1 = mock(Tag.class);
     doNothing().when(tagValidator).validate(tag0);
@@ -122,6 +130,7 @@ public class TagRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(tagCaptor.capture());
-    tagCaptor.getValue().count(); // consume stream
+    assertThrows(
+        MolgenisValidationException.class, () -> tagCaptor.getValue().count()); // consume stream
   }
 }

@@ -10,21 +10,21 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.AuthenticationException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AjaxAwareLoginUrlAuthenticationEntryPointTest {
+class AjaxAwareLoginUrlAuthenticationEntryPointTest {
   private AjaxAwareLoginUrlAuthenticationEntryPoint ajaxAwareLoginUrlAuthenticationEntryPoint;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     ajaxAwareLoginUrlAuthenticationEntryPoint =
         new AjaxAwareLoginUrlAuthenticationEntryPoint("/login");
   }
 
   @Test
-  public void testCommencePreflight() throws Exception {
+  void testCommencePreflight() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getMethod()).thenReturn(OPTIONS.toString()).getMock();
     HttpServletResponse response = mock(HttpServletResponse.class);
@@ -34,7 +34,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPointTest {
   }
 
   @Test
-  public void testCommenceRest() throws Exception {
+  void testCommenceRest() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     Enumeration<String> headerValueEnumeration = enumeration(singleton("XMLHttpRequest"));
     when(request.getHeader("X-Requested-With")).thenReturn("XMLHttpRequest");
@@ -46,7 +46,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPointTest {
   }
 
   @Test
-  public void testCommenceOther() throws Exception {
+  void testCommenceOther() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getScheme()).thenReturn("http");
     when(request.getServerName()).thenReturn("molgenis.org");

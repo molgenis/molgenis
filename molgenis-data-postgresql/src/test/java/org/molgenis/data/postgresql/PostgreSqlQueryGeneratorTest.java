@@ -3,6 +3,8 @@ package org.molgenis.data.postgresql;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -31,13 +33,16 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.INCLUDE_DEFAULT_CONSTRAINT;
-import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
@@ -45,18 +50,16 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
-public class PostgreSqlQueryGeneratorTest {
+class PostgreSqlQueryGeneratorTest {
   @Test
-  public void getSqlSetNotNull() {
+  void getSqlSetNotNull() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -68,7 +71,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropNotNull() {
+  void getSqlDropNotNull() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -80,7 +83,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateTable() {
+  void getSqlCreateTable() {
     // ref entity with string id attribute
     Attribute refIdAttrStr = mock(Attribute.class);
     when(refIdAttrStr.getIdentifier()).thenReturn("refIdAttrStrId");
@@ -158,7 +161,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateFunctionValidateUpdate() {
+  void getSqlCreateFunctionValidateUpdate() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -187,7 +190,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropFunctionValidateUpdate() {
+  void getSqlDropFunctionValidateUpdate() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     String expectedSql = "DROP FUNCTION \"validate_update_entityTypeId#c34894ba\"();";
@@ -196,7 +199,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateUpdateTrigger() {
+  void getSqlCreateUpdateTrigger() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
@@ -211,7 +214,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropUpdateTrigger() {
+  void getSqlDropUpdateTrigger() {
     String expectedSql =
         "DROP TRIGGER \"update_trigger_entityTypeId#c34894ba\" ON \"entityTypeId#c34894ba\"";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
@@ -220,7 +223,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateForeignKey() {
+  void getSqlCreateForeignKey() {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
     EntityType refEntityType =
@@ -241,7 +244,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateForeignKeySelfReferencing() {
+  void getSqlCreateForeignKeySelfReferencing() {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -260,7 +263,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropForeignKey() {
+  void getSqlDropForeignKey() {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
     EntityType refEntityType =
@@ -281,7 +284,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateUniqueKey() {
+  void getSqlCreateUniqueKey() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -294,7 +297,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropUniqueKey() {
+  void getSqlDropUniqueKey() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -307,7 +310,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateCheckConstraint() {
+  void getSqlCreateCheckConstraint() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -319,18 +322,20 @@ public class PostgreSqlQueryGeneratorTest {
         "ALTER TABLE \"entityTypeId#c34894ba\" ADD CONSTRAINT \"entityTypeId#c34894ba_attr_chk\" CHECK (\"attr\" IN ('enum0','enum1','enum2'))");
   }
 
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void getSqlCreateCheckConstraintWrongDataType() {
+  @Test
+  void getSqlCreateCheckConstraintWrongDataType() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
-    PostgreSqlQueryGenerator.getSqlCreateCheckConstraint(entityType, attr);
+    assertThrows(
+        MolgenisDataException.class,
+        () -> PostgreSqlQueryGenerator.getSqlCreateCheckConstraint(entityType, attr));
   }
 
   @Test
-  public void getSqlDropCheckConstraint() {
+  void getSqlDropCheckConstraint() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -342,18 +347,20 @@ public class PostgreSqlQueryGeneratorTest {
         "ALTER TABLE \"entityTypeId#c34894ba\" DROP CONSTRAINT \"entityTypeId#c34894ba_attr_chk\"");
   }
 
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void getSqlDropCheckConstraintWrongDataType() {
+  @Test
+  void getSqlDropCheckConstraintWrongDataType() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
-    PostgreSqlQueryGenerator.getSqlDropCheckConstraint(entityType, attr);
+    assertThrows(
+        MolgenisDataException.class,
+        () -> PostgreSqlQueryGenerator.getSqlDropCheckConstraint(entityType, attr));
   }
 
   @Test
-  public void getSqlCreateJunctionTable() {
+  void getSqlCreateJunctionTable() {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
     when(refIdAttr.getDataType()).thenReturn(STRING);
@@ -379,7 +386,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateJunctionTableSelfReferencing() {
+  void getSqlCreateJunctionTableSelfReferencing() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -397,7 +404,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getJunctionTableSelect() {
+  void getJunctionTableSelect() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -412,7 +419,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlInsertJunction() {
+  void getSqlInsertJunction() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -427,7 +434,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlInsertJunctionInversedBy() {
+  void getSqlInsertJunctionInversedBy() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
@@ -443,7 +450,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSelectXref() {
+  void getSqlSelectXref() {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(XREF);
@@ -471,7 +478,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSelectXrefInversed() {
+  void getSqlSelectXrefInversed() {
     Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("refAttr").getMock();
     when(refAttr.getIdentifier()).thenReturn("refAttrId");
     when(refAttr.getDataType()).thenReturn(ONE_TO_MANY);
@@ -503,8 +510,7 @@ public class PostgreSqlQueryGeneratorTest {
     assertEquals(parameters, emptyList());
   }
 
-  @DataProvider(name = "getSqlSelectOneToManyMappedByProvider")
-  public Iterator<Object[]> getSqlSelectOneToManyMappedByProvider() {
+  static Iterator<Object[]> getSqlSelectOneToManyMappedByProvider() {
     List<Object[]> dataList = new ArrayList<>();
     dataList.add(
         new Object[] {
@@ -529,8 +535,9 @@ public class PostgreSqlQueryGeneratorTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "getSqlSelectOneToManyMappedByProvider")
-  public void getSqlSelectOneToManyMappedBy(
+  @ParameterizedTest
+  @MethodSource("getSqlSelectOneToManyMappedByProvider")
+  void getSqlSelectOneToManyMappedBy(
       Query<Entity> query, String expectedSql, List<Object> expectedParameters) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
@@ -572,7 +579,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSelectMref() {
+  void getSqlSelectMref() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("org_molgenis").getMock();
 
     Attribute ref1IdAttr = when(mock(Attribute.class).getName()).thenReturn("ref1Id").getMock();
@@ -620,7 +627,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSortNoSort() {
+  void getSqlSortNoSort() {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -639,7 +646,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSortSortWithUniqueAttribute() {
+  void getSqlSortSortWithUniqueAttribute() {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -665,7 +672,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSortSortWithoutUniqueAttribute() {
+  void getSqlSortSortWithoutUniqueAttribute() {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -692,7 +699,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlSortOnUnselectedMref() {
+  void getSqlSortOnUnselectedMref() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("org_molgenis").getMock();
 
     Attribute ref1IdAttr = when(mock(Attribute.class).getName()).thenReturn("ref1Id").getMock();
@@ -738,8 +745,7 @@ public class PostgreSqlQueryGeneratorTest {
         "SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityTypeId#c34894ba_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"mref1\" ASC, \"masterId\" ASC");
   }
 
-  @DataProvider(name = "getSqlAddColumnProvider")
-  public static Iterator<Object[]> getSqlAddColumnProvider() {
+  static Iterator<Object[]> getSqlAddColumnProvider() {
     // ref entity with string id attribute
     Attribute refIdAttrStr = mock(Attribute.class);
     when(refIdAttrStr.getIdentifier()).thenReturn("refIdAttrId");
@@ -1157,8 +1163,9 @@ public class PostgreSqlQueryGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getSqlAddColumnProvider")
-  public void getSqlAddColumn(
+  @ParameterizedTest
+  @MethodSource("getSqlAddColumnProvider")
+  void getSqlAddColumn(
       AttributeType attrType,
       String defaultValueStr,
       ColumnMode columnMode,
@@ -1184,8 +1191,7 @@ public class PostgreSqlQueryGeneratorTest {
     assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode), sql);
   }
 
-  @DataProvider(name = "getSqlAddColumnInvalidType")
-  public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider() {
+  static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider() {
     return Arrays.asList(
             new Object[] {COMPOUND, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT},
             new Object[] {CATEGORICAL_MREF, ColumnMode.EXCLUDE_DEFAULT_CONSTRAINT},
@@ -1196,16 +1202,19 @@ public class PostgreSqlQueryGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getSqlAddColumnInvalidType", expectedExceptions = RuntimeException.class)
-  public void getSqlAddColumnInvalidType(AttributeType attrType, ColumnMode columnMode) {
+  @ParameterizedTest
+  @MethodSource("getSqlAddColumnInvalidTypeProvider")
+  void getSqlAddColumnInvalidType(AttributeType attrType, ColumnMode columnMode) {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getDataType()).thenReturn(attrType);
-    PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode);
+    assertThrows(
+        IllegalAttributeTypeException.class,
+        () -> PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr, columnMode));
   }
 
   @Test
-  public void getSqlDropColumn() {
+  void getSqlDropColumn() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -1216,7 +1225,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlDropColumnDefault() {
+  void getSqlDropColumnDefault() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -1226,8 +1235,7 @@ public class PostgreSqlQueryGeneratorTest {
         "ALTER TABLE \"entityTypeId#c34894ba\" ALTER COLUMN \"attr\" DROP DEFAULT");
   }
 
-  @DataProvider(name = "generateSqlColumnDefaultConstraint")
-  public static Iterator<Object[]> generateSqlColumnDefaultConstraintProvider() {
+  static Iterator<Object[]> generateSqlColumnDefaultConstraintProvider() {
     return Arrays.asList(
             new Object[] {null, STRING, false},
             new Object[] {null, XREF, false},
@@ -1236,8 +1244,9 @@ public class PostgreSqlQueryGeneratorTest {
         .iterator();
   }
 
-  @Test(dataProvider = "generateSqlColumnDefaultConstraint")
-  public void generateSqlColumnDefaultConstraint(
+  @ParameterizedTest
+  @MethodSource("generateSqlColumnDefaultConstraintProvider")
+  void generateSqlColumnDefaultConstraint(
       String defaultValue, AttributeType attributeType, boolean expectedResult) {
     Attribute attribute = mock(Attribute.class);
     when(attribute.getDefaultValue()).thenReturn(defaultValue);
@@ -1247,7 +1256,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlCreateJunctionTableIndex() {
+  void getSqlCreateJunctionTableIndex() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getId()).thenReturn("entityTypeId");
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
@@ -1261,7 +1270,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlFrom() {
+  void getSqlFrom() {
     Package eric = createPackage("eu_bbmri_eric");
     Attribute collectionsIdAttribute = createIdAttribute("collectionsId");
     EntityType collectionsEntity =
@@ -1296,7 +1305,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void getSqlWhere() {
+  void getSqlWhere() {
     Package eric = createPackage("eu_bbmri_eric");
     Attribute collectionsIdAttribute = createIdAttribute("collectionsId");
     EntityType collectionsEntity =
@@ -1351,7 +1360,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void testGetSqlUpdate() {
+  void testGetSqlUpdate() {
     String idAttributeName = "MyIdAttribute";
     Attribute idAttribute =
         when(mock(Attribute.class).getName()).thenReturn(idAttributeName).getMock();
@@ -1371,7 +1380,7 @@ public class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
-  public void testGetSqlUpdateAttribute() {
+  void testGetSqlUpdateAttribute() {
     String idAttributeName = "MyIdAttribute";
     Attribute idAttribute =
         when(mock(Attribute.class).getName()).thenReturn(idAttributeName).getMock();

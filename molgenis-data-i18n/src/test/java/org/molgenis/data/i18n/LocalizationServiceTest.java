@@ -1,8 +1,10 @@
 package org.molgenis.data.i18n;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doReturn;
@@ -12,8 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.MSGID;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.NAMESPACE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.collections.Lists.newArrayList;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -24,6 +24,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -32,10 +34,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class LocalizationServiceTest extends AbstractMockitoTest {
+class LocalizationServiceTest extends AbstractMockitoTest {
   private static final Locale DUTCH = new Locale("nl");
 
   private LocalizationService localizationService;
@@ -53,13 +53,13 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   @Captor private ArgumentCaptor<Stream<L10nString>> addCaptor;
   @Captor private ArgumentCaptor<Stream<L10nString>> deleteCaptor;
 
-  @BeforeMethod
-  public void setUp() throws Exception {
+  @BeforeEach
+  void setUp() throws Exception {
     localizationService = new LocalizationService(dataService, l10nStringFactory);
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     doReturn("string 1 - nl").when(enPlusNl).getString(DUTCH);
     @SuppressWarnings("unchecked")
     Query<L10nString> query = mock(Query.class, RETURNS_SELF);
@@ -71,7 +71,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetMessages() {
+  void testGetMessages() {
     @SuppressWarnings("unchecked")
     Query<L10nString> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
@@ -87,7 +87,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddMissingMessageIds() {
+  void testAddMissingMessageIds() {
     Set<String> messageIds = ImmutableSet.of("EN_PLUS_NL", "NEW");
     @SuppressWarnings("unchecked")
     Query<L10nString> query = mock(Query.class, RETURNS_SELF);
@@ -107,7 +107,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteNamespace() {
+  void testDeleteNamespace() {
     @SuppressWarnings("unchecked")
     Query<L10nString> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(L10N_STRING, L10nString.class)).thenReturn(query);
@@ -120,7 +120,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testStore() {
+  void testStore() {
     List<L10nString> toAdd = singletonList(newString1);
     List<L10nString> toUpdate = singletonList(enPlusNl);
     localizationService.store(toUpdate, toAdd);
@@ -133,7 +133,7 @@ public class LocalizationServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetAllMessageIds() {
+  void testGetAllMessageIds() {
     when(dataService.findAll(L10N_STRING, L10nString.class))
         .thenReturn(Stream.of(enPlusNl, nlOnly));
     when(enPlusNl.getMessageID()).thenReturn("A");

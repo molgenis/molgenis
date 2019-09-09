@@ -1,6 +1,9 @@
 package org.molgenis.oneclickimporter.service;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -9,9 +12,6 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadLinesFromFile;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadSheetFromFile;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,25 +20,25 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.impl.OneClickImporterServiceImpl;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class OneClickImporterServiceTest {
+class OneClickImporterServiceTest {
   private OneClickImporterService oneClickImporterService;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  void beforeClass() {
     initMocks(this);
     oneClickImporterService = new OneClickImporterServiceImpl();
   }
 
   @Test
-  public void testBuildDataCollectionWithSimpleValidExcelFile()
+  void testBuildDataCollectionWithSimpleValidExcelFile()
       throws IOException, InvalidFormatException, URISyntaxException, EmptySheetException {
     List<Sheet> sheets = loadSheetFromFile(OneClickImporterServiceTest.class, "/simple-valid.xlsx");
     DataCollection actual = oneClickImporterService.buildDataCollectionsFromExcel(sheets).get(0);
@@ -56,7 +56,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataSheetWithValidFormulaFile()
+  void testBuildDataSheetWithValidFormulaFile()
       throws IOException, InvalidFormatException, URISyntaxException, EmptySheetException {
     List<Sheet> sheets =
         loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-formula.xlsx");
@@ -71,7 +71,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataSheetBuildsColumnsOfEqualLength()
+  void testBuildDataSheetBuildsColumnsOfEqualLength()
       throws IOException, InvalidFormatException, URISyntaxException, EmptySheetException {
     List<Sheet> sheets =
         loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-blank-values.xlsx");
@@ -93,7 +93,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataSheetWithComplexFile()
+  void testBuildDataSheetWithComplexFile()
       throws IOException, InvalidFormatException, URISyntaxException, EmptySheetException {
     List<Sheet> sheets =
         loadSheetFromFile(OneClickImporterServiceTest.class, "/complex-valid.xlsx");
@@ -150,7 +150,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataSheetWithDates()
+  void testBuildDataSheetWithDates()
       throws IOException, InvalidFormatException, URISyntaxException, EmptySheetException {
     List<Sheet> sheets =
         loadSheetFromFile(OneClickImporterServiceTest.class, "/valid-with-dates.xlsx");
@@ -178,8 +178,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataCollectionWithSimpleValidCsvFile()
-      throws IOException, URISyntaxException {
+  void testBuildDataCollectionWithSimpleValidCsvFile() throws IOException, URISyntaxException {
 
     oneClickImporterService = new OneClickImporterServiceImpl();
 
@@ -200,8 +199,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testBuildDataCollectionWithComplexValidCsvFile()
-      throws IOException, URISyntaxException {
+  void testBuildDataCollectionWithComplexValidCsvFile() throws IOException, URISyntaxException {
     oneClickImporterService = new OneClickImporterServiceImpl();
 
     List<String[]> lines =
@@ -261,7 +259,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testIsFirstColumnUnique() {
+  void testIsFirstColumnUnique() {
     Column column = Column.create("col", 0, Arrays.asList(1, 2, 3));
     assertTrue(
         oneClickImporterService.hasUniqueValues(column), "should return true for unique int list");
@@ -287,7 +285,7 @@ public class OneClickImporterServiceTest {
   }
 
   @Test
-  public void testCastType() {
+  void testCastType() {
     Object value = 1;
     AttributeType type = INT;
     Object casted = oneClickImporterService.castValueAsAttributeType(value, type);

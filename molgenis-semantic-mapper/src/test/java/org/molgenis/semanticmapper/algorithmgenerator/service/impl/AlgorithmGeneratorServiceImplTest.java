@@ -3,16 +3,19 @@ package org.molgenis.semanticmapper.algorithmgenerator.service.impl;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 import static org.molgenis.script.core.ScriptMetadata.TYPE;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -41,11 +44,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = AlgorithmGeneratorServiceImplTest.Config.class)
-public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest {
+class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -58,14 +59,14 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 
   @Autowired AlgorithmGeneratorService algorithmGeneratorService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
         .thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
   }
 
   @Test
-  public void testGenerateTemplateBasedAlgorithm() {
+  void testGenerateTemplateBasedAlgorithm() {
     EntityType targetEntityType = entityTypeFactory.create("target");
     Attribute targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
     targetBMIAttribute.setLabel("BMI kg/m²");
@@ -122,7 +123,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
   }
 
   @Test
-  public void testConvertUnitsAlgorithm() {
+  void testConvertUnitsAlgorithm() {
     EntityType targetEntityType = entityTypeFactory.create("target");
     Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
     targetAttribute.setLabel("height in m");
@@ -147,49 +148,55 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
     assertEquals(actualAlgorithm, expectedAlgorithm);
   }
 
-  @Test(expectedExceptions = AlgorithmException.class)
-  public void testGenerateListExpressedTargetAttribute() {
+  @Test
+  void testGenerateListExpressedTargetAttribute() {
     Attribute targetAttribute =
         when(mock(Attribute.class).hasExpression()).thenReturn(true).getMock();
     List<Attribute> sourceAttributes = emptyList();
     EntityType targetEntityType = mock(EntityType.class);
     EntityType sourceEntityType = mock(EntityType.class);
-    algorithmGeneratorService.generate(
-        targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+    assertThrows(
+        AlgorithmException.class,
+        () ->
+            algorithmGeneratorService.generate(
+                targetAttribute, sourceAttributes, targetEntityType, sourceEntityType));
   }
 
-  @Test(expectedExceptions = AlgorithmException.class)
-  public void testGenerateMapExpressedTargetAttribute() {
+  @Test
+  void testGenerateMapExpressedTargetAttribute() {
     Attribute targetAttribute =
         when(mock(Attribute.class).hasExpression()).thenReturn(true).getMock();
     Hits<ExplainedAttribute> sourceAttributes = Hits.create();
     EntityType targetEntityType = mock(EntityType.class);
     EntityType sourceEntityType = mock(EntityType.class);
-    algorithmGeneratorService.generate(
-        targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+    assertThrows(
+        AlgorithmException.class,
+        () ->
+            algorithmGeneratorService.generate(
+                targetAttribute, sourceAttributes, targetEntityType, sourceEntityType));
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
     @Bean
-    public UnitResolver unitResolver() {
+    UnitResolver unitResolver() {
       return new UnitResolverImpl(ontologyService());
     }
 
     @Bean
-    public OntologyService ontologyService() {
+    OntologyService ontologyService() {
       return mock(OntologyService.class);
     }
 
     @Bean
-    public AlgorithmTemplateService algorithmTemplateService() {
+    AlgorithmTemplateService algorithmTemplateService() {
       return new AlgorithmTemplateServiceImpl(dataService);
     }
 
     @Bean
-    public AlgorithmGeneratorService algorithmGeneratorService() {
+    AlgorithmGeneratorService algorithmGeneratorService() {
       return new AlgorithmGeneratorServiceImpl(
           dataService, unitResolver(), algorithmTemplateService());
     }

@@ -1,13 +1,16 @@
 package org.molgenis.api.data.v2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
@@ -22,11 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {AttributeFilterToFetchConverterTest.Config.class})
-public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
+class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
   private static final String ID_ATTR_NAME = "attrId";
   private static final String LABEL_ATTR_NAME = "attrLabel";
   private static final String COMPOUND_ATTR_NAME = "attrCompound";
@@ -74,8 +75,8 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   @Autowired private AttributeFactory attributeFactory;
   @Autowired private FileMetaMetadata fileMetaMeta;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     selfRefEntityType = entityTypeFactory.create("SelfRefEntity");
     Attribute selfRefIdAttr = attributeFactory.create().setName("id");
     selfRefEntityType
@@ -150,7 +151,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertNoAttrFilter() {
+  void convertNoAttrFilter() {
     Fetch fetch =
         new Fetch()
             .field(ID_ATTR_NAME)
@@ -168,7 +169,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterIncludeAll() {
+  void convertAttrFilterIncludeAll() {
     AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
     assertEquals(
         AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
@@ -182,7 +183,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterIncludeIdAndLabelAttrs() {
+  void convertAttrFilterIncludeIdAndLabelAttrs() {
     AttributeFilter attrFilter =
         new AttributeFilter().setIncludeIdAttr(true).setIncludeLabelAttr(true);
     assertEquals(
@@ -191,7 +192,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterIncludeAttr() {
+  void convertAttrFilterIncludeAttr() {
     AttributeFilter attrFilter = new AttributeFilter().add(LABEL_ATTR_NAME);
     assertEquals(
         AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
@@ -199,7 +200,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterCompoundAttr() {
+  void convertAttrFilterCompoundAttr() {
     AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
     assertEquals(
         AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
@@ -215,7 +216,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterCompoundAttrPart() {
+  void convertAttrFilterCompoundAttrPart() {
     AttributeFilter attrFilter =
         new AttributeFilter()
             .add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_COMPOUND_ATTR_NAME));
@@ -227,7 +228,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterCompoundPartCompoundAttr() {
+  void convertAttrFilterCompoundPartCompoundAttr() {
     AttributeFilter attrFilter =
         new AttributeFilter()
             .add(
@@ -242,7 +243,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void convertAttrFilterXrefAttr() {
+  void convertAttrFilterXrefAttr() {
     AttributeFilter attrFilter =
         new AttributeFilter().add(XREF_ATTR_NAME, new AttributeFilter().add(REF_ATTR_NAME));
     assertEquals(
@@ -250,14 +251,16 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
         new Fetch().field(XREF_ATTR_NAME, new Fetch().field(REF_ATTR_NAME)));
   }
 
-  @Test(expectedExceptions = UnknownAttributeException.class)
-  public void convertAttrFilterUnknownAttr() {
+  @Test
+  void convertAttrFilterUnknownAttr() {
     AttributeFilter attrFilter = new AttributeFilter().add("unknown");
-    AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en");
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"));
   }
 
   @Test
-  public void createDefaultEntityFetchRefs() {
+  void createDefaultEntityFetchRefs() {
     Fetch fetch =
         new Fetch()
             .field(ID_ATTR_NAME)
@@ -275,25 +278,25 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void createDefaultEntityFetchNoRefs() {
+  void createDefaultEntityFetchNoRefs() {
     assertNull(AttributeFilterToFetchConverter.createDefaultEntityFetch(xrefEntityType, "en"));
   }
 
   @Test
-  public void createDefaultEntityFetchRefAttr() {
+  void createDefaultEntityFetchRefAttr() {
     Fetch fetch = new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME);
     assertEquals(
         AttributeFilterToFetchConverter.createDefaultAttributeFetch(xrefAttr, "en"), fetch);
   }
 
   @Test
-  public void createDefaultAttributeFetchNoRefAttr() {
+  void createDefaultAttributeFetchNoRefAttr() {
     assertNull(AttributeFilterToFetchConverter.createDefaultAttributeFetch(labelAttr, "en"));
   }
 
   /** attrs=~id,selfRef should fetch id, and selfRef(id, label) */
   @Test
-  public void testConvertSelfRefIncludeId() {
+  void testConvertSelfRefIncludeId() {
     AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).add("selfRef");
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
@@ -302,7 +305,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 
   /** attrs=id,selfRef should fetch id, and selfRef(id, label) */
   @Test
-  public void testConvertIdSelfRef() {
+  void testConvertIdSelfRef() {
     AttributeFilter filter = new AttributeFilter().add("id").add("selfRef");
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
@@ -311,7 +314,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 
   /** A Fetch for attrs=~id,selfRef(*) should fetch id and selfRef(id, label, selfRef(id, label)) */
   @Test
-  public void testConvertNestedSelfRef() {
+  void testConvertNestedSelfRef() {
     AttributeFilter filter =
         new AttributeFilter()
             .setIncludeIdAttr(true)
@@ -334,7 +337,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
    * label, selfRef(id, label)))
    */
   @Test
-  public void testConvertDoubleNestedSelfRef() {
+  void testConvertDoubleNestedSelfRef() {
     AttributeFilter filter =
         new AttributeFilter()
             .setIncludeIdAttr(true)
@@ -365,5 +368,5 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 
   @Configuration
   @Import({FileMetaMetadata.class, SecurityPackage.class, RootSystemPackage.class})
-  public static class Config {}
+  static class Config {}
 }

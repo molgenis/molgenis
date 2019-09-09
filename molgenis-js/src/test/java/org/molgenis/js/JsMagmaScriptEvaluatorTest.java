@@ -5,6 +5,8 @@ import static java.time.Instant.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -16,8 +18,6 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -31,16 +31,17 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.script.ScriptException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.js.nashorn.NashornScriptEngine;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class JsMagmaScriptEvaluatorTest {
+class JsMagmaScriptEvaluatorTest {
   private static EntityType personWeightEntityType;
   private static EntityType personHeightEntityType;
   private static EntityType personWeightAndHeightEntityType;
@@ -58,8 +59,8 @@ public class JsMagmaScriptEvaluatorTest {
 
   private static JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
-  @BeforeClass
-  protected static void beforeClass() throws ScriptException, IOException {
+  @BeforeAll
+  static void beforeClass() throws ScriptException, IOException {
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -167,7 +168,7 @@ public class JsMagmaScriptEvaluatorTest {
 
   @SuppressWarnings("UnnecessaryBoxing")
   @Test
-  public void testValueForDateTime() {
+  void testValueForDateTime() {
     Entity person = new DynamicEntity(personLastUpdatedEntityType);
     Instant lastUpdate = Instant.now();
     person.set("lastUpdate", lastUpdate);
@@ -177,7 +178,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForBool() {
+  void testValueForBool() {
     Entity person = new DynamicEntity(personSmokingEntityType);
     person.set("smoking", true);
 
@@ -187,7 +188,7 @@ public class JsMagmaScriptEvaluatorTest {
 
   @SuppressWarnings("UnnecessaryBoxing")
   @Test
-  public void testValueForLong() {
+  void testValueForLong() {
     Entity person = new DynamicEntity(personLongEntityType);
     person.set("long", Long.MAX_VALUE);
 
@@ -196,7 +197,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForXrefDefaultDepth() {
+  void testValueForXrefDefaultDepth() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "1");
     gender.set("label", "male");
@@ -209,7 +210,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForNestedXrefDefaultDepth() {
+  void testValueForNestedXrefDefaultDepth() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "1");
     gender.set("label", "male");
@@ -225,7 +226,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForMref() {
+  void testValueForMref() {
     Entity trait = new DynamicEntity(traitEntityType);
     trait.set("id", "1");
     trait.set("name", "Hello");
@@ -239,7 +240,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForMrefWithComplexAlgorithm() {
+  void testValueForMrefWithComplexAlgorithm() {
     Entity trait = new DynamicEntity(traitEntityType);
     trait.set("id", "1");
     trait.set("name", "Hello");
@@ -257,7 +258,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testValueForMrefWithSimplifiedAlgorithm() {
+  void testValueForMrefWithSimplifiedAlgorithm() {
     Entity trait = new DynamicEntity(traitEntityType);
     trait.set("id", "1");
     trait.set("name", "Hello");
@@ -275,7 +276,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void test$() {
+  void test$() {
     Entity person = new DynamicEntity(personWeightEntityType);
     person.set("weight", 82);
 
@@ -284,7 +285,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testEvalDefaultDepth$() {
+  void testEvalDefaultDepth$() {
     Entity person = new DynamicEntity(personWeightEntityType);
     person.set("weight", 82);
 
@@ -293,7 +294,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testUnitConversion() {
+  void testUnitConversion() {
     Entity person = new DynamicEntity(personWeightEntityType);
     person.set("weight", 82);
 
@@ -304,7 +305,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testAttrValue() {
+  void testAttrValue() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "1");
     gender.set("label", "male");
@@ -317,7 +318,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testCompareIdValue() {
+  void testCompareIdValue() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "1");
     gender.set("label", "male");
@@ -330,7 +331,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void mapSimple() {
+  void mapSimple() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "m");
     gender.set("label", "Male");
@@ -343,7 +344,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void mapDefault() {
+  void mapDefault() {
     Entity gender = new DynamicEntity(genderEntityType);
     gender.set("id", "f");
     gender.set("label", "Female");
@@ -357,7 +358,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void mapNull() {
+  void mapNull() {
     Object result =
         jsMagmaScriptEvaluator.eval(
             "$('gender').map({'20':'2'}, 'B2', 'B3').value()",
@@ -367,7 +368,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testAverageValueOfMultipleNumericAttributes() {
+  void testAverageValueOfMultipleNumericAttributes() {
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -406,7 +407,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGroup() {
+  void testGroup() {
     Entity entity1 = new DynamicEntity(personAgeEntityType);
     entity1.set("age", 29);
 
@@ -431,16 +432,16 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGroupNull() {
+  void testGroupNull() {
     Entity entity4 = new DynamicEntity(personAgeEntityType);
     entity4.set("age", 47);
 
     Object result4 = jsMagmaScriptEvaluator.eval("$('age').group().value();", entity4, 3);
-    assertNull(result4, null);
+    assertNull(result4);
 
     Object result5 =
         jsMagmaScriptEvaluator.eval("$('age').group([56, 18, 35]).value();", entity4, 3);
-    assertNull(result5, null);
+    assertNull(result5);
 
     Object result6 =
         jsMagmaScriptEvaluator.eval(
@@ -449,7 +450,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGroupConstantValue() {
+  void testGroupConstantValue() {
     Entity entity4 = new DynamicEntity(personAgeEntityType);
     entity4.set("age", 47);
 
@@ -462,7 +463,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void combineGroupMapFunctions() {
+  void combineGroupMapFunctions() {
     Entity entity1 = new DynamicEntity(personAgeEntityType);
     entity1.set("age", 29);
 
@@ -515,7 +516,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void combinePlusGroupMapFunctions() {
+  void combinePlusGroupMapFunctions() {
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -545,7 +546,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testPlusValue() {
+  void testPlusValue() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 180);
     Object result = jsMagmaScriptEvaluator.eval("$('height').plus(100).value()", entity0, 3);
@@ -553,7 +554,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testPlusObject() {
+  void testPlusObject() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 180);
     Object result1 =
@@ -562,7 +563,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testPlusNullValue() {
+  void testPlusNullValue() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 180);
     Object result1 = jsMagmaScriptEvaluator.eval("$('height').plus(null).value()", entity0, 3);
@@ -570,7 +571,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testTimes() {
+  void testTimes() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 2);
     Object result = jsMagmaScriptEvaluator.eval("$('height').times(100).value()", entity0, 3);
@@ -578,7 +579,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void div() {
+  void div() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 200);
     Object result = jsMagmaScriptEvaluator.eval("$('height').div(100).value()", entity0, 3);
@@ -586,7 +587,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void pow() {
+  void pow() {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 20);
     Object result = jsMagmaScriptEvaluator.eval("$('height').pow(2).value()", entity0, 3);
@@ -594,7 +595,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testBmi() {
+  void testBmi() {
     Entity person = new DynamicEntity(personWeightAndHeightEntityType);
     person.set("weight", 82);
     person.set("height", 189);
@@ -607,7 +608,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGlucose() {
+  void testGlucose() {
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -629,7 +630,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void age() {
+  void age() {
     Entity person = new DynamicEntity(personBirthDateMeta);
     person.set("birthdate", now().atOffset(UTC).toLocalDate());
     Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
@@ -637,7 +638,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void evalList() {
+  void evalList() {
     Entity person = new DynamicEntity(personWeightAndHeightEntityType);
     person.set("weight", 80);
     person.set("height", 20);
@@ -648,8 +649,9 @@ public class JsMagmaScriptEvaluatorTest {
     assertEquals(result, Arrays.asList(80, 400));
   }
 
-  @Test(enabled = false)
-  public void testPerformance() {
+  @Disabled
+  @Test
+  void testPerformance() {
     Entity person = new DynamicEntity(personBirthDateMeta);
     person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
@@ -670,7 +672,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testNull() {
+  void testNull() {
     Entity person0 = new DynamicEntity(personBirthDateMeta);
     person0.set("birthdate", LocalDate.now());
 
@@ -686,7 +688,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testEq() {
+  void testEq() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", 100);
     String script = "$('weight').eq(100).value()";
@@ -701,7 +703,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testIsValidJson() {
+  void testIsValidJson() {
     Entity person = new DynamicEntity(personWeightEntityType);
     Collection<Object> result =
         jsMagmaScriptEvaluator.eval(
@@ -713,7 +715,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testIsNull() {
+  void testIsNull() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').isNull().value()";
@@ -728,7 +730,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testNot() {
+  void testNot() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').isNull().not().value()";
@@ -743,7 +745,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testOr() {
+  void testOr() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').eq(99).or($('weight').eq(100)).value()";
@@ -768,7 +770,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGt() {
+  void testGt() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').gt(100).value()";
@@ -793,7 +795,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testLt() {
+  void testLt() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').lt(100).value()";
@@ -818,7 +820,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testGe() {
+  void testGe() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').ge(100).value()";
@@ -843,7 +845,7 @@ public class JsMagmaScriptEvaluatorTest {
   }
 
   @Test
-  public void testLe() {
+  void testLe() {
     Entity person0 = new DynamicEntity(personWeightEntityType);
     person0.set("weight", null);
     String script = "$('weight').le(100).value()";

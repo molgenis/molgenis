@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -26,10 +28,8 @@ import org.molgenis.navigator.util.ResourceCollector;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DownloadServiceTest extends AbstractMolgenisSpringTest {
+class DownloadServiceTest extends AbstractMolgenisSpringTest {
 
   @Mock EmxExportService downloadService;
 
@@ -45,13 +45,13 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
 
   @Mock MessageSource messageSource;
 
-  @BeforeMethod
-  public void messageTestBeforeMethod() {
+  @BeforeEach
+  void messageTestBeforeMethod() {
     MessageSourceHolder.setMessageSource(messageSource);
   }
 
   @Test
-  public void testDownload() {
+  void testDownload() {
     doReturn("done")
         .when(messageSource)
         .getMessage(

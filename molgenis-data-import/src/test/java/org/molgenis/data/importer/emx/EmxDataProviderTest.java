@@ -2,17 +2,20 @@ package org.molgenis.data.importer.emx;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
@@ -23,27 +26,25 @@ import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EmxDataProviderTest extends AbstractMockitoTest {
+class EmxDataProviderTest extends AbstractMockitoTest {
   @Mock private EmxImportJob emxImportJob;
 
   @Mock private EntityManager entityManager;
 
   private EmxDataProvider emxDataProvider;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     emxDataProvider = new EmxDataProvider(emxImportJob, entityManager);
   }
 
-  public EmxDataProviderTest() {
+  EmxDataProviderTest() {
     super(Strictness.WARN);
   }
 
   @Test
-  public void testGetEntityTypes() throws Exception {
+  void testGetEntityTypes() {
     ImmutableCollection<EntityType> entityTypes = ImmutableList.of();
     ParsedMetaData parsedMetaData = mock(ParsedMetaData.class);
     when(parsedMetaData.getEntities()).thenReturn(entityTypes).getMock();
@@ -53,7 +54,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasEntitiesTrue() throws Exception {
+  void testHasEntitiesTrue() {
     String entityTypeId = "EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -65,7 +66,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasEntitiesFalse() throws Exception {
+  void testHasEntitiesFalse() {
     String entityTypeId = "EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -77,7 +78,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasEntitiesExistingPackageFalse() throws Exception {
+  void testHasEntitiesExistingPackageFalse() {
     String entityTypeId = "test_EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -90,7 +91,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasEntitiesAlternativeEntityTypeIdTrue() throws Exception {
+  void testHasEntitiesAlternativeEntityTypeIdTrue() {
     String entityTypeId = "base_EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -103,7 +104,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasEntitiesAlternativeEntityTypeIdFalse() throws Exception {
+  void testHasEntitiesAlternativeEntityTypeIdFalse() {
     String entityTypeId = "base_EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -115,7 +116,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetEntities() throws Exception {
+  void testGetEntities() {
     EntityType entityType = mock(EntityType.class);
     RepositoryCollection repositoryCollection = mock(RepositoryCollection.class);
     @SuppressWarnings("unchecked")
@@ -127,7 +128,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetEntitiesAlternativeEntityTypeId() throws Exception {
+  void testGetEntitiesAlternativeEntityTypeId() {
     String entityTypeId = "base_EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -141,8 +142,8 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
     assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
   }
 
-  @Test(expectedExceptions = UnknownRepositoryException.class)
-  public void testGetEntitiesUnknownRepository() throws Exception {
+  @Test
+  void testGetEntitiesUnknownRepository() {
     String entityTypeId = "EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -152,11 +153,13 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
         .getRepository(entityType);
     when(emxImportJob.getSource()).thenReturn(repositoryCollection);
 
-    assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
+    assertThrows(
+        UnknownRepositoryException.class,
+        () -> emxDataProvider.getEntities(entityType).collect(toList()));
   }
 
-  @Test(expectedExceptions = UnknownRepositoryException.class)
-  public void testGetEntitiesAlternativeEntityTypeIdUnknownRepository() throws Exception {
+  @Test
+  void testGetEntitiesAlternativeEntityTypeIdUnknownRepository() {
     String entityTypeId = "base_EntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
@@ -165,6 +168,8 @@ public class EmxDataProviderTest extends AbstractMockitoTest {
         .when(repositoryCollection)
         .getRepository("EntityTypeId");
     when(emxImportJob.getSource()).thenReturn(repositoryCollection);
-    assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
+    assertThrows(
+        UnknownRepositoryException.class,
+        () -> emxDataProvider.getEntities(entityType).collect(toList()));
   }
 }

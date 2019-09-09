@@ -3,31 +3,31 @@ package org.molgenis.security.settings;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AuthenticationSettingsImplTest extends AbstractMockitoTest {
+class AuthenticationSettingsImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   private AuthenticationSettingsImpl authenticationSettingsImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     authenticationSettingsImpl = new AuthenticationSettingsImpl();
     authenticationSettingsImpl.setDataService(dataService);
   }
 
   @Test
-  public void testGetOidcClients() {
+  void testGetOidcClients() {
     Entity entity = mock(Entity.class);
     OidcClient oidcClient = mock(OidcClient.class);
     when(entity.getEntities("oidcClients", OidcClient.class)).thenReturn(singletonList(oidcClient));
@@ -38,14 +38,14 @@ public class AuthenticationSettingsImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetOidcClientsSignUpDisabled() {
+  void testGetOidcClientsSignUpDisabled() {
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("sys_set_auth", "auth")).thenReturn(entity);
     assertEquals(newArrayList(authenticationSettingsImpl.getOidcClients()), emptyList());
   }
 
   @Test
-  public void testGetOidcClientsSignUpModerationEnabled() {
+  void testGetOidcClientsSignUpModerationEnabled() {
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("sys_set_auth", "auth")).thenReturn(entity);
     doReturn(true).when(entity).getBoolean("signup");

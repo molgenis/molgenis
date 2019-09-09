@@ -1,6 +1,7 @@
 package org.molgenis.util.file;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -13,32 +14,32 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.zeroturnaround.zip.commons.FileUtils;
 
-public class ZipFileUtilTest {
+class ZipFileUtilTest {
   private File tempDir;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     tempDir = Files.createTempDir();
   }
 
-  @AfterMethod
-  public void afterMethod() throws IOException {
+  @AfterEach
+  void afterMethod() throws IOException {
     FileUtils.deleteDirectory(tempDir);
   }
 
-  @Test(expectedExceptions = UnzipException.class)
-  public void testUnzipInvalid() {
+  @Test
+  void testUnzipInvalid() {
     InputStream is = ZipFileUtil.class.getResourceAsStream("flip.zip");
-    ZipFileUtil.unzip(is, tempDir);
+    assertThrows(UnzipException.class, () -> ZipFileUtil.unzip(is, tempDir));
   }
 
   @Test
-  public void testUnzip() {
+  void testUnzip() {
     InputStream is = ZipFileUtil.class.getResourceAsStream("emx-csv.zip");
     ZipFileUtil.unzip(is, tempDir);
     Path tempDirPath = tempDir.toPath();
@@ -59,7 +60,7 @@ public class ZipFileUtilTest {
   }
 
   @Test
-  public void testUnzipSkipHidden() throws IOException {
+  void testUnzipSkipHidden() throws IOException {
     InputStream is = ZipFileUtil.class.getResourceAsStream("test.zip");
     Path tempDirPath = tempDir.toPath();
     Path targetPath = tempDirPath.resolve("test.zip");
@@ -73,14 +74,14 @@ public class ZipFileUtilTest {
     assertEquals(md5Hash(visiblePath), "aff776838092862d398b58e380901753");
   }
 
-  @Test(expectedExceptions = UnzipException.class)
-  public void testUnzipSkipHiddenInvalid() throws IOException {
+  @Test
+  void testUnzipSkipHiddenInvalid() throws IOException {
     InputStream is = ZipFileUtil.class.getResourceAsStream("flip.zip");
     Path tempDirPath = tempDir.toPath();
     Path targetPath = tempDirPath.resolve("flip.zip");
     java.nio.file.Files.copy(is, targetPath);
 
-    ZipFileUtil.unzipSkipHidden(targetPath.toFile());
+    assertThrows(UnzipException.class, () -> ZipFileUtil.unzipSkipHidden(targetPath.toFile()));
   }
 
   private String md5Hash(Path path) {

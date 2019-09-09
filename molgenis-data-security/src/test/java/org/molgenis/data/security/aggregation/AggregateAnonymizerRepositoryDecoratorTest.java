@@ -1,27 +1,27 @@
 package org.molgenis.data.security.aggregation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.settings.AppSettings;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AggregateAnonymizerRepositoryDecoratorTest {
+class AggregateAnonymizerRepositoryDecoratorTest {
   private AggregateAnonymizerRepositoryDecorator aggregateAnonymizerRepoDecorator;
   private Repository<Entity> delegateRepository;
   private AggregateAnonymizer aggregateAnonymizer;
   private AppSettings appSettings;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = mock(Repository.class);
     aggregateAnonymizer = mock(AggregateAnonymizer.class);
     appSettings = mock(AppSettings.class);
@@ -31,7 +31,7 @@ public class AggregateAnonymizerRepositoryDecoratorTest {
   }
 
   @Test
-  public void aggregateNoThreshold() throws Exception {
+  void aggregateNoThreshold() throws Exception {
     when(appSettings.getAggregateThreshold()).thenReturn(null);
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
@@ -42,7 +42,7 @@ public class AggregateAnonymizerRepositoryDecoratorTest {
   }
 
   @Test
-  public void aggregateThreshold() throws Exception {
+  void aggregateThreshold() throws Exception {
     int threshold = 10;
     when(appSettings.getAggregateThreshold()).thenReturn(threshold);
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);

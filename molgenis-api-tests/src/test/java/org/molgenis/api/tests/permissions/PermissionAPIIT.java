@@ -1,6 +1,8 @@
 package org.molgenis.api.tests.permissions;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.api.permissions.PermissionsController.OBJECTS;
 import static org.molgenis.api.permissions.PermissionsController.TYPES;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
@@ -11,14 +13,17 @@ import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFileWithoutPackage;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import java.util.Arrays;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.permissions.PermissionsController;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
@@ -27,23 +32,18 @@ import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PermissionAPIIT extends AbstractApiTests {
+class PermissionAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(PermissionAPIIT.class);
   private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
 
-  private String testUserName;
-  private String testUserToken;
-  private String testUserName2;
-  private String adminToken;
+  private static String testUserName;
+  private static String testUserToken;
+  private static String testUserName2;
+  private static String adminToken;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -73,15 +73,15 @@ public class PermissionAPIIT extends AbstractApiTests {
     testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     LOG.info("Importing Test data");
     uploadEmxFileWithoutPackage(adminToken, "/Permissions_TestEMX.xlsx");
     LOG.info("Importing Done");
   }
 
   @Test
-  public void testSetPermissions1() {
+  void testSetPermissions1() {
     /*
      * Create READ permission for test user
      * Get permission to check if it was created succesfully
@@ -161,7 +161,7 @@ public class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testSetPermissionsInherited() {
+  void testSetPermissionsInherited() {
     /*
      * Create READ permission for test user
      * Get permission to check if it was created succesfully
@@ -221,7 +221,7 @@ public class PermissionAPIIT extends AbstractApiTests {
 
   // patch for type (multiple at once) - get for type - delete as admin
   @Test
-  public void testSetPermissions2() {
+  void testSetPermissions2() {
     String create =
         "{objects:[{objectId:perm1_entity2,permissions:[{user:"
             + testUserName
@@ -290,7 +290,7 @@ public class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testCreateAcls() {
+  void testCreateAcls() {
     given()
         .post(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/1")
         .then()
@@ -313,7 +313,7 @@ public class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testEnableRLS() {
+  void testEnableRLS() {
     given()
         .post(PermissionsController.BASE_URI + "/" + TYPES + "/entity-perm2_entity4")
         .then()
@@ -336,7 +336,7 @@ public class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testSuitablePermissions() {
+  void testSuitablePermissions() {
     given()
         .get(PermissionsController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta")
         .then()
@@ -345,7 +345,7 @@ public class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetPermissionsAsUser() {
+  void testGetPermissionsAsUser() {
     /*
      * Create READ permission for test user as admin
      * Get permission as user
@@ -378,13 +378,13 @@ public class PermissionAPIIT extends AbstractApiTests {
         .statusCode(204);
   }
 
-  @AfterMethod(alwaysRun = true)
-  public void afterMethod() {
+  @AfterEach
+  void afterMethod() {
     removePackages(adminToken, Arrays.asList("perm1", "perm2"));
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     cleanupUserToken(testUserToken);
 
     removeRightsForUser(adminToken, testUserName);

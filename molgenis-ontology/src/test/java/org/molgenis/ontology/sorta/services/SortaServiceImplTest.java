@@ -3,6 +3,7 @@ package org.molgenis.ontology.sorta.services;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -16,13 +17,14 @@ import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -52,11 +54,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {SortaServiceImplTest.Config.class})
-public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
+class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   private static final String ONTOLOGY_IRI = "http://www.molgenis.org/";
 
   @Autowired private SortaServiceImpl sortaServiceImpl;
@@ -71,12 +71,12 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
 
   @Autowired private OntologyTermDynamicAnnotationFactory ontologyTermDynamicAnnotationFactory;
 
-  public SortaServiceImplTest() {
+  SortaServiceImplTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     // Mock ontology entity
     Ontology ontology = ontologyFactory.create();
     ontology.setOntologyIri(ONTOLOGY_IRI);
@@ -335,7 +335,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void findOntologyTermEntities() {
+  void findOntologyTermEntities() {
     Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("Name").getMock();
     when(nameAttr.getDataType()).thenReturn(STRING);
     Attribute omimAttr = when(mock(Attribute.class).getName()).thenReturn("OMIM").getMock();
@@ -397,7 +397,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getAllOntologyEntities() {
+  void getAllOntologyEntities() {
     Iterable<Entity> allOntologyEntities = sortaServiceImpl.getAllOntologyEntities();
 
     Iterator<Entity> iterator = allOntologyEntities.iterator();
@@ -412,13 +412,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getOntologyEntity() {
+  void getOntologyEntity() {
     Entity ontologyEntity = sortaServiceImpl.getOntologyEntity(ONTOLOGY_IRI);
     assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI));
   }
 
   @Test
-  public void getOntologyTermEntity() {
+  void getOntologyTermEntity() {
     Entity firstOntologyTermEntity =
         sortaServiceImpl.getOntologyTermEntity(ONTOLOGY_IRI + 1, ONTOLOGY_IRI);
     assertEquals(
@@ -434,20 +434,20 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({OntologyTestConfig.class, OntologyTermHitMetaData.class})
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
-    @Autowired public OntologyTermHitMetaData ontologyTermHitMetaData;
+    @Autowired OntologyTermHitMetaData ontologyTermHitMetaData;
 
     @Autowired private OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
     @Bean
-    public InformationContentService informationContentService() {
+    InformationContentService informationContentService() {
       return mock(InformationContentService.class);
     }
 
     @Bean
-    public SortaServiceImpl sortaServiceImpl() {
+    SortaServiceImpl sortaServiceImpl() {
       return new SortaServiceImpl(
           dataService,
           informationContentService(),

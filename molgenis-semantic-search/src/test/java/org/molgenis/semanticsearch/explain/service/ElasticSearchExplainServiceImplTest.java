@@ -1,8 +1,8 @@
 package org.molgenis.semanticsearch.explain.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,17 +10,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.lucene.search.Explanation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class ElasticSearchExplainServiceImplTest {
+class ElasticSearchExplainServiceImplTest {
   private ElasticSearchExplainService elasticSearchExplainService;
   private ExplainServiceHelper explainServiceHelper;
 
-  @BeforeClass
-  public void setup() {
+  @BeforeEach
+  void setup() {
     explainServiceHelper = new ExplainServiceHelper();
     ElasticsearchService elasticsearchService = mock(ElasticsearchService.class);
     elasticSearchExplainService =
@@ -28,7 +28,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testRegExp() {
+  void testRegExp() {
     String description = "weight(label:high in 328) [PerFieldSimilarity], result of:";
     String actual = explainServiceHelper.getMatchedWord(description);
     assertEquals(actual, "high");
@@ -39,7 +39,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testRemoveBoostFromQuery() {
+  void testRemoveBoostFromQuery() {
     String description = "Measurement^0.5 glucose^0.25 fasting^0.5";
     assertEquals(
         explainServiceHelper.removeBoostFromQuery(description), "Measurement glucose fasting");
@@ -57,7 +57,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testDiscoverMatchedQueries() {
+  void testDiscoverMatchedQueries() {
     Explanation explanation_2 =
         Explanation.match(
             Float.valueOf("3.6267629"),
@@ -87,7 +87,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testRecursivelyFindQuery() {
+  void testRecursivelyFindQuery() {
     Map<String, String> expanedQueryMap = new HashMap<>();
     expanedQueryMap.put("hypertension", "hypertension");
     expanedQueryMap.put("hypertensive disorder", "hypertension");
@@ -106,7 +106,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testReverseSearchQueryStrings() {
+  void testReverseSearchQueryStrings() {
     Explanation explanation_2 =
         Explanation.match(
             Float.valueOf("3.6267629"),
@@ -155,7 +155,7 @@ public class ElasticSearchExplainServiceImplTest {
   }
 
   @Test
-  public void testReverseSearchQueryStringsWithoutExpandedQueryMap() {
+  void testReverseSearchQueryStringsWithoutExpandedQueryMap() {
     Explanation explanation_2 =
         Explanation.match(
             Float.valueOf("3.6267629"),

@@ -8,6 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
@@ -15,11 +18,8 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class BootstrapThemePopulatorTest {
+class BootstrapThemePopulatorTest {
 
   private BootstrapThemePopulator bootstrapThemePopulator;
   private MockitoSession mockitoSession;
@@ -33,31 +33,31 @@ public class BootstrapThemePopulatorTest {
 
   @Mock private StyleSheet mockSheet = mock(StyleSheet.class);
 
-  @BeforeMethod
-  public void initMocks() {
+  @BeforeEach
+  void initMocks() {
     mockitoSession = mockitoSession().initMocks(this).strictness(Strictness.LENIENT).startMocking();
   }
 
-  @AfterMethod
-  public void tearDownAfterMethod() {
+  @AfterEach
+  void tearDownAfterMethod() {
     mockitoSession.finishMocking();
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     bootstrapThemePopulator = new BootstrapThemePopulator(styleService, dataService);
     when(styleRepository.findOneById(ArgumentMatchers.anyString())).thenReturn(mockSheet);
     when(dataService.getRepository(StyleSheetMetadata.STYLE_SHEET)).thenReturn(styleRepository);
   }
 
   @Test
-  public void noNewThemes() throws MolgenisStyleException {
+  void noNewThemes() throws MolgenisStyleException {
     bootstrapThemePopulator.populate();
     verify(styleService, never()).addStyle(any(), any(), any(), any(), any());
   }
 
   @Test
-  public void addNewTheme() throws MolgenisStyleException {
+  void addNewTheme() throws MolgenisStyleException {
     when(styleRepository.findOneById(ArgumentMatchers.eq("bootstrap-yeti.min.css")))
         .thenReturn(null);
     bootstrapThemePopulator.populate();

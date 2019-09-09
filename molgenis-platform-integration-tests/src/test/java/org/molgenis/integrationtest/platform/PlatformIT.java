@@ -8,6 +8,11 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
 import static org.molgenis.data.EntityTestHarness.ATTR_DECIMAL;
 import static org.molgenis.data.EntityTestHarness.ATTR_ENUM;
@@ -22,12 +27,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +37,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySelfXrefTestHarness;
@@ -70,6 +73,7 @@ import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,18 +84,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class PlatformIT extends AbstractTestNGSpringContextTests {
+public class PlatformIT extends AbstractMockitoSpringContextTests {
   private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
   private static final String USERNAME = "platform-user";
@@ -144,8 +142,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeEach
+  public void beforeMethod() {
     refEntityTypeStatic = testHarness.createStaticRefTestEntityType();
     entityTypeStatic = testHarness.createStaticTestEntityType();
     refEntityTypeDynamic = testHarness.createDynamicRefEntityType("PlatformITRefEntityType");
@@ -165,10 +163,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           metaDataService.updateEntityType(selfXrefEntityType);
         });
     waitForWorkToBeFinished(indexService, LOG);
-  }
 
-  @BeforeMethod
-  public void beforeMethod() {
     entityTypeDynamic =
         runAsSystem(
             () ->
@@ -177,21 +172,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
                     .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())));
   }
 
-  @AfterClass
-  public void tearDown() throws InterruptedException {
-    runAsSystem(
-        () -> {
-          entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
-          refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
-          selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
-          metaDataService.deleteEntityType(
-              asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType));
-        });
-    indexService.waitForAllIndicesStable();
-  }
-
-  @AfterMethod
-  public void afterMethod() {
+  @AfterEach
+  public void afterMethod() throws InterruptedException {
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeStatic.getId());
@@ -206,6 +188,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     waitForIndexToBeStable(refEntityTypeDynamic, indexService, LOG);
     waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
     cleanupUserPermissions();
+
+    runAsSystem(
+        () -> {
+          entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
+          refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
+          selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
+          metaDataService.deleteEntityType(
+              asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType));
+        });
+    indexService.waitForAllIndicesStable();
   }
 
   private void addDefaultLanguages() {
@@ -237,7 +229,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testLanguageService() {
     populateUserPermissions();
 
@@ -283,7 +275,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         "label");
 
     assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
-    assertEqualsNoOrder(
+    assertArrayEquals(
         LanguageService.getLanguageCodes().toArray(),
         new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"});
 
@@ -313,7 +305,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testEntityListener() {
     populateUserPermissions();
 
@@ -361,7 +353,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testDeletePackage() {
     populateUserPermissions();
 
@@ -399,7 +391,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testDeletePackageWithOneToMany() {
     populateUserPermissions();
 
@@ -443,7 +435,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testReindexOnEntityTypeUpdate() {
     populateUserPermissions();
 
@@ -482,8 +474,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   /** Test used as a caching benchmark */
+  @Disabled
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, enabled = false)
+  @Test
   public void cachePerformanceTest() {
     populateUserPermissions();
 
@@ -508,7 +501,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testUpdateSingleRefEntityIndexesReferencingEntities() {
     populateUserPermissions();
 
@@ -526,8 +519,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 5);
   }
 
+  @Disabled // FIXME: sys_md_attributes spam
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, enabled = false) // FIXME: sys_md_attributes spam
+  @Test
   public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities() {
     populateUserPermissions();
 
@@ -585,7 +579,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   private void assertNotPresent(Entity entity) {
     // Found in PostgreSQL
-    assertNull(dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
 
     // Not found in index Elasticsearch
     Query<Entity> q = new QueryImpl<>();
@@ -594,7 +589,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testCreateSelfXref() {
     populateUserPermissions();
 
@@ -640,7 +635,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexCreateMetaData() {
     populateUserPermissions();
 
@@ -649,7 +644,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexDeleteMetaData() {
     populateUserPermissions();
 
@@ -658,7 +653,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexUpdateMetaDataUpdateAttribute() {
     populateUserPermissions();
 
@@ -667,7 +662,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexUpdateMetaDataRemoveAttribute() {
     populateUserPermissions();
 
@@ -743,7 +738,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexUpdateMetaDataRemoveCompoundAttribute() {
     populateUserPermissions();
 
@@ -753,7 +748,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   // Derived from fix: https://github.com/molgenis/molgenis/issues/5227
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void testIndexBatchUpdate() {
     populateUserPermissions();
 
@@ -816,7 +811,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true)
+  @Test
   public void storeIndexActions() {
     populateUserPermissions();
 
@@ -841,8 +836,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         });
   }
 
+  @Disabled
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, enabled = false)
+  @Test
   public void testDistinctAggregateQueryManyRows() {
     populateUserPermissions();
 
@@ -857,8 +853,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     assertEquals(result, expectedResult);
   }
 
+  @Disabled
   @WithMockUser(username = USERNAME)
-  @Test(singleThreaded = true, enabled = false)
+  @Test
   public void testAggregateQueryManyRows() {
     populateUserPermissions();
 

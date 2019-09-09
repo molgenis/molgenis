@@ -1,8 +1,8 @@
 package org.molgenis.python;
 
-import static org.testng.Assert.*;
 
-import org.testng.annotations.Test;
+
+
 
 public class PythonScriptExecutorTest {
 

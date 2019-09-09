@@ -1,21 +1,23 @@
 package org.molgenis.security.permission;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.session.HttpSessionCreatedEvent;
 import org.springframework.security.web.session.HttpSessionDestroyedEvent;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SecurityContextRegistryImplTest {
+class SecurityContextRegistryImplTest {
   private SecurityContextRegistryImpl securityContextRegistry;
 
   private String httpSessionWithSecurityContextId;
@@ -23,8 +25,8 @@ public class SecurityContextRegistryImplTest {
   private SecurityContext securityContext;
   private String httpSessionWithoutSecurityContextId;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     securityContextRegistry = new SecurityContextRegistryImpl();
 
     httpSessionWithSecurityContextId = "sessionWithSecurityContext";
@@ -48,22 +50,19 @@ public class SecurityContextRegistryImplTest {
   }
 
   @Test
-  public void testGetSecurityContextFromSessionWithSecurityContext() {
+  void testGetSecurityContextFromSessionWithSecurityContext() {
     assertEquals(
         securityContextRegistry.getSecurityContext(httpSessionWithSecurityContextId),
         securityContext);
   }
 
   @Test
-  public void testGetSecurityContextFromSessionWithoutSecurityContext() {
+  void testGetSecurityContextFromSessionWithoutSecurityContext() {
     assertNull(securityContextRegistry.getSecurityContext(httpSessionWithoutSecurityContextId));
   }
 
-  @Test(
-      expectedExceptions = RuntimeException.class,
-      expectedExceptionsMessageRegExp =
-          "Session attribute 'SPRING_SECURITY_CONTEXT' is of type 'String' instead of 'SecurityContext'")
-  public void testGetSecurityContextFromSessionUnexpectedValue() {
+  @Test
+  void testGetSecurityContextFromSessionUnexpectedValue() {
     String corruptHttpSessionId = "corruptSessionId";
     HttpSession corruptHttpSession =
         when(mock(HttpSession.class).getId()).thenReturn(corruptHttpSessionId).getMock();
@@ -71,11 +70,17 @@ public class SecurityContextRegistryImplTest {
         .thenReturn("corruptSecurityContext");
     securityContextRegistry.handleHttpSessionCreatedEvent(
         new HttpSessionCreatedEvent(corruptHttpSession));
-    assertNull(securityContextRegistry.getSecurityContext(corruptHttpSessionId));
+    Exception exception =
+        assertThrows(
+            RuntimeException.class,
+            () -> securityContextRegistry.getSecurityContext(corruptHttpSessionId));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Session attribute 'SPRING_SECURITY_CONTEXT' is of type 'String' instead of 'SecurityContext'");
   }
 
   @Test
-  public void testGetSecurityContextInvalidatedSession() {
+  void testGetSecurityContextInvalidatedSession() {
     String corruptHttpSessionId = "invalidSessionId";
     HttpSession corruptHttpSession =
         when(mock(HttpSession.class).getId()).thenReturn(corruptHttpSessionId).getMock();
@@ -88,19 +93,19 @@ public class SecurityContextRegistryImplTest {
   }
 
   @Test
-  public void testGetSecurityContextUnknownSessionId() {
+  void testGetSecurityContextUnknownSessionId() {
     assertNull(securityContextRegistry.getSecurityContext("unknownSessionId"));
   }
 
   @Test
-  public void testGetSecurityContexts() {
+  void testGetSecurityContexts() {
     assertEquals(
         securityContextRegistry.getSecurityContexts().collect(Collectors.toList()),
         singletonList(securityContext));
   }
 
   @Test
-  public void testHandleHttpSessionDestroyedEvent() {
+  void testHandleHttpSessionDestroyedEvent() {
     securityContextRegistry.handleHttpSessionDestroyedEvent(
         new HttpSessionDestroyedEvent(httpSessionWithSecurityContext));
   }

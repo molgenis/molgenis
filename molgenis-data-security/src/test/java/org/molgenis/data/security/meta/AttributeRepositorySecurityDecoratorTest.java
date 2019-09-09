@@ -5,6 +5,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -13,13 +16,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -41,18 +44,15 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {AttributeRepositorySecurityDecoratorTest.Config.class})
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class AttributeRepositorySecurityDecoratorTest
-    extends AbstractMockitoTestNGSpringContextTests {
+class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
   private static final String ROLE_SU = "SU";
   private static final String ROLE_SYSTEM = "SYSTEM";
@@ -72,12 +72,12 @@ public class AttributeRepositorySecurityDecoratorTest
   private String attributeId = "SDFSADFSDAF";
   @Captor private ArgumentCaptor<Consumer<List<Attribute>>> consumerCaptor;
 
-  public AttributeRepositorySecurityDecoratorTest() {
+  AttributeRepositorySecurityDecoratorTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(attribute.getEntity()).thenReturn(abstractEntityType);
     when(attribute.getName()).thenReturn("attributeName");
     when(dataService.getMeta()).thenReturn(metadataService);
@@ -95,7 +95,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void countSu() {
+  void countSu() {
     countSuOrSystem();
   }
 
@@ -103,7 +103,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void countSystem() {
+  void countSystem() {
     countSuOrSystem();
   }
 
@@ -115,7 +115,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void countUser() {
+  void countUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -142,7 +142,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void countQuerySu() {
+  void countQuerySu() {
     countQuerySuOrSystem();
   }
 
@@ -150,7 +150,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void countQuerySystem() {
+  void countQuerySystem() {
     countQuerySuOrSystem();
   }
 
@@ -164,7 +164,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void countQueryUser() {
+  void countQueryUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -196,7 +196,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findAllQuerySu() {
+  void findAllQuerySu() {
     findAllQuerySuOrSystem();
   }
 
@@ -204,7 +204,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findAllQuerySystem() {
+  void findAllQuerySystem() {
     findAllQuerySuOrSystem();
   }
 
@@ -219,7 +219,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllQueryUser() {
+  void findAllQueryUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -249,7 +249,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllQueryUserOffsetLimit() {
+  void findAllQueryUserOffsetLimit() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -284,7 +284,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void iteratorSu() {
+  void iteratorSu() {
     iteratorSuOrSystem();
   }
 
@@ -292,7 +292,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void iteratorSystem() {
+  void iteratorSystem() {
     iteratorSuOrSystem();
   }
 
@@ -305,7 +305,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void iteratorUser() {
+  void iteratorUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -332,7 +332,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void forEachBatchedSu() {
+  void forEachBatchedSu() {
     forEachBatchedSuOrSystem();
   }
 
@@ -340,7 +340,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void forEachBatchedSystem() {
+  void forEachBatchedSystem() {
     forEachBatchedSuOrSystem();
   }
 
@@ -354,7 +354,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void forEachBatchedUser() {
+  void forEachBatchedUser() {
     List<Attribute> attributes = newArrayList();
     Attribute attribute1 = mock(Attribute.class);
     Attribute attribute2 = mock(Attribute.class);
@@ -403,7 +403,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findOneQuerySu() {
+  void findOneQuerySu() {
     findOneQuerySuOrSystem();
   }
 
@@ -411,7 +411,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findOneQuerySystem() {
+  void findOneQuerySystem() {
     findOneQuerySuOrSystem();
   }
 
@@ -425,7 +425,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneQueryUserPermissionAllowed() {
+  void findOneQueryUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -442,7 +442,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneQueryUserPermissionDenied() {
+  void findOneQueryUserPermissionDenied() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -461,7 +461,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findOneByIdSu() {
+  void findOneByIdSu() {
     findOneByIdSuOrSystem();
   }
 
@@ -469,7 +469,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findOneByIdSystem() {
+  void findOneByIdSystem() {
     findOneByIdSuOrSystem();
   }
 
@@ -482,7 +482,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdUserPermissionAllowed() {
+  void findOneByIdUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -499,7 +499,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdUserPermissionAllowedAttrInCompoundWithOneAttr() {
+  void findOneByIdUserPermissionAllowedAttrInCompoundWithOneAttr() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -520,7 +520,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdUserPermissionDenied() {
+  void findOneByIdUserPermissionDenied() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -539,7 +539,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findOneByIdFetchSu() {
+  void findOneByIdFetchSu() {
     findOneByIdFetchSuOrSystem();
   }
 
@@ -547,7 +547,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findOneByIdFetchSystem() {
+  void findOneByIdFetchSystem() {
     findOneByIdFetchSuOrSystem();
   }
 
@@ -560,7 +560,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdFetchUserPermissionAllowed() {
+  void findOneByIdFetchUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -578,7 +578,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdFetchUserPermissionDenied() {
+  void findOneByIdFetchUserPermissionDenied() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -598,7 +598,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findAllIdsSu() {
+  void findAllIdsSu() {
     findAllIdsSuOrSystem();
   }
 
@@ -606,7 +606,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findAllIdsSystem() {
+  void findAllIdsSystem() {
     findAllIdsSuOrSystem();
   }
 
@@ -620,7 +620,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllIdsUser() {
+  void findAllIdsUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -648,7 +648,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void findAllIdsFetchSu() {
+  void findAllIdsFetchSu() {
     findAllIdsFetchSuOrSystem();
   }
 
@@ -656,7 +656,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void findAllIdsFetchSystem() {
+  void findAllIdsFetchSystem() {
     findAllIdsFetchSuOrSystem();
   }
 
@@ -671,7 +671,7 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllIdsFetchUser() {
+  void findAllIdsFetchUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -700,7 +700,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void aggregateSu() {
+  void aggregateSu() {
     aggregateSuOrSystem();
   }
 
@@ -708,7 +708,7 @@ public class AttributeRepositorySecurityDecoratorTest
       username = USERNAME,
       roles = {ROLE_SYSTEM})
   @Test
-  public void aggregateSystem() {
+  void aggregateSystem() {
     aggregateSuOrSystem();
   }
 
@@ -721,32 +721,32 @@ public class AttributeRepositorySecurityDecoratorTest
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = MolgenisDataAccessException.class)
-  public void aggregateUser() {
+  @Test
+  void aggregateUser() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
-    repo.aggregate(aggregateQuery);
+    assertThrows(MolgenisDataAccessException.class, () -> repo.aggregate(aggregateQuery));
   }
 
   @Test
-  public void delete() {
+  void delete() {
     String attrName = "attrName";
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     repo.delete(attr);
     verify(delegateRepository).delete(attr);
   }
 
-  @Test(expectedExceptions = SystemMetadataModificationException.class)
-  public void deleteSystemAttribute() {
+  @Test
+  void deleteSystemAttribute() {
     String attrName = "attrName";
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     String attrIdentifier = "id";
     when(attr.getIdentifier()).thenReturn(attrIdentifier);
     when(systemEntityTypeRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(true);
-    repo.delete(attr);
+    assertThrows(SystemMetadataModificationException.class, () -> repo.delete(attr));
   }
 
   @Test
-  public void deleteStream() {
+  void deleteStream() {
     AttributeRepositorySecurityDecorator repoSpy = spy(repo);
     doNothing().when(repoSpy).delete(any(Attribute.class));
     Attribute attr0 = mock(Attribute.class);
@@ -759,12 +759,11 @@ public class AttributeRepositorySecurityDecoratorTest
   @WithMockUser(
       username = USERNAME,
       roles = {ROLE_SU})
-  @Test(expectedExceptions = {SystemMetadataModificationException.class})
-  public void updateSystemEntity() {
+  @Test
+  void updateSystemEntity() {
     Attribute currentAttribute = mock(Attribute.class);
     when(systemEntityTypeRegistry.getSystemAttribute(attributeId)).thenReturn(currentAttribute);
-
-    repo.update(attribute);
+    assertThrows(SystemMetadataModificationException.class, () -> repo.update(attribute));
   }
 
   static class Config {}

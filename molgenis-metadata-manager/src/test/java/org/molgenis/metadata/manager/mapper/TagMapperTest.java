@@ -2,11 +2,14 @@ package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
@@ -14,31 +17,29 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.metadata.manager.model.EditorTagIdentifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TagMapperTest {
+class TagMapperTest {
   @Mock private TagFactory tagFactory;
 
   @Mock private DataService dataService;
 
   private TagMapper tagMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     TagMetadata tagMetadata = mock(TagMetadata.class);
     when(tagFactory.getEntityType()).thenReturn(tagMetadata);
     tagMapper = new TagMapper(tagFactory, dataService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testTagMapper() {
-    new TagMapper(null, null);
+  @Test
+  void testTagMapper() {
+    assertThrows(NullPointerException.class, () -> new TagMapper(null, null));
   }
 
   @Test
-  public void testToTagReferences() {
+  void testToTagReferences() {
     String id0 = "id0";
     String id1 = "id1";
     EditorTagIdentifier tagIdentifier0 = EditorTagIdentifier.create(id0, "label0");
@@ -50,7 +51,7 @@ public class TagMapperTest {
   }
 
   @Test
-  public void testToEditorTags() {
+  void testToEditorTags() {
     String id0 = "id0";
     String label0 = "label0";
     String id1 = "id1";

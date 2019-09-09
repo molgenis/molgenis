@@ -2,18 +2,18 @@ package org.molgenis.web.menu.model;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.util.AutoGson;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MenuTest {
+class MenuTest {
   private Menu menu;
   private Gson gson;
 
@@ -25,8 +25,8 @@ public class MenuTest {
   private Class<? extends MenuItem> menuItemAutoValueClass =
       (Class<? extends MenuItem>) MenuItem.class.getAnnotation(AutoGson.class).autoValueClass();
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     MenuItem p30 = MenuItem.create("p3_0", "lbl");
     MenuItem p31 = MenuItem.create("p3_1", "lbl");
 
@@ -48,12 +48,12 @@ public class MenuTest {
   }
 
   @Test
-  public void testFilterMenuNodeFiltersAllChildren() {
+  void testFilterMenuNodeFiltersAllChildren() {
     assertEquals(menu.filter(it -> false), Optional.of(Menu.create("root", "", emptyList())));
   }
 
   @Test
-  public void getPath() {
+  void getPath() {
     assertEquals(menu.getPath("p1_0"), Optional.of(asList("root/p1_0".split("/"))));
     assertEquals(menu.getPath("p1_1"), Optional.of(asList("root/p1_1".split("/"))));
     assertEquals(menu.getPath("p2_0"), Optional.of(asList("p1_1/p2_0".split("/"))));
@@ -64,7 +64,7 @@ public class MenuTest {
   }
 
   @Test
-  public void toJsonAndBackAgain() {
+  void toJsonAndBackAgain() {
     String json = gson.toJson(menu);
     assertEquals(gson.fromJson(json, menuAutoValueClass), menu);
   }

@@ -1,13 +1,15 @@
 package org.molgenis.beacon.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.config.BeaconDataset;
@@ -22,10 +24,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class BeaconQueryServiceTest {
+class BeaconQueryServiceTest {
   private BeaconQueryService beaconQueryService;
 
   @Mock private DataService dataService;
@@ -38,8 +38,8 @@ public class BeaconQueryServiceTest {
 
   private static final String BEACON_ID = "beacon";
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
 
     dataset1 = mock(BeaconDataset.class, RETURNS_DEEP_STUBS);
@@ -82,7 +82,7 @@ public class BeaconQueryServiceTest {
   }
 
   @Test
-  public void getQueryExistsTest() {
+  void getQueryExistsTest() {
     Beacon beacon = mock(Beacon.class);
     when(beacon.getDataSets()).thenReturn(Lists.newArrayList(dataset1, dataset2));
 
@@ -102,7 +102,7 @@ public class BeaconQueryServiceTest {
   }
 
   @Test
-  public void postQueryExistsTest() {
+  void postQueryExistsTest() {
     Beacon beacon = mock(Beacon.class);
     when(beacon.getDataSets()).thenReturn(Lists.newArrayList(dataset1, dataset2));
 
@@ -122,7 +122,7 @@ public class BeaconQueryServiceTest {
   }
 
   @Test
-  public void queryNotExistsTest() {
+  void queryNotExistsTest() {
     Beacon beacon = mock(Beacon.class);
     when(beacon.getDataSets()).thenReturn(Lists.newArrayList(dataset1, dataset2));
 
@@ -143,7 +143,7 @@ public class BeaconQueryServiceTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  public void queryErrorTest() {
+  void queryErrorTest() {
     MolgenisDataException exception = new MolgenisDataException("Error test");
     when(dataService.findOneById(BeaconMetadata.BEACON, BEACON_ID, Beacon.class))
         .thenThrow(exception);

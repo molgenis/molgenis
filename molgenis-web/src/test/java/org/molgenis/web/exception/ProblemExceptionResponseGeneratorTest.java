@@ -2,14 +2,16 @@ package org.molgenis.web.exception;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.web.exception.ExceptionResponseType.PROBLEM;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.net.URI;
 import javax.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.test.AbstractMockitoTest;
@@ -26,15 +28,13 @@ import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
+class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   @Mock private ContextMessageSource contextMessageSource;
   private ProblemExceptionResponseGenerator problemExceptionResponseGenerator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     problemExceptionResponseGenerator = new ProblemExceptionResponseGenerator(contextMessageSource);
 
     MockHttpServletRequest request = new MockHttpServletRequest();
@@ -42,12 +42,12 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetType() {
+  void testGetType() {
     assertEquals(problemExceptionResponseGenerator.getType(), PROBLEM);
   }
 
   @Test
-  public void testCreateExceptionResponse() {
+  void testCreateExceptionResponse() {
     Exception exception = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
@@ -66,7 +66,7 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateExceptionResponseErrorCoded() {
+  void testCreateExceptionResponseErrorCoded() {
     CodedRuntimeException exception = mock(CodedRuntimeException.class);
     when(exception.getErrorCode()).thenReturn("A1");
     when(exception.getLocalizedMessage()).thenReturn("message always exposed");
@@ -89,7 +89,7 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateExceptionResponseDevEnvironment() {
+  void testCreateExceptionResponseDevEnvironment() {
     Exception exception = mock(Exception.class);
     when(exception.getLocalizedMessage()).thenReturn("message only exposed in dev environment");
     when(exception.getStackTrace())
@@ -116,7 +116,7 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateExceptionResponseInputInvalidObjectErrorCoded() {
+  void testCreateExceptionResponseInputInvalidObjectErrorCoded() {
     String errorCode = "MYERR01";
     String errorMessage = "My error message";
 
@@ -145,7 +145,7 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateExceptionResponseInputInvalidObjectErrorConstraintViolation() {
+  void testCreateExceptionResponseInputInvalidObjectErrorConstraintViolation() {
     String errorMessage = "My error message";
 
     ConstraintViolation constraintViolation = mock(ConstraintViolation.class);
@@ -174,7 +174,7 @@ public class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateExceptionResponseInputInvalidFieldErrorCoded() {
+  void testCreateExceptionResponseInputInvalidFieldErrorCoded() {
     String errorCode = "MYERR01";
     String errorMessage = "My error message";
 

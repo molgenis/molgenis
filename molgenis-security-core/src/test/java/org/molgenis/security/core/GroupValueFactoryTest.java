@@ -1,19 +1,20 @@
 package org.molgenis.security.core;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 public class GroupValueFactoryTest {
   private GroupValueFactory groupValueFactory = new GroupValueFactory();
 
   @Test
-  public void testCreateGroup() {
+  void testCreateGroup() {
     GroupValue bbmri_eric =
         groupValueFactory.createGroup(
             "bbmri-eric",
@@ -69,13 +70,13 @@ public class GroupValueFactoryTest {
     return expectedBuilder.build();
   }
 
-  @Test(dataProvider = "roleNameProvider")
-  public void testCreateRoleName(String groupName, String roleLabel, String roleName) {
+  @ParameterizedTest
+  @MethodSource("roleNameProvider")
+  void testCreateRoleName(String groupName, String roleLabel, String roleName) {
     assertEquals(GroupValueFactory.createRoleName(groupName, roleLabel), roleName);
   }
 
-  @DataProvider(name = "roleNameProvider")
-  public Object[][] roleNameProvider() {
+  static Object[][] roleNameProvider() {
     return new Object[][] {
       new Object[] {"bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER"},
       new Object[] {"bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER"},

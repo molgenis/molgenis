@@ -1,7 +1,8 @@
 package org.molgenis.api.permissions.rsql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.*;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
@@ -10,28 +11,28 @@ import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import java.util.Arrays;
 import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.permissions.exceptions.rsql.UnsupportedPermissionQueryOperatorException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PermissionRsqlVisitorTest {
+class PermissionRsqlVisitorTest {
 
   private PermissionRsqlVisitor visitor;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     visitor = new PermissionRsqlVisitor();
   }
 
-  @Test(expectedExceptions = UnsupportedPermissionQueryOperatorException.class)
-  public void testVisitAnd() {
+  @Test
+  void testVisitAnd() {
     Node node = mock(Node.class);
     AndNode andNode = new AndNode(Arrays.asList(node, node));
-    visitor.visit(andNode);
+    assertThrows(UnsupportedPermissionQueryOperatorException.class, () -> visitor.visit(andNode));
   }
 
   @Test
-  public void testVisit() {
+  void testVisit() {
     ComparisonNode comparisonNode =
         new ComparisonNode(
             new ComparisonOperator("=="), "user", Collections.singletonList("user1"));
@@ -41,7 +42,7 @@ public class PermissionRsqlVisitorTest {
   }
 
   @Test
-  public void testVisit2() {
+  void testVisit2() {
     ComparisonNode comparisonNode =
         new ComparisonNode(
             new ComparisonOperator("=in=", true), "role", Arrays.asList("role1", "role2"));
@@ -51,7 +52,7 @@ public class PermissionRsqlVisitorTest {
   }
 
   @Test
-  public void testVisitOr() {
+  void testVisitOr() {
     ComparisonNode comparisonNodeUser =
         new ComparisonNode(
             new ComparisonOperator("=="), "user", Collections.singletonList("user1"));

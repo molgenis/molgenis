@@ -2,19 +2,24 @@ package org.molgenis.core.ui.admin.user;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -23,40 +28,42 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.ui.Model;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.springframework.web.servlet.LocaleResolver;
 
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-@ContextConfiguration(classes = UserAccountControllerTestConfig.class)
-public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContextTests {
-  @Autowired private UserAccountControllerTestConfig config;
-  @Autowired private UserAccountService userAccountService;
-  @Autowired private RecoveryService recoveryService;
-  @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
-  @Autowired private AuthenticationSettings authenticationSettings;
-  @Autowired private UserAccountController userAccountController;
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SecurityTestExecutionListeners
+class UserAccountControllerTest {
+  @Mock private UserAccountService userAccountService;
+  @Mock private RecoveryService recoveryService;
+  @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;
+  @Mock private AuthenticationSettings authenticationSettings;
+  @Mock private LocaleResolver localeResolver;
+  private UserAccountController userAccountController;
+
   @Mock private Model model;
   @Mock private User user;
 
-  @BeforeMethod
-  public void setUp() {
-    config.resetMocks();
-    MockitoAnnotations.initMocks(this);
+  @BeforeEach
+  void setUp() {
+    userAccountController =
+        new UserAccountController(
+            userAccountService,
+            recoveryService,
+            twoFactorAuthenticationService,
+            authenticationSettings,
+            localeResolver);
   }
 
   @Test
-  public void testShowAccountWithCodes() {
+  void testShowAccountWithCodes() {
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENABLED);
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isTwoFactorAuthentication()).thenReturn(true);
@@ -72,20 +79,21 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
     verifyNoMoreInteractions(model);
   }
 
-  @Test(
-      expectedExceptions = MolgenisUserException.class,
-      expectedExceptionsMessageRegExp = "Please enter old password to update your password.")
-  public void testUpdateAccountNoOldPassword() {
+  @Test
+  void testUpdateAccountNoOldPassword() {
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
     accountUpdateRequest.setNewpwd("abc");
 
-    userAccountController.updateAccount(accountUpdateRequest);
+    Exception exception =
+        assertThrows(
+            MolgenisUserException.class,
+            () -> userAccountController.updateAccount(accountUpdateRequest));
+    assertThat(exception.getMessage())
+        .containsPattern("Please enter old password to update your password.");
   }
 
-  @Test(
-      expectedExceptions = MolgenisUserException.class,
-      expectedExceptionsMessageRegExp = "The password you entered is incorrect.")
-  public void testUpdateAccountOldPasswordIncorrect() {
+  @Test
+  void testUpdateAccountOldPasswordIncorrect() {
     when(userAccountService.validateCurrentUserPassword("incorrect")).thenReturn(false);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -93,13 +101,15 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
     accountUpdateRequest.setNewpwd("new");
     accountUpdateRequest.setNewpwd2("new");
 
-    userAccountController.updateAccount(accountUpdateRequest);
+    Exception exception =
+        assertThrows(
+            MolgenisUserException.class,
+            () -> userAccountController.updateAccount(accountUpdateRequest));
+    assertThat(exception.getMessage()).containsPattern("The password you entered is incorrect.");
   }
 
-  @Test(
-      expectedExceptions = MolgenisUserException.class,
-      expectedExceptionsMessageRegExp = "'New password' does not match 'Repeat new password'.")
-  public void testUpdateAccountNonMatchingNewPasswords() {
+  @Test
+  void testUpdateAccountNonMatchingNewPasswords() {
     when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -107,13 +117,16 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
     accountUpdateRequest.setNewpwd("abc");
     accountUpdateRequest.setNewpwd2("different");
 
-    userAccountController.updateAccount(accountUpdateRequest);
+    Exception exception =
+        assertThrows(
+            MolgenisUserException.class,
+            () -> userAccountController.updateAccount(accountUpdateRequest));
+    assertThat(exception.getMessage())
+        .containsPattern("'New password' does not match 'Repeat new password'.");
   }
 
-  @Test(
-      expectedExceptions = MolgenisUserException.class,
-      expectedExceptionsMessageRegExp = "New password must consist of at least 6 characters.")
-  public void testUpdateAccountNewPasswordTooShort() {
+  @Test
+  void testUpdateAccountNewPasswordTooShort() {
     when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -121,11 +134,16 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
     accountUpdateRequest.setNewpwd("abc");
     accountUpdateRequest.setNewpwd2("abc");
 
-    userAccountController.updateAccount(accountUpdateRequest);
+    Exception exception =
+        assertThrows(
+            MolgenisUserException.class,
+            () -> userAccountController.updateAccount(accountUpdateRequest));
+    assertThat(exception.getMessage())
+        .containsPattern("New password must consist of at least 6 characters.");
   }
 
   @Test
-  public void testUpdateAccountUpdatesPassword() {
+  void testUpdateAccountUpdatesPassword() {
     when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -142,7 +160,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testUpdateAccountAddressFields() {
+  void testUpdateAccountAddressFields() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -160,7 +178,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testUpdateAccountNameFields() {
+  void testUpdateAccountNameFields() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -180,7 +198,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testUpdateAccountWorkFields() {
+  void testUpdateAccountWorkFields() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
@@ -205,13 +223,13 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testEnableTwoFactorAuthentication() {
+  void testEnableTwoFactorAuthentication() {
     assertEquals(userAccountController.enableTwoFactorAuthentication(), "redirect:/2fa/activation");
   }
 
   @Test
   @WithMockUser
-  public void testDisableTwoFactorAuthentication() {
+  void testDisableTwoFactorAuthentication() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isTwoFactorAuthentication()).thenReturn(false);
     assertEquals(userAccountController.disableTwoFactorAuthentication(model), "view-useraccount");
@@ -229,13 +247,13 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testResetTwoFactorAuthentication() {
+  void testResetTwoFactorAuthentication() {
     assertEquals(userAccountController.resetTwoFactorAuthentication(), "redirect:/2fa/activation");
     verify(twoFactorAuthenticationService).resetSecretForUser();
   }
 
   @Test
-  public void testGetRecoveryCodes() {
+  void testGetRecoveryCodes() {
     RecoveryCode code1 = mock(RecoveryCode.class);
     when(code1.getCode()).thenReturn("code1");
     RecoveryCode code2 = mock(RecoveryCode.class);
@@ -247,7 +265,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   }
 
   @Test
-  public void testGenerateRecoveryCodes() {
+  void testGenerateRecoveryCodes() {
     RecoveryCode code1 = mock(RecoveryCode.class);
     when(code1.getCode()).thenReturn("code1");
     RecoveryCode code2 = mock(RecoveryCode.class);

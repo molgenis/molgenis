@@ -1,9 +1,9 @@
 package org.molgenis.security.freemarker;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Maps;
 import freemarker.core.Environment;
@@ -14,20 +14,20 @@ import freemarker.template.TemplateModel;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class HasPermissionDirectiveTest {
+class HasPermissionDirectiveTest {
   private HasPermissionDirective directive;
   private UserPermissionEvaluator permissionService;
   private StringWriter envWriter;
   private Template fakeTemplate;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     permissionService = mock(UserPermissionEvaluator.class);
     directive = new HasPermissionDirective(permissionService);
     envWriter = new StringWriter();
@@ -37,7 +37,7 @@ public class HasPermissionDirectiveTest {
   }
 
   @Test
-  public void executeWithPermission() throws TemplateException, IOException {
+  void executeWithPermission() throws TemplateException, IOException {
     when(permissionService.hasPermission(
             new EntityTypeIdentity("entity"), newArrayList(EntityTypePermission.COUNT_DATA)))
         .thenReturn(true);
@@ -56,7 +56,7 @@ public class HasPermissionDirectiveTest {
   }
 
   @Test
-  public void executeWithoutPermission() throws TemplateException, IOException {
+  void executeWithoutPermission() throws TemplateException, IOException {
     when(permissionService.hasPermission(
             new EntityTypeIdentity("entity"), EntityTypePermission.UPDATE_DATA))
         .thenReturn(false);

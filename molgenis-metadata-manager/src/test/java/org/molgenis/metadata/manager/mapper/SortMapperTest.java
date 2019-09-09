@@ -1,28 +1,28 @@
 package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.of;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Sort;
 import org.molgenis.metadata.manager.model.EditorOrder;
 import org.molgenis.metadata.manager.model.EditorSort;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SortMapperTest {
+class SortMapperTest {
   private SortMapper sortMapper;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     sortMapper = new SortMapper();
   }
 
   @Test
-  public void testToSort() {
+  void testToSort() {
     String attributeName = "attr";
     String direction = Sort.Direction.DESC.name();
     EditorSort editorSort = EditorSort.create(of(EditorOrder.create(attributeName, direction)));
@@ -36,12 +36,12 @@ public class SortMapperTest {
   }
 
   @Test
-  public void testToSortNull() {
+  void testToSortNull() {
     assertNull(sortMapper.toSort(null));
   }
 
   @Test
-  public void testToEditorSort() {
+  void testToEditorSort() {
     String attr = "attr";
     Sort sort = new Sort(of(new Sort.Order(attr, Sort.Direction.ASC)));
     EditorSort editorSort = sortMapper.toEditorSort(sort);
@@ -49,7 +49,7 @@ public class SortMapperTest {
   }
 
   @Test
-  public void testToEditorSortNull() {
+  void testToEditorSortNull() {
     assertNull(sortMapper.toEditorSort(null));
   }
 }

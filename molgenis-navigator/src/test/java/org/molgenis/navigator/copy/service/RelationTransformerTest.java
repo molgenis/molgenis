@@ -15,15 +15,15 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.testng.annotations.Test;
 
-public class RelationTransformerTest {
+class RelationTransformerTest {
 
   @Test
-  public void testTransformPackageEmptyMap() {
+  void testTransformPackageEmptyMap() {
     EntityType entityType = mock(EntityType.class);
 
     RelationTransformer.transformPackage(entityType, emptyMap());
@@ -33,7 +33,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testTransformPackage() {
+  void testTransformPackage() {
     EntityType entityType = mock(EntityType.class, RETURNS_DEEP_STUBS);
     when(entityType.getPackage().getId()).thenReturn("oldPackage");
     Package newPackage = mock(Package.class);
@@ -46,7 +46,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testTransformPackageNoChange() {
+  void testTransformPackageNoChange() {
     EntityType entityType = mock(EntityType.class, RETURNS_DEEP_STUBS);
     when(entityType.getPackage().getId()).thenReturn("oldPackage");
     Package newPackage = mock(Package.class);
@@ -58,7 +58,7 @@ public class RelationTransformerTest {
   }
 
   @Test
-  public void testTransformExtendsEmptyMap() {
+  void testTransformExtendsEmptyMap() {
     EntityType entityType = mock(EntityType.class);
 
     RelationTransformer.transformExtends(entityType, emptyMap());
@@ -68,7 +68,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testTransformExtends() {
+  void testTransformExtends() {
     EntityType entityType = mock(EntityType.class, RETURNS_DEEP_STUBS);
     when(entityType.getExtends().getId()).thenReturn("oldExtends");
     EntityType newExtends = mock(EntityType.class);
@@ -81,7 +81,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testTransformExtendsNoChange() {
+  void testTransformExtendsNoChange() {
     EntityType entityType = mock(EntityType.class, RETURNS_DEEP_STUBS);
     when(entityType.getExtends().getId()).thenReturn("oldExtends");
     EntityType newExtends = mock(EntityType.class);
@@ -93,7 +93,7 @@ public class RelationTransformerTest {
   }
 
   @Test
-  public void testTransformRefEntitiesEmptyMap() {
+  void testTransformRefEntitiesEmptyMap() {
     EntityType entityType = mock(EntityType.class);
 
     RelationTransformer.transformRefEntities(entityType, emptyMap());
@@ -103,7 +103,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings("ConstantConditions")
   @Test
-  public void testTransformRefEntity() {
+  void testTransformRefEntity() {
     EntityType entityType = mock(EntityType.class);
     Attribute refAttr1 = mock(Attribute.class, RETURNS_DEEP_STUBS);
     Attribute refAttr2 = mock(Attribute.class, RETURNS_DEEP_STUBS);
@@ -131,7 +131,7 @@ public class RelationTransformerTest {
   }
 
   @Test
-  public void testTransformMappedBysEmptyMap() {
+  void testTransformMappedBysEmptyMap() {
     EntityType entityType = mock(EntityType.class);
 
     RelationTransformer.transformMappedBys(entityType, emptyMap());
@@ -141,7 +141,7 @@ public class RelationTransformerTest {
 
   @SuppressWarnings({"ConstantConditions", "unchecked"})
   @Test
-  public void testTransformMappedBy() {
+  void testTransformMappedBy() {
     EntityType entityType = mock(EntityType.class);
     Attribute refAttr1 = mock(Attribute.class, RETURNS_DEEP_STUBS);
     Attribute refAttr2 = mock(Attribute.class, RETURNS_DEEP_STUBS);

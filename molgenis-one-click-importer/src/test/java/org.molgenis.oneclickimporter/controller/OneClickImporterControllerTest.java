@@ -19,6 +19,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Locale;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.file.FileStore;
@@ -29,7 +31,7 @@ import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +44,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
   private static final String CONTENT_TYPE_EXCEL =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   private MockMvc mockMvc;
@@ -68,12 +68,12 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 
   @Mock private JobExecutor jobExecutor;
 
-  public OneClickImporterControllerTest() {
+  OneClickImporterControllerTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void before() {
+  @BeforeEach
+  void before() {
     OneClickImporterController oneClickImporterController =
         new OneClickImporterController(
             menuReaderService,
@@ -111,7 +111,7 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 
   /** Test that a get call to the plugin returns the correct view */
   @Test
-  public void testInit() throws Exception {
+  void testInit() throws Exception {
     mockMvc
         .perform(get(OneClickImporterController.URI))
         .andExpect(status().isOk())
@@ -122,7 +122,7 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
   }
 
   @Test
-  public void testUpload() throws Exception {
+  void testUpload() throws Exception {
     MockMultipartFile multipartFile =
         getTestMultipartFile("/simple-valid.xlsx", CONTENT_TYPE_EXCEL);
 

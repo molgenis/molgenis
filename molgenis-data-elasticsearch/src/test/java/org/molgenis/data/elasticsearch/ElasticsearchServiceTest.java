@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZE;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
@@ -22,10 +24,8 @@ import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ElasticsearchServiceTest extends AbstractMockitoTest {
+class ElasticsearchServiceTest extends AbstractMockitoTest {
   private ElasticsearchService elasticsearchService;
 
   @Mock private ClientFacade clientFacade;
@@ -36,18 +36,18 @@ public class ElasticsearchServiceTest extends AbstractMockitoTest {
 
   @Mock private EntityType entityType;
 
-  public ElasticsearchServiceTest() {
+  ElasticsearchServiceTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     elasticsearchService = new ElasticsearchService(clientFacade, contentGenerators, dataService);
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testBatchingSearchPageSizeZero() {
+  void testBatchingSearchPageSizeZero() {
     QueryImpl<Entity> query = mock(QueryImpl.class);
     when(query.getPageSize()).thenReturn(0);
     when(query.getOffset()).thenReturn(0);
@@ -73,7 +73,7 @@ public class ElasticsearchServiceTest extends AbstractMockitoTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testSingleBatchSearch() {
+  void testSingleBatchSearch() {
     QueryImpl<Entity> query = mock(QueryImpl.class);
     when(query.getPageSize()).thenReturn(50);
     when(query.getOffset()).thenReturn(20);
@@ -91,7 +91,7 @@ public class ElasticsearchServiceTest extends AbstractMockitoTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testBatchingSearchPageSizeLargerThanMax() {
+  void testBatchingSearchPageSizeLargerThanMax() {
     QueryImpl<Entity> query = mock(QueryImpl.class);
     when(query.getPageSize()).thenReturn(10001);
     when(query.getOffset()).thenReturn(5000);

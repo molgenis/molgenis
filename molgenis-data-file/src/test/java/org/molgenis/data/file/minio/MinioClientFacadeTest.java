@@ -1,9 +1,9 @@
 package org.molgenis.data.file.minio;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import io.minio.MinioClient;
 import io.minio.ObjectStat;
@@ -17,25 +17,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class MinioClientFacadeTest extends AbstractMockitoTest {
+class MinioClientFacadeTest extends AbstractMockitoTest {
   @Mock private MinioClient minioClient;
   private String bucketName;
   private MinioClientFacade minioClientFacade;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     bucketName = "molgenis";
     minioClientFacade = new MinioClientFacade(minioClient, bucketName);
   }
 
   @Test
-  public void testPutObject()
+  void testPutObject()
       throws IOException, XmlPullParserException, NoSuchAlgorithmException, InvalidKeyException,
           InvalidArgumentException, InternalException, NoResponseException,
           InvalidBucketNameException, InsufficientDataException, ErrorResponseException {
@@ -47,7 +47,7 @@ public class MinioClientFacadeTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testStatObject()
+  void testStatObject()
       throws IOException, InvalidKeyException, NoSuchAlgorithmException, InsufficientDataException,
           InternalException, NoResponseException, InvalidBucketNameException,
           XmlPullParserException, ErrorResponseException {
@@ -58,7 +58,7 @@ public class MinioClientFacadeTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRemoveObject()
+  void testRemoveObject()
       throws IOException, InvalidKeyException, NoSuchAlgorithmException, InsufficientDataException,
           InvalidArgumentException, InternalException, NoResponseException,
           InvalidBucketNameException, XmlPullParserException, ErrorResponseException {
@@ -68,7 +68,7 @@ public class MinioClientFacadeTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetObject()
+  void testGetObject()
       throws IOException, InvalidKeyException, NoSuchAlgorithmException, InsufficientDataException,
           InvalidArgumentException, InternalException, NoResponseException,
           InvalidBucketNameException, XmlPullParserException, ErrorResponseException {

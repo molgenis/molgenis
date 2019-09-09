@@ -2,6 +2,7 @@ package org.molgenis.data.meta.system;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -10,9 +11,10 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -24,10 +26,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SystemEntityTypePersisterTest extends AbstractMockitoTest {
+class SystemEntityTypePersisterTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private SystemEntityTypeRegistry systemEntityTypeRegistry;
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
@@ -38,8 +38,8 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest {
 
   @Mock private MetaDataService metaDataService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     systemEntityTypePersister =
         new SystemEntityTypePersister(
             dataService,
@@ -50,7 +50,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void removeNonExistingSystemEntities() {
+  void removeNonExistingSystemEntities() {
     when(dataService.getMeta()).thenReturn(metaDataService);
     Package systemPackage = mock(Package.class);
     when(systemPackage.getId()).thenReturn(PACKAGE_SYSTEM);
@@ -79,7 +79,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void persistSystemPackageChange() {
+  void persistSystemPackageChange() {
     RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
     when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
     when(dataService.getMeta()).thenReturn(metaDataService);
@@ -111,7 +111,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest {
   // regression test for https://github.com/molgenis/molgenis/issues/5168
   @SuppressWarnings("unchecked")
   @Test
-  public void persistSystemPackageNoChange() {
+  void persistSystemPackageNoChange() {
     RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
     when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
     when(dataService.getMeta()).thenReturn(metaDataService);

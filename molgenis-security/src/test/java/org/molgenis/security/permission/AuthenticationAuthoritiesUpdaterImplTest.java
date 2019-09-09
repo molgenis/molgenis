@@ -2,11 +2,15 @@ package org.molgenis.security.permission;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
@@ -18,21 +22,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AuthenticationAuthoritiesUpdaterImplTest {
+class AuthenticationAuthoritiesUpdaterImplTest {
   private AuthenticationAuthoritiesUpdaterImpl authenticationAuthoritiesUpdaterImpl;
   private List<GrantedAuthority> updatedAuthorities;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     authenticationAuthoritiesUpdaterImpl = new AuthenticationAuthoritiesUpdaterImpl();
     updatedAuthorities = singletonList(new SimpleGrantedAuthority("role"));
   }
 
   @Test
-  public void testUpdateAuthenticationTwoFactorAuthenticationToken() {
+  void testUpdateAuthenticationTwoFactorAuthenticationToken() {
     Object principal = mock(Object.class);
     Object credentials = mock(Object.class);
     String verificationCode = "dummyVerificationCode";
@@ -51,7 +53,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationSystemSecurityToken() {
+  void testUpdateAuthenticationSystemSecurityToken() {
     SystemSecurityToken systemSecurityToken = mock(SystemSecurityToken.class);
     Authentication updatedAuthentication =
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
@@ -60,7 +62,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationRestAuthenticationToken() {
+  void testUpdateAuthenticationRestAuthenticationToken() {
     Object principal = mock(Object.class);
     Object credentials = mock(Object.class);
     String token = "token";
@@ -76,7 +78,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationRecoveryAuthenticationToken() {
+  void testUpdateAuthenticationRecoveryAuthenticationToken() {
     Object principal = mock(Object.class);
     Object credentials = mock(Object.class);
     String recoveryCode = "recoveryCode";
@@ -92,7 +94,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationUsernamePasswordAuthenticationToken() {
+  void testUpdateAuthenticationUsernamePasswordAuthenticationToken() {
     Object principal = mock(Object.class);
     Object credentials = mock(Object.class);
     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
@@ -107,7 +109,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationRunAsUserToken() {
+  void testUpdateAuthenticationRunAsUserToken() {
     String key = "key";
     Object principal = mock(Object.class);
     Object credentials = mock(Object.class);
@@ -125,7 +127,7 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
   }
 
   @Test
-  public void testUpdateAuthenticationAnonymousAuthenticationToken() {
+  void testUpdateAuthenticationAnonymousAuthenticationToken() {
     String key = "key";
     Object principal = mock(Object.class);
     AnonymousAuthenticationToken anonymousAuthenticationToken =
@@ -140,11 +142,14 @@ public class AuthenticationAuthoritiesUpdaterImplTest {
         new AnonymousAuthenticationToken(key, principal, updatedAuthorities));
   }
 
-  @Test(
-      expectedExceptions = SessionAuthenticationException.class,
-      expectedExceptionsMessageRegExp = "Unknown authentication type '.*?'")
-  public void testUpdateAuthenticationUnknownToken() {
-    authenticationAuthoritiesUpdaterImpl.updateAuthentication(
-        mock(Authentication.class), updatedAuthorities);
+  @Test
+  void testUpdateAuthenticationUnknownToken() {
+    Exception exception =
+        assertThrows(
+            SessionAuthenticationException.class,
+            () ->
+                authenticationAuthoritiesUpdaterImpl.updateAuthentication(
+                    mock(Authentication.class), updatedAuthorities));
+    assertThat(exception.getMessage()).containsPattern("Unknown authentication type '.*?'");
   }
 }

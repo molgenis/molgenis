@@ -4,6 +4,11 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -17,13 +22,12 @@ import static org.molgenis.data.security.auth.GroupService.EDITOR;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -42,10 +46,8 @@ import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class GroupServiceTest extends AbstractMockitoTest {
+class GroupServiceTest extends AbstractMockitoTest {
   @Mock private GroupFactory groupFactory;
   @Mock private RoleFactory roleFactory;
   @Mock private PackageFactory packageFactory;
@@ -77,8 +79,8 @@ public class GroupServiceTest extends AbstractMockitoTest {
   private static final String MANAGER_NAME = "GROUP_MANAGER";
   private static final String EDITOR_NAME = "GROUP_EDITOR";
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     packageValue = PackageValue.builder().setName("package").setLabel("Package").build();
     managerRoleValue = RoleValue.builder().setName(MANAGER_NAME).setLabel(MANAGER).build();
     editorRoleValue = RoleValue.builder().setName(EDITOR_NAME).setLabel(EDITOR).build();
@@ -107,7 +109,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPersist() {
+  void testPersist() {
     when(groupFactory.create(groupValue)).thenReturn(group);
     when(packageFactory.create(packageValue)).thenReturn(aPackage);
 
@@ -145,10 +147,8 @@ public class GroupServiceTest extends AbstractMockitoTest {
     verify(editorRole).setIncludes(singletonList(defaultEditorRole));
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_sec_Role id:MANAGER attribute:name")
-  public void testPersistIncludedRoleNotFound() {
+  @Test
+  void testPersistIncludedRoleNotFound() {
     doReturn(editorRole).when(roleFactory).create(editorRoleValue);
     doReturn(managerRole).when(roleFactory).create(managerRoleValue);
     when(managerRole.getName()).thenReturn(MANAGER_NAME);
@@ -165,17 +165,20 @@ public class GroupServiceTest extends AbstractMockitoTest {
     when(dataService.query(ROLE, Role.class)).thenReturn(query);
     when(query.eq(RoleMetadata.NAME, MANAGER.toUpperCase()).findOne()).thenReturn(null);
 
-    groupService.persist(groupValue);
+    Exception exception =
+        assertThrows(UnknownEntityException.class, () -> groupService.persist(groupValue));
+    assertThat(exception.getMessage())
+        .containsPattern("type:sys_sec_Role id:MANAGER attribute:name");
   }
 
   @Test
-  public void testGetGroups() {
+  void testGetGroups() {
     when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group));
     assertEquals(groupService.getGroups(), singletonList(group));
   }
 
   @Test
-  public void testGetGroup() {
+  void testGetGroup() {
     Fetch fetch = buildGroupFetch();
     @SuppressWarnings("unchecked")
     Query<Group> query = mock(Query.class, RETURNS_SELF);
@@ -184,15 +187,15 @@ public class GroupServiceTest extends AbstractMockitoTest {
     assertEquals(groupService.getGroup("devs"), group);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testGetGroupNotFound() {
+  @Test
+  void testGetGroupNotFound() {
     Fetch fetch = buildGroupFetch();
     when(groupMetadata.getAttribute(GroupMetadata.NAME)).thenReturn(attribute);
     @SuppressWarnings("unchecked")
     Query<Group> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
     when(query.eq(GroupMetadata.NAME, "devs").fetch(fetch).findOne()).thenReturn(null);
-    groupService.getGroup("devs");
+    assertThrows(UnknownEntityException.class, () -> groupService.getGroup("devs"));
   }
 
   private Fetch buildGroupFetch() {
@@ -208,7 +211,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddMemberHappyPath() {
+  void testAddMemberHappyPath() {
     when(group.getRoles()).thenReturn(singletonList(managerRole));
     when(managerRole.getName()).thenReturn("dev");
 
@@ -219,8 +222,8 @@ public class GroupServiceTest extends AbstractMockitoTest {
     verify(roleMembershipService).addUserToRole(user, managerRole);
   }
 
-  @Test(expectedExceptions = IsAlreadyMemberException.class)
-  public void testAddMemberAlreadyAMember() {
+  @Test
+  void testAddMemberAlreadyAMember() {
     when(group.getRoles()).thenReturn(singletonList(managerRole));
     when(managerRole.getName()).thenReturn("dev");
 
@@ -228,18 +231,20 @@ public class GroupServiceTest extends AbstractMockitoTest {
         .thenReturn(singletonList(membership));
     when(membership.getUser()).thenReturn(user);
 
-    groupService.addMember(group, user, managerRole);
-  }
-
-  @Test(expectedExceptions = NotAValidGroupRoleException.class)
-  public void testAddMemberNotAValidGroupRole() {
-    when(group.getRoles()).thenReturn(emptyList());
-
-    groupService.addMember(group, user, managerRole);
+    assertThrows(
+        IsAlreadyMemberException.class, () -> groupService.addMember(group, user, managerRole));
   }
 
   @Test
-  public void testRemoveMember() {
+  void testAddMemberNotAValidGroupRole() {
+    when(group.getRoles()).thenReturn(emptyList());
+
+    assertThrows(
+        NotAValidGroupRoleException.class, () -> groupService.addMember(group, user, managerRole));
+  }
+
+  @Test
+  void testRemoveMember() {
     when(group.getRoles()).thenReturn(singletonList(managerRole));
     when(roleMembershipService.getMemberships(singletonList(managerRole)))
         .thenReturn(singletonList(membership));
@@ -251,18 +256,18 @@ public class GroupServiceTest extends AbstractMockitoTest {
     verify(roleMembershipService).removeMembership(membership);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testRemoveMemberNotAMember() {
+  @Test
+  void testRemoveMemberNotAMember() {
     when(group.getRoles()).thenReturn(singletonList(managerRole));
     when(roleMembershipService.getMemberships(singletonList(managerRole))).thenReturn(emptyList());
     when(roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER)).thenReturn(attribute);
     when(user.getUsername()).thenReturn("henkie");
 
-    groupService.removeMember(group, user);
+    assertThrows(UnknownEntityException.class, () -> groupService.removeMember(group, user));
   }
 
   @Test
-  public void testUpdateMemberRole() {
+  void testUpdateMemberRole() {
     when(managerRole.getName()).thenReturn(MANAGER_NAME);
     when(editorRole.getName()).thenReturn(EDITOR_NAME);
     when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
@@ -276,17 +281,19 @@ public class GroupServiceTest extends AbstractMockitoTest {
     verify(roleMembershipService).updateMembership(membership, editorRole);
   }
 
-  @Test(expectedExceptions = NotAValidGroupRoleException.class)
-  public void testUpdateMemberRoleNotAGroupRole() {
+  @Test
+  void testUpdateMemberRoleNotAGroupRole() {
     when(group.getRoles()).thenReturn(ImmutableList.of(managerRole));
     when(managerRole.getName()).thenReturn(MANAGER_NAME);
     when(editorRole.getName()).thenReturn(EDITOR_NAME);
 
-    groupService.updateMemberRole(group, user, editorRole);
+    assertThrows(
+        NotAValidGroupRoleException.class,
+        () -> groupService.updateMemberRole(group, user, editorRole));
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testUpdateMemberRoleUserNotAMember() {
+  @Test
+  void testUpdateMemberRoleUserNotAMember() {
     when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
     when(roleMembershipService.getMemberships(ImmutableList.of(managerRole, editorRole)))
         .thenReturn(emptyList());
@@ -295,11 +302,12 @@ public class GroupServiceTest extends AbstractMockitoTest {
     when(managerRole.getName()).thenReturn(MANAGER_NAME);
     when(editorRole.getName()).thenReturn(EDITOR_NAME);
 
-    groupService.updateMemberRole(group, user, editorRole);
+    assertThrows(
+        UnknownEntityException.class, () -> groupService.updateMemberRole(group, user, editorRole));
   }
 
   @Test
-  public void testIsGroupNameAvailableReturnsTrueIfNameIsAvailable() {
+  void testIsGroupNameAvailableReturnsTrueIfNameIsAvailable() {
     @SuppressWarnings("unchecked")
     Query<Package> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(PACKAGE, Package.class)).thenReturn(query);
@@ -318,7 +326,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testIsGroupNameAvailableReturnsFalseIfNameIsNotAvailable() {
+  void testIsGroupNameAvailableReturnsFalseIfNameIsNotAvailable() {
     Package mock = mock(Package.class);
     @SuppressWarnings("unchecked")
     Query<Package> query = mock(Query.class, RETURNS_SELF);
@@ -338,7 +346,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void deleteGroupTest() {
+  void deleteGroupTest() {
     @SuppressWarnings("unchecked")
     Query<Group> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
@@ -348,7 +356,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdateExtendsRole() {
+  void testUpdateExtendsRole() {
     Role anonymousRole = mock(Role.class, "anonymous");
     Role groupRole = mock(Role.class, "group");
     Role groupEditorRole = mock(Role.class, "group editor");
@@ -365,7 +373,7 @@ public class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRemoveExtendsRole() {
+  void testRemoveExtendsRole() {
     Role anonymousRole = mock(Role.class, "anonymous");
     Role groupRole = mock(Role.class, "group");
     Role groupEditorRole = mock(Role.class, "group editor");

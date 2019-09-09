@@ -3,20 +3,20 @@ package org.molgenis.semanticsearch.service.impl;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -40,11 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = SemanticSearchServiceHelperTest.Config.class)
-public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
+class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrMetaFactory;
 
   @Autowired private EntityTypeFactory entityTypeFactory;
@@ -56,7 +54,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   @Autowired private DataService dataService;
 
   @Test
-  public void testCreateDisMaxQueryRule() {
+  void testCreateDisMaxQueryRule() {
     List<String> createdTargetAttributeQueries =
         asList(
             "Height",
@@ -83,7 +81,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testCreateShouldQueryRule() {
+  void testCreateShouldQueryRule() {
     String multiOntologyTermIri = "http://www.molgenis.org/1,http://www.molgenis.org/2";
     OntologyTerm ontologyTerm_1 =
         OntologyTerm.create("http://www.molgenis.org/1", "molgenis label in the gcc");
@@ -105,7 +103,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testCreateTargetAttributeQueryTerms() {
+  void testCreateTargetAttributeQueryTerms() {
     Attribute targetAttribute_1 = attrMetaFactory.create().setName("targetAttribute 1");
     targetAttribute_1.setDescription("Height");
 
@@ -161,7 +159,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testCollectQueryTermsFromOntologyTerm() {
+  void testCollectQueryTermsFromOntologyTerm() {
     // Case 1
     OntologyTerm ontologyTerm1 =
         OntologyTerm.create(
@@ -191,7 +189,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testGetAttributeIdentifiers() {
+  void testGetAttributeIdentifiers() {
     EntityType sourceEntityType = entityTypeFactory.create("sourceEntityType");
     Entity entityTypeEntity = mock(Entity.class);
 
@@ -216,14 +214,14 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testParseBoostQueryString() {
+  void testParseBoostQueryString() {
     String description = "falling in the ocean!";
     String actual = semanticSearchServiceHelper.parseBoostQueryString(description, 0.5);
     assertEquals(actual, "ocean^0.5 falling^0.5");
   }
 
   @Test
-  public void testRemoveStopWords() {
+  void testRemoveStopWords() {
     String description = "falling in the ocean!";
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
     Set<String> expected = Sets.newHashSet("falling", "ocean");
@@ -231,7 +229,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testFindTagsSync() {
+  void testFindTagsSync() {
     String description = "Fall " + NGramDistanceAlgorithm.STOPWORDSLIST + " sleep";
     List<String> ontologyIds = singletonList("1");
     Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
@@ -241,7 +239,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testSearchCircumflex() throws InterruptedException, ExecutionException {
+  void testSearchCircumflex() {
     String description = "body^0.5 length^0.5";
     Set<String> expected = Sets.newHashSet("length", "body", "0.5");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
@@ -250,7 +248,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testSearchTilde() throws InterruptedException, ExecutionException {
+  void testSearchTilde() {
     String description = "body~0.5 length~0.5";
     Set<String> expected = Sets.newHashSet("length~0.5", "body~0.5");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
@@ -258,7 +256,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testSearchUnderScore() throws InterruptedException, ExecutionException {
+  void testSearchUnderScore() {
     String description = "body_length";
     Set<String> expected = Sets.newHashSet("body", "length");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
@@ -266,7 +264,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testSearchIsoLatin() throws InterruptedException, ExecutionException {
+  void testSearchIsoLatin() {
     String description = "Standing height (Ångstrøm)";
     List<String> ontologyIds = singletonList("1");
     Set<String> searchTerms = Sets.newHashSet("standing", "height", "ångstrøm");
@@ -276,7 +274,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testSearchUnicode() throws InterruptedException, ExecutionException {
+  void testSearchUnicode() {
     String description = "/əˈnædrəməs/";
     List<String> ontologyIds = singletonList("1");
     Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
@@ -286,18 +284,18 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testEscapeCharsExcludingCaretChar() {
-    Assert.assertEquals(
+  void testEscapeCharsExcludingCaretChar() {
+    assertEquals(
         semanticSearchServiceHelper.escapeCharsExcludingCaretChar("(hypertension^4)~[]"),
         "\\(hypertension^4\\)\\~\\[\\]");
 
-    Assert.assertEquals(
+    assertEquals(
         semanticSearchServiceHelper.escapeCharsExcludingCaretChar("hypertension^4"),
         "hypertension^4");
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
     OntologyService ontologyService() {
       return mock(OntologyService.class);

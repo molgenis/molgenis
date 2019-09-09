@@ -4,22 +4,24 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class InvalidEmxIdentifierExceptionTest extends ExceptionMessageTest {
+class InvalidEmxIdentifierExceptionTest extends ExceptionMessageTest {
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-import");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
-  public void testGetLocalizedMessageNL(String lang, String message) {
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
+  @Override
+  protected void testGetLocalizedMessage(String lang, String message) {
     Entity entity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
     when(entity.getEntityType()).thenReturn(entityType);
@@ -29,12 +31,7 @@ public class InvalidEmxIdentifierExceptionTest extends ExceptionMessageTest {
     assertExceptionMessageEquals(new InvalidEmxIdentifierException(entity), lang, message);
   }
 
-  @Override
-  public void testGetLocalizedMessage(String language, String message) {}
-
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "nl",

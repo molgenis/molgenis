@@ -5,6 +5,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.CREATED;
 import static org.molgenis.api.tests.utils.RestTestUtils.NO_CONTENT;
@@ -25,20 +26,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /** Tests each endpoint of the V1 Rest Api through http calls */
-public class RestControllerV1APIIT extends AbstractApiTests {
+class RestControllerV1APIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV1APIIT.class);
 
-  private String testUserName;
+  private static String testUserName;
   private static final String REST_TEST_USER_PASSWORD = "api_v1_test_user_password";
   private static final String V1_TEST_FILE = "/RestControllerV1_API_TestEMX.xlsx";
   private static final String V1_DELETE_TEST_FILE = "/RestControllerV1_API_DeleteEMX.xlsx";
@@ -50,11 +50,11 @@ public class RestControllerV1APIIT extends AbstractApiTests {
       "application/x-www-form-urlencoded; charset=UTF-8";
   private static final String TEXT_CSV = "text/csv";
 
-  private String testUserToken;
-  private String adminToken;
+  private static String testUserToken;
+  private static String adminToken;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -93,7 +93,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testEntityExists() {
+  void testEntityExists() {
     given(testUserToken)
         .contentType(TEXT_PLAIN)
         .when()
@@ -104,7 +104,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testEntityNotExists() {
+  void testEntityNotExists() {
     given(testUserToken)
         .contentType(TEXT_PLAIN)
         .when()
@@ -115,7 +115,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetEntityType() {
+  void testGetEntityType() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -126,7 +126,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetEntityTypePost() {
+  void testGetEntityTypePost() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -138,7 +138,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityAttributeMeta() {
+  void testRetrieveEntityAttributeMeta() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -149,7 +149,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityAttributeMetaPost() {
+  void testRetrieveEntityAttributeMetaPost() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -161,7 +161,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntity() {
+  void testRetrieveEntity() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -172,7 +172,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityPost() {
+  void testRetrieveEntityPost() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -184,7 +184,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityAttribute() {
+  void testRetrieveEntityAttribute() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -195,7 +195,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityAttributePost() {
+  void testRetrieveEntityAttributePost() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -207,7 +207,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityCollectionResponse() {
+  void testRetrieveEntityCollectionResponse() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -218,7 +218,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityCollectionResponsePost() {
+  void testRetrieveEntityCollectionResponsePost() {
     ValidatableResponse response =
         given(testUserToken)
             .contentType(APPLICATION_JSON)
@@ -230,7 +230,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityCollection() {
+  void testRetrieveEntityCollection() {
     String contents = getFileContents("/testRetrieveEntityCollection_response.csv");
     // workaround on windows due to git replacing \n with \r\n on checkout of file depending on git
     // core.eol and core.autocrlf config values
@@ -247,11 +247,11 @@ public class RestControllerV1APIIT extends AbstractApiTests {
             .statusCode(200)
             .extract()
             .asString();
-    Assert.assertEquals(response, contents);
+    assertEquals(response, contents);
   }
 
   @Test
-  public void testCreateFromFormPost() {
+  void testCreateFromFormPost() {
     given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
@@ -282,7 +282,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testCreateFromFormPostMultiPart() throws URISyntaxException {
+  void testCreateFromFormPostMultiPart() throws URISyntaxException {
     URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
     File file = new File(new URI(resourceUrl.toString()).getPath());
 
@@ -313,7 +313,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testCreate() {
+  void testCreate() {
     Map<String, Object> entityMap = newHashMap();
     entityMap.put("value", "ref6");
     entityMap.put("label", "label6");
@@ -344,7 +344,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     Map<String, Object> parameters = newHashMap();
     parameters.put("value", "ref1");
     parameters.put("label", "label900");
@@ -371,7 +371,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdatePost() {
+  void testUpdatePost() {
     Map<String, Object> parameters = newHashMap();
     parameters.put("value", "ref1");
     parameters.put("label", "label900");
@@ -398,7 +398,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdateAttributePut() {
+  void testUpdateAttributePut() {
     given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label900")
@@ -421,7 +421,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdateAttributePutWithEmptyValue() {
+  void testUpdateAttributePutWithEmptyValue() {
     given(testUserToken)
         .contentType(APPLICATION_JSON)
         .put(API_V1 + "V1_API_TypeTestAPIV1/1/xstringnillable")
@@ -436,7 +436,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdateAttribute() {
+  void testUpdateAttribute() {
     given(testUserToken)
         .contentType(APPLICATION_JSON)
         .body("label900")
@@ -459,7 +459,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdateFromFormPostMultiPart() throws URISyntaxException {
+  void testUpdateFromFormPostMultiPart() throws URISyntaxException {
     URL resourceUrl = getResource(RestControllerV1APIIT.class, V1_FILE_ATTRIBUTE_TEST_FILE);
     File file = new File(new URI(resourceUrl.toString()).getPath());
 
@@ -488,7 +488,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testUpdateFromFormPost() {
+  void testUpdateFromFormPost() {
     given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref1")
@@ -515,7 +515,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
@@ -547,7 +547,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeletePost() {
+  void testDeletePost() {
     given(testUserToken)
         .contentType(APPLICATION_FORM_URL_ENCODED)
         .formParam("value", "ref6")
@@ -579,7 +579,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     given(testUserToken)
         .get(API_V1 + "base_APITest1")
         .then()
@@ -596,7 +596,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteAllPost() {
+  void testDeleteAllPost() {
     given(testUserToken)
         .get(API_V1 + "base_APITest2")
         .then()
@@ -616,7 +616,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteMeta() {
+  void testDeleteMeta() {
     given(testUserToken)
         .get(API_V1 + "base_APITest3")
         .then()
@@ -634,7 +634,7 @@ public class RestControllerV1APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteMetaPost() {
+  void testDeleteMetaPost() {
     given(testUserToken)
         .get(API_V1 + "base_APITest4")
         .then()
@@ -810,8 +810,8 @@ public class RestControllerV1APIIT extends AbstractApiTests {
         equalTo("label5"));
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Clean up TestEMX
     removeEntity(adminToken, "V1_API_TypeTestAPIV1");
     removeEntity(adminToken, "V1_API_TypeTestRefAPIV1");

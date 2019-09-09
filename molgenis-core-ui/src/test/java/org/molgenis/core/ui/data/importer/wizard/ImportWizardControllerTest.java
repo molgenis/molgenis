@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
-import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,10 @@ import java.util.concurrent.ExecutorService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataAction;
@@ -31,7 +35,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,13 +47,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {ImportWizardControllerTest.Config.class})
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 
   @Mock private UploadWizardPage uploadWizardPage;
@@ -66,8 +67,8 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 
   private ImportWizardController importWizardController;
 
-  @BeforeMethod
-  private void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -86,17 +87,17 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
     importWizardController.setExecutorService(executorService);
   }
 
-  @DataProvider(name = "testImportFileProvider")
-  public static Iterator<Object[]> testInitProvider() {
+  static Iterator<Object[]> testInitProvider() {
     return asList(
             new Object[] {"add", DataAction.ADD, "upsert", MetadataAction.UPSERT},
             new Object[] {"update", DataAction.UPDATE, "ignore", MetadataAction.IGNORE})
         .iterator();
   }
 
+  @ParameterizedTest
+  @MethodSource("testInitProvider")
   @WithMockUser(username = USERNAME)
-  @Test(dataProvider = "testImportFileProvider")
-  public void testImportFile(
+  void testImportFile(
       String dataActionStr,
       DataAction dataAction,
       String metadataActionStr,
@@ -165,7 +166,7 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testImportFileDataActionUnknown() throws IOException, URISyntaxException {
+  void testImportFileDataActionUnknown() throws IOException, URISyntaxException {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 
     String filename = "example.xlsx";
@@ -203,7 +204,7 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testImportFileMetadataActionUnknown() throws IOException, URISyntaxException {
+  void testImportFileMetadataActionUnknown() throws IOException, URISyntaxException {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 
     String filename = "example.xlsx";

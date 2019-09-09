@@ -1,17 +1,16 @@
 package org.molgenis.data.util;
 
 import static java.time.ZoneId.systemDefault;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class MolgenisDateFormatTest {
-  @DataProvider(name = "parseInstantDataProvider")
-  public Object[][] parseInstantDataProvider() {
+class MolgenisDateFormatTest {
+  static Object[][] parseInstantDataProvider() {
     return new Object[][] {
       {"2000-12-31T12:34:56.789+0200", "2000-12-31T10:34:56.789Z"},
       {"2000-12-31T12:34:56.789+02:00", "2000-12-31T10:34:56.789Z"},
@@ -34,13 +33,13 @@ public class MolgenisDateFormatTest {
     };
   }
 
-  @Test(dataProvider = "parseInstantDataProvider")
-  public void testParseInstant(String text, String expected) {
-    Assert.assertEquals(MolgenisDateFormat.parseInstant(text), Instant.parse(expected));
+  @ParameterizedTest
+  @MethodSource("parseInstantDataProvider")
+  void testParseInstant(String text, String expected) {
+    assertEquals(MolgenisDateFormat.parseInstant(text), Instant.parse(expected));
   }
 
-  @DataProvider(name = "parseLocalDateDataProvider")
-  public Object[][] parseLocalDateDataProvider() {
+  static Object[][] parseLocalDateDataProvider() {
     return new Object[][] {
       {"2000-12-31T00:34:56.789+0200", "2000-12-31"},
       {"2000-12-31T00:34:56.789+02:00", "2000-12-31"},
@@ -51,8 +50,9 @@ public class MolgenisDateFormatTest {
     };
   }
 
-  @Test(dataProvider = "parseLocalDateDataProvider")
-  public void testParseLocalDate(String text, String expected) {
-    Assert.assertEquals(MolgenisDateFormat.parseLocalDate(text), LocalDate.parse(expected));
+  @ParameterizedTest
+  @MethodSource("parseLocalDateDataProvider")
+  void testParseLocalDate(String text, String expected) {
+    assertEquals(MolgenisDateFormat.parseLocalDate(text), LocalDate.parse(expected));
   }
 }

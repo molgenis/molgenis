@@ -1,45 +1,49 @@
 package org.molgenis.data.security.permission;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.READMETA;
 import static org.molgenis.security.core.PermissionSet.WRITE;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
-import static org.testng.Assert.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class PermissionSetUtilsTest {
+class PermissionSetUtilsTest {
 
   @Test
-  public void testParamValueToPermissionSetRead() {
+  void testParamValueToPermissionSetRead() {
     assertEquals(READ, PermissionSetUtils.paramValueToPermissionSet("read"));
   }
 
   @Test
-  public void testParamValueToPermissionSetWrite() {
+  void testParamValueToPermissionSetWrite() {
     assertEquals(WRITE, PermissionSetUtils.paramValueToPermissionSet("write"));
   }
 
   @Test
-  public void testParamValueToPermissionSetWritemeta() {
+  void testParamValueToPermissionSetWritemeta() {
     assertEquals(WRITEMETA, PermissionSetUtils.paramValueToPermissionSet("writemeta"));
   }
 
   @Test
-  public void testParamValueToPermissionSetReadmeta() {
+  void testParamValueToPermissionSetReadmeta() {
     assertEquals(READMETA, PermissionSetUtils.paramValueToPermissionSet("readmeta"));
   }
 
   @Test
-  public void testParamValueToPermissionSetCount() {
+  void testParamValueToPermissionSetCount() {
     assertEquals(COUNT, PermissionSetUtils.paramValueToPermissionSet("count"));
   }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Unknown PermissionSet \'test\'")
-  public void testParamValueToPermissionSetInvalid() {
-    PermissionSetUtils.paramValueToPermissionSet("test");
+  @Test
+  void testParamValueToPermissionSetInvalid() {
+    Exception exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> PermissionSetUtils.paramValueToPermissionSet("test"));
+    assertThat(exception.getMessage()).containsPattern("Unknown PermissionSet \'test\'");
   }
 }

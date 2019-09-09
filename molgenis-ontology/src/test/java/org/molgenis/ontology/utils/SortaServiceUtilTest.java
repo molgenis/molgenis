@@ -2,6 +2,7 @@ package org.molgenis.ontology.utils;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_TERMS;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
@@ -13,10 +14,11 @@ import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.COMBINED_SCORE;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.SCORE;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.Ontology;
@@ -33,11 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {Config.class})
-public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
+class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
   private static final String ONTOLOGY_IRI = "http://www.molgenis.org/";
 
   @Autowired private OntologyFactory ontologyFactory;
@@ -48,8 +48,8 @@ public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
 
   private OntologyTerm term;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     OntologyTermSynonym synonym = ontologyTermSynonymFactory.create();
     synonym.setId("1");
     synonym.setOntologyTermSynonym("synonym");
@@ -68,7 +68,7 @@ public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetEntityAsMap() {
+  void testGetEntityAsMap() {
     HashMap<String, Object> expected = newHashMap();
     expected.put(ID, null);
     expected.put(ONTOLOGY_TERM_IRI, "iri");
@@ -102,5 +102,5 @@ public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({OntologyTestConfig.class, OntologyTermHitMetaData.class})
-  public static class Config {}
+  static class Config {}
 }

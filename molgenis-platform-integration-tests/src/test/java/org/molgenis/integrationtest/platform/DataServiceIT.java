@@ -7,6 +7,12 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL_MREF;
@@ -33,11 +39,6 @@ import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -48,6 +49,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -76,6 +85,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
@@ -83,18 +93,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-@SuppressWarnings("groupsTestNG") // IntelliJ false positives
+@TestMethodOrder(OrderAnnotation.class)
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class DataServiceIT extends AbstractTestNGSpringContextTests {
+public class DataServiceIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME_READ = "dataService-user-read";
   private static final String USERNAME_WRITE = "dataService-user-write";
 
@@ -116,7 +121,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   private FileMeta secretFile;
   private FileMeta publicFile;
 
-  @BeforeClass
+  @BeforeEach
   public void setUpBeforeClass() throws InterruptedException {
     // bootstrapper has finished but indexing of bootstrapped data might be in progress
     indexJobScheduler.waitForAllIndicesStable();
@@ -124,13 +129,14 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     runAsSystem(this::populate);
   }
 
-  @AfterClass
+  @AfterEach
   public void tearDownAfterClass() {
     runAsSystem(this::depopulate);
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(1)
   public void testGetCapabilities() {
     Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityType.getId());
     assertNotNull(capabilities);
@@ -140,30 +146,36 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(2)
   public void testReadSecretFile() {
-    assertNull(dataService.findOneById(FILE_META, secretFile.getId()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        dataService.findOneById(FILE_META, secretFile.getId()));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(
-      groups = "readtest",
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_FileMeta")
+  @Order(3)
   public void testWritePublicFile() {
     FileMeta updated = fileMetaFactory.create(publicFile);
     updated.setUrl("http://example.org/updated.png");
-    dataService.update(FILE_META, updated);
+    Exception exception =
+        assertThrows(
+            EntityTypePermissionDeniedException.class,
+            () -> dataService.update(FILE_META, updated));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:UPDATE_DATA entityTypeId:sys_FileMeta");
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(4)
   public void testReadPublicFile() {
     assertNotNull(dataService.findOneById(FILE_META, publicFile.getId()));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(5)
   public void testGetEntityNames() {
     Stream<String> names = dataService.getEntityTypeIds();
     assertNotNull(names);
@@ -171,13 +183,15 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(6)
   public void testGetMeta() {
     assertNotNull(dataService.getMeta());
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(7)
   public void testGetKnownRepository() {
     Repository<Entity> repo = dataService.getRepository(entityType.getId());
     assertNotNull(repo);
@@ -185,20 +199,23 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", expectedExceptions = UnknownEntityTypeException.class)
+  @Test
+  @Order(8)
   public void testGetUnknownRepository() {
-    dataService.getRepository("bogus");
+    assertThrows(UnknownEntityTypeException.class, () -> dataService.getRepository("bogus"));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(9)
   public void testHasRepository() {
     assertTrue(dataService.hasRepository(entityType.getId()));
     assertFalse(dataService.hasRepository("bogus"));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(10)
   public void testIterator() {
     assertNotNull(dataService.iterator());
     Repository repo = dataService.getRepository(entityType.getId());
@@ -209,33 +226,38 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", expectedExceptions = UnknownEntityTypeException.class)
+  @Test
+  @Order(11)
   public void testQuery() {
     assertNotNull(dataService.query(entityType.getId()));
-    dataService.query("bogus");
+    assertThrows(UnknownEntityTypeException.class, () -> dataService.query("bogus"));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(12)
   public void testCount() {
     assertEquals(dataService.count(entityType.getId()), entities.size());
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(13)
   public void testCountQuery() {
     assertEquals(dataService.count(entityType.getId(), new QueryImpl<>().gt(ATTR_INT, 10)), 2);
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(14)
   public void testFindOne() {
     Entity entity = entities.get(0);
     assertNotNull(dataService.findOneById(entityType.getId(), entity.getIdValue()));
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(15)
   public void testFindOneFetch() {
     Entity entity = entities.get(0);
     assertNotNull(
@@ -244,7 +266,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(16)
   public void testFindOneQuery() {
     Entity entity = entities.get(0);
     entity =
@@ -253,14 +276,16 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(17)
   public void testFindAll() {
     Stream<Entity> retrieved = dataService.findAll(entityType.getId());
     assertEquals(retrieved.count(), entities.size());
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(18)
   public void testFindAllByIds() {
     Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
     Stream<Entity> retrieved = dataService.findAll(entityType.getId(), ids);
@@ -268,7 +293,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(19)
   public void testFindAllTyped() {
     Supplier<Stream<Entity>> retrieved =
         () -> dataService.findAll(entityType.getId(), Entity.class);
@@ -277,7 +303,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(20)
   public void testFindAllStreamFetch() {
     Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
     Stream<Entity> retrieved =
@@ -285,7 +312,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(retrieved.count(), entities.size());
   }
 
-  @DataProvider(name = "findQueryOperatorEq")
   private static Object[][] findQueryOperatorEq() {
     return new Object[][] {
       {ATTR_ID, "1", singletonList(1)},
@@ -321,7 +347,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorEq")
+  //  @Test(groups = "readtest")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorEq")
   public void testFindQueryOperatorEq(
       String attrName, Object value, List<Integer> expectedEntityIndices) {
 
@@ -335,7 +363,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorGreater")
   private static Object[][] findQueryOperatorGreater() {
     return new Object[][] {
       {9, asList(0, 1, 2)}, {10, asList(1, 2)}, {11, singletonList(2)}, {12, emptyList()}
@@ -343,7 +370,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorGreater")
+  //  @Test(groups = "readtest")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorGreater")
   public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).gt(ATTR_INT, value).findAll();
@@ -355,7 +384,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorGreaterEqual")
   private static Object[][] findQueryOperatorGreaterEqual() {
     return new Object[][] {
       {9, asList(0, 1, 2)},
@@ -367,7 +395,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorGreaterEqual")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorGreaterEqual")
+  @Order(21)
   public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).ge(ATTR_INT, value).findAll();
@@ -379,7 +409,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorRange")
   private static Object[][] findQueryOperatorRange() {
     return new Object[][] {
       {0, 9, emptyList()},
@@ -392,7 +421,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorRange")
+  //  @Test(groups = "readtest")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorRange")
   public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).rng(ATTR_INT, low, high).findAll();
@@ -404,7 +435,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorNot")
   private static Object[][] findQueryOperatorNot() {
     return new Object[][] {
       {9, asList(0, 1, 2)},
@@ -416,7 +446,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorNot")
+  //  @Test(groups = "readtest")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorNot")
   public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).not().eq(ATTR_INT, value).findAll();
@@ -428,7 +460,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorAnd")
   private static Object[][] findQueryOperatorAnd() {
     return new Object[][] {
       {"string1", 10, singletonList(0)},
@@ -439,7 +470,10 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorAnd")
+  @Test
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorAnd")
+  @Order(22)
   public void testFindQueryOperatorAnd(
       String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -458,7 +492,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorOr")
   private static Object[][] findQueryOperatorOr() {
     return new Object[][] {
       {"string1", 10, asList(0, 1, 2)},
@@ -469,7 +502,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorOr")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorOr")
+  @Order(23)
   public void testFindQueryOperatorOr(
       String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -488,7 +523,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorNested")
   private static Object[][] findQueryOperatorNested() {
     return new Object[][] {
       {true, "string1", 10, asList(0, 2)},
@@ -503,7 +537,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorNested")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorNested")
+  @Order(24)
   public void testFindQueryOperatorNested(
       boolean boolValue, String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -526,7 +562,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorLess")
   private static Object[][] findQueryOperatorLess() {
     return new Object[][] {
       {9, emptyList()},
@@ -538,7 +573,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorLess")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLess")
+  @Order(25)
   public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).lt(ATTR_INT, value).findAll();
@@ -550,7 +587,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorLessEqual")
   private static Object[][] findQueryOperatorLessEqual() {
     return new Object[][] {
       {9, emptyList()}, {10, singletonList(0)}, {11, asList(0, 1)}, {12, asList(0, 1, 2)}
@@ -558,7 +594,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorLessEqual")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLessEqual")
+  @Order(26)
   public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).le(ATTR_INT, value).findAll();
@@ -570,7 +608,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorLike")
   private static Object[][] findQueryOperatorLike() {
     return new Object[][] {
       {"ring", asList(0, 1, 2)}, {"Ring", emptyList()}, {"nomatch", emptyList()}
@@ -578,7 +615,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorLike")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLike")
+  @Order(27)
   public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).like(ATTR_STRING, likeStr).findAll();
@@ -590,7 +629,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorIn")
   private static Object[][] findQueryOperatorIn() {
     return new Object[][] {
       {singletonList("-1"), emptyList()},
@@ -601,7 +639,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorIn")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorIn")
+  @Order(28)
   public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).in(ATTR_ID, ids).findAll();
@@ -613,7 +653,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
     }
   }
 
-  @DataProvider(name = "findQueryOperatorSearch")
   private static Object[][] findQueryOperatorSearch() {
     return new Object[][] {
       {"body", singletonList(1)}, {"head", singletonList(1)}, {"unknownString", emptyList()}
@@ -621,7 +660,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest", dataProvider = "findQueryOperatorSearch")
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorSearch")
+  @Order(29)
   public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).search(ATTR_HTML, searchStr).findAll();
@@ -634,7 +675,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(30)
   public void testFindQueryLimitOffsetSort() {
     List<Entity> foundAsList =
         dataService
@@ -651,7 +693,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(31)
   public void testFindQueryTypedStatic() {
     List<TestEntityStatic> entities =
         dataService
@@ -665,7 +708,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(32)
   public void testFindOneTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -676,7 +720,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(33)
   public void testFindOneFetchTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -690,7 +735,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(34)
   public void testFindOneQueryTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -703,7 +749,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(35)
   public void testFindAllByIdsTyped() {
     Supplier<Stream<TestEntityStatic>> retrieved =
         () ->
@@ -718,7 +765,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(36)
   public void testAggregateOneDimensional() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl().query(new QueryImpl<>()).attrX(entityType.getAttribute(ATTR_BOOL));
@@ -731,7 +779,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(37)
   public void testAggregateOneDimensionalDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -747,7 +796,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(38)
   public void testAggregateTwoDimensional() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -763,7 +813,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(39)
   public void testAggregateTwoDimensionalDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -778,7 +829,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(40)
   public void testAggregateTwoDimensionalQuery() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -794,7 +846,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(groups = "readtest")
+  @Test
+  @Order(41)
   public void testAggregateTwoDimensionalQueryDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -812,28 +865,34 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test(
-      groups = "readtest",
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:ADD_DATA entityTypeId:DataServiceItEntityType")
+  @Test
+  @Order(42)
   public void testAddNotAllowed() {
     Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
-    dataService.add(entityType.getId(), entity);
+    Exception exception =
+        assertThrows(
+            EntityTypePermissionDeniedException.class,
+            () -> dataService.add(entityType.getId(), entity));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:ADD_DATA entityTypeId:DataServiceItEntityType");
   }
 
   @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "readtest",
-      expectedExceptions = ValueReferencedException.class,
-      expectedExceptionsMessageRegExp =
-          "entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0")
+  @Test
+  @Order(43)
   public void testDeleteReferencedEntity() {
-    dataService.delete(refEntityType.getId(), refEntities.get(0));
+    Exception exception =
+        assertThrows(
+            ValueReferencedException.class,
+            () -> dataService.delete(refEntityType.getId(), refEntities.get(0)));
+    assertThat(exception.getMessage())
+        .containsPattern("entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0");
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(groups = "addtest", dependsOnGroups = "readtest")
+  @Test
+  @Order(44)
   public void testAdd() {
     Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
     dataService.add(entityType.getId(), entity);
@@ -841,7 +900,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(groups = "addtest", dependsOnGroups = "readtest")
+  @Test
+  @Order(45)
   public void testAddStream() {
     Entity entity4 = entityTestHarness.createEntity(entityType, 4, refEntities.get(0));
     Entity entity5 = entityTestHarness.createEntity(entityType, 5, refEntities.get(0));
@@ -851,7 +911,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(groups = "updatetest", dependsOnGroups = "addtest")
+  @Test
+  @Order(46)
   public void testUpdate() {
     Entity entity = dataService.findOneById(entityType.getId(), "3");
     entity.set(ATTR_STRING, "updatedstring1");
@@ -877,7 +938,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(groups = "updatetest", dependsOnGroups = "addtest")
+  @Test
+  @Order(47)
   public void testUpdateStream() {
     Entity entity4 = dataService.findOneById(entityType.getId(), "4");
     entity4.set(ATTR_STRING, "string4");
@@ -891,36 +953,32 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "deletetest",
-      dependsOnGroups = {"addtest", "updatetest"})
+  @Test
+  @Order(48)
   public void testDelete() {
     dataService.deleteById(entityType.getId(), "3");
-    assertNull(dataService.findOneById(entityType.getId(), "3"));
+    org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "3"));
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "deletetest",
-      dependsOnGroups = {"addtest", "updatetest"})
+  @Test
+  @Order(49)
   public void testDeleteStream() {
     dataService.deleteAll(entityType.getId(), Stream.of("3", "4"));
-    assertNull(dataService.findOneById(entityType.getId(), "3"));
+    org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "3"));
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "deletetest",
-      dependsOnGroups = {"addtest", "updatetest"})
+  @Test
+  @Order(50)
   public void testDeleteById() {
     dataService.deleteById(entityType.getId(), "2");
-    assertNull(dataService.findOneById(entityType.getId(), "2"));
+    org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "2"));
   }
 
   @WithMockUser(username = USERNAME_WRITE)
-  @Test(
-      groups = "deletealltest",
-      dependsOnGroups = {"addtest", "updatetest", "deletetest"})
+  @Test
+  @Order(51)
   public void testDeleteAll() {
     dataService.deleteAll(entityType.getId());
     assertEquals(dataService.count(entityType.getId()), 0);

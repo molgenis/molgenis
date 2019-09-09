@@ -1,16 +1,16 @@
 package org.molgenis.data.i18n;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class I18nUtilsTest {
+class I18nUtilsTest {
 
   @Test
-  public void isI18n() {
+  void isI18n() {
     assertTrue(I18nUtils.isI18n("test-nl"));
     assertTrue(I18nUtils.isI18n("test-xxx"));
     assertFalse(I18nUtils.isI18n("test"));
@@ -22,7 +22,7 @@ public class I18nUtilsTest {
   }
 
   @Test
-  public void getLanguageCode() {
+  void getLanguageCode() {
     assertEquals(I18nUtils.getLanguageCode("test-nl"), "nl");
     assertEquals(I18nUtils.getLanguageCode("test-xxx"), "xxx");
     assertNull(I18nUtils.getLanguageCode("test"));

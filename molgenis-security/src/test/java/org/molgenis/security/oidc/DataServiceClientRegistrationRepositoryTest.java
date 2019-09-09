@@ -2,13 +2,16 @@ package org.molgenis.security.oidc;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -18,26 +21,25 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistration.ProviderDetails.UserInfoEndpoint;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
+class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
   @Mock private AuthenticationSettings authenticationSettings;
   private DataServiceClientRegistrationRepository dataServiceClientRegistrationRepository;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     dataServiceClientRegistrationRepository =
         new DataServiceClientRegistrationRepository(authenticationSettings);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testDataServiceClientRegistrationRepository() {
-    new DataServiceClientRegistrationRepository(null);
+  @Test
+  void testDataServiceClientRegistrationRepository() {
+    assertThrows(
+        NullPointerException.class, () -> new DataServiceClientRegistrationRepository(null));
   }
 
   @Test
-  public void testFindByRegistrationId() {
+  void testFindByRegistrationId() {
     String registrationId = "registrationId";
     String clientId = "clientId";
     String clientName = "clientName";
@@ -92,7 +94,7 @@ public class DataServiceClientRegistrationRepositoryTest extends AbstractMockito
   }
 
   @Test
-  public void testFindByRegistrationIdNotExists() {
+  void testFindByRegistrationIdNotExists() {
     String registrationId = "registrationId";
     when(authenticationSettings.getOidcClients()).thenReturn(emptyList());
     assertNull(dataServiceClientRegistrationRepository.findByRegistrationId(registrationId));

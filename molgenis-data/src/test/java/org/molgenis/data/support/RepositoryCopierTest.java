@@ -1,6 +1,8 @@
 package org.molgenis.data.support;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -11,9 +13,10 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -26,26 +29,24 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RepositoryCopierTest extends AbstractMockitoTest {
+class RepositoryCopierTest extends AbstractMockitoTest {
   private RepositoryCopier repositoryCopier;
   @Mock private MetaDataService metaDataService;
   @Mock private AttributeFactory attributeFactory;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     repositoryCopier = new RepositoryCopier(metaDataService, attributeFactory);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testRepositoryCopier() {
-    new RepositoryCopier(null, null);
+  @Test
+  void testRepositoryCopier() {
+    assertThrows(NullPointerException.class, () -> new RepositoryCopier(null, null));
   }
 
   @Test
-  public void testCopyRepository() {
+  void testCopyRepository() {
     Repository<Entity> repository = getMockRepository();
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);

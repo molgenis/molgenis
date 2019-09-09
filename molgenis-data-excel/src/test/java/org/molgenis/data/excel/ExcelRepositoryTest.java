@@ -1,13 +1,15 @@
 package org.molgenis.data.excel;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +18,9 @@ import java.util.NoSuchElementException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -26,11 +31,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
+class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -40,12 +42,12 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   private Workbook workbook;
   private InputStream is;
 
-  public ExcelRepositoryTest() {
+  ExcelRepositoryTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void beforeMethod() throws InvalidFormatException, IOException {
+  @BeforeEach
+  void beforeMethod() throws InvalidFormatException, IOException {
     is = getClass().getResourceAsStream("/test.xls");
     workbook = WorkbookFactory.create(is);
     excelSheetReader =
@@ -53,20 +55,26 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
             "test.xls", workbook.getSheet("test"), entityTypeFactory, attrMetaFactory);
   }
 
-  @AfterMethod
-  public void afterMethod() throws IOException {
+  @AfterEach
+  void afterMethod() throws IOException {
     is.close();
   }
 
   @SuppressWarnings({"resource", "deprecation"})
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void ExcelRepository() {
-    new ExcelRepository(
-        "test.xls", workbook.getSheet("test_mergedcells"), entityTypeFactory, attrMetaFactory);
+  @Test
+  void ExcelRepository() {
+    assertThrows(
+        MolgenisDataException.class,
+        () ->
+            new ExcelRepository(
+                "test.xls",
+                workbook.getSheet("test_mergedcells"),
+                entityTypeFactory,
+                attrMetaFactory));
   }
 
   @Test
-  public void addCellProcessor_header() {
+  void addCellProcessor_header() {
     CellProcessor processor = mock(CellProcessor.class);
     when(processor.processHeader()).thenReturn(true);
     when(processor.process("col1")).thenReturn("col1");
@@ -80,7 +88,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void addCellProcessor_data() {
+  void addCellProcessor_data() {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
     excelSheetReader.addCellProcessor(processor);
@@ -92,7 +100,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getAttribute() {
+  void getAttribute() {
     Attribute attr = excelSheetReader.getEntityType().getAttribute("col1");
     assertNotNull(attr);
     assertEquals(attr.getDataType(), AttributeType.STRING);
@@ -100,7 +108,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getAttributes() {
+  void getAttributes() {
     Iterator<Attribute> it = excelSheetReader.getEntityType().getAttributes().iterator();
     assertTrue(it.hasNext());
     assertEquals(it.next().getName(), "col1");
@@ -110,37 +118,37 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void getDescription() {
+  void getDescription() {
     assertNull(excelSheetReader.getEntityType().getDescription());
   }
 
   @Test
-  public void getIdAttribute() {
+  void getIdAttribute() {
     assertNull(excelSheetReader.getEntityType().getIdAttribute());
   }
 
   @Test
-  public void getLabel() {
+  void getLabel() {
     assertEquals(excelSheetReader.getEntityType().getLabel(), "test");
   }
 
   @Test
-  public void getLabelAttribute() {
+  void getLabelAttribute() {
     assertNull(excelSheetReader.getEntityType().getLabelAttribute());
   }
 
   @Test
-  public void getName() {
+  void getName() {
     assertEquals(excelSheetReader.getName(), "test");
   }
 
   @Test
-  public void getNrRows() {
+  void getNrRows() {
     assertEquals(excelSheetReader.getNrRows(), 5);
   }
 
   @Test
-  public void iterator() {
+  void iterator() {
     Iterator<Entity> it = excelSheetReader.iterator();
     assertTrue(it.hasNext());
 
@@ -166,34 +174,34 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
     assertFalse(it.hasNext());
   }
 
-  @Test(expectedExceptions = NoSuchElementException.class)
-  public void iteratorNextWhenNoNext() {
+  @Test
+  void iteratorNextWhenNoNext() {
     Iterator<Entity> it = excelSheetReader.iterator();
     it.next(); // 1
     it.next(); // 2
     it.next(); // 3
     it.next(); // 4
-    it.next(); // does not exist
+    assertThrows(NoSuchElementException.class, () -> it.next()); // does not exist
   }
 
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Duplicate column header 'entity' in sheet 'attributes' not allowed")
-  public void iteratorDuplicateSheetHeader() throws IOException, InvalidFormatException {
+  @Test
+  void iteratorDuplicateSheetHeader() throws IOException, InvalidFormatException {
     String fileName = "/duplicate-sheet-header.xlsx";
     try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
       Workbook workbook = WorkbookFactory.create(inputStream);
       ExcelRepository excelRepository =
           new ExcelRepository(
               fileName, workbook.getSheet("attributes"), entityTypeFactory, attrMetaFactory);
-      excelRepository.iterator();
+      Exception exception =
+          assertThrows(MolgenisDataException.class, () -> excelRepository.iterator());
+      assertThat(exception.getMessage())
+          .containsPattern("Duplicate column header 'entity' in sheet 'attributes' not allowed");
     }
   }
 
   @Test
-  public void iteratorHeaderCaseSensitive() throws IOException, InvalidFormatException {
+  void iteratorHeaderCaseSensitive() throws IOException, InvalidFormatException {
     String fileName = "/case-sensitivity.xlsx";
     try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
       Workbook workbook = WorkbookFactory.create(inputStream);
@@ -207,7 +215,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void attributesAndIterator() {
+  void attributesAndIterator() {
     Iterator<Attribute> headerIt = excelSheetReader.getEntityType().getAttributes().iterator();
     assertTrue(headerIt.hasNext());
     assertEquals(headerIt.next().getName(), "col1");

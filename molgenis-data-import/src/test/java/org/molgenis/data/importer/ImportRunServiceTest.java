@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,11 +9,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;
 import static org.molgenis.data.importer.ImportStatus.FAILED;
-import static org.testng.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
@@ -19,10 +22,8 @@ import org.molgenis.data.security.user.UserService;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.MailSender;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ImportRunServiceTest extends AbstractMockitoTest {
+class ImportRunServiceTest extends AbstractMockitoTest {
 
   @Mock private DataService dataService;
   @Mock private MailSender mailSender;
@@ -31,15 +32,15 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   @Mock private ImportRunFactory importRunFactory;
   private ImportRunService importRunService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     importRunService =
         new ImportRunService(
             dataService, mailSender, userService, contextMessageSource, importRunFactory);
   }
 
   @Test
-  public void testCreateEnglishMailText() {
+  void testCreateEnglishMailText() {
     ImportRun importRun = mock(ImportRun.class);
     when(importRun.getMessage()).thenReturn("Entity already exists.");
     when(importRun.getStatus()).thenReturn(FAILED.toString());
@@ -58,7 +59,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testFailImportRun() {
+  void testFailImportRun() {
     String importRunId = "importRunId";
     String mesage = "import run failed";
     ImportRun importRun = mock(ImportRun.class);
@@ -73,7 +74,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testFailImportRunTrancatedMessage() {
+  void testFailImportRunTrancatedMessage() {
     StringBuilder messageBuilder = new StringBuilder(65545);
     for (int i = 0; i < 65535; ++i) {
       messageBuilder.append("x");
@@ -97,7 +98,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testFailImportRunDoesNotExist() {
+  void testFailImportRunDoesNotExist() {
     String importRunId = "importRunId";
     String message = "import run failed";
     when(dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class)).thenReturn(null);
@@ -108,7 +109,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testFailImportRunNoMessage() {
+  void testFailImportRunNoMessage() {
     String persistedMessage = "unknown error";
     String importRunId = "importRunId";
     ImportRun importRun = mock(ImportRun.class);
@@ -123,7 +124,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testFinishImportRun() {
+  void testFinishImportRun() {
     String importRunId = "MyImportRunId";
     String message = "message";
     String importedEntities = "importedEntities";
@@ -138,8 +139,11 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
     verify(dataService).update(IMPORT_RUN, importRun);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testFinishImportRunUnknown() {
-    importRunService.finishImportRun("unknownImportRunId", "message", "importedEntities");
+  @Test
+  void testFinishImportRunUnknown() {
+    assertThrows(
+        UnknownEntityException.class,
+        () ->
+            importRunService.finishImportRun("unknownImportRunId", "message", "importedEntities"));
   }
 }

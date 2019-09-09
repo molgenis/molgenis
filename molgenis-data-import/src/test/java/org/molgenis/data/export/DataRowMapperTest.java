@@ -1,24 +1,24 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.export.mapper.DataRowMapper;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.Test;
 
-public class DataRowMapperTest {
+class DataRowMapperTest {
 
   @Test
-  public void testMapDataRow() {
+  void testMapDataRow() {
     Entity entity = mock(Entity.class);
     EntityType entityType = mock(EntityType.class);
     Entity refEntity1 = mock(Entity.class);

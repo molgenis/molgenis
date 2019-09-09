@@ -1,30 +1,31 @@
 package org.molgenis.data.migrate.version;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertFalse;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisUpgradeServiceImplTest extends AbstractMockitoTest {
+class MolgenisUpgradeServiceImplTest extends AbstractMockitoTest {
   @Mock private MolgenisVersionService molgenisVersionService;
   private MolgenisUpgradeServiceImpl molgenisUpgradeServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     molgenisUpgradeServiceImpl = new MolgenisUpgradeServiceImpl(molgenisVersionService);
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void testUpgradeFromVersion30() {
+  @Test
+  void testUpgradeFromVersion30() {
     when(molgenisVersionService.getSchemaVersion()).thenReturn(30);
-    molgenisUpgradeServiceImpl.upgrade();
+    assertThrows(UnsupportedOperationException.class, () -> molgenisUpgradeServiceImpl.upgrade());
   }
 
   @Test
-  public void testUpgradeFromVersion31() {
+  void testUpgradeFromVersion31() {
     when(molgenisVersionService.getSchemaVersion()).thenReturn(31);
     assertFalse(molgenisUpgradeServiceImpl.upgrade());
   }

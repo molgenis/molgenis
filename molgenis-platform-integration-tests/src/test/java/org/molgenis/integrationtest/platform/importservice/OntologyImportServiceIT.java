@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.importservice;
 
 import static java.util.Collections.emptySet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.DataAction.ADD;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
@@ -32,9 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.testng.annotations.Test;
 
-public class OntologyImportServiceIT extends ImportServiceIT {
+class OntologyImportServiceIT extends ImportServiceIT {
   private static final String USERNAME = "ontology_user";
 
   @Override
@@ -48,7 +48,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportOboAsNonSuperuser() {
+  void testDoImportOboAsNonSuperuser() {
     populateUserPermissions();
     testDoImportObo();
   }
@@ -57,7 +57,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportOboAsSuperuser() {
+  void testDoImportOboAsSuperuser() {
     testDoImportObo();
   }
 
@@ -119,7 +119,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportOwlAsNonSuperuser() {
+  void testDoImportOwlAsNonSuperuser() {
     populateUserPermissions();
     testDoImportOwl();
   }
@@ -128,7 +128,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportOwlAsSuperuser() {
+  void testDoImportOwlAsSuperuser() {
     testDoImportOwl();
   }
 

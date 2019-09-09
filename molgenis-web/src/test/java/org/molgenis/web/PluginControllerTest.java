@@ -1,25 +1,27 @@
 package org.molgenis.web;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class PluginControllerTest {
+class PluginControllerTest {
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void MolgenisPlugin() {
-    new PluginController("/invalidprefix/test") {};
+  @Test
+  void MolgenisPlugin() {
+    assertThrows(
+        IllegalArgumentException.class, () -> new PluginController("/invalidprefix/test") {});
   }
 
   @Test
-  public void getId() {
+  void getId() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = new PluginController(uri) {};
     assertEquals(molgenisPlugin.getId(), "test");
   }
 
   @Test
-  public void getUri() {
+  void getUri() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = new PluginController(uri) {};
     assertEquals(molgenisPlugin.getUri(), uri);

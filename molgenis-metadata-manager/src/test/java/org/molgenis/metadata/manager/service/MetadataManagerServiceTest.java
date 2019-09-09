@@ -2,18 +2,21 @@ package org.molgenis.metadata.manager.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -28,15 +31,14 @@ import org.molgenis.metadata.manager.model.EditorAttributeResponse;
 import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {MetadataManagerServiceTest.Config.class})
-public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests {
+class MetadataManagerServiceTest extends AbstractMockitoSpringContextTests {
   @Autowired private MetadataManagerService metadataManagerService;
 
   @Autowired private MetaDataService metaDataService;
@@ -52,9 +54,8 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
       newArrayList("en", "nl", "de", "es", "it", "pt", "fr", "xx");
 
   @Test
-  public void testGetEditorPackages() {
+  void testGetEditorPackages() {
     Package package_ = mock(Package.class);
-    when(package_.getId()).thenReturn("test");
     List<Package> packages = newArrayList(package_);
     when(metaDataService.getPackages()).thenReturn(packages);
 
@@ -68,7 +69,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
   }
 
   @Test
-  public void testGetEditorEntityType() {
+  void testGetEditorEntityType() {
     EntityType entityType = mock(EntityType.class);
     Attribute attr1 = mock(Attribute.class);
     Attribute attr2 = mock(Attribute.class);
@@ -90,15 +91,17 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
     assertEquals(actual, expected);
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityTypeException.class,
-      expectedExceptionsMessageRegExp = "id:unknownId")
-  public void testGetNonExistingEditorEntityType() {
-    metadataManagerService.getEditorEntityType("unknownId");
+  @Test
+  void testGetNonExistingEditorEntityType() {
+    Exception exception =
+        assertThrows(
+            UnknownEntityTypeException.class,
+            () -> metadataManagerService.getEditorEntityType("unknownId"));
+    assertThat(exception.getMessage()).containsPattern("id:unknownId");
   }
 
   @Test
-  public void testCreateEditorEntityType() {
+  void testCreateEditorEntityType() {
     EditorEntityType editorEntityType = mock(EditorEntityType.class);
     when(entityTypeMapper.createEditorEntityType()).thenReturn(editorEntityType);
 
@@ -110,7 +113,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
   }
 
   @Test
-  public void testUpsertEntityType() {
+  void testUpsertEntityType() {
     EditorEntityType editorEntityType = mock(EditorEntityType.class);
     EntityType entityType = mock(EntityType.class);
 
@@ -121,7 +124,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
   }
 
   @Test
-  public void testCreateEditorAttribute() {
+  void testCreateEditorAttribute() {
     EditorAttribute editorAttribute = mock(EditorAttribute.class);
     when(attributeMapper.createEditorAttribute()).thenReturn(editorAttribute);
 
@@ -137,34 +140,34 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public MetaDataService metaDataService() {
+    MetaDataService metaDataService() {
       return mock(MetaDataService.class);
     }
 
     @Bean
-    public PackageMapper packageMapper() {
+    PackageMapper packageMapper() {
       return mock(PackageMapper.class);
     }
 
     @Bean
-    public EntityTypeMapper entityTypeMapper() {
+    EntityTypeMapper entityTypeMapper() {
       return mock(EntityTypeMapper.class);
     }
 
     @Bean
-    public AttributeMapper attributeMapper() {
+    AttributeMapper attributeMapper() {
       return mock(AttributeMapper.class);
     }
 
     @Bean
-    public EntityTypeFactory entityTypeFactory() {
+    EntityTypeFactory entityTypeFactory() {
       return mock(EntityTypeFactory.class);
     }
 
     @Bean
-    public MetadataManagerService metadataManagerService() {
+    MetadataManagerService metadataManagerService() {
       return new MetadataManagerServiceImpl(
           metaDataService(), packageMapper(), entityTypeMapper(), attributeMapper());
     }

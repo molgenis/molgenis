@@ -5,11 +5,12 @@ import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
 import static org.apache.poi.ss.usermodel.CellType.ERROR;
 import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 import static org.apache.poi.ss.usermodel.CellType.STRING;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -22,24 +23,24 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.processor.LowerCaseProcessor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ExcelEntityTest {
+class ExcelEntityTest {
   private ExcelEntity excelEntity;
   private List<CellProcessor> cellProcessors;
   private Row row;
   private Cell cell;
   private Map<String, Integer> colNamesMap;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     cellProcessors = new ArrayList<>();
     row = mock(Row.class);
 
@@ -54,7 +55,7 @@ public class ExcelEntityTest {
   }
 
   @Test
-  public void getStringType() {
+  void getStringType() {
     when(cell.getCellTypeEnum()).thenReturn(STRING);
     when(cell.getStringCellValue()).thenReturn("XXX");
 
@@ -64,14 +65,14 @@ public class ExcelEntityTest {
   }
 
   @Test
-  public void getBlankType() {
+  void getBlankType() {
     when(cell.getCellTypeEnum()).thenReturn(BLANK);
     Object val = excelEntity.get("attr1");
     assertNull(val);
   }
 
   @Test
-  public void getIntegerType() {
+  void getIntegerType() {
     when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
     when(cell.getNumericCellValue()).thenReturn(1d);
 
@@ -81,7 +82,7 @@ public class ExcelEntityTest {
   }
 
   @Test
-  public void getDoubleType() {
+  void getDoubleType() {
     when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
     when(cell.getNumericCellValue()).thenReturn(1.8d);
 
@@ -91,7 +92,7 @@ public class ExcelEntityTest {
   }
 
   @Test
-  public void getNumericDateType() {
+  void getNumericDateType() {
     double dateDouble = 35917.0;
     TimeZone utcTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
     Date javaDate = DateUtil.getJavaDate(dateDouble, utcTimeZone);
@@ -111,7 +112,7 @@ public class ExcelEntityTest {
   }
 
   @Test
-  public void getBooleanType() {
+  void getBooleanType() {
     when(cell.getCellTypeEnum()).thenReturn(BOOLEAN);
     when(cell.getBooleanCellValue()).thenReturn(true);
 
@@ -120,20 +121,20 @@ public class ExcelEntityTest {
     assertEquals(val, "true");
   }
 
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void getErrorType() {
+  @Test
+  void getErrorType() {
     when(cell.getCellTypeEnum()).thenReturn(ERROR);
-    excelEntity.get("attr1");
+    assertThrows(MolgenisDataException.class, () -> excelEntity.get("attr1"));
   }
 
   @Test
-  public void set() {
+  void set() {
     excelEntity.set("attr1", "test");
     assertEquals(excelEntity.get("attr1"), "test");
   }
 
   @Test
-  public void setEntity() {
+  void setEntity() {
     Entity entity =
         new DynamicEntity(mock(EntityType.class)) {
           @Override

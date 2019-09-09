@@ -5,50 +5,41 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {PrincipalSecurityContextRegistryImplTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class PrincipalSecurityContextRegistryImplTest
-    extends AbstractMockitoTestNGSpringContextTests {
-  @Autowired private Config config;
-
-  @Autowired private SecurityContextRegistry securityContextRegistry;
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SecurityTestExecutionListeners
+class PrincipalSecurityContextRegistryImplTest {
+  @Mock private SecurityContextRegistry securityContextRegistry;
 
   private PrincipalSecurityContextRegistryImpl principalSecurityContextRegistryImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
-    config.resetMocks();
+  @BeforeEach
+  void setUpBeforeMethod() {
     principalSecurityContextRegistryImpl =
         new PrincipalSecurityContextRegistryImpl(securityContextRegistry);
   }
 
   @WithMockUser(username = "user")
   @Test
-  public void testGetSecurityContextsUserThreadNoUserSessions() {
+  void testGetSecurityContextsUserThreadNoUserSessions() {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Object user = securityContext.getAuthentication().getPrincipal();
     assertEquals(
@@ -58,7 +49,7 @@ public class PrincipalSecurityContextRegistryImplTest
 
   @WithMockUser(username = "systemUser")
   @Test
-  public void testGetSecurityContextsNoUserThreadNoUserSessions() {
+  void testGetSecurityContextsNoUserThreadNoUserSessions() {
     Object user = when(mock(User.class).getUsername()).thenReturn("user").getMock();
     assertEquals(
         principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toList()),
@@ -67,7 +58,7 @@ public class PrincipalSecurityContextRegistryImplTest
 
   @WithMockUser(username = "user")
   @Test
-  public void testGetSecurityContextsUserThreadSessions() {
+  void testGetSecurityContextsUserThreadSessions() {
     Authentication userAuthentication = SecurityContextHolder.getContext().getAuthentication();
     SecurityContext securityContextUser0 = mock(SecurityContext.class);
     when(securityContextUser0.getAuthentication()).thenReturn(userAuthentication);
@@ -85,23 +76,5 @@ public class PrincipalSecurityContextRegistryImplTest
     assertEquals(
         principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toSet()),
         new HashSet<>(asList(securityContextUser0, securityContextUser1)));
-  }
-
-  @Configuration
-  public static class Config {
-    public Config() {
-      MockitoAnnotations.initMocks(this);
-    }
-
-    @Mock private SecurityContextRegistry securityContextRegistry;
-
-    @Bean
-    public SecurityContextRegistry securityContextRegistry() {
-      return securityContextRegistry;
-    }
-
-    void resetMocks() {
-      reset(securityContextRegistry);
-    }
   }
 }

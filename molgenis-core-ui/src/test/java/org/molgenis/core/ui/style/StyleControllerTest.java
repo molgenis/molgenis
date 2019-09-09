@@ -10,23 +10,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
-public class StyleControllerTest {
+class StyleControllerTest {
 
   @Mock private StyleService styleService;
 
   private MockMvc mockMvc;
 
-  @BeforeMethod
-  public void before() {
+  @BeforeEach
+  void before() {
     initMocks(this);
     StyleController styleController = new StyleController(styleService);
 
@@ -34,7 +34,7 @@ public class StyleControllerTest {
   }
 
   @Test
-  public void testGetTheme() throws Exception {
+  void testGetTheme() throws Exception {
     FileSystemResource themeResource = mock(FileSystemResource.class);
     InputStream inputStream =
         new ByteArrayInputStream("yo, it's a style, oke ".getBytes(StandardCharsets.UTF_8));
@@ -49,7 +49,7 @@ public class StyleControllerTest {
   }
 
   @Test
-  public void testGetBs4Theme() throws Exception {
+  void testGetBs4Theme() throws Exception {
     FileSystemResource themeResource = mock(FileSystemResource.class);
     InputStream inputStream =
         new ByteArrayInputStream("next level style ".getBytes(StandardCharsets.UTF_8));

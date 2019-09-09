@@ -1,5 +1,9 @@
 package org.molgenis.semanticmapper.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,11 +12,11 @@ import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -28,10 +32,8 @@ import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AlgorithmServiceImplTest extends AbstractMockitoTest {
+class AlgorithmServiceImplTest extends AbstractMockitoTest {
   @Mock private OntologyTagService ontologyTagService;
   @Mock private SemanticSearchService semanticSearhService;
   @Mock private AlgorithmGeneratorService algorithmGeneratorService;
@@ -40,63 +42,76 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
 
   private AlgorithmServiceImpl algorithmServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     algorithmServiceImpl =
         new AlgorithmServiceImpl(
             semanticSearhService, algorithmGeneratorService, entityManager, jsMagmaScriptEvaluator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testAlgorithmServiceImpl() {
-    new AlgorithmServiceImpl(null, null, null, null);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp = "'invalidDate' can't be converted to type 'DATE'")
-  public void testApplyConvertDateNumberFormatException() {
-    testApplyConvertException("invalidDate", DATE);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp = "'invalidDateTime' can't be converted to type 'DATE_TIME'")
-  public void testApplyConvertDateTimeNumberFormatException() {
-    testApplyConvertException("invalidDateTime", DATE_TIME);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp = "'invalidDouble' can't be converted to type 'DECIMAL'")
-  public void testApplyConvertDoubleNumberFormatException() {
-    testApplyConvertException("invalidDouble", DECIMAL);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp = "'invalidInt' can't be converted to type 'INT'")
-  public void testApplyConvertIntNumberFormatException() {
-    testApplyConvertException("invalidInt", INT);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp =
-          "'9007199254740991' is larger than the maximum allowed value for type 'INT'")
-  public void testApplyConvertIntArithmeticException() {
-    testApplyConvertException("9007199254740991", INT);
-  }
-
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp = "'invalidLong' can't be converted to type 'LONG'")
-  public void testApplyConvertLongNumberFormatException() {
-    testApplyConvertException("invalidLong", LONG);
+  @Test
+  void testAlgorithmServiceImpl() {
+    assertThrows(
+        NullPointerException.class, () -> new AlgorithmServiceImpl(null, null, null, null));
   }
 
   @Test
-  public void testApplyAlgorithm() {
+  void testApplyConvertDateNumberFormatException() {
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class, () -> testApplyConvertException("invalidDate", DATE));
+    assertThat(exception.getMessage())
+        .containsPattern("'invalidDate' can't be converted to type 'DATE'");
+  }
+
+  @Test
+  void testApplyConvertDateTimeNumberFormatException() {
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class,
+            () -> testApplyConvertException("invalidDateTime", DATE_TIME));
+    assertThat(exception.getMessage())
+        .containsPattern("'invalidDateTime' can't be converted to type 'DATE_TIME'");
+  }
+
+  @Test
+  void testApplyConvertDoubleNumberFormatException() {
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class, () -> testApplyConvertException("invalidDouble", DECIMAL));
+    assertThat(exception.getMessage())
+        .containsPattern("'invalidDouble' can't be converted to type 'DECIMAL'");
+  }
+
+  @Test
+  void testApplyConvertIntNumberFormatException() {
+    Exception exception =
+        assertThrows(AlgorithmException.class, () -> testApplyConvertException("invalidInt", INT));
+    assertThat(exception.getMessage())
+        .containsPattern("'invalidInt' can't be converted to type 'INT'");
+  }
+
+  @Test
+  void testApplyConvertIntArithmeticException() {
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class, () -> testApplyConvertException("9007199254740991", INT));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "'9007199254740991' is larger than the maximum allowed value for type 'INT'");
+  }
+
+  @Test
+  void testApplyConvertLongNumberFormatException() {
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class, () -> testApplyConvertException("invalidLong", LONG));
+    assertThat(exception.getMessage())
+        .containsPattern("'invalidLong' can't be converted to type 'LONG'");
+  }
+
+  @Test
+  void testApplyAlgorithm() {
     Attribute attribute = mock(Attribute.class);
     String algorithm = "algorithm";
     Entity entity = mock(Entity.class);
@@ -113,7 +128,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testApplyAlgorithmWitInvalidScript() {
+  void testApplyAlgorithmWitInvalidScript() {
     Attribute attribute = mock(Attribute.class);
     String algorithm = "algorithm";
     Entity entity = mock(Entity.class);
@@ -126,11 +141,8 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     assertEquals(eval.getErrorMessage(), "algorithm is not defined");
   }
 
-  @Test(
-      expectedExceptions = AlgorithmException.class,
-      expectedExceptionsMessageRegExp =
-          "org.molgenis.script.core.ScriptException: algorithm is not defined")
-  public void testApplyWithInvalidScript() {
+  @Test
+  void testApplyWithInvalidScript() {
     AttributeMapping attributeMapping = mock(AttributeMapping.class);
     String algorithm = "algorithm";
     when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
@@ -138,11 +150,16 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Entity sourceEntity = mock(Entity.class);
     when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3))
         .thenReturn(new ScriptException("algorithm is not defined"));
-    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3);
+    Exception exception =
+        assertThrows(
+            AlgorithmException.class,
+            () -> algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3));
+    assertThat(exception.getMessage())
+        .containsPattern("org.molgenis.script.core.ScriptException: algorithm is not defined");
   }
 
   @Test
-  public void testCopyAlgorithms() {
+  void testCopyAlgorithms() {
     EntityMapping sourceEntityMapping = mock(EntityMapping.class);
     AttributeMapping attributeMapping = mock(AttributeMapping.class);
     when(attributeMapping.getIdentifier()).thenReturn("MyIdentifier");

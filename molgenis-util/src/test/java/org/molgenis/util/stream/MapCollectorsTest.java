@@ -1,16 +1,17 @@
 package org.molgenis.util.stream;
 
 import static java.util.function.Function.identity;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class MapCollectorsTest {
+class MapCollectorsTest {
   @Test
-  public void testToLinkedMap() {
+  void testToLinkedMap() {
     Map<String, Integer> expectedLinkedMap = new LinkedHashMap<>();
     expectedLinkedMap.put("a", 1);
     expectedLinkedMap.put("bb", 2);
@@ -20,12 +21,16 @@ public class MapCollectorsTest {
     assertEquals(expectedLinkedMap, actualLinkedMap);
   }
 
-  @Test(
-      expectedExceptions = IllegalStateException.class,
-      expectedExceptionsMessageRegExp = "Duplicate key detected with values '1' and '2'")
-  public void testToLinkedMapDuplicateKey() {
+  @Test
+  void testToLinkedMapDuplicateKey() {
     //noinspection ResultOfMethodCallIgnored
-    Stream.of("a1", "a2")
-        .collect(MapCollectors.toLinkedMap(str -> str.charAt(0), str -> str.charAt(1)));
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                Stream.of("a1", "a2")
+                    .collect(
+                        MapCollectors.toLinkedMap(str -> str.charAt(0), str -> str.charAt(1))));
+    assertEquals("Duplicate key detected with values '1' and '2'", exception.getMessage());
   }
 }

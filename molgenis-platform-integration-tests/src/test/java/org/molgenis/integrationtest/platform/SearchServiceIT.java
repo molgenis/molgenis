@@ -6,6 +6,10 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL;
 import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL_MREF;
@@ -29,9 +33,6 @@ import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,11 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.apache.lucene.search.Explanation;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
@@ -51,16 +57,12 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.semanticsearch.explain.service.ElasticSearchExplainService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
-public class SearchServiceIT extends AbstractTestNGSpringContextTests {
+class SearchServiceIT extends AbstractMockitoSpringContextTests {
   private static EntityType entityTypeDynamic;
   private static EntityType refEntityTypeDynamic;
 
@@ -68,8 +70,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
   @Autowired private ElasticsearchService searchService;
   @Autowired private ElasticSearchExplainService explainService;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     searchService.refreshIndex();
     refEntityTypeDynamic = testHarness.createDynamicRefEntityType("SearchServiceITRefEntityType");
     entityTypeDynamic =
@@ -79,8 +81,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     searchService.createIndex(entityTypeDynamic);
   }
 
-  @AfterMethod
-  public void afterMethod() {
+  @AfterEach
+  void afterMethod() {
     try {
       searchService.deleteIndex(entityTypeDynamic);
     } catch (UnknownIndexException e) { // silently ignore
@@ -93,7 +95,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testFuzzyMatch() {
+  void testFuzzyMatch() {
     // Fuzzy match is used to find child nodes of an OntologyTerm.
     List<Entity> ontologyTerms = createDynamic(6).collect(toList());
     ontologyTerms.get(0).getEntity(ATTR_XREF).set(ATTR_REF_STRING, "0[0]");
@@ -123,7 +125,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testSemanticSearch() {
+  void testSemanticSearch() {
     List<Entity> attributes = createDynamic(6).collect(toList());
     attributes.get(0).set(ATTR_STRING, "High chance of pulmonary disease");
     attributes.get(1).set(ATTR_STRING, "And now for something completely different...");
@@ -180,7 +182,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
 
     List<Float> scores = explanations.stream().map(Explanation::getValue).collect(toList());
     // FIXME these scores vary between runs
-    // assertEquals(scores, asList(0.3463153, 0, 0.7889965, 1.7814579, 0.76421005, 1.0707202));
+    // assertEquals(scores, asList(0.3463153, 0, 0.7889965,
+    // 1.7814579, 0.76421005, 1.0707202));
 
     Map<String, String> expandedQueryMap = new HashMap<>();
     for (String term :
@@ -229,23 +232,23 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(explanationStrings, expectedExplanationStrings);
   }
 
-  @Test(singleThreaded = true)
-  public void testIndex() throws InterruptedException {
+  @Test
+  void testIndex() throws InterruptedException {
     createAndIndexEntities(2);
 
     assertEquals(searchService.count(entityTypeDynamic), 2);
   }
 
-  @Test(singleThreaded = true)
-  public void testCount() {
+  @Test
+  void testCount() {
     createAndIndexEntities(2);
 
     assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>()), 2);
     assertEquals(searchService.count(entityTypeDynamic), 2);
   }
 
-  @Test(singleThreaded = true)
-  public void testDelete() {
+  @Test
+  void testDelete() {
     Entity entity = createAndIndexEntities(1).get(0);
 
     searchService.delete(entityTypeDynamic, entity);
@@ -253,8 +256,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic), 0);
   }
 
-  @Test(singleThreaded = true)
-  public void testDeleteById() {
+  @Test
+  void testDeleteById() {
     Entity entity = createAndIndexEntities(1).get(0);
 
     searchService.deleteById(entityTypeDynamic, entity.getIdValue());
@@ -262,8 +265,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic), 0);
   }
 
-  @Test(singleThreaded = true)
-  public void testDeleteStream() {
+  @Test
+  void testDeleteStream() {
     List<Entity> entities = createAndIndexEntities(2);
 
     searchService.delete(entityTypeDynamic, entities.stream());
@@ -271,31 +274,31 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(searchService.count(entityTypeDynamic), 0);
   }
 
-  @Test(singleThreaded = true, expectedExceptions = UnknownIndexException.class)
-  public void testDeleteAll() {
+  @Test
+  void testDeleteAll() {
     createAndIndexEntities(5);
 
     searchService.deleteIndex(entityTypeDynamic);
     searchService.refreshIndex();
-    assertEquals(searchService.count(entityTypeDynamic), 0);
+    assertThrows(UnknownIndexException.class, () -> searchService.count(entityTypeDynamic));
   }
 
-  @Test(singleThreaded = true)
-  public void testFindAllEmpty() {
+  @Test
+  void testFindAllEmpty() {
     long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
     assertEquals(count, 0L);
   }
 
-  @Test(singleThreaded = true)
-  public void testFindAll() {
+  @Test
+  void testFindAll() {
     List<Entity> entities = createAndIndexEntities(5);
 
     long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
     assertEquals(count, entities.size());
   }
 
-  @Test(singleThreaded = true)
-  public void testFindAllStreaming() {
+  @Test
+  void testFindAllStreaming() {
     createAndIndexEntities(3);
 
     Supplier<Stream<Object>> retrieved =
@@ -303,7 +306,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(retrieved.get().count(), 3);
   }
 
-  @DataProvider(name = "findQueryOperatorEq")
   private static Object[][] findQueryOperatorEq() {
     return new Object[][] {
       {ATTR_ID, "1", singletonList("1")},
@@ -338,9 +340,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorEq")
-  public void testFindQueryOperatorEq(
-      String attrName, Object value, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorEq")
+  void testFindQueryOperatorEq(String attrName, Object value, List<Integer> expectedEntityIds) {
     createAndIndexEntities(3);
 
     Query<Entity> query = new QueryImpl<>().eq(attrName, value);
@@ -349,7 +351,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(ids, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorIn")
   private static Object[][] findQueryOperatorIn() {
     return new Object[][] {
       {singletonList("-1"), emptyList()},
@@ -359,8 +360,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorIn")
-  public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorIn")
+  void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIds) {
     createAndIndexEntities(2);
 
     Query<Entity> query = new QueryImpl<>().in(ATTR_ID, ids);
@@ -369,7 +371,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorLess")
   private static Object[][] findQueryOperatorLess() {
     return new Object[][] {
       {9, emptyList()},
@@ -380,8 +381,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorLess")
-  public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLess")
+  void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIds) {
     createAndIndexEntities(5);
 
     Query<Entity> query = new QueryImpl<>().lt(ATTR_INT, value);
@@ -390,7 +392,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorLessEqual")
   private static Object[][] findQueryOperatorLessEqual() {
     return new Object[][] {
       {9, emptyList()},
@@ -401,8 +402,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorLessEqual")
-  public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLessEqual")
+  void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIds) {
     createAndIndexEntities(5);
 
     Query<Entity> query = new QueryImpl<>().le(ATTR_INT, value);
@@ -411,7 +413,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorGreater")
   private static Object[][] findQueryOperatorGreater() {
     return new Object[][] {
       {9, asList("0", "1", "2")},
@@ -421,8 +422,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorGreater")
-  public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorGreater")
+  void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIds) {
     createAndIndexEntities(3);
 
     Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, value);
@@ -431,7 +433,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorGreaterEqual")
   private static Object[][] findQueryOperatorGreaterEqual() {
     return new Object[][] {
       {9, asList("0", "1", "2")},
@@ -442,8 +443,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorGreaterEqual")
-  public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorGreaterEqual")
+  void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIds) {
     createAndIndexEntities(3);
 
     Query<Entity> query = new QueryImpl<>().ge(ATTR_INT, value);
@@ -452,7 +454,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, expectedEntityIds);
   }
 
-  @DataProvider(name = "findQueryOperatorRange")
   private static Object[][] findQueryOperatorRange() {
     return new Object[][] {
       {0, 9, emptyList()},
@@ -464,8 +465,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
-  public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIDs) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorRange")
+  void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(3);
 
     Query<Entity> nestedQuery = new QueryImpl<>().rng(ATTR_INT, low, high);
@@ -474,15 +476,15 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorLike")
   private static Object[][] findQueryOperatorLike() {
     return new Object[][] {
       {"stri", asList("0", "1")}, {"Stri", asList("0", "1")}, {"nomatch", emptyList()}
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
-  public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIDs) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorLike")
+  void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(2);
 
     Query<Entity> nestedQuery = new QueryImpl<>().like(ATTR_STRING, likeStr);
@@ -491,7 +493,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorNot")
   private static Object[][] findQueryOperatorNot() {
     return new Object[][] {
       {9, asList("0", "1", "2")},
@@ -502,8 +503,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
-  public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIDs) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorNot")
+  void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(3);
 
     Query<Entity> nestedQuery = new QueryImpl<>().not().eq(ATTR_INT, value);
@@ -512,7 +514,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorAnd")
   private static Object[][] findQueryOperatorAnd() {
     return new Object[][] {
       {"string1", 10, singletonList("0")},
@@ -522,9 +523,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
-  public void testFindQueryOperatorAnd(
-      String strValue, int value, List<Integer> expectedEntityIDs) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorAnd")
+  void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(3);
 
     Query<Entity> nestedQuery =
@@ -534,7 +535,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorOr")
   private static Object[][] findQueryOperatorOr() {
     return new Object[][] {
       {"string1", 10, asList("0", "1", "2")},
@@ -544,8 +544,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
-  public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIDs) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorOr")
+  void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(3);
 
     Query<Entity> nestedQuery =
@@ -555,7 +556,6 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorNested")
   private static Object[][] findQueryOperatorNested() {
     return new Object[][] {
       {true, "string1", 10, asList("0", "2")},
@@ -569,8 +569,9 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
-  public void testFindQueryOperatorNested(
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorNested")
+  void testFindQueryOperatorNested(
       boolean boolValue, String strValue, int value, List<Integer> expectedEntityIDs) {
     createAndIndexEntities(3);
 
@@ -588,15 +589,15 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundAsList, expectedEntityIDs);
   }
 
-  @DataProvider(name = "findQueryOperatorSearch")
   private static Object[][] findQueryOperatorSearch() {
     return new Object[][] {
       {"body", singletonList("1")}, {"head", singletonList("1")}, {"unknownString", emptyList()}
     };
   }
 
-  @Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
-  public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIds) {
+  @ParameterizedTest
+  @MethodSource("findQueryOperatorSearch")
+  void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIds) {
     createAndIndexEntities(2);
 
     Query<Entity> query = new QueryImpl<>().search(ATTR_HTML, searchStr);
@@ -605,8 +606,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(ids, expectedEntityIds);
   }
 
-  @Test(singleThreaded = true)
-  public void testSearchRanking() {
+  @Test
+  void testSearchRanking() {
     List<Entity> entities = createDynamic(5).collect(toList());
     entities.get(0).set(ATTR_STRING, "ligament carcinoma");
     entities.get(1).set(ATTR_STRING, "cars in omaha");
@@ -621,8 +622,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, asList("0", "2"));
   }
 
-  @Test(singleThreaded = true)
-  public void testSearchRankingMultipleWords() {
+  @Test
+  void testSearchRankingMultipleWords() {
     List<Entity> entities = createDynamic(50).collect(toList());
     entities.get(0).set(ATTR_STRING, "ligament carcinoma");
     entities.get(1).set(ATTR_STRING, "cars in omaha");
@@ -637,8 +638,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(foundIds, asList("0", "2", "1"));
   }
 
-  @Test(singleThreaded = true)
-  public void testSearchQueryLimit2_Offset2_sortOnInt() {
+  @Test
+  void testSearchQueryLimit2_Offset2_sortOnInt() {
     List<Entity> testEntities = createAndIndexEntities(10);
 
     Query<Entity> query =
@@ -649,8 +650,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(ids, expected);
   }
 
-  @Test(singleThreaded = true)
-  public void testSearchAsStreamQueryLimit2_Offset2_sortOnInt() {
+  @Test
+  void testSearchAsStreamQueryLimit2_Offset2_sortOnInt() {
     List<Entity> testEntities = createAndIndexEntities(10);
 
     Query<Entity> query =
@@ -662,8 +663,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests {
     assertEquals(ids, expected);
   }
 
-  @Test(singleThreaded = true)
-  public void testFindOneQuery() {
+  @Test
+  void testFindOneQuery() {
     Entity entity = createAndIndexEntities(1).get(0);
 
     Object entityId =

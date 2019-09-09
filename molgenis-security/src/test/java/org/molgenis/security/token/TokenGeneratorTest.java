@@ -1,14 +1,14 @@
 package org.molgenis.security.token;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class TokenGeneratorTest {
+class TokenGeneratorTest {
 
   @Test
-  public void generateToken() {
+  void generateToken() {
     TokenGenerator tg = new TokenGenerator();
     String token = tg.generateToken();
     assertNotNull(token);

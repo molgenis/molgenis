@@ -1,22 +1,22 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.*;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.export.mapper.PackageMapper;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class PackageMapperTest extends AbstractMockitoTest {
+class PackageMapperTest extends AbstractMockitoTest {
 
   @Test
-  public void testMapPackage() {
+  void testMapPackage() {
     Package pack = mock(Package.class);
     Tag tag1 = mock(Tag.class);
     Tag tag2 = mock(Tag.class);

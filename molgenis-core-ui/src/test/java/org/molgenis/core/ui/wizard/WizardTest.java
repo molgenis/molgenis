@@ -1,25 +1,25 @@
 package org.molgenis.core.ui.wizard;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Test;
 import org.springframework.validation.BindingResult;
-import org.testng.annotations.Test;
 
-public class WizardTest {
+class WizardTest {
 
   @Test
-  public void addPage() {
+  void addPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     assertEquals(wizard.getPages().size(), 1);
   }
 
   @Test
-  public void getCurrentPage() {
+  void getCurrentPage() {
     Wizard wizard = new Wizard();
     WizardPage page = new TestWizardPage();
     wizard.addPage(page);
@@ -27,7 +27,7 @@ public class WizardTest {
   }
 
   @Test
-  public void getNextButton() {
+  void getNextButton() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -46,7 +46,7 @@ public class WizardTest {
   }
 
   @Test
-  public void getPages() {
+  void getPages() {
     Wizard wizard = new Wizard();
     assertNotNull(wizard.getPages());
     assertEquals(wizard.getPages().size(), 0);
@@ -59,7 +59,7 @@ public class WizardTest {
   }
 
   @Test
-  public void getPreviousButton() {
+  void getPreviousButton() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     WizardButton prevButton = wizard.getPreviousButton();
@@ -69,7 +69,7 @@ public class WizardTest {
   }
 
   @Test
-  public void isFirstPage() {
+  void isFirstPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -79,7 +79,7 @@ public class WizardTest {
   }
 
   @Test
-  public void isLastPage() {
+  void isLastPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -89,7 +89,7 @@ public class WizardTest {
   }
 
   @Test
-  public void next() {
+  void next() {
     Wizard wizard = new Wizard();
     WizardPage p1 = new TestWizardPage();
     wizard.addPage(p1);
@@ -102,7 +102,7 @@ public class WizardTest {
   }
 
   @Test
-  public void previous() {
+  void previous() {
     Wizard wizard = new Wizard();
     WizardPage p1 = new TestWizardPage();
     wizard.addPage(p1);

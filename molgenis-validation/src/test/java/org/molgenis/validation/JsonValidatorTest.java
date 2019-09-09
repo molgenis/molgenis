@@ -3,28 +3,29 @@ package org.molgenis.validation;
 import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singletonList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.gson.Gson;
 import org.everit.json.schema.Schema;
+import org.junit.jupiter.api.Test;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {JsonValidator.class})
-public class JsonValidatorTest extends AbstractTestNGSpringContextTests {
+class JsonValidatorTest extends AbstractMockitoSpringContextTests {
   @Autowired private JsonValidator jsonValidator;
 
   private Gson gson = new Gson();
 
-  @Test(expectedExceptions = InvalidJsonSchemaException.class)
-  public void testLoadSchemaInvalid() {
-    jsonValidator.loadSchema("");
+  @Test
+  void testLoadSchemaInvalid() {
+    assertThrows(InvalidJsonSchemaException.class, () -> jsonValidator.loadSchema(""));
   }
 
   @Test
-  public void testLoadAndValidate() {
+  void testLoadAndValidate() {
     String schemaJson =
         gson.toJson(
             of(
@@ -41,7 +42,7 @@ public class JsonValidatorTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testLoadAndValidateInvalid() {
+  void testLoadAndValidateInvalid() {
     String schemaJson =
         gson.toJson(
             of(

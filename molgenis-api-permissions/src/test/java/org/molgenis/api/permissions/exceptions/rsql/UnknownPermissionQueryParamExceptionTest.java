@@ -1,35 +1,35 @@
 package org.molgenis.api.permissions.exceptions.rsql;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class UnknownPermissionQueryParamExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class UnknownPermissionQueryParamExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("api-permissions");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new UnknownPermissionQueryParamException("type"), lang, message);
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     CodedRuntimeException ex = new UnknownPermissionQueryParamException("type");
     assertEquals(ex.getMessage(), "key:type");
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {"en", "Unknown field 'type' in query, only 'user' and 'role' are supported."}
     };

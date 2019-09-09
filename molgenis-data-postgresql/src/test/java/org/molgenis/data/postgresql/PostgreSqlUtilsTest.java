@@ -2,6 +2,8 @@ package org.molgenis.data.postgresql;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -23,7 +25,6 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -31,6 +32,10 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.Iterator;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.model.FileMeta;
@@ -38,11 +43,8 @@ import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PostgreSqlUtilsTest {
+class PostgreSqlUtilsTest {
   private static Attribute attrBool;
   private static Attribute attrBoolNillable;
   private static Attribute attrCategorical;
@@ -107,8 +109,8 @@ public class PostgreSqlUtilsTest {
   private static int xrefValueId;
   private static OffsetDateTime offsetDateTime;
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws ParseException {
+  @BeforeAll
+  static void setUpBeforeClass() throws ParseException {
     // create ref entities
     String attrRefStringIdName = "refStringId";
     Attribute attrRefStringId = mock(Attribute.class);
@@ -328,8 +330,7 @@ public class PostgreSqlUtilsTest {
     when(entity.toString()).thenReturn("entity");
   }
 
-  @DataProvider(name = "getPostgreSqlValue")
-  public static Iterator<Object[]> getPostgreSqlValueProvider() {
+  static Iterator<Object[]> getPostgreSqlValueProvider() {
     return asList(
             new Object[] {attrBool, boolValue},
             new Object[] {attrBoolNillable, null},
@@ -373,18 +374,22 @@ public class PostgreSqlUtilsTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getPostgreSqlValue")
-  public void getPostgreSqlValue(Attribute attr, Object postgreSqlValue) {
+  @ParameterizedTest
+  @MethodSource("getPostgreSqlValueProvider")
+  void getPostgreSqlValue(Attribute attr, Object postgreSqlValue) {
     assertEquals(PostgreSqlUtils.getPostgreSqlValue(entity, attr), postgreSqlValue);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void getPostgreSqlValueCompound() {
-    PostgreSqlUtils.getPostgreSqlValue(mock(Entity.class), createAttr("attrCompound", COMPOUND));
+  @Test
+  void getPostgreSqlValueCompound() {
+    assertThrows(
+        RuntimeException.class,
+        () ->
+            PostgreSqlUtils.getPostgreSqlValue(
+                mock(Entity.class), createAttr("attrCompound", COMPOUND)));
   }
 
-  @DataProvider(name = "getPostgreSqlValueQuery")
-  public static Iterator<Object[]> getPostgreSqlValueQueryProvider() {
+  static Iterator<Object[]> getPostgreSqlValueQueryProvider() {
     return asList(
             new Object[] {boolValue, attrBool, boolValue},
             new Object[] {null, attrBoolNillable, null},
@@ -433,18 +438,20 @@ public class PostgreSqlUtilsTest {
         .iterator();
   }
 
-  @Test(dataProvider = "getPostgreSqlValueQuery")
-  public void getPostgreSqlValueQuery(Object value, Attribute attr, Object postgreSqlValue) {
+  @ParameterizedTest
+  @MethodSource("getPostgreSqlValueQueryProvider")
+  void getPostgreSqlValueQuery(Object value, Attribute attr, Object postgreSqlValue) {
     assertEquals(PostgreSqlUtils.getPostgreSqlQueryValue(value, attr), postgreSqlValue);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void getPostgreSqlValueQueryCompound() {
-    PostgreSqlUtils.getPostgreSqlQueryValue(null, createAttr("attrCompound", COMPOUND));
+  @Test
+  void getPostgreSqlValueQueryCompound() {
+    assertThrows(
+        RuntimeException.class,
+        () -> PostgreSqlUtils.getPostgreSqlQueryValue(null, createAttr("attrCompound", COMPOUND)));
   }
 
-  @DataProvider(name = "getPostgreSqlValueQueryException")
-  public static Iterator<Object[]> getPostgreSqlValueQueryExceptionProvider() {
+  static Iterator<Object[]> getPostgreSqlValueQueryExceptionProvider() {
     Object valueOfWrongType = mock(Object.class);
     when(valueOfWrongType.toString()).thenReturn("valueOfWrongType");
     return asList(
@@ -478,11 +485,11 @@ public class PostgreSqlUtilsTest {
         .iterator();
   }
 
-  @Test(
-      dataProvider = "getPostgreSqlValueQueryException",
-      expectedExceptions = MolgenisDataException.class)
-  public void getPostgreSqlValueQueryException(Object value, Attribute attr) {
-    PostgreSqlUtils.getPostgreSqlQueryValue(value, attr);
+  @ParameterizedTest
+  @MethodSource("getPostgreSqlValueQueryExceptionProvider")
+  void getPostgreSqlValueQueryException(Object value, Attribute attr) {
+    assertThrows(
+        MolgenisDataException.class, () -> PostgreSqlUtils.getPostgreSqlQueryValue(value, attr));
   }
 
   private static Attribute createAttr(String attrName, AttributeType attrType) {

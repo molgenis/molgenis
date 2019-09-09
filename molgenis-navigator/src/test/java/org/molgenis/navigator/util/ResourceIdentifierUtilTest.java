@@ -1,17 +1,17 @@
 package org.molgenis.navigator.util;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
-import org.testng.annotations.Test;
 
-public class ResourceIdentifierUtilTest {
+class ResourceIdentifierUtilTest {
 
   @Test
-  public void testGetResourcesFromJson() {
+  void testGetResourcesFromJson() {
     String json =
         "[{'id':'idValue1','type':'ENTITY_TYPE_ABSTRACT'},{'id':'idValue2','type':'PACKAGE'}]";
     ResourceIdentifier expected1 =

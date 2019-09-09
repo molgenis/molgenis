@@ -2,6 +2,9 @@ package org.molgenis.data.elasticsearch.generator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,8 +21,6 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -29,6 +30,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
@@ -37,21 +42,18 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DocumentContentBuilderTest extends AbstractMockitoTest {
+class DocumentContentBuilderTest extends AbstractMockitoTest {
   @Mock private DocumentIdGenerator documentIdGenerator;
 
   private DocumentContentBuilder documentContentBuilder;
 
-  public DocumentContentBuilderTest() {
+  DocumentContentBuilderTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(documentIdGenerator.generateId(any(EntityType.class)))
         .thenAnswer(invocation -> invocation.<EntityType>getArgument(0).getId());
     when(documentIdGenerator.generateId(any(Attribute.class)))
@@ -59,21 +61,20 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     documentContentBuilder = new DocumentContentBuilder(documentIdGenerator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void DocumentContentBuilder() {
-    new DocumentContentBuilder(null);
+  @Test
+  void DocumentContentBuilder() {
+    assertThrows(NullPointerException.class, () -> new DocumentContentBuilder(null));
   }
 
   @Test
-  public void createDocumentObject() {
+  void createDocumentObject() {
     String entityId = "id";
     Document document = documentContentBuilder.createDocument(entityId);
     Document expectedDocument = Document.builder().setId(entityId).build();
     assertEquals(document, expectedDocument);
   }
 
-  @DataProvider(name = "createDocumentBool")
-  public static Iterator<Object[]> createDocumentBoolProvider() {
+  static Iterator<Object[]> createDocumentBoolProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(new Object[] {true, "{\"attr\":true}"});
@@ -81,8 +82,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentBool")
-  public void createDocumentBool(Boolean value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentBoolProvider")
+  void createDocumentBool(Boolean value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.BOOL);
     when(entity.getBoolean(attrIdentifier)).thenReturn(value);
@@ -90,8 +92,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentReference")
-  public static Iterator<Object[]> createDocumentReferenceProvider() {
+  static Iterator<Object[]> createDocumentReferenceProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     String refAttr = "refAttr";
     Entity refEntity = createEntity(refAttr, AttributeType.STRING);
@@ -103,8 +104,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentReference")
-  public void createDocumentReferenceAttribute(
+  @ParameterizedTest
+  @MethodSource("createDocumentReferenceProvider")
+  void createDocumentReferenceAttribute(
       AttributeType attributeType, Entity value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, attributeType);
@@ -113,8 +115,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentMultiReference")
-  public static Iterator<Object[]> createDocumentMultiReferenceProvider() {
+  static Iterator<Object[]> createDocumentMultiReferenceProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     String refAttr = "refAttr";
     Entity refEntity = createEntity(refAttr, AttributeType.STRING);
@@ -129,8 +130,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentMultiReference")
-  public void createDocumentMultiReferenceAttribute(
+  @ParameterizedTest
+  @MethodSource("createDocumentMultiReferenceProvider")
+  void createDocumentMultiReferenceAttribute(
       AttributeType attributeType, Iterable<Entity> values, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, attributeType);
@@ -139,16 +141,16 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentDate")
-  public static Iterator<Object[]> createDocumentDateProvider() {
+  static Iterator<Object[]> createDocumentDateProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(new Object[] {LocalDate.parse("2017-06-19"), "{\"attr\":\"2017-06-19\"}"});
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentDate")
-  public void createDocumentDate(LocalDate localDate, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentDateProvider")
+  void createDocumentDate(LocalDate localDate, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.DATE);
     when(entity.getLocalDate(attrIdentifier)).thenReturn(localDate);
@@ -156,8 +158,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentDateTime")
-  public static Iterator<Object[]> createDocumentDateTimeProvider() {
+  static Iterator<Object[]> createDocumentDateTimeProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(
@@ -167,8 +168,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentDateTime")
-  public void createDocumentDateTime(Instant value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentDateTimeProvider")
+  void createDocumentDateTime(Instant value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.DATE_TIME);
     when(entity.getInstant(attrIdentifier)).thenReturn(value);
@@ -176,8 +178,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentDecimal")
-  public static Iterator<Object[]> createDocumentDecimalProvider() {
+  static Iterator<Object[]> createDocumentDecimalProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(new Object[] {-1.23d, "{\"attr\":-1.23}"});
@@ -188,8 +189,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentDecimal")
-  public void createDocumentDecimal(Double value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentDecimalProvider")
+  void createDocumentDecimal(Double value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.DECIMAL);
     when(entity.getDouble(attrIdentifier)).thenReturn(value);
@@ -197,8 +199,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentString")
-  public static Iterator<Object[]> createDocumentStringProvider() {
+  static Iterator<Object[]> createDocumentStringProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     for (AttributeType attributeType :
         EnumSet.of(EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT)) {
@@ -209,9 +210,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentString")
-  public void createDocumentString(
-      AttributeType attributeType, String value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentStringProvider")
+  void createDocumentString(AttributeType attributeType, String value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, attributeType);
     when(entity.getString(attrIdentifier)).thenReturn(value);
@@ -219,8 +220,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentInt")
-  public static Iterator<Object[]> createDocumentIntProvider() {
+  static Iterator<Object[]> createDocumentIntProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(new Object[] {-1, "{\"attr\":-1}"});
@@ -230,8 +230,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentInt")
-  public void createDocumentInt(Integer value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentIntProvider")
+  void createDocumentInt(Integer value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.INT);
     when(entity.getInt(attrIdentifier)).thenReturn(value);
@@ -239,8 +240,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentLong")
-  public static Iterator<Object[]> createDocumentLongProvider() {
+  static Iterator<Object[]> createDocumentLongProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {null, "{\"attr\":null}"});
     dataItems.add(new Object[] {-1L, "{\"attr\":-1}"});
@@ -250,8 +250,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentLong")
-  public void createDocumentLong(Long value, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentLongProvider")
+  void createDocumentLong(Long value, String expectedContent) {
     String attrIdentifier = "attr";
     Entity entity = createEntity(attrIdentifier, AttributeType.LONG);
     when(entity.getLong(attrIdentifier)).thenReturn(value);
@@ -259,8 +260,7 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     assertDocumentEquals(document, expectedContent);
   }
 
-  @DataProvider(name = "createDocumentDepth")
-  public static Iterator<Object[]> createDocumentDepthProvider() {
+  static Iterator<Object[]> createDocumentDepthProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {1, "{\"attr\":{\"refAttr\":null}}"});
     dataItems.add(new Object[] {2, "{\"attr\":{\"refAttr\":{\"refRefAttr\":null}}}"});
@@ -268,8 +268,9 @@ public class DocumentContentBuilderTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createDocumentDepth")
-  public void createDocumentDepth(int indexingDepth, String expectedContent) {
+  @ParameterizedTest
+  @MethodSource("createDocumentDepthProvider")
+  void createDocumentDepth(int indexingDepth, String expectedContent) {
     String refRefAttrIdentifier = "refRefAttr";
     Entity refRefEntity = createEntity(refRefAttrIdentifier, AttributeType.DECIMAL);
     when(refRefEntity.getDouble(refRefAttrIdentifier)).thenReturn(null);

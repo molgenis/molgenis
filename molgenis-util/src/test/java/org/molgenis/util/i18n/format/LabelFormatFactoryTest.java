@@ -1,38 +1,38 @@
 package org.molgenis.util.i18n.format;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.text.Format;
 import java.util.Locale;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.Labeled;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class LabelFormatFactoryTest extends AbstractMockitoTest {
+class LabelFormatFactoryTest extends AbstractMockitoTest {
   private Format labelFormat;
   @Mock private Labeled labeled;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     labelFormat = new LabelFormatFactory().getFormat(null, null, new Locale("de"));
   }
 
   @Test
-  public void testFormatLabeled() {
+  void testFormatLabeled() {
     when(labeled.getLabel("de")).thenReturn("abcde");
     assertEquals(labelFormat.format(labeled), "abcde");
   }
 
   @Test
-  public void testFormatString() {
+  void testFormatString() {
     assertEquals(labelFormat.format("abcde"), "abcde");
   }
 
   @Test
-  public void testFormatNull() {
+  void testFormatNull() {
     assertEquals(labelFormat.format(null), "null");
   }
 }

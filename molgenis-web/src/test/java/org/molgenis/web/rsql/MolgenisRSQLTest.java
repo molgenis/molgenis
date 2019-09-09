@@ -1,15 +1,18 @@
 package org.molgenis.web.rsql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -19,23 +22,21 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisRSQLTest extends AbstractMockitoTest {
+class MolgenisRSQLTest extends AbstractMockitoTest {
   @Mock private Repository<Entity> repository;
   @Mock private EntityType entityType;
   @Mock private EntityType genderEntityType;
   private MolgenisRSQL molgenisRSQL;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     molgenisRSQL = new MolgenisRSQL(new RSQLParser());
     when(repository.getEntityType()).thenReturn(entityType);
   }
 
   @Test
-  public void testEquals() throws RSQLParserException {
+  void testEquals() throws RSQLParserException {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
@@ -51,13 +52,15 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     assertEquals(q, new QueryImpl<>().eq("age", 87));
   }
 
-  @Test(expectedExceptions = UnknownAttributeException.class)
-  public void testUnknowAttribute() throws RSQLParserException {
-    molgenisRSQL.createQuery("nonexistingattribute==piet", repository);
+  @Test
+  void testUnknowAttribute() throws RSQLParserException {
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> molgenisRSQL.createQuery("nonexistingattribute==piet", repository));
   }
 
   @Test
-  public void testGreaterThanOrEqual() throws RSQLParserException {
+  void testGreaterThanOrEqual() throws RSQLParserException {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
@@ -66,7 +69,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGreaterThan() throws RSQLParserException {
+  void testGreaterThan() throws RSQLParserException {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
@@ -75,7 +78,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testLessThanOrEqual() throws RSQLParserException {
+  void testLessThanOrEqual() throws RSQLParserException {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
@@ -84,7 +87,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testLessThan() throws RSQLParserException {
+  void testLessThan() throws RSQLParserException {
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
@@ -93,7 +96,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAnd() throws RSQLParserException {
+  void testAnd() throws RSQLParserException {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
@@ -109,7 +112,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testOr() throws RSQLParserException {
+  void testOr() throws RSQLParserException {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
@@ -124,24 +127,26 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
     assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testGreaterThanOnNonNumericalAttribute() throws RSQLParserException {
+  @Test
+  void testGreaterThanOnNonNumericalAttribute() throws RSQLParserException {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
 
-    molgenisRSQL.createQuery("name>87", repository);
-  }
-
-  @Test(expectedExceptions = NumberFormatException.class)
-  public void testGreaterThanWithNonNumericalArg() throws RSQLParserException {
-    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    doReturn(ageAttr).when(entityType).getAttribute("age");
-
-    molgenisRSQL.createQuery("age>bogus", repository);
+    assertThrows(
+        IllegalArgumentException.class, () -> molgenisRSQL.createQuery("name>87", repository));
   }
 
   @Test
-  public void testComplexQuery() throws RSQLParserException {
+  void testGreaterThanWithNonNumericalArg() throws RSQLParserException {
+    Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    doReturn(ageAttr).when(entityType).getAttribute("age");
+
+    assertThrows(
+        NumberFormatException.class, () -> molgenisRSQL.createQuery("age>bogus", repository));
+  }
+
+  @Test
+  void testComplexQuery() throws RSQLParserException {
     Attribute nameAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute ageAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
     doReturn(nameAttr).when(entityType).getAttribute("name");
@@ -168,7 +173,7 @@ public class MolgenisRSQLTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testXrefIntegerIdValue() {
+  void testXrefIntegerIdValue() {
     Attribute genderIdAttribute = mock(Attribute.class);
     when(genderIdAttribute.getDataType()).thenReturn(INT);
     when(genderEntityType.getIdAttribute()).thenReturn(genderIdAttribute);

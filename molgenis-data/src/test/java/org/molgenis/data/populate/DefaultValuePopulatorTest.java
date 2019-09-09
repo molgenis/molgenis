@@ -27,39 +27,38 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DefaultValuePopulatorTest {
+class DefaultValuePopulatorTest {
   private static Entity entity1;
   private static Entity entityA;
   private static Entity entityB;
 
   private DefaultValuePopulator defaultValuePopulator;
 
-  @BeforeClass
-  public static void setUpBeforeClass() {
+  @BeforeAll
+  static void setUpBeforeClass() {
     entity1 = mock(Entity.class);
     entityA = mock(Entity.class);
     entityB = mock(Entity.class);
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     EntityReferenceCreator entityReferenceCreator = mock(EntityReferenceCreator.class);
     when(entityReferenceCreator.getReference(any(EntityType.class), eq(1))).thenReturn(entity1);
     when(entityReferenceCreator.getReference(any(EntityType.class), eq("a"))).thenReturn(entityA);
@@ -69,8 +68,7 @@ public class DefaultValuePopulatorTest {
     this.defaultValuePopulator = new DefaultValuePopulator(entityReferenceCreator);
   }
 
-  @DataProvider(name = "testPopulateProvider")
-  public static Iterator<Object[]> testPopulateProvider() throws ParseException {
+  static Iterator<Object[]> testPopulateProvider() {
     List<Object[]> populationData = new ArrayList<>(20);
     populationData.add(new Object[] {createEntity(BOOL, "true"), true});
     populationData.add(new Object[] {createEntity(BOOL, "false"), false});
@@ -127,8 +125,9 @@ public class DefaultValuePopulatorTest {
     return entity;
   }
 
-  @Test(dataProvider = "testPopulateProvider")
-  public void testPopulate(Entity entity, Object expectedValue) throws Exception {
+  @ParameterizedTest
+  @MethodSource("testPopulateProvider")
+  void testPopulate(Entity entity, Object expectedValue) {
     defaultValuePopulator.populate(entity);
     verify(entity).set("attr", expectedValue);
   }

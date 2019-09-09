@@ -5,6 +5,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -12,9 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
@@ -28,6 +29,8 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -51,10 +54,8 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class VcfImporterServiceTest extends AbstractMockitoTest {
+class VcfImporterServiceTest extends AbstractMockitoTest {
   private VcfImporterService vcfImporterService;
   @Mock private DataService dataService;
 
@@ -66,8 +67,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   @Mock private SecurityContext securityContext;
   @Mock private RepositoryCollection repositoryCollection;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     vcfImporterService =
         new VcfImporterService(dataService, permissionSystemService, metaDataService);
     SecurityContextHolder.setContext(securityContext);
@@ -75,7 +76,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void doImportVcfWithoutSamples() {
+  void doImportVcfWithoutSamples() {
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
     when(repositoryCollection.getName()).thenReturn("default");
@@ -152,7 +153,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void doImportVcfWithSamples() {
+  void doImportVcfWithSamples() {
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
     when(repositoryCollection.getName()).thenReturn("default");
@@ -252,8 +253,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void doImportAlreadyExists() {
+  @Test
+  void doImportAlreadyExists() {
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
 
@@ -267,34 +268,48 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
     String importPackageId = "package";
     Package importPackage = mock(Package.class);
     when(metaDataService.getPackage(importPackageId)).thenReturn(Optional.of(importPackage));
-    vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD, importPackageId);
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void doImportAddIgnoreExisting() {
-    RepositoryCollection source = mock(RepositoryCollection.class);
-    String defaultPackage = "package";
-    vcfImporterService.doImport(
-        source, MetadataAction.ADD, DataAction.ADD_IGNORE_EXISTING, defaultPackage);
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void doImportAddUpdateExisting() {
-    RepositoryCollection source = mock(RepositoryCollection.class);
-    String defaultPackage = "package";
-    vcfImporterService.doImport(
-        source, MetadataAction.ADD, DataAction.ADD_UPDATE_EXISTING, defaultPackage);
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void doImportUpdate() {
-    RepositoryCollection source = mock(RepositoryCollection.class);
-    String defaultPackage = "package";
-    vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.UPDATE, defaultPackage);
+    assertThrows(
+        MolgenisDataException.class,
+        () ->
+            vcfImporterService.doImport(
+                source, MetadataAction.ADD, DataAction.ADD, importPackageId));
   }
 
   @Test
-  public void validateImportWithoutSamples() {
+  void doImportAddIgnoreExisting() {
+    RepositoryCollection source = mock(RepositoryCollection.class);
+    String defaultPackage = "package";
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            vcfImporterService.doImport(
+                source, MetadataAction.ADD, DataAction.ADD_IGNORE_EXISTING, defaultPackage));
+  }
+
+  @Test
+  void doImportAddUpdateExisting() {
+    RepositoryCollection source = mock(RepositoryCollection.class);
+    String defaultPackage = "package";
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            vcfImporterService.doImport(
+                source, MetadataAction.ADD, DataAction.ADD_UPDATE_EXISTING, defaultPackage));
+  }
+
+  @Test
+  void doImportUpdate() {
+    RepositoryCollection source = mock(RepositoryCollection.class);
+    String defaultPackage = "package";
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            vcfImporterService.doImport(
+                source, MetadataAction.ADD, DataAction.UPDATE, defaultPackage));
+  }
+
+  @Test
+  void validateImportWithoutSamples() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
@@ -333,7 +348,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void validateImportWithoutSamplesAlreadyExists() {
+  void validateImportWithoutSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
@@ -373,7 +388,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void validateImportWithSamples() {
+  void validateImportWithSamples() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
@@ -425,7 +440,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void validateImportWithSamplesAlreadyExists() {
+  void validateImportWithSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
@@ -479,25 +494,25 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void canImportVcf() {
+  void canImportVcf() {
     RepositoryCollection source = mock(RepositoryCollection.class);
     assertTrue(vcfImporterService.canImport(new File("file.vcf"), source));
   }
 
   @Test
-  public void canImportVcfGz() {
+  void canImportVcfGz() {
     RepositoryCollection source = mock(RepositoryCollection.class);
     assertTrue(vcfImporterService.canImport(new File("file.vcf.gz"), source));
   }
 
   @Test
-  public void canImportXls() {
+  void canImportXls() {
     RepositoryCollection source = mock(RepositoryCollection.class);
     assertFalse(vcfImporterService.canImport(new File("file.xls"), source));
   }
 
   @Test
-  public void getMetadataAction() {
+  void getMetadataAction() {
     RepositoryCollection source = mock(RepositoryCollection.class);
     assertEquals(vcfImporterService.getMetadataAction(source), MetadataAction.ADD);
   }

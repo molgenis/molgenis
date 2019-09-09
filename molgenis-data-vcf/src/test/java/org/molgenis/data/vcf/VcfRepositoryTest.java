@@ -2,6 +2,10 @@ package org.molgenis.data.vcf;
 
 import static java.nio.file.Files.createTempFile;
 import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -11,8 +15,6 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
 import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -22,6 +24,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -39,12 +44,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {VcfRepositoryTest.Config.class})
-public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
+class VcfRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private VcfAttributes vcfAttrs;
 
   @Autowired private EntityTypeFactory entityTypeFactory;
@@ -59,30 +61,35 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
   private static File testNoData;
   private static File testEmptyFile;
 
-  @BeforeClass
-  public void beforeClass() throws IOException {
+  @BeforeAll
+  static void beforeClass() throws IOException {
     testData = new ClassPathResource("testdata.vcf").getFile();
     testNoData = new ClassPathResource("testnodata.vcf").getFile();
     testEmptyFile = createTempFile("empty", "vcf").toFile();
   }
 
-  @AfterClass
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     testEmptyFile.delete();
   }
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6528
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers")
-  public void testCreateRepositoryForEmptyFile() {
-    new VcfRepository(testEmptyFile, "test", vcfAttrs, entityTypeFactory, attrMetaFactory);
+  @Test
+  void testCreateRepositoryForEmptyFile() {
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () ->
+                new VcfRepository(
+                    testEmptyFile, "test", vcfAttrs, entityTypeFactory, attrMetaFactory));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers");
   }
 
   @Test
-  public void metaData() {
+  void metaData() {
     VcfRepository vcfRepository =
         new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory, attrMetaFactory);
 
@@ -117,7 +124,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testForEachBatched() {
+  void testForEachBatched() {
     VcfRepository vcfRepository =
         new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory, attrMetaFactory);
 
@@ -150,7 +157,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iterator_noValues() {
+  void iterator_noValues() {
     VcfRepository vcfRepository =
         new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory, attrMetaFactory);
     vcfRepository.forEachBatched(batchConsumer, 1000);
@@ -160,5 +167,5 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({VcfTestConfig.class})
-  public static class Config {}
+  static class Config {}
 }

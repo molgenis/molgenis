@@ -1,12 +1,15 @@
 package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
@@ -15,28 +18,26 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
 import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AttributeReferenceMapperTest {
+class AttributeReferenceMapperTest {
   @Mock private AttributeMetadata attributeMetadata;
   @Mock private DataService dataService;
 
   private AttributeReferenceMapper attributeReferenceMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     attributeReferenceMapper = new AttributeReferenceMapper(attributeMetadata, dataService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testAttributeReferenceMapper() {
-    new AttributeReferenceMapper(null, null);
+  @Test
+  void testAttributeReferenceMapper() {
+    assertThrows(NullPointerException.class, () -> new AttributeReferenceMapper(null, null));
   }
 
   @Test
-  public void testToEditorAttributeIdentifiers() {
+  void testToEditorAttributeIdentifiers() {
     String id = "id";
     String label = "label";
     String entityTypeId = "id";
@@ -58,7 +59,7 @@ public class AttributeReferenceMapperTest {
   }
 
   @Test
-  public void testToEditorAttributeIdentifier() {
+  void testToEditorAttributeIdentifier() {
     String id = "id";
     String label = "label";
     String entityTypeId = "id";
@@ -81,12 +82,12 @@ public class AttributeReferenceMapperTest {
   }
 
   @Test
-  public void testToEditorAttributeIdentifierNull() {
+  void testToEditorAttributeIdentifierNull() {
     assertNull(attributeReferenceMapper.toEditorAttributeIdentifier(null));
   }
 
   @Test
-  public void testToAttributeReference() {
+  void testToAttributeReference() {
     String id = "id";
     String label = "label";
     EditorAttributeIdentifier editorAttributeIdentifier =
@@ -96,7 +97,7 @@ public class AttributeReferenceMapperTest {
   }
 
   @Test
-  public void testToAttributeReferenceNull() {
+  void testToAttributeReferenceNull() {
     assertNull(attributeReferenceMapper.toAttributeReference(null));
   }
 }

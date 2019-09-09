@@ -2,42 +2,43 @@ package org.molgenis.data.plugin.model;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
+class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock Repository<Plugin> delegateRepository;
   @Mock AppSettings appSettings;
   private PluginRepositoryDecorator pluginRepositoryDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     pluginRepositoryDecorator = new PluginRepositoryDecorator(delegateRepository, appSettings);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testPluginRepositoryDecorator() {
-    new PluginRepositoryDecorator(null, null);
+  @Test
+  void testPluginRepositoryDecorator() {
+    assertThrows(NullPointerException.class, () -> new PluginRepositoryDecorator(null, null));
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     String pluginId = "myPluginId";
     Plugin plugin = when(mock(Plugin.class).getId()).thenReturn(pluginId).getMock();
 
@@ -50,7 +51,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteNoEntries() {
+  void testDeleteNoEntries() {
     String pluginId = "myPluginId";
     Plugin plugin = when(mock(Plugin.class).getId()).thenReturn(pluginId).getMock();
 
@@ -65,7 +66,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteMultipleMenuEntries() {
+  void testDeleteMultipleMenuEntries() {
     String pluginId = "myPluginId";
     Plugin plugin = when(mock(Plugin.class).getId()).thenReturn(pluginId).getMock();
 
@@ -80,7 +81,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     String pluginId = "myPluginId";
 
     String menu =
@@ -92,7 +93,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     String pluginId = "myPluginId";
     Plugin plugin = when(mock(Plugin.class).getId()).thenReturn(pluginId).getMock();
 
@@ -119,7 +120,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteStream() {
+  void testDeleteStream() {
     String pluginId = "myPluginId";
     Plugin plugin = when(mock(Plugin.class).getId()).thenReturn(pluginId).getMock();
 
@@ -136,7 +137,7 @@ public class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAllStream() {
+  void testDeleteAllStream() {
     String pluginId = "myPluginId";
 
     String menu =

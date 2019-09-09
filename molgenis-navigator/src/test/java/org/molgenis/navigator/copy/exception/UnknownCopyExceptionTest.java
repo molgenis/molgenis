@@ -2,28 +2,27 @@ package org.molgenis.navigator.copy.exception;
 
 import static org.mockito.Mockito.mock;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class UnknownCopyExceptionTest extends ExceptionMessageTest {
+class UnknownCopyExceptionTest extends ExceptionMessageTest {
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("navigator");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new UnknownCopyFailedException(mock(Throwable.class)), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "An error occurred during copying."};
     Object[] nlParams = {"nl", "Er is een fout opgetreden tijdens het kopiëren."};
     return new Object[][] {enParams, nlParams};

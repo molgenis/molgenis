@@ -1,14 +1,16 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.jobs.config.JobTestConfig;
@@ -25,11 +27,9 @@ import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {ProgressImplTest.Config.class})
-public class ProgressImplTest extends AbstractMolgenisSpringTest {
+class ProgressImplTest extends AbstractMolgenisSpringTest {
   @Autowired private JobExecutionMetaData jobExecutionMeta;
 
   private ProgressImpl progress;
@@ -37,8 +37,8 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   @Mock private MailSender mailSender;
   private JobExecution jobExecution;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     jobExecution = new JobExecution(jobExecutionMeta) {};
     jobExecution.setIdentifier("ABCDE");
     jobExecution.setType("Annotator");
@@ -46,7 +46,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testLog() {
+  void testLog() {
     progress.start();
     progress.status("Working....");
     progress.success();
@@ -57,7 +57,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testMailSuccess() {
+  void testMailSuccess() {
     jobExecution.setSuccessEmail("a@b.c,d@e.f");
     progress.start();
     progress.status("Working....");
@@ -75,7 +75,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testMailFailed() {
+  void testMailFailed() {
     jobExecution.setFailureEmail("a@b.c,d@e.f");
     progress.start();
     progress.status("Working....");
@@ -95,12 +95,12 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void jobSucceedsButMailFails() {
+  void jobSucceedsButMailFails() {
     doThrow(new MailPreparationException("fail!"))
         .when(mailSender)
         .send(any(SimpleMailMessage.class));
     jobExecution.setProgressMessage("Job finished.");
-    jobExecution.setSuccessEmail("test@test");
+    jobExecution.setSuccessEmail("test@Test");
     progress.start();
     progress.success();
 
@@ -109,12 +109,12 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void jobFailsAndMailFails() {
+  void jobFailsAndMailFails() {
     doThrow(new MailPreparationException("fail!"))
         .when(mailSender)
         .send(any(SimpleMailMessage.class));
     jobExecution.setProgressMessage("Downloading...");
-    jobExecution.setFailureEmail("test@test");
+    jobExecution.setFailureEmail("test@Test");
     progress.start();
 
     String exceptionMessage = "x is not a number";
@@ -126,7 +126,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCanceling() {
+  void testCanceling() {
     JobExecution mockJobExecution = mock(JobExecution.class);
     ProgressImpl progressImpl = new ProgressImpl(mockJobExecution, updater, mailSender);
     progressImpl.canceling();
@@ -135,12 +135,12 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void jobCanceledAndMailFails() {
+  void jobCanceledAndMailFails() {
     doThrow(new MailPreparationException("fail!"))
         .when(mailSender)
         .send(any(SimpleMailMessage.class));
     jobExecution.setProgressMessage("Downloading...");
-    jobExecution.setFailureEmail("test@test");
+    jobExecution.setFailureEmail("test@Test");
     progress.start();
     progress.canceled();
 
@@ -150,8 +150,8 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import(JobTestConfig.class)
-  public static class Config {
-    public Config() {
+  static class Config {
+    Config() {
       Logger logger = LoggerFactory.getLogger(JobExecution.class);
       if (!(logger instanceof ch.qos.logback.classic.Logger)) {
         throw new RuntimeException("Expected logback als SLF4J implementation");

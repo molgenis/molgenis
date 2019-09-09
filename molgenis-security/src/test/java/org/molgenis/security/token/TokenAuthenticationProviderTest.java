@@ -1,13 +1,16 @@
 package org.molgenis.security.token;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.Authentication;
@@ -15,22 +18,20 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TokenAuthenticationProviderTest {
+class TokenAuthenticationProviderTest {
   private TokenAuthenticationProvider tokenAuthenticationProvider;
   private TokenService tokenService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     tokenService = mock(TokenService.class);
     tokenAuthenticationProvider =
         new TokenAuthenticationProvider(tokenService, mock(UserDetailsChecker.class));
   }
 
   @Test
-  public void authenticate() {
+  void authenticate() {
     RestAuthenticationToken authToken = new RestAuthenticationToken("token");
     assertFalse(authToken.isAuthenticated());
 
@@ -46,10 +47,12 @@ public class TokenAuthenticationProviderTest {
     assertEquals(auth.getAuthorities().iterator().next().getAuthority(), "admin");
   }
 
-  @Test(expectedExceptions = AuthenticationException.class)
-  public void authenticateInvalidToken() {
+  @Test
+  void authenticateInvalidToken() {
     when(tokenService.findUserByToken("token"))
         .thenThrow(new UnknownTokenException("Invalid token"));
-    tokenAuthenticationProvider.authenticate(new RestAuthenticationToken("token"));
+    assertThrows(
+        AuthenticationException.class,
+        () -> tokenAuthenticationProvider.authenticate(new RestAuthenticationToken("token")));
   }
 }

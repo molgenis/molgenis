@@ -1,13 +1,14 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.export.mapper.EntityTypeMapper;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -16,12 +17,11 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class EntityTypeMapperTest extends AbstractMockitoTest {
+class EntityTypeMapperTest extends AbstractMockitoTest {
 
   @Test
-  public void testMapEntityType() {
+  void testMapEntityType() {
     EntityType entityType = mock(EntityType.class);
     EntityType parentType = mock(EntityType.class);
     Tag tag1 = mock(Tag.class);
@@ -72,7 +72,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapEntityTypeNotExtending() {
+  void testMapEntityTypeNotExtending() {
     EntityType entityType = mock(EntityType.class);
     Tag tag1 = mock(Tag.class);
     Tag tag2 = mock(Tag.class);
@@ -121,7 +121,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testMapEntityTypeI18N() {
+  void testMapEntityTypeI18N() {
     EntityType entityType = mock(EntityType.class);
     Tag tag1 = mock(Tag.class);
     Tag tag2 = mock(Tag.class);
@@ -186,7 +186,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGet() {
+  void testGet() {
     EntityType entityType = mock(EntityType.class);
     Attribute attr1 = mock(Attribute.class);
     when(attr1.getName()).thenReturn("attribute 1");

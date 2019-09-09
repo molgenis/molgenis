@@ -3,6 +3,7 @@ package org.molgenis.navigator.copy.service;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictableIdGeneratorMock;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -35,10 +37,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.jobs.Progress;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeCopierTest extends AbstractMockitoTest {
+class EntityTypeCopierTest extends AbstractMockitoTest {
 
   @Mock(answer = RETURNS_DEEP_STUBS)
   private DataService dataService;
@@ -49,15 +49,15 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
 
   private EntityTypeCopier copier;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     copier =
         new EntityTypeCopier(
             dataService, idGenerator, entityTypeDependencyResolver, entityTypeMetadataCopier);
   }
 
   @Test
-  public void testUniqueLabel() {
+  void testUniqueLabel() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     Package targetPackage = mock(Package.class);
@@ -72,7 +72,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelNoChange() {
+  void testUniqueLabelNoChange() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     Package targetPackage = mock(Package.class);
@@ -87,7 +87,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelRootPackage() {
+  void testUniqueLabelRootPackage() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeInRoot = mock(EntityType.class);
@@ -105,7 +105,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void copySingleEntityType() {
+  void copySingleEntityType() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeCopy = mock(EntityType.class);
@@ -127,7 +127,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void copyEntityTypesWithInternalReferences() {
+  void copyEntityTypesWithInternalReferences() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityTypeA = mockEntityType("A");
     EntityType entityTypeB = mockEntityType("B");
@@ -161,7 +161,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void copyWithDefaultReferenceValue() {
+  void copyWithDefaultReferenceValue() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeCopy = mock(EntityType.class);
@@ -185,7 +185,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void copyDoubleEntityType() {
+  void copyDoubleEntityType() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityTypeA = mock(EntityType.class);
     when(entityTypeA.getId()).thenReturn("A");
@@ -210,7 +210,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void copyData() {
+  void copyData() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     when(entityType.getId()).thenReturn("originalId");

@@ -3,25 +3,25 @@ package org.molgenis.api.data.v2;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.LONG;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.data.v2.EntityAggregatesResponse.AggregateResultResponse;
 import org.molgenis.data.Entity;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class EntityAggregatesResponseTest extends AbstractMockitoTest {
+class EntityAggregatesResponseTest extends AbstractMockitoTest {
   // regression test for https://github.com/molgenis/molgenis/issues/6581
   @Test
-  public void testAggregateResultResponseToResponseAggregateResult() {
+  void testAggregateResultResponseToResponseAggregateResult() {
     EntityType entityType = mock(EntityType.class);
     Attribute longAttribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
     when(longAttribute.getName()).thenReturn("longAttribute");
