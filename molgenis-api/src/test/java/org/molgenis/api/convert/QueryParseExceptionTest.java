@@ -20,6 +20,8 @@ public class QueryParseExceptionTest extends ExceptionMessageTest {
   public void testGetLocalizedMessage(String lang, String message) {
     RSQLParserException ex = mock(RSQLParserException.class);
     when(ex.getLocalizedMessage()).thenReturn("RSQL MESSAGE");
+    Throwable cause = new IllegalAccessException("Query cannot be null");
+    when(ex.getCause()).thenReturn(cause);
     assertExceptionMessageEquals(new QueryParseException(ex), lang, message);
   }
 
