@@ -42,6 +42,8 @@
   </developers>
 
   <properties>
+    <java.version>11</java.version>
+
     <!-- authentication for release scm plugin -->
     <project.scm.id>github</project.scm.id>
 
@@ -71,7 +73,7 @@
     <skipUTs>${skipTests}</skipUTs>
 
     <!-- override dependency versions managed by parent pom -->
-    <elasticsearch.version>5.5.1</elasticsearch.version>
+    <elasticsearch.version>5.5.3</elasticsearch.version>
     <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
     <mockito.version>3.0.0</mockito.version>
@@ -201,13 +203,11 @@
             <configLocation>molgenis_checks.xml</configLocation>
           </configuration>
         </plugin>
-        <!-- use java 1.8 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
-            <release>11</release>
             <compilerArgs>
               <arg>-Xlint:all,-deprecation</arg>
             </compilerArgs>
