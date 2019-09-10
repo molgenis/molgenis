@@ -41,11 +41,11 @@ public abstract class Attribute {
 
   @Nullable
   @CheckForNull
-  public abstract I18nResponse getLabel();
+  public abstract I18nValue getLabel();
 
   @Nullable
   @CheckForNull
-  public abstract I18nResponse getDescription();
+  public abstract I18nValue getDescription();
 
   public abstract boolean isNullable();
 
@@ -122,9 +122,9 @@ public abstract class Attribute {
 
     public abstract Builder setOrderBy(Sort sort);
 
-    public abstract Builder setLabel(I18nResponse label);
+    public abstract Builder setLabel(I18nValue label);
 
-    public abstract Builder setDescription(I18nResponse description);
+    public abstract Builder setDescription(I18nValue description);
 
     public abstract Builder setNullable(boolean isNullable);
 

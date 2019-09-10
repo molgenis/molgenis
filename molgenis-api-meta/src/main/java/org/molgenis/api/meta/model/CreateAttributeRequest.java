@@ -7,10 +7,10 @@ import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_AttributeRequest.class)
+@AutoGson(autoValueClass = AutoValue_CreateAttributeRequest.class)
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class AttributeRequest {
+public abstract class CreateAttributeRequest {
   public abstract String getId();
 
   @Nullable
@@ -29,7 +29,7 @@ public abstract class AttributeRequest {
   @CheckForNull
   public abstract String getRefEntityType();
 
-  public abstract boolean isCascadeDelete();
+  public abstract Boolean getCascadeDelete();
 
   @Nullable
   @CheckForNull
@@ -43,21 +43,21 @@ public abstract class AttributeRequest {
   @CheckForNull
   public abstract String getExpression();
 
-  public abstract boolean isNullable();
+  public abstract Boolean getNullable();
 
-  public abstract boolean isAuto();
+  public abstract Boolean getAuto();
 
-  public abstract boolean isVisible();
-
-  @Nullable
-  @CheckForNull
-  public abstract I18nResponse getLabel();
+  public abstract Boolean getVisible();
 
   @Nullable
   @CheckForNull
-  public abstract I18nResponse getDescription();
+  public abstract I18nValue getLabel();
 
-  public abstract boolean isAggregatable();
+  @Nullable
+  @CheckForNull
+  public abstract I18nValue getDescription();
+
+  public abstract Boolean getAggregatable();
 
   @Nullable
   @CheckForNull
@@ -71,9 +71,9 @@ public abstract class AttributeRequest {
   @CheckForNull
   public abstract Long getRangeMax();
 
-  public abstract boolean isReadonly();
+  public abstract Boolean getReadonly();
 
-  public abstract boolean isUnique();
+  public abstract Boolean getUnique();
 
   @Nullable
   @CheckForNull
@@ -93,7 +93,7 @@ public abstract class AttributeRequest {
 
   public abstract Integer getSequenceNumber();
 
-  public static AttributeRequest create(
+  public static CreateAttributeRequest create(
       String id,
       @Nullable @CheckForNull String name,
       @Nullable @CheckForNull String type,
@@ -106,8 +106,8 @@ public abstract class AttributeRequest {
       boolean nullable,
       boolean auto,
       boolean visible,
-      @Nullable @CheckForNull I18nResponse label,
-      @Nullable @CheckForNull I18nResponse description,
+      @Nullable @CheckForNull I18nValue label,
+      @Nullable @CheckForNull I18nValue description,
       boolean aggregatable,
       @Nullable @CheckForNull List<String> enumOptions,
       @Nullable @CheckForNull Long rangeMin,
@@ -119,7 +119,7 @@ public abstract class AttributeRequest {
       @Nullable @CheckForNull String validationExpression,
       @Nullable @CheckForNull String defaultValue,
       Integer sequenceNumber) {
-    return new AutoValue_AttributeRequest(
+    return new AutoValue_CreateAttributeRequest(
         id,
         name,
         type,

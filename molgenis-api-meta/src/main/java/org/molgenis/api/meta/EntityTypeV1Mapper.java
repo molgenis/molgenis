@@ -17,7 +17,7 @@ import org.molgenis.api.meta.model.AttributeResponse;
 import org.molgenis.api.meta.model.AttributesResponse;
 import org.molgenis.api.meta.model.EntityTypeResponse;
 import org.molgenis.api.meta.model.EntityTypesResponse;
-import org.molgenis.api.meta.model.I18nResponse;
+import org.molgenis.api.meta.model.I18nValue;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -158,32 +158,32 @@ public class EntityTypeV1Mapper {
     return builder.build();
   }
 
-  private I18nResponse getI18nAttrLabel(Attribute attr) {
+  private I18nValue getI18nAttrLabel(Attribute attr) {
     String defaultValue = attr.getLabel();
     Map<String, String> translations = new HashMap<>();
     getLanguageCodes().forEach(code -> translations.put(code, attr.getLabel(code)));
-    return I18nResponse.create(defaultValue, translations);
+    return I18nValue.create(defaultValue, translations);
   }
 
-  private I18nResponse getI18nAttrDesc(Attribute attr) {
+  private I18nValue getI18nAttrDesc(Attribute attr) {
     String defaultValue = attr.getDescription();
     Map<String, String> translations = new HashMap<>();
     getLanguageCodes().forEach(code -> translations.put(code, attr.getDescription(code)));
-    return I18nResponse.create(defaultValue, translations);
+    return I18nValue.create(defaultValue, translations);
   }
 
-  private I18nResponse getI18nEntityTypeLabel(EntityType entityType) {
+  private I18nValue getI18nEntityTypeLabel(EntityType entityType) {
     String defaultValue = entityType.getLabel();
     Map<String, String> translations = new HashMap<>();
     getLanguageCodes().forEach(code -> translations.put(code, entityType.getLabel(code)));
-    return I18nResponse.create(defaultValue, translations);
+    return I18nValue.create(defaultValue, translations);
   }
 
-  private I18nResponse getI18nEntityTypeDesc(EntityType entityType) {
+  private I18nValue getI18nEntityTypeDesc(EntityType entityType) {
     String defaultValue = entityType.getDescription();
     Map<String, String> translations = new HashMap<>();
     getLanguageCodes().forEach(code -> translations.put(code, entityType.getDescription(code)));
-    return I18nResponse.create(defaultValue, translations);
+    return I18nValue.create(defaultValue, translations);
   }
 
   private LinksResponse createLinksResponse(int number, int size, int total) {
