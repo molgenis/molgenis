@@ -121,7 +121,6 @@ pipeline {
                     steps {
                         milestone(ordinal: 100, label: 'deploy to master.dev.molgenis.org')
                         container('rancher') {
-                            sh "rancher context switch dev-molgenis"
                             sh "rancher apps upgrade --set image.tag=${TAG} master ${CHART_VERSION}"
                         }
                     }
