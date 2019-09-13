@@ -19,7 +19,7 @@
       "errorCode": "API03",
       "field": "q",
       "value": "id=invalid=1",
-      "detail": "An error occurred while parsing the RSQL: 'cz.jirutka.rsql.parser.UnknownOperatorException: Unknown operator: =invalid='."
+      "detail": "An error occurred while parsing the RSQL: 'Unknown operator: =invalid='."
     },
     {
       "errorCode": "API01",
