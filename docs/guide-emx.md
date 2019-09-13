@@ -7,6 +7,9 @@ It is also possible to provide packages in an emx file via the 'packages' sheet 
 ## Minimal example
 ([download](data/simple_data_example_v20180912.xlsx))
 
+**Note**: In order to upload data, at least one group must be created.
+View the section on [groups and roles](guide-groups-roles.md), for information on creating a group.
+
 For example, if you want to upload an Excel with sheet 'patients':
 
 | displayName | firstName | lastName | birthdate  | birthplace |
@@ -27,7 +30,8 @@ Then you must provide a model of your 'patients' via Excel with sheet named 'att
 
 'entity' should show the name of your data sheet. Each attribute the column headers in your data. Default dataType is 'string' so you only need to provide non-string values (int, date, decimal, etc). And you must always provide one idAttribute that has 'nillable' = 'FALSE'.
 
-You can first upload the 'model' and then the 'data'. Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
+You can first upload the 'model' and then the 'data'. 
+Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
 
 ## Advanced example
 ([download](data/advanced_data_example_v20171206.xlsx))
