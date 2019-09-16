@@ -16,7 +16,7 @@
       "detail": "Unexpected token ')' while parsing the selection, line '1' position '26'."
     },
     {
-      "errorCode": "API03",
+      "errorCode": "API05",
       "field": "q",
       "value": "id=invalid=1",
       "detail": "Invalid query operator '=invalid='."
