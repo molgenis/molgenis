@@ -19,7 +19,7 @@
       "errorCode": "API03",
       "field": "q",
       "value": "id=invalid=1",
-      "detail": "An error occurred while parsing the RSQL: 'Unknown operator: =invalid='."
+      "detail": "Invalid query operator '=invalid='."
     },
     {
       "errorCode": "API01",
