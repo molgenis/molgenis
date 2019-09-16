@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -87,6 +87,7 @@ import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -110,25 +111,29 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Autowired private TestEntityStaticMetaData entityTypeStatic;
   @Autowired private TestRefEntityStaticMetaData refEntityTypeStatic;
 
-  @Autowired private IndexJobScheduler indexJobScheduler;
   @Autowired private EntityTestHarness entityTestHarness;
   @Autowired private PermissionService permissionService;
   @Autowired private DataService dataService;
   @Autowired private FileMetaFactory fileMetaFactory;
-  private FileMeta secretFile;
-  private FileMeta publicFile;
+  private static FileMeta secretFile;
+  private static FileMeta publicFile;
 
-  @BeforeEach
-  public void setUpBeforeClass() throws InterruptedException {
-    // bootstrapper has finished but indexing of bootstrapped data might be in progress
-    indexJobScheduler.waitForAllIndicesStable();
-
-    runAsSystem(this::populate);
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    runAsSystem(
+        () -> {
+          populate(applicationContext);
+          waitForAllIndicesStable(applicationContext);
+        });
   }
 
   @AfterEach
-  public void tearDownAfterClass() {
-    runAsSystem(this::depopulate);
+  public void tearDownAfterAll(ApplicationContext applicationContext) {
+    runAsSystem(
+        () -> {
+          depopulate(applicationContext);
+          waitForAllIndicesStable(applicationContext);
+        });
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -981,18 +986,20 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, dataService.count(entityType.getId()));
   }
 
-  private void populate() {
-    populateData();
-    populateDataPermissions();
-
-    try {
-      indexJobScheduler.waitForAllIndicesStable();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+  private static void populate(ApplicationContext applicationContext) {
+    populateData(applicationContext);
+    populateDataPermissions(applicationContext);
   }
 
-  private void populateData() {
+  private static void populateData(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    EntityTestHarness entityTestHarness = applicationContext.getBean(EntityTestHarness.class);
+    TestEntityStaticMetaData entityTypeStatic =
+        applicationContext.getBean(TestEntityStaticMetaData.class);
+    TestRefEntityStaticMetaData refEntityTypeStatic =
+        applicationContext.getBean(TestRefEntityStaticMetaData.class);
+    FileMetaFactory fileMetaFactory = applicationContext.getBean(FileMetaFactory.class);
+
     refEntityType = entityTestHarness.createDynamicRefEntityType("DataServiceItRefEntityType");
     dataService.getMeta().createRepository(refEntityType);
     refEntities = entityTestHarness.createTestRefEntities(refEntityType, 3);
@@ -1027,7 +1034,13 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     dataService.add(FILE_META, Stream.of(secretFile, publicFile));
   }
 
-  private void populateDataPermissions() {
+  private static void populateDataPermissions(ApplicationContext applicationContext) {
+    TestEntityStaticMetaData entityTypeStatic =
+        applicationContext.getBean(TestEntityStaticMetaData.class);
+    TestRefEntityStaticMetaData refEntityTypeStatic =
+        applicationContext.getBean(TestRefEntityStaticMetaData.class);
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
+
     Map<ObjectIdentity, PermissionSet> basePermissions = new HashMap<>();
     basePermissions.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
     basePermissions.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.READ);
@@ -1042,26 +1055,39 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
     readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
     readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
-    grant(readerPermissions, SidUtils.createUserSid(USERNAME_READ));
+    grant(permissionService, readerPermissions, SidUtils.createUserSid(USERNAME_READ));
 
     Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
     editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
     editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
-    grant(editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
+    grant(permissionService, editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
   }
 
-  private void grant(Map<ObjectIdentity, PermissionSet> editorPermissions, Sid sid) {
+  private static void grant(
+      PermissionService permissionService,
+      Map<ObjectIdentity, PermissionSet> editorPermissions,
+      Sid sid) {
     for (Entry<ObjectIdentity, PermissionSet> entry : editorPermissions.entrySet()) {
       permissionService.createPermission(Permission.create(entry.getKey(), sid, entry.getValue()));
     }
   }
 
-  private void depopulate() {
+  private static void depopulate(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    TestEntityStaticMetaData entityTypeStatic =
+        applicationContext.getBean(TestEntityStaticMetaData.class);
+    TestRefEntityStaticMetaData refEntityTypeStatic =
+        applicationContext.getBean(TestRefEntityStaticMetaData.class);
+
     dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
     dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
     dataService.delete(refEntityTypeStatic.getId(), staticRefEntities.stream());
     dataService.delete(FILE_META, publicFile);
     dataService.delete(FILE_META, secretFile);
+  }
+
+  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
     try {
       indexJobScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {
