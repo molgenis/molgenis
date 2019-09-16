@@ -1,6 +1,7 @@
 package org.molgenis.api.fair.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
@@ -76,11 +77,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, \"value1\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, \"value1\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -104,11 +105,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI2.nl, \"2\"^^<http://www.w3.org/2001/XMLSchema#int>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI2.nl, \"2\"^^<http://www.w3.org/2001/XMLSchema#int>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -137,11 +138,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI3.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI3.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -166,11 +167,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -197,11 +198,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -230,11 +231,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2013-08-12\"^^<http://www.w3.org/2001/XMLSchema#date>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2013-08-12\"^^<http://www.w3.org/2001/XMLSchema#date>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -263,11 +264,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2011-12-03T10:15:30Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2011-12-03T10:15:30Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -296,11 +297,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"10.0\"^^<http://www.w3.org/2001/XMLSchema#double>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"10.0\"^^<http://www.w3.org/2001/XMLSchema#double>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -329,11 +330,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"987654321\"^^<http://www.w3.org/2001/XMLSchema#long>) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"987654321\"^^<http://www.w3.org/2001/XMLSchema#long>) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -361,14 +362,14 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 3);
+    assertEquals(3, result.size());
     List<String> statements = result.stream().map(Statement::toString).collect(toList());
     assertEquals(
-        statements,
-        Arrays.asList(
+        asList(
             "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"molgenis\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
             "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"genetics\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
-            "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"fair\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]"));
+            "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"fair\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]"),
+        statements);
   }
 
   @Test
@@ -403,11 +404,11 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Model result =
         writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
 
-    assertEquals(result.size(), 1);
+    assertEquals(1, result.size());
     Iterator results = result.iterator();
     assertEquals(
-        results.next().toString(),
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, http://molgenis.org/index.html) [null]");
+        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, http://molgenis.org/index.html) [null]",
+        results.next().toString());
   }
 
   @Test
@@ -427,6 +428,6 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Statement statement =
         valueFactory.createStatement(
             subject, TYPE, valueFactory.createIRI("http://example.org/object"));
-    assertEquals(newArrayList(model), singletonList(statement));
+    assertEquals(singletonList(statement), newArrayList(model));
   }
 }

@@ -40,7 +40,7 @@ class ScheduledScriptConfigTest extends AbstractMockitoTest {
     expected.put("param2", "value");
     expected.put("scriptJobExecutionId", "scriptJobExecutionIdentifier");
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -53,6 +53,6 @@ class ScheduledScriptConfigTest extends AbstractMockitoTest {
     Map<String, Object> expected = new HashMap<>();
     expected.put("scriptJobExecutionId", "scriptJobExecutionIdentifier");
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

@@ -36,7 +36,7 @@ class SortContentBuilderTest {
   }
 
   private void assertSortsEqual(List<SortBuilder> sorts, List<String> contentStrings) {
-    assertEquals(sorts.stream().map(SortBuilder::toString).collect(toList()), contentStrings);
+    assertEquals(contentStrings, sorts.stream().map(SortBuilder::toString).collect(toList()));
   }
 
   private static final String JSON_SORT_ASC =

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -51,7 +52,7 @@ class TokenAuthenticationFilterTest {
       filter.doFilter(request, response, chain);
       verify(chain).doFilter(request, response);
 
-      assertEquals(SecurityContextHolder.getContext().getAuthentication(), auth);
+      assertEquals(auth, getContext().getAuthentication());
     } finally {
       SecurityContextHolder.setContext(previous);
     }

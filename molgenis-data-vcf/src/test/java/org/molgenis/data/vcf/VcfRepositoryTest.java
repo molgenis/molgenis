@@ -1,5 +1,6 @@
 package org.molgenis.data.vcf;
 
+import static com.google.common.collect.ImmutableList.of;
 import static java.nio.file.Files.createTempFile;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +17,6 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
 import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 
-import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -93,7 +93,7 @@ class VcfRepositoryTest extends AbstractMolgenisSpringTest {
     VcfRepository vcfRepository =
         new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory, attrMetaFactory);
 
-    assertEquals(vcfRepository.getName(), "testData");
+    assertEquals("testData", vcfRepository.getName());
     Iterator<Attribute> it = vcfRepository.getEntityType().getAttributes().iterator();
     assertTrue(it.hasNext());
     testAttribute(it.next(), VcfAttributes.CHROM, STRING);
@@ -119,8 +119,8 @@ class VcfRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   private static void testAttribute(Attribute metadata, String name, AttributeType type) {
-    assertEquals(metadata.getName(), name);
-    assertEquals(metadata.getDataType(), type);
+    assertEquals(name, metadata.getName());
+    assertEquals(type, metadata.getDataType());
   }
 
   @Test
@@ -144,16 +144,13 @@ class VcfRepositoryTest extends AbstractMolgenisSpringTest {
                     batch.stream().map(entity -> entity.getInt(POS)).collect(Collectors.toList()))
             .collect(Collectors.toList());
     assertEquals(
-        positions,
-        ImmutableList.of(
-            ImmutableList.of(565286, 2243618, 3171929, 3172062, 3172273),
-            ImmutableList.of(6097450, 7569187)));
+        of(of(565286, 2243618, 3171929, 3172062, 3172273), of(6097450, 7569187)), positions);
 
     Set<String> chroms =
         allValues.stream()
             .flatMap(batch -> batch.stream().map(entity -> entity.getString(CHROM)))
             .collect(Collectors.toSet());
-    assertEquals(chroms, singleton("1"));
+    assertEquals(singleton("1"), chroms);
   }
 
   @Test

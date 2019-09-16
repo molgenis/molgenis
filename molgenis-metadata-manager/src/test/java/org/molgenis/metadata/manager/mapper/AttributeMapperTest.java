@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.metadata.manager.model.EditorAttribute.create;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -84,8 +85,7 @@ class AttributeMapperTest {
 
     EditorAttribute editorAttribute = attributeMapper.createEditorAttribute();
     assertEquals(
-        editorAttribute,
-        EditorAttribute.create(
+        create(
             id,
             null,
             "string",
@@ -113,7 +113,8 @@ class AttributeMapperTest {
             null,
             null,
             null,
-            sequenceNumber));
+            sequenceNumber),
+        editorAttribute);
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -252,7 +253,7 @@ class AttributeMapperTest {
         copyOf(
             attributeMapper.toAttributes(
                 of(editorAttribute, editorParentAttribute), editorEntityType));
-    assertEquals(attributes.size(), 2);
+    assertEquals(2, attributes.size());
     Attribute attribute = attributes.get(0);
     verify(attribute).setIdentifier(id);
     verify(attribute).setName(name);
@@ -423,7 +424,7 @@ class AttributeMapperTest {
             validationExpression,
             defaultValue,
             sequenceNumber);
-    assertEquals(editorAttributes, of(expectedEditorAttribute));
+    assertEquals(of(expectedEditorAttribute), editorAttributes);
   }
 
   @Test
@@ -458,6 +459,6 @@ class AttributeMapperTest {
 
     List<EditorAttribute> attrs = newArrayList(attrOther, attrAA, attrAB, attrABA);
     AttributeMapper.removeCompoundOrphans(attrs);
-    assertEquals(attrs, singletonList(attrOther));
+    assertEquals(singletonList(attrOther), attrs);
   }
 }

@@ -67,7 +67,7 @@ class TwoFactorAuthenticationFilterTest {
     String initialRedirectUrl =
         TwoFactorAuthenticationController.URI
             + TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI;
-    assertEquals(response.getRedirectedUrl(), initialRedirectUrl);
+    assertEquals(initialRedirectUrl, response.getRedirectedUrl());
   }
 
   @Test
@@ -93,7 +93,7 @@ class TwoFactorAuthenticationFilterTest {
     String configuredRedirectUrl =
         TwoFactorAuthenticationController.URI
             + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
-    assertEquals(response.getRedirectedUrl(), configuredRedirectUrl);
+    assertEquals(configuredRedirectUrl, response.getRedirectedUrl());
   }
 
   @Test

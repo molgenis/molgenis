@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -130,7 +131,7 @@ class SecurityUtilsTest {
 
   @Test
   void getCurrentUsernameUserDetails() {
-    assertEquals(SecurityUtils.getCurrentUsername(), userDetails.getUsername());
+    assertEquals(userDetails.getUsername(), getCurrentUsername());
   }
 
   @Test

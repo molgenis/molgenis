@@ -105,7 +105,7 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(metaDataService).upsertPackages(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
+    assertEquals(newArrayList(package0, package1), captor.getValue().collect(toList()));
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/5168
@@ -138,6 +138,6 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(metaDataService).upsertPackages(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), newArrayList(package0, package1));
+    assertEquals(newArrayList(package0, package1), captor.getValue().collect(toList()));
   }
 }

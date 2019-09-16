@@ -35,13 +35,13 @@ class JobExecutorLocaleServiceImplTest extends AbstractMockitoTest {
         when(mock(JobExecution.class).getUser()).thenReturn(Optional.of(username)).getMock();
     Locale locale = Locale.getDefault();
     when(userLocaleResolver.resolveLocale(username)).thenReturn(locale);
-    assertEquals(jobExecutorLocaleServiceImpl.createLocale(jobExecution), locale);
+    assertEquals(locale, jobExecutorLocaleServiceImpl.createLocale(jobExecution));
   }
 
   @Test
   void testCreateLocaleSystem() {
     Locale locale = Locale.getDefault();
     JobExecution jobExecution = mock(JobExecution.class);
-    assertEquals(jobExecutorLocaleServiceImpl.createLocale(jobExecution), locale);
+    assertEquals(locale, jobExecutorLocaleServiceImpl.createLocale(jobExecution));
   }
 }

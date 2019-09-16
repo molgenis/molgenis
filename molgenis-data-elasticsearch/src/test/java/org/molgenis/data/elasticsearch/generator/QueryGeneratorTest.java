@@ -1836,6 +1836,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
   private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected) {
     // QueryBuilder classes do not implement equals
     assertEquals(
-        actual.toString().replaceAll("\\s", ""), expected.toString().replaceAll("\\s", ""));
+        expected.toString().replaceAll("\\s", ""), actual.toString().replaceAll("\\s", ""));
   }
 }

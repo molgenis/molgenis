@@ -49,6 +49,6 @@ class RootApiControllerTest {
     String expected =
         "{\"app\":{\"version\":\"versionString\",\"buildDate\":{\"seconds\":1558434720,\"nanos\":0}}}";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

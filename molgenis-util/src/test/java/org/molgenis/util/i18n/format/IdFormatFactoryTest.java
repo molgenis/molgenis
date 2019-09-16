@@ -22,16 +22,16 @@ class IdFormatFactoryTest extends AbstractMockitoTest {
   @Test
   void testFormatIdentifiable() {
     when(identifiable.getIdValue()).thenReturn("abcde");
-    assertEquals(idFormat.format(identifiable), "abcde");
+    assertEquals("abcde", idFormat.format(identifiable));
   }
 
   @Test
   void testFormatString() {
-    assertEquals(idFormat.format("abcde"), "abcde");
+    assertEquals("abcde", idFormat.format("abcde"));
   }
 
   @Test
   void testFormatNull() {
-    assertEquals(idFormat.format(null), "null");
+    assertEquals("null", idFormat.format(null));
   }
 }

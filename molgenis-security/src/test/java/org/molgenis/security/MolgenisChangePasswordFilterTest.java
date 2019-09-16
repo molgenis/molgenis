@@ -52,7 +52,7 @@ class MolgenisChangePasswordFilterTest {
 
     filter.doFilter(request, response, chain);
 
-    assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
+    assertEquals(CHANGE_PASSWORD_URI, response.getRedirectedUrl());
   }
 
   @Test
@@ -89,6 +89,6 @@ class MolgenisChangePasswordFilterTest {
 
     filter.doFilter(request, response, chain);
 
-    assertEquals(response.getRedirectedUrl(), CHANGE_PASSWORD_URI);
+    assertEquals(CHANGE_PASSWORD_URI, response.getRedirectedUrl());
   }
 }

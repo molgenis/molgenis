@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.admin.user;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ class UserAccountControllerTest {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isTwoFactorAuthentication()).thenReturn(true);
 
-    assertEquals(userAccountController.showAccount(model, true), "view-useraccount");
+    assertEquals("view-useraccount", userAccountController.showAccount(model, true));
 
     verify(model).addAttribute("user", user);
     verify(model).addAttribute("countries", CountryCodes.get());
@@ -224,7 +224,7 @@ class UserAccountControllerTest {
 
   @Test
   void testEnableTwoFactorAuthentication() {
-    assertEquals(userAccountController.enableTwoFactorAuthentication(), "redirect:/2fa/activation");
+    assertEquals("redirect:/2fa/activation", userAccountController.enableTwoFactorAuthentication());
   }
 
   @Test
@@ -232,7 +232,7 @@ class UserAccountControllerTest {
   void testDisableTwoFactorAuthentication() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isTwoFactorAuthentication()).thenReturn(false);
-    assertEquals(userAccountController.disableTwoFactorAuthentication(model), "view-useraccount");
+    assertEquals("view-useraccount", userAccountController.disableTwoFactorAuthentication(model));
 
     verify(twoFactorAuthenticationService).disableForUser();
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -240,15 +240,15 @@ class UserAccountControllerTest {
     assertTrue(authentication instanceof UsernamePasswordAuthenticationToken);
     org.springframework.security.core.userdetails.User principal =
         (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-    assertEquals(principal.getUsername(), "user");
+    assertEquals("user", principal.getUsername());
     assertEquals(
-        principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toSet()),
-        singleton("ROLE_USER"));
+        singleton("ROLE_USER"),
+        principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toSet()));
   }
 
   @Test
   void testResetTwoFactorAuthentication() {
-    assertEquals(userAccountController.resetTwoFactorAuthentication(), "redirect:/2fa/activation");
+    assertEquals("redirect:/2fa/activation", userAccountController.resetTwoFactorAuthentication());
     verify(twoFactorAuthenticationService).resetSecretForUser();
   }
 
@@ -260,8 +260,8 @@ class UserAccountControllerTest {
     when(code2.getCode()).thenReturn("code2");
     when(recoveryService.getRecoveryCodes()).thenReturn(Stream.of(code1, code2));
     assertEquals(
-        userAccountController.getRecoveryCodes(),
-        ImmutableMap.of("recoveryCodes", ImmutableList.of("code1", "code2")));
+        of("recoveryCodes", ImmutableList.of("code1", "code2")),
+        userAccountController.getRecoveryCodes());
   }
 
   @Test
@@ -273,7 +273,7 @@ class UserAccountControllerTest {
     when(recoveryService.generateRecoveryCodes()).thenReturn(Stream.of(code1, code2));
 
     assertEquals(
-        userAccountController.generateRecoveryCodes(),
-        ImmutableMap.of("recoveryCodes", ImmutableList.of("code1", "code2")));
+        of("recoveryCodes", ImmutableList.of("code1", "code2")),
+        userAccountController.generateRecoveryCodes());
   }
 }

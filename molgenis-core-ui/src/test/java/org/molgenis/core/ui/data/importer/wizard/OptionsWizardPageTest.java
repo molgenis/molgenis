@@ -68,8 +68,8 @@ class OptionsWizardPageTest extends AbstractMockitoTest {
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(entitiesValidationReport.valid()).thenReturn(true);
     assertEquals(
-        optionsWizardPage.handleRequest(httpServletRequest, bindingResult, wizard),
-        "File is validated and can be imported.");
+        "File is validated and can be imported.",
+        optionsWizardPage.handleRequest(httpServletRequest, bindingResult, wizard));
     verify(wizard).setEntitiesInDefaultPackage(emptyList());
     verify(wizard).setPackages(emptyMap());
   }

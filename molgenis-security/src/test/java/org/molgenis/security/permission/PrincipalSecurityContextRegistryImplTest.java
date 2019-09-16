@@ -43,8 +43,8 @@ class PrincipalSecurityContextRegistryImplTest {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Object user = securityContext.getAuthentication().getPrincipal();
     assertEquals(
-        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toList()),
-        singletonList(securityContext));
+        singletonList(securityContext),
+        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toList()));
   }
 
   @WithMockUser(username = "systemUser")
@@ -52,8 +52,8 @@ class PrincipalSecurityContextRegistryImplTest {
   void testGetSecurityContextsNoUserThreadNoUserSessions() {
     Object user = when(mock(User.class).getUsername()).thenReturn("user").getMock();
     assertEquals(
-        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toList()),
-        emptyList());
+        emptyList(),
+        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toList()));
   }
 
   @WithMockUser(username = "user")
@@ -74,7 +74,7 @@ class PrincipalSecurityContextRegistryImplTest {
             Stream.of(securityContextUser0, securityContextUser1, securityContextOtherUser));
     Object user = when(mock(User.class).getUsername()).thenReturn("user").getMock();
     assertEquals(
-        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toSet()),
-        new HashSet<>(asList(securityContextUser0, securityContextUser1)));
+        new HashSet<>(asList(securityContextUser0, securityContextUser1)),
+        principalSecurityContextRegistryImpl.getSecurityContexts(user).collect(toSet()));
   }
 }

@@ -121,7 +121,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
             .eq(ATTR_CATEGORICAL, ontology1);
     List<Object> ids = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(ids, asList("1", "2", "3", "4"));
+    assertEquals(asList("1", "2", "3", "4"), ids);
   }
 
   @Test
@@ -171,8 +171,8 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     List<Object> matchingAttributeIDs =
         searchService.search(entityTypeDynamic, query).collect(toList());
-    assertEquals(matchingAttributeIDs.get(0), "3");
-    assertEquals(matchingAttributeIDs.get(1), "5");
+    assertEquals("3", matchingAttributeIDs.get(0));
+    assertEquals("5", matchingAttributeIDs.get(1));
     assertFalse(matchingAttributeIDs.contains("1"));
 
     List<Explanation> explanations =
@@ -229,22 +229,22 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
                     "hypertension",
                     78.04878048780488)));
 
-    assertEquals(explanationStrings, expectedExplanationStrings);
+    assertEquals(expectedExplanationStrings, explanationStrings);
   }
 
   @Test
   void testIndex() throws InterruptedException {
     createAndIndexEntities(2);
 
-    assertEquals(searchService.count(entityTypeDynamic), 2);
+    assertEquals(2, searchService.count(entityTypeDynamic));
   }
 
   @Test
   void testCount() {
     createAndIndexEntities(2);
 
-    assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>()), 2);
-    assertEquals(searchService.count(entityTypeDynamic), 2);
+    assertEquals(2, searchService.count(entityTypeDynamic, new QueryImpl<>()));
+    assertEquals(2, searchService.count(entityTypeDynamic));
   }
 
   @Test
@@ -253,7 +253,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     searchService.delete(entityTypeDynamic, entity);
     searchService.refreshIndex();
-    assertEquals(searchService.count(entityTypeDynamic), 0);
+    assertEquals(0, searchService.count(entityTypeDynamic));
   }
 
   @Test
@@ -262,7 +262,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     searchService.deleteById(entityTypeDynamic, entity.getIdValue());
     searchService.refreshIndex();
-    assertEquals(searchService.count(entityTypeDynamic), 0);
+    assertEquals(0, searchService.count(entityTypeDynamic));
   }
 
   @Test
@@ -271,7 +271,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     searchService.delete(entityTypeDynamic, entities.stream());
     searchService.refreshIndex();
-    assertEquals(searchService.count(entityTypeDynamic), 0);
+    assertEquals(0, searchService.count(entityTypeDynamic));
   }
 
   @Test
@@ -286,7 +286,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
   @Test
   void testFindAllEmpty() {
     long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
-    assertEquals(count, 0L);
+    assertEquals(0L, count);
   }
 
   @Test
@@ -294,7 +294,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     List<Entity> entities = createAndIndexEntities(5);
 
     long count = searchService.search(entityTypeDynamic, new QueryImpl<>()).count();
-    assertEquals(count, entities.size());
+    assertEquals(entities.size(), count);
   }
 
   @Test
@@ -303,7 +303,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     Supplier<Stream<Object>> retrieved =
         () -> searchService.search(entityTypeDynamic, new QueryImpl<>());
-    assertEquals(retrieved.get().count(), 3);
+    assertEquals(3, retrieved.get().count());
   }
 
   private static Object[][] findQueryOperatorEq() {
@@ -348,7 +348,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().eq(attrName, value);
     List<Object> ids = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(ids, expectedEntityIds);
+    assertEquals(expectedEntityIds, ids);
   }
 
   private static Object[][] findQueryOperatorIn() {
@@ -368,7 +368,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().in(ATTR_ID, ids);
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, expectedEntityIds);
+    assertEquals(expectedEntityIds, foundIds);
   }
 
   private static Object[][] findQueryOperatorLess() {
@@ -389,7 +389,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().lt(ATTR_INT, value);
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, expectedEntityIds);
+    assertEquals(expectedEntityIds, foundIds);
   }
 
   private static Object[][] findQueryOperatorLessEqual() {
@@ -410,7 +410,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().le(ATTR_INT, value);
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, expectedEntityIds);
+    assertEquals(expectedEntityIds, foundIds);
   }
 
   private static Object[][] findQueryOperatorGreater() {
@@ -430,7 +430,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().gt(ATTR_INT, value);
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, expectedEntityIds);
+    assertEquals(expectedEntityIds, foundIds);
   }
 
   private static Object[][] findQueryOperatorGreaterEqual() {
@@ -451,7 +451,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().ge(ATTR_INT, value);
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, expectedEntityIds);
+    assertEquals(expectedEntityIds, foundIds);
   }
 
   private static Object[][] findQueryOperatorRange() {
@@ -473,7 +473,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> nestedQuery = new QueryImpl<>().rng(ATTR_INT, low, high);
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorLike() {
@@ -490,7 +490,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> nestedQuery = new QueryImpl<>().like(ATTR_STRING, likeStr);
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorNot() {
@@ -511,7 +511,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> nestedQuery = new QueryImpl<>().not().eq(ATTR_INT, value);
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorAnd() {
@@ -532,7 +532,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
         new QueryImpl<>().eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value);
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorOr() {
@@ -553,7 +553,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
         new QueryImpl<>().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value);
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorNested() {
@@ -586,7 +586,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
             .unnest();
     List<Object> foundAsList =
         searchService.search(entityTypeDynamic, nestedQuery).collect(toList());
-    assertEquals(foundAsList, expectedEntityIDs);
+    assertEquals(expectedEntityIDs, foundAsList);
   }
 
   private static Object[][] findQueryOperatorSearch() {
@@ -603,7 +603,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().search(ATTR_HTML, searchStr);
     List<Object> ids = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(ids, expectedEntityIds);
+    assertEquals(expectedEntityIds, ids);
   }
 
   @Test
@@ -619,7 +619,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "carcinoma");
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, asList("0", "2"));
+    assertEquals(asList("0", "2"), foundIds);
   }
 
   @Test
@@ -635,7 +635,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     Query<Entity> query = new QueryImpl<>().search(ATTR_STRING, "car carcinoma");
     List<Object> foundIds = searchService.search(entityTypeDynamic, query).collect(toList());
 
-    assertEquals(foundIds, asList("0", "2", "1"));
+    assertEquals(asList("0", "2", "1"), foundIds);
   }
 
   @Test
@@ -647,7 +647,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
     List<Object> ids = searchService.search(entityTypeDynamic, query).collect(toList());
     List<Object> expected =
         asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
-    assertEquals(ids, expected);
+    assertEquals(expected, ids);
   }
 
   @Test
@@ -660,7 +660,7 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
 
     List<Object> expected =
         asList(testEntities.get(7).getIdValue(), testEntities.get(6).getIdValue());
-    assertEquals(ids, expected);
+    assertEquals(expected, ids);
   }
 
   @Test

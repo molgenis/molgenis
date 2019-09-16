@@ -23,16 +23,16 @@ class LabelFormatFactoryTest extends AbstractMockitoTest {
   @Test
   void testFormatLabeled() {
     when(labeled.getLabel("de")).thenReturn("abcde");
-    assertEquals(labelFormat.format(labeled), "abcde");
+    assertEquals("abcde", labelFormat.format(labeled));
   }
 
   @Test
   void testFormatString() {
-    assertEquals(labelFormat.format("abcde"), "abcde");
+    assertEquals("abcde", labelFormat.format("abcde"));
   }
 
   @Test
   void testFormatNull() {
-    assertEquals(labelFormat.format(null), "null");
+    assertEquals("null", labelFormat.format(null));
   }
 }

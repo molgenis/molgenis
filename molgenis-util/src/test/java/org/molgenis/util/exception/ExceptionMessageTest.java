@@ -38,7 +38,7 @@ public abstract class ExceptionMessageTest extends AbstractMockitoTest {
   protected static void assertExceptionMessageEquals(Exception e, String language, String message) {
     LocaleContextHolder.setLocale(new Locale(language));
     try {
-      assertEquals(e.getLocalizedMessage(), message);
+      assertEquals(message, e.getLocalizedMessage());
     } finally {
       LocaleContextHolder.setLocale(null);
     }

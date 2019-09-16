@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
+import static org.molgenis.data.QueryRule.Operator.SHOULD;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
@@ -68,16 +70,16 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
         semanticSearchServiceHelper.createDisMaxQueryRuleForTerms(createdTargetAttributeQueries);
     String expectedQueryRuleToString =
         "DIS_MAX ('label' FUZZY_MATCH 'Height', 'description' FUZZY_MATCH 'Height', 'label' FUZZY_MATCH 'Standing height in cm', 'description' FUZZY_MATCH 'Standing height in cm', 'label' FUZZY_MATCH 'body_length', 'description' FUZZY_MATCH 'body_length', 'label' FUZZY_MATCH 'Sitting height', 'description' FUZZY_MATCH 'Sitting height', 'label' FUZZY_MATCH 'sitting_length', 'description' FUZZY_MATCH 'sitting_length', 'label' FUZZY_MATCH 'Height', 'description' FUZZY_MATCH 'Height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature')";
-    assertEquals(actualRule.getOperator(), QueryRule.Operator.DIS_MAX);
-    assertEquals(actualRule.toString(), expectedQueryRuleToString);
+    assertEquals(DIS_MAX, actualRule.getOperator());
+    assertEquals(expectedQueryRuleToString, actualRule.toString());
 
     List<String> createdTargetAttributeQueries2 = singletonList("(Height) [stand^~]");
     QueryRule actualRule2 =
         semanticSearchServiceHelper.createDisMaxQueryRuleForTerms(createdTargetAttributeQueries2);
     String expectedQueryRuleToString2 =
         "DIS_MAX ('label' FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]', 'description' FUZZY_MATCH '\\(Height\\) \\[stand^\\~\\]')";
-    assertEquals(actualRule2.getOperator(), QueryRule.Operator.DIS_MAX);
-    assertEquals(actualRule2.toString(), expectedQueryRuleToString2);
+    assertEquals(DIS_MAX, actualRule2.getOperator());
+    assertEquals(expectedQueryRuleToString2, actualRule2.toString());
   }
 
   @Test
@@ -98,8 +100,8 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String expectedShouldQueryRuleToString =
         "SHOULD (DIS_MAX ('label' FUZZY_MATCH 'gcc molgenis label', 'description' FUZZY_MATCH 'gcc molgenis label'), DIS_MAX ('label' FUZZY_MATCH '2 label', 'description' FUZZY_MATCH '2 label', 'label' FUZZY_MATCH '2 genetics molgenis label', 'description' FUZZY_MATCH '2 genetics molgenis label'))";
 
-    assertEquals(actualShouldQueryRule.toString(), expectedShouldQueryRuleToString);
-    assertEquals(actualShouldQueryRule.getOperator(), QueryRule.Operator.SHOULD);
+    assertEquals(expectedShouldQueryRuleToString, actualShouldQueryRule.toString());
+    assertEquals(SHOULD, actualShouldQueryRule.getOperator());
   }
 
   @Test
@@ -137,7 +139,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
             Sets.newLinkedHashSet(asList("targetAttribute 1", "Height")), tags.values());
     String expecteddisMaxQueryRuleToString_1 =
         "DIS_MAX ('label' FUZZY_MATCH '1 targetattribute', 'description' FUZZY_MATCH '1 targetattribute', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
-    assertEquals(actualTargetAttributeQueryTerms_1.toString(), expecteddisMaxQueryRuleToString_1);
+    assertEquals(expecteddisMaxQueryRuleToString_1, actualTargetAttributeQueryTerms_1.toString());
 
     // Case 2
     QueryRule expecteddisMaxQueryRuleToString_2 =
@@ -146,7 +148,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String expectedTargetAttributeQueryTermsToString_2 =
         "DIS_MAX ('label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
     assertEquals(
-        expecteddisMaxQueryRuleToString_2.toString(), expectedTargetAttributeQueryTermsToString_2);
+        expectedTargetAttributeQueryTermsToString_2, expecteddisMaxQueryRuleToString_2.toString());
 
     // Case 3
     QueryRule expecteddisMaxQueryRuleToString_3 =
@@ -155,7 +157,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String expectedTargetAttributeQueryTermsToString_3 =
         "DIS_MAX ('label' FUZZY_MATCH '3 targetattribute', 'description' FUZZY_MATCH '3 targetattribute', 'label' FUZZY_MATCH 'length body', 'description' FUZZY_MATCH 'length body', 'label' FUZZY_MATCH 'standing height', 'description' FUZZY_MATCH 'standing height', 'label' FUZZY_MATCH 'length sitting', 'description' FUZZY_MATCH 'length sitting', 'label' FUZZY_MATCH 'sitting height', 'description' FUZZY_MATCH 'sitting height', 'label' FUZZY_MATCH 'sature', 'description' FUZZY_MATCH 'sature', 'label' FUZZY_MATCH 'height', 'description' FUZZY_MATCH 'height')";
     assertEquals(
-        expecteddisMaxQueryRuleToString_3.toString(), expectedTargetAttributeQueryTermsToString_3);
+        expectedTargetAttributeQueryTermsToString_3, expecteddisMaxQueryRuleToString_3.toString());
   }
 
   @Test
@@ -168,7 +170,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
             "Description is not used",
             singletonList("body_length"));
     List<String> actual_1 = semanticSearchServiceHelper.parseOntologyTermQueries(ontologyTerm1);
-    assertEquals(actual_1, asList("length body", "standing height"));
+    assertEquals(asList("length body", "standing height"), actual_1);
 
     // Case 2
     OntologyTerm ontologyTerm2 =
@@ -185,7 +187,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
 
     List<String> actual_2 = semanticSearchServiceHelper.parseOntologyTermQueries(ontologyTerm2);
 
-    assertEquals(actual_2, asList("height", "length^0.5 body^0.5", "length^0.5"));
+    assertEquals(asList("height", "length^0.5 body^0.5", "length^0.5"), actual_2);
   }
 
   @Test
@@ -209,15 +211,15 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
 
     List<String> expactedAttributeIdentifiers = asList("1", "2");
     assertEquals(
-        semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType),
-        expactedAttributeIdentifiers);
+        expactedAttributeIdentifiers,
+        semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType));
   }
 
   @Test
   void testParseBoostQueryString() {
     String description = "falling in the ocean!";
     String actual = semanticSearchServiceHelper.parseBoostQueryString(description, 0.5);
-    assertEquals(actual, "ocean^0.5 falling^0.5");
+    assertEquals("ocean^0.5 falling^0.5", actual);
   }
 
   @Test
@@ -225,7 +227,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String description = "falling in the ocean!";
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
     Set<String> expected = Sets.newHashSet("falling", "ocean");
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -243,7 +245,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String description = "body^0.5 length^0.5";
     Set<String> expected = Sets.newHashSet("length", "body", "0.5");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-    assertEquals(actual.size(), 3);
+    assertEquals(3, actual.size());
     assertTrue(actual.containsAll(expected));
   }
 
@@ -252,7 +254,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String description = "body~0.5 length~0.5";
     Set<String> expected = Sets.newHashSet("length~0.5", "body~0.5");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -260,7 +262,7 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
     String description = "body_length";
     Set<String> expected = Sets.newHashSet("body", "length");
     Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -286,12 +288,12 @@ class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest {
   @Test
   void testEscapeCharsExcludingCaretChar() {
     assertEquals(
-        semanticSearchServiceHelper.escapeCharsExcludingCaretChar("(hypertension^4)~[]"),
-        "\\(hypertension^4\\)\\~\\[\\]");
+        "\\(hypertension^4\\)\\~\\[\\]",
+        semanticSearchServiceHelper.escapeCharsExcludingCaretChar("(hypertension^4)~[]"));
 
     assertEquals(
-        semanticSearchServiceHelper.escapeCharsExcludingCaretChar("hypertension^4"),
-        "hypertension^4");
+        "hypertension^4",
+        semanticSearchServiceHelper.escapeCharsExcludingCaretChar("hypertension^4"));
   }
 
   @Configuration

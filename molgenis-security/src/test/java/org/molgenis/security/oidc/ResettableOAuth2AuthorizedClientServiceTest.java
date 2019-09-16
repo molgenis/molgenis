@@ -22,6 +22,6 @@ class ResettableOAuth2AuthorizedClientServiceTest extends AbstractMockitoTest {
   @Test
   void testReset() {
     oAuth2AuthorizedClientService.reset();
-    assertEquals(oAuth2AuthorizedClientService.getAuthorizedClients(), emptyMap());
+    assertEquals(emptyMap(), oAuth2AuthorizedClientService.getAuthorizedClients());
   }
 }

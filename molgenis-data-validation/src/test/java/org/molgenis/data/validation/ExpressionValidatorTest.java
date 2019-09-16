@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -33,8 +34,7 @@ class ExpressionValidatorTest extends AbstractMockitoTest {
     List<String> expressions = Arrays.asList("a", "b");
     when(jsMagmaScriptEvaluator.eval(expressions, entity)).thenReturn(Arrays.asList(TRUE, FALSE));
     assertEquals(
-        expressionValidator.resolveBooleanExpressions(expressions, entity),
-        Arrays.asList(true, false));
+        asList(true, false), expressionValidator.resolveBooleanExpressions(expressions, entity));
   }
 
   static Object[][] resultProvider() {
@@ -58,6 +58,6 @@ class ExpressionValidatorTest extends AbstractMockitoTest {
   void testResolveBooleanExpression(Object result, boolean expected) {
     when(jsMagmaScriptEvaluator.eval(singletonList("expression"), entity))
         .thenReturn(singletonList(result));
-    assertEquals(expressionValidator.resolveBooleanExpression("expression", entity), expected);
+    assertEquals(expected, expressionValidator.resolveBooleanExpression("expression", entity));
   }
 }

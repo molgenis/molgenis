@@ -1,6 +1,7 @@
 package org.molgenis.data.security.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Integer.MAX_VALUE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -94,7 +95,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType1Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.count(), 1L);
+    assertEquals(1L, repo.count());
   }
 
   @WithMockUser(username = USERNAME)
@@ -148,7 +149,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
 
   @Test
   void query() {
-    assertEquals(repo.query().getRepository(), repo);
+    assertEquals(repo, repo.query().getRepository());
   }
 
   @WithMockUser(username = USERNAME)
@@ -171,9 +172,9 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType1Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.count(q), 1L);
-    assertEquals(queryCaptor.getValue().getOffset(), 0);
-    assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
+    assertEquals(1L, repo.count(q));
+    assertEquals(0, queryCaptor.getValue().getOffset());
+    assertEquals(MAX_VALUE, queryCaptor.getValue().getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
@@ -203,10 +204,10 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), repo.findAll(q).collect(toList()));
     Query<EntityType> decoratedQ = queryCaptor.getValue();
-    assertEquals(decoratedQ.getOffset(), 0);
-    assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
+    assertEquals(0, decoratedQ.getOffset());
+    assertEquals(MAX_VALUE, decoratedQ.getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
@@ -238,10 +239,10 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(q).collect(toList()), singletonList(entityType2));
+    assertEquals(singletonList(entityType2), repo.findAll(q).collect(toList()));
     Query<EntityType> decoratedQ = queryCaptor.getValue();
-    assertEquals(decoratedQ.getOffset(), 0);
-    assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
+    assertEquals(0, decoratedQ.getOffset());
+    assertEquals(MAX_VALUE, decoratedQ.getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
@@ -267,7 +268,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), newArrayList(repo.iterator()));
   }
 
   @SuppressWarnings("unchecked")
@@ -283,7 +284,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOne(q), entityType0);
+    assertEquals(entityType0, repo.findOne(q));
   }
 
   @SuppressWarnings("unchecked")
@@ -311,7 +312,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOneById("entity0"), entityType0);
+    assertEquals(entityType0, repo.findOneById("entity0"));
   }
 
   @WithMockUser(username = USERNAME)
@@ -334,7 +335,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOneById(entityType0Name, fetch), entityType0);
+    assertEquals(entityType0, repo.findOneById(entityType0Name, fetch));
   }
 
   @WithMockUser(username = USERNAME)
@@ -373,7 +374,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), repo.findAll(ids, fetch).collect(toList()));
   }
 
   @WithMockUser(username = USERNAME, authorities = "ROLE_SU")
@@ -392,7 +393,7 @@ class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCon
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
     when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
-    assertEquals(repo.aggregate(aggregateQuery), aggregateResult);
+    assertEquals(aggregateResult, repo.aggregate(aggregateQuery));
   }
 
   @WithMockUser(username = USERNAME)

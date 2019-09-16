@@ -1,9 +1,10 @@
 package org.molgenis.api.convert;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.model.Selection.FULL_SELECTION;
 
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.molgenis.api.model.Selection;
@@ -18,13 +19,12 @@ class SelectionConverterTest {
 
   @Test
   void testConvert() {
-    assertEquals(
-        selectionConverter.convert("item"), new Selection(Collections.singletonMap("item", null)));
+    assertEquals(new Selection(singletonMap("item", null)), selectionConverter.convert("item"));
   }
 
   @Test
   void testConvertEmptySelection() {
-    assertEquals(selectionConverter.convert(""), Selection.FULL_SELECTION);
+    assertEquals(FULL_SELECTION, selectionConverter.convert(""));
   }
 
   @Test

@@ -26,7 +26,7 @@ class AclAlreadyExistsExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     DataAlreadyExistsException ex = new AclAlreadyExistsException("type", "identifier");
-    assertEquals(ex.getMessage(), "typeId:type, id:identifier");
+    assertEquals("typeId:type, id:identifier", ex.getMessage());
   }
 
   public static Object[][] languageMessageProvider() {

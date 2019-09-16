@@ -22,6 +22,6 @@ class OidcUserMissingEmailExceptionTest extends AbstractMockitoTest {
   void testGetMessage() {
     when(oidcUser.getSubject()).thenReturn("userId");
     assertEquals(
-        oidcUserMissingEmailException.getMessage(), "email claim missing for subject 'userId'");
+        "email claim missing for subject 'userId'", oidcUserMissingEmailException.getMessage());
   }
 }

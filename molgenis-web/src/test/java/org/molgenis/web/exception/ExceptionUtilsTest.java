@@ -1,12 +1,16 @@
 package org.molgenis.web.exception;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.web.exception.ExceptionUtils.getErrorCode;
+import static org.molgenis.web.exception.ExceptionUtils.getErrorCodedCause;
+import static org.molgenis.web.exception.ExceptionUtils.getErrors;
 
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.springframework.validation.BindException;
@@ -20,13 +24,13 @@ class ExceptionUtilsTest {
     String myErrorCode = "MyErrorCode";
     CodedRuntimeException e = mock(CodedRuntimeException.class);
     when(e.getErrorCode()).thenReturn(myErrorCode);
-    assertEquals(ExceptionUtils.getErrorCode(e), Optional.of(myErrorCode));
+    assertEquals(of(myErrorCode), getErrorCode(e));
   }
 
   @Test
   void testGetErrorCodeNotExists() {
     Exception e = mock(Exception.class);
-    assertEquals(ExceptionUtils.getErrorCode(e), Optional.empty());
+    assertEquals(empty(), getErrorCode(e));
   }
 
   @Test
@@ -47,7 +51,7 @@ class ExceptionUtilsTest {
   @Test
   void testGetErrorsBindException() {
     BindException bindException = mock(BindException.class);
-    assertEquals(ExceptionUtils.getErrors(bindException), Optional.of(bindException));
+    assertEquals(of(bindException), getErrors(bindException));
   }
 
   @Test
@@ -56,19 +60,18 @@ class ExceptionUtilsTest {
         mock(MethodArgumentNotValidException.class);
     BindingResult bindingResult = mock(BindingResult.class);
     when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
-    assertEquals(
-        ExceptionUtils.getErrors(methodArgumentNotValidException), Optional.of(bindingResult));
+    assertEquals(of(bindingResult), getErrors(methodArgumentNotValidException));
   }
 
   @Test
   void testGetErrorsEmpty() {
-    assertEquals(ExceptionUtils.getErrors(mock(Throwable.class)), Optional.empty());
+    assertEquals(empty(), getErrors(mock(Throwable.class)));
   }
 
   @Test
   void testGetErrorCodedThrowable() {
     Throwable throwable = mock(CodedRuntimeException.class);
-    assertEquals(ExceptionUtils.getErrorCodedCause(throwable), Optional.of(throwable));
+    assertEquals(of(throwable), getErrorCodedCause(throwable));
   }
 
   @Test
@@ -78,12 +81,12 @@ class ExceptionUtilsTest {
     Throwable throwable = mock(Throwable.class);
     when(throwable.getCause()).thenReturn(throwableCause);
     when(throwableCause.getCause()).thenReturn(throwableCauseCause);
-    assertEquals(ExceptionUtils.getErrorCodedCause(throwable), Optional.of(throwableCauseCause));
+    assertEquals(of(throwableCauseCause), getErrorCodedCause(throwable));
   }
 
   @Test
   void testGetErrorCodedCauseEmpty() {
     Throwable throwable = mock(Throwable.class);
-    assertEquals(ExceptionUtils.getErrorCodedCause(throwable), Optional.empty());
+    assertEquals(empty(), getErrorCodedCause(throwable));
   }
 }

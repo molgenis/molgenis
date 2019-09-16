@@ -32,8 +32,8 @@ class ReadonlyValueExceptionTest extends ExceptionMessageTest {
         new ReadonlyValueException(
             "MyEntityType", "myAttributeName", "myEntityId", mock(Throwable.class));
     assertEquals(
-        ex.getMessage(),
-        "entityTypeId:MyEntityType attributeName:myAttributeName entityId:myEntityId");
+        "entityTypeId:MyEntityType attributeName:myAttributeName entityId:myEntityId",
+        ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

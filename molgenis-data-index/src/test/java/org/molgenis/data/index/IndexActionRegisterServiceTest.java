@@ -1,6 +1,8 @@
 package org.molgenis.data.index;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,8 +18,6 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
-import com.google.common.collect.Lists;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,9 +91,7 @@ class IndexActionRegisterServiceTest extends AbstractMockitoTest {
 
     verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
     verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
-    assertEquals(
-        indexActionStreamCaptor.getValue().collect(Collectors.toList()),
-        Lists.newArrayList(indexAction));
+    assertEquals(newArrayList(indexAction), indexActionStreamCaptor.getValue().collect(toList()));
   }
 
   @Test

@@ -26,7 +26,7 @@ class UnknownTypeExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     UnknownDataException ex = new UnknownTypeException("type");
-    assertEquals(ex.getMessage(), "typeId:type");
+    assertEquals("typeId:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

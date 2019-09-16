@@ -1,5 +1,6 @@
 package org.molgenis.data.security;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -7,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,13 +62,13 @@ class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
     when(aclGeneralChanges.getName()).thenReturn("ACL_GENERAL_CHANGES");
 
     assertEquals(
-        molgenisRoleHierarchy.getReachableGrantedAuthorities(
-            singletonList(new SimpleGrantedAuthority("ROLE_SU"))),
-        ImmutableSet.of(
+        of(
             new SimpleGrantedAuthority("ROLE_ACL_TAKE_OWNERSHIP"),
             new SimpleGrantedAuthority("ROLE_ACL_MODIFY_AUDITING"),
             new SimpleGrantedAuthority("ROLE_ACL_GENERAL_CHANGES"),
-            new SimpleGrantedAuthority("ROLE_SU")));
+            new SimpleGrantedAuthority("ROLE_SU")),
+        molgenisRoleHierarchy.getReachableGrantedAuthorities(
+            singletonList(new SimpleGrantedAuthority("ROLE_SU"))));
   }
 
   @Test
@@ -82,11 +82,11 @@ class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
     when(dataExplorer.getName()).thenReturn("DATA_EXPLORER");
 
     assertEquals(
-        molgenisRoleHierarchy.getReachableGrantedAuthorities(
-            singletonList(new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"))),
-        ImmutableSet.of(
+        of(
             new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"),
             new SimpleGrantedAuthority("ROLE_VIEWER"),
-            new SimpleGrantedAuthority("ROLE_DATA_EXPLORER")));
+            new SimpleGrantedAuthority("ROLE_DATA_EXPLORER")),
+        molgenisRoleHierarchy.getReachableGrantedAuthorities(
+            singletonList(new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"))));
   }
 }

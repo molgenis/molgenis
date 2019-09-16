@@ -20,7 +20,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -201,10 +200,9 @@ class L2CacheTest extends AbstractMolgenisSpringTest {
     List<Entity> result = l2Cache.getBatch(repository, newArrayList("0", "1", "2", "3"));
     Map<Object, Entity> retrievedEntities =
         result.stream().collect(toMap(Entity::getIdValue, e -> e));
-    assertEquals(retrievedEntities.size(), 4);
+    assertEquals(4, retrievedEntities.size());
     assertTrue(EntityUtils.equals(retrievedEntities.get("1"), testEntities.get(1)));
-    assertEquals(
-        idStreamCaptor.getValue().collect(Collectors.toList()), newArrayList("0", "1", "2", "3"));
+    assertEquals(newArrayList("0", "1", "2", "3"), idStreamCaptor.getValue().collect(toList()));
   }
 
   @Configuration

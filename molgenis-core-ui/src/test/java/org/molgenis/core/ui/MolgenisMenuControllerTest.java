@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.core.ui.MolgenisMenuController.VoidPluginController;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.springframework.web.servlet.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 
@@ -54,7 +55,7 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn("home");
 
     assertEquals(
-        molgenisMenuController.forwardDefaultMenuDefaultPlugin(model), "forward:/plugin/home");
+        "forward:/plugin/home", molgenisMenuController.forwardDefaultMenuDefaultPlugin(model));
 
     verify(model).addAttribute("menu_id", "main");
     verify(model).addAttribute("context_url", "/menu/main/home");
@@ -76,7 +77,7 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
   void testForwardDefaultMenuPluginNoPermissions() {
     when(menuReaderService.getMenu()).thenReturn(menu.filter(it -> false).map(Menu.class::cast));
 
-    assertEquals(molgenisMenuController.forwardDefaultMenuDefaultPlugin(model), "forward:/login");
+    assertEquals("forward:/login", molgenisMenuController.forwardDefaultMenuDefaultPlugin(model));
 
     verify(model).addAttribute("menu_id", "main");
     verifyNoMoreInteractions(model);
@@ -89,7 +90,7 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn("themes");
 
     assertEquals(
-        molgenisMenuController.forwardMenuDefaultPlugin("admin", model), "forward:/plugin/themes");
+        "forward:/plugin/themes", molgenisMenuController.forwardMenuDefaultPlugin("admin", model));
 
     verify(model).addAttribute("menu_id", "admin");
     verify(model).addAttribute("context_url", "/menu/admin/themes");
@@ -116,7 +117,7 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn("void");
 
     assertEquals(
-        molgenisMenuController.forwardMenuDefaultPlugin("admin", model), "forward:/plugin/void");
+        "forward:/plugin/void", molgenisMenuController.forwardMenuDefaultPlugin("admin", model));
 
     verify(model).addAttribute("menu_id", "admin");
     verify(model).addAttribute("context_url", "/menu/admin/void");
@@ -133,8 +134,8 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
         .thenReturn("/menu/admin/permissions/blah/blah?x=y&a=b");
 
     assertEquals(
-        molgenisMenuController.forwardMenuPlugin(request, "admin", "permissions", model),
-        "forward:/plugin/permissions//blah/blah?x=y&a=b");
+        "forward:/plugin/permissions//blah/blah?x=y&a=b",
+        molgenisMenuController.forwardMenuPlugin(request, "admin", "permissions", model));
 
     verify(model).addAttribute("menu_id", "admin");
     verify(model).addAttribute("context_url", "/menu/admin/permissions");
@@ -163,7 +164,7 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
 
     String uri = molgenisMenuController.getForwardPluginUri(pluginId, "", null);
 
-    assertEquals(uri, "forward:/plugin/app/test");
+    assertEquals("forward:/plugin/app/test", uri);
   }
 
   @Test
@@ -173,8 +174,8 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
-        molgenisMenuController.getForwardPluginUri(pluginId, "remainder", null),
-        "forward:/plugin/pluginPath/remainder");
+        "forward:/plugin/pluginPath/remainder",
+        molgenisMenuController.getForwardPluginUri(pluginId, "remainder", null));
   }
 
   @Test
@@ -184,8 +185,8 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
-        molgenisMenuController.getForwardPluginUri(pluginId, null, "key=value"),
-        "forward:/plugin/pluginPath?key=value");
+        "forward:/plugin/pluginPath?key=value",
+        molgenisMenuController.getForwardPluginUri(pluginId, null, "key=value"));
   }
 
   @Test
@@ -195,8 +196,8 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
-        molgenisMenuController.getForwardPluginUri(pluginId, null, ""),
-        "forward:/plugin/pluginPath");
+        "forward:/plugin/pluginPath",
+        molgenisMenuController.getForwardPluginUri(pluginId, null, ""));
   }
 
   @Test
@@ -206,12 +207,12 @@ class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
-        molgenisMenuController.getForwardPluginUri(pluginId, null, null),
-        "forward:/plugin/pluginPath/");
+        "forward:/plugin/pluginPath/",
+        molgenisMenuController.getForwardPluginUri(pluginId, null, null));
   }
 
   @Test
   void testVoidController() {
-    assertEquals(new MolgenisMenuController.VoidPluginController().init(), "view-void");
+    assertEquals("view-void", new VoidPluginController().init());
   }
 }

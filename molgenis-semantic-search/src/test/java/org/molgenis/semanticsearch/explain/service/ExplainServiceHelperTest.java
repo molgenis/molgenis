@@ -26,7 +26,7 @@ class ExplainServiceHelperTest {
     Explanation explanation =
         new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"), Explanation.class);
     Set<String> discoverMatchedQueries = explainServiceHelper.findMatchedWords(explanation);
-    assertEquals(discoverMatchedQueries.size(), 2);
+    assertEquals(2, discoverMatchedQueries.size());
     assertTrue(discoverMatchedQueries.contains("high blood"));
     assertTrue(discoverMatchedQueries.contains("medic"));
   }
@@ -34,13 +34,13 @@ class ExplainServiceHelperTest {
   @Test
   void getMatchedWord() {
     assertEquals(
+        "blood",
         explainServiceHelper.getMatchedWord(
-            "weight(label:blood in 20697) [PerFieldSimilarity], result of:"),
-        "blood");
+            "weight(label:blood in 20697) [PerFieldSimilarity], result of:"));
     assertEquals(
+        "blood",
         explainServiceHelper.getMatchedWord(
-            "weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"),
-        "blood");
+            "weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"));
   }
 
   @Test

@@ -1,9 +1,10 @@
 package org.molgenis.data.csv;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,8 +29,8 @@ class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
     repo.setEntityTypeFactory(entityTypeFactory);
     repo.setAttributeFactory(attrMetaFactory);
     assertNotNull(repo.getEntityTypeIds());
-    assertEquals(Iterables.size(repo.getEntityTypeIds()), 1);
-    assertEquals(Iterables.get(repo.getEntityTypeIds(), 0), "testdata");
+    assertEquals(1, size(repo.getEntityTypeIds()));
+    assertEquals("testdata", get(repo.getEntityTypeIds(), 0));
   }
 
   @SuppressWarnings("deprecation")
@@ -487,7 +488,7 @@ class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
     repo.setEntityTypeFactory(entityTypeFactory);
     repo.setAttributeFactory(attrMetaFactory);
     assertNotNull(repo.getEntityTypeIds());
-    assertEquals(Iterables.size(repo.getEntityTypeIds()), 3);
+    assertEquals(3, size(repo.getEntityTypeIds()));
     assertNotNull(repo.getRepository("0"));
     assertNotNull(repo.getRepository("1"));
   }

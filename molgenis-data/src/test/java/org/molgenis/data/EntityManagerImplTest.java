@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -8,8 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ class EntityManagerImplTest {
     Stream<Entity> entities = Stream.of(entity0, entity1);
 
     Fetch fetch = null;
-    assertEquals(entities, entityManagerImpl.resolveReferences(entityType, entities, fetch));
+    assertEquals(entityManagerImpl.resolveReferences(entityType, entities, fetch), entities);
   }
 
   @Test
@@ -82,6 +82,6 @@ class EntityManagerImplTest {
     Fetch fetch = null;
     Stream<Entity> entities =
         entityManagerImpl.resolveReferences(entityType, Stream.of(entity0, entity1), fetch);
-    assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), entities.collect(toList()));
   }
 }

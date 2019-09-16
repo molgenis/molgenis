@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,9 +17,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.importer.PersistResult.create;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,9 +129,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
   void testPersistMetaNoneDataAdd() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -160,9 +159,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
   void testPersistMetaNoneDataUpdate() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPDATE);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -180,9 +177,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPDATE);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -206,9 +201,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPSERT);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, repository0, repository1);
     inOrder.verify(repository1).upsertBatch(anyList());
@@ -222,9 +215,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
   void testPersistMetaAddDataAdd() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.ADD, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).addEntityType(entityType2);
@@ -245,9 +236,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.ADD, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).addEntityType(entityType2);
@@ -288,9 +277,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.UPDATE, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).updateEntityType(entityType2);
@@ -332,9 +319,7 @@ class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.UPSERT, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).updateEntityType(entityType2);

@@ -47,9 +47,9 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             twoFactorAuthenticationToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
         new TwoFactorAuthenticationToken(
-            principal, credentials, updatedAuthorities, verificationCode, secretKey));
+            principal, credentials, updatedAuthorities, verificationCode, secretKey),
+        updatedAuthentication);
   }
 
   @Test
@@ -58,7 +58,7 @@ class AuthenticationAuthoritiesUpdaterImplTest {
     Authentication updatedAuthentication =
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             systemSecurityToken, updatedAuthorities);
-    assertEquals(updatedAuthentication, systemSecurityToken);
+    assertEquals(systemSecurityToken, updatedAuthentication);
   }
 
   @Test
@@ -73,8 +73,8 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             restAuthenticationToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
-        new RestAuthenticationToken(principal, credentials, updatedAuthorities, token));
+        new RestAuthenticationToken(principal, credentials, updatedAuthorities, token),
+        updatedAuthentication);
   }
 
   @Test
@@ -89,8 +89,8 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             recoveryAuthenticationToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
-        new RecoveryAuthenticationToken(principal, credentials, updatedAuthorities, recoveryCode));
+        new RecoveryAuthenticationToken(principal, credentials, updatedAuthorities, recoveryCode),
+        updatedAuthentication);
   }
 
   @Test
@@ -104,8 +104,8 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             usernamePasswordAuthenticationToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
-        new UsernamePasswordAuthenticationToken(principal, credentials, updatedAuthorities));
+        new UsernamePasswordAuthenticationToken(principal, credentials, updatedAuthorities),
+        updatedAuthentication);
   }
 
   @Test
@@ -121,9 +121,8 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             runAsUserToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
-        new RunAsUserToken(
-            key, principal, credentials, updatedAuthorities, originalAuthentication));
+        new RunAsUserToken(key, principal, credentials, updatedAuthorities, originalAuthentication),
+        updatedAuthentication);
   }
 
   @Test
@@ -138,8 +137,8 @@ class AuthenticationAuthoritiesUpdaterImplTest {
         authenticationAuthoritiesUpdaterImpl.updateAuthentication(
             anonymousAuthenticationToken, updatedAuthorities);
     assertEquals(
-        updatedAuthentication,
-        new AnonymousAuthenticationToken(key, principal, updatedAuthorities));
+        new AnonymousAuthenticationToken(key, principal, updatedAuthorities),
+        updatedAuthentication);
   }
 
   @Test

@@ -43,7 +43,7 @@ class InformationContentServiceTest extends AbstractMolgenisSpringTest {
         informationContentService.createStemmedWordSet("hearing-impairment_eye ball");
     Set<String> expectedStemmedWordSet = Sets.newHashSet("hear", "impair", "ey", "ball");
 
-    assertEquals(actualStemmedWordSet.size(), expectedStemmedWordSet.size());
+    assertEquals(expectedStemmedWordSet.size(), actualStemmedWordSet.size());
     assertTrue(expectedStemmedWordSet.containsAll(actualStemmedWordSet));
   }
 
@@ -92,8 +92,8 @@ class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     Map<String, Double> expectedWordIDF =
         informationContentService.createWordIDF("hearing impairment", ontologyIri);
 
-    assertEquals(expectedWordIDF.get("hear").intValue(), 2);
-    assertEquals(expectedWordIDF.get("impair").intValue(), 3);
+    assertEquals(2, expectedWordIDF.get("hear").intValue());
+    assertEquals(3, expectedWordIDF.get("impair").intValue());
   }
 
   @Test
@@ -141,8 +141,8 @@ class InformationContentServiceTest extends AbstractMolgenisSpringTest {
 
     Map<String, Double> redistributedNGramScore =
         informationContentService.redistributedNGramScore("hearing impairment", ontologyIri);
-    assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
-    assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
+    assertEquals(-7, redistributedNGramScore.get("hear").intValue());
+    assertEquals(7, redistributedNGramScore.get("impair").intValue());
   }
 
   @Test

@@ -1,6 +1,8 @@
 package org.molgenis.data.i18n;
 
+import static java.lang.Integer.valueOf;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,8 +57,7 @@ class LanguageRepositoryDecoratorTest extends AbstractMockitoTest {
             })
         .when(delegateRepository)
         .add(any(Stream.class));
-    assertEquals(
-        languageRepositoryDecorator.add(Stream.of(language0, language1)), Integer.valueOf(2));
+    assertEquals(valueOf(2), languageRepositoryDecorator.add(of(language0, language1)));
   }
 
   @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})

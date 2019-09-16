@@ -1,5 +1,8 @@
 package org.molgenis.data.util;
 
+import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +13,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.function.Function;
@@ -81,9 +83,8 @@ class GenericDependencyResolverTest {
     d2.addDependency(d3);
 
     assertEquals(
-        Lists.newArrayList(d3, d2, d1),
-        genericDependencyResolver.resolve(
-            Sets.newHashSet(d1, d2, d3), DependentOn::getDependencies));
+        genericDependencyResolver.resolve(newHashSet(d1, d2, d3), DependentOn::getDependencies),
+        newArrayList(d3, d2, d1));
   }
 
   @Test
@@ -100,8 +101,7 @@ class GenericDependencyResolverTest {
     when(getDependants.apply(4)).thenReturn(emptySet());
 
     assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants),
-        ImmutableSet.of(1, 4, 3));
+        of(1, 4, 3), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
     verify(getDepth, never()).apply(0);
   }
 
@@ -110,8 +110,7 @@ class GenericDependencyResolverTest {
     when(getDepth.apply(0)).thenReturn(1);
     when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
 
-    assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants), ImmutableSet.of(0));
+    assertEquals(of(0), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
   }
 
   @Test
@@ -120,6 +119,6 @@ class GenericDependencyResolverTest {
     when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
 
     assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants), emptySet());
+        emptySet(), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
   }
 }

@@ -98,7 +98,7 @@ class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
             entityMappingEntity.getString(EntityMappingMetadata.SOURCE_ENTITY_TYPE)))
         .thenReturn(sourceEntityType);
 
-    assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
+    assertEquals(entityMappings, entityMappingRepository.toEntityMappings(entityMappingEntities));
   }
 
   @Test

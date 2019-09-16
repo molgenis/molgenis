@@ -1,10 +1,10 @@
 package org.molgenis.web.i18n;
 
+import static java.util.Locale.forLanguageTag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,6 +29,6 @@ class FallbackLocaleSupplierImplTest extends AbstractMockitoTest {
   void testGet() {
     String languageCode = "nl";
     when(appSettings.getLanguageCode()).thenReturn(languageCode);
-    assertEquals(fallbackLocaleSupplierImpl.get(), Locale.forLanguageTag("nl"));
+    assertEquals(forLanguageTag("nl"), fallbackLocaleSupplierImpl.get());
   }
 }

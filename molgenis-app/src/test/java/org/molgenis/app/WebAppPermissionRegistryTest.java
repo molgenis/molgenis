@@ -1,13 +1,13 @@
 package org.molgenis.app;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.molgenis.security.core.PermissionSet.READ;
 
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.data.plugin.model.PluginIdentity;
@@ -27,7 +27,6 @@ public class WebAppPermissionRegistryTest {
     Collection<Pair<PermissionSet, Sid>> pairs =
         permissions.get(new PluginIdentity(HomeController.ID));
     assertEquals(
-        copyOf(pairs),
-        Collections.singleton(new Pair<>(READ, new GrantedAuthoritySid("ROLE_ANONYMOUS"))));
+        singleton(new Pair<>(READ, new GrantedAuthoritySid("ROLE_ANONYMOUS"))), copyOf(pairs));
   }
 }

@@ -1,12 +1,12 @@
 package org.molgenis.data.i18n;
 
+import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Locale;
@@ -75,7 +75,7 @@ class LocalizationPopulatorTest extends AbstractMockitoTest {
     verify(biobankUTF8).set("nl", "\uD83D\uDC00\uD83C\uDDF3\uD83C\uDDF1");
 
     verify(localizationService).store(updateCaptor.capture(), addCaptor.capture());
-    assertEquals(newArrayList(updateCaptor.getValue()), ImmutableList.of(enPlusNl, nlOnly));
-    assertEquals(newArrayList(addCaptor.getValue()), ImmutableList.of(enOnly, biobankUTF8));
+    assertEquals(of(enPlusNl, nlOnly), newArrayList(updateCaptor.getValue()));
+    assertEquals(of(enOnly, biobankUTF8), newArrayList(addCaptor.getValue()));
   }
 }

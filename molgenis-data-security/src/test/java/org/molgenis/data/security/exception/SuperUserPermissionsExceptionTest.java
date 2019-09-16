@@ -27,7 +27,7 @@ class SuperUserPermissionsExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new SuperUserPermissionsException("admin");
-    assertEquals(ex.getMessage(), "name:admin");
+    assertEquals("name:admin", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

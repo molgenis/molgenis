@@ -3,6 +3,7 @@ package org.molgenis.jobs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.jobs.JobExecutionUriUtils.getUriPath;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,6 @@ class JobExecutionUriUtilsTest {
     JobExecution jobExecution = mock(JobExecution.class);
     when(jobExecution.getEntityType()).thenReturn(entityType);
     when(jobExecution.getIdValue()).thenReturn("MyJobExecutionId");
-    assertEquals(
-        JobExecutionUriUtils.getUriPath(jobExecution),
-        "/api/v2/MyJobExecutionEntityType/MyJobExecutionId");
+    assertEquals("/api/v2/MyJobExecutionEntityType/MyJobExecutionId", getUriPath(jobExecution));
   }
 }

@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.admin.permission;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -283,23 +284,22 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   void testGetUsers() {
-    assertEquals(permissionManagerController.getUsers(), Arrays.asList(user1, user2));
+    assertEquals(asList(user1, user2), permissionManagerController.getUsers());
   }
 
   @Test
   void testGetRoles() {
-    assertEquals(permissionManagerController.getRoles(), Arrays.asList(role1, role2));
+    assertEquals(asList(role1, role2), permissionManagerController.getRoles());
   }
 
   @Test
   void testGetPlugins() {
-    assertEquals(permissionManagerController.getPlugins(), Arrays.asList(plugin1, plugin2));
+    assertEquals(asList(plugin1, plugin2), permissionManagerController.getPlugins());
   }
 
   @Test
   void testGetPackages() {
-    assertEquals(
-        permissionManagerController.getPackages(), Arrays.asList(package1, package2, package3));
+    assertEquals(asList(package1, package2, package3), permissionManagerController.getPackages());
   }
 
   @Test
@@ -326,7 +326,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
     Permissions expected =
         Permissions.create(
             ImmutableSet.of("1", "2"), ImmutableMultimap.of(plugin1.getId(), "read"));
-    assertEquals(permissionManagerController.getUserPluginPermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserPluginPermissions("Ipsum"));
   }
 
   @Test
@@ -354,7 +354,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
         Permissions.create(
             ImmutableSet.of("1", "2"), ImmutableMultimap.of(entityType1.getId(), "read"));
     Permissions actual = permissionManagerController.getRolePluginPermissions("ONE");
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -390,7 +390,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(entityType1.getId(), "writemeta", entityType2.getId(), "count"));
 
-    assertEquals(permissionManagerController.getUserEntityClassPermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserEntityClassPermissions("Ipsum"));
   }
 
   @Test
@@ -426,7 +426,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(entityType1.getId(), "write", entityType2.getId(), "read"));
 
-    assertEquals(permissionManagerController.getRoleEntityClassPermissions("ONE"), expected);
+    assertEquals(expected, permissionManagerController.getRoleEntityClassPermissions("ONE"));
   }
 
   @Test
@@ -462,7 +462,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(package1.getId(), "writemeta", package2.getId(), "count"));
 
-    assertEquals(permissionManagerController.getUserPackagePermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserPackagePermissions("Ipsum"));
   }
 
   @Test
@@ -498,7 +498,7 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(package1.getId(), "write", package2.getId(), "read"));
 
-    assertEquals(permissionManagerController.getRolePackagePermissions("ONE"), expected);
+    assertEquals(expected, permissionManagerController.getRolePackagePermissions("ONE"));
   }
 
   @Test
@@ -792,6 +792,6 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
                     PermissionResponse.create("TestPermission", "UPDATE", "Description of UPDATE"),
                     PermissionResponse.create(
                         "TestPermission", "DELETE", "Description of DELETE"))));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

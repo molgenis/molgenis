@@ -1,5 +1,7 @@
 package org.molgenis.data.index.job;
 
+import static java.time.Duration.between;
+import static java.time.Instant.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -11,8 +13,6 @@ import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EX
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -98,8 +98,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
     assertTrue(queryMatcher.matches());
 
     // check the endDate time limit in the query
-    assertEquals(
-        Duration.between(parseInstant(queryMatcher.group(1)), Instant.now()).toMinutes(), 5);
+    assertEquals(5, between(parseInstant(queryMatcher.group(1)), now()).toMinutes());
   }
 
   @Configuration

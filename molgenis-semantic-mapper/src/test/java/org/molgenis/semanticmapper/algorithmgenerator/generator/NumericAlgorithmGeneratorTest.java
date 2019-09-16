@@ -73,7 +73,7 @@ class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
     String generate =
         numericAlgorithmGenerator.generate(
             targetAttribute, asList(sourceAttribute), targetEntityType, sourceEntityType);
-    assertEquals(generate, "$('sourceHeight').unit('cm').toUnit('m').value();");
+    assertEquals("$('sourceHeight').unit('cm').toUnit('m').value();", generate);
 
     String generateAverageValue =
         numericAlgorithmGenerator.generate(
@@ -84,7 +84,7 @@ class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
     String expected =
         "var counter = 0;\nvar SUM=newValue(0);\nif(!$('sourceHeight').isNull().value()){\n\tSUM.plus($('sourceHeight').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(!$('sourceHeight1').isNull().value()){\n\tSUM.plus($('sourceHeight1').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}";
 
-    assertEquals(generateAverageValue, expected);
+    assertEquals(expected, generateAverageValue);
   }
 
   @Test
@@ -93,7 +93,7 @@ class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
         numericAlgorithmGenerator.generateUnitConversionAlgorithm(
             targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
     assertEquals(
-        generateUnitConversionAlgorithm, "$('sourceHeight').unit('cm').toUnit('m').value();");
+        "$('sourceHeight').unit('cm').toUnit('m').value();", generateUnitConversionAlgorithm);
   }
 
   @Test

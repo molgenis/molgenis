@@ -93,9 +93,9 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     targetEntityType.addAttribute(targetAttribute);
 
     assertEquals(
+        attributeMappings,
         attributeMappingRepository.getAttributeMappings(
-            attributeMappingEntities, sourceEntityType, targetEntityType),
-        attributeMappings);
+            attributeMappingEntities, sourceEntityType, targetEntityType));
   }
 
   @Test
@@ -126,7 +126,7 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     result.add(attributeMappingEntity);
 
     List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
-    assertEquals(expectedAttrMappings.size(), result.size());
+    assertEquals(result.size(), expectedAttrMappings.size());
     for (int i = 0; i < expectedAttrMappings.size(); ++i) {
       assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
     }
@@ -161,7 +161,7 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     result.add(attributeMappingEntity);
 
     List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
-    assertEquals(expectedAttrMappings.size(), result.size());
+    assertEquals(result.size(), expectedAttrMappings.size());
     for (int i = 0; i < expectedAttrMappings.size(); ++i) {
       assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
     }
@@ -185,9 +185,9 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
         new AttributeMapping(
             identifier, targetAttribute, null, algorithm, emptyList(), algorithmState);
     assertEquals(
+        singletonList(attributeMapping),
         attributeMappingRepository.getAttributeMappings(
-            singletonList(attributeMappingEntity), null, null),
-        singletonList(attributeMapping));
+            singletonList(attributeMappingEntity), null, null));
   }
 
   @Test
@@ -201,9 +201,9 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     doReturn(attribute0).when(sourceEntityType).getAttribute("attr0");
     doReturn(attribute1).when(sourceEntityType).getAttribute("attr1");
     assertEquals(
+        asList(attribute0, attribute1),
         attributeMappingRepository.getAlgorithmSourceAttributes(
-            attributeMappingEntity, sourceEntityType),
-        asList(attribute0, attribute1));
+            attributeMappingEntity, sourceEntityType));
   }
 
   @Test
@@ -211,9 +211,9 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     Entity attributeMappingEntity = mock(Entity.class);
     EntityType sourceEntityType = mock(EntityType.class);
     assertEquals(
+        emptyList(),
         attributeMappingRepository.getAlgorithmSourceAttributes(
-            attributeMappingEntity, sourceEntityType),
-        emptyList());
+            attributeMappingEntity, sourceEntityType));
   }
 
   @Test
@@ -226,9 +226,9 @@ class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
     doReturn(null).when(sourceEntityType).getAttribute("unknownAttr");
     doReturn(attribute0).when(sourceEntityType).getAttribute("attr0");
     assertEquals(
+        singletonList(attribute0),
         attributeMappingRepository.getAlgorithmSourceAttributes(
-            attributeMappingEntity, sourceEntityType),
-        singletonList(attribute0));
+            attributeMappingEntity, sourceEntityType));
   }
 
   @Configuration

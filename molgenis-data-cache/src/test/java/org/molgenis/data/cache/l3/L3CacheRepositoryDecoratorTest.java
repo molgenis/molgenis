@@ -118,7 +118,7 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     when(l3Cache.get(delegateRepository, queryWithPageSizeOne)).thenReturn(singletonList(3));
     when(delegateRepository.findOneById(3, fetch)).thenReturn(entity3);
 
-    assertEquals(l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne), entity3);
+    assertEquals(entity3, l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne));
     verify(delegateRepository, times(1)).findOneById(3, fetch);
     verify(delegateRepository, atLeast(0)).getEntityType();
     verifyNoMoreInteractions(delegateRepository);
@@ -129,7 +129,7 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
     when(delegateRepository.findOne(query)).thenReturn(entity3);
 
-    assertEquals(l3CacheRepositoryDecorator.findOne(query), entity3);
+    assertEquals(entity3, l3CacheRepositoryDecorator.findOne(query));
     verifyNoMoreInteractions(l3Cache);
   }
 
@@ -146,8 +146,8 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     Stream<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query);
 
-    assertEquals(actualEntities.collect(toList()), expectedEntities);
-    assertEquals(entityIdCaptor.getValue().collect(toList()), ids);
+    assertEquals(expectedEntities, actualEntities.collect(toList()));
+    assertEquals(ids, entityIdCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -161,7 +161,7 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 
@@ -176,7 +176,7 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 
@@ -194,7 +194,7 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 

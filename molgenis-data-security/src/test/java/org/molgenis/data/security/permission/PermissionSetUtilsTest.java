@@ -3,6 +3,7 @@ package org.molgenis.data.security.permission;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.data.security.permission.PermissionSetUtils.paramValueToPermissionSet;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.READMETA;
@@ -15,27 +16,27 @@ class PermissionSetUtilsTest {
 
   @Test
   void testParamValueToPermissionSetRead() {
-    assertEquals(READ, PermissionSetUtils.paramValueToPermissionSet("read"));
+    assertEquals(paramValueToPermissionSet("read"), READ);
   }
 
   @Test
   void testParamValueToPermissionSetWrite() {
-    assertEquals(WRITE, PermissionSetUtils.paramValueToPermissionSet("write"));
+    assertEquals(paramValueToPermissionSet("write"), WRITE);
   }
 
   @Test
   void testParamValueToPermissionSetWritemeta() {
-    assertEquals(WRITEMETA, PermissionSetUtils.paramValueToPermissionSet("writemeta"));
+    assertEquals(paramValueToPermissionSet("writemeta"), WRITEMETA);
   }
 
   @Test
   void testParamValueToPermissionSetReadmeta() {
-    assertEquals(READMETA, PermissionSetUtils.paramValueToPermissionSet("readmeta"));
+    assertEquals(paramValueToPermissionSet("readmeta"), READMETA);
   }
 
   @Test
   void testParamValueToPermissionSetCount() {
-    assertEquals(COUNT, PermissionSetUtils.paramValueToPermissionSet("count"));
+    assertEquals(paramValueToPermissionSet("count"), COUNT);
   }
 
   @Test

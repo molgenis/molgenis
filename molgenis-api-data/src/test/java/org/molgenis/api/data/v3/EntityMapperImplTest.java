@@ -85,7 +85,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", true))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   static Iterator<Object[]> refTypeProvider() {
@@ -114,7 +114,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", expectedRefEntityResponse))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   static Iterator<Object[]> refsTypeProvider() {
@@ -142,7 +142,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", expectedRefEntitiesResponse))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   @Test
@@ -157,7 +157,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", LocalDate.of(2019, 4, 30)))
             .build();
 
-    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
+    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
   }
 
   @Test
@@ -172,7 +172,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", Instant.ofEpochMilli(1561010330984L)))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   @Test
@@ -187,7 +187,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", 3.14))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   static Iterator<Object[]> stringTypeProvider() {
@@ -215,7 +215,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", "string"))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   @Test
@@ -230,7 +230,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", 123))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   @Test
@@ -245,7 +245,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setData(singletonMap("attr", Long.MAX_VALUE))
             .build();
 
-    assertEquals(entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION), expectedEntityResponse);
+    assertEquals(expectedEntityResponse, entityMapper.map(entity, FULL_SELECTION, EMPTY_SELECTION));
   }
 
   @Test
@@ -271,8 +271,8 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .build();
 
     assertEquals(
-        entityMapper.map(entity, new Selection(singletonMap("attr1", null)), EMPTY_SELECTION),
-        expectedEntityResponse);
+        expectedEntityResponse,
+        entityMapper.map(entity, new Selection(singletonMap("attr1", null)), EMPTY_SELECTION));
   }
 
   @Test
@@ -302,8 +302,8 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .build();
 
     assertEquals(
-        entityMapper.map(entity, FULL_SELECTION, new Selection(singletonMap("attr", null))),
-        expectedEntityResponse);
+        expectedEntityResponse,
+        entityMapper.map(entity, FULL_SELECTION, new Selection(singletonMap("attr", null))));
   }
 
   @Test
@@ -341,8 +341,8 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .build();
 
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100),
-        expectedEntitiesResponse);
+        expectedEntitiesResponse,
+        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100));
   }
 
   @Test
@@ -381,8 +381,8 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, EMPTY_SELECTION, 10, 1, 100),
-        expectedEntitiesResponse);
+        expectedEntitiesResponse,
+        entityMapper.map(entityCollection, FULL_SELECTION, EMPTY_SELECTION, 10, 1, 100));
   }
 
   @Test
@@ -437,8 +437,8 @@ class EntityMapperImplTest extends AbstractMockitoTest {
             .setPage(PageResponse.create(1, 2, 2, 0))
             .build();
     assertEquals(
-        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100),
-        expectedEntitiesResponse);
+        expectedEntitiesResponse,
+        entityMapper.map(entityCollection, FULL_SELECTION, FULL_SELECTION, 10, 1, 100));
   }
 
   private Entity createMockEntity(AttributeType attributeType) {

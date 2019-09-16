@@ -56,8 +56,8 @@ class OneClickImporterControllerAPIIT extends AbstractApiTests {
       "one_click_importer_test_user_password";
   private static final String API_V2 = "api/v2/";
 
-  private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
-  private static final String ONE_CLICK_IMPORT_CSV_FILE = "/OneClickImport_complex-valid.csv";
+  private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "OneClickImport_complex-valid.xlsx";
+  private static final String ONE_CLICK_IMPORT_CSV_FILE = "OneClickImport_complex-valid.csv";
 
   private static String testUserToken;
   private static String adminToken;
@@ -167,7 +167,7 @@ class OneClickImporterControllerAPIIT extends AbstractApiTests {
     entityResponse.statusCode(OKE);
 
     JSONAssert.assertEquals(
-        ResourceUtils.getString(getClass(), "/users.json"),
+        ResourceUtils.getString(getClass(), "users.json"),
         entityResponse.extract().body().asString(),
         false);
   }

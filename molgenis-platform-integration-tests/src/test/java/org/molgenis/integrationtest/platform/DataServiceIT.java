@@ -195,7 +195,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   public void testGetKnownRepository() {
     Repository<Entity> repo = dataService.getRepository(entityType.getId());
     assertNotNull(repo);
-    assertEquals(repo.getName(), entityType.getId());
+    assertEquals(entityType.getId(), repo.getName());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -237,14 +237,14 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Test
   @Order(12)
   public void testCount() {
-    assertEquals(dataService.count(entityType.getId()), entities.size());
+    assertEquals(entities.size(), dataService.count(entityType.getId()));
   }
 
   @WithMockUser(username = USERNAME_READ)
   @Test
   @Order(13)
   public void testCountQuery() {
-    assertEquals(dataService.count(entityType.getId(), new QueryImpl<>().gt(ATTR_INT, 10)), 2);
+    assertEquals(2, dataService.count(entityType.getId(), new QueryImpl<>().gt(ATTR_INT, 10)));
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -280,7 +280,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(17)
   public void testFindAll() {
     Stream<Entity> retrieved = dataService.findAll(entityType.getId());
-    assertEquals(retrieved.count(), entities.size());
+    assertEquals(entities.size(), retrieved.count());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -289,7 +289,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   public void testFindAllByIds() {
     Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
     Stream<Entity> retrieved = dataService.findAll(entityType.getId(), ids);
-    assertEquals(retrieved.count(), entities.size());
+    assertEquals(entities.size(), retrieved.count());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -298,8 +298,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   public void testFindAllTyped() {
     Supplier<Stream<Entity>> retrieved =
         () -> dataService.findAll(entityType.getId(), Entity.class);
-    assertEquals(retrieved.get().count(), entities.size());
-    assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
+    assertEquals(entities.size(), retrieved.get().count());
+    assertEquals(entities.get(0).getIdValue(), retrieved.get().iterator().next().getIdValue());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -309,7 +309,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
     Stream<Entity> retrieved =
         dataService.findAll(entityType.getId(), ids, new Fetch().field(ATTR_ID));
-    assertEquals(retrieved.count(), entities.size());
+    assertEquals(entities.size(), retrieved.count());
   }
 
   private static Object[][] findQueryOperatorEq() {
@@ -356,7 +356,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).eq(attrName, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -377,7 +377,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).gt(ATTR_INT, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -402,7 +402,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).ge(ATTR_INT, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -428,7 +428,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).rng(ATTR_INT, low, high).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -453,7 +453,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).not().eq(ATTR_INT, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -485,7 +485,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                 .eq(ATTR_INT, value)
                 .findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -516,7 +516,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                 .eq(ATTR_INT, value)
                 .findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -555,7 +555,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                 .unnest()
                 .findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -580,7 +580,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).lt(ATTR_INT, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -601,7 +601,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).le(ATTR_INT, value).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -622,7 +622,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).like(ATTR_STRING, likeStr).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -646,7 +646,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).in(ATTR_ID, ids).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -667,7 +667,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).search(ATTR_HTML, searchStr).findAll();
     List<Entity> foundAsList = found.get().collect(toList());
-    assertEquals(foundAsList.size(), expectedEntityIndices.size());
+    assertEquals(expectedEntityIndices.size(), foundAsList.size());
     for (int i = 0; i < expectedEntityIndices.size(); ++i) {
       assertTrue(
           EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
@@ -687,7 +687,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                     .offset(1)
                     .sort(new Sort(ATTR_ID, Sort.Direction.DESC)))
             .collect(toList());
-    assertEquals(foundAsList.size(), 2);
+    assertEquals(2, foundAsList.size());
     assertTrue(EntityUtils.equals(foundAsList.get(0), entities.get(1)));
     assertTrue(EntityUtils.equals(foundAsList.get(1), entities.get(0)));
   }
@@ -703,8 +703,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                 new QueryImpl<TestEntityStatic>().eq(ATTR_ID, staticEntities.get(0).getIdValue()),
                 TestEntityStatic.class)
             .collect(toList());
-    assertEquals(entities.size(), 1);
-    assertEquals(entities.get(0).getId(), staticEntities.get(0).getIdValue());
+    assertEquals(1, entities.size());
+    assertEquals(staticEntities.get(0).getIdValue(), entities.get(0).getId());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -716,7 +716,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         dataService.findOneById(
             entityTypeStatic.getId(), entity.getIdValue(), TestEntityStatic.class);
     assertNotNull(testEntityStatic);
-    assertEquals(testEntityStatic.getId(), entity.getIdValue());
+    assertEquals(entity.getIdValue(), testEntityStatic.getId());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -731,7 +731,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
             new Fetch().field(ATTR_ID),
             TestEntityStatic.class);
     assertNotNull(testEntityStatic);
-    assertEquals(testEntityStatic.getIdValue(), entity.getIdValue());
+    assertEquals(entity.getIdValue(), testEntityStatic.getIdValue());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -745,7 +745,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
             new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()),
             TestEntityStatic.class);
     assertNotNull(testEntityStatic);
-    assertEquals(testEntityStatic.getId(), entity.getIdValue());
+    assertEquals(entity.getIdValue(), testEntityStatic.getId());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -758,10 +758,10 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
                 entityTypeStatic.getId(),
                 Stream.concat(staticEntities.stream().map(Entity::getIdValue), of("bogus")),
                 TestEntityStatic.class);
-    assertEquals(retrieved.get().count(), staticEntities.size());
-    assertEquals(retrieved.get().iterator().next().getId(), staticEntities.get(0).getIdValue());
+    assertEquals(staticEntities.size(), retrieved.get().count());
+    assertEquals(staticEntities.get(0).getIdValue(), retrieved.get().iterator().next().getId());
     assertEquals(
-        retrieved.get().iterator().next().getIdValue(), staticEntities.get(0).getIdValue());
+        staticEntities.get(0).getIdValue(), retrieved.get().iterator().next().getIdValue());
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -775,7 +775,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     AggregateResult expectedResult =
         new AggregateResult(
             asList(singletonList(1L), singletonList(2L)), asList(0L, 1L), emptyList());
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -792,7 +792,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     AggregateResult expectedResult =
         new AggregateResult(
             asList(singletonList(1L), singletonList(1L)), asList(0L, 1L), emptyList());
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -809,7 +809,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     AggregateResult expectedResult =
         new AggregateResult(
             asList(asList(0L, 1L), asList(2L, 0L)), asList(0L, 1L), asList("option1", "option2"));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -825,7 +825,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     AggregateResult result = dataService.aggregate(entityType.getId(), aggregateQuery);
     AggregateResult expectedResult =
         new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList(0L, 1L), asList(0L, 1L));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -842,7 +842,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
     AggregateResult expectedResult =
         new AggregateResult(asList(asList(1L, 0L), asList(0L, 1L)), asList(0L, 1L), asList(0L, 1L));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -861,7 +861,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     AggregateResult expectedResult =
         new AggregateResult(
             asList(asList(0L, 1L), asList(1L, 0L)), asList(0L, 1L), asList("option1", "option2"));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @WithMockUser(username = USERNAME_READ)
@@ -907,7 +907,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     Entity entity5 = entityTestHarness.createEntity(entityType, 5, refEntities.get(0));
     dataService.add(entityType.getId(), Stream.of(entity4, entity5));
     assertEquals(
-        dataService.count(entityType.getId(), new QueryImpl<>().rng(ATTR_INT, 14, 15)), 2L);
+        2L, dataService.count(entityType.getId(), new QueryImpl<>().rng(ATTR_INT, 14, 15)));
   }
 
   @WithMockUser(username = USERNAME_WRITE)
@@ -947,9 +947,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     entity5.set(ATTR_STRING, "string5");
     dataService.update(entityType.getId(), Stream.of(entity4, entity5));
     assertEquals(
+        2L,
         dataService.count(
-            entityType.getId(), new QueryImpl<>().in(ATTR_STRING, asList("string4", "string5"))),
-        2L);
+            entityType.getId(), new QueryImpl<>().in(ATTR_STRING, asList("string4", "string5"))));
   }
 
   @WithMockUser(username = USERNAME_WRITE)
@@ -981,7 +981,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(51)
   public void testDeleteAll() {
     dataService.deleteAll(entityType.getId());
-    assertEquals(dataService.count(entityType.getId()), 0);
+    assertEquals(0, dataService.count(entityType.getId()));
   }
 
   private void populate() {

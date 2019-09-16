@@ -47,12 +47,12 @@ class MolgenisTimedAspectTest extends AbstractMockitoTest {
     when(signature.getName()).thenReturn("annotatedMethod");
     when(proceedingJoinPoint.proceed()).thenReturn(42);
 
-    assertEquals(timedAspect.timedMethod(proceedingJoinPoint), 42);
+    assertEquals(42, timedAspect.timedMethod(proceedingJoinPoint));
 
     verify(proceedingJoinPoint, times(1)).proceed();
     Timer timer = meterRegistry.get("test.method").timer();
-    assertEquals(timer.count(), 1);
-    assertEquals(timer.max(NANOSECONDS), 100.0);
+    assertEquals(1, timer.count());
+    assertEquals(100.0, timer.max(NANOSECONDS));
   }
 
   @Test
@@ -67,12 +67,12 @@ class MolgenisTimedAspectTest extends AbstractMockitoTest {
     when(signature.getName()).thenReturn("annotatedMethod");
     when(proceedingJoinPoint.proceed()).thenReturn(42);
 
-    assertEquals(timedAspect.timedClassMethod(proceedingJoinPoint), 42);
+    assertEquals(42, timedAspect.timedClassMethod(proceedingJoinPoint));
 
     verify(proceedingJoinPoint, times(1)).proceed();
     Timer timer = meterRegistry.get("test.class").timer();
-    assertEquals(timer.count(), 1);
-    assertEquals(timer.max(NANOSECONDS), 100.0);
+    assertEquals(1, timer.count());
+    assertEquals(100.0, timer.max(NANOSECONDS));
   }
 
   /*

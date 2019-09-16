@@ -28,6 +28,7 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -128,7 +129,7 @@ class EntityUtilsTest {
   @ParameterizedTest
   @MethodSource("testEqualsEntityTypeProvider")
   void testEqualsEntityType(EntityType entityType, EntityType otherEntityType, boolean equals) {
-    assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
+    assertEquals(equals, EntityUtils.equals(entityType, otherEntityType));
   }
 
   @Test
@@ -150,8 +151,7 @@ class EntityUtilsTest {
     when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
     when(entityManager.getReference(refEntityType, 2)).thenReturn(entity2);
     assertEquals(
-        EntityUtils.getTypedValue(valueStr, attr, entityManager),
-        newArrayList(entity0, entity1, entity2));
+        newArrayList(entity0, entity1, entity2), getTypedValue(valueStr, attr, entityManager));
   }
 
   @Test
@@ -168,7 +168,7 @@ class EntityUtilsTest {
     Entity entity = mock(Entity.class);
     EntityManager entityManager = mock(EntityManager.class);
     when(entityManager.getReference(refEntityType, valueStr)).thenReturn(entity);
-    assertEquals(EntityUtils.getTypedValue(valueStr, attr, entityManager), entity);
+    assertEquals(entity, getTypedValue(valueStr, attr, entityManager));
   }
 
   @Test
@@ -183,7 +183,7 @@ class EntityUtilsTest {
   @ParameterizedTest
   @MethodSource("testEqualsAttributeProvider")
   void testEqualsAttribute(Attribute attr, Attribute otherAttr, boolean shouldEqual) {
-    assertEquals(EntityUtils.equals(attr, otherAttr), shouldEqual);
+    assertEquals(shouldEqual, EntityUtils.equals(attr, otherAttr));
   }
 
   static Iterator<Object[]> testEqualsAttributeProvider() {
@@ -648,7 +648,7 @@ class EntityUtilsTest {
   @MethodSource("testEqualsAttributeNoIdentifierCheckProvider")
   void testEqualsAttributeNoIdentifierCheck(
       Attribute attr, Attribute otherAttr, boolean shouldEqual) {
-    assertEquals(EntityUtils.equals(attr, otherAttr, false), shouldEqual);
+    assertEquals(shouldEqual, EntityUtils.equals(attr, otherAttr, false));
   }
 
   static Iterator<Object[]> testEqualsAttributeNoIdentifierCheckProvider() {
@@ -849,7 +849,7 @@ class EntityUtilsTest {
   @ParameterizedTest
   @MethodSource("testIsNullValueProvider")
   void isNullValue(Entity entity, Attribute attribute, boolean expectedIsNullValue) {
-    assertEquals(EntityUtils.isNullValue(entity, attribute), expectedIsNullValue);
+    assertEquals(expectedIsNullValue, EntityUtils.isNullValue(entity, attribute));
   }
 
   @Test

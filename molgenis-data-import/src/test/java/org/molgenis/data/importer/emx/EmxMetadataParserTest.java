@@ -138,7 +138,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
             ImmutableMap.of(),
             ImmutableMap.of());
     ParsedMetaData parsedMetaData = emxMetadataParser.parse(repositoryCollection, null);
-    assertEquals(parsedMetaData, expectedParsedMetaData);
+    assertEquals(expectedParsedMetaData, parsedMetaData);
   }
 
   @Test
@@ -155,7 +155,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport =
         emxMetadataParser.validate(repositoryCollection);
 
-    assertEquals(entitiesValidationReport, expectedEntitiesValidationReport);
+    assertEquals(expectedEntitiesValidationReport, entitiesValidationReport);
     // 6: name, entity, dataType, idAttribute, labelAttribute, visible
     verify(attributeValidator, times(6))
         .validate(any(Attribute.class), eq(ADD_SKIP_ENTITY_VALIDATION));
@@ -633,9 +633,9 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     expected.put("entityType2", entityType2);
 
     assertEquals(
+        expected,
         EmxMetadataParser.getEntityTypeFromDataService(
-            dataService, Arrays.asList("entityType1", "entityType2")),
-        expected);
+            dataService, asList("entityType1", "entityType2")));
   }
 
   @Test
@@ -889,8 +889,8 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     intermediateParseResults.addTag("tag2", tag2);
     when(dataService.findOneById(TAG, "tag1", Tag.class)).thenReturn(tag1);
     assertEquals(
-        emxMetadataParser.toTags(intermediateParseResults, Arrays.asList("tag1", "tag2")),
-        Arrays.asList(tag1, tag2));
+        asList(tag1, tag2),
+        emxMetadataParser.toTags(intermediateParseResults, asList("tag1", "tag2")));
   }
 
   @Test

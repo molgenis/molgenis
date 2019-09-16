@@ -30,6 +30,6 @@ class AggregateAnonymizerImplTest {
     expectedMatrix.add(Arrays.asList(11L, null, 90L, -1L, -1L));
 
     assertEquals(
-        result, new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold));
+        new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold), result);
   }
 }

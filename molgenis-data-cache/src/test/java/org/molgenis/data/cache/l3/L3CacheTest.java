@@ -1,5 +1,6 @@
 package org.molgenis.data.cache.l3;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.atLeast;
@@ -17,7 +18,6 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,8 +106,8 @@ class L3CacheTest extends AbstractMolgenisSpringTest {
     Fetch fetch = mock(Fetch.class);
     Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
 
     verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
     verify(decoratedRepository, atLeast(0)).getName();
@@ -153,8 +153,8 @@ class L3CacheTest extends AbstractMolgenisSpringTest {
     Fetch fetch = mock(Fetch.class);
     Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
 
     when(transactionInformation.getDirtyRepositories())
         .thenReturn(Collections.singleton(repositoryName));
@@ -162,8 +162,8 @@ class L3CacheTest extends AbstractMolgenisSpringTest {
 
     when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity3, entity2));
 
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(3, 2));
+    assertEquals(asList(3, 2), l3Cache.get(decoratedRepository, query));
+    assertEquals(asList(3, 2), l3Cache.get(decoratedRepository, query));
 
     verify(decoratedRepository, times(2)).findAll(fetchLessQuery);
   }
@@ -178,14 +178,14 @@ class L3CacheTest extends AbstractMolgenisSpringTest {
     Fetch fetch = mock(Fetch.class);
     Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
 
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
 
     when(transactionInformation.getDirtyRepositories()).thenReturn(Collections.singleton("blah"));
     l3Cache.afterCommitTransaction("ABCDE");
 
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
-    assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
+    assertEquals(asList(1, 2), l3Cache.get(decoratedRepository, query));
 
     verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
     verify(decoratedRepository, atLeast(0)).getName();

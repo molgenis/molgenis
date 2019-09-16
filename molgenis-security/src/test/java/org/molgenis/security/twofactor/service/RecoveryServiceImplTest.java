@@ -66,7 +66,7 @@ class RecoveryServiceImplTest {
 
     when(recoveryCodeFactory.create()).thenReturn(recoveryCode);
     Stream<RecoveryCode> recoveryCodeStream = recoveryServiceImpl.generateRecoveryCodes();
-    assertEquals(10, recoveryCodeStream.count());
+    assertEquals(recoveryCodeStream.count(), 10);
   }
 
   @Test
@@ -123,6 +123,6 @@ class RecoveryServiceImplTest {
             .findAll())
         .thenReturn(Stream.of(recoveryCode));
     Stream<RecoveryCode> recoveryCodeList = recoveryServiceImpl.getRecoveryCodes();
-    assertEquals(1, recoveryCodeList.count());
+    assertEquals(recoveryCodeList.count(), 1);
   }
 }

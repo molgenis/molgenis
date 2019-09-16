@@ -14,6 +14,7 @@ import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.COMBINED_SCORE;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.SCORE;
+import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
             OntologyMetadata.ONTOLOGY_NAME,
             "testOntology"));
 
-    assertEquals(SortaServiceUtil.getEntityAsMap(singletonList(term)), singletonList(expected));
+    assertEquals(singletonList(expected), getEntityAsMap(singletonList(term)));
   }
 
   @Configuration

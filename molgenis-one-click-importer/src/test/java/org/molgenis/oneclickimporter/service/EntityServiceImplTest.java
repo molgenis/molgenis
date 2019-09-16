@@ -154,7 +154,7 @@ class EntityServiceImplTest {
             userPermissionEvaluator);
 
     EntityType entityType = entityService.createEntityType(dataCollection, "package_");
-    assertEquals(entityType.getId(), generatedId);
+    assertEquals(generatedId, entityType.getId());
 
     verify(table).setPackage(package_);
     verify(table).setId(generatedId);

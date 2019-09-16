@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class LowerCaseProcessorTest {
   @Test
   void process() {
-    assertEquals(new LowerCaseProcessor().process("A"), "a");
+    assertEquals("a", new LowerCaseProcessor().process("A"));
   }
 
   @Test

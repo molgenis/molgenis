@@ -1,8 +1,10 @@
 package org.molgenis.integrationtest.platform;
 
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Streams.stream;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,9 +36,6 @@ import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeS
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,40 +115,40 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
 
     String bookEntityName = authorsAndBooks.getBookMetaData().getId();
     assertEquals(
-        dataService.findOneById(bookEntityName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(),
-        AUTHOR_1);
+        AUTHOR_1,
+        dataService.findOneById(bookEntityName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue());
     assertEquals(
-        dataService.findOneById(bookEntityName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(),
-        AUTHOR_2);
+        AUTHOR_2,
+        dataService.findOneById(bookEntityName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue());
     assertEquals(
-        dataService.findOneById(bookEntityName, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(),
-        AUTHOR_3);
+        AUTHOR_3,
+        dataService.findOneById(bookEntityName, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue());
 
     String authorEntityName = authorsAndBooks.getAuthorMetaData().getId();
     assertEquals(
+        BOOK_1,
         dataService
             .findOneById(authorEntityName, AUTHOR_1)
             .getEntities(ATTR_BOOKS)
             .iterator()
             .next()
-            .getIdValue(),
-        BOOK_1);
+            .getIdValue());
     assertEquals(
+        BOOK_2,
         dataService
             .findOneById(authorEntityName, AUTHOR_2)
             .getEntities(ATTR_BOOKS)
             .iterator()
             .next()
-            .getIdValue(),
-        BOOK_2);
+            .getIdValue());
     assertEquals(
+        BOOK_3,
         dataService
             .findOneById(authorEntityName, AUTHOR_3)
             .getEntities(ATTR_BOOKS)
             .iterator()
             .next()
-            .getIdValue(),
-        BOOK_3);
+            .getIdValue());
   }
 
   @WithMockUser(username = USERNAME)
@@ -162,19 +161,19 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     Entity person2 = dataService.findOneById(personEntityName, PERSON_2);
     Entity person3 = dataService.findOneById(personEntityName, PERSON_3);
 
-    assertEquals(person1.getEntity(ATTR_PARENT).getIdValue(), PERSON_3);
-    assertEquals(person2.getEntity(ATTR_PARENT).getIdValue(), PERSON_1);
-    assertEquals(person3.getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
+    assertEquals(PERSON_3, person1.getEntity(ATTR_PARENT).getIdValue());
+    assertEquals(PERSON_1, person2.getEntity(ATTR_PARENT).getIdValue());
+    assertEquals(PERSON_2, person3.getEntity(ATTR_PARENT).getIdValue());
 
     assertEquals(
-        stream(person1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_2));
+        newHashSet(PERSON_2),
+        stream(person1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
     assertEquals(
-        stream(person2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_3));
+        newHashSet(PERSON_3),
+        stream(person2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
     assertEquals(
-        stream(person3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_1));
+        newHashSet(PERSON_1),
+        stream(person3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
   }
 
   @WithMockUser(username = USERNAME)
@@ -195,8 +194,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          Collections.emptyList(),
-          Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
 
       Entity author2Retrieved =
           dataService.findOneById(
@@ -206,7 +204,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
       // expected behavior: book.author changed, new author.books order is undefined
       Set<Object> retrievedAuthor2BookIds =
           stream(author2Books).map(Entity::getIdValue).collect(toSet());
-      assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
+      assertEquals(newHashSet(BOOK_2, BOOK_1), retrievedAuthor2BookIds);
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());
@@ -231,8 +229,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          Collections.emptyList(),
-          Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
 
       Entity author2Retrieved =
           dataService.findOneById(
@@ -242,7 +239,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
       // expected behavior: book.author changed, new author.books order is undefined
       Set<Object> retrievedAuthor2BookIds =
           stream(author2Books).map(Entity::getIdValue).collect(toSet());
-      assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
+      assertEquals(newHashSet(BOOK_2, BOOK_1), retrievedAuthor2BookIds);
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());
@@ -264,8 +261,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          Collections.emptyList(),
-          Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());
@@ -287,8 +283,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          Collections.emptyList(),
-          Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());
@@ -312,19 +307,19 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     dataService.update(bookName, Stream.of(book1, book2));
 
     assertEquals(
-        dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+        AUTHOR_2, dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue());
     assertEquals(
-        dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+        AUTHOR_1, dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue());
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
     assertEquals(
-        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(BOOK_2));
+        newHashSet(BOOK_2),
+        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()));
 
     Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
     assertEquals(
-        stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(BOOK_1));
+        newHashSet(BOOK_1),
+        stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()));
   }
 
   @WithMockUser(username = USERNAME)
@@ -342,29 +337,29 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     dataService.update(personName, Stream.of(person1, person2, person3));
 
     assertEquals(
-        dataService.findOneById(personName, PERSON_1).getEntity(ATTR_PARENT).getIdValue(),
-        PERSON_2);
+        PERSON_2,
+        dataService.findOneById(personName, PERSON_1).getEntity(ATTR_PARENT).getIdValue());
     assertEquals(
-        dataService.findOneById(personName, PERSON_2).getEntity(ATTR_PARENT).getIdValue(),
-        PERSON_3);
+        PERSON_3,
+        dataService.findOneById(personName, PERSON_2).getEntity(ATTR_PARENT).getIdValue());
     assertEquals(
-        dataService.findOneById(personName, PERSON_3).getEntity(ATTR_PARENT).getIdValue(),
-        PERSON_1);
+        PERSON_1,
+        dataService.findOneById(personName, PERSON_3).getEntity(ATTR_PARENT).getIdValue());
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
     assertEquals(
-        stream(updatedPerson1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_3));
+        newHashSet(PERSON_3),
+        stream(updatedPerson1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
 
     Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
     assertEquals(
-        stream(updatedPerson2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_1));
+        newHashSet(PERSON_1),
+        stream(updatedPerson2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
 
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
     assertEquals(
-        stream(updatedPerson3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
-        newHashSet(PERSON_2));
+        newHashSet(PERSON_2),
+        stream(updatedPerson3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()));
   }
 
   @WithMockUser(username = USERNAME)
@@ -383,13 +378,13 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
 
     Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
     assertEquals(
-        stream(updatedAuthor3.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()),
-        newArrayList(BOOK_1, BOOK_2, BOOK_3));
+        newArrayList(BOOK_1, BOOK_2, BOOK_3),
+        stream(updatedAuthor3.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()));
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
     Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-    assertEquals(Iterables.size(updatedAuthor1.getEntities(bookName)), 0);
-    assertEquals(Iterables.size(updatedAuthor2.getEntities(bookName)), 0);
+    assertEquals(0, size(updatedAuthor1.getEntities(bookName)));
+    assertEquals(0, size(updatedAuthor2.getEntities(bookName)));
   }
 
   @WithMockUser(username = USERNAME)
@@ -409,13 +404,13 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
     assertEquals(
-        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()),
-        newArrayList(BOOK_3, BOOK_2, BOOK_1));
+        newArrayList(BOOK_3, BOOK_2, BOOK_1),
+        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()));
 
     Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
     Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-    assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
-    assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
+    assertEquals(0, size(updatedAuthor2.getEntities(ATTR_BOOKS)));
+    assertEquals(0, size(updatedAuthor3.getEntities(ATTR_BOOKS)));
   }
 
   @WithMockUser(username = USERNAME)
@@ -434,13 +429,15 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
 
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
     assertEquals(
-        stream(updatedPerson3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toList()),
-        newArrayList(PERSON_1, PERSON_2, PERSON_3));
+        newArrayList(PERSON_1, PERSON_2, PERSON_3),
+        stream(updatedPerson3.getEntities(ATTR_CHILDREN))
+            .map(Entity::getIdValue)
+            .collect(toList()));
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
     Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
-    assertEquals(Iterables.size(updatedPerson1.getEntities(ATTR_CHILDREN)), 0);
-    assertEquals(Iterables.size(updatedPerson2.getEntities(ATTR_CHILDREN)), 0);
+    assertEquals(0, size(updatedPerson1.getEntities(ATTR_CHILDREN)));
+    assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
   }
 
   @WithMockUser(username = USERNAME)
@@ -459,13 +456,15 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
     assertEquals(
-        stream(updatedPerson1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toList()),
-        newArrayList(PERSON_3, PERSON_2, PERSON_1));
+        newArrayList(PERSON_3, PERSON_2, PERSON_1),
+        stream(updatedPerson1.getEntities(ATTR_CHILDREN))
+            .map(Entity::getIdValue)
+            .collect(toList()));
 
     Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
-    assertEquals(Iterables.size(updatedPerson2.getEntities(ATTR_CHILDREN)), 0);
-    assertEquals(Iterables.size(updatedPerson3.getEntities(ATTR_CHILDREN)), 0);
+    assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
+    assertEquals(0, size(updatedPerson3.getEntities(ATTR_CHILDREN)));
   }
 
   private void deleteBooksThenAuthors(int testCase) {

@@ -32,7 +32,7 @@ class UnknownValueReferenceExceptionTest extends ExceptionMessageTest {
         new UnknownValueReferenceException(
             "MyEntityType", "myAttributeName", "myValue", mock(Throwable.class));
     assertEquals(
-        ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue");
+        "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

@@ -22,7 +22,7 @@ class OidcUserEmailVerificationExceptionTest extends AbstractMockitoTest {
   void testGetMessage() {
     when(oidcUser.getSubject()).thenReturn("userId");
     assertEquals(
-        oidcUserEmailVerificationException.getMessage(),
-        "email verification claim exists but evaluates to false for subject 'userId'");
+        "email verification claim exists but evaluates to false for subject 'userId'",
+        oidcUserEmailVerificationException.getMessage());
   }
 }

@@ -90,7 +90,7 @@ class PostgreSqlExceptionTranslatorTest {
     ReadonlyValueException e =
         postgreSqlExceptionTranslator.translateReadonlyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr entityId:abc");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr entityId:abc", e.getMessage());
   }
 
   @Test
@@ -104,7 +104,7 @@ class PostgreSqlExceptionTranslatorTest {
     ReadonlyValueException e =
         postgreSqlExceptionTranslator.translateReadonlyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr entityId:abc");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr entityId:abc", e.getMessage());
   }
 
   @Test
@@ -119,7 +119,7 @@ class PostgreSqlExceptionTranslatorTest {
     EntityTypeReferencedException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "dependencies:myRefEntity=myEntity");
+    assertEquals("dependencies:myRefEntity=myEntity", e.getMessage());
   }
 
   @Test
@@ -134,7 +134,7 @@ class PostgreSqlExceptionTranslatorTest {
     EntityTypeReferencedException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "dependencies:myRefEntity=myEntity");
+    assertEquals("dependencies:myRefEntity=myEntity", e.getMessage());
   }
 
   @Test
@@ -149,7 +149,7 @@ class PostgreSqlExceptionTranslatorTest {
     EntityTypeReferencedException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "dependencies:myRefEntity=myEntity;myOtherRefEntity=myEntity");
+    assertEquals("dependencies:myRefEntity=myEntity;myOtherRefEntity=myEntity", e.getMessage());
   }
 
   @Test
@@ -164,7 +164,7 @@ class PostgreSqlExceptionTranslatorTest {
     EntityTypeReferencedException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "dependencies:myRefEntity=myEntity");
+    assertEquals("dependencies:myRefEntity=myEntity", e.getMessage());
   }
 
   @Test
@@ -179,7 +179,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateNotNullViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr", e.getMessage());
     assertTrue(e instanceof ValueRequiredException);
   }
 
@@ -209,7 +209,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateNotNullViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr", e.getMessage());
     assertTrue(e instanceof ValueRequiredException);
   }
 
@@ -224,7 +224,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof UnknownValueReferenceException);
   }
 
@@ -240,7 +240,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof UnknownValueReferenceException);
   }
 
@@ -259,7 +259,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof ValueReferencedException);
   }
 
@@ -288,7 +288,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:null value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:null value:myValue", e.getMessage());
     assertTrue(e instanceof UnknownValueReferenceException);
   }
 
@@ -303,7 +303,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:null attributeName:null value:myValue");
+    assertEquals("entityTypeId:null attributeName:null value:myValue", e.getMessage());
     assertTrue(e instanceof UnknownValueReferenceException);
   }
 
@@ -318,7 +318,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof ValueAlreadyExistsException);
   }
 
@@ -333,7 +333,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof ValueAlreadyExistsException);
   }
 
@@ -350,8 +350,8 @@ class PostgreSqlExceptionTranslatorTest {
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
     assertEquals(
-        e.getMessage(),
-        "entityTypeId:myEntity attributeName:myAttr entityId:myIdValue value:myValue");
+        "entityTypeId:myEntity attributeName:myAttr entityId:myIdValue value:myValue",
+        e.getMessage());
     assertTrue(e instanceof ListValueAlreadyExistsException);
   }
 
@@ -366,7 +366,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof DuplicateValueException);
   }
 
@@ -381,7 +381,7 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr value:myValue");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr value:myValue", e.getMessage());
     assertTrue(e instanceof DuplicateValueException);
   }
 
@@ -408,7 +408,7 @@ class PostgreSqlExceptionTranslatorTest {
     InvalidValueTypeException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "value:str1 type:INT or LONG");
+    assertEquals("value:str1 type:INT or LONG", e.getMessage());
   }
 
   @Test
@@ -421,7 +421,7 @@ class PostgreSqlExceptionTranslatorTest {
     InvalidValueTypeException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "value:str1 type:BOOL");
+    assertEquals("value:str1 type:BOOL", e.getMessage());
   }
 
   @Test
@@ -434,7 +434,7 @@ class PostgreSqlExceptionTranslatorTest {
     InvalidValueTypeException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "value:str1 type:DECIMAL");
+    assertEquals("value:str1 type:DECIMAL", e.getMessage());
   }
 
   @Test
@@ -447,7 +447,7 @@ class PostgreSqlExceptionTranslatorTest {
     InvalidValueTypeException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "value:str1 type:DATE");
+    assertEquals("value:str1 type:DATE", e.getMessage());
   }
 
   @Test
@@ -460,7 +460,7 @@ class PostgreSqlExceptionTranslatorTest {
     InvalidValueTypeException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "value:str1 type:DATE_TIME");
+    assertEquals("value:str1 type:DATE_TIME", e.getMessage());
   }
 
   @Test
@@ -473,7 +473,7 @@ class PostgreSqlExceptionTranslatorTest {
     UnknownEnumValueException e =
         postgreSqlExceptionTranslator.translateCheckConstraintViolation(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "entityTypeId:myEntity attributeName:myAttr");
+    assertEquals("entityTypeId:myEntity attributeName:myAttr", e.getMessage());
   }
 
   @Test
@@ -487,6 +487,6 @@ class PostgreSqlExceptionTranslatorTest {
     Exception e =
         PostgreSqlExceptionTranslator.translateUndefinedColumnException(
             mock(Throwable.class), new PSQLException(serverErrorMessage));
-    assertEquals(e.getMessage(), "Undefined column: 7 ERROR: column \"test\" does not exist");
+    assertEquals("Undefined column: 7 ERROR: column \"test\" does not exist", e.getMessage());
   }
 }

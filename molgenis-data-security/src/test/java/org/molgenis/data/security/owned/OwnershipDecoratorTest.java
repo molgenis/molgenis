@@ -73,11 +73,11 @@ class OwnershipDecoratorTest extends AbstractMockitoTest {
     verify(delegate).add(entity);
     verify(mutableAclService).updateAcl(acl);
     PrincipalSid ownerSid = new PrincipalSid("username");
-    assertEquals(acl.getOwner(), ownerSid);
-    assertEquals(acl.getEntries().size(), 1);
+    assertEquals(ownerSid, acl.getOwner());
+    assertEquals(1, acl.getEntries().size());
     AccessControlEntry ace = acl.getEntries().get(0);
-    assertEquals(ace.getSid(), ownerSid);
-    assertEquals(ace.getPermission(), WRITE);
+    assertEquals(ownerSid, ace.getSid());
+    assertEquals(WRITE, ace.getPermission());
     assertTrue(ace.isGranting());
   }
 
@@ -95,14 +95,14 @@ class OwnershipDecoratorTest extends AbstractMockitoTest {
     ownershipDecorator.add(Stream.of(entity));
 
     verify(delegate).add(streamCaptor.capture());
-    assertEquals(streamCaptor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), streamCaptor.getValue().collect(toList()));
     verify(mutableAclService).updateAcl(acl);
     PrincipalSid ownerSid = new PrincipalSid("username");
-    assertEquals(acl.getOwner(), ownerSid);
-    assertEquals(acl.getEntries().size(), 1);
+    assertEquals(ownerSid, acl.getOwner());
+    assertEquals(1, acl.getEntries().size());
     AccessControlEntry ace = acl.getEntries().get(0);
-    assertEquals(ace.getSid(), ownerSid);
-    assertEquals(ace.getPermission(), WRITE);
+    assertEquals(ownerSid, ace.getSid());
+    assertEquals(WRITE, ace.getPermission());
     assertTrue(ace.isGranting());
   }
 
@@ -134,17 +134,17 @@ class OwnershipDecoratorTest extends AbstractMockitoTest {
   @Test
   void testGetFactoryDescription() {
     assertEquals(
-        ownershipDecoratorFactory.getDescription(),
-        "When entities are added to the decorated repository, their owner is set to the value of the ownerAttribute.");
+        "When entities are added to the decorated repository, their owner is set to the value of the ownerAttribute.",
+        ownershipDecoratorFactory.getDescription());
   }
 
   @Test
   void testGetFactoryLabel() {
-    assertEquals(ownershipDecoratorFactory.getLabel(), "Ownership decorator");
+    assertEquals("Ownership decorator", ownershipDecoratorFactory.getLabel());
   }
 
   @Test
   void testGetFactoryId() {
-    assertEquals(ownershipDecoratorFactory.getId(), "ownership");
+    assertEquals("ownership", ownershipDecoratorFactory.getId());
   }
 }

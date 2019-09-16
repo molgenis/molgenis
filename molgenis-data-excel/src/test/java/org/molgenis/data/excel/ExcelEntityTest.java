@@ -61,7 +61,7 @@ class ExcelEntityTest {
 
     Object val = excelEntity.get("attr1");
     assertNotNull(val);
-    assertEquals(val, "xxx");
+    assertEquals("xxx", val);
   }
 
   @Test
@@ -78,7 +78,7 @@ class ExcelEntityTest {
 
     Object val = excelEntity.get("attr1");
     assertNotNull(val);
-    assertEquals(val, "1");
+    assertEquals("1", val);
   }
 
   @Test
@@ -88,7 +88,7 @@ class ExcelEntityTest {
 
     Object val = excelEntity.get("attr1");
     assertNotNull(val);
-    assertEquals(val, "1.8");
+    assertEquals("1.8", val);
   }
 
   @Test
@@ -108,7 +108,7 @@ class ExcelEntityTest {
     Object val = excelEntity.get("attr1");
 
     assertNotNull(val);
-    assertEquals(val, "1998-05-02t00:00");
+    assertEquals("1998-05-02t00:00", val);
   }
 
   @Test
@@ -118,7 +118,7 @@ class ExcelEntityTest {
 
     Object val = excelEntity.get("attr1");
     assertNotNull(val);
-    assertEquals(val, "true");
+    assertEquals("true", val);
   }
 
   @Test
@@ -130,7 +130,7 @@ class ExcelEntityTest {
   @Test
   void set() {
     excelEntity.set("attr1", "test");
-    assertEquals(excelEntity.get("attr1"), "test");
+    assertEquals("test", excelEntity.get("attr1"));
   }
 
   @Test
@@ -146,7 +146,7 @@ class ExcelEntityTest {
     entity.set("attr2", "test2");
 
     excelEntity.set(entity);
-    assertEquals(excelEntity.get("attr1"), "test1");
+    assertEquals("test1", excelEntity.get("attr1"));
     assertNull(excelEntity.get("attr2"));
   }
 }

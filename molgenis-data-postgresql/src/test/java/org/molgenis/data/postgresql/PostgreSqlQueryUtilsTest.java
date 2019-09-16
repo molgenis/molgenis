@@ -47,7 +47,7 @@ class PostgreSqlQueryUtilsTest {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
     assertEquals(
-        PostgreSqlQueryUtils.getPersistedAttributes(entityType).collect(toList()), persistedAttrs);
+        persistedAttrs, PostgreSqlQueryUtils.getPersistedAttributes(entityType).collect(toList()));
   }
 
   @Test
@@ -74,8 +74,8 @@ class PostgreSqlQueryUtilsTest {
                 stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
     List<Attribute> junctionTableAttrs = newArrayList(mrefAttr);
     assertEquals(
-        PostgreSqlQueryUtils.getJunctionTableAttributes(entityType).collect(toList()),
-        junctionTableAttrs);
+        junctionTableAttrs,
+        PostgreSqlQueryUtils.getJunctionTableAttributes(entityType).collect(toList()));
   }
 
   @Test
@@ -102,7 +102,7 @@ class PostgreSqlQueryUtilsTest {
                 stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
     List<Attribute> junctionTableAttrs = newArrayList(stringAttr, xrefAttr, xrefAttrInversedBy);
     assertEquals(
-        PostgreSqlQueryUtils.getTableAttributes(entityType).collect(toList()), junctionTableAttrs);
+        junctionTableAttrs, PostgreSqlQueryUtils.getTableAttributes(entityType).collect(toList()));
   }
 
   @Test

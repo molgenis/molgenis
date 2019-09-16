@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class FetchTest {
   void getFetch() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertEquals(subFetch, new Fetch().field(field, subFetch).getFetch(field));
+    assertEquals(new Fetch().field(field, subFetch).getFetch(field), subFetch);
   }
 
   @Test
@@ -49,7 +49,7 @@ class FetchTest {
     String field2 = "field2";
     Fetch fetch = new Fetch().field(field0).field(field1).field(field2);
 
-    assertEquals(Sets.newHashSet(field0, field1, field2), fetch.getFields());
+    assertEquals(fetch.getFields(), newHashSet(field0, field1, field2));
   }
 
   @Test
@@ -73,11 +73,11 @@ class FetchTest {
 
     Iterator<Entry<String, Fetch>> it = fetch.iterator();
     assertTrue(it.hasNext());
-    assertEquals("field0", it.next().getKey());
+    assertEquals(it.next().getKey(), "field0");
     assertTrue(it.hasNext());
-    assertEquals("field1", it.next().getKey());
+    assertEquals(it.next().getKey(), "field1");
     assertTrue(it.hasNext());
-    assertEquals("field2", it.next().getKey());
+    assertEquals(it.next().getKey(), "field2");
     assertFalse(it.hasNext());
   }
 }

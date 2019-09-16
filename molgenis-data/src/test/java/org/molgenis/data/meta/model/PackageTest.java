@@ -39,7 +39,7 @@ class PackageTest extends AbstractSystemEntityTest {
   void getRootPackageNoParent() throws Exception {
     PackageMetadata packageMetadata = mock(PackageMetadata.class);
     Package package_ = new Package(packageMetadata);
-    assertEquals(package_.getRootPackage(), package_);
+    assertEquals(package_, package_.getRootPackage());
   }
 
   @Test
@@ -52,6 +52,6 @@ class PackageTest extends AbstractSystemEntityTest {
     parentParent.setParent(grandParentPackage);
     Package package_ = new Package(packageMetadata);
     package_.setParent(parentParent);
-    assertEquals(package_.getRootPackage(), grandParentPackage);
+    assertEquals(grandParentPackage, package_.getRootPackage());
   }
 }

@@ -33,6 +33,6 @@ class OntologyServiceImplTest extends AbstractMockitoTest {
     Ontology ontology0 = mock(Ontology.class);
     Ontology ontology1 = mock(Ontology.class);
     when(ontologyRepository.getOntologies(ontologyIds)).thenReturn(Stream.of(ontology0, ontology1));
-    assertEquals(ontologyServiceImpl.getOntologies(ontologyIds), asList(ontology0, ontology1));
+    assertEquals(asList(ontology0, ontology1), ontologyServiceImpl.getOntologies(ontologyIds));
   }
 }

@@ -10,6 +10,6 @@ class PropertiesMessageSourceTest {
 
   @Test
   void testGetNamespace() {
-    assertEquals(propertiesMessageSource.getNamespace(), "namespace");
+    assertEquals("namespace", propertiesMessageSource.getNamespace());
   }
 }

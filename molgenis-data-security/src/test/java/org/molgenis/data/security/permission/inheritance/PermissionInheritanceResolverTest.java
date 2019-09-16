@@ -64,7 +64,7 @@ class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     InheritedPermissionsResult expected =
         getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
 
-    assertEquals(resolver.getInheritedPermissionsResults(entityAcl, user), expected);
+    assertEquals(expected, resolver.getInheritedPermissionsResults(entityAcl, user));
   }
 
   @Test
@@ -120,6 +120,6 @@ class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     Set<LabelledPermission> expected =
         new HashSet<>(Arrays.asList(role2Permission, packPermission));
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

@@ -1,5 +1,6 @@
 package org.molgenis.util.file;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -69,9 +69,9 @@ class ZipFileUtilTest {
     List<File> files = ZipFileUtil.unzipSkipHidden(targetPath.toFile());
 
     Path visiblePath = tempDirPath.resolve(Paths.get("subdir", "visible.txt"));
-    assertEquals(files, Collections.singletonList(visiblePath.toFile()));
+    assertEquals(singletonList(visiblePath.toFile()), files);
 
-    assertEquals(md5Hash(visiblePath), "aff776838092862d398b58e380901753");
+    assertEquals("aff776838092862d398b58e380901753", md5Hash(visiblePath));
   }
 
   @Test

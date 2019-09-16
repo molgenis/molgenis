@@ -42,7 +42,7 @@ class StaticContentServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class))
         .thenReturn(staticContent);
     when(staticContent.getContent()).thenReturn("<p>Welcome to Molgenis!</p>");
-    assertEquals(staticContentService.getContent("home"), "<p>Welcome to Molgenis!</p>");
+    assertEquals("<p>Welcome to Molgenis!</p>", staticContentService.getContent("home"));
   }
 
   @Test

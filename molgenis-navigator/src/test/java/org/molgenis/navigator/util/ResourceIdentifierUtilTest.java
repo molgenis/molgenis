@@ -2,6 +2,7 @@ package org.molgenis.navigator.util;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.navigator.util.ResourceIdentifierUtil.getResourcesFromJson;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,6 @@ class ResourceIdentifierUtilTest {
         ResourceIdentifier.create(ResourceType.ENTITY_TYPE_ABSTRACT, "idValue1");
     ResourceIdentifier expected2 = ResourceIdentifier.create(ResourceType.PACKAGE, "idValue2");
     List<ResourceIdentifier> expected = newArrayList(expected1, expected2);
-    assertEquals(ResourceIdentifierUtil.getResourcesFromJson(json), expected);
+    assertEquals(expected, getResourcesFromJson(json));
   }
 }

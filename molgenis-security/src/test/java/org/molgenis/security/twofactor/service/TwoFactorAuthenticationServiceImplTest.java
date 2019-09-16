@@ -90,7 +90,7 @@ class TwoFactorAuthenticationServiceImplTest {
 
     when(userSecret.getSecret()).thenReturn("secretKey");
     boolean isConfigured = twoFactorAuthenticationServiceImpl.isConfiguredForUser();
-    assertEquals(true, isConfigured);
+    assertEquals(isConfigured, true);
   }
 
   @Test

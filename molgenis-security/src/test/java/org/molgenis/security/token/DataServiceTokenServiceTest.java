@@ -61,7 +61,7 @@ class DataServiceTokenServiceTest {
             "admin", "admin", singletonList(new SimpleGrantedAuthority("admin")));
     when(userDetailsService.loadUserByUsername("admin")).thenReturn(userDetails);
 
-    assertEquals(tokenService.findUserByToken("token"), userDetails);
+    assertEquals(userDetails, tokenService.findUserByToken("token"));
   }
 
   @Test
@@ -90,7 +90,7 @@ class DataServiceTokenServiceTest {
     when(dataService.query(USER, User.class)).thenReturn(q);
 
     when(tokenGenerator.generateToken()).thenReturn("token");
-    assertEquals(tokenService.generateAndStoreToken("admin", "description"), "token");
+    assertEquals("token", tokenService.generateAndStoreToken("admin", "description"));
 
     ArgumentCaptor<Token> argumentCaptor = ArgumentCaptor.forClass(Token.class);
     verify(dataService).add(eq(TOKEN), argumentCaptor.capture());

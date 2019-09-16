@@ -79,7 +79,7 @@ class MutableAclClassServiceImplTest extends AbstractMockitoTest {
     List<String> aclClassTypes = asList("MyType0", "MyType1");
     when(jdbcTemplate.queryForList("select class from acl_class", String.class))
         .thenReturn(aclClassTypes);
-    assertEquals(mutableAclClassService.getAclClassTypes(), aclClassTypes);
+    assertEquals(aclClassTypes, mutableAclClassService.getAclClassTypes());
     verifyZeroInteractions(aclCache);
   }
 }

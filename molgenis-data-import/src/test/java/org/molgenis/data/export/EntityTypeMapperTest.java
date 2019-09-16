@@ -1,10 +1,12 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.export.mapper.EntityTypeMapper.getHeaders;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +70,7 @@ class EntityTypeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = EntityTypeMapper.map(entityType);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -117,7 +119,7 @@ class EntityTypeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = EntityTypeMapper.map(entityType);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -182,7 +184,7 @@ class EntityTypeMapperTest extends AbstractMockitoTest {
             "xx Label",
             "xx description");
     List<Object> actual = EntityTypeMapper.map(entityType);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -197,7 +199,6 @@ class EntityTypeMapperTest extends AbstractMockitoTest {
     when(attr3.getName()).thenReturn("attribute 3");
     when(attr3.getDataType()).thenReturn(AttributeType.STRING);
     when(entityType.getAttributes()).thenReturn(Arrays.asList(attr1, attr2, attr3));
-    assertEquals(
-        EntityTypeMapper.getHeaders(entityType), Arrays.asList("attribute 1", "attribute 3"));
+    assertEquals(asList("attribute 1", "attribute 3"), getHeaders(entityType));
   }
 }

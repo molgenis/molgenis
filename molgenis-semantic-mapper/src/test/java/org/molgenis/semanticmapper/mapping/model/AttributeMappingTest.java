@@ -3,6 +3,7 @@ package org.molgenis.semanticmapper.mapping.model;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.createCopy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,6 @@ class AttributeMappingTest extends AbstractMockitoTest {
             algorithm,
             sourceAttributes,
             algorithmState);
-    assertEquals(AttributeMapping.createCopy(attributeMapping), attributeMapping);
+    assertEquals(attributeMapping, createCopy(attributeMapping));
   }
 }

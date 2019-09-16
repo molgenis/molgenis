@@ -59,7 +59,7 @@ class PostgreSqlEntityFactoryTest {
     when(entityManager.getReferences(refEntityMeta, newArrayList("id0", "id1")))
         .thenReturn(newArrayList(refEntity0, refEntity1));
     assertEquals(
-        postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum), entity);
+        entity, postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum));
     verify(entity).set(oneToManyAttrName, newArrayList(refEntity0, refEntity1));
   }
 
@@ -92,7 +92,7 @@ class PostgreSqlEntityFactoryTest {
     when(entityManager.getReferences(refEntityMeta, newArrayList(0, 1)))
         .thenReturn(newArrayList(refEntity0, refEntity1));
     assertEquals(
-        postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum), entity);
+        entity, postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum));
     verify(entity).set(oneToManyAttrName, newArrayList(refEntity0, refEntity1));
   }
 
@@ -121,7 +121,7 @@ class PostgreSqlEntityFactoryTest {
     Entity refEntity = mock(Entity.class);
     when(entityManager.getReference(refEntityType, "id0")).thenReturn(refEntity);
     assertEquals(
-        postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum), entity);
+        entity, postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum));
     verify(entity).set(xrefAttr, refEntity);
   }
 }

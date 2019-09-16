@@ -189,8 +189,8 @@ class AttributeValidatorTest {
       fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
-          actual.getCause().getMessage(),
-          "Text 'test' could not be parsed, unparsed text found at index 0");
+          "Text 'test' could not be parsed, unparsed text found at index 0",
+          actual.getCause().getMessage());
     }
   }
 
@@ -212,8 +212,8 @@ class AttributeValidatorTest {
       fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
-          actual.getCause().getMessage(),
-          "Text 'test' could not be parsed, unparsed text found at index 0");
+          "Text 'test' could not be parsed, unparsed text found at index 0",
+          actual.getCause().getMessage());
     }
   }
 
@@ -234,7 +234,7 @@ class AttributeValidatorTest {
       attributeValidator.validateDefaultValue(attr, true);
       fail();
     } catch (MolgenisDataException actual) {
-      assertEquals(actual.getMessage(), "Default value [test^] is not a valid hyperlink.");
+      assertEquals("Default value [test^] is not a valid hyperlink.", actual.getMessage());
     }
   }
 
@@ -257,8 +257,8 @@ class AttributeValidatorTest {
       fail();
     } catch (MolgenisDataException actual) {
       assertEquals(
-          actual.getMessage(),
-          "Invalid default value [test] for enum [null] value must be one of [a, b, c]");
+          "Invalid default value [test] for enum [null] value must be one of [a, b, c]",
+          actual.getMessage());
     }
   }
 

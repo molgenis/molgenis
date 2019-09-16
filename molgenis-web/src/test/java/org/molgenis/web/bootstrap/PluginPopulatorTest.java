@@ -84,10 +84,10 @@ class PluginPopulatorTest extends AbstractMockitoTest {
 
     verify(pluginRepository).upsertBatch(updateStreamArgumentCaptor.capture());
     assertEquals(
-        newHashSet(updateStreamArgumentCaptor.getValue()), newHashSet(newPlugin, changedPlugin));
+        newHashSet(newPlugin, changedPlugin), newHashSet(updateStreamArgumentCaptor.getValue()));
     verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
     assertEquals(
-        deleteStreamArgumentCaptor.getValue().collect(toList()), singletonList(deletedPlugin));
+        singletonList(deletedPlugin), deleteStreamArgumentCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -105,6 +105,6 @@ class PluginPopulatorTest extends AbstractMockitoTest {
     verify(pluginRepository, times(0)).upsertBatch(any(List.class));
     verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
     assertEquals(
-        deleteStreamArgumentCaptor.getValue().collect(toList()), newArrayList(deletedPlugin));
+        newArrayList(deletedPlugin), deleteStreamArgumentCaptor.getValue().collect(toList()));
   }
 }

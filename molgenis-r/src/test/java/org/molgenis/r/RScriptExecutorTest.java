@@ -1,6 +1,7 @@
 package org.molgenis.r;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.readAllBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 import org.apache.http.Header;
@@ -53,14 +53,14 @@ class RScriptExecutorTest extends AbstractMockitoTest {
 
     String script = "script";
     String resultValue = rScriptExecutor.executeScript(script, null);
-    assertEquals(resultValue, "value");
+    assertEquals("value", resultValue);
 
     List<HttpUriRequest> requests = requestsCaptor.getAllValues();
     assertEquals(
-        requests.get(0).getURI(),
-        new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
+        new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"),
+        requests.get(0).getURI());
     assertEquals(
-        requests.get(1).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/stdout"));
+        new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/stdout"), requests.get(1).getURI());
   }
 
   @Test
@@ -80,12 +80,12 @@ class RScriptExecutorTest extends AbstractMockitoTest {
       String script = "script";
       String resultValue = rScriptExecutor.executeScript(script, outputPath);
       assertNull(resultValue);
-      assertArrayEquals(Files.readAllBytes(new File(outputPath).toPath()), "value".getBytes(UTF_8));
+      assertArrayEquals("value".getBytes(UTF_8), readAllBytes(new File(outputPath).toPath()));
 
       List<HttpUriRequest> requests = requestsCaptor.getAllValues();
       assertEquals(
-          requests.get(0).getURI(),
-          new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
+          new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"),
+          requests.get(0).getURI());
       assertTrue(
           requests
               .get(1)

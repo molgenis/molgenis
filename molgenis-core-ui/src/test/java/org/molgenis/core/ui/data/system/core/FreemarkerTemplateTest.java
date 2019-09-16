@@ -39,14 +39,14 @@ class FreemarkerTemplateTest extends AbstractSystemEntityTest {
   void testGetNameWithoutExtensionEndsWithFtl() throws Exception {
     FreemarkerTemplate freemarkerTemplate = getFreemarkerTemplateSpy();
     when(freemarkerTemplate.getName()).thenReturn("template.ftl");
-    assertEquals(freemarkerTemplate.getNameWithoutExtension(), "template");
+    assertEquals("template", freemarkerTemplate.getNameWithoutExtension());
   }
 
   @Test
   void testGetNameWithoutExtensionNotEndsWithFtl() throws Exception {
     FreemarkerTemplate freemarkerTemplate = getFreemarkerTemplateSpy();
     when(freemarkerTemplate.getName()).thenReturn("template");
-    assertEquals(freemarkerTemplate.getNameWithoutExtension(), "template");
+    assertEquals("template", freemarkerTemplate.getNameWithoutExtension());
   }
 
   private FreemarkerTemplate getFreemarkerTemplateSpy() {

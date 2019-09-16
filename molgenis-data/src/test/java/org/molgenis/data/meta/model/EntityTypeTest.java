@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -22,7 +23,6 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -91,8 +91,8 @@ class EntityTypeTest extends AbstractSystemEntityTest {
     EntityType entityType = new EntityType(entityTypeMeta);
     String label = "label";
     entityType.setLabel(label);
-    assertEquals(entityType.getLabel(), label);
-    assertEquals(entityType.getString(LABEL), label);
+    assertEquals(label, entityType.getLabel());
+    assertEquals(label, entityType.getString(LABEL));
   }
 
   @Test
@@ -153,13 +153,13 @@ class EntityTypeTest extends AbstractSystemEntityTest {
 
     EntityType entityTypeCopy = EntityType.newInstance(entityType);
     assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
-    assertEquals(entityTypeCopy.getId(), "myPackage_myEntity");
+    assertEquals("myPackage_myEntity", entityTypeCopy.getId());
     assertSame(entityTypeCopy.getPackage(), package_);
-    assertEquals(entityTypeCopy.getLabel(), "label");
-    assertEquals(entityTypeCopy.getDescription(), "description");
+    assertEquals("label", entityTypeCopy.getLabel());
+    assertEquals("description", entityTypeCopy.getDescription());
 
     List<Attribute> ownAttrsCopy = newArrayList(entityTypeCopy.getOwnAllAttributes());
-    assertEquals(ownAttrsCopy.size(), 4);
+    assertEquals(4, ownAttrsCopy.size());
     assertSame(ownAttrsCopy.get(0), attrId);
     assertSame(ownAttrsCopy.get(1), attrLabel);
     assertSame(ownAttrsCopy.get(2), attrCompound);
@@ -169,7 +169,7 @@ class EntityTypeTest extends AbstractSystemEntityTest {
 
     List<Attribute> ownLookAttrsCopy = newArrayList(entityTypeCopy.getOwnLookupAttributes());
 
-    assertEquals(ownLookAttrsCopy.size(), 2);
+    assertEquals(2, ownLookAttrsCopy.size());
     assertSame(ownLookAttrsCopy.get(0), attrId);
     assertSame(ownLookAttrsCopy.get(1), attrLabel);
 
@@ -177,11 +177,11 @@ class EntityTypeTest extends AbstractSystemEntityTest {
     assertSame(entityTypeCopy.getExtends(), extendsEntityType);
 
     List<Tag> tagsCopy = newArrayList(entityTypeCopy.getTags());
-    assertEquals(tagsCopy.size(), 2);
+    assertEquals(2, tagsCopy.size());
     assertSame(tagsCopy.get(0), tag0);
     assertSame(tagsCopy.get(1), tag1);
-    assertEquals(entityTypeCopy.getBackend(), "backend");
-    assertEquals(entityTypeCopy.getIndexingDepth(), 3);
+    assertEquals("backend", entityTypeCopy.getBackend());
+    assertEquals(3, entityTypeCopy.getIndexingDepth());
   }
 
   @Test
@@ -240,8 +240,8 @@ class EntityTypeTest extends AbstractSystemEntityTest {
 
     entityType.removeAttribute(compoundAttr);
 
-    assertEquals(Iterables.size(entityType.getAllAttributes()), 1);
-    assertEquals(entityType.getAllAttributes().iterator().next(), normalAttr);
+    assertEquals(1, size(entityType.getAllAttributes()));
+    assertEquals(normalAttr, entityType.getAllAttributes().iterator().next());
   }
 
   private EntityType mockEntityTypeMeta() {

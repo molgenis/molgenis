@@ -50,7 +50,7 @@ class EmxDataProviderTest extends AbstractMockitoTest {
     when(parsedMetaData.getEntities()).thenReturn(entityTypes).getMock();
     when(emxImportJob.getParsedMetaData()).thenReturn(parsedMetaData);
 
-    assertEquals(emxDataProvider.getEntityTypes().collect(toList()), emptyList());
+    assertEquals(emptyList(), emxDataProvider.getEntityTypes().collect(toList()));
   }
 
   @Test
@@ -124,7 +124,7 @@ class EmxDataProviderTest extends AbstractMockitoTest {
     when(repository.spliterator()).thenReturn(Collections.<Entity>emptyList().spliterator());
     when(repositoryCollection.getRepository(entityType)).thenReturn(repository);
     when(emxImportJob.getSource()).thenReturn(repositoryCollection);
-    assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
+    assertEquals(emptyList(), emxDataProvider.getEntities(entityType).collect(toList()));
   }
 
   @Test
@@ -139,7 +139,7 @@ class EmxDataProviderTest extends AbstractMockitoTest {
     when(repositoryCollection.getRepository("EntityTypeId")).thenReturn(repository);
     when(emxImportJob.getPackageId()).thenReturn(Optional.of("base"));
     when(emxImportJob.getSource()).thenReturn(repositoryCollection);
-    assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
+    assertEquals(emptyList(), emxDataProvider.getEntities(entityType).collect(toList()));
   }
 
   @Test

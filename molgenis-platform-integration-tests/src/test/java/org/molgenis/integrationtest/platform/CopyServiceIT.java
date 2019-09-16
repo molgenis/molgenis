@@ -120,39 +120,39 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
-    assertEquals(packages.size(), 1);
+    assertEquals(1, packages.size());
 
     Package packageACopy = packages.get(0);
-    assertEquals(packageACopy.getLabel(), "Package A");
+    assertEquals("Package A", packageACopy.getLabel());
     List<EntityType> entityTypesInACopy = newArrayList(packageACopy.getEntityTypes());
     List<Package> packagesInACopy = newArrayList(packageACopy.getChildren());
-    assertEquals(entityTypesInACopy.size(), 1);
-    assertEquals(packagesInACopy.size(), 1);
+    assertEquals(1, entityTypesInACopy.size());
+    assertEquals(1, packagesInACopy.size());
 
     Package packageBCopy = packagesInACopy.get(0);
-    assertEquals(packageBCopy.getLabel(), "Package B (child of A)");
+    assertEquals("Package B (child of A)", packageBCopy.getLabel());
     List<EntityType> entityTypesInBCopy = newArrayList(packageBCopy.getEntityTypes());
     List<Package> packagesInBCopy = newArrayList(packageBCopy.getChildren());
-    assertEquals(entityTypesInBCopy.size(), 1);
-    assertEquals(packagesInBCopy.size(), 0);
+    assertEquals(1, entityTypesInBCopy.size());
+    assertEquals(0, packagesInBCopy.size());
 
     EntityType entityTypeACopy = entityTypesInACopy.get(0);
     EntityType entityTypeBCopy = entityTypesInBCopy.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeBCopy.getLabel(), "EntityType B (referenced by A)");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals("EntityType B (referenced by A)", entityTypeBCopy.getLabel());
+    assertEquals(ENTITY_TYPE_B, entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
     assertEquals(
-        entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), entityTypeBCopy.getId());
+        entityTypeBCopy.getId(), entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 4);
+    assertEquals(4, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     List<Object> entitiesOfB =
         dataService.findAll(entityTypeBCopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfB, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfB);
 
     cleanupTargetPackage(targetPackageId);
   }
@@ -175,19 +175,19 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
-    assertEquals(packages.size(), 0);
-    assertEquals(entityTypes.size(), 1);
+    assertEquals(0, packages.size());
+    assertEquals(1, entityTypes.size());
 
     EntityType entityTypeACopy = entityTypes.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
-    assertEquals(entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals(ENTITY_TYPE_B, entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
+    assertEquals(ENTITY_TYPE_B, entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 1);
+    assertEquals(1, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     cleanupTargetPackage(targetPackageId);
   }
@@ -216,33 +216,33 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
-    assertEquals(packages.size(), 1);
-    assertEquals(entityTypes.size(), 1);
+    assertEquals(1, packages.size());
+    assertEquals(1, entityTypes.size());
     Package packageBCopy = packages.get(0);
 
-    assertEquals(packageBCopy.getLabel(), "Package B (child of A)");
+    assertEquals("Package B (child of A)", packageBCopy.getLabel());
     List<EntityType> entityTypesInBCopy = newArrayList(packageBCopy.getEntityTypes());
     List<Package> packagesInBCopy = newArrayList(packageBCopy.getChildren());
-    assertEquals(entityTypesInBCopy.size(), 1);
-    assertEquals(packagesInBCopy.size(), 0);
+    assertEquals(1, entityTypesInBCopy.size());
+    assertEquals(0, packagesInBCopy.size());
 
     EntityType entityTypeACopy = entityTypes.get(0);
     EntityType entityTypeBCopy = entityTypesInBCopy.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeBCopy.getLabel(), "EntityType B (referenced by A)");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), entityTypeB.getId());
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals("EntityType B (referenced by A)", entityTypeBCopy.getLabel());
+    assertEquals(entityTypeB.getId(), entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
     assertEquals(
-        entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), entityTypeBCopy.getId());
+        entityTypeBCopy.getId(), entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 3);
+    assertEquals(3, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     List<Object> entitiesOfB =
         dataService.findAll(entityTypeBCopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfB, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfB);
 
     cleanupTargetPackage(targetPackageId);
   }

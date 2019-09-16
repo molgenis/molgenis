@@ -76,7 +76,7 @@ class DataServiceImplTest {
     EntityType entityType = mock(EntityType.class);
     when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    assertEquals(dataService.getEntityType(entityTypeId), entityType);
+    assertEquals(entityType, dataService.getEntityType(entityTypeId));
   }
 
   @Test
@@ -117,7 +117,7 @@ class DataServiceImplTest {
   @Test
   void getEntityNames() {
     assertEquals(
-        dataService.getEntityTypeIds().collect(toList()), asList("Entity1", "Entity2", "Entity3"));
+        asList("Entity1", "Entity2", "Entity3"), dataService.getEntityTypeIds().collect(toList()));
   }
 
   @Test
@@ -139,7 +139,7 @@ class DataServiceImplTest {
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
-    assertEquals(dataService.getRepository(entityTypeId), repository);
+    assertEquals(repository, dataService.getRepository(entityTypeId));
   }
 
   @Test
@@ -163,7 +163,7 @@ class DataServiceImplTest {
     Fetch fetch = new Fetch();
     Entity entity = mock(Entity.class);
     when(repo1.findOneById(id, fetch)).thenReturn(entity);
-    assertEquals(dataService.findOneById("Entity1", id, fetch), entity);
+    assertEquals(entity, dataService.findOneById("Entity1", id, fetch));
     verify(repo1, times(1)).findOneById(id, fetch);
   }
 
@@ -207,7 +207,7 @@ class DataServiceImplTest {
     Entity entity0 = mock(Entity.class);
     when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = dataService.findAll("Entity1", ids);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -219,7 +219,7 @@ class DataServiceImplTest {
     when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
     when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
     Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -230,7 +230,7 @@ class DataServiceImplTest {
     Fetch fetch = new Fetch();
     when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -243,7 +243,7 @@ class DataServiceImplTest {
     when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
     when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
     Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -251,7 +251,7 @@ class DataServiceImplTest {
     Entity entity0 = mock(Entity.class);
     when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = dataService.findAll("Entity1");
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -261,7 +261,7 @@ class DataServiceImplTest {
     when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
     when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
     Stream<Entity> entities = dataService.findAll("Entity1", clazz);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -271,7 +271,7 @@ class DataServiceImplTest {
     Query<Entity> query = mock(Query.class);
     when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = dataService.findAll("Entity1", query);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -283,6 +283,6 @@ class DataServiceImplTest {
     when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
     when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
     Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
-    assertEquals(entities.collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 }

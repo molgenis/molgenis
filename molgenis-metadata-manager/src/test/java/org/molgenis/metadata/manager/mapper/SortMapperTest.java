@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.molgenis.data.Sort.Direction.DESC;
+import static org.molgenis.metadata.manager.model.EditorSort.create;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +32,8 @@ class SortMapperTest {
     Iterator<Sort.Order> iterator = sort.iterator();
     assertTrue(iterator.hasNext());
     Sort.Order order = iterator.next();
-    assertEquals(order.getAttr(), attributeName);
-    assertEquals(order.getDirection(), Sort.Direction.DESC);
+    assertEquals(attributeName, order.getAttr());
+    assertEquals(DESC, order.getDirection());
     assertFalse(iterator.hasNext());
   }
 
@@ -45,7 +47,7 @@ class SortMapperTest {
     String attr = "attr";
     Sort sort = new Sort(of(new Sort.Order(attr, Sort.Direction.ASC)));
     EditorSort editorSort = sortMapper.toEditorSort(sort);
-    assertEquals(editorSort, EditorSort.create(of(EditorOrder.create(attr, "ASC"))));
+    assertEquals(create(of(EditorOrder.create(attr, "ASC"))), editorSort);
   }
 
   @Test

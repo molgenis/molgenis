@@ -46,6 +46,6 @@ class ThemeFingerprintRegistryTest {
     verifyNoMoreInteractions(styleService);
 
     // verify stable key
-    assertEquals(firstResult, secondResult);
+    assertEquals(secondResult, firstResult);
   }
 }

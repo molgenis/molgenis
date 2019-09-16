@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf.importer;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
@@ -16,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.importer.MetadataAction.ADD;
 
 import java.io.File;
 import java.util.Arrays;
@@ -145,7 +148,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     EntityImportReport expectedEntityImportReport = new EntityImportReport();
     expectedEntityImportReport.addEntityCount(entityTypeId0, entities.size());
     expectedEntityImportReport.addNewEntity(entityTypeId0);
-    assertEquals(entityImportReport, expectedEntityImportReport);
+    assertEquals(expectedEntityImportReport, entityImportReport);
 
     verify(metaDataService, times(1)).createRepository(argThat(eqName(entityType0)));
     verify(permissionSystemService, times(1)).giveUserWriteMetaPermissions(entityType0);
@@ -244,7 +247,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     expectedEntityImportReport.addEntityCount(sampleEntityName0, 4);
     expectedEntityImportReport.addNewEntity(entityTypeId0);
     expectedEntityImportReport.addEntityCount(entityTypeId0, entities.size());
-    assertEquals(entityImportReport, expectedEntityImportReport);
+    assertEquals(expectedEntityImportReport, entityImportReport);
 
     verify(metaDataService).createRepository(argThat(eqName(sampleEntityType0)));
     verify(metaDataService).createRepository(argThat(eqName(entityType0)));
@@ -335,16 +338,15 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport =
         vcfImporterService.validateImport(file, source);
     assertTrue(entitiesValidationReport.valid());
-    assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
-        entitiesValidationReport.getFieldsImportable(),
-        singletonMap(entityTypeId0, singletonList(attrName0)));
-    assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());
-    assertEquals(entitiesValidationReport.getFieldsUnknown(), emptyMap());
-    assertEquals(entitiesValidationReport.getImportOrder(), emptyList());
-    assertEquals(entitiesValidationReport.getPackages(), emptyList());
-    assertEquals(
-        entitiesValidationReport.getSheetsImportable(), singletonMap(entityTypeId0, Boolean.TRUE));
+        singletonMap(entityTypeId0, singletonList(attrName0)),
+        entitiesValidationReport.getFieldsImportable());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsRequired());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsUnknown());
+    assertEquals(emptyList(), entitiesValidationReport.getImportOrder());
+    assertEquals(emptyList(), entitiesValidationReport.getPackages());
+    assertEquals(singletonMap(entityTypeId0, TRUE), entitiesValidationReport.getSheetsImportable());
   }
 
   @Test
@@ -375,16 +377,16 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport =
         vcfImporterService.validateImport(file, source);
     assertFalse(entitiesValidationReport.valid());
-    assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
-        entitiesValidationReport.getFieldsImportable(),
-        singletonMap(entityTypeId0, singletonList(attrName0)));
-    assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());
-    assertEquals(entitiesValidationReport.getFieldsUnknown(), emptyMap());
-    assertEquals(entitiesValidationReport.getImportOrder(), emptyList());
-    assertEquals(entitiesValidationReport.getPackages(), emptyList());
+        singletonMap(entityTypeId0, singletonList(attrName0)),
+        entitiesValidationReport.getFieldsImportable());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsRequired());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsUnknown());
+    assertEquals(emptyList(), entitiesValidationReport.getImportOrder());
+    assertEquals(emptyList(), entitiesValidationReport.getPackages());
     assertEquals(
-        entitiesValidationReport.getSheetsImportable(), singletonMap(entityTypeId0, Boolean.FALSE));
+        singletonMap(entityTypeId0, FALSE), entitiesValidationReport.getSheetsImportable());
   }
 
   @Test
@@ -424,19 +426,19 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport =
         vcfImporterService.validateImport(file, source);
     assertTrue(entitiesValidationReport.valid());
-    assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();
     importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
     importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
-    assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
-    assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());
-    assertEquals(entitiesValidationReport.getFieldsUnknown(), emptyMap());
-    assertEquals(entitiesValidationReport.getImportOrder(), emptyList());
-    assertEquals(entitiesValidationReport.getPackages(), emptyList());
+    assertEquals(importableFields, entitiesValidationReport.getFieldsImportable());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsRequired());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsUnknown());
+    assertEquals(emptyList(), entitiesValidationReport.getImportOrder());
+    assertEquals(emptyList(), entitiesValidationReport.getPackages());
     Map<String, Boolean> sheetsImportable = new HashMap<>();
     sheetsImportable.put(entityTypeId0, Boolean.TRUE);
     sheetsImportable.put(sampleEntityName0, Boolean.TRUE);
-    assertEquals(entitiesValidationReport.getSheetsImportable(), sheetsImportable);
+    assertEquals(sheetsImportable, entitiesValidationReport.getSheetsImportable());
   }
 
   @Test
@@ -478,19 +480,19 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport =
         vcfImporterService.validateImport(file, source);
     assertFalse(entitiesValidationReport.valid());
-    assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();
     importableFields.put(entityTypeId0, singletonList(VcfAttributes.SAMPLES));
     importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
-    assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
-    assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());
-    assertEquals(entitiesValidationReport.getFieldsUnknown(), emptyMap());
-    assertEquals(entitiesValidationReport.getImportOrder(), emptyList());
-    assertEquals(entitiesValidationReport.getPackages(), emptyList());
+    assertEquals(importableFields, entitiesValidationReport.getFieldsImportable());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsRequired());
+    assertEquals(emptyMap(), entitiesValidationReport.getFieldsUnknown());
+    assertEquals(emptyList(), entitiesValidationReport.getImportOrder());
+    assertEquals(emptyList(), entitiesValidationReport.getPackages());
     Map<String, Boolean> sheetsImportable = new HashMap<>();
     sheetsImportable.put(entityTypeId0, Boolean.FALSE);
     sheetsImportable.put(sampleEntityName0, Boolean.FALSE);
-    assertEquals(entitiesValidationReport.getSheetsImportable(), sheetsImportable);
+    assertEquals(sheetsImportable, entitiesValidationReport.getSheetsImportable());
   }
 
   @Test
@@ -514,7 +516,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   @Test
   void getMetadataAction() {
     RepositoryCollection source = mock(RepositoryCollection.class);
-    assertEquals(vcfImporterService.getMetadataAction(source), MetadataAction.ADD);
+    assertEquals(ADD, vcfImporterService.getMetadataAction(source));
   }
 
   private static ArgumentMatcher<EntityType> eqName(EntityType expectedEntityType) {

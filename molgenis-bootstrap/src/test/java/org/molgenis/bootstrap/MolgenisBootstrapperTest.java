@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap;
 
+import static java.lang.Integer.MIN_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -92,6 +93,6 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
 
   @Test
   void testGetOrder() {
-    assertEquals(molgenisBootstrapper.getOrder(), Integer.MIN_VALUE);
+    assertEquals(MIN_VALUE, molgenisBootstrapper.getOrder());
   }
 }

@@ -82,7 +82,7 @@ class MolgenisLoginControllerTest extends AbstractMockitoSpringContextTests {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getSession(false)).thenReturn(null);
 
-    assertEquals(controller.getLoginPage(request, model), VIEW_LOGIN);
+    assertEquals(VIEW_LOGIN, controller.getLoginPage(request, model));
     verifyNoMoreInteractions(model);
   }
 
@@ -105,7 +105,7 @@ class MolgenisLoginControllerTest extends AbstractMockitoSpringContextTests {
     when(session.getAttribute(SPRING_SECURITY_CONTEXT)).thenReturn(securityContext);
     when(request.getSession(false)).thenReturn(session);
 
-    assertEquals(controller.getLoginPage(request, model), VIEW_LOGIN);
+    assertEquals(VIEW_LOGIN, controller.getLoginPage(request, model));
     verifyNoMoreInteractions(model);
   }
 
@@ -126,7 +126,7 @@ class MolgenisLoginControllerTest extends AbstractMockitoSpringContextTests {
     when(session.getAttribute(SPRING_SECURITY_CONTEXT)).thenReturn(securityContext);
     when(request.getSession(false)).thenReturn(session);
 
-    assertEquals(controller.getLoginPage(request, model), VIEW_LOGIN);
+    assertEquals(VIEW_LOGIN, controller.getLoginPage(request, model));
     verify(model).addAttribute(ERROR_MESSAGE_ATTRIBUTE, ERROR_MESSAGE_SESSION_AUTHENTICATION);
   }
 

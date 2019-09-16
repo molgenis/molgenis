@@ -56,7 +56,7 @@ class PluginSecurityRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Plugin>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), asList(plugin0, plugin1));
+    assertEquals(asList(plugin0, plugin1), pluginCaptor.getValue().collect(toList()));
     verify(mutableAclService).createAcl(new PluginIdentity("plugin0"));
     verify(mutableAclService).createAcl(new PluginIdentity("plugin1"));
   }
@@ -95,7 +95,7 @@ class PluginSecurityRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Plugin>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), asList(plugin0, plugin1));
+    assertEquals(asList(plugin0, plugin1), pluginCaptor.getValue().collect(toList()));
     verify(mutableAclService).deleteAcl(new PluginIdentity("plugin0"), true);
     verify(mutableAclService).deleteAcl(new PluginIdentity("plugin1"), true);
   }
@@ -125,7 +125,7 @@ class PluginSecurityRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), asList("plugin0", "plugin1"));
+    assertEquals(asList("plugin0", "plugin1"), pluginCaptor.getValue().collect(toList()));
     verify(mutableAclService).deleteAcl(new PluginIdentity("plugin0"), true);
     verify(mutableAclService).deleteAcl(new PluginIdentity("plugin1"), true);
   }

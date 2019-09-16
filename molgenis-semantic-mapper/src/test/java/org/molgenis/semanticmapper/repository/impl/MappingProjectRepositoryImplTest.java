@@ -104,7 +104,7 @@ class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest {
 
     ArgumentCaptor<DynamicEntity> argumentCaptor = ArgumentCaptor.forClass(DynamicEntity.class);
     Mockito.verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
-    assertEquals(argumentCaptor.getValue().getString(IDENTIFIER), "mappingProjectID");
+    assertEquals("mappingProjectID", argumentCaptor.getValue().getString(IDENTIFIER));
     assertNull(mappingTarget1.getIdentifier());
     assertNull(mappingTarget2.getIdentifier());
   }
@@ -116,7 +116,7 @@ class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest {
     try {
       mappingProjectRepositoryImpl.add(mappingProject);
     } catch (MolgenisDataException mde) {
-      assertEquals(mde.getMessage(), "MappingProject already exists");
+      assertEquals("MappingProject already exists", mde.getMessage());
     }
   }
 
@@ -134,7 +134,7 @@ class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(asList(mappingTarget1, mappingTarget2));
     List<MappingProject> result = mappingProjectRepositoryImpl.getMappingProjects(q);
     mappingProject.setIdentifier("mappingProjectID");
-    assertEquals(result, singletonList(mappingProject));
+    assertEquals(singletonList(mappingProject), result);
   }
 
   @Test
@@ -144,7 +144,7 @@ class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(asList(mappingTarget1, mappingTarget2));
     List<MappingProject> result = mappingProjectRepositoryImpl.getAllMappingProjects();
     mappingProject.setIdentifier("mappingProjectID");
-    assertEquals(result, singletonList(mappingProject));
+    assertEquals(singletonList(mappingProject), result);
   }
 
   @Test
@@ -155,7 +155,7 @@ class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest {
       mappingProjectRepositoryImpl.update(mappingProject);
       fail("Expected exception");
     } catch (MolgenisDataException expected) {
-      assertEquals(expected.getMessage(), "MappingProject does not exist");
+      assertEquals("MappingProject does not exist", expected.getMessage());
     }
   }
 

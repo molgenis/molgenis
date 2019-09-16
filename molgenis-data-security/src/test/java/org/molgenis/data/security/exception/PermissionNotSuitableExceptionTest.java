@@ -26,7 +26,7 @@ class PermissionNotSuitableExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new PermissionNotSuitableException("permission", "type");
-    assertEquals(ex.getMessage(), "permission:permission, typeId:type");
+    assertEquals("permission:permission, typeId:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

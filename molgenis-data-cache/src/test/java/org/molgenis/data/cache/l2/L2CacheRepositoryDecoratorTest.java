@@ -71,7 +71,7 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
     when(l2Cache.get(delegateRepository, "0")).thenReturn(entities.get(0));
     assertEquals(
-        l2CacheRepositoryDecorator.findOneById("0", new Fetch().field("id")), entities.get(0));
+        entities.get(0), l2CacheRepositoryDecorator.findOneById("0", new Fetch().field("id")));
   }
 
   @Test
@@ -87,14 +87,14 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(false);
     when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(true);
     when(delegateRepository.findOneById("0")).thenReturn(entities.get(0));
-    assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
+    assertEquals(entities.get(0), l2CacheRepositoryDecorator.findOneById("0"));
   }
 
   @Test
   void testFindOneByIdEntireRepositoryDirty() {
     when(transactionInformation.isEntireRepositoryDirty(emd)).thenReturn(true);
     when(delegateRepository.findOneById("0")).thenReturn(entities.get(0));
-    assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
+    assertEquals(entities.get(0), l2CacheRepositoryDecorator.findOneById("0"));
   }
 
   @Test
@@ -120,11 +120,11 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     List<Entity> retrievedEntities = l2CacheRepositoryDecorator.findAll(ids).collect(toList());
 
     List<Object> decoratedRepoIds = repoIdCaptor.getValue().collect(toList());
-    assertEquals(decoratedRepoIds, Lists.newArrayList("0", "1"));
+    assertEquals(newArrayList("0", "1"), decoratedRepoIds);
     List<Object> cacheIds = Lists.newArrayList(cacheIdCaptor.getValue());
-    assertEquals(cacheIds, Lists.newArrayList("2", "3"));
+    assertEquals(newArrayList("2", "3"), cacheIds);
 
-    assertEquals(retrievedEntities.size(), 2);
+    assertEquals(2, retrievedEntities.size());
     assertTrue(EntityUtils.equals(retrievedEntities.get(0), entities.get(1)));
     assertTrue(EntityUtils.equals(retrievedEntities.get(1), entities.get(3)));
   }
@@ -167,7 +167,7 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> retrievedEntities = l2CacheRepositoryDecorator.findAll(ids).collect(toList());
 
-    assertEquals(retrievedEntities.size(), NUMBER_OF_ENTITIES);
+    assertEquals(NUMBER_OF_ENTITIES, retrievedEntities.size());
     for (int i = 0; i < NUMBER_OF_ENTITIES; i++) {
       assertTrue(EntityUtils.equals(retrievedEntities.get(i), lotsOfEntities.get(i)));
     }

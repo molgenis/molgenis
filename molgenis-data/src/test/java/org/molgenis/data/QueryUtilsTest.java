@@ -16,6 +16,7 @@ import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SHOULD;
+import static org.molgenis.data.QueryUtils.getQueryRuleAttribute;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;
@@ -211,7 +212,7 @@ class QueryUtilsTest {
     EntityType entityType = mock(EntityType.class);
     Attribute attr = mock(Attribute.class);
     when(entityType.getAttribute(attrName)).thenReturn(attr);
-    assertEquals(QueryUtils.getQueryRuleAttribute(queryRule, entityType), attr);
+    assertEquals(attr, getQueryRuleAttribute(queryRule, entityType));
   }
 
   @Test
@@ -240,7 +241,7 @@ class QueryUtilsTest {
     when(refEntity.getAttribute(attrName)).thenReturn(attr);
     when(refAttr.getRefEntity()).thenReturn(refEntity);
     when(entityType.getAttribute(refAttrName)).thenReturn(refAttr);
-    assertEquals(QueryUtils.getQueryRuleAttribute(queryRule, entityType), attr);
+    assertEquals(attr, getQueryRuleAttribute(queryRule, entityType));
   }
 
   @Test

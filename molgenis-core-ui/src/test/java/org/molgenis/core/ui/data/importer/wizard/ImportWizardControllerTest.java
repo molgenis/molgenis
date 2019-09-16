@@ -9,9 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.ResponseEntity.badRequest;
+import static org.springframework.http.ResponseEntity.created;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -38,7 +42,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -143,26 +146,26 @@ class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
             dataActionStr,
             notify);
     assertEquals(
-        responseEntity,
-        ResponseEntity.created(new java.net.URI("/api/v2/entityTypeId/importRunId"))
+        created(new URI("/api/v2/entityTypeId/importRunId"))
             .contentType(TEXT_PLAIN)
-            .body("/api/v2/entityTypeId/importRunId"));
+            .body("/api/v2/entityTypeId/importRunId"),
+        responseEntity);
 
     verify(fileStore).store(any(), eq(filename));
     ArgumentCaptor<ImportJob> importJobArgumentCaptor = ArgumentCaptor.forClass(ImportJob.class);
     verify(executorService).execute(importJobArgumentCaptor.capture());
     assertEquals(
-        importJobArgumentCaptor.getValue(),
         new ImportJob(
             importService,
-            SecurityContextHolder.getContext(),
+            getContext(),
             null,
             metadataAction,
             dataAction,
             importRunIdValue,
             importRunService,
             httpSession,
-            null));
+            null),
+        importJobArgumentCaptor.getValue());
   }
 
   @Test
@@ -193,11 +196,11 @@ class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
             action,
             notify);
     assertEquals(
-        responseEntity,
-        ResponseEntity.badRequest()
+        badRequest()
             .contentType(TEXT_PLAIN)
             .body(
-                "Invalid action:[UNKNOWNACTION] valid values: [ADD, ADD_UPDATE_EXISTING, UPDATE, ADD_IGNORE_EXISTING]"));
+                "Invalid action:[UNKNOWNACTION] valid values: [ADD, ADD_UPDATE_EXISTING, UPDATE, ADD_IGNORE_EXISTING]"),
+        responseEntity);
 
     verify(fileStore).store(any(), eq(filename));
     verifyZeroInteractions(executorService);
@@ -231,10 +234,10 @@ class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
             action,
             notify);
     assertEquals(
-        responseEntity,
-        ResponseEntity.badRequest()
+        badRequest()
             .contentType(TEXT_PLAIN)
-            .body("Invalid action:[UNKNOWNACTION] valid values: [ADD, UPDATE, UPSERT, IGNORE]"));
+            .body("Invalid action:[UNKNOWNACTION] valid values: [ADD, UPDATE, UPSERT, IGNORE]"),
+        responseEntity);
 
     verify(fileStore).store(any(), eq(filename));
     verifyZeroInteractions(executorService);

@@ -10,18 +10,18 @@ class PubMedTermFrequencyServiceTest {
   @Test
   void testRegexPattern() {
     assertEquals(
+        4603,
         termFrequencyService
             .parseResponse(
                 "<eSearchResult><Count>4603</Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>")
-            .getOccurrence(),
-        4603);
+            .getOccurrence());
     assertEquals(
+        null,
         termFrequencyService.parseResponse(
-            "<eSearchResult><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
-        null);
+            "<eSearchResult><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"));
     assertEquals(
+        null,
         termFrequencyService.parseResponse(
-            "<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
-        null);
+            "<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"));
   }
 }

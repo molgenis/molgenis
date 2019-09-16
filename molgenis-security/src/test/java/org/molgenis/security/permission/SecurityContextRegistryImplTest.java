@@ -1,6 +1,7 @@
 package org.molgenis.security.permission;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,8 @@ class SecurityContextRegistryImplTest {
   @Test
   void testGetSecurityContextFromSessionWithSecurityContext() {
     assertEquals(
-        securityContextRegistry.getSecurityContext(httpSessionWithSecurityContextId),
-        securityContext);
+        securityContext,
+        securityContextRegistry.getSecurityContext(httpSessionWithSecurityContextId));
   }
 
   @Test
@@ -100,8 +100,8 @@ class SecurityContextRegistryImplTest {
   @Test
   void testGetSecurityContexts() {
     assertEquals(
-        securityContextRegistry.getSecurityContexts().collect(Collectors.toList()),
-        singletonList(securityContext));
+        singletonList(securityContext),
+        securityContextRegistry.getSecurityContexts().collect(toList()));
   }
 
   @Test

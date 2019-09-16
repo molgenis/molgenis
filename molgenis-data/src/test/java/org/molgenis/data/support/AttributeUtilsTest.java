@@ -22,6 +22,7 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ class AttributeUtilsTest {
   @MethodSource("isIdAttributeTypeAllowedProvider")
   void isIdAttributeTypeAllowed(AttributeType attrType, boolean validIdAttrType) {
     Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(attrType).getMock();
-    assertEquals(AttributeUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
+    assertEquals(validIdAttrType, AttributeUtils.isIdAttributeTypeAllowed(attr));
   }
 
   static Iterator<Object[]> getI18nAttributeNameProvider() {
@@ -76,7 +77,7 @@ class AttributeUtilsTest {
   @ParameterizedTest
   @MethodSource("getI18nAttributeNameProvider")
   void testGetI18nAttributeName(String attrName, String languageCode, String i18nAttrName) {
-    assertEquals(AttributeUtils.getI18nAttributeName(attrName, languageCode), i18nAttrName);
+    assertEquals(i18nAttrName, getI18nAttributeName(attrName, languageCode));
   }
 
   // AttributeUtils.getDefaultTypedValue tested through DefaultValuePopulator

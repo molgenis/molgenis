@@ -71,7 +71,7 @@ class DocumentContentBuilderTest extends AbstractMockitoTest {
     String entityId = "id";
     Document document = documentContentBuilder.createDocument(entityId);
     Document expectedDocument = Document.builder().setId(entityId).build();
-    assertEquals(document, expectedDocument);
+    assertEquals(expectedDocument, document);
   }
 
   static Iterator<Object[]> createDocumentBoolProvider() {
@@ -310,10 +310,10 @@ class DocumentContentBuilderTest extends AbstractMockitoTest {
   }
 
   private void assertDocumentEquals(Document document, String expectedContent) {
-    assertEquals(document.getId(), "id");
+    assertEquals("id", document.getId());
     assertNotNull(document.getContent());
     try {
-      assertEquals(document.getContent().string(), expectedContent);
+      assertEquals(expectedContent, document.getContent().string());
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

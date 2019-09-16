@@ -30,7 +30,7 @@ class PretendingEntityTest extends AbstractMockitoTest {
 
     PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
 
-    assertEquals(pretendingEntity.getEntityType(), entityType);
+    assertEquals(entityType, pretendingEntity.getEntityType());
   }
 
   @Test
@@ -44,7 +44,7 @@ class PretendingEntityTest extends AbstractMockitoTest {
 
     PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
 
-    assertEquals(pretendingEntity.getEntityType(), entityTypeCopy);
+    assertEquals(entityTypeCopy, pretendingEntity.getEntityType());
   }
 
   @Test
@@ -61,7 +61,7 @@ class PretendingEntityTest extends AbstractMockitoTest {
     PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
     Entity actualRefEntity = pretendingEntity.getEntity("ref");
 
-    assertEquals(actualRefEntity.getEntityType(), refEntityTypeCopy);
+    assertEquals(refEntityTypeCopy, actualRefEntity.getEntityType());
   }
 
   @Test
@@ -76,7 +76,7 @@ class PretendingEntityTest extends AbstractMockitoTest {
     PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
     Entity actualRefEntity = pretendingEntity.getEntity("ref");
 
-    assertEquals(actualRefEntity.getEntityType(), refEntityType);
+    assertEquals(refEntityType, actualRefEntity.getEntityType());
   }
 
   @Test
@@ -95,8 +95,8 @@ class PretendingEntityTest extends AbstractMockitoTest {
     PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
     List<Entity> actualRefEntities = newArrayList(pretendingEntity.getEntities("ref"));
 
-    assertEquals(actualRefEntities.get(0).getEntityType(), refEntityTypeCopy);
-    assertEquals(actualRefEntities.get(1).getEntityType(), refEntityTypeCopy);
+    assertEquals(refEntityTypeCopy, actualRefEntities.get(0).getEntityType());
+    assertEquals(refEntityTypeCopy, actualRefEntities.get(1).getEntityType());
   }
 
   @Test
@@ -113,8 +113,8 @@ class PretendingEntityTest extends AbstractMockitoTest {
     PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
     List<Entity> actualRefEntities = newArrayList(pretendingEntity.getEntities("ref"));
 
-    assertEquals(actualRefEntities.get(0).getEntityType(), refEntityType);
-    assertEquals(actualRefEntities.get(1).getEntityType(), refEntityType);
+    assertEquals(refEntityType, actualRefEntities.get(0).getEntityType());
+    assertEquals(refEntityType, actualRefEntities.get(1).getEntityType());
   }
 
   @Test
@@ -131,7 +131,7 @@ class PretendingEntityTest extends AbstractMockitoTest {
     PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
     FileMeta actualRefEntity = pretendingEntity.getEntity("ref", FileMeta.class);
 
-    assertEquals(actualRefEntity.getEntityType(), refEntityTypeCopy);
+    assertEquals(refEntityTypeCopy, actualRefEntity.getEntityType());
   }
 
   @Test
@@ -151,8 +151,8 @@ class PretendingEntityTest extends AbstractMockitoTest {
     List<FileMeta> actualRefEntities =
         newArrayList(pretendingEntity.getEntities("ref", FileMeta.class));
 
-    assertEquals(actualRefEntities.get(0).getEntityType(), refEntityTypeCopy);
-    assertEquals(actualRefEntities.get(1).getEntityType(), refEntityTypeCopy);
+    assertEquals(refEntityTypeCopy, actualRefEntities.get(0).getEntityType());
+    assertEquals(refEntityTypeCopy, actualRefEntities.get(1).getEntityType());
   }
 
   @Test

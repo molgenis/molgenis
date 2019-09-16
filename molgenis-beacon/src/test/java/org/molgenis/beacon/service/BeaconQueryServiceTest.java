@@ -98,7 +98,7 @@ class BeaconQueryServiceTest {
     BeaconAlleleResponse expectedResponse =
         BeaconAlleleResponse.create(BEACON_ID, true, null, request);
 
-    assertEquals(actualResponse, expectedResponse);
+    assertEquals(expectedResponse, actualResponse);
   }
 
   @Test
@@ -118,7 +118,7 @@ class BeaconQueryServiceTest {
     BeaconAlleleResponse expectedResponse =
         BeaconAlleleResponse.create(BEACON_ID, true, null, request);
 
-    assertEquals(actualResponse, expectedResponse);
+    assertEquals(expectedResponse, actualResponse);
   }
 
   @Test
@@ -138,7 +138,7 @@ class BeaconQueryServiceTest {
     BeaconAlleleResponse expectedResponse =
         BeaconAlleleResponse.create(BEACON_ID, false, null, request);
 
-    assertEquals(actualResponse, expectedResponse);
+    assertEquals(expectedResponse, actualResponse);
   }
 
   @SuppressWarnings("deprecation")
@@ -153,7 +153,7 @@ class BeaconQueryServiceTest {
       beaconQueryService.query("beacon", request);
     } catch (BeaconException e) {
       BeaconException beaconException = new NestedBeaconException(BEACON_ID, request);
-      assertEquals(e.getMessage(), beaconException.getMessage());
+      assertEquals(beaconException.getMessage(), e.getMessage());
     }
   }
 }

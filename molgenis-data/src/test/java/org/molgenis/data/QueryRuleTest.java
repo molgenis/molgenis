@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -50,7 +51,7 @@ class QueryRuleTest {
   @Test
   void valuesForRangeOperator() {
     QueryRule qr = new QueryRule("field", RANGE, Arrays.asList(10, 10));
-    assertEquals(qr.getValue(), Arrays.asList(10, 10));
+    assertEquals(asList(10, 10), qr.getValue());
   }
 
   @Test
@@ -61,8 +62,8 @@ class QueryRuleTest {
 
     QueryRule nested = new QueryRule("field", EQUALS, "Test");
     q = new QueryRule(Operator.NOT, new QueryRule(nested));
-    assertEquals(q.getNestedRules().size(), 1);
-    assertEquals(nested, q.getNestedRules().get(0));
+    assertEquals(1, q.getNestedRules().size());
+    assertEquals(q.getNestedRules().get(0), nested);
   }
 
   @Test
@@ -73,7 +74,7 @@ class QueryRuleTest {
 
     QueryRule q1 = new QueryRule("field", EQUALS, valueEntity);
     QueryRule q2 = new QueryRule("field", EQUALS, valueId);
-    assertEquals(q1, q2);
+    assertEquals(q2, q1);
   }
 
   @Test
@@ -90,6 +91,6 @@ class QueryRuleTest {
     QueryRule q1 = new QueryRule("field", IN, entities);
     QueryRule q2 = new QueryRule("field", IN, ids);
 
-    assertEquals(q1, q2);
+    assertEquals(q2, q1);
   }
 }

@@ -36,8 +36,8 @@ class UnknownAceExceptionTest extends ExceptionMessageTest {
     UnknownDataException ex =
         new UnknownAceException(objectIdentity, new GrantedAuthoritySid("ROLE_role1"), "delete");
     assertEquals(
-        ex.getMessage(),
-        "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1], operation:delete");
+        "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1], operation:delete",
+        ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

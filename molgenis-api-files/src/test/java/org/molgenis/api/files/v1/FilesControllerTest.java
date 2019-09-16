@@ -11,6 +11,7 @@ import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
 import static org.molgenis.data.security.EntityTypePermission.DELETE_DATA;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
+import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +25,6 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -71,8 +71,8 @@ class FilesControllerTest extends AbstractMockitoTest {
             .setContentType(contentType)
             .setSize(size)
             .build();
-    assertEquals(fileResponseResponseEntity.getBody(), expectedFileResponse);
-    assertEquals(fileResponseResponseEntity.getStatusCode(), HttpStatus.CREATED);
+    assertEquals(expectedFileResponse, fileResponseResponseEntity.getBody());
+    assertEquals(CREATED, fileResponseResponseEntity.getStatusCode());
     assertNotNull(fileResponseResponseEntity.getHeaders().getLocation());
   }
 
@@ -120,7 +120,7 @@ class FilesControllerTest extends AbstractMockitoTest {
             .setContentType(contentType)
             .setSize(size)
             .build();
-    assertEquals(fileResponse, expectedFileResponse);
+    assertEquals(expectedFileResponse, fileResponse);
   }
 
   @Test
@@ -139,7 +139,7 @@ class FilesControllerTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ResponseEntity<StreamingResponseBody> responseEntity = mock(ResponseEntity.class);
     when(filesApiService.download(fileId)).thenReturn(responseEntity);
-    assertEquals(filesApiController.downloadFile(fileId), responseEntity);
+    assertEquals(responseEntity, filesApiController.downloadFile(fileId));
   }
 
   @Test

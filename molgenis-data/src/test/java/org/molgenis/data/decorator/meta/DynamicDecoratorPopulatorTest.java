@@ -78,10 +78,10 @@ class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
     verify(dataService).deleteAll(eq(DYNAMIC_DECORATOR), stringCaptor.capture());
     List<DynamicDecorator> addedDecorators = decoratorCaptor.getValue().collect(toList());
     List<Object> deletedDecorators = stringCaptor.getValue().collect(toList());
-    assertEquals(addedDecorators.size(), 1);
-    assertEquals(addedDecorators.get(0).getId(), "id3");
-    assertEquals(deletedDecorators.size(), 1);
-    assertEquals(deletedDecorators.get(0), "id2");
+    assertEquals(1, addedDecorators.size());
+    assertEquals("id3", addedDecorators.get(0).getId());
+    assertEquals(1, deletedDecorators.size());
+    assertEquals("id2", deletedDecorators.get(0));
   }
 
   @Test
@@ -98,7 +98,7 @@ class DynamicDecoratorPopulatorTest extends AbstractMockitoTest {
     populator.removeReferencesOrDeleteIfEmpty(idsToRemove, config);
 
     verify(config).setDecoratorParameters(parameterCaptor.capture());
-    assertEquals(parameterCaptor.getValue().collect(toList()), singletonList(params2));
+    assertEquals(singletonList(params2), parameterCaptor.getValue().collect(toList()));
   }
 
   @Test

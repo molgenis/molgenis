@@ -2,10 +2,10 @@ package org.molgenis.api.convert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.model.Sort.create;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.molgenis.api.model.Sort;
 
 class SortConverterTest {
   private SortConverter sortConverter;
@@ -17,7 +17,7 @@ class SortConverterTest {
 
   @Test
   void testConvert() {
-    assertEquals(sortConverter.convert("item"), Sort.create("item"));
+    assertEquals(create("item"), sortConverter.convert("item"));
   }
 
   @Test

@@ -113,7 +113,7 @@ public class EmxExportServiceIT {
             new XSSFExcelExtractor(actualWorkbook).getText().replaceAll("\t", "");
         String expectedWorkbookString =
             new XSSFExcelExtractor(expected).getText().replaceAll("\t", "");
-        assertEquals(actualWorkbookString, expectedWorkbookString);
+        assertEquals(expectedWorkbookString, actualWorkbookString);
       }
     }
 
@@ -123,9 +123,9 @@ public class EmxExportServiceIT {
             4,
             "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata.",
             "");
-    assertEquals(progress.getMessage(), expectedProgress.getMessage());
-    assertEquals(progress.getProgress(), expectedProgress.getProgress());
-    assertEquals(progress.getProgressMax(), expectedProgress.getProgressMax());
-    assertEquals(progress.getResultUrl(), expectedProgress.getResultUrl());
+    assertEquals(expectedProgress.getMessage(), progress.getMessage());
+    assertEquals(expectedProgress.getProgress(), progress.getProgress());
+    assertEquals(expectedProgress.getProgressMax(), progress.getProgressMax());
+    assertEquals(expectedProgress.getResultUrl(), progress.getResultUrl());
   }
 }

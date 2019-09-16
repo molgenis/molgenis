@@ -36,7 +36,7 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
 
   @Test
   void testGetDefaultMessage() {
-    assertEquals(messageSource.getDefaultMessage("CODE"), "#CODE#");
+    assertEquals("#CODE#", messageSource.getDefaultMessage("CODE"));
   }
 
   @Test
@@ -44,7 +44,7 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
     when(messageRepository.resolveCodeWithoutArguments("TEST_MESSAGE_DE", GERMAN))
         .thenReturn("Deutsche Nachricht");
     assertEquals(
-        messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_DE", GERMAN), "Deutsche Nachricht");
+        "Deutsche Nachricht", messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_DE", GERMAN));
   }
 
   @Test
@@ -55,7 +55,7 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
         .when(messageRepository)
         .resolveCodeWithoutArguments("TEST_MESSAGE_NL", new Locale("nl"));
     assertEquals(
-        messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_NL", GERMAN), "Nederlands bericht");
+        "Nederlands bericht", messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_NL", GERMAN));
   }
 
   @Test
@@ -64,7 +64,7 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
         .thenReturn("English message");
 
     assertEquals(
-        messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_EN", ENGLISH), "English message");
+        "English message", messageSource.resolveCodeWithoutArguments("TEST_MESSAGE_EN", ENGLISH));
   }
 
   @Test
@@ -78,8 +78,8 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
     when(messageRepository.resolveCodeWithoutArguments("TEST_MESSAGE_EN", ENGLISH))
         .thenReturn("label: ''{0, label}''");
     assertEquals(
-        messageSource.resolveCode("TEST_MESSAGE_EN", ENGLISH).format(new Object[] {labeled}),
-        "label: 'The Label'");
+        "label: 'The Label'",
+        messageSource.resolveCode("TEST_MESSAGE_EN", ENGLISH).format(new Object[] {labeled}));
   }
 
   @Test
@@ -96,8 +96,8 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
         .when(messageRepository)
         .resolveCodeWithoutArguments("TEST_MESSAGE_EN", new Locale("nl"));
     assertEquals(
-        messageSource.resolveCode("TEST_MESSAGE_EN", KOREAN).format(new Object[] {labeled}),
-        "Het label: 'The Label (ko)'");
+        "Het label: 'The Label (ko)'",
+        messageSource.resolveCode("TEST_MESSAGE_EN", KOREAN).format(new Object[] {labeled}));
   }
 
   @Test
@@ -105,6 +105,6 @@ class LocalizationMessageSourceTest extends AbstractMockitoTest {
     doThrow(new RuntimeException()).when(fallbackLocaleSupplier).get();
     doReturn("test").when(messageRepository).resolveCodeWithoutArguments("TEST", DEFAULT_LOCALE);
 
-    assertEquals(messageSource.resolveCodeWithoutArguments("TEST", null), "test");
+    assertEquals("test", messageSource.resolveCodeWithoutArguments("TEST", null));
   }
 }

@@ -89,10 +89,10 @@ class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(dataService, times(2))
         .delete(eq(RoleMembershipMetadata.ROLE_MEMBERSHIP), memberCaptor.capture());
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
-    assertEquals(values.get(1).collect(toList()), emptyList());
-    assertEquals(values.get(0).collect(toList()), asList(member1, member2));
+    assertEquals(emptyList(), values.get(1).collect(toList()));
+    assertEquals(asList(member1, member2), values.get(0).collect(toList()));
     verify(dataService).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
-    assertEquals(roleCaptor.getValue().collect(toList()), asList(role1, role2));
+    assertEquals(asList(role1, role2), roleCaptor.getValue().collect(toList()));
     verify(delegateRepository).deleteById("test");
     verify(aclService).deleteAcl(new GroupIdentity("name"), true);
   }
@@ -135,10 +135,10 @@ class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(dataService, times(2))
         .delete(eq(RoleMembershipMetadata.ROLE_MEMBERSHIP), memberCaptor.capture());
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
-    assertEquals(values.get(1).collect(toList()), emptyList());
-    assertEquals(values.get(0).collect(toList()), asList(member1, member2));
+    assertEquals(emptyList(), values.get(1).collect(toList()));
+    assertEquals(asList(member1, member2), values.get(0).collect(toList()));
     verify(dataService).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
-    assertEquals(roleCaptor.getValue().collect(toList()), asList(role1, role2));
+    assertEquals(asList(role1, role2), roleCaptor.getValue().collect(toList()));
     verify(delegateRepository).deleteById("test");
     verify(aclService).deleteAcl(new GroupIdentity("name"), true);
   }
@@ -206,21 +206,21 @@ class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(dataService, times(3))
         .delete(eq(RoleMembershipMetadata.ROLE_MEMBERSHIP), memberCaptor.capture());
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
-    assertEquals(values.get(0).collect(toList()), asList(member1, member2));
-    assertEquals(values.get(1).collect(toList()), emptyList());
-    assertEquals(values.get(2).collect(toList()), asList(member3));
+    assertEquals(asList(member1, member2), values.get(0).collect(toList()));
+    assertEquals(emptyList(), values.get(1).collect(toList()));
+    assertEquals(asList(member3), values.get(2).collect(toList()));
     verify(dataService, times(2)).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
-    assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
-    assertEquals(roleValues.get(1).collect(toList()), asList(role3));
+    assertEquals(asList(role1, role2), roleValues.get(0).collect(toList()));
+    assertEquals(asList(role3), roleValues.get(1).collect(toList()));
     verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
-    assertEquals(groupValues.get(0), "test");
-    assertEquals(groupValues.get(1), "test2");
+    assertEquals("test", groupValues.get(0));
+    assertEquals("test2", groupValues.get(1));
     verify(aclService, times(2)).deleteAcl(identityCaptor.capture(), eq(true));
     List<GroupIdentity> identityValues = identityCaptor.getAllValues();
-    assertEquals(identityValues.get(0), new GroupIdentity("name"));
-    assertEquals(identityValues.get(1), new GroupIdentity("name2"));
+    assertEquals(new GroupIdentity("name"), identityValues.get(0));
+    assertEquals(new GroupIdentity("name2"), identityValues.get(1));
   }
 
   @Test
@@ -277,21 +277,21 @@ class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(dataService, times(3))
         .delete(eq(RoleMembershipMetadata.ROLE_MEMBERSHIP), memberCaptor.capture());
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
-    assertEquals(values.get(0).collect(toList()), asList(member1, member2));
-    assertEquals(values.get(1).collect(toList()), emptyList());
-    assertEquals(values.get(2).collect(toList()), asList(member3));
+    assertEquals(asList(member1, member2), values.get(0).collect(toList()));
+    assertEquals(emptyList(), values.get(1).collect(toList()));
+    assertEquals(asList(member3), values.get(2).collect(toList()));
     verify(dataService, times(2)).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
-    assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
-    assertEquals(roleValues.get(1).collect(toList()), asList(role3));
+    assertEquals(asList(role1, role2), roleValues.get(0).collect(toList()));
+    assertEquals(asList(role3), roleValues.get(1).collect(toList()));
     verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
-    assertEquals(groupValues.get(0), "test");
-    assertEquals(groupValues.get(1), "test2");
+    assertEquals("test", groupValues.get(0));
+    assertEquals("test2", groupValues.get(1));
     verify(aclService, times(2)).deleteAcl(identityCaptor.capture(), eq(true));
     List<GroupIdentity> identityValues = identityCaptor.getAllValues();
-    assertEquals(identityValues.get(0), new GroupIdentity("name"));
-    assertEquals(identityValues.get(1), new GroupIdentity("name2"));
+    assertEquals(new GroupIdentity("name"), identityValues.get(0));
+    assertEquals(new GroupIdentity("name2"), identityValues.get(1));
   }
 
   @Test
@@ -346,21 +346,21 @@ class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     verify(dataService, times(3))
         .delete(eq(RoleMembershipMetadata.ROLE_MEMBERSHIP), memberCaptor.capture());
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
-    assertEquals(values.get(0).collect(toList()), asList(member1, member2));
-    assertEquals(values.get(1).collect(toList()), emptyList());
-    assertEquals(values.get(2).collect(toList()), asList(member3));
+    assertEquals(asList(member1, member2), values.get(0).collect(toList()));
+    assertEquals(emptyList(), values.get(1).collect(toList()));
+    assertEquals(asList(member3), values.get(2).collect(toList()));
     verify(dataService, times(2)).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
-    assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
-    assertEquals(roleValues.get(1).collect(toList()), asList(role3));
+    assertEquals(asList(role1, role2), roleValues.get(0).collect(toList()));
+    assertEquals(asList(role3), roleValues.get(1).collect(toList()));
     verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
-    assertEquals(groupValues.get(0), "test");
-    assertEquals(groupValues.get(1), "test2");
+    assertEquals("test", groupValues.get(0));
+    assertEquals("test2", groupValues.get(1));
     verify(aclService, times(2)).deleteAcl(identityCaptor.capture(), eq(true));
     List<GroupIdentity> identityValues = identityCaptor.getAllValues();
-    assertEquals(identityValues.get(0), new GroupIdentity("name"));
-    assertEquals(identityValues.get(1), new GroupIdentity("name2"));
+    assertEquals(new GroupIdentity("name"), identityValues.get(0));
+    assertEquals(new GroupIdentity("name2"), identityValues.get(1));
   }
 
   @Test

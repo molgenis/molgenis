@@ -13,6 +13,9 @@ import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.util.EntityTypeUtils.buildFullName;
+import static org.molgenis.data.util.EntityTypeUtils.createFetchForReindexing;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import com.google.common.collect.Lists;
 import java.util.Iterator;
@@ -51,7 +54,7 @@ class EntityTypeUtilsTest {
   @ParameterizedTest
   @MethodSource("isReferenceTypeAttrProvider")
   void isReferenceTypeAttr(Attribute attr, boolean isRefAttr) {
-    assertEquals(EntityTypeUtils.isReferenceType(attr), isRefAttr);
+    assertEquals(isRefAttr, isReferenceType(attr));
   }
 
   static Iterator<Object[]> isReferenceTypeAttrTypeProvider() {
@@ -72,7 +75,7 @@ class EntityTypeUtilsTest {
   @ParameterizedTest
   @MethodSource("isReferenceTypeAttrTypeProvider")
   void isReferenceTypeAttrType(AttributeType attrType, boolean isRefAttrType) {
-    assertEquals(EntityTypeUtils.isReferenceType(attrType), isRefAttrType);
+    assertEquals(isRefAttrType, isReferenceType(attrType));
   }
 
   static Iterator<Object[]> isMultipleReferenceTypeProvider() {
@@ -92,7 +95,7 @@ class EntityTypeUtilsTest {
   @ParameterizedTest
   @MethodSource("isMultipleReferenceTypeProvider")
   void isMultipleReferenceType(Attribute attr, boolean isMultipleRefAttr) {
-    assertEquals(EntityTypeUtils.isMultipleReferenceType(attr), isMultipleRefAttr);
+    assertEquals(isMultipleRefAttr, EntityTypeUtils.isMultipleReferenceType(attr));
   }
 
   @Test
@@ -100,20 +103,19 @@ class EntityTypeUtilsTest {
     Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
     Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
     assertEquals(
-        newArrayList(EntityTypeUtils.getAttributeNames(asList(attr0, attr1))),
-        asList("attr0", "attr1"));
+        asList("attr0", "attr1"),
+        newArrayList(EntityTypeUtils.getAttributeNames(asList(attr0, attr1))));
   }
 
   @Test
   void buildFullNamePackage() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("my_first_package").getMock();
-    assertEquals(
-        EntityTypeUtils.buildFullName(package_, "simpleName"), "my_first_package_simpleName");
+    assertEquals("my_first_package_simpleName", buildFullName(package_, "simpleName"));
   }
 
   @Test
   void buildFullNameNoPackage() {
-    assertEquals(EntityTypeUtils.buildFullName(null, "simpleName"), "simpleName");
+    assertEquals("simpleName", buildFullName(null, "simpleName"));
   }
 
   @Test
@@ -163,7 +165,7 @@ class EntityTypeUtilsTest {
     EntityType entityType = createMockEntityType();
     when(entityType.getIndexingDepth()).thenReturn(0);
     Fetch expectedFetch = new Fetch().field("MyEntityTypeAttr").field("MyEntityTypeRefAttr");
-    assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+    assertEquals(expectedFetch, createFetchForReindexing(entityType));
   }
 
   @Test
@@ -176,7 +178,7 @@ class EntityTypeUtilsTest {
             .field(
                 "MyEntityTypeRefAttr",
                 new Fetch().field("MyRefEntityTypeAttr").field("MyRefEntityTypeRefAttr"));
-    assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+    assertEquals(expectedFetch, createFetchForReindexing(entityType));
   }
 
   @Test
@@ -195,7 +197,7 @@ class EntityTypeUtilsTest {
                         new Fetch()
                             .field("MyRefRefEntityTypeAttr")
                             .field("MyRefRefEntityTypeRefAttr")));
-    assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+    assertEquals(expectedFetch, createFetchForReindexing(entityType));
   }
 
   @Test

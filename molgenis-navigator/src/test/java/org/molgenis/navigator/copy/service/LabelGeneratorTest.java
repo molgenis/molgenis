@@ -13,7 +13,7 @@ class LabelGeneratorTest {
 
     String result = LabelGenerator.generateUniqueLabel("labelX", existingLabels);
 
-    assertEquals(result, "labelX");
+    assertEquals("labelX", result);
   }
 
   @Test
@@ -22,7 +22,7 @@ class LabelGeneratorTest {
 
     String result = LabelGenerator.generateUniqueLabel("labelB", existingLabels);
 
-    assertEquals(result, "labelB (Copy)");
+    assertEquals("labelB (Copy)", result);
   }
 
   @Test
@@ -31,6 +31,6 @@ class LabelGeneratorTest {
 
     String result = LabelGenerator.generateUniqueLabel("labelB", existingLabels);
 
-    assertEquals(result, "labelB (Copy) (Copy)");
+    assertEquals("labelB (Copy) (Copy)", result);
   }
 }

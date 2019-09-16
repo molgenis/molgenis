@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.semanticsearch.semantic.Hit.create;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
@@ -151,7 +152,7 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
             ontologies, ImmutableSet.of("standing", "height", "meters"), 100))
         .thenReturn(ontologyTerms);
     Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-    assertEquals(result, Hit.create(standingHeight, 0.81250f));
+    assertEquals(create(standingHeight, 0.81250f), result);
   }
 
   @Test
@@ -163,7 +164,7 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
             ontologies, ImmutableSet.of("standing", "height", "m"), 100))
         .thenReturn(ontologyTerms);
     Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-    assertEquals(result, Hit.create(standingHeight, 0.92857f));
+    assertEquals(create(standingHeight, 0.92857f), result);
   }
 
   @Test
@@ -273,7 +274,7 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
     Hits<ExplainedAttribute> termsExpected1 =
         Hits.create(Hit.create(ExplainedAttribute.create(attributeHeight, emptySet(), false), 1f));
 
-    assertEquals(termsActual1.toString(), termsExpected1.toString());
+    assertEquals(termsExpected1.toString(), termsActual1.toString());
 
     // Case 2
     when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
@@ -285,7 +286,7 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
 
     Hits<ExplainedAttribute> termsExpected2 = Hits.create();
 
-    assertEquals(termsActual2, termsExpected2);
+    assertEquals(termsExpected2, termsActual2);
 
     Mockito.reset(ontologyService);
     attribute.setDescription("Standing height (Ångstrøm)");
@@ -294,7 +295,7 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
             ontologies, ImmutableSet.of("standing", "height", "ångstrøm"), 100))
         .thenReturn(ontologyTerms);
     Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-    assertEquals(result, Hit.create(standingHeight, 0.76471f));
+    assertEquals(create(standingHeight, 0.76471f), result);
   }
 
   @Test
@@ -331,9 +332,9 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(explainedQueryStrings);
 
     assertEquals(
+        explainedQueryStrings,
         semanticSearchService.convertAttributeToExplainedAttribute(
-            attribute, collectExpandedQueryMap, query),
-        explainedQueryStrings);
+            attribute, collectExpandedQueryMap, query));
   }
 
   @Configuration

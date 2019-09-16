@@ -51,8 +51,8 @@ class JsMagmaScriptExecutorTest extends AbstractMockitoTest {
     when(jsMagmaScriptEvaluator.eval(eq(jsScript), entityCaptor.capture())).thenReturn(object);
     Map<String, Object> parameters = Collections.singletonMap(attributeName, attributeValue);
 
-    assertEquals(jsMagmaScriptExecutor.executeScript(jsScript, parameters), object);
+    assertEquals(object, jsMagmaScriptExecutor.executeScript(jsScript, parameters));
     verify(attribute).setName(attributeName);
-    assertEquals(entityCaptor.getValue().get(attributeName), attributeValue);
+    assertEquals(attributeValue, entityCaptor.getValue().get(attributeName));
   }
 }

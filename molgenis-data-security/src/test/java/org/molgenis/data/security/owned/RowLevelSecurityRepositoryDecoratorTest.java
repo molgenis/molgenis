@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -99,7 +100,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), entityStreamCaptor.getValue().collect(toList()));
     verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME), true);
   }
 
@@ -147,7 +148,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -198,7 +199,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), entityStreamCaptor.getValue().collect(toList()));
     verify(mutableAclService).deleteAcl(new EntityIdentity(entity), true);
   }
 
@@ -210,7 +211,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), emptyList());
+    assertEquals(emptyList(), entityStreamCaptor.getValue().collect(toList()));
     verify(mutableAclService, times(0)).deleteAcl(new EntityIdentity(entity), true);
   }
 
@@ -265,7 +266,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     rowLevelSecurityRepositoryDecorator.deleteAll();
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -291,7 +292,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     rowLevelSecurityRepositoryDecorator.deleteAll();
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), emptyList());
+    assertEquals(emptyList(), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -308,7 +309,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entityId));
+    assertEquals(singletonList(entityId), entityStreamCaptor.getValue().collect(toList()));
     verify(mutableAclService).deleteAcl(new EntityIdentity(entityTypeId, entityId), true);
   }
 
@@ -323,7 +324,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), emptyList());
+    assertEquals(emptyList(), entityStreamCaptor.getValue().collect(toList()));
     verify(mutableAclService, times(0)).deleteAcl(new EntityIdentity(entityTypeId, entityId), true);
   }
 
@@ -337,7 +338,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .thenReturn(true);
     Entity entity = mock(Entity.class);
     when(delegateRepository.findOneById(entityId)).thenReturn(entity);
-    assertEquals(rowLevelSecurityRepositoryDecorator.findOneById(entityId), entity);
+    assertEquals(entity, rowLevelSecurityRepositoryDecorator.findOneById(entityId));
   }
 
   @Test
@@ -360,7 +361,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     Entity entity = mock(Entity.class);
     Fetch fetch = mock(Fetch.class);
     when(delegateRepository.findOneById(entityId, fetch)).thenReturn(entity);
-    assertEquals(rowLevelSecurityRepositoryDecorator.findOneById(entityId, fetch), entity);
+    assertEquals(entity, rowLevelSecurityRepositoryDecorator.findOneById(entityId, fetch));
   }
 
   @Test
@@ -381,7 +382,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
-    assertEquals(entity, rowLevelSecurityRepositoryDecorator.findOne(query));
+    assertEquals(rowLevelSecurityRepositoryDecorator.findOne(query), entity);
   }
 
   @Test
@@ -403,8 +404,8 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
     assertEquals(
-        rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()),
-        singletonList(entity));
+        singletonList(entity),
+        rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()));
   }
 
   @Test
@@ -414,7 +415,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
-    assertEquals(rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()), emptyList());
+    assertEquals(emptyList(), rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -425,8 +426,8 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
     assertEquals(
-        rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()),
-        singletonList(entity));
+        singletonList(entity),
+        rowLevelSecurityRepositoryDecorator.findAll(of(entityId)).collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -436,8 +437,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
     assertEquals(
-        rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()),
-        emptyList());
+        emptyList(), rowLevelSecurityRepositoryDecorator.findAll(of(entityId)).collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -450,8 +450,8 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
     assertEquals(
-        rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId), fetch).collect(toList()),
-        singletonList(entity));
+        singletonList(entity),
+        rowLevelSecurityRepositoryDecorator.findAll(of(entityId), fetch).collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -463,8 +463,8 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     when(delegateRepository.findAll(any(Stream.class), eq(fetch)))
         .thenAnswer(invocation -> Stream.of(entity));
     assertEquals(
-        rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId), fetch).collect(toList()),
-        emptyList());
+        emptyList(),
+        rowLevelSecurityRepositoryDecorator.findAll(of(entityId), fetch).collect(toList()));
   }
 
   @Test
@@ -474,7 +474,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.READ))
         .thenReturn(true);
-    assertEquals(rowLevelSecurityRepositoryDecorator.count(), 1L);
+    assertEquals(1L, rowLevelSecurityRepositoryDecorator.count());
   }
 
   @Test
@@ -482,7 +482,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
-    assertEquals(rowLevelSecurityRepositoryDecorator.count(), 0L);
+    assertEquals(0L, rowLevelSecurityRepositoryDecorator.count());
   }
 
   @Test
@@ -494,7 +494,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .thenAnswer(invocation -> Stream.of(entity));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.READ))
         .thenReturn(true);
-    assertEquals(rowLevelSecurityRepositoryDecorator.count(query), 1L);
+    assertEquals(1L, rowLevelSecurityRepositoryDecorator.count(query));
   }
 
   @Test
@@ -504,7 +504,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     Entity entity = getEntityMock();
     when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE)))
         .thenAnswer(invocation -> Stream.of(entity));
-    assertEquals(rowLevelSecurityRepositoryDecorator.count(query), 0L);
+    assertEquals(0L, rowLevelSecurityRepositoryDecorator.count(query));
   }
 
   @Test
@@ -513,14 +513,14 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     when(delegateRepository.iterator()).thenReturn(singletonList(entity).iterator());
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
     assertEquals(
-        newArrayList(rowLevelSecurityRepositoryDecorator.iterator()), singletonList(entity));
+        singletonList(entity), newArrayList(rowLevelSecurityRepositoryDecorator.iterator()));
   }
 
   @Test
   void testIteratorPermissionDenied() {
     Entity entity = getEntityMock();
     when(delegateRepository.iterator()).thenReturn(singletonList(entity).iterator());
-    assertEquals(newArrayList(rowLevelSecurityRepositoryDecorator.iterator()), emptyList());
+    assertEquals(emptyList(), newArrayList(rowLevelSecurityRepositoryDecorator.iterator()));
   }
 
   @SuppressWarnings("unchecked")
@@ -538,7 +538,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .forEachBatched(eq(fetch), any(), eq(1000));
     when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
     rowLevelSecurityRepositoryDecorator.forEachBatched(fetch, actualEntities::addAll, 1000);
-    assertEquals(actualEntities, singletonList(entity));
+    assertEquals(singletonList(entity), actualEntities);
   }
 
   @SuppressWarnings("unchecked")
@@ -555,7 +555,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
         .when(delegateRepository)
         .forEachBatched(eq(fetch), any(), eq(1000));
     rowLevelSecurityRepositoryDecorator.forEachBatched(fetch, actualEntities::addAll, 1000);
-    assertEquals(actualEntities, emptyList());
+    assertEquals(emptyList(), actualEntities);
   }
 
   @WithMockUser(username = USERNAME, roles = "SU")
@@ -564,7 +564,7 @@ class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringConte
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResponse = mock(AggregateResult.class);
     when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResponse);
-    assertEquals(rowLevelSecurityRepositoryDecorator.aggregate(aggregateQuery), aggregateResponse);
+    assertEquals(aggregateResponse, rowLevelSecurityRepositoryDecorator.aggregate(aggregateQuery));
   }
 
   @WithMockUser(username = USERNAME)

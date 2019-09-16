@@ -24,8 +24,8 @@ class ExceptionResponseGeneratorRegistryImplTest {
     when(responseGenerator.getType()).thenReturn(PROBLEM);
     exceptionResponseGeneratorRegistryImpl.registerExceptionResponseGenerator(responseGenerator);
     assertEquals(
-        exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM),
-        responseGenerator);
+        responseGenerator,
+        exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM));
   }
 
   @Test

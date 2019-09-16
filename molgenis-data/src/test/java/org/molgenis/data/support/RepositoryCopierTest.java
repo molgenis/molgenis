@@ -64,15 +64,15 @@ class RepositoryCopierTest extends AbstractMockitoTest {
     when(metaDataService.createRepository(any(EntityType.class))).thenReturn(copiedRepository);
 
     assertEquals(
-        repositoryCopier.copyRepository(repository, entityTypeId, package_, entityTypeLabel),
-        copiedRepository);
+        copiedRepository,
+        repositoryCopier.copyRepository(repository, entityTypeId, package_, entityTypeLabel));
 
     ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
     verify(metaDataService).createRepository(entityTypeCaptor.capture());
     EntityType copiedEntityType = entityTypeCaptor.getValue();
-    assertEquals(copiedEntityType.getId(), entityTypeId);
-    assertEquals(copiedEntityType.getLabel(), entityTypeLabel);
-    assertEquals(copiedEntityType.getPackage(), package_);
+    assertEquals(entityTypeId, copiedEntityType.getId());
+    assertEquals(entityTypeLabel, copiedEntityType.getLabel());
+    assertEquals(package_, copiedEntityType.getPackage());
 
     verify(copiedRepository).add(entitiesStream);
   }

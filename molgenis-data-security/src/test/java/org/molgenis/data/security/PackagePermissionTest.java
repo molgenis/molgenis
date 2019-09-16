@@ -1,8 +1,8 @@
 package org.molgenis.data.security;
 
+import static java.util.Locale.ENGLISH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.molgenis.util.i18n.AllPropertiesMessageSource;
@@ -24,14 +24,13 @@ class PackagePermissionTest {
 
   @Test
   void testNameEnglish() {
-    assertEquals(
-        messageSource.getMessage(addPackagePermission.getName(), Locale.ENGLISH), "Add package");
+    assertEquals("Add package", messageSource.getMessage(addPackagePermission.getName(), ENGLISH));
   }
 
   @Test
   void testDescription() {
     assertEquals(
-        messageSource.getMessage(addPackagePermission.getDescription(), Locale.ENGLISH),
-        "Permission to add a child package to this package");
+        "Permission to add a child package to this package",
+        messageSource.getMessage(addPackagePermission.getDescription(), ENGLISH));
   }
 }

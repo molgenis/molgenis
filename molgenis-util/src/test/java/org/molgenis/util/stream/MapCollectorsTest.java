@@ -18,7 +18,7 @@ class MapCollectorsTest {
     expectedLinkedMap.put("ccc", 3);
     Map<String, Integer> actualLinkedMap =
         Stream.of("a", "bb", "ccc").collect(MapCollectors.toLinkedMap(identity(), String::length));
-    assertEquals(expectedLinkedMap, actualLinkedMap);
+    assertEquals(actualLinkedMap, expectedLinkedMap);
   }
 
   @Test
@@ -31,6 +31,6 @@ class MapCollectorsTest {
                 Stream.of("a1", "a2")
                     .collect(
                         MapCollectors.toLinkedMap(str -> str.charAt(0), str -> str.charAt(1))));
-    assertEquals("Duplicate key detected with values '1' and '2'", exception.getMessage());
+    assertEquals(exception.getMessage(), "Duplicate key detected with values '1' and '2'");
   }
 }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class TrimProcessorTest {
   @Test
   void process() {
-    assertEquals(new TrimProcessor().process(" val "), "val");
+    assertEquals("val", new TrimProcessor().process(" val "));
   }
 
   @Test

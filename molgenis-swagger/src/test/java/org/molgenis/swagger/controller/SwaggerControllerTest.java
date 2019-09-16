@@ -50,7 +50,7 @@ class SwaggerControllerTest extends AbstractMockitoSpringContextTests {
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
     when(tokenService.generateAndStoreToken("user", "For Swagger UI")).thenReturn("ABCDEFG");
-    assertEquals("view-swagger-ui", swaggerController.init(model));
+    assertEquals(swaggerController.init(model), "view-swagger-ui");
     verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
     verify(model).addAttribute("baseUrl", "http://localhost");
     verify(model).addAttribute("token", "ABCDEFG");
@@ -62,7 +62,7 @@ class SwaggerControllerTest extends AbstractMockitoSpringContextTests {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-    assertEquals("view-swagger-ui", swaggerController.init(model));
+    assertEquals(swaggerController.init(model), "view-swagger-ui");
     verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
     verify(model).addAttribute("baseUrl", "http://localhost");
     verifyNoMoreInteractions(model);
@@ -77,7 +77,7 @@ class SwaggerControllerTest extends AbstractMockitoSpringContextTests {
     when(type2.getId()).thenReturn("abc_EntityType1ëæ");
     when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
 
-    assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals(swaggerController.swagger(model, response), "view-swagger");
 
     verify(model).addAttribute("scheme", "http");
     verify(model).addAttribute("host", "localhost");
@@ -100,7 +100,7 @@ class SwaggerControllerTest extends AbstractMockitoSpringContextTests {
 
     when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
 
-    assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals(swaggerController.swagger(model, response), "view-swagger");
 
     verify(model).addAttribute("scheme", "http");
     verify(model).addAttribute("host", "localhost:8080");

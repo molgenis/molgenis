@@ -37,7 +37,7 @@ class FetchMapperTest extends AbstractMockitoTest {
     Selection expand = new Selection(Collections.singletonMap("xref", Selection.FULL_SELECTION));
     Selection filter = Selection.FULL_SELECTION;
     Fetch expected = new Fetch().field("xref").field("test");
-    assertEquals(fetchMapper.toFetch(entityType, filter, expand), expected);
+    assertEquals(expected, fetchMapper.toFetch(entityType, filter, expand));
   }
 
   @Test
@@ -49,6 +49,6 @@ class FetchMapperTest extends AbstractMockitoTest {
     Selection expand = Selection.EMPTY_SELECTION;
     Selection filter = Selection.FULL_SELECTION;
     Fetch expected = new Fetch().field("test");
-    assertEquals(fetchMapper.toFetch(entityType, filter, expand), expected);
+    assertEquals(expected, fetchMapper.toFetch(entityType, filter, expand));
   }
 }

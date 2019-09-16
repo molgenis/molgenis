@@ -1,7 +1,11 @@
 package org.molgenis.data.index;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.EnumSet.allOf;
+import static java.util.EnumSet.of;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,12 +29,10 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -149,7 +151,7 @@ class IndexedRepositoryDecoratorTest {
         .thenThrow(new UnknownIndexException("msg"))
         .thenReturn(aggregateResult);
 
-    assertEquals(indexedRepositoryDecorator.aggregate(aggregateQuery), aggregateResult);
+    assertEquals(aggregateResult, indexedRepositoryDecorator.aggregate(aggregateQuery));
     verify(delegateRepository, never()).count(unsupportedQuery);
   }
 
@@ -201,7 +203,7 @@ class IndexedRepositoryDecoratorTest {
         .thenThrow(new UnknownIndexException("msg"))
         .thenReturn(5L);
 
-    assertEquals(indexedRepositoryDecorator.count(unsupportedQuery), 5L);
+    assertEquals(5L, indexedRepositoryDecorator.count(unsupportedQuery));
     verify(delegateRepository, never()).count(unsupportedQuery);
   }
 
@@ -305,19 +307,19 @@ class IndexedRepositoryDecoratorTest {
 
     Entity entity = mock(Entity.class);
     when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-    assertEquals(indexedRepositoryDecorator.findOneById(id, fetch), entity);
+    assertEquals(entity, indexedRepositoryDecorator.findOneById(id, fetch));
     verify(delegateRepository, times(1)).findOneById(id, fetch);
     verifyZeroInteractions(searchService);
   }
 
   @Test
   void getEntityType() {
-    assertEquals(indexedRepositoryDecorator.getEntityType(), repositoryEntityType);
+    assertEquals(repositoryEntityType, indexedRepositoryDecorator.getEntityType());
   }
 
   @Test
   void getName() {
-    assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getId());
+    assertEquals(repositoryEntityType.getId(), indexedRepositoryDecorator.getName());
   }
 
   @Test
@@ -346,7 +348,7 @@ class IndexedRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
     verifyZeroInteractions(searchService);
   }
 
@@ -360,7 +362,7 @@ class IndexedRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds, fetch);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
     verifyZeroInteractions(searchService);
   }
 
@@ -423,18 +425,18 @@ class IndexedRepositoryDecoratorTest {
   @Test
   void getCapabilities() {
     assertEquals(
-        indexedRepositoryDecorator.getCapabilities(),
-        EnumSet.of(AGGREGATEABLE, QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
+        of(AGGREGATEABLE, QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT),
+        indexedRepositoryDecorator.getCapabilities());
   }
 
   @Test
   void getQueryOperators() {
-    assertEquals(indexedRepositoryDecorator.getQueryOperators(), EnumSet.allOf(Operator.class));
+    assertEquals(allOf(Operator.class), indexedRepositoryDecorator.getQueryOperators());
   }
 
   @Test
   void query() {
-    assertEquals(indexedRepositoryDecorator.query().getRepository(), indexedRepositoryDecorator);
+    assertEquals(indexedRepositoryDecorator, indexedRepositoryDecorator.query().getRepository());
     verifyZeroInteractions(searchService);
   }
 

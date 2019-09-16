@@ -115,7 +115,7 @@ class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Plugin>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), singletonList(plugin));
+    assertEquals(singletonList(plugin), pluginCaptor.getValue().collect(toList()));
     verify(appSettings).setMenu("{\"type\":\"menu\",\"id\":\"main\",\"items\":[]}");
   }
 
@@ -132,7 +132,7 @@ class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Plugin>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), singletonList(plugin));
+    assertEquals(singletonList(plugin), pluginCaptor.getValue().collect(toList()));
     verify(appSettings).setMenu("{\"type\":\"menu\",\"id\":\"main\",\"items\":[]}");
   }
 
@@ -148,7 +148,7 @@ class PluginRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> pluginCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(pluginCaptor.capture());
-    assertEquals(pluginCaptor.getValue().collect(toList()), singletonList(pluginId));
+    assertEquals(singletonList(pluginId), pluginCaptor.getValue().collect(toList()));
     verify(appSettings).setMenu("{\"type\":\"menu\",\"id\":\"main\",\"items\":[]}");
   }
 }

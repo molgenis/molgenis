@@ -26,7 +26,7 @@ class SidPermissionExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new SidPermissionException("user1,user2,roleA,roleB");
-    assertEquals(ex.getMessage(), "sids:user1,user2,roleA,roleB");
+    assertEquals("sids:user1,user2,roleA,roleB", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

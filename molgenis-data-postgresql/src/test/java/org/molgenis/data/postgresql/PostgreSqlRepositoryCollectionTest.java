@@ -84,7 +84,7 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate).execute(captor.capture());
     assertEquals(
-        captor.getValue(), "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET NOT NULL");
+        "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET NOT NULL", captor.getValue());
   }
 
   @Test
@@ -102,7 +102,7 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate).execute(captor.capture());
     assertEquals(
-        captor.getValue(), "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" DROP NOT NULL");
+        "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" DROP NOT NULL", captor.getValue());
   }
 
   @Test
@@ -137,8 +137,8 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate).execute(captor.capture());
     assertEquals(
-        captor.getValue(),
-        "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_key\"");
+        "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_key\"",
+        captor.getValue());
   }
 
   @Test
@@ -173,8 +173,8 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate).execute(captor.capture());
     assertEquals(
-        captor.getValue(),
-        "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_key\" UNIQUE (\"attr\")");
+        "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_key\" UNIQUE (\"attr\")",
+        captor.getValue());
   }
 
   @Test
@@ -191,8 +191,8 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate).execute(captor.capture());
     assertEquals(
-        captor.getValue(),
-        "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE integer USING \"attr\"::integer");
+        "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE integer USING \"attr\"::integer",
+        captor.getValue());
   }
 
   @Test
@@ -210,10 +210,10 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate, times(2)).execute(captor.capture());
     assertEquals(
-        captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_fkey\"",
-            "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)"));
+            "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)"),
+        captor.getAllValues());
   }
 
   @Test
@@ -269,10 +269,10 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate, times(2)).execute(captor.capture());
     assertEquals(
-        captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#00c877f0\"(\"refIdAttr\") DEFERRABLE INITIALLY DEFERRED"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#00c877f0\"(\"refIdAttr\") DEFERRABLE INITIALLY DEFERRED"),
+        captor.getAllValues());
   }
 
   @Test
@@ -477,10 +477,10 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate, times(2)).execute(captor.capture());
     assertEquals(
-        captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_fkey\"",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"),
+        captor.getAllValues());
   }
 
   @Test
@@ -519,11 +519,11 @@ class PostgreSqlRepositoryCollectionTest {
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate, times(3)).execute(captor.capture());
     assertEquals(
-        captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_fkey\"",
             "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"),
+        captor.getAllValues());
   }
 
   @Test

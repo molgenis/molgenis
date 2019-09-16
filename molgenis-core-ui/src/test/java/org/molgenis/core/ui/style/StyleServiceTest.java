@@ -94,7 +94,7 @@ class StyleServiceTest extends AbstractMockitoTest {
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
     verify(appSettings).setBootstrapTheme(argument.capture());
-    assertEquals("bootstrap-" + newTheme + ".min.css", argument.getValue());
+    assertEquals(argument.getValue(), "bootstrap-" + newTheme + ".min.css");
   }
 
   @Test
@@ -107,7 +107,7 @@ class StyleServiceTest extends AbstractMockitoTest {
     when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class))
         .thenReturn(styleSheets.stream());
 
-    assertEquals(styleServiceImpl.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
+    assertEquals(THEME_MOLGENIS_NAME, styleServiceImpl.getSelectedStyle().getName());
   }
 
   @SuppressWarnings("deprecation")
@@ -240,7 +240,7 @@ class StyleServiceTest extends AbstractMockitoTest {
     when(fileStore.getFile(fileId)).thenReturn(file);
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 
   @SuppressWarnings("deprecation")
@@ -263,7 +263,7 @@ class StyleServiceTest extends AbstractMockitoTest {
 
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 
   @SuppressWarnings("deprecation")
@@ -291,6 +291,6 @@ class StyleServiceTest extends AbstractMockitoTest {
 
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 }

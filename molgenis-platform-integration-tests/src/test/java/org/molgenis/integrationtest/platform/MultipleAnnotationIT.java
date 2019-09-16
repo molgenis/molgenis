@@ -39,11 +39,11 @@ public class MultipleAnnotationIT extends AbstractMockitoSpringContextTests {
     // Tests that RunAsSystem aspect takes place AFTER spring auth checks and BEFORE spring
     // transaction management
     // and that its order is independent of the annotation order.
-    assertEquals(getCurrentUsername(), "user");
+    assertEquals("user", getCurrentUsername());
     bean.runAsSystemMethod();
-    assertEquals(getCurrentUsername(), "user");
+    assertEquals("user", getCurrentUsername());
     bean.runAsSystemMethod2();
-    assertEquals(getCurrentUsername(), "user");
+    assertEquals("user", getCurrentUsername());
   }
 
   public static class BeanClass {

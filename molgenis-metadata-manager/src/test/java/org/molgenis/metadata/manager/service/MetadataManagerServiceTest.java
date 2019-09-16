@@ -65,7 +65,7 @@ class MetadataManagerServiceTest extends AbstractMockitoSpringContextTests {
     List<EditorPackageIdentifier> actual = metadataManagerService.getEditorPackages();
     List<EditorPackageIdentifier> expected = newArrayList(editorPackage);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -88,7 +88,7 @@ class MetadataManagerServiceTest extends AbstractMockitoSpringContextTests {
     EditorEntityTypeResponse expected =
         EditorEntityTypeResponse.create(editorEntityType, languageCodes);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -109,7 +109,7 @@ class MetadataManagerServiceTest extends AbstractMockitoSpringContextTests {
     EditorEntityTypeResponse expected =
         EditorEntityTypeResponse.create(editorEntityType, languageCodes);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -132,7 +132,7 @@ class MetadataManagerServiceTest extends AbstractMockitoSpringContextTests {
     EditorAttributeResponse expected =
         EditorAttributeResponse.create(editorAttribute, languageCodes);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   private EditorPackageIdentifier getEditorPackageIdentifier() {

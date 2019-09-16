@@ -2,6 +2,8 @@ package org.molgenis.security.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.security.core.SidUtils.createRoleAuthority;
+import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,19 +38,19 @@ class SidUtilsTest {
     String principal = "username";
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
-    assertEquals(SidUtils.createSecurityContextSid(), new PrincipalSid(principal));
+    assertEquals(new PrincipalSid(principal), createSecurityContextSid());
   }
 
   @Test
   void createSecurityContextSidSystem() {
     SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
-    assertEquals(SidUtils.createSecurityContextSid(), new GrantedAuthoritySid("ROLE_SYSTEM"));
+    assertEquals(new GrantedAuthoritySid("ROLE_SYSTEM"), createSecurityContextSid());
   }
 
   @Test
   void createSecurityContextSidAnonymous() {
     SecurityContextHolder.getContext().setAuthentication(null);
-    assertEquals(SidUtils.createSecurityContextSid(), new GrantedAuthoritySid("ROLE_ANONYMOUS"));
+    assertEquals(new GrantedAuthoritySid("ROLE_ANONYMOUS"), createSecurityContextSid());
   }
 
   @Test
@@ -61,23 +63,23 @@ class SidUtilsTest {
   @Test
   void testCreateSidUser() {
     Sid sid = SidUtils.createUserSid("username");
-    assertEquals(sid, new PrincipalSid("username"));
+    assertEquals(new PrincipalSid("username"), sid);
   }
 
   @Test
   void testCreateSidUsernameAnonymous() {
     Sid sid = SidUtils.createUserSid("anonymous");
-    assertEquals(sid, new GrantedAuthoritySid("ROLE_ANONYMOUS"));
+    assertEquals(new GrantedAuthoritySid("ROLE_ANONYMOUS"), sid);
   }
 
   @Test
   void testCreateSidRole() {
     Sid sid = SidUtils.createRoleSid("NAME");
-    assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")));
+    assertEquals(new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")), sid);
   }
 
   @Test
   void testCreateRoleAuthority() {
-    assertEquals("ROLE_NAME", SidUtils.createRoleAuthority("NAME"));
+    assertEquals(createRoleAuthority("NAME"), "ROLE_NAME");
   }
 }

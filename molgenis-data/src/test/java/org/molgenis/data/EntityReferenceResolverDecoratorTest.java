@@ -1,6 +1,9 @@
 package org.molgenis.data;
 
+import static java.lang.Integer.valueOf;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
@@ -15,7 +18,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +63,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
   void addStream() {
     Stream<Entity> entities = Stream.empty();
     when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(entityReferenceResolverDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), entityReferenceResolverDecorator.add(entities));
   }
 
   @Test
@@ -148,7 +150,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
     when(delegateRepository.findAll(query)).thenReturn(entities);
     when(entityManager.resolveReferences(entityType, entities, fetch)).thenReturn(entities);
     Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
-    assertEquals(expectedEntities.collect(Collectors.toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -161,7 +163,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
     when(delegateRepository.findAll(query)).thenReturn(entities);
     when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);
     Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
-    assertEquals(expectedEntities.collect(Collectors.toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -179,9 +181,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
     when(entityManager.resolveReferences(entityType, entities, null))
         .thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
     Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds);
-    assertEquals(
-        expectedEntities.collect(Collectors.toList()),
-        Arrays.asList(entity0WithRefs, entity1WithRefs));
+    assertEquals(asList(entity0WithRefs, entity1WithRefs), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -200,9 +200,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
     when(entityManager.resolveReferences(entityType, entities, fetch))
         .thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
     Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds, fetch);
-    assertEquals(
-        expectedEntities.collect(Collectors.toList()),
-        Arrays.asList(entity0WithRefs, entity1WithRefs));
+    assertEquals(asList(entity0WithRefs, entity1WithRefs), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -227,7 +225,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
 
     Stream<Entity> entitiesToDecorate = streamArgumentCaptor.getValue();
 
-    assertEquals(entitiesToDecorate.collect(Collectors.toList()), entities);
+    assertEquals(entities, entitiesToDecorate.collect(toList()));
     verify(consumer).accept(entitiesWithRefs);
   }
 
@@ -319,7 +317,7 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
   @Test
   void query() {
     assertEquals(
-        entityReferenceResolverDecorator.query().getRepository(), entityReferenceResolverDecorator);
+        entityReferenceResolverDecorator, entityReferenceResolverDecorator.query().getRepository());
     verifyZeroInteractions(entityManager);
   }
 
@@ -339,6 +337,6 @@ class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     entityReferenceResolverDecorator.update(entities);
-    assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), captor.getValue().collect(toList()));
   }
 }

@@ -132,7 +132,7 @@ class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest 
     String expectedAlgorithm =
         "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
-    assertEquals(generatedAlgorithm, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, generatedAlgorithm);
   }
 
   @Test
@@ -171,7 +171,7 @@ class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest 
     String expectedAlgorithm =
         "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
 
-    assertEquals(generatedAlgorithm, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, generatedAlgorithm);
   }
 
   private EntityType createCategoricalRefEntityType(String entityTypeId) {

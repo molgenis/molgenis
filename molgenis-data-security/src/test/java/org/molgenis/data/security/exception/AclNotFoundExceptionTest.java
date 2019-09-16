@@ -26,7 +26,7 @@ class AclNotFoundExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new AclNotFoundException("type");
-    assertEquals(ex.getMessage(), "typeId:type");
+    assertEquals("typeId:type", ex.getMessage());
   }
 
   public static Object[][] languageMessageProvider() {

@@ -247,7 +247,7 @@ class RestControllerV1APIIT extends AbstractApiTests {
             .statusCode(200)
             .extract()
             .asString();
-    assertEquals(response, contents);
+    assertEquals(contents, response);
   }
 
   @Test

@@ -1,5 +1,6 @@
 package org.molgenis.data.security.permission;
 
+import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -185,7 +186,6 @@ class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     when(roleMembership.isCurrent()).thenReturn(true);
 
     assertEquals(
-        roleMembershipService.getMemberships(ImmutableList.of(editor, viewer)),
-        singletonList(roleMembership));
+        singletonList(roleMembership), roleMembershipService.getMemberships(of(editor, viewer)));
   }
 }

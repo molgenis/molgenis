@@ -12,6 +12,7 @@ import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.DISCUSS;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;
@@ -123,8 +124,8 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     AlgorithmEvaluation eval = result.iterator().next();
 
     assertEquals(
-        eval.getErrorMessage(),
-        "Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+        "Applying an algorithm on a null source value caused an exception. Is the target attribute required?",
+        eval.getErrorMessage());
   }
 
   @Test
@@ -138,7 +139,7 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Iterable<AlgorithmEvaluation> result =
         algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity), 3);
     AlgorithmEvaluation eval = result.iterator().next();
-    assertEquals(eval.getErrorMessage(), "algorithm is not defined");
+    assertEquals("algorithm is not defined", eval.getErrorMessage());
   }
 
   @Test
@@ -175,7 +176,7 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     verify(targetEntityMapping).addAttributeMapping(attributeMappingCaptor.capture());
     AttributeMapping attributeMappingCopy = attributeMappingCaptor.getValue();
     assertNull(attributeMappingCopy.getIdentifier());
-    assertEquals(attributeMappingCopy.getAlgorithmState(), AlgorithmState.DISCUSS);
+    assertEquals(DISCUSS, attributeMappingCopy.getAlgorithmState());
   }
 
   private void testApplyConvertException(String algorithmResult, AttributeType attributeType) {

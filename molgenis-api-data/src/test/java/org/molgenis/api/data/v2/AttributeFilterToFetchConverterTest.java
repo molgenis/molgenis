@@ -3,6 +3,12 @@ package org.molgenis.api.data.v2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.data.v2.AttributeFilterToFetchConverter.convert;
+import static org.molgenis.api.data.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
+import static org.molgenis.api.data.v2.AttributeFilterToFetchConverter.createDefaultEntityFetch;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILENAME;
+import static org.molgenis.data.file.model.FileMetaMetadata.ID;
+import static org.molgenis.data.file.model.FileMetaMetadata.URL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.XREF;
@@ -165,21 +171,21 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
             .field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
             .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-    assertEquals(AttributeFilterToFetchConverter.convert(null, entityType, "en"), fetch);
+    assertEquals(fetch, convert(null, entityType, "en"));
   }
 
   @Test
   void convertAttrFilterIncludeAll() {
     AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
         new Fetch()
             .field("attrId")
             .field("attrLabel")
             .field("attrCompoundPartFile", new Fetch().field("id").field("filename").field("url"))
             .field("attrCompoundPartCompoundPart")
             .field("attr2CompoundPartCompoundPart")
-            .field("xrefAttr", new Fetch().field("refAttrId").field("refAttrLabel")));
+            .field("xrefAttr", new Fetch().field("refAttrId").field("refAttrLabel")),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
@@ -187,32 +193,25 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
     AttributeFilter attrFilter =
         new AttributeFilter().setIncludeIdAttr(true).setIncludeLabelAttr(true);
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
-        new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME));
+        new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
   void convertAttrFilterIncludeAttr() {
     AttributeFilter attrFilter = new AttributeFilter().add(LABEL_ATTR_NAME);
-    assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
-        new Fetch().field(LABEL_ATTR_NAME));
+    assertEquals(new Fetch().field(LABEL_ATTR_NAME), convert(attrFilter, entityType, "en"));
   }
 
   @Test
   void convertAttrFilterCompoundAttr() {
     AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
         new Fetch()
-            .field(
-                COMPOUND_PART_FILE_ATTR_NAME,
-                new Fetch()
-                    .field(FileMetaMetadata.ID)
-                    .field(FileMetaMetadata.FILENAME)
-                    .field(FileMetaMetadata.URL))
+            .field(COMPOUND_PART_FILE_ATTR_NAME, new Fetch().field(ID).field(FILENAME).field(URL))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
-            .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
+            .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
@@ -221,10 +220,10 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
         new AttributeFilter()
             .add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_COMPOUND_ATTR_NAME));
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
         new Fetch()
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
-            .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
+            .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
@@ -238,8 +237,8 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
                         COMPOUND_PART_COMPOUND_ATTR_NAME,
                         new AttributeFilter().add(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)));
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
-        new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME));
+        new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
@@ -247,8 +246,8 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
     AttributeFilter attrFilter =
         new AttributeFilter().add(XREF_ATTR_NAME, new AttributeFilter().add(REF_ATTR_NAME));
     assertEquals(
-        AttributeFilterToFetchConverter.convert(attrFilter, entityType, "en"),
-        new Fetch().field(XREF_ATTR_NAME, new Fetch().field(REF_ATTR_NAME)));
+        new Fetch().field(XREF_ATTR_NAME, new Fetch().field(REF_ATTR_NAME)),
+        convert(attrFilter, entityType, "en"));
   }
 
   @Test
@@ -274,7 +273,7 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
             .field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
             .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-    assertEquals(AttributeFilterToFetchConverter.createDefaultEntityFetch(entityType, "en"), fetch);
+    assertEquals(fetch, createDefaultEntityFetch(entityType, "en"));
   }
 
   @Test
@@ -285,8 +284,7 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
   @Test
   void createDefaultEntityFetchRefAttr() {
     Fetch fetch = new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME);
-    assertEquals(
-        AttributeFilterToFetchConverter.createDefaultAttributeFetch(xrefAttr, "en"), fetch);
+    assertEquals(fetch, createDefaultAttributeFetch(xrefAttr, "en"));
   }
 
   @Test
@@ -300,7 +298,7 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
     AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).add("selfRef");
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
-        fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
+        new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")), fetch);
   }
 
   /** attrs=id,selfRef should fetch id, and selfRef(id, label) */
@@ -309,7 +307,7 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
     AttributeFilter filter = new AttributeFilter().add("id").add("selfRef");
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
-        fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
+        new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")), fetch);
   }
 
   /** A Fetch for attrs=~id,selfRef(*) should fetch id and selfRef(id, label, selfRef(id, label)) */
@@ -321,7 +319,6 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
             .add("selfRef", new AttributeFilter().setIncludeAllAttrs(true));
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
-        fetch,
         new Fetch()
             .field("id")
             .field(
@@ -329,7 +326,8 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
                 new Fetch()
                     .field("id")
                     .field("label")
-                    .field("selfRef", new Fetch().field("id").field("label"))));
+                    .field("selfRef", new Fetch().field("id").field("label"))),
+        fetch);
   }
 
   /**
@@ -349,7 +347,6 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
                     .add("selfRef", new AttributeFilter().setIncludeAllAttrs(true)));
     Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
     assertEquals(
-        fetch,
         new Fetch()
             .field("id")
             .field("label")
@@ -363,7 +360,8 @@ class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest {
                         new Fetch()
                             .field("id")
                             .field("label")
-                            .field("selfRef", new Fetch().field("id").field("label")))));
+                            .field("selfRef", new Fetch().field("id").field("label")))),
+        fetch);
   }
 
   @Configuration

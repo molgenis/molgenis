@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.metadata.manager.model.EditorTagIdentifier.create;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,9 +46,9 @@ class TagMapperTest {
     EditorTagIdentifier tagIdentifier0 = EditorTagIdentifier.create(id0, "label0");
     EditorTagIdentifier tagIdentifier1 = EditorTagIdentifier.create(id1, "label1");
     List<Tag> tags = copyOf(tagMapper.toTagReferences(of(tagIdentifier0, tagIdentifier1)));
-    assertEquals(tags.size(), 2);
-    assertEquals(tags.get(0).getIdValue(), id0);
-    assertEquals(tags.get(1).getIdValue(), id1);
+    assertEquals(2, tags.size());
+    assertEquals(id0, tags.get(0).getIdValue());
+    assertEquals(id1, tags.get(1).getIdValue());
   }
 
   @Test
@@ -63,8 +64,6 @@ class TagMapperTest {
     when(tag1.getId()).thenReturn(id1);
     when(tag1.getLabel()).thenReturn(label1);
     List<EditorTagIdentifier> editorTags = tagMapper.toEditorTags(of(tag0, tag1));
-    assertEquals(
-        editorTags,
-        of(EditorTagIdentifier.create(id0, label0), EditorTagIdentifier.create(id1, label1)));
+    assertEquals(of(create(id0, label0), create(id1, label1)), editorTags);
   }
 }

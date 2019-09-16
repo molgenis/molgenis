@@ -41,24 +41,24 @@ class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest {
 
   @Test
   void getNumberOfSheets() {
-    assertEquals(excelRepositoryCollection.getNumberOfSheets(), 3);
+    assertEquals(3, excelRepositoryCollection.getNumberOfSheets());
   }
 
   @Test
   void getRepositories() {
     List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityTypeIds());
     assertNotNull(repositories);
-    assertEquals(repositories.size(), 3);
+    assertEquals(3, repositories.size());
   }
 
   @Test
   void getRepository() {
     Repository<Entity> test = excelRepositoryCollection.getRepository("test");
     assertNotNull(test);
-    assertEquals(test.getName(), "test");
+    assertEquals("test", test.getName());
 
     Repository<Entity> blad2 = excelRepositoryCollection.getRepository("Blad2");
     assertNotNull(blad2);
-    assertEquals(blad2.getName(), "Blad2");
+    assertEquals("Blad2", blad2.getName());
   }
 }

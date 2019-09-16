@@ -78,7 +78,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(query.eq(OIDC_CLIENT, registrationId).and().eq(OIDC_USERNAME, username).findOne())
         .thenReturn(oidcUserMapping);
 
-    assertEquals(oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest), user);
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
   }
 
   @Test
@@ -128,7 +128,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
 
     when(oidcUserMappingFactory.create()).thenReturn(oidcUserMapping);
 
-    assertEquals(oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest), user);
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:username");
     verify(oidcUserMapping).setOidcClient(oidcClient);
@@ -188,7 +188,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     User user = mock(User.class);
     when(userFactory.create()).thenReturn(user);
 
-    assertEquals(oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest), user);
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:username");
     verify(oidcUserMapping).setOidcClient(oidcClient);

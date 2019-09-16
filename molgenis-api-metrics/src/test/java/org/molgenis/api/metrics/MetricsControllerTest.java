@@ -23,6 +23,6 @@ class MetricsControllerTest extends AbstractMockitoTest {
   void testPrometheus() {
     when(meterRegistry.scrape()).thenReturn("scraped");
     String actual = metricsController.prometheus();
-    assertEquals(actual, "scraped");
+    assertEquals("scraped", actual);
   }
 }

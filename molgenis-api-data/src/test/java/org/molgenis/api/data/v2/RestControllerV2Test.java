@@ -44,6 +44,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -110,7 +111,6 @@ import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
-import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.TestResourceUtils;
@@ -486,13 +486,13 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
     when(dataService.getEntityType(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityType);
     when(dataService.getEntityType(SELF_REF_ENTITY_NAME)).thenReturn(selfRefEntityType);
 
-    assertEquals(entity.getIdValue(), ENTITY_ID);
-    assertEquals(refEntity0.getIdValue(), REF_ENTITY0_ID);
-    assertEquals(refEntity0.getLabelValue(), REF_ENTITY0_LABEL_NL);
-    assertEquals(refEntity1.getIdValue(), REF_ENTITY1_ID);
-    assertEquals(refEntity1.getLabelValue(), REF_ENTITY1_LABEL_NL);
-    assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
-    assertEquals(selfRefEntity.getIdValue(), "0");
+    assertEquals(ENTITY_ID, entity.getIdValue());
+    assertEquals(REF_ENTITY0_ID, refEntity0.getIdValue());
+    assertEquals(REF_ENTITY0_LABEL_NL, refEntity0.getLabelValue());
+    assertEquals(REF_ENTITY1_ID, refEntity1.getIdValue());
+    assertEquals(REF_ENTITY1_LABEL_NL, refEntity1.getLabelValue());
+    assertEquals(REF_REF_ENTITY_ID, refRefEntity.getIdValue());
+    assertEquals("0", selfRefEntity.getIdValue());
 
     when(entityManager.create(entityType, POPULATE))
         .thenAnswer(invocation -> new DynamicEntity(entityType));
@@ -529,19 +529,19 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
   @Test
   void retrieveAtrributeMetaData() {
     assertEquals(
-        restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getHref(),
-        "/api/v2/entity/meta/id");
-    assertEquals(restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getName(), "id");
+        "/api/v2/entity/meta/id",
+        restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getHref());
+    assertEquals("id", restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getName());
     assertNull(restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getDescription());
   }
 
   @Test
   void retrieveAtrributeMetaDataPost() {
     assertEquals(
-        restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getHref(),
-        "/api/v2/entity/meta/id");
+        "/api/v2/entity/meta/id",
+        restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getHref());
     assertEquals(
-        restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getName(), "id");
+        "id", restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getName());
     assertNull(
         restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getDescription());
   }
@@ -1116,8 +1116,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
     verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
     Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-    assertEquals(
-        entity.get("date_time"), MolgenisDateFormat.parseInstant("1985-08-12T08:12:13+0200"));
+    assertEquals(parseInstant("1985-08-12T08:12:13+0200"), entity.get("date_time"));
   }
 
   @Test
@@ -1210,7 +1209,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).deleteAll(eq("MyEntityType"), captor.capture());
-    assertEquals(captor.getValue().collect(toList()), expectedIds);
+    assertEquals(expectedIds, captor.getValue().collect(toList()));
   }
 
   @Test
@@ -1290,7 +1289,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
-    assertEquals(withAttrs, withoutAttrs);
+    assertEquals(withoutAttrs, withAttrs);
   }
 
   @Test

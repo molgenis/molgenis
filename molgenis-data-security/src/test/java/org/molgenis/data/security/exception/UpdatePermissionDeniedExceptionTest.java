@@ -39,7 +39,7 @@ class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
     InsufficientPermissionsException ex =
         new InsufficientPermissionsException(
             objectIdentity, Collections.singletonList("superuser"));
-    assertEquals(ex.getMessage(), "type:type, identifier:identifier, roles:[superuser]");
+    assertEquals("type:type, identifier:identifier, roles:[superuser]", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

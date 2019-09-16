@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -102,7 +104,7 @@ class AbstractRepositoryTest {
         .findAll(ArgumentMatchers.any(Query.class));
 
     Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -120,7 +122,7 @@ class AbstractRepositoryTest {
         .findAll(ArgumentMatchers.any(Query.class));
 
     Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   //	// Note: streamFetch cannot be tested because mocking default methods is not supported by

@@ -82,8 +82,8 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
         .thenReturn((Collection) mappedAuthorities);
 
     UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
-    assertEquals(userDetails.getUsername(), username);
-    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+    assertEquals(username, userDetails.getUsername());
+    assertEquals(mappedAuthorities, userDetails.getAuthorities());
   }
 
   @SuppressWarnings("unchecked")
@@ -115,8 +115,8 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
         .thenReturn((Collection) mappedAuthorities);
 
     UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
-    assertEquals(userDetails.getUsername(), username);
-    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+    assertEquals(username, userDetails.getUsername());
+    assertEquals(mappedAuthorities, userDetails.getAuthorities());
   }
 
   @SuppressWarnings("unchecked")
@@ -148,8 +148,8 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
         .thenReturn((Collection) mappedAuthorities);
 
     UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
-    assertEquals(userDetails.getUsername(), username);
-    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+    assertEquals(username, userDetails.getUsername());
+    assertEquals(mappedAuthorities, userDetails.getAuthorities());
   }
 
   @Test

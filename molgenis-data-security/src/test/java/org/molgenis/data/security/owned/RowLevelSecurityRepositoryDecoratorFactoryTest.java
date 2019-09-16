@@ -50,8 +50,8 @@ class RowLevelSecurityRepositoryDecoratorFactoryTest extends AbstractMockitoTest
   void testCreateDecoratedRepositoryRowLevelSecurityDisabled() {
     Repository<Entity> repository = getRepositoryMock();
     assertEquals(
-        rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(repository),
-        repository);
+        repository,
+        rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(repository));
   }
 
   private Repository<Entity> getRepositoryMock() {

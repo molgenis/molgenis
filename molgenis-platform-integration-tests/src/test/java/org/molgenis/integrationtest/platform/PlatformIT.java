@@ -6,9 +6,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,13 +27,15 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.util.i18n.LanguageService.getBundle;
+import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -234,50 +236,50 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     populateUserPermissions();
 
     assertEquals(
+        "labelEn",
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getAttribute("labelEn")
-            .getName(),
-        "labelEn");
+            .getName());
     assertEquals(
+        "label",
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("en")
-            .getName(),
-        "label");
+            .getName());
     assertEquals(
+        "label",
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("pt")
-            .getName(),
-        "label");
+            .getName());
     assertEquals(
+        "label",
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("nl")
-            .getName(),
-        "label");
+            .getName());
     assertEquals(
+        "label",
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute()
-            .getName(),
-        "label");
+            .getName());
 
-    assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
-    assertArrayEquals(
-        LanguageService.getLanguageCodes().toArray(),
-        new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"});
+    assertEquals("en", getCurrentUserLanguageCode());
+    assertEquals(
+        new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"},
+        getLanguageCodes().toArray());
 
     // NL
     assertNotNull(dataService.getEntityType(L10N_STRING).getAttribute("nl"));
@@ -301,7 +303,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     dataService.add(L10nStringMetadata.L10N_STRING, car);
 
     // Test default value
-    assertEquals(LanguageService.getBundle().getString("car"), "car");
+    assertEquals("car", getBundle().getString("car"));
   }
 
   @WithMockUser(username = USERNAME)
@@ -330,7 +332,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
           @Override
           public void postUpdate(Entity entity) {
             updateCalled.incrementAndGet();
-            assertEquals(entity.getIdValue(), entities.get(0).getIdValue());
+            assertEquals(entities.get(0).getIdValue(), entity.getIdValue());
           }
         };
 
@@ -338,7 +340,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
       // Test that the listener is being called
       entityListenersService.addEntityListener(entityTypeDynamic.getId(), listener);
       dataService.update(entityTypeDynamic.getId(), entities.stream());
-      assertEquals(updateCalled.get(), 1);
+      assertEquals(1, updateCalled.get());
       waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
       assertPresent(entityTypeDynamic, entities);
     } finally {
@@ -346,7 +348,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
       entityListenersService.removeEntityListener(entityTypeDynamic.getId(), listener);
       updateCalled.set(0);
       dataService.update(entityTypeDynamic.getId(), entities.stream());
-      assertEquals(updateCalled.get(), 0);
+      assertEquals(0, updateCalled.get());
       waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
       assertPresent(entityTypeDynamic, entities);
     }
@@ -383,8 +385,8 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
           assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "parent");
-          assertEquals(metadataService.getPackage("parent"), Optional.empty());
-          assertEquals(metadataService.getPackage("parent_sub"), Optional.empty());
+          assertEquals(empty(), metadataService.getPackage("parent"));
+          assertEquals(empty(), metadataService.getPackage("parent_sub"));
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
@@ -426,7 +428,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
           assertPresent(refEntityType, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "package_onetomany");
-          assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
+          assertEquals(empty(), metadataService.getPackage("package_onetomany"));
           assertFalse(dataService.hasEntityType(entityType.getId()));
           assertFalse(dataService.hasEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);
@@ -457,16 +459,16 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
 
             Query<Entity> query = new QueryImpl<>().search("1337");
             Set<Object> resultIds = searchService.search(entityType, query).collect(toSet());
-            assertEquals(resultIds.size(), 2);
-            assertEquals(resultIds, newHashSet("1", "2"));
+            assertEquals(2, resultIds.size());
+            assertEquals(newHashSet("1", "2"), resultIds);
 
             entityType.setIndexingDepth(2);
             dataService.getMeta().updateEntityType(entityType);
             waitForIndexToBeStable(entityType, indexService, LOG);
 
             Set<Object> newResultIds = searchService.search(entityType, query).collect(toSet());
-            assertEquals(newResultIds.size(), 3);
-            assertEquals(newResultIds, newHashSet("0", "1", "2"));
+            assertEquals(3, newResultIds.size());
+            assertEquals(newHashSet("0", "1", "2"), newResultIds);
           } finally {
             metaDataService.deleteEntityType(singletonList(entityType));
           }
@@ -511,12 +513,12 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
 
     Query<Entity> q = new QueryImpl<>().search("refstring4");
 
-    assertEquals(searchService.count(entityTypeDynamic, q), 5);
+    assertEquals(5, searchService.count(entityTypeDynamic, q));
     refEntity4.set(ATTR_REF_STRING, "qwerty");
     runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-    assertEquals(searchService.count(entityTypeDynamic, q), 0);
-    assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 5);
+    assertEquals(0, searchService.count(entityTypeDynamic, q));
+    assertEquals(5, searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")));
   }
 
   @Disabled // FIXME: sys_md_attributes spam
@@ -529,7 +531,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
 
     Query<Entity> q = new QueryImpl<>().search("refstring4").or().search("refstring5");
 
-    assertEquals(searchService.count(entityTypeDynamic, q), 3333);
+    assertEquals(3333, searchService.count(entityTypeDynamic, q));
     Entity refEntity4 = dataService.findOneById(refEntityTypeDynamic.getId(), "4");
     refEntity4.set(ATTR_REF_STRING, "qwerty");
     runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity4));
@@ -539,9 +541,9 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     runAsSystem(() -> dataService.update(refEntityTypeDynamic.getId(), refEntity5));
 
     waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-    assertEquals(searchService.count(entityTypeDynamic, q), 0);
+    assertEquals(0, searchService.count(entityTypeDynamic, q));
 
-    assertEquals(searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")), 3333);
+    assertEquals(3333, searchService.count(entityTypeDynamic, new QueryImpl<>().search("qwerty")));
   }
 
   private List<Entity> createDynamicAndAdd(int count) {
@@ -574,7 +576,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     // Found in index Elasticsearch
     Query<Entity> q = new QueryImpl<>();
     q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
-    assertEquals(searchService.count(emd, q), 1);
+    assertEquals(1, searchService.count(emd, q));
   }
 
   private void assertNotPresent(Entity entity) {
@@ -585,7 +587,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     // Not found in index Elasticsearch
     Query<Entity> q = new QueryImpl<>();
     q.eq(entityTypeDynamic.getIdAttribute().getName(), entity.getIdValue());
-    assertEquals(searchService.count(entityTypeDynamic, q), 0);
+    assertEquals(0, searchService.count(entityTypeDynamic, q));
   }
 
   @WithMockUser(username = USERNAME)
@@ -613,8 +615,8 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     entity.set(ATTR_STRING, "attr_string_new");
 
     // Verify value in elasticsearch before update
-    assertEquals(searchService.count(selfXrefEntityType, q1), 1);
-    assertEquals(searchService.count(selfXrefEntityType, q2), 0);
+    assertEquals(1, searchService.count(selfXrefEntityType, q1));
+    assertEquals(0, searchService.count(selfXrefEntityType, q2));
 
     // Update
     dataService.update(selfXrefEntityType.getId(), entity);
@@ -622,16 +624,16 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     assertPresent(selfXrefEntityType, entity);
 
     // Verify value in elasticsearch after update
-    assertEquals(searchService.count(selfXrefEntityType, q2), 1);
-    assertEquals(searchService.count(selfXrefEntityType, q1), 0);
+    assertEquals(1, searchService.count(selfXrefEntityType, q2));
+    assertEquals(0, searchService.count(selfXrefEntityType, q1));
 
     // Verify value in PostgreSQL after update
     entity = dataService.findOneById(selfXrefEntityType.getId(), entity.getIdValue());
     assertNotNull(entity.get(ATTR_STRING));
-    assertEquals(entity.get(ATTR_STRING), "attr_string_new");
+    assertEquals("attr_string_new", entity.get(ATTR_STRING));
 
     // Check id are equals
-    assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
+    assertEquals(entity.getIdValue(), entity.getEntity(ATTR_XREF).getIdValue());
   }
 
   @WithMockUser(username = USERNAME)
@@ -766,19 +768,19 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     Query<Entity> q0 = new QueryImpl<>();
     q0.search("string1");
     long count0 = searchService.count(entityTypeDynamic, q0);
-    assertEquals(count0, 2L);
+    assertEquals(2L, count0);
 
     // test refstring1 from ref entity
     Query<Entity> q1 = new QueryImpl<>();
     q1.search("refstring0");
     long count1 = searchService.count(entityTypeDynamic, q1);
-    assertEquals(count1, 1L);
+    assertEquals(1L, count1);
 
     // test refstring1 from ref entity
     Query<Entity> q2 = new QueryImpl<>();
     q2.search("refstring1");
     long count2 = searchService.count(entityTypeDynamic, q2);
-    assertEquals(count2, 1L);
+    assertEquals(1L, count2);
 
     refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
     runAsSystem(
@@ -789,25 +791,25 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
 
     // test string1 from entity
     long count3 = searchService.count(entityTypeDynamic, q0);
-    assertEquals(count3, 2L);
+    assertEquals(2L, count3);
 
     // test refstring1 from ref entity
     Query<Entity> q4 = new QueryImpl<>();
     q4.search("refstring0");
     long count4 = searchService.count(entityTypeDynamic, q4);
-    assertEquals(count4, 0L);
+    assertEquals(0L, count4);
 
     // test refstring1 from ref entity
     Query<Entity> q5 = new QueryImpl<>();
     q5.search("refstring1");
     long count5 = searchService.count(entityTypeDynamic, q5);
-    assertEquals(count5, 1L);
+    assertEquals(1L, count5);
 
     // test refstring1 from ref entity
     Query<Entity> q6 = new QueryImpl<>();
     q6.search("searchTestBatchUpdate");
     long count6 = searchService.count(entityTypeDynamic, q6);
-    assertEquals(count6, 1L);
+    assertEquals(1L, count6);
   }
 
   @WithMockUser(username = USERNAME)
@@ -850,7 +852,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     AggregateResult expectedResult =
         new AggregateResult(
             singletonList(singletonList(1L)), singletonList(1L), singletonList("option1"));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   @Disabled
@@ -869,7 +871,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
             asList(asList(0L, 7495L), asList(500000L, 0L)),
             asList(0L, 1L),
             asList("option1", "option2"));
-    assertEquals(result, expectedResult);
+    assertEquals(expectedResult, result);
   }
 
   private AggregateResult runAggregateQuery(

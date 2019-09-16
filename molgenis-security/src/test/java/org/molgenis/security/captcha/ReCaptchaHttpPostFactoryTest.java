@@ -1,8 +1,8 @@
 package org.molgenis.security.captcha;
 
+import static java.net.URI.create;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.net.URI;
 import org.apache.http.client.methods.HttpPost;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ class ReCaptchaHttpPostFactoryTest {
   @Test
   void testHttpPostCreate() {
     HttpPost post = factory.create("http://verify.test.org");
-    assertEquals(post.getURI(), URI.create("http://verify.test.org"));
+    assertEquals(create("http://verify.test.org"), post.getURI());
   }
 
   @Test

@@ -1,5 +1,6 @@
 package org.molgenis.data.index;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +35,7 @@ class IndexingStrategyTest {
 
   @Test
   void testDetermineNecessaryActionsEmptySet() {
-    assertEquals(indexingStrategy.determineImpact(emptySet(), dependencyModel), emptySet());
+    assertEquals(emptySet(), indexingStrategy.determineImpact(emptySet(), dependencyModel));
   }
 
   @Test
@@ -44,11 +45,11 @@ class IndexingStrategyTest {
     when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.of("A", "B", "C"));
     Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
     assertEquals(
-        actual,
-        ImmutableSet.of(
+        of(
             createWholeRepositoryImpact("A"),
             createWholeRepositoryImpact("B"),
-            createWholeRepositoryImpact("C")));
+            createWholeRepositoryImpact("C")),
+        actual);
   }
 
   @Test
@@ -60,11 +61,11 @@ class IndexingStrategyTest {
 
     Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
     assertEquals(
-        actual,
-        ImmutableSet.of(
+        of(
             createWholeRepositoryImpact("A"),
             createWholeRepositoryImpact("B"),
-            createWholeRepositoryImpact("C")));
+            createWholeRepositoryImpact("C")),
+        actual);
   }
 
   @Test
@@ -75,6 +76,6 @@ class IndexingStrategyTest {
     when(dependencyModel.getEntityTypesDependentOn("A")).thenReturn(Stream.empty());
 
     Set<Impact> actual = indexingStrategy.determineImpact(registeredIndexActions, dependencyModel);
-    assertEquals(actual, ImmutableSet.of(createSingleEntityImpact("A", "6")));
+    assertEquals(of(createSingleEntityImpact("A", "6")), actual);
   }
 }

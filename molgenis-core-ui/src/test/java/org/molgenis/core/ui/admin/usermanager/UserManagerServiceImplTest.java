@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.admin.usermanager;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -119,8 +119,7 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user0, user1));
     this.setSecurityContextSuperUser();
     assertEquals(
-        userManagerService.getAllUsers(),
-        Arrays.asList(new UserViewData(user0), new UserViewData(user1)));
+        asList(new UserViewData(user0), new UserViewData(user1)), userManagerService.getAllUsers());
   }
 
   @Test

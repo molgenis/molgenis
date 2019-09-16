@@ -1,9 +1,11 @@
 package org.molgenis.web;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
@@ -13,14 +15,14 @@ class ErrorMessageResponseTest {
   @Test
   void ErrorMessageResponse() {
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse();
-    assertEquals(errorMessageResponse.getErrors(), Collections.emptyList());
+    assertEquals(emptyList(), errorMessageResponse.getErrors());
   }
 
   @Test
   void ErrorMessageResponseErrorMessage() {
     ErrorMessage errorMessage = new ErrorMessage("message");
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse(errorMessage);
-    assertEquals(errorMessageResponse.getErrors(), Collections.singletonList(errorMessage));
+    assertEquals(singletonList(errorMessage), errorMessageResponse.getErrors());
   }
 
   @Test
@@ -28,7 +30,7 @@ class ErrorMessageResponseTest {
     List<ErrorMessage> errorMessages =
         Arrays.asList(new ErrorMessage("message1"), new ErrorMessage("message2"));
     ErrorMessageResponse errorMessageResponse = new ErrorMessageResponse(errorMessages);
-    assertEquals(errorMessageResponse.getErrors(), errorMessages);
+    assertEquals(errorMessages, errorMessageResponse.getErrors());
   }
 
   @Test
@@ -39,8 +41,8 @@ class ErrorMessageResponseTest {
     errorMessageResponse.addErrorMessage(errorMessage1);
     errorMessageResponse.addErrorMessage(errorMessage2);
     assertEquals(
-        errorMessageResponse.getErrors(),
-        Arrays.asList(new ErrorMessage("message1"), new ErrorMessage("message2")));
+        asList(new ErrorMessage("message1"), new ErrorMessage("message2")),
+        errorMessageResponse.getErrors());
   }
 
   @Test
@@ -55,7 +57,7 @@ class ErrorMessageResponseTest {
     errorMessageResponse.addErrorMessages(errorMessages1);
     errorMessageResponse.addErrorMessages(errorMessages2);
     assertEquals(
-        errorMessageResponse.getErrors(),
-        Arrays.asList(errorMessage1, errorMessage2, errorMessage3, errorMessage4));
+        asList(errorMessage1, errorMessage2, errorMessage3, errorMessage4),
+        errorMessageResponse.getErrors());
   }
 }

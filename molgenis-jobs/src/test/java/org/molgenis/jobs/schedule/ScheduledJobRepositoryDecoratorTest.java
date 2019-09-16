@@ -50,7 +50,7 @@ class ScheduledJobRepositoryDecoratorTest {
   @Test
   void testQuery() {
     assertEquals(
-        scheduledJobRepositoryDecorator.query().getRepository(), scheduledJobRepositoryDecorator);
+        scheduledJobRepositoryDecorator, scheduledJobRepositoryDecorator.query().getRepository());
   }
 
   @Test

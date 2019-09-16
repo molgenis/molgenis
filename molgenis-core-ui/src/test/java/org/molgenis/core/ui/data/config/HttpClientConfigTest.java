@@ -50,7 +50,7 @@ class HttpClientConfigTest extends AbstractMockitoSpringContextTests {
 
     String redirectURL =
         restTemplate.postForLocation("http://directory.url/request", entity).toASCIIString();
-    assertEquals(redirectURL, "http://directory.url/request/DEF");
+    assertEquals("http://directory.url/request/DEF", redirectURL);
 
     // Verify all expectations met
     server.verify();

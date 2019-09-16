@@ -1,5 +1,6 @@
 package org.molgenis.validation;
 
+import static java.lang.Long.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -11,7 +12,7 @@ class ConstraintViolationTest {
   void renumberRowIndexRowNumber() {
     ConstraintViolation constraintViolation = new ConstraintViolation("test", 1L);
     constraintViolation.renumberRowIndex(Arrays.asList(3, 2, 1));
-    assertEquals(constraintViolation.getRowNr(), Long.valueOf(3L));
+    assertEquals(valueOf(3L), constraintViolation.getRowNr());
   }
 
   @Test

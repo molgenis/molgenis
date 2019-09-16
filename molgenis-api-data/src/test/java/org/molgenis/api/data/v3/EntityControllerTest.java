@@ -62,7 +62,7 @@ class EntityControllerTest extends AbstractMockitoTest {
     ResponseEntity responseEntity = entityController.createEntity(entityTypeId, entityMap);
     ResponseEntity<Object> expectedResponseEntity =
         ResponseEntity.created(new URI("http://localhost/api/data/MyEntityTypeId/MyId")).build();
-    assertEquals(responseEntity, expectedResponseEntity);
+    assertEquals(expectedResponseEntity, responseEntity);
   }
 
   @Test
@@ -83,7 +83,7 @@ class EntityControllerTest extends AbstractMockitoTest {
 
     EntityResponse entityResponse = mock(EntityResponse.class);
     when(entityMapper.map(entity, filter, expand)).thenReturn(entityResponse);
-    assertEquals(entityController.getEntity(entityRequest), entityResponse);
+    assertEquals(entityResponse, entityController.getEntity(entityRequest));
   }
 
   @Test
@@ -118,7 +118,7 @@ class EntityControllerTest extends AbstractMockitoTest {
     when(entityMapper.map(entityCollection, filter, expand, 10, 2, 30))
         .thenReturn(entitiesResponse);
 
-    assertEquals(entityController.getEntities(entityRequest), entitiesResponse);
+    assertEquals(entitiesResponse, entityController.getEntities(entityRequest));
   }
 
   @Test
@@ -158,7 +158,7 @@ class EntityControllerTest extends AbstractMockitoTest {
     when(entityMapper.map(entityCollection, filter, expand, 10, 2, 30))
         .thenReturn(entitiesResponse);
 
-    assertEquals(entityController.getReferencedEntities(readSubResourceRequest), entitiesResponse);
+    assertEquals(entitiesResponse, entityController.getReferencedEntities(readSubResourceRequest));
   }
 
   @SuppressWarnings("unchecked")

@@ -21,11 +21,11 @@ class NegotiatorQueryTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void testSerialization() {
-    assertEquals(gson.toJson(negotiatorQuery), json);
+    assertEquals(json, gson.toJson(negotiatorQuery));
   }
 
   @Test
   void testDeserialization() {
-    assertEquals(gson.fromJson(json, NegotiatorQuery.class), negotiatorQuery);
+    assertEquals(negotiatorQuery, gson.fromJson(json, NegotiatorQuery.class));
   }
 }

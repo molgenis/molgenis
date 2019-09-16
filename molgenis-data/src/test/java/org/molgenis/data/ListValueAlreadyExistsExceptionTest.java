@@ -32,8 +32,8 @@ class ListValueAlreadyExistsExceptionTest extends ExceptionMessageTest {
         new ListValueAlreadyExistsException(
             "MyEntityTypeId", "myAttributeName", "myEntityId", "myValue", mock(Throwable.class));
     assertEquals(
-        ex.getMessage(),
-        "entityTypeId:MyEntityTypeId attributeName:myAttributeName entityId:myEntityId value:myValue");
+        "entityTypeId:MyEntityTypeId attributeName:myAttributeName entityId:myEntityId value:myValue",
+        ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

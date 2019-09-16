@@ -175,7 +175,7 @@ class CascadeDeleteRepositoryDecoratorTest {
     cascadeDeleteRepositoryDecorator.deleteAll();
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), captor.getValue().collect(toList()));
     verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
   }
 
@@ -197,7 +197,7 @@ class CascadeDeleteRepositoryDecoratorTest {
     cascadeDeleteRepositoryDecorator.delete(Stream.of(entity));
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), captor.getValue().collect(toList()));
     verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
   }
 
@@ -210,7 +210,7 @@ class CascadeDeleteRepositoryDecoratorTest {
     cascadeDeleteRepositoryDecorator.delete(Stream.of(entity));
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), captor.getValue().collect(toList()));
     verify(dataService, never()).delete(REF_ENTITY_TYPE_NAME, refEntity);
   }
 
@@ -225,7 +225,7 @@ class CascadeDeleteRepositoryDecoratorTest {
     cascadeDeleteRepositoryDecorator.deleteAll(Stream.of(entityId));
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
+    assertEquals(singletonList(entityId), captor.getValue().collect(toList()));
     verify(dataService).delete(REF_ENTITY_TYPE_NAME, refEntity);
   }
 
@@ -240,7 +240,7 @@ class CascadeDeleteRepositoryDecoratorTest {
     cascadeDeleteRepositoryDecorator.deleteAll(Stream.of(entityId));
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
+    assertEquals(singletonList(entityId), captor.getValue().collect(toList()));
     verify(dataService, never()).delete(REF_ENTITY_TYPE_NAME, refEntity);
   }
 }

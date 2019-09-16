@@ -130,7 +130,7 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
   @Test
   void dehydrateTest() {
     Map<String, Object> actualDehydratedEntity = entityHydration.dehydrate(hydratedEntity);
-    assertEquals(actualDehydratedEntity, dehydratedEntity);
+    assertEquals(dehydratedEntity, actualDehydratedEntity);
   }
 
   @Test
@@ -151,8 +151,8 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
     when(entityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
     when(entity.getEntityType()).thenReturn(entityType);
     assertEquals(
-        entityHydration.dehydrate(entity),
-        singletonMap(attrName, newArrayList(oneToManyEntity0IdValue, oneToManyEntity1IdValue)));
+        singletonMap(attrName, newArrayList(oneToManyEntity0IdValue, oneToManyEntity1IdValue)),
+        entityHydration.dehydrate(entity));
   }
 
   @Test
@@ -169,6 +169,6 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
     when(xrefAttr.getDataType()).thenReturn(XREF);
     when(entityType.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(entityHydration.dehydrate(entity), singletonMap(attrName, manyToOneEntityIdValue));
+    assertEquals(singletonMap(attrName, manyToOneEntityIdValue), entityHydration.dehydrate(entity));
   }
 }

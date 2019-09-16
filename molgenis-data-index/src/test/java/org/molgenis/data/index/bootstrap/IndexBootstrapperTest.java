@@ -139,7 +139,7 @@ class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
 
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).deleteAll(eq(IndexActionMetadata.INDEX_ACTION), captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList("actionId"));
+    assertEquals(singletonList("actionId"), captor.getValue().collect(toList()));
     verify(dataService).deleteById(IndexActionGroupMetadata.INDEX_ACTION_GROUP, "id");
   }
 

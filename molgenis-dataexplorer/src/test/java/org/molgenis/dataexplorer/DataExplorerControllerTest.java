@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer;
 
+import static java.time.LocalDateTime.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,7 +20,6 @@ import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWN
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -218,7 +218,7 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
     String actual = controller.viewEntityDetails(entityTypeId, entityId, model);
     String expected = "view-entityreport";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
     verify(model).addAttribute("entity", entity);
     verify(model).addAttribute("entityType", entityType);
     verify(model).addAttribute("viewName", "view-entityreport-specific-template");
@@ -238,7 +238,7 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
     String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
     String expected = "view-standalone-report";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
     verify(model).addAttribute("entity", entity);
     verify(model).addAttribute("entityType", entityType);
     verify(model).addAttribute("entityTypeId", entityTypeId);
@@ -257,21 +257,17 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
   @Test
   void testGetDownloadFilenameCsv() {
     assertEquals(
+        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv",
         controller.getDownloadFilename(
-            "it_emx_datatypes_TypeTest",
-            LocalDateTime.parse("2017-07-04T14:14:33"),
-            DOWNLOAD_TYPE_CSV),
-        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv");
+            "it_emx_datatypes_TypeTest", parse("2017-07-04T14:14:33"), DOWNLOAD_TYPE_CSV));
   }
 
   @Test
   void testGetDownloadFilenameXlsx() {
     assertEquals(
+        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx",
         controller.getDownloadFilename(
-            "it_emx_datatypes_TypeTest",
-            LocalDateTime.parse("2017-07-04T14:14:33"),
-            DOWNLOAD_TYPE_XLSX),
-        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx");
+            "it_emx_datatypes_TypeTest", parse("2017-07-04T14:14:33"), DOWNLOAD_TYPE_XLSX));
   }
 
   @Test
@@ -284,7 +280,7 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/", "glyphicon-home"));
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/parentId", "parent"));
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/packId", "pack"));
-    assertEquals(controller.getNavigatorLinks(entityTypeId), expected);
+    assertEquals(expected, controller.getNavigatorLinks(entityTypeId));
   }
 
   @Test

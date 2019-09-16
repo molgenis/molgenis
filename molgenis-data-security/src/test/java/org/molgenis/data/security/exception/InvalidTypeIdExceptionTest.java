@@ -26,7 +26,7 @@ class InvalidTypeIdExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new InvalidTypeIdException("type");
-    assertEquals(ex.getMessage(), "typeId:type");
+    assertEquals("typeId:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

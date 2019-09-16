@@ -30,7 +30,7 @@ class EntityMappingTest extends AbstractMockitoTest {
     when(attributeMapping.getTargetAttributeName()).thenReturn(targetAttributeName);
     entityMapping.addAttributeMapping(attributeMapping);
     assertEquals(
-        new ArrayList<>(entityMapping.getAttributeMappings()), singletonList(attributeMapping));
+        singletonList(attributeMapping), new ArrayList<>(entityMapping.getAttributeMappings()));
   }
 
   @Test

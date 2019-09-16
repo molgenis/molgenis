@@ -14,6 +14,8 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.semantic.Relation.forIRI;
+import static org.molgenis.ontology.core.model.OntologyTerm.create;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
@@ -150,7 +152,7 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     expected.put(instanceOf, chromosomeName);
     expected.put(instanceOf, geneAnnotation);
 
-    assertEquals(ontologyTagService.getTagsForAttribute(emd, attribute), expected);
+    assertEquals(expected, ontologyTagService.getTagsForAttribute(emd, attribute));
   }
 
   @Test
@@ -181,7 +183,7 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
             "http://edamontology.org"))
         .thenReturn(expected);
 
-    assertEquals(ontologyTagService.getTagEntity(tag), expected);
+    assertEquals(expected, ontologyTagService.getTagEntity(tag));
   }
 
   @Test
@@ -213,9 +215,9 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
 
     ArgumentCaptor<Attribute> captor = forClass(Attribute.class);
     verify(dataService, times(1)).update(eq(ATTRIBUTE_META_DATA), captor.capture());
-    assertEquals(captor.getValue().getName(), "Chr");
+    assertEquals("Chr", captor.getValue().getName());
     assertEquals(
-        captor.getValue().getTags(), asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
+        asList(geneAnnotationTagEntity, chromosomeNameTagEntity), captor.getValue().getTags());
   }
 
   @Test
@@ -239,7 +241,7 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     ArgumentCaptor<Attribute> captor = forClass(Attribute.class);
     verify(dataService, times(1)).update(eq(ATTRIBUTE_META_DATA), captor.capture());
     assertEquals(
-        captor.getValue().getTags(), asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
+        asList(chromosomeNameTagEntity, geneAnnotationTagEntity), captor.getValue().getTags());
   }
 
   @Test
@@ -255,17 +257,17 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.findOneById(PACKAGE, "test")).thenReturn(pack);
 
     assertEquals(
-        ontologyTagService.getTagsForPackage(p),
         singletonList(
             new SemanticTag<>(
                 "1234",
                 p,
-                Relation.forIRI("http://molgenis.org/biobankconnect/instanceOf"),
-                OntologyTerm.create(
+                forIRI("http://molgenis.org/biobankconnect/instanceOf"),
+                create(
                     "http://edamontology.org/data_0987",
                     "Chromosome name",
                     "Name of a chromosome."),
-                Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
+                Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))),
+        ontologyTagService.getTagsForPackage(p));
   }
 
   @Test
@@ -322,7 +324,7 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     updatedEntity.setTags(asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
     updatedEntity.setName("Chr");
 
-    assertEquals(ontologyTagService.tagAttributesInEntity("test", tags), attributeTagMap);
+    assertEquals(attributeTagMap, ontologyTagService.tagAttributesInEntity("test", tags));
   }
 
   @Configuration

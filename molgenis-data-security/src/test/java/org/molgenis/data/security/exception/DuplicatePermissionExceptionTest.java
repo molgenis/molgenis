@@ -36,7 +36,7 @@ class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
     DataAlreadyExistsException ex =
         new DuplicatePermissionException(objectIdentity, new GrantedAuthoritySid("ROLE_role1"));
     assertEquals(
-        ex.getMessage(), "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1]");
+        "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1]", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

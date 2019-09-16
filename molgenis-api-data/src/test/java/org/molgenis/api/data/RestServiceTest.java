@@ -1,6 +1,8 @@
 package org.molgenis.api.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.time.LocalDate.parse;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,8 +25,6 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -79,7 +79,7 @@ class RestServiceTest {
   void toEntityValue() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(MREF);
-    assertEquals(restService.toEntityValue(attr, null, "test"), emptyList());
+    assertEquals(emptyList(), restService.toEntityValue(attr, null, "test"));
   }
 
   // https://github.com/molgenis/molgenis/issues/4725
@@ -104,7 +104,7 @@ class RestServiceTest {
     when(entityManager.getReference(refEntityType, 0)).thenReturn(entity0);
     when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
     Object entityValue = restService.toEntityValue(attr, "0,1", "test"); // string
-    assertEquals(entityValue, Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), entityValue);
   }
 
   @ParameterizedTest
@@ -124,7 +124,7 @@ class RestServiceTest {
     when(entityManager.getReference(refEntityType, "0")).thenReturn(entity0);
     when(entityManager.getReference(refEntityType, "1")).thenReturn(entity1);
     Object entityValue = restService.toEntityValue(attr, "0,1", "test"); // string
-    assertEquals(entityValue, Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), entityValue);
   }
 
   @Test
@@ -140,15 +140,14 @@ class RestServiceTest {
     when(attr.getDataType()).thenReturn(XREF);
     when(attr.getRefEntity()).thenReturn(refEntityMeta);
     when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
-    assertEquals(restService.toEntityValue(attr, "0", "test"), entity0);
+    assertEquals(entity0, restService.toEntityValue(attr, "0", "test"));
   }
 
   @Test
   void toEntityDateStringValueValid() throws ParseException {
     Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
     when(dateAttr.getDataType()).thenReturn(DATE);
-    assertEquals(
-        restService.toEntityValue(dateAttr, "2000-12-31", "test"), LocalDate.parse("2000-12-31"));
+    assertEquals(parse("2000-12-31"), restService.toEntityValue(dateAttr, "2000-12-31", "test"));
   }
 
   @Test
@@ -157,7 +156,7 @@ class RestServiceTest {
     when(dateAttr.getDataType()).thenReturn(DATE_TIME);
 
     Instant expected = Instant.parse("2000-12-31T10:34:56.789Z");
-    assertEquals(restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z", "test"), expected);
+    assertEquals(expected, restService.toEntityValue(dateAttr, "2000-12-31T10:34:56.789Z", "test"));
   }
 
   @Test
@@ -182,7 +181,7 @@ class RestServiceTest {
     MockMultipartFile mockMultipartFile =
         new MockMultipartFile("name", "fileName", "contentType", content);
 
-    assertEquals(restService.toEntityValue(fileAttr, mockMultipartFile, null), fileMeta);
+    assertEquals(fileMeta, restService.toEntityValue(fileAttr, mockMultipartFile, null));
   }
 
   @Test
@@ -209,7 +208,7 @@ class RestServiceTest {
     when(dataService.findOneById(fileAttr.getEntity().getId(), entityId)).thenReturn(oldEntity);
 
     Object result = restService.toEntityValue(fileAttr, fileName, entityId);
-    assertEquals(result, storedFileMeta);
+    assertEquals(storedFileMeta, result);
   }
 
   @Test
@@ -257,7 +256,7 @@ class RestServiceTest {
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(refEntityName), captor.capture());
     List<Entity> refEntities = captor.getValue().collect(toList());
-    assertEquals(refEntities, newArrayList(refEntity0, refEntity1));
+    assertEquals(newArrayList(refEntity0, refEntity1), refEntities);
     verify(refEntity0).set(mappedByAttrName, entity);
     verify(refEntity1).set(mappedByAttrName, entity);
     verifyNoMoreInteractions(dataService);
@@ -302,7 +301,7 @@ class RestServiceTest {
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(refEntityName), captor.capture());
     List<Entity> refEntities = captor.getValue().collect(toList());
-    assertEquals(refEntities, newArrayList(refEntity0, refEntity2));
+    assertEquals(newArrayList(refEntity0, refEntity2), refEntities);
     verify(refEntity0).set(mappedByAttrName, entity);
     verify(refEntity2).set(mappedByAttrName, null);
     verifyNoMoreInteractions(dataService);

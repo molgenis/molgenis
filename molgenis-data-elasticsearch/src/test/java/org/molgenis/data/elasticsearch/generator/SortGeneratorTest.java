@@ -45,7 +45,7 @@ class SortGeneratorTest {
         new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.ASC);
     Sort elasticSort = sortGenerator.generateSort(sort, entityType);
     Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("int", ASC)));
-    assertEquals(elasticSort, expectedElasticSort);
+    assertEquals(expectedElasticSort, elasticSort);
   }
 
   @Test
@@ -54,7 +54,7 @@ class SortGeneratorTest {
         new org.molgenis.data.Sort("string", org.molgenis.data.Sort.Direction.ASC);
     Sort elasticSort = sortGenerator.generateSort(sort, entityType);
     Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("string.raw", ASC)));
-    assertEquals(elasticSort, expectedElasticSort);
+    assertEquals(expectedElasticSort, elasticSort);
   }
 
   @Test
@@ -63,7 +63,7 @@ class SortGeneratorTest {
         new org.molgenis.data.Sort("int", org.molgenis.data.Sort.Direction.DESC);
     Sort elasticSort = sortGenerator.generateSort(sort, entityType);
     Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("int", DESC)));
-    assertEquals(elasticSort, expectedElasticSort);
+    assertEquals(expectedElasticSort, elasticSort);
   }
 
   @Test
@@ -72,7 +72,7 @@ class SortGeneratorTest {
         new org.molgenis.data.Sort("string", org.molgenis.data.Sort.Direction.ASC);
     Sort elasticSort = sortGenerator.generateSort(sort, entityType);
     Sort expectedElasticSort = Sort.create(singletonList(SortOrder.create("string.raw", ASC)));
-    assertEquals(elasticSort, expectedElasticSort);
+    assertEquals(expectedElasticSort, elasticSort);
   }
 
   @Test
@@ -83,6 +83,6 @@ class SortGeneratorTest {
     Sort elasticSort = sortGenerator.generateSort(sort, entityType);
     Sort expectedElasticSort =
         Sort.create(asList(SortOrder.create("int", DESC), SortOrder.create("string.raw", ASC)));
-    assertEquals(elasticSort, expectedElasticSort);
+    assertEquals(expectedElasticSort, elasticSort);
   }
 }

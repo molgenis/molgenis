@@ -1,10 +1,10 @@
 package org.molgenis.semanticsearch.explain.service;
 
+import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,29 +31,29 @@ class ElasticSearchExplainServiceImplTest {
   void testRegExp() {
     String description = "weight(label:high in 328) [PerFieldSimilarity], result of:";
     String actual = explainServiceHelper.getMatchedWord(description);
-    assertEquals(actual, "high");
+    assertEquals("high", actual);
 
     String description2 = "weight(label:length^0.5 in 328) [PerFieldSimilarity], result of:";
     String actual2 = explainServiceHelper.getMatchedWord(description2);
-    assertEquals(actual2, "length");
+    assertEquals("length", actual2);
   }
 
   @Test
   void testRemoveBoostFromQuery() {
     String description = "Measurement^0.5 glucose^0.25 fasting^0.5";
     assertEquals(
-        explainServiceHelper.removeBoostFromQuery(description), "Measurement glucose fasting");
+        "Measurement glucose fasting", explainServiceHelper.removeBoostFromQuery(description));
 
     String description2 = "Measurement^5 glucose^5.0 fasting^00.52";
     assertEquals(
-        explainServiceHelper.removeBoostFromQuery(description2), "Measurement glucose fasting");
+        "Measurement glucose fasting", explainServiceHelper.removeBoostFromQuery(description2));
 
     String description3 = "Measurement glucose 5 fasting43";
     assertEquals(
-        explainServiceHelper.removeBoostFromQuery(description3), "Measurement glucose 5 fasting43");
+        "Measurement glucose 5 fasting43", explainServiceHelper.removeBoostFromQuery(description3));
 
     String description4 = "glycemia^0.03125";
-    assertEquals(explainServiceHelper.removeBoostFromQuery(description4), "glycemia");
+    assertEquals("glycemia", explainServiceHelper.removeBoostFromQuery(description4));
   }
 
   @Test
@@ -81,7 +81,7 @@ class ElasticSearchExplainServiceImplTest {
         Explanation.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
 
     Set<String> actual = explainServiceHelper.findMatchedWords(explanation_1);
-    assertEquals(actual.size(), 2);
+    assertEquals(2, actual.size());
     assertTrue(actual.contains("high blood"));
     assertTrue(actual.contains("medication"));
   }
@@ -142,16 +142,16 @@ class ElasticSearchExplainServiceImplTest {
 
     ExplainedQueryString first = iterator.next();
 
-    assertEquals(first.getMatchedWords(), "high blood");
-    assertEquals(first.getQueryString(), "high blood pressure");
-    assertEquals(first.getTagName(), "hypertension");
-    assertEquals((int) first.getScore(), 73);
+    assertEquals("high blood", first.getMatchedWords());
+    assertEquals("high blood pressure", first.getQueryString());
+    assertEquals("hypertension", first.getTagName());
+    assertEquals(73, (int) first.getScore());
 
     ExplainedQueryString second = iterator.next();
-    assertEquals(second.getMatchedWords(), "medication");
-    assertEquals(second.getQueryString(), "medication");
-    assertEquals(second.getTagName(), "medication");
-    assertEquals((int) second.getScore(), 100);
+    assertEquals("medication", second.getMatchedWords());
+    assertEquals("medication", second.getQueryString());
+    assertEquals("medication", second.getTagName());
+    assertEquals(100, (int) second.getScore());
   }
 
   @Test
@@ -181,6 +181,6 @@ class ElasticSearchExplainServiceImplTest {
     Set<ExplainedQueryString> reverseSearchQueryStrings =
         elasticSearchExplainService.findQueriesFromExplanation(expandedQueryMap, explanation_1);
 
-    assertEquals(reverseSearchQueryStrings, Collections.emptySet());
+    assertEquals(emptySet(), reverseSearchQueryStrings);
   }
 }

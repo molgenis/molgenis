@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.metadata.manager.model.EditorAttributeIdentifier.create;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,9 +54,7 @@ class AttributeReferenceMapperTest {
         attributeReferenceMapper.toEditorAttributeIdentifiers(of(attribute));
     EditorEntityTypeIdentifier editorEntityTypeIdentifier =
         EditorEntityTypeIdentifier.create(entityTypeId, entityTypeLabel);
-    assertEquals(
-        editorAttributeIdentifier,
-        of(EditorAttributeIdentifier.create(id, label, editorEntityTypeIdentifier)));
+    assertEquals(of(create(id, label, editorEntityTypeIdentifier)), editorAttributeIdentifier);
   }
 
   @Test
@@ -76,9 +75,7 @@ class AttributeReferenceMapperTest {
 
     EditorEntityTypeIdentifier editorEntityTypeIdentifier =
         EditorEntityTypeIdentifier.create(entityTypeId, entityTypeLabel);
-    assertEquals(
-        editorAttributeIdentifier,
-        EditorAttributeIdentifier.create(id, label, editorEntityTypeIdentifier));
+    assertEquals(create(id, label, editorEntityTypeIdentifier), editorAttributeIdentifier);
   }
 
   @Test
@@ -93,7 +90,7 @@ class AttributeReferenceMapperTest {
     EditorAttributeIdentifier editorAttributeIdentifier =
         EditorAttributeIdentifier.create(id, label);
     Attribute attribute = attributeReferenceMapper.toAttributeReference(editorAttributeIdentifier);
-    assertEquals(attribute.getIdValue(), id);
+    assertEquals(id, attribute.getIdValue());
   }
 
   @Test

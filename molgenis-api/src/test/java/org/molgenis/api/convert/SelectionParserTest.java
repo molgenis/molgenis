@@ -13,7 +13,7 @@ class SelectionParserTest {
   @Test
   void testSingleItem() throws ParseException {
     Map<String, Selection> itemSelections = Collections.singletonMap("abc", null);
-    assertEquals(new SelectionParser("abc").parse(), new Selection(itemSelections));
+    assertEquals(new Selection(itemSelections), new SelectionParser("abc").parse());
   }
 
   @Test
@@ -21,7 +21,7 @@ class SelectionParserTest {
     Map<String, Selection> itemSelections = new HashMap<>();
     itemSelections.put("abc", null);
     itemSelections.put("def", null);
-    assertEquals(new SelectionParser("abc,def").parse(), new Selection(itemSelections));
+    assertEquals(new Selection(itemSelections), new SelectionParser("abc,def").parse());
   }
 
   @Test
@@ -29,7 +29,7 @@ class SelectionParserTest {
     Map<String, Selection> subItemSelections = Collections.singletonMap("def", null);
     Map<String, Selection> itemSelections =
         Collections.singletonMap("abc", new Selection(subItemSelections));
-    assertEquals(new SelectionParser("abc(def)").parse(), new Selection(itemSelections));
+    assertEquals(new Selection(itemSelections), new SelectionParser("abc(def)").parse());
   }
 
   @Test
@@ -39,7 +39,7 @@ class SelectionParserTest {
     subItemSelections.put("ghi", null);
     Map<String, Selection> itemSelections =
         Collections.singletonMap("abc", new Selection(subItemSelections));
-    assertEquals(new SelectionParser("abc(def,ghi)").parse(), new Selection(itemSelections));
+    assertEquals(new Selection(itemSelections), new SelectionParser("abc(def,ghi)").parse());
   }
 
   @Test
@@ -47,7 +47,7 @@ class SelectionParserTest {
     Map<String, Selection> itemSelections = new HashMap<>();
     itemSelections.put("abc", new Selection(Collections.singletonMap("def", null)));
     itemSelections.put("ghi", new Selection(Collections.singletonMap("jkl", null)));
-    assertEquals(new SelectionParser("abc(def),ghi(jkl)").parse(), new Selection(itemSelections));
+    assertEquals(new Selection(itemSelections), new SelectionParser("abc(def),ghi(jkl)").parse());
   }
 
   @Test

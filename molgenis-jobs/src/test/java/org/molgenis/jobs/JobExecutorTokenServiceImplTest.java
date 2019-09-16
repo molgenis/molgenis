@@ -47,7 +47,7 @@ class JobExecutorTokenServiceImplTest extends AbstractMockitoTest {
     when(runAsUserTokenFactory.create("Job Execution", userDetails, null))
         .thenReturn(runAsUserToken);
 
-    assertEquals(jobExecutorTokenServiceImpl.createToken(jobExecution), runAsUserToken);
+    assertEquals(runAsUserToken, jobExecutorTokenServiceImpl.createToken(jobExecution));
   }
 
   @Test

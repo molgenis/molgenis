@@ -206,7 +206,7 @@ class VcfToEntityTest extends AbstractMolgenisSpringTest {
         new VcfRecord(
             vcfMeta, new String[] {"1", "54728", ".", "G", "T,C", ".", ".", "GoNL_AF=0.01,."});
     Entity entity = vcfToEntity.toEntity(record);
-    assertEquals(entity.getString("GoNL_AF"), "0.01,.");
+    assertEquals("0.01,.", entity.getString("GoNL_AF"));
   }
 
   @Configuration

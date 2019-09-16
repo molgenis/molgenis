@@ -1,12 +1,17 @@
 package org.molgenis.core.ui;
 
+import static com.google.common.collect.ImmutableList.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.core.ui.MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE;
+import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
+import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
+import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -73,15 +78,13 @@ class MolgenisInterceptorTest {
     molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 
     Map<String, Object> model = modelAndView.getModel();
-    assertEquals(
-        model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
+    assertEquals(resourceFingerprintRegistry, model.get(KEY_RESOURCE_FINGERPRINT_REGISTRY));
 
     Map<String, String> environmentAttributes =
         gson.fromJson(String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
 
-    assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
-    assertEquals(
-        environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
+    assertEquals(appSettings, model.get(KEY_APP_SETTINGS));
+    assertEquals(environment, environmentAttributes.get(ATTRIBUTE_ENVIRONMENT_TYPE));
     assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
     assertSame(model.get(KEY_GSON), gson);
   }
@@ -112,14 +115,14 @@ class MolgenisInterceptorTest {
 
     Map<String, Object> model = modelAndView.getModel();
     assertEquals(
-        model.get(PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS),
-        ImmutableList.of(
+        of(
             ImmutableMap.of(
                 "name",
                 "clientName",
                 "registrationId",
                 "registrationId",
                 "requestUri",
-                "/oauth2/authorization/registrationId")));
+                "/oauth2/authorization/registrationId")),
+        model.get(KEY_AUTHENTICATION_OIDC_CLIENTS));
   }
 }

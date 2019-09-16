@@ -1,13 +1,14 @@
 package org.molgenis.data.listeners;
 
+import static java.lang.Integer.valueOf;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,15 +51,15 @@ class EntityListenerRepositoryDecoratorTest {
   @Test
   void testQuery() {
     assertEquals(
-        entityListenerRepositoryDecorator.query().getRepository(),
-        entityListenerRepositoryDecorator);
+        entityListenerRepositoryDecorator,
+        entityListenerRepositoryDecorator.query().getRepository());
   }
 
   @Test
   void addStream() {
     Stream<Entity> entities = Stream.empty();
     Mockito.when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(entityListenerRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), entityListenerRepositoryDecorator.add(entities));
   }
 
   @Test
@@ -165,7 +166,7 @@ class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository).update(captor.capture());
-    assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
 
     Mockito.verify(entityListener0, Mockito.times(1)).postUpdate(entity0);
     Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
@@ -189,7 +190,7 @@ class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository).update(captor.capture());
-    assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
     Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
   }
 
@@ -208,7 +209,7 @@ class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository, Mockito.times(1)).update(captor.capture());
-    assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("resource")
@@ -240,7 +241,7 @@ class EntityListenerRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     Mockito.when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -254,7 +255,7 @@ class EntityListenerRepositoryDecoratorTest {
     Mockito.when(delegateRepository.findAll(entityIds, fetch))
         .thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds, fetch);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -264,7 +265,7 @@ class EntityListenerRepositoryDecoratorTest {
     Query<Entity> query = Mockito.mock(Query.class);
     Mockito.when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
-    assertEquals(entities.collect(Collectors.toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test

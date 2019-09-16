@@ -36,7 +36,7 @@ class DocumentIdGeneratorTest {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     String id = documentIdGenerator.generateId(entityType);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 
   static Iterator<Object[]> generateIdAttributeProvider() {
@@ -67,6 +67,6 @@ class DocumentIdGeneratorTest {
     when(attr.getIdentifier()).thenReturn(attrId);
     when(attr.getName()).thenReturn(attrName);
     String id = documentIdGenerator.generateId(attr);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 }

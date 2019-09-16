@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.util.FileCopyUtils.copyToString;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import javax.servlet.http.Part;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.util.FileCopyUtils;
 
 class FileUploadUtilsTest {
   private Part part;
@@ -30,7 +30,7 @@ class FileUploadUtilsTest {
     when(part.getHeader("content-disposition"))
         .thenReturn("form-data; name=\"upload\"; filename=\"example.xls\"");
     String filename = FileUploadUtils.getOriginalFileName(part);
-    assertEquals(filename, "example.xls");
+    assertEquals("example.xls", filename);
   }
 
   @Test
@@ -46,7 +46,7 @@ class FileUploadUtilsTest {
                 + File.separator
                 + "example.xls\"");
     String filename = FileUploadUtils.getOriginalFileName(part);
-    assertEquals(filename, "example.xls");
+    assertEquals("example.xls", filename);
   }
 
   @Test
@@ -75,7 +75,7 @@ class FileUploadUtilsTest {
     try {
       assertNotNull(tempFile);
       assertTrue(tempFile.exists());
-      assertEquals(FileCopyUtils.copyToString(new FileReader(tempFile)), fileContent);
+      assertEquals(fileContent, copyToString(new FileReader(tempFile)));
     } finally {
       tempFile.delete();
     }

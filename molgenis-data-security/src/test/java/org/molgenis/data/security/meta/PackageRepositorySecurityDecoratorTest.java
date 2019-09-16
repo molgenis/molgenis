@@ -171,7 +171,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), asList(package1, package2));
+    assertEquals(asList(package1, package2), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -215,7 +215,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(package1));
+    assertEquals(singletonList(package1), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -261,7 +261,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedPackage));
+    assertEquals(singletonList(permittedPackage), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -289,7 +289,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList("1"));
+    assertEquals(singletonList("1"), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -388,7 +388,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), asList(package1, package2));
+    assertEquals(asList(package1, package2), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -398,7 +398,7 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     when(delegateRepository.findOneById("1")).thenReturn(pack);
     when(userPermissionEvaluator.hasPermission(new PackageIdentity("1"), PackagePermission.VIEW))
         .thenReturn(true);
-    assertEquals(repo.findOneById("1"), pack);
+    assertEquals(pack, repo.findOneById("1"));
   }
 
   @Test

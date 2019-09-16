@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 import static org.molgenis.script.core.ScriptMetadata.TYPE;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -30,7 +31,6 @@ import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
-import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.service.UnitResolver;
 import org.molgenis.semanticmapper.service.impl.AlgorithmException;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateService;
@@ -117,9 +117,9 @@ class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest {
             targetBMIAttribute, sourceAttributes, targetEntityType, sourceEntityType);
 
     assertEquals(
-        generate.getAlgorithm(),
-        "$('sourceWeight').div($('sourceHeight').div(100.0).pow(2)).value()");
-    assertEquals(generate.getAlgorithmState(), AttributeMapping.AlgorithmState.GENERATED_HIGH);
+        "$('sourceWeight').div($('sourceHeight').div(100.0).pow(2)).value()",
+        generate.getAlgorithm());
+    assertEquals(GENERATED_HIGH, generate.getAlgorithmState());
   }
 
   @Test
@@ -145,7 +145,7 @@ class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest {
 
     String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
 
-    assertEquals(actualAlgorithm, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, actualAlgorithm);
   }
 
   @Test

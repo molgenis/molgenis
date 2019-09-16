@@ -49,7 +49,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).eq("test", parsedValue));
+        new QueryImpl<>(repository).eq("test", parsedValue), queryMapper.map(query, repository));
   }
 
   @Test
@@ -60,7 +60,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     Repository<Entity> repository = createMockRepository(attribute);
     when(rsqlValueParser.parse(null, attribute)).thenReturn(null);
 
-    assertEquals(queryMapper.map(query, repository), new QueryImpl<>(repository).eq("test", null));
+    assertEquals(new QueryImpl<>(repository).eq("test", null), queryMapper.map(query, repository));
   }
 
   @Test
@@ -75,8 +75,8 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository),
-        new QueryImpl<>(repository).not().eq("test", parsedValue));
+        new QueryImpl<>(repository).not().eq("test", parsedValue),
+        queryMapper.map(query, repository));
   }
 
   @Test
@@ -98,8 +98,8 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     doReturn(parsedValue1).when(rsqlValueParser).parse(value1, attribute);
 
     assertEquals(
-        queryMapper.map(query, repository),
-        new QueryImpl<>(repository).in("test", asList(parsedValue0, parsedValue1)));
+        new QueryImpl<>(repository).in("test", asList(parsedValue0, parsedValue1)),
+        queryMapper.map(query, repository));
   }
 
   @Test
@@ -121,8 +121,8 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     doReturn(parsedValue1).when(rsqlValueParser).parse(value1, attribute);
 
     assertEquals(
-        queryMapper.map(query, repository),
-        new QueryImpl<>(repository).not().in("test", asList(parsedValue0, parsedValue1)));
+        new QueryImpl<>(repository).not().in("test", asList(parsedValue0, parsedValue1)),
+        queryMapper.map(query, repository));
   }
 
   @Test
@@ -135,7 +135,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     Repository<Entity> repository = mock(Repository.class);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).search("test", value));
+        new QueryImpl<>(repository).search("test", value), queryMapper.map(query, repository));
   }
 
   @Test
@@ -146,7 +146,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
 
-    assertEquals(queryMapper.map(query, repository), new QueryImpl<>(repository).search(value));
+    assertEquals(new QueryImpl<>(repository).search(value), queryMapper.map(query, repository));
   }
 
   @Test
@@ -159,7 +159,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     Repository<Entity> repository = mock(Repository.class);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).like("test", value));
+        new QueryImpl<>(repository).like("test", value), queryMapper.map(query, repository));
   }
 
   @Test
@@ -174,7 +174,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).lt("test", parsedValue));
+        new QueryImpl<>(repository).lt("test", parsedValue), queryMapper.map(query, repository));
   }
 
   @Test
@@ -193,7 +193,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).le("test", parsedValue));
+        new QueryImpl<>(repository).le("test", parsedValue), queryMapper.map(query, repository));
   }
 
   @Test
@@ -208,7 +208,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).gt("test", parsedValue));
+        new QueryImpl<>(repository).gt("test", parsedValue), queryMapper.map(query, repository));
   }
 
   @Test
@@ -227,7 +227,7 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     when(rsqlValueParser.parse(value, attribute)).thenReturn(parsedValue);
 
     assertEquals(
-        queryMapper.map(query, repository), new QueryImpl<>(repository).ge("test", parsedValue));
+        new QueryImpl<>(repository).ge("test", parsedValue), queryMapper.map(query, repository));
   }
 
   @Test
@@ -247,8 +247,8 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     Repository<Entity> repository = mock(Repository.class);
 
     assertEquals(
-        queryMapper.map(query, repository),
-        new QueryImpl<>(repository).nest().search(value0).and().search(value1).unnest());
+        new QueryImpl<>(repository).nest().search(value0).and().search(value1).unnest(),
+        queryMapper.map(query, repository));
   }
 
   @Test
@@ -268,8 +268,8 @@ class QueryV3MapperTest extends AbstractMockitoTest {
     Repository<Entity> repository = mock(Repository.class);
 
     assertEquals(
-        queryMapper.map(query, repository),
-        new QueryImpl<>(repository).nest().search(value0).or().search(value1).unnest());
+        new QueryImpl<>(repository).nest().search(value0).or().search(value1).unnest(),
+        queryMapper.map(query, repository));
   }
 
   @Test

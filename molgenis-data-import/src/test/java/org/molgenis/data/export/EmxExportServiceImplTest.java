@@ -88,8 +88,8 @@ class EmxExportServiceImplTest extends AbstractMockitoTest {
         ImmutableMap.of(
             entityType1Id, entityType1, entityType2Id, entityType2, entityType3Id, entityType3);
 
-    assertEquals(packages, expectedPackages);
-    assertEquals(entityTypes, expectedEntityTypes);
+    assertEquals(expectedPackages, packages);
+    assertEquals(expectedEntityTypes, entityTypes);
   }
 
   @Test
@@ -117,7 +117,7 @@ class EmxExportServiceImplTest extends AbstractMockitoTest {
     Stream<List> argument = argumentCaptor.getValue();
     List<Object> actual = argument.collect(Collectors.toList()).get(0);
     // Check that the abstract entityType comes first in the stream to the writer
-    assertEquals(actual.get(0), "3");
+    assertEquals("3", actual.get(0));
   }
 
   @Test

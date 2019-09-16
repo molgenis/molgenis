@@ -43,9 +43,9 @@ class EntityAggregatesResponseTest extends AbstractMockitoTest {
 
     AggregateResultResponse aggregateResultResponse =
         AggregateResultResponse.toResponse(aggregateResult);
-    assertEquals(aggregateResultResponse.getMatrix(), matrix);
+    assertEquals(matrix, aggregateResultResponse.getMatrix());
     assertEquals(
-        aggregateResultResponse.getxLabels(), singletonList(singletonMap("longAttribute", "123")));
-    assertEquals(aggregateResultResponse.getyLabels(), emptyList());
+        singletonList(singletonMap("longAttribute", "123")), aggregateResultResponse.getxLabels());
+    assertEquals(emptyList(), aggregateResultResponse.getyLabels());
   }
 }

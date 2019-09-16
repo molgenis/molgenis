@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.navigator.Folder.create;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -88,8 +89,8 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
 
     when(dataService.findOneById(PACKAGE, folderId, Package.class)).thenReturn(aPackage);
     assertEquals(
-        navigatorServiceImpl.getFolder(folderId),
-        Folder.create(folderId, "packageLabel", Folder.create("parentId", "parentLabel", null)));
+        create(folderId, "packageLabel", create("parentId", "parentLabel", null)),
+        navigatorServiceImpl.getFolder(folderId));
   }
 
   @Test
@@ -141,7 +142,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
                 .setId("e0")
                 .setLabel("entityType0")
                 .build());
-    assertEquals(navigatorServiceImpl.getResources(folderId), expectedResources);
+    assertEquals(expectedResources, navigatorServiceImpl.getResources(folderId));
   }
 
   @Test
@@ -177,21 +178,21 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
 
     navigatorServiceImpl.moveResources(resources, targetFolderId);
 
-    assertEquals(packageIdsCaptor.getValue().collect(toList()), singletonList("p0"));
+    assertEquals(singletonList("p0"), packageIdsCaptor.getValue().collect(toList()));
     verify(package0).setParent(targetPackage);
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> updatedPackagesCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(PackageMetadata.PACKAGE), updatedPackagesCaptor.capture());
-    assertEquals(updatedPackagesCaptor.getValue().collect(toList()), singletonList(package0));
+    assertEquals(singletonList(package0), updatedPackagesCaptor.getValue().collect(toList()));
 
-    assertEquals(entityTypeIdsCaptor.getValue().collect(toList()), singletonList("e0"));
+    assertEquals(singletonList("e0"), entityTypeIdsCaptor.getValue().collect(toList()));
     verify(entityType0).setPackage(targetPackage);
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<EntityType>> updatedEntityTypesCaptor =
         ArgumentCaptor.forClass(Stream.class);
     verify(dataService)
         .update(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), updatedEntityTypesCaptor.capture());
-    assertEquals(updatedEntityTypesCaptor.getValue().collect(toList()), singletonList(entityType0));
+    assertEquals(singletonList(entityType0), updatedEntityTypesCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -210,13 +211,13 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
         .when(dataService)
         .findAll(eq(PackageMetadata.PACKAGE), packageIdsCaptor.capture(), eq(Package.class));
     navigatorServiceImpl.moveResources(resources, null);
-    assertEquals(packageIdsCaptor.getValue().collect(toList()), singletonList("p0"));
+    assertEquals(singletonList("p0"), packageIdsCaptor.getValue().collect(toList()));
     verify(package0).setParent(null);
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> updatedPackagesCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(PackageMetadata.PACKAGE), updatedPackagesCaptor.capture());
-    assertEquals(updatedPackagesCaptor.getValue().collect(toList()), singletonList(package0));
+    assertEquals(singletonList(package0), updatedPackagesCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -323,7 +324,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
     when(dataService.findOneById(PackageMetadata.PACKAGE, targetFolderId, Package.class))
         .thenReturn(targetPackage);
 
-    assertEquals(navigatorServiceImpl.copyResources(resources, targetFolderId), copyJobExecution);
+    assertEquals(copyJobExecution, navigatorServiceImpl.copyResources(resources, targetFolderId));
     verify(copyJobExecution).setResources(resources);
     verify(copyJobExecution).setTargetPackage(targetFolderId);
     verify(jobExecutor).submit(copyJobExecution);
@@ -340,7 +341,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
             ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
             ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
-    assertEquals(navigatorServiceImpl.copyResources(resources, null), copyJobExecution);
+    assertEquals(copyJobExecution, navigatorServiceImpl.copyResources(resources, null));
     verify(copyJobExecution).setResources(resources);
     verify(copyJobExecution).setTargetPackage(null);
     verify(jobExecutor).submit(copyJobExecution);
@@ -378,7 +379,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
             ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
             ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
-    assertEquals(navigatorServiceImpl.downloadResources(resources), downloadJobExecution);
+    assertEquals(downloadJobExecution, navigatorServiceImpl.downloadResources(resources));
     verify(downloadJobExecution).setResources(resources);
     verify(jobExecutor).submit(downloadJobExecution);
   }
@@ -546,7 +547,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
                 .setId("e0")
                 .setLabel("entityType0")
                 .build());
-    assertEquals(navigatorServiceImpl.findResources(query), expectedResources);
+    assertEquals(expectedResources, navigatorServiceImpl.findResources(query));
   }
 
   @WithMockUser
@@ -560,7 +561,7 @@ class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
             ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
             ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
-    assertEquals(navigatorServiceImpl.deleteResources(resources), deleteJobExecution);
+    assertEquals(deleteJobExecution, navigatorServiceImpl.deleteResources(resources));
     verify(deleteJobExecution).setResources(resources);
     verify(jobExecutor).submit(deleteJobExecution);
   }

@@ -1,6 +1,8 @@
 package org.molgenis.data.index;
 
+import static java.lang.Integer.valueOf;
 import static java.util.Collections.singleton;
+import static java.util.EnumSet.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +12,6 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 
-import java.util.EnumSet;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,8 +69,7 @@ class IndexActionRepositoryDecoratorTest {
 
   @Test
   void getCapabilities() {
-    assertEquals(
-        indexActionRepositoryDecorator.getCapabilities(), EnumSet.of(INDEXABLE, MANAGABLE));
+    assertEquals(of(INDEXABLE, MANAGABLE), indexActionRepositoryDecorator.getCapabilities());
   }
 
   @Test
@@ -264,7 +264,7 @@ class IndexActionRepositoryDecoratorTest {
 
     Stream<Entity> entities = Stream.empty();
     when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), indexActionRepositoryDecorator.add(entities));
     verify(delegateRepository, times(1)).add(entities);
     verify(indexActionRegisterService).register(entityType, null);
     verifyNoMoreInteractions(indexActionRegisterService);
@@ -276,7 +276,7 @@ class IndexActionRepositoryDecoratorTest {
 
     Stream<Entity> entities = Stream.empty();
     when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), indexActionRepositoryDecorator.add(entities));
     verify(delegateRepository, times(1)).add(entities);
     verify(indexActionRegisterService).register(entityType, null);
     verify(indexActionRegisterService).register(mappedByEntity, null);

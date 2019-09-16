@@ -92,7 +92,7 @@ class OntologyImportServiceIT extends ImportServiceIT {
   private void verifyOboAsSystem() {
     List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
     Ontology ontology = (Ontology) ontologies.get(0);
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
 
     List<Entity> synonyms =
         dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
@@ -114,7 +114,7 @@ class OntologyImportServiceIT extends ImportServiceIT {
             .filter(s -> s.getString("ontologyTermName").equals(ontologyTermName))
             .findFirst();
     assertTrue(molOntCoreOpt.isPresent());
-    assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
+    assertEquals(ontologyTermIRI, molOntCoreOpt.get().getString("ontologyTermIRI"));
   }
 
   @WithMockUser(username = USERNAME)
@@ -177,44 +177,44 @@ class OntologyImportServiceIT extends ImportServiceIT {
     Entity team = teamOpt.get();
 
     // Verify organization
-    assertEquals(organization.getString("ontologyTermIRI"), "http://www.molgenis.org#Organization");
-    assertEquals(organization.getString("ontologyTermName"), "organization");
+    assertEquals("http://www.molgenis.org#Organization", organization.getString("ontologyTermIRI"));
+    assertEquals("organization", organization.getString("ontologyTermName"));
 
     // verify organization ontologyTermSynonym
     Iterable<Entity> ontologyTermSynonym = organization.getEntities("ontologyTermSynonym");
     List<Entity> termSynonymRefList = new ArrayList<>();
     ontologyTermSynonym.forEach(termSynonymRefList::add);
-    assertEquals(termSynonymRefList.size(), 1);
+    assertEquals(1, termSynonymRefList.size());
     Entity organizationOntologyTermSynonym =
         dataService.findOneById(
             "sys_ont_OntologyTermSynonym", termSynonymRefList.get(0).getIdValue());
-    assertEquals(organizationOntologyTermSynonym.getString("ontologyTermSynonym"), "organization");
+    assertEquals("organization", organizationOntologyTermSynonym.getString("ontologyTermSynonym"));
 
     // verify organization ontology
     Ontology ontology = (Ontology) organization.get("ontology");
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
 
     // Verify the team row
-    assertEquals(team.getString("ontologyTermIRI"), "http://www.molgenis.org#Team");
-    assertEquals(team.getString("ontologyTermName"), "team");
+    assertEquals("http://www.molgenis.org#Team", team.getString("ontologyTermIRI"));
+    assertEquals("team", team.getString("ontologyTermName"));
 
     // verify team dynamic annotations
     Iterable<Entity> dynamicAnnotationItr = team.getEntities("ontologyTermDynamicAnnotation");
     List<Entity> dynamicAnnotations = new ArrayList<>();
     dynamicAnnotationItr.forEach(dynamicAnnotations::add);
-    assertEquals(dynamicAnnotations.size(), 2);
+    assertEquals(2, dynamicAnnotations.size());
     Entity annotationOne =
         dataService.findOneById(
             "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(0).getIdValue());
-    assertEquals(annotationOne.getString("label"), "friday:2412423");
+    assertEquals("friday:2412423", annotationOne.getString("label"));
     Entity annotationTwo =
         dataService.findOneById(
             "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(1).getIdValue());
-    assertEquals(annotationTwo.getString("label"), "molgenis:1231424");
+    assertEquals("molgenis:1231424", annotationTwo.getString("label"));
 
     // verify team ontology
     ontology = (Ontology) team.get("ontology");
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
   }
 
   @Autowired private PermissionService testPermissionService;

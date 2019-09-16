@@ -1,6 +1,7 @@
 package org.molgenis.data.file;
 
 import static java.io.File.separator;
+import static org.apache.commons.io.FileUtils.readFileToByteArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ class FileStoreTest {
   @Test
   void testStore() throws IOException {
     File file = fileStore.store(new ByteArrayInputStream(new byte[] {1, 2, 3}), "bytes.bin");
-    assertArrayEquals(FileUtils.readFileToByteArray(file), new byte[] {1, 2, 3});
+    assertArrayEquals(new byte[] {1, 2, 3}, readFileToByteArray(file));
   }
 
   @Test
@@ -51,7 +51,7 @@ class FileStoreTest {
         new ByteArrayInputStream(new byte[] {1, 2, 3}), "testDir1" + separator + "bytes.bin");
     fileStore.move("testDir1", "testDir2");
     File file = fileStore.getFileUnchecked("testDir2" + separator + "bytes.bin");
-    assertArrayEquals(FileUtils.readFileToByteArray(file), new byte[] {1, 2, 3});
+    assertArrayEquals(new byte[] {1, 2, 3}, readFileToByteArray(file));
   }
 
   @Test
@@ -64,14 +64,14 @@ class FileStoreTest {
     fileStore.move("testDir1" + separator + "testDir2", "testDir2" + separator + "testDir3");
     File file =
         fileStore.getFileUnchecked("testDir2" + separator + "testDir3" + separator + "bytes.bin");
-    assertArrayEquals(FileUtils.readFileToByteArray(file), new byte[] {1, 2, 3});
+    assertArrayEquals(new byte[] {1, 2, 3}, readFileToByteArray(file));
   }
 
   @Test
   void testGetFileUnchecked() throws IOException {
     String fileName = "bytes.bin";
     File file = fileStore.store(new ByteArrayInputStream(new byte[] {1, 2, 3}), fileName);
-    assertEquals(fileStore.getFileUnchecked(fileName).getAbsolutePath(), file.getAbsolutePath());
+    assertEquals(file.getAbsolutePath(), fileStore.getFileUnchecked(fileName).getAbsolutePath());
   }
 
   @Test

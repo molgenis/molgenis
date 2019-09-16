@@ -19,7 +19,7 @@ class SortV3MapperTest {
     org.molgenis.data.Sort expected = new org.molgenis.data.Sort();
     expected.on("attr1", org.molgenis.data.Sort.Direction.ASC);
     expected.on("attr2", org.molgenis.data.Sort.Direction.DESC);
-    assertEquals(sortV3Mapper.map(sort), expected);
+    assertEquals(expected, sortV3Mapper.map(sort));
   }
 
   @Test
@@ -28,6 +28,6 @@ class SortV3MapperTest {
     Sort sort = Sort.create(singletonList(Order.create("attr1")));
     org.molgenis.data.Sort expected =
         new org.molgenis.data.Sort().on("attr1", org.molgenis.data.Sort.Direction.ASC);
-    assertEquals(sortV3Mapper.map(sort), expected);
+    assertEquals(expected, sortV3Mapper.map(sort));
   }
 }

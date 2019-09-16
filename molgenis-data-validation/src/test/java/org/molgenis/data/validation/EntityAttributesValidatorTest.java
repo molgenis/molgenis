@@ -92,7 +92,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     entity.set("intrangemin", -1);
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity, intRangeMinMeta);
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   @Test
@@ -112,7 +112,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     entity.set("intrangemin", 2);
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity, intRangeMaxMeta);
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   static Iterator<Object[]> checkXrefValidProvider() {
@@ -153,7 +153,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 0);
+    assertEquals(0, constraints.size());
   }
 
   @ParameterizedTest
@@ -200,7 +200,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   static Iterator<Object[]> checkMrefValidProvider() {
@@ -245,7 +245,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 0);
+    assertEquals(0, constraints.size());
   }
 
   @ParameterizedTest
@@ -295,7 +295,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   @ParameterizedTest
@@ -336,7 +336,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   @Test
@@ -374,7 +374,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
                 "Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1"),
             new ConstraintViolation(
                 "Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2"));
-    assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
+    assertEquals(expectedConstraintViolations, newHashSet(constraintViolations));
   }
 
   @Test
@@ -390,10 +390,10 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     Set<ConstraintViolation> constraintViolations =
         entityAttributesValidator.validate(entity, entityType);
     assertEquals(
-        constraintViolations,
         singleton(
             new ConstraintViolation(
-                "Invalid [string] value [null] for attribute [id] of entity [My entity] with type [MyEntityTypeId].")));
+                "Invalid [string] value [null] for attribute [id] of entity [My entity] with type [MyEntityTypeId].")),
+        constraintViolations);
   }
 
   @Test
@@ -404,7 +404,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     when(entity.getDouble(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.DECIMAL);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   @Test
@@ -415,7 +415,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     when(entity.getInt(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.INT);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   @Test
@@ -426,7 +426,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     when(entity.getLong(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.LONG);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   private Attribute createMockAttribute(

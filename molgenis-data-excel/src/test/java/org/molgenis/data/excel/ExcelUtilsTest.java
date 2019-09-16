@@ -5,6 +5,9 @@ import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.excel.ExcelUtils.getNumberOfSheets;
+import static org.molgenis.data.excel.ExcelUtils.isExcelFile;
+import static org.molgenis.data.excel.ExcelUtils.toValue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +31,7 @@ class ExcelUtilsTest {
     Cell cell = mock(Cell.class);
     when(cell.getCellTypeEnum()).thenReturn(NUMERIC);
     when(cell.getNumericCellValue()).thenReturn(1.2342151234E10);
-    assertEquals(ExcelUtils.toValue(cell), "12342151234");
+    assertEquals("12342151234", toValue(cell));
   }
 
   @Test
@@ -52,7 +55,7 @@ class ExcelUtilsTest {
     when(cell.getCellTypeEnum()).thenReturn(FORMULA);
     when(cell.getSheet()).thenReturn(sheet);
     when(cell.getNumericCellValue()).thenReturn(1.2342151234E10);
-    assertEquals(ExcelUtils.toValue(cell), "12342151234");
+    assertEquals("12342151234", toValue(cell));
   }
 
   @Test
@@ -62,33 +65,33 @@ class ExcelUtilsTest {
     FileUtils.copyFile(file, temp);
     ExcelUtils.renameSheet("unittest", temp, 0);
     Workbook workbook = WorkbookFactory.create(new FileInputStream(temp));
-    assertEquals(workbook.getSheetAt(0).getSheetName(), "unittest");
+    assertEquals("unittest", workbook.getSheetAt(0).getSheetName());
   }
 
   @Test
   void getNumberOfSheetsTest() {
     File file = ResourceUtils.getFile(getClass(), "/test.xls");
-    assertEquals(ExcelUtils.getNumberOfSheets(file), 3);
+    assertEquals(3, getNumberOfSheets(file));
   }
 
   @Test
   void getNumberOfSheetsTestCSV() {
     File file = ResourceUtils.getFile(getClass(), "/test.csv");
-    assertEquals(ExcelUtils.getNumberOfSheets(file), -1);
+    assertEquals(-1, getNumberOfSheets(file));
   }
 
   @Test
   void testIsExcelFileTrueXLSX() {
-    assertEquals(ExcelUtils.isExcelFile("test.xlsx"), true);
+    assertEquals(true, isExcelFile("test.xlsx"));
   }
 
   @Test
   void testIsExcelFileTrueXLS() {
-    assertEquals(ExcelUtils.isExcelFile("test.xls"), true);
+    assertEquals(true, isExcelFile("test.xls"));
   }
 
   @Test
   void testIsExcelFileFalse() {
-    assertEquals(ExcelUtils.isExcelFile("test.csv"), false);
+    assertEquals(false, isExcelFile("test.csv"));
   }
 }

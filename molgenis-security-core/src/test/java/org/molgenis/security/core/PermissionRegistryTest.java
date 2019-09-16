@@ -1,5 +1,6 @@
 package org.molgenis.security.core;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.WRITE;
@@ -35,9 +36,7 @@ class PermissionRegistryTest {
 
   @Test
   void testGetPermissions() {
-    assertEquals(
-        permissionRegistry.getPermissions(TestPermission.UPDATE),
-        ImmutableSet.of(WRITE, WRITEMETA));
+    assertEquals(of(WRITE, WRITEMETA), permissionRegistry.getPermissions(TestPermission.UPDATE));
   }
 
   @Test
@@ -50,6 +49,6 @@ class PermissionRegistryTest {
             ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE),
             READ,
             ImmutableSet.of(TestPermission.READ));
-    assertEquals(permissionRegistry.getPermissionSets(), expected);
+    assertEquals(expected, permissionRegistry.getPermissionSets());
   }
 }

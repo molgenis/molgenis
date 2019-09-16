@@ -136,7 +136,7 @@ class NegotiatorControllerTest {
     ExportValidationResponse expected =
         ExportValidationResponse.create(true, "", enabledCollections, emptyList());
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -189,7 +189,7 @@ class NegotiatorControllerTest {
             false,
             "Please make sure your selection contains at least 1 row that supports the negotiator.");
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -227,7 +227,7 @@ class NegotiatorControllerTest {
             enabledCollections,
             disabledCollections);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -258,7 +258,7 @@ class NegotiatorControllerTest {
             emptyList(),
             disabledCollections);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -281,7 +281,7 @@ class NegotiatorControllerTest {
     String actual = negotiatorController.exportToNegotiator(request);
     String expected = "http://directory.com/request/1280";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test

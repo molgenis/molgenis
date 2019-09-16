@@ -1,5 +1,6 @@
 package org.molgenis.data.icd10;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -7,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -69,8 +69,7 @@ class Icd10ClassExpanderImplTest {
       Collection<Entity> diseaseClasses, Collection<Entity> expectedExpandedDiseaseClasses) {
     Collection<Entity> expandedDiseaseClasses =
         icd10ClassExpanderImpl.expandClasses(diseaseClasses);
-    assertEquals(
-        Sets.newHashSet(expandedDiseaseClasses), Sets.newHashSet(expectedExpandedDiseaseClasses));
+    assertEquals(newHashSet(expectedExpandedDiseaseClasses), newHashSet(expandedDiseaseClasses));
   }
 
   private static Entity createEntity(String idValue) {

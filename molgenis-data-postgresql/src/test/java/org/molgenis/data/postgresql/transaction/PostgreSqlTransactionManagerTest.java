@@ -37,6 +37,6 @@ class PostgreSqlTransactionManagerTest {
     assertTrue(trans instanceof MolgenisTransaction);
 
     MolgenisTransaction molgenisTransaction = (MolgenisTransaction) trans;
-    assertEquals(molgenisTransaction.getId(), id);
+    assertEquals(id, molgenisTransaction.getId());
   }
 }

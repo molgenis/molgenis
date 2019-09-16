@@ -10,14 +10,14 @@ class MenuItemTest {
   @Test
   void itemWithParams() {
     MenuItem menuItem = MenuItem.create("id", "label", "params");
-    assertEquals(menuItem.getParams(), "params");
-    assertEquals(menuItem.getUrl(), "id?params");
+    assertEquals("params", menuItem.getParams());
+    assertEquals("id?params", menuItem.getUrl());
   }
 
   @Test
   void itemWithOutParams() {
     MenuItem menuItem = MenuItem.create("id", "label");
     assertNull(menuItem.getParams());
-    assertEquals(menuItem.getUrl(), "id");
+    assertEquals("id", menuItem.getUrl());
   }
 }

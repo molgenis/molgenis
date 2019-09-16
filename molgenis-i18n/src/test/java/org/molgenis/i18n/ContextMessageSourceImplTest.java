@@ -31,7 +31,7 @@ class ContextMessageSourceImplTest extends AbstractMockitoTest {
 
     LocaleContextHolder.setLocale(locale);
     MessageSourceHolder.setMessageSource(messageSource);
-    assertEquals(userMessageSourceImpl.getMessage(code), message);
+    assertEquals(message, userMessageSourceImpl.getMessage(code));
   }
 
   @Test
@@ -45,6 +45,6 @@ class ContextMessageSourceImplTest extends AbstractMockitoTest {
 
     LocaleContextHolder.setLocale(locale);
     MessageSourceHolder.setMessageSource(messageSource);
-    assertEquals(userMessageSourceImpl.getMessage(code, args), message);
+    assertEquals(message, userMessageSourceImpl.getMessage(code, args));
   }
 }

@@ -27,7 +27,7 @@ class InvalidValueTypeExceptionTest extends ExceptionMessageTest {
   void testGetMessage() {
     InvalidValueTypeException ex =
         new InvalidValueTypeException("value", "type", mock(Throwable.class));
-    assertEquals(ex.getMessage(), "value:value type:type");
+    assertEquals("value:value type:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

@@ -32,7 +32,7 @@ class ValueReferencedExceptionTest extends ExceptionMessageTest {
         new ValueReferencedException(
             "MyEntityType", "myAttributeName", "myValue", mock(Throwable.class));
     assertEquals(
-        ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue");
+        "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

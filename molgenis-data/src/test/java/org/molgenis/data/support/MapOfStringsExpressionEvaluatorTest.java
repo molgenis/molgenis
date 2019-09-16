@@ -76,7 +76,7 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected NPE");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "Attribute has no expression.");
+      assertEquals("Attribute has no expression.", expected.getMessage());
     }
   }
 
@@ -89,7 +89,7 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected IllegalArgumentException.");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "refEntity not specified.");
+      assertEquals("refEntity not specified.", expected.getMessage());
     }
   }
 
@@ -120,8 +120,8 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Nested expressions not supported, expression must be Map<String,String>.");
+          "Nested expressions not supported, expression must be Map<String,String>.",
+          expected.getMessage());
     }
   }
 
@@ -136,7 +136,7 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
-      assertEquals(expected.getMessage(), "Unknown target attribute: hallo.");
+      assertEquals("Unknown target attribute: hallo.", expected.getMessage());
     }
   }
 
@@ -152,8 +152,8 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
       fail("Expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.");
+          "Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.",
+          expected.getMessage());
     }
   }
 

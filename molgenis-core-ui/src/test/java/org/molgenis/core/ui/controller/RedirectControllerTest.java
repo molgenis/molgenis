@@ -72,6 +72,6 @@ class RedirectControllerTest extends AbstractMockitoTest {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
     String url = "https://nu.nl/?a=b&c=d";
     RedirectView response = (RedirectView) redirectController.redirect(url);
-    assertEquals(response.getUrl(), url);
+    assertEquals(url, response.getUrl());
   }
 }

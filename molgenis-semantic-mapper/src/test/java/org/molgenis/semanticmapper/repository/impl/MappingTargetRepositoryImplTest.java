@@ -107,7 +107,7 @@ class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(entityMappings);
     when(dataService.hasRepository("target")).thenReturn(true);
 
-    assertEquals(mappingTargetRepository.toMappingTargets(mappingTargetEntities), mappingTargets);
+    assertEquals(mappingTargets, mappingTargetRepository.toMappingTargets(mappingTargetEntities));
   }
 
   @Test
@@ -115,7 +115,7 @@ class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
     when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
     List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
 
-    assertEquals(mappingTargetEntities.size(), result.size());
+    assertEquals(result.size(), mappingTargetEntities.size());
     for (int i = 0; i < mappingTargetEntities.size(); ++i) {
       assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
     }
@@ -129,7 +129,7 @@ class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
     when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
     List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
 
-    assertEquals(mappingTargetEntities.size(), result.size());
+    assertEquals(result.size(), mappingTargetEntities.size());
     for (int i = 0; i < mappingTargetEntities.size(); ++i) {
       assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
     }

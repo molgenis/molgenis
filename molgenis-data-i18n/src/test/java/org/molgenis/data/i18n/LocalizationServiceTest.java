@@ -1,6 +1,9 @@
 package org.molgenis.data.i18n;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -15,14 +18,10 @@ import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.MSGID;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.NAMESPACE;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +66,7 @@ class LocalizationServiceTest extends AbstractMockitoTest {
     when(query.eq(MSGID, "EN_PLUS_NL").findOne()).thenReturn(enPlusNl);
 
     assertEquals(
-        localizationService.resolveCodeWithoutArguments("EN_PLUS_NL", DUTCH), "string 1 - nl");
+        "string 1 - nl", localizationService.resolveCodeWithoutArguments("EN_PLUS_NL", DUTCH));
   }
 
   @Test
@@ -82,8 +81,8 @@ class LocalizationServiceTest extends AbstractMockitoTest {
     doReturn("string 2 - nl").when(nlOnly).getString(DUTCH);
 
     assertEquals(
-        localizationService.getMessages("test", DUTCH),
-        ImmutableMap.of("EN_PLUS_NL", "string 1 - nl", "NL_ONLY", "string 2 - nl"));
+        of("EN_PLUS_NL", "string 1 - nl", "NL_ONLY", "string 2 - nl"),
+        localizationService.getMessages("test", DUTCH));
   }
 
   @Test
@@ -103,7 +102,7 @@ class LocalizationServiceTest extends AbstractMockitoTest {
     localizationService.addMissingMessageIds("test", messageIds);
 
     verify(dataService).add(eq(L10N_STRING), addCaptor.capture());
-    assertEquals(addCaptor.getValue().collect(toSet()), Collections.singleton(newString1));
+    assertEquals(singleton(newString1), addCaptor.getValue().collect(toSet()));
   }
 
   @Test
@@ -115,8 +114,7 @@ class LocalizationServiceTest extends AbstractMockitoTest {
 
     localizationService.deleteNamespace("test");
     verify(dataService).delete(eq(L10N_STRING), deleteCaptor.capture());
-    assertEquals(
-        deleteCaptor.getValue().collect(Collectors.toList()), newArrayList(enPlusNl, nlOnly));
+    assertEquals(newArrayList(enPlusNl, nlOnly), deleteCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -128,8 +126,8 @@ class LocalizationServiceTest extends AbstractMockitoTest {
     verify(dataService).add(eq(L10N_STRING), addCaptor.capture());
     verify(dataService).update(eq(L10N_STRING), updateCaptor.capture());
 
-    assertEquals(addCaptor.getValue().collect(toList()), toAdd);
-    assertEquals(updateCaptor.getValue().collect(toList()), toUpdate);
+    assertEquals(toAdd, addCaptor.getValue().collect(toList()));
+    assertEquals(toUpdate, updateCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -138,6 +136,6 @@ class LocalizationServiceTest extends AbstractMockitoTest {
         .thenReturn(Stream.of(enPlusNl, nlOnly));
     when(enPlusNl.getMessageID()).thenReturn("A");
     when(nlOnly.getMessageID()).thenReturn("B");
-    assertEquals(localizationService.getAllMessageIds(), Arrays.asList("A", "B"));
+    assertEquals(asList("A", "B"), localizationService.getAllMessageIds());
   }
 }

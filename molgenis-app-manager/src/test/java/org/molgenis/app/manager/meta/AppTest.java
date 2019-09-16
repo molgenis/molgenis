@@ -31,23 +31,23 @@ class AppTest extends AbstractMolgenisSpringTest {
 
   @Test
   void testId() {
-    assertEquals(app.getId(), "id");
+    assertEquals("id", app.getId());
     app.setId("id1");
-    assertEquals(app.getId(), "id1");
+    assertEquals("id1", app.getId());
   }
 
   @Test
   void testLabel() {
     assertNull(app.getLabel());
     app.setLabel("label");
-    assertEquals(app.getLabel(), "label");
+    assertEquals("label", app.getLabel());
   }
 
   @Test
   void testDescription() {
     assertNull(app.getDescription());
     app.setDescription("description");
-    assertEquals(app.getDescription(), "description");
+    assertEquals("description", app.getDescription());
   }
 
   @Test
@@ -61,49 +61,49 @@ class AppTest extends AbstractMolgenisSpringTest {
   void testVersion() {
     assertNull(app.getAppVersion());
     app.setAppVersion("1.0.0");
-    assertEquals(app.getAppVersion(), "1.0.0");
+    assertEquals("1.0.0", app.getAppVersion());
   }
 
   @Test
   void testDependency() {
     assertNull(app.getApiDependency());
     app.setApiDependency("7.9.1");
-    assertEquals(app.getApiDependency(), "7.9.1");
+    assertEquals("7.9.1", app.getApiDependency());
   }
 
   @Test
   void testContent() {
     assertNull(app.getTemplateContent());
     app.setTemplateContent("<html></html>");
-    assertEquals(app.getTemplateContent(), "<html></html>");
+    assertEquals("<html></html>", app.getTemplateContent());
   }
 
   @Test
   void testResource() {
     assertNull(app.getResourceFolder());
     app.setResourceFolder("/blah");
-    assertEquals(app.getResourceFolder(), "/blah");
+    assertEquals("/blah", app.getResourceFolder());
   }
 
   @Test
   void testUri() {
     assertNull(app.getName());
     app.setName("app1");
-    assertEquals(app.getName(), "app1");
+    assertEquals("app1", app.getName());
   }
 
   @Test
   void testConfig() {
     assertNull(app.getAppConfig());
     app.setAppConfig("{key: value}");
-    assertEquals(app.getAppConfig(), "{key: value}");
+    assertEquals("{key: value}", app.getAppConfig());
   }
 
   @Test
   void testFolder() {
     assertNull(app.getResourceFolder());
     app.setResourceFolder("/blah");
-    assertEquals(app.getResourceFolder(), "/blah");
+    assertEquals("/blah", app.getResourceFolder());
   }
 
   @Test

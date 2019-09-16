@@ -42,9 +42,9 @@ class TokenAuthenticationProviderTest {
     Authentication auth = tokenAuthenticationProvider.authenticate(authToken);
     assertNotNull(auth);
     assertTrue(auth.isAuthenticated());
-    assertEquals(auth.getName(), "username");
-    assertEquals(auth.getAuthorities().size(), 1);
-    assertEquals(auth.getAuthorities().iterator().next().getAuthority(), "admin");
+    assertEquals("username", auth.getName());
+    assertEquals(1, auth.getAuthorities().size());
+    assertEquals("admin", auth.getAuthorities().iterator().next().getAuthority());
   }
 
   @Test

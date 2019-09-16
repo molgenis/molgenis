@@ -1,6 +1,7 @@
 package org.molgenis.security.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ public class GroupValueFactoryTest {
             ImmutableList.of("Manager", "Editor", "Viewer"));
 
     GroupValue groupValue = getTestGroupValue();
-    assertEquals(bbmri_eric, groupValue);
+    assertEquals(groupValue, bbmri_eric);
   }
 
   /** Creates a test GroupValue. */
@@ -73,7 +74,7 @@ public class GroupValueFactoryTest {
   @ParameterizedTest
   @MethodSource("roleNameProvider")
   void testCreateRoleName(String groupName, String roleLabel, String roleName) {
-    assertEquals(GroupValueFactory.createRoleName(groupName, roleLabel), roleName);
+    assertEquals(roleName, createRoleName(groupName, roleLabel));
   }
 
   static Object[][] roleNameProvider() {

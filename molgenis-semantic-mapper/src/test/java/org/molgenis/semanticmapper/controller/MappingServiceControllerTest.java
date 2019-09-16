@@ -18,6 +18,8 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
+import static org.molgenis.semanticsearch.explain.bean.ExplainedAttributeDto.create;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -62,7 +64,6 @@ import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticsearch.explain.bean.AttributeSearchResults;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
-import org.molgenis.semanticsearch.explain.bean.ExplainedAttributeDto;
 import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.OntologyTagService;
@@ -291,8 +292,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     String actual = result.getResponse().getContentAsString();
 
     assertEquals(
-        actual,
-        "{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"age\"}");
+        "{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"age\"}",
+        actual);
   }
 
   @Test
@@ -318,8 +319,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     String actual2 = result2.getResponse().getContentAsString();
 
     assertEquals(
-        actual2,
-        "{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"dob\"}");
+        "{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"dob\"}",
+        actual2);
   }
 
   @Test
@@ -336,7 +337,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
         response.getContentAsString(),
         "true",
         "When checking for a new entity type, the result should be the String \"true\"");
-    assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+    assertEquals(APPLICATION_JSON_UTF8_VALUE, response.getContentType());
     verify(dataService).hasEntityType("blah");
   }
 
@@ -352,7 +353,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                     .accept(MediaType.APPLICATION_JSON))
             .andReturn()
             .getResponse();
-    assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+    assertEquals(APPLICATION_JSON_UTF8_VALUE, response.getContentType());
     assertEquals(
         response.getContentAsString(),
         "false",
@@ -387,7 +388,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
     String actual3 = result3.getResponse().getContentAsString();
 
-    assertEquals(actual3, "");
+    assertEquals("", actual3);
   }
 
   @Test
@@ -538,7 +539,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
     String view = controller.viewMappingProject("hop hop hop", model);
 
-    assertEquals(view, "view-single-mapping-project");
+    assertEquals("view-single-mapping-project", view);
     verify(model).addAttribute("entityTypes", asList(target1, target2));
     verify(model).addAttribute("packages", singletonList(base));
     verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
@@ -605,8 +606,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                     Hit.create(
                         ExplainedAttribute.create(stringAttribute, emptySet(), false), 1f))));
     assertEquals(
-        controller.getSemanticSearchAttributeMapping(requestBody),
-        singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
+        singletonList(create(stringAttribute, emptySet(), false)),
+        controller.getSemanticSearchAttributeMapping(requestBody));
   }
 
   @Test
@@ -636,8 +637,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     when(semanticSearchService.findAttributes(sourceEntityType, targetEntityType, null, emptySet()))
         .thenReturn(AttributeSearchResults.create(stringAttribute, Hits.create(emptyList())));
     assertEquals(
-        controller.getSemanticSearchAttributeMapping(requestBody),
-        singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
+        singletonList(create(stringAttribute, emptySet(), false)),
+        controller.getSemanticSearchAttributeMapping(requestBody));
   }
 
   @Test

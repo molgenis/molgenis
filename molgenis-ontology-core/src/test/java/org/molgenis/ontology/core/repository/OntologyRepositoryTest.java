@@ -12,6 +12,7 @@ import static org.molgenis.ontology.core.meta.OntologyMetadata.ID;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_IRI;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_NAME;
+import static org.molgenis.ontology.core.model.Ontology.create;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -43,8 +44,7 @@ class OntologyRepositoryTest extends AbstractMockitoSpringContextTests {
 
     when(dataService.findAll(eq(ONTOLOGY))).thenReturn(Stream.of(ontologyEntity));
     List<Ontology> ontologies = ontologyRepository.getOntologies().collect(toList());
-    assertEquals(
-        ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
+    assertEquals(asList(create("1", "http://www.ontology.com/test", "testOntology")), ontologies);
   }
 
   @Test
@@ -61,9 +61,8 @@ class OntologyRepositoryTest extends AbstractMockitoSpringContextTests {
         .thenReturn(Stream.of(ontologyEntity));
     List<Ontology> ontologies =
         ontologyRepository.getOntologies(singletonList("1")).collect(toList());
-    assertEquals(
-        ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
-    assertEquals(idCaptor.getValue().collect(toList()), singletonList("1"));
+    assertEquals(asList(create("1", "http://www.ontology.com/test", "testOntology")), ontologies);
+    assertEquals(singletonList("1"), idCaptor.getValue().collect(toList()));
   }
 
   @Test
@@ -80,8 +79,8 @@ class OntologyRepositoryTest extends AbstractMockitoSpringContextTests {
     when(query.eq(ONTOLOGY_IRI, "http://www.ontology.com/test").findOne())
         .thenReturn(ontologyEntity);
     assertEquals(
-        ontologyRepository.getOntology("http://www.ontology.com/test"),
-        Ontology.create("1", "http://www.ontology.com/test", "testOntology"));
+        create("1", "http://www.ontology.com/test", "testOntology"),
+        ontologyRepository.getOntology("http://www.ontology.com/test"));
   }
 
   @Configuration

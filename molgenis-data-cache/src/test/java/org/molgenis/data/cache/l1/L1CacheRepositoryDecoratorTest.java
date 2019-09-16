@@ -1,6 +1,8 @@
 package org.molgenis.data.cache.l1;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.never;
@@ -16,7 +18,6 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
 import com.google.common.collect.Sets;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -130,9 +131,8 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     verify(l1Cache).put(authorEntityName, author);
     verify(l1Cache).evict(entityKeysCaptor.capture());
     assertEquals(
-        entityKeysCaptor.getValue().collect(Collectors.toList()),
-        Arrays.asList(
-            EntityKey.create(bookEntityName, bookID), EntityKey.create(bookEntityName, bookID2)));
+        asList(create(bookEntityName, bookID), create(bookEntityName, bookID2)),
+        entityKeysCaptor.getValue().collect(toList()));
     verifyNoMoreInteractions(l1Cache);
   }
 
@@ -153,9 +153,8 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     verify(l1Cache).putDeletion(create(author));
     verify(l1Cache).evict(entityKeysCaptor.capture());
     assertEquals(
-        entityKeysCaptor.getValue().collect(Collectors.toList()),
-        Arrays.asList(
-            EntityKey.create(bookEntityName, bookID), EntityKey.create(bookEntityName, bookID2)));
+        asList(create(bookEntityName, bookID), create(bookEntityName, bookID2)),
+        entityKeysCaptor.getValue().collect(toList()));
 
     verifyNoMoreInteractions(l1Cache);
   }
@@ -223,7 +222,7 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
     when(l1Cache.get(authorEntityName, authorID, authorMetaData))
         .thenReturn(Optional.of(CacheHit.of(author)));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
-    assertEquals(actualEntity, author);
+    assertEquals(author, actualEntity);
 
     verify(authorRepository, never()).findOneById(Mockito.any());
   }
@@ -258,10 +257,10 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
         l1CacheRepositoryDecorator
             .findAll(Stream.of(authorID, authorID2))
             .collect(Collectors.toList());
-    assertEquals(actual, asList(author, author2));
+    assertEquals(asList(author, author2), actual);
 
     List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
-    assertEquals(ids, asList(authorID, authorID2));
+    assertEquals(asList(authorID, authorID2), ids);
   }
 
   @Test
@@ -278,8 +277,8 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
             .collect(Collectors.toList());
 
     List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
-    assertEquals(ids, Collections.singletonList(authorID2));
-    assertEquals(actual, asList(author, author2));
+    assertEquals(singletonList(authorID2), ids);
+    assertEquals(asList(author, author2), actual);
   }
 
   @Configuration

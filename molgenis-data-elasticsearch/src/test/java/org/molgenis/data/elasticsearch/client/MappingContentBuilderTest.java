@@ -43,7 +43,7 @@ class MappingContentBuilderTest {
     Mapping mapping =
         createMapping(FieldMapping.builder().setName("field").setType(mappingType).build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
-    assertEquals(xContentBuilder.string(), expectedJson);
+    assertEquals(expectedJson, xContentBuilder.string());
   }
 
   @Test
@@ -58,7 +58,7 @@ class MappingContentBuilderTest {
                 .setNestedFieldMappings(singletonList(nestedFieldMapping))
                 .build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
-    assertEquals(xContentBuilder.string(), JSON_NESTED);
+    assertEquals(JSON_NESTED, xContentBuilder.string());
   }
 
   private static Mapping createMapping(FieldMapping fieldMapping) {

@@ -44,6 +44,6 @@ class RSQLValueParserTest {
     when(refIdAttr.getDataType()).thenReturn(refIdAttrType);
     when(refEntity.getIdAttribute()).thenReturn(refIdAttr);
     when(oneToManyAttr.getRefEntity()).thenReturn(refEntity);
-    assertEquals(parsedValue, rSqlValueParser.parse("1", oneToManyAttr));
+    assertEquals(rSqlValueParser.parse("1", oneToManyAttr), parsedValue);
   }
 }

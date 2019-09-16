@@ -22,7 +22,7 @@ class NashornScriptEngineTest {
   @Test
   void testInvokeFunction() throws Exception {
     long epoch = 1487342481434L;
-    assertEquals(nashornScriptEngine.eval("new Date(" + epoch + ")"), epoch);
+    assertEquals(epoch, nashornScriptEngine.eval("new Date(" + epoch + ")"));
   }
 
   @Test
@@ -33,7 +33,7 @@ class NashornScriptEngineTest {
             "new Date(%d,%d,%d)",
             localDate.getYear(), localDate.getMonth().getValue() - 1, localDate.getDayOfMonth());
     long epochMilli = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    assertEquals(nashornScriptEngine.eval(script), epochMilli);
+    assertEquals(epochMilli, nashornScriptEngine.eval(script));
   }
 
   @Test

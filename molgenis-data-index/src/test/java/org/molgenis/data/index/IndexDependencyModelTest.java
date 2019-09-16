@@ -1,11 +1,11 @@
 package org.molgenis.data.index;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("1", "3", "4"));
+    assertEquals(of("1", "3", "4"), dependencies);
   }
 
   @Test
@@ -76,7 +76,7 @@ class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("3").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("0", "4"));
+    assertEquals(of("0", "4"), dependencies);
   }
 
   @Test
@@ -91,7 +91,7 @@ class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("0"));
+    assertEquals(of("0"), dependencies);
   }
 
   @Test
@@ -106,7 +106,7 @@ class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of());
+    assertEquals(of(), dependencies);
   }
 
   private void addReferences(EntityType referringEntity, List<EntityType> refEntities) {

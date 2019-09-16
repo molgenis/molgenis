@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.security.login.MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE;
 import static org.molgenis.security.twofactor.TwoFactorAuthenticationController.ATTRIBUTE_2FA_SECRET_KEY;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProviderImpl;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProvider;
@@ -59,13 +59,13 @@ class TwoFactorAuthenticationControllerTest {
     when(twoFactorAuthenticationService.generateSecretKey()).thenReturn("secretKey");
     Model model = new ExtendedModelMap();
     String viewTemplate = twoFactorAuthenticationController.activation(model);
-    assertEquals(viewTemplate, "view-2fa-activation-modal");
+    assertEquals("view-2fa-activation-modal", viewTemplate);
   }
 
   @Test
   void configuredExceptionTest() {
     String viewTemplate = twoFactorAuthenticationController.configured();
-    assertEquals(viewTemplate, "view-2fa-configured-modal");
+    assertEquals("view-2fa-configured-modal", viewTemplate);
   }
 
   @Test
@@ -82,11 +82,9 @@ class TwoFactorAuthenticationControllerTest {
 
     String viewTemplate =
         twoFactorAuthenticationController.authenticate(model, verificationCode, secretKey);
-    assertEquals(model.asMap().get(ATTRIBUTE_2FA_SECRET_KEY), secretKey);
-    assertEquals(
-        "Invalid verification code entered",
-        model.asMap().get(MolgenisLoginController.ERROR_MESSAGE_ATTRIBUTE));
-    assertEquals(viewTemplate, "view-2fa-activation-modal");
+    assertEquals(secretKey, model.asMap().get(ATTRIBUTE_2FA_SECRET_KEY));
+    assertEquals(model.asMap().get(ERROR_MESSAGE_ATTRIBUTE), "Invalid verification code entered");
+    assertEquals("view-2fa-activation-modal", viewTemplate);
   }
 
   @Test
@@ -98,7 +96,7 @@ class TwoFactorAuthenticationControllerTest {
     when(twoFactorAuthenticationProvider.authenticate(authToken))
         .thenThrow(new BadCredentialsException("test"));
     String viewTemplate = twoFactorAuthenticationController.validate(model, verificationCode);
-    assertEquals(viewTemplate, "view-2fa-configured-modal");
+    assertEquals("view-2fa-configured-modal", viewTemplate);
   }
 
   @Test
@@ -107,7 +105,7 @@ class TwoFactorAuthenticationControllerTest {
     String recoveryCodeId = "123456";
     Model model = new ExtendedModelMap();
     String viewTemplate = twoFactorAuthenticationController.recoverAccount(model, recoveryCodeId);
-    assertEquals(viewTemplate, "redirect:/");
+    assertEquals("redirect:/", viewTemplate);
   }
 
   @Test
@@ -116,7 +114,7 @@ class TwoFactorAuthenticationControllerTest {
     Model model = new ExtendedModelMap();
     when(twoFactorAuthenticationService.generateSecretKey()).thenReturn("secret");
     String viewTemplate = twoFactorAuthenticationController.activation(model);
-    assertEquals(viewTemplate, "view-2fa-activation-modal");
+    assertEquals("view-2fa-activation-modal", viewTemplate);
   }
 
   @Test
@@ -133,7 +131,7 @@ class TwoFactorAuthenticationControllerTest {
     String viewTemplate =
         twoFactorAuthenticationController.authenticate(model, verificationCode, secretKey);
 
-    assertEquals(viewTemplate, "redirect:/menu/main/useraccount?showCodes=true#security");
+    assertEquals("redirect:/menu/main/useraccount?showCodes=true#security", viewTemplate);
     verify(twoFactorAuthenticationService).enableForUser();
   }
 

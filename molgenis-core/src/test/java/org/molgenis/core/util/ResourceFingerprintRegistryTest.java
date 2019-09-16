@@ -9,6 +9,6 @@ class ResourceFingerprintRegistryTest {
   @Test
   void getFingerprint() throws IOException {
     assertEquals(
-        new ResourceFingerprintRegistry().getFingerprint(getClass(), "/resource.txt"), "czpzLA");
+        "czpzLA", new ResourceFingerprintRegistry().getFingerprint(getClass(), "/resource.txt"));
   }
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.token.TokenExtractor.TOKEN_HEADER;
 import static org.molgenis.security.token.TokenExtractor.TOKEN_PARAMETER;
+import static org.molgenis.security.token.TokenExtractor.getToken;
 
 import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -31,13 +32,13 @@ class TokenExtractorTest extends AbstractMockitoTest {
   @Test
   void testGetTokenFromHeader() {
     when(request.getHeader(TOKEN_HEADER)).thenReturn(TEST_TOKEN);
-    assertEquals(TokenExtractor.getToken(request), TEST_TOKEN);
+    assertEquals(TEST_TOKEN, getToken(request));
   }
 
   @Test
   void testGetTokenFromParam() {
     when(request.getParameter(TOKEN_PARAMETER)).thenReturn(TEST_TOKEN);
-    assertEquals(TokenExtractor.getToken(request), TEST_TOKEN);
+    assertEquals(TEST_TOKEN, getToken(request));
   }
 
   @Test
@@ -45,8 +46,8 @@ class TokenExtractorTest extends AbstractMockitoTest {
     when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
     when(webRequest.getHeader(TOKEN_HEADER)).thenReturn(TEST_TOKEN);
     assertEquals(
-        (String) tokenExtractor.resolveArgument(methodParameter, null, webRequest, null),
-        TEST_TOKEN);
+        TEST_TOKEN,
+        (String) tokenExtractor.resolveArgument(methodParameter, null, webRequest, null));
   }
 
   @Test
@@ -54,8 +55,8 @@ class TokenExtractorTest extends AbstractMockitoTest {
     when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
     when(webRequest.getParameter(TOKEN_PARAMETER)).thenReturn(TEST_TOKEN);
     assertEquals(
-        (String) tokenExtractor.resolveArgument(methodParameter, null, webRequest, null),
-        TEST_TOKEN);
+        TEST_TOKEN,
+        (String) tokenExtractor.resolveArgument(methodParameter, null, webRequest, null));
   }
 
   @Test

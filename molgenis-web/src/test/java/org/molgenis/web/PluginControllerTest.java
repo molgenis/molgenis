@@ -17,13 +17,13 @@ class PluginControllerTest {
   void getId() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = new PluginController(uri) {};
-    assertEquals(molgenisPlugin.getId(), "test");
+    assertEquals("test", molgenisPlugin.getId());
   }
 
   @Test
   void getUri() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = new PluginController(uri) {};
-    assertEquals(molgenisPlugin.getUri(), uri);
+    assertEquals(uri, molgenisPlugin.getUri());
   }
 }

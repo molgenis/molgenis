@@ -1,5 +1,6 @@
 package org.molgenis.web.i18n;
 
+import static java.util.Locale.forLanguageTag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -35,7 +36,7 @@ class UserLocaleResolverImplTest extends AbstractMockitoTest {
     String languageCode = "nl";
     User user = when(mock(User.class).getLanguageCode()).thenReturn(languageCode).getMock();
     when(userService.getUser(username)).thenReturn(user);
-    assertEquals(userLocaleResolver.resolveLocale(username), Locale.forLanguageTag(languageCode));
+    assertEquals(forLanguageTag(languageCode), userLocaleResolver.resolveLocale(username));
   }
 
   @Test
@@ -45,7 +46,7 @@ class UserLocaleResolverImplTest extends AbstractMockitoTest {
     User user = mock(User.class);
     when(userService.getUser(username)).thenReturn(user);
     when(fallbackLocaleSupplier.get()).thenReturn(Locale.forLanguageTag(languageCode));
-    assertEquals(userLocaleResolver.resolveLocale(username), Locale.forLanguageTag(languageCode));
+    assertEquals(forLanguageTag(languageCode), userLocaleResolver.resolveLocale(username));
   }
 
   @Test

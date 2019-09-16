@@ -16,6 +16,7 @@ import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.model.OntologyTerm.create;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -118,10 +119,8 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
         ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
     assertEquals(
-        exactOntologyTerms,
-        singletonList(
-            OntologyTerm.create(
-                "http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))));
+        singletonList(create("http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))),
+        exactOntologyTerms);
   }
 
   @Test
@@ -136,13 +135,13 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
             asList("1", "2"), of("term1", "term2", "term3"), 100);
 
     assertEquals(
-        terms,
         singletonList(
-            OntologyTerm.create(
-                "http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))));
+            create(
+                "http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))),
+        terms);
     assertEquals(
-        queryCaptor.getValue().toString(),
-        "rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100");
+        "rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100",
+        queryCaptor.getValue().toString());
   }
 
   @Test
@@ -188,38 +187,38 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
     List<OntologyTerm> childOntologyTermsByNodePath =
         ontologyTermRepository.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
 
-    assertEquals(childOntologyTermsByNodePath.size(), 2);
+    assertEquals(2, childOntologyTermsByNodePath.size());
     assertEquals(
-        childOntologyTermsByNodePath.get(0),
-        OntologyTerm.create("iri 2", "name 2", null, singletonList("name 2")));
+        create("iri 2", "name 2", null, singletonList("name 2")),
+        childOntologyTermsByNodePath.get(0));
     assertEquals(
-        childOntologyTermsByNodePath.get(1),
-        OntologyTerm.create("iri 3", "name 3", null, singletonList("name 3")));
+        create("iri 3", "name 3", null, singletonList("name 3")),
+        childOntologyTermsByNodePath.get(1));
   }
 
   @Test
   void testCalculateNodePathDistance() {
     // Case 1
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].1[2]"), 1);
+        1, ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].1[2]"));
 
     // Case 2
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1].1[2]", "0[0].0[1]"), 1);
+        1, ontologyTermRepository.calculateNodePathDistance("0[0].0[1].1[2]", "0[0].0[1]"));
 
     // Case 3
     assertEquals(
+        4,
         ontologyTermRepository.calculateNodePathDistance(
-            "0[0].0[1].1[2].2[3]", "0[0].0[1].0[2].2[3]"),
-        4);
+            "0[0].0[1].1[2].2[3]", "0[0].0[1].0[2].2[3]"));
 
     // Case 4
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].0[2].1[3].2[4]"),
-        3);
+        3,
+        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].0[2].1[3].2[4]"));
 
     // Case 5
-    assertEquals(ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1]"), 0);
+    assertEquals(0, ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1]"));
   }
 
   @Test
@@ -235,9 +234,8 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
     OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
     assertEquals(
-        ontologyTerm,
-        OntologyTerm.create(
-            "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term")));
+        create("http://www.test.nl/iri", "Ontology term", singletonList("Ontology term")),
+        ontologyTerm);
   }
 
   @Configuration

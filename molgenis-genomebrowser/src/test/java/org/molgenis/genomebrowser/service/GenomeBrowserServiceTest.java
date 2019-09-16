@@ -1,5 +1,6 @@
 package org.molgenis.genomebrowser.service;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -9,10 +10,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.genomebrowser.GenomeBrowserTrack.create;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.ALT;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.CHROM;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.POS;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.REF;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.MolgenisReferenceMode.ALL;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,8 +99,8 @@ class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
 
-    assertEquals(result.size(), 1);
-    assertEquals(result.get("ref_id"), reference);
+    assertEquals(1, result.size());
+    assertEquals(reference, result.get("ref_id"));
   }
 
   @Test
@@ -189,39 +193,39 @@ class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
     GenomeBrowserService genomeBrowserService =
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
-    assertEquals(result.size(), 2);
+    assertEquals(2, result.size());
     assertEquals(
-        result.get("type2"),
-        GenomeBrowserTrack.create(
+        create(
             "type2",
             "label2",
             "refLabel",
             type2,
-            GenomeBrowserSettings.TrackType.VARIANT,
-            Collections.emptyList(),
-            GenomeBrowserSettings.MolgenisReferenceMode.ALL,
+            VARIANT,
+            emptyList(),
+            ALL,
             refGenomeBrowserAttributes1,
             null,
             null,
             null,
             null,
-            null));
+            null),
+        result.get("type2"));
     assertEquals(
-        result.get("type1"),
-        GenomeBrowserTrack.create(
+        create(
             "type1",
             "label1",
             "refLabel",
             type1,
-            GenomeBrowserSettings.TrackType.VARIANT,
-            Collections.emptyList(),
-            GenomeBrowserSettings.MolgenisReferenceMode.ALL,
+            VARIANT,
+            emptyList(),
+            ALL,
             refGenomeBrowserAttributes2,
             null,
             null,
             null,
             null,
-            null));
+            null),
+        result.get("type1"));
   }
 
   @Test
@@ -268,7 +272,7 @@ class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
 
-    assertEquals(result.size(), 0);
+    assertEquals(0, result.size());
     verify(dataService, never()).getMeta();
   }
 
@@ -316,7 +320,7 @@ class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
     GenomeBrowserService genomeBrowserService =
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
-    assertEquals(result.size(), 0);
+    assertEquals(0, result.size());
     verify(dataService, never()).getMeta();
   }
 }

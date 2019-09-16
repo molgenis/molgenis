@@ -410,7 +410,7 @@ class RestControllerV2APIIT extends AbstractApiTests {
     Properties expectedProperties = new Properties();
     expectedProperties.load(new InputStreamReader(is, "UTF-8"));
 
-    assertEquals(responseProperties, expectedProperties);
+    assertEquals(expectedProperties, responseProperties);
   }
 
   @Test

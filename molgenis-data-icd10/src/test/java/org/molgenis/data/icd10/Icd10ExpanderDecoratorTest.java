@@ -36,20 +36,20 @@ class Icd10ExpanderDecoratorTest extends AbstractMockitoTest {
   @Test
   void testCount() {
     when(decoratedRepository.count(transformedQuery)).thenReturn(123L);
-    assertEquals(icd10ExpanderDecorator.count(query), 123L);
+    assertEquals(123L, icd10ExpanderDecorator.count(query));
   }
 
   @Test
   void testFindOne() {
     Entity entity = mock(Entity.class);
     when(decoratedRepository.findOne(transformedQuery)).thenReturn(entity);
-    assertEquals(icd10ExpanderDecorator.findOne(query), entity);
+    assertEquals(entity, icd10ExpanderDecorator.findOne(query));
   }
 
   @Test
   void testFindAll() {
     Stream<Entity> entities = Stream.empty();
     when(decoratedRepository.findAll(transformedQuery)).thenReturn(entities);
-    assertEquals(icd10ExpanderDecorator.findAll(query), entities);
+    assertEquals(entities, icd10ExpanderDecorator.findAll(query));
   }
 }

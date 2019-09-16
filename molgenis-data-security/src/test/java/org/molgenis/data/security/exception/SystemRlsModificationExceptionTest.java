@@ -26,7 +26,7 @@ class SystemRlsModificationExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new SystemRlsModificationException("type");
-    assertEquals(ex.getMessage(), "entityType:type");
+    assertEquals("entityType:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

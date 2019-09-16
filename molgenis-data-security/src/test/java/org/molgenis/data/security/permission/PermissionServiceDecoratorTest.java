@@ -1,5 +1,6 @@
 package org.molgenis.data.security.permission;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -98,7 +99,7 @@ class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("type3"), READ);
-    assertEquals(permissionServiceDecorator.getLabelledTypes(), Sets.newHashSet(type1, type3));
+    assertEquals(newHashSet(type1, type3), permissionServiceDecorator.getLabelledTypes());
   }
 
   @Test

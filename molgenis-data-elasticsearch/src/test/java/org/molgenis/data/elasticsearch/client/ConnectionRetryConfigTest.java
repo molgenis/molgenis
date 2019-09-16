@@ -1,12 +1,12 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
@@ -68,10 +68,9 @@ class ConnectionRetryConfigTest extends AbstractMockitoSpringContextTests {
       fakeBackOff.backOff(context);
     }
     assertEquals(
-        sleeps,
-        Arrays.asList(
-            1000L, 2000L, 4000L, 8000L, 16000L, 32000L, 64000L, 128000L, 256000L, 300000L,
-            300000L));
+        asList(
+            1000L, 2000L, 4000L, 8000L, 16000L, 32000L, 64000L, 128000L, 256000L, 300000L, 300000L),
+        sleeps);
   }
 
   @Test

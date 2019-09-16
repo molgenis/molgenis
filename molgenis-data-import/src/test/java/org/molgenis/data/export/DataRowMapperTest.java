@@ -48,6 +48,6 @@ class DataRowMapperTest {
 
     List<Object> actual = DataRowMapper.mapDataRow(entity);
     List<Object> expected = newArrayList("stringValue", "ref1", "ref1,ref2");
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

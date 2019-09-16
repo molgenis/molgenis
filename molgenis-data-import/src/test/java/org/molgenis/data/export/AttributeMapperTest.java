@@ -106,7 +106,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -192,7 +192,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -278,7 +278,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -364,7 +364,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -467,6 +467,6 @@ class AttributeMapperTest extends AbstractMockitoTest {
             "xx Label",
             "xx description");
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

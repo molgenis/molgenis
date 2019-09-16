@@ -42,7 +42,7 @@ class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest {
     HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response);
     SecurityContext securityContext = mock(SecurityContext.class);
     when(defaultSecurityContextRepository.loadContext(holder)).thenReturn(securityContext);
-    assertEquals(tokenAwareSecurityContextRepository.loadContext(holder), securityContext);
+    assertEquals(securityContext, tokenAwareSecurityContextRepository.loadContext(holder));
   }
 
   @Test
@@ -53,7 +53,7 @@ class TokenAwareSecurityContextRepositoryTest extends AbstractMockitoTest {
     HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response);
     SecurityContext securityContext = mock(SecurityContext.class);
     when(tokenSecurityContextRepository.loadContext(holder)).thenReturn(securityContext);
-    assertEquals(tokenAwareSecurityContextRepository.loadContext(holder), securityContext);
+    assertEquals(securityContext, tokenAwareSecurityContextRepository.loadContext(holder));
   }
 
   @Test

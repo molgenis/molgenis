@@ -55,7 +55,7 @@ class ScriptTypePopulatorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(SCRIPT_TYPE), captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList(scriptType1));
+    assertEquals(singletonList(scriptType1), captor.getValue().collect(toList()));
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/5168

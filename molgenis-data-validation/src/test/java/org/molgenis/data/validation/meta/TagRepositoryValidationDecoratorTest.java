@@ -85,7 +85,7 @@ class TagRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(tagCaptor.capture());
-    assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
+    assertEquals(asList(tag0, tag1), tagCaptor.getValue().collect(toList()));
     verify(tagValidator).validate(tag0);
     verify(tagValidator).validate(tag1);
   }
@@ -115,7 +115,7 @@ class TagRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Tag>> tagCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(tagCaptor.capture());
-    assertEquals(tagCaptor.getValue().collect(toList()), asList(tag0, tag1));
+    assertEquals(asList(tag0, tag1), tagCaptor.getValue().collect(toList()));
     verify(tagValidator).validate(tag0);
     verify(tagValidator).validate(tag1);
   }

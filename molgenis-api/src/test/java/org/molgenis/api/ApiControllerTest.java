@@ -10,7 +10,7 @@ class ApiControllerTest {
   void testGetApiId() {
     String apiId = "myapi";
     ApiController apiController = new ApiController(apiId, 1) {};
-    assertEquals(apiController.getApiId(), apiId);
+    assertEquals(apiId, apiController.getApiId());
   }
 
   @Test
@@ -23,14 +23,14 @@ class ApiControllerTest {
   void testGetApiVersion() {
     int apiVersion = 2;
     ApiController apiController = new ApiController("myapi", apiVersion) {};
-    assertEquals(apiController.getApiVersion(), apiVersion);
+    assertEquals(apiVersion, apiController.getApiVersion());
   }
 
   @Test
   void testGetApiVersionEmpty() {
     int apiVersion = 2;
     ApiController apiController = new ApiController("", apiVersion) {};
-    assertEquals(apiController.getApiVersion(), apiVersion);
+    assertEquals(apiVersion, apiController.getApiVersion());
   }
 
   @Test

@@ -108,7 +108,7 @@ class QuestionnaireServiceTest extends AbstractMockitoTest {
     List<EntityType> questionnaires =
         questionnaireService.getQuestionnaires().collect(Collectors.toList());
     List<EntityType> entityTypes = Collections.singletonList(entityType);
-    assertEquals(questionnaires, entityTypes);
+    assertEquals(entityTypes, questionnaires);
   }
 
   @Test
@@ -138,7 +138,7 @@ class QuestionnaireServiceTest extends AbstractMockitoTest {
 
     // =========== Test ===========
     QuestionnaireResponse actual = questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
-    assertEquals(actual.getId(), QUESTIONNAIRE_ID);
+    assertEquals(QUESTIONNAIRE_ID, actual.getId());
     verify(dataService).add(QUESTIONNAIRE_ID, questionnaire);
   }
 
@@ -172,7 +172,7 @@ class QuestionnaireServiceTest extends AbstractMockitoTest {
 
     // =========== Test ===========
     QuestionnaireResponse actual = questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
-    assertEquals(actual.getId(), QUESTIONNAIRE_ID);
+    assertEquals(QUESTIONNAIRE_ID, actual.getId());
     verify(dataService, times(0)).add(QUESTIONNAIRE_ID, questionnaire);
   }
 
@@ -184,7 +184,7 @@ class QuestionnaireServiceTest extends AbstractMockitoTest {
     String actual = questionnaireService.getQuestionnaireSubmissionText(QUESTIONNAIRE_ID);
     String expected = "<h3>Thank you for submitting the questionnaire.</h3>";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
     verify(staticContentService)
         .submitContent(key, "<h3>Thank you for submitting the questionnaire.</h3>");
   }
@@ -197,6 +197,6 @@ class QuestionnaireServiceTest extends AbstractMockitoTest {
     String actual = questionnaireService.getQuestionnaireSubmissionText(QUESTIONNAIRE_ID);
     String expected = "My awesome submission text";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

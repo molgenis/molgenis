@@ -71,6 +71,6 @@ public class GenomeBrowserTrackTest extends AbstractMockitoSpringContextTests {
     String expected =
         "{\"name\":\"label\",\"entity\":\"molgenisEntityType\",\"tier_type\":\"molgenis\",\"uri\":\"/api/v2/molgenisEntityType\",\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"position\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"],\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"featureInfoPlugin\":function(f, info) {if (f.id) {info.add('Label', makeElement('a', f.id, {href: 'https://www.theonion.com/', target:'_newtab'}))}}}";
 
-    assertEquals(track.toTrackString(), expected);
+    assertEquals(expected, track.toTrackString());
   }
 }

@@ -90,6 +90,6 @@ class EntitySerializerTest {
 
     String expectedJson =
         "{\"__entityTypeId\":\"entity\",\"oneToManyAttr\":[{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"xrefAttr\":{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"xrefEntity0\",\"__labelValue\":\"xrefEntityLabel0\"}}";
-    assertEquals(entitySerializer.serialize(entity, type, context).toString(), expectedJson);
+    assertEquals(expectedJson, entitySerializer.serialize(entity, type, context).toString());
   }
 }

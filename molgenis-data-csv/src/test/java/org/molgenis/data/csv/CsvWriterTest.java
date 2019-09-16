@@ -81,7 +81,7 @@ class CsvWriterTest extends AbstractMolgenisSpringTest {
       entity.set("col1", "val1");
       entity.set("col2", "val2");
       csvWriter.add(entity);
-      assertEquals(strWriter.toString(), "\"col1\",\"col2\"\n\"val1\",\"val2\"\n");
+      assertEquals("\"col1\",\"col2\"\n\"val1\",\"val2\"\n", strWriter.toString());
     }
   }
 
@@ -94,7 +94,7 @@ class CsvWriterTest extends AbstractMolgenisSpringTest {
       entity.set("col1", "val1");
       entity.set("col2", "val2");
       csvWriter.add(entity);
-      assertEquals(strWriter.toString(), "\"label1\",\"label2\"\n\"val1\",\"val2\"\n");
+      assertEquals("\"label1\",\"label2\"\n\"val1\",\"val2\"\n", strWriter.toString());
     }
   }
 

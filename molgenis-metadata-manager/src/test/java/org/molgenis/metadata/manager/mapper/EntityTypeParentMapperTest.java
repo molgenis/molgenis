@@ -50,7 +50,7 @@ class EntityTypeParentMapperTest {
     EditorEntityTypeParent editorEntityTypeParent =
         EditorEntityTypeParent.create(id, label, attributes, parent);
     EntityType entityType = entityTypeParentMapper.toEntityTypeReference(editorEntityTypeParent);
-    assertEquals(entityType.getIdValue(), id);
+    assertEquals(id, entityType.getIdValue());
   }
 
   @Test
@@ -96,7 +96,7 @@ class EntityTypeParentMapperTest {
             label,
             editorAttributes,
             EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
-    assertEquals(editorEntityTypeParent, expectedEditorEntityTypeParent);
+    assertEquals(expectedEditorEntityTypeParent, editorEntityTypeParent);
   }
 
   @Test

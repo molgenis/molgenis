@@ -122,7 +122,7 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
     String expected =
         "[{\"id\":\"test_quest\",\"label\":\"label\",\"description\":\"description\",\"status\":\"NOT_STARTED\"}]";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -150,6 +150,6 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
     String actual = result.getResponse().getContentAsString();
     String expected = "\"thanks!\"";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

@@ -34,7 +34,6 @@ import static org.molgenis.data.util.EntityTypeUtils.getEntityTypeFetch;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,7 +99,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Repository<Entity> repo = mock(Repository.class);
     when(repoCollection.getRepository(entityType)).thenReturn(repo);
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-    assertEquals(metaDataServiceImpl.getRepository(entityTypeId), of(repo));
+    assertEquals(of(repo), metaDataServiceImpl.getRepository(entityTypeId));
   }
 
   @Test
@@ -110,7 +109,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(
             eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class), eq(EntityType.class)))
         .thenReturn(entityType);
-    assertEquals(metaDataServiceImpl.getRepository(entityTypeId), empty());
+    assertEquals(empty(), metaDataServiceImpl.getRepository(entityTypeId));
   }
 
   @Test
@@ -143,7 +142,10 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(repoCollection.getRepository(entityType))
         .thenReturn((Repository<Entity>) (Repository<?>) repo);
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-    assertEquals(metaDataServiceImpl.getRepository(entityTypeId, Package.class), of(repo));
+    assertEquals(
+        of(repo),
+        metaDataServiceImpl.getRepository(
+            entityTypeId, org.molgenis.data.meta.model.Package.class));
   }
 
   @Test
@@ -153,7 +155,10 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(
             eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class), eq(EntityType.class)))
         .thenReturn(entityType);
-    assertEquals(metaDataServiceImpl.getRepository(entityTypeId, Package.class), empty());
+    assertEquals(
+        empty(),
+        metaDataServiceImpl.getRepository(
+            entityTypeId, org.molgenis.data.meta.model.Package.class));
   }
 
   @Test
@@ -180,13 +185,13 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Repository<Entity> repo = mock(Repository.class);
     when(repoCollection.getRepository(entityType)).thenReturn(repo);
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-    assertEquals(metaDataServiceImpl.getRepository(entityType), of(repo));
+    assertEquals(of(repo), metaDataServiceImpl.getRepository(entityType));
   }
 
   @Test
   void getRepositoryEntityTypeAbstract() {
     EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
-    assertEquals(metaDataServiceImpl.getRepository(entityType), empty());
+    assertEquals(empty(), metaDataServiceImpl.getRepository(entityType));
   }
 
   @SuppressWarnings("unchecked")
@@ -202,13 +207,13 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
         .thenReturn((Repository<Entity>) (Repository<?>) repo);
 
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-    assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), of(repo));
+    assertEquals(of(repo), metaDataServiceImpl.getRepository(entityType, Package.class));
   }
 
   @Test
   void getRepositoryTypedEntityTypeAbstract() {
     EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
-    assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), empty());
+    assertEquals(empty(), metaDataServiceImpl.getRepository(entityType, Package.class));
   }
 
   @Test
@@ -239,7 +244,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(repoCollection1.getRepository(entityType1)).thenReturn(repo1);
     doReturn(repoCollection1).when(repoCollectionRegistry).getRepositoryCollection(backendName1);
     List<Repository<Entity>> expectedRepos = newArrayList(repo0, repo1);
-    assertEquals(metaDataServiceImpl.getRepositories().collect(toList()), expectedRepos);
+    assertEquals(expectedRepos, metaDataServiceImpl.getRepositories().collect(toList()));
   }
 
   @Test
@@ -294,12 +299,12 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
     when(repoCollection.getRepository(entityType)).thenReturn(repo);
-    assertEquals(metaDataServiceImpl.createRepository(entityType), repo);
+    assertEquals(repo, metaDataServiceImpl.createRepository(entityType));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
-    assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+    assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
@@ -331,11 +336,11 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Repository<Package> repo = mock(Repository.class);
     when(repoCollection.getRepository(entityType))
         .thenReturn((Repository<Entity>) (Repository<?>) repo);
-    assertEquals(metaDataServiceImpl.createRepository(entityType, entityClass), repo);
+    assertEquals(repo, metaDataServiceImpl.createRepository(entityType, entityClass));
 
     ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
-    assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+    assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
@@ -355,7 +360,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     String backendName = "backend";
     RepositoryCollection repo = mock(RepositoryCollection.class);
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repo);
-    assertEquals(metaDataServiceImpl.getBackend(backendName), repo);
+    assertEquals(repo, metaDataServiceImpl.getBackend(backendName));
   }
 
   @Test
@@ -374,7 +379,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
         when(mock(EntityType.class).getBackend()).thenReturn(backendName).getMock();
     RepositoryCollection repo = mock(RepositoryCollection.class);
     when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repo);
-    assertEquals(metaDataServiceImpl.getBackend(entityType), repo);
+    assertEquals(repo, metaDataServiceImpl.getBackend(entityType));
   }
 
   @Test
@@ -398,7 +403,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
   void getDefaultRepositoryCollection() {
     RepositoryCollection repo = mock(RepositoryCollection.class);
     when(repoCollectionRegistry.getDefaultRepoCollection()).thenReturn(repo);
-    assertEquals(metaDataServiceImpl.getDefaultBackend(), repo);
+    assertEquals(repo, metaDataServiceImpl.getDefaultBackend());
   }
 
   @Test
@@ -413,7 +418,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Package package0 = mock(Package.class);
     Package package1 = mock(Package.class);
     when(dataService.findAll(PACKAGE, Package.class)).thenReturn(Stream.of(package0, package1));
-    assertEquals(metaDataServiceImpl.getPackages(), newArrayList(package0, package1));
+    assertEquals(newArrayList(package0, package1), metaDataServiceImpl.getPackages());
   }
 
   @Test
@@ -425,7 +430,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(packageQ.eq(PARENT, null)).thenReturn(packageQ);
     when(packageQ.findAll()).thenReturn(Stream.of(package0, package1));
     when(dataService.query(PACKAGE, Package.class)).thenReturn(packageQ);
-    assertEquals(metaDataServiceImpl.getRootPackages(), newArrayList(package0, package1));
+    assertEquals(newArrayList(package0, package1), metaDataServiceImpl.getRootPackages());
   }
 
   @Test
@@ -433,14 +438,14 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Package package_ = mock(Package.class);
     String packageId = "package";
     when(dataService.findOneById(PACKAGE, packageId, Package.class)).thenReturn(package_);
-    assertEquals(metaDataServiceImpl.getPackage(packageId), Optional.of(package_));
+    assertEquals(of(package_), metaDataServiceImpl.getPackage(packageId));
   }
 
   @Test
   void getPackageStringUnknownPackage() {
     String packageName = "package";
     when(dataService.findOneById(PACKAGE, packageName, Package.class)).thenReturn(null);
-    assertEquals(metaDataServiceImpl.getPackage(packageName), empty());
+    assertEquals(empty(), metaDataServiceImpl.getPackage(packageName));
   }
 
   @Test
@@ -459,7 +464,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(packagePersister).upsertPackages(captor.capture());
-    assertEquals(captor.getValue().collect(toList()), asList(package0, package1));
+    assertEquals(asList(package0, package1), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -498,13 +503,13 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
             eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class), eq(EntityType.class)))
         .thenReturn(entityType);
 
-    assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), Optional.of(entityType));
+    assertEquals(of(entityType), metaDataServiceImpl.getEntityType(entityTypeId));
     verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
   }
 
   @Test
   void getEntityTypeNull() {
-    assertEquals(metaDataServiceImpl.getEntityType(null), Optional.empty());
+    assertEquals(empty(), metaDataServiceImpl.getEntityType(null));
   }
 
   @Test
@@ -515,7 +520,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
             eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(), eq(EntityType.class)))
         .thenReturn(null);
 
-    assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), Optional.empty());
+    assertEquals(empty(), metaDataServiceImpl.getEntityType(entityTypeId));
 
     verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
     verify(dataService)
@@ -529,8 +534,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
 
     when(systemEntityTypeRegistry.getSystemEntityType(systemEntityTypeId))
         .thenReturn(systemEntityType);
-    assertEquals(
-        metaDataServiceImpl.getEntityType(systemEntityTypeId), Optional.of(systemEntityType));
+    assertEquals(of(systemEntityType), metaDataServiceImpl.getEntityType(systemEntityTypeId));
 
     verifyZeroInteractions(dataService);
   }
@@ -544,7 +548,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
         .thenReturn(systemEntityType);
 
     assertEquals(
-        metaDataServiceImpl.getEntityTypeBypassingRegistry(systemEntityTypeId), systemEntityType);
+        systemEntityType, metaDataServiceImpl.getEntityTypeBypassingRegistry(systemEntityTypeId));
     verifyZeroInteractions(systemEntityTypeRegistry);
   }
 
@@ -560,8 +564,8 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     when(query.eq(REF_ENTITY_TYPE, entityTypeId).findAll()).thenReturn(Stream.of(attr1, attr2));
 
     assertEquals(
-        metaDataServiceImpl.getReferringAttributes(entityTypeId).collect(toList()),
-        ImmutableList.of(attr1, attr2));
+        ImmutableList.of(attr1, attr2),
+        metaDataServiceImpl.getReferringAttributes(entityTypeId).collect(toList()));
   }
 
   @Test
@@ -575,7 +579,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
-    assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+    assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
@@ -607,13 +611,13 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
     assertEquals(
-        attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
+        newArrayList(entity1Attr0, entity1Attr1), attrsCaptor1.getValue().collect(toList()));
 
     inOrder.verify(dataService).add(ENTITY_TYPE_META_DATA, entityType0);
     ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
     assertEquals(
-        attrsCaptor0.getValue().collect(toList()), newArrayList(entity0Attr0, entity0Attr1));
+        newArrayList(entity0Attr0, entity0Attr1), attrsCaptor0.getValue().collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
@@ -654,24 +658,24 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Entity>> attrsCaptor1 = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor1.capture());
     assertEquals(
-        attrsCaptor1.getValue().collect(toList()), newArrayList(entity1Attr0, entity1Attr1));
+        newArrayList(entity1Attr0, entity1Attr1), attrsCaptor1.getValue().collect(toList()));
 
     ArgumentCaptor<EntityType> entityCaptor0 = ArgumentCaptor.forClass(EntityType.class);
     inOrder.verify(dataService).add(eq(ENTITY_TYPE_META_DATA), entityCaptor0.capture());
     assertEquals(
-        newArrayList(entityCaptor0.getValue().getOwnAllAttributes()), singletonList(entity0Attr1));
+        singletonList(entity0Attr1), newArrayList(entityCaptor0.getValue().getOwnAllAttributes()));
 
     ArgumentCaptor<Stream<Entity>> attrsCaptor0 = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0.capture());
-    assertEquals(attrsCaptor0.getValue().collect(toList()), singletonList(entity0Attr1));
+    assertEquals(singletonList(entity0Attr1), attrsCaptor0.getValue().collect(toList()));
 
     ArgumentCaptor<EntityType> entityCaptor0b = ArgumentCaptor.forClass(EntityType.class);
     inOrder.verify(dataService).update(eq(ENTITY_TYPE_META_DATA), entityCaptor0b.capture());
-    assertEquals(entityCaptor0b.getValue(), entityType0);
+    assertEquals(entityType0, entityCaptor0b.getValue());
 
     ArgumentCaptor<Stream<Entity>> attrsCaptor0b = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor0b.capture());
-    assertEquals(attrsCaptor0b.getValue().collect(toList()), singletonList(entity0Attr0));
+    assertEquals(singletonList(entity0Attr0), attrsCaptor0b.getValue().collect(toList()));
   }
 
   @Test
@@ -698,7 +702,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<EntityType>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
     assertEquals(
-        entityIdCaptor.getValue().collect(toList()), newArrayList(entityType0, entityType1));
+        newArrayList(entityType0, entityType1), entityIdCaptor.getValue().collect(toList()));
 
     verifyNoMoreInteractions(dataService);
   }
@@ -754,12 +758,12 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
-    assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
+    assertEquals(singletonList(attrAdded), attrAddCaptor.getValue().collect(toList()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
-    assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
+    assertEquals(singletonList(attrShared1Updated), attrUpdateCaptor.getValue().collect(toList()));
 
     verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
   }
@@ -834,11 +838,11 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
 
     ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
-    assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
+    assertEquals(singletonList(attrAdded), attrAddCaptor.getValue().collect(toList()));
 
     ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
-    assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
+    assertEquals(singletonList(attrShared1Updated), attrUpdateCaptor.getValue().collect(toList()));
 
     verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
   }
@@ -897,15 +901,15 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
 
     ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
-    assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
+    assertEquals(singletonList(attrAdded), attrAddCaptor.getValue().collect(toList()));
 
     ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
-    assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
+    assertEquals(singletonList(attrShared1Updated), attrUpdateCaptor.getValue().collect(toList()));
 
     ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
-    assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
+    assertEquals(singletonList(attrDeleted), attrDeletedCaptor.getValue().collect(toList()));
 
     inOrder.verifyNoMoreInteractions();
   }
@@ -963,15 +967,15 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
 
     ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
-    assertEquals(attrAddCaptor.getValue().collect(toList()), singletonList(attrAdded));
+    assertEquals(singletonList(attrAdded), attrAddCaptor.getValue().collect(toList()));
 
     ArgumentCaptor<Stream<Entity>> attrUpdateCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
-    assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
+    assertEquals(singletonList(attrShared1Updated), attrUpdateCaptor.getValue().collect(toList()));
 
     ArgumentCaptor<Stream<Entity>> attrDeletedCaptor = ArgumentCaptor.forClass(Stream.class);
     inOrder.verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrDeletedCaptor.capture());
-    assertEquals(attrDeletedCaptor.getValue().collect(toList()), singletonList(attrDeleted));
+    assertEquals(singletonList(attrDeleted), attrDeletedCaptor.getValue().collect(toList()));
 
     inOrder.verifyNoMoreInteractions();
   }
@@ -1020,7 +1024,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
   @MethodSource("isMetaEntityTypeProvider")
   void isMetaEntityType(String entityTypeId, boolean isMeta) {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
-    assertEquals(MetaDataService.isMetaEntityType(entityType), isMeta);
+    assertEquals(isMeta, MetaDataService.isMetaEntityType(entityType));
   }
 
   @Test

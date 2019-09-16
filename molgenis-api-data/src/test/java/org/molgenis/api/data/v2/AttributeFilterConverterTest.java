@@ -17,13 +17,13 @@ class AttributeFilterConverterTest {
   @Test
   void convertSingleAttribute() {
     AttributeFilter attributeFilter = new AttributeFilter().add("attr0");
-    assertEquals(attributeFilterConverter.convert("attr0"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0"));
   }
 
   @Test
   void convertSingleAttributeEscapeComma() {
     AttributeFilter attributeFilter = new AttributeFilter().add("attr,0");
-    assertEquals(attributeFilterConverter.convert("attr\\,0"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr\\,0"));
   }
 
   // @Test
@@ -37,13 +37,13 @@ class AttributeFilterConverterTest {
   @Test
   void convertSingleAttributeEscapeParenthesisLeft() {
     AttributeFilter attributeFilter = new AttributeFilter().add("attr(0");
-    assertEquals(attributeFilterConverter.convert("attr\\(0"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr\\(0"));
   }
 
   @Test
   void convertSingleAttributeEscapeParenthesisRight() {
     AttributeFilter attributeFilter = new AttributeFilter().add("attr)0");
-    assertEquals(attributeFilterConverter.convert("attr\\)0"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr\\)0"));
   }
 
   // @Test
@@ -58,21 +58,21 @@ class AttributeFilterConverterTest {
   void convertSingleAttributeSubSelectionSingleAttributeParenthesis() {
     AttributeFilter attributeFilter =
         new AttributeFilter().add("attr0", new AttributeFilter().add("subattr0"));
-    assertEquals(attributeFilterConverter.convert("attr0(subattr0)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(subattr0)"));
   }
 
   @Test
   void convertSingleAttributeSubSelectionSingleAttributeParenthesisWildcard() {
     AttributeFilter attributeFilter =
         new AttributeFilter().add("attr0", new AttributeFilter().setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0(*)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(*)"));
   }
 
   @Test
   void convertSingleAttributeSubSelectionMultipleAttributes() {
     AttributeFilter attributeFilter =
         new AttributeFilter().add("attr0", new AttributeFilter().add("subattr0").add("subattr1"));
-    assertEquals(attributeFilterConverter.convert("attr0(subattr0,subattr1)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(subattr0,subattr1)"));
   }
 
   @Test
@@ -80,7 +80,7 @@ class AttributeFilterConverterTest {
     AttributeFilter attributeFilter =
         new AttributeFilter()
             .add("attr0", new AttributeFilter().add("subattr0").setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0(subattr0,*)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(subattr0,*)"));
   }
 
   @Test
@@ -88,7 +88,7 @@ class AttributeFilterConverterTest {
     AttributeFilter attributeFilter =
         new AttributeFilter()
             .add("attr0", new AttributeFilter().add("subattr1").setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0(*,subattr1)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(*,subattr1)"));
   }
 
   @Test
@@ -98,13 +98,13 @@ class AttributeFilterConverterTest {
             .add(
                 "attr0",
                 new AttributeFilter().add("subattr0", new AttributeFilter().add("subsubattr0")));
-    assertEquals(attributeFilterConverter.convert("attr0(subattr0(subsubattr0)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0(subattr0(subsubattr0)"));
   }
 
   @Test
   void convertMultipleAttributes() {
     AttributeFilter attributeFilter = new AttributeFilter().add("attr0").add("attr1");
-    assertEquals(attributeFilterConverter.convert("attr0,attr1"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0,attr1"));
   }
 
   // @Test
@@ -119,7 +119,7 @@ class AttributeFilterConverterTest {
   void convertMultipleAttributesSubSelectionSingleAttributeParenthesis() {
     AttributeFilter attributeFilter =
         new AttributeFilter().add("attr0").add("attr1", new AttributeFilter().add("subattr1"));
-    assertEquals(attributeFilterConverter.convert("attr0,attr1(subattr1)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0,attr1(subattr1)"));
   }
 
   @Test
@@ -128,7 +128,7 @@ class AttributeFilterConverterTest {
         new AttributeFilter()
             .add("attr0")
             .add("attr1", new AttributeFilter().setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0,attr1(*)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0,attr1(*)"));
   }
 
   @Test
@@ -138,7 +138,7 @@ class AttributeFilterConverterTest {
             .add("attr0")
             .add("attr1", new AttributeFilter().add("subattr1").add("subattr2"));
     assertEquals(
-        attributeFilterConverter.convert("attr0,attr1(subattr1,subattr2)"), attributeFilter);
+        attributeFilter, attributeFilterConverter.convert("attr0,attr1(subattr1,subattr2)"));
   }
 
   @Test
@@ -147,7 +147,7 @@ class AttributeFilterConverterTest {
         new AttributeFilter()
             .add("attr0")
             .add("attr1", new AttributeFilter().add("subattr1").setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0,attr1(subattr1,*)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0,attr1(subattr1,*)"));
   }
 
   @Test
@@ -156,6 +156,6 @@ class AttributeFilterConverterTest {
         new AttributeFilter()
             .add("attr0")
             .add("attr1", new AttributeFilter().add("subattr2").setIncludeAllAttrs(true));
-    assertEquals(attributeFilterConverter.convert("attr0,attr1(*,subattr2)"), attributeFilter);
+    assertEquals(attributeFilter, attributeFilterConverter.convert("attr0,attr1(*,subattr2)"));
   }
 }

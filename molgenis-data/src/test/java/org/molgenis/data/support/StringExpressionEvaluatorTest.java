@@ -60,7 +60,7 @@ class StringExpressionEvaluatorTest {
       new StringExpressionEvaluator(amd, entityType);
       fail("Expected NPE");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "Attribute has no expression.");
+      assertEquals("Attribute has no expression.", expected.getMessage());
     }
   }
 
@@ -86,8 +86,8 @@ class StringExpressionEvaluatorTest {
       fail("expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Expression for attribute '#CHROM' references non-existant attribute 'bogus'.");
+          "Expression for attribute '#CHROM' references non-existant attribute 'bogus'.",
+          expected.getMessage());
     }
   }
 
@@ -96,7 +96,7 @@ class StringExpressionEvaluatorTest {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("Int");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), "1");
+    assertEquals("1", new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
@@ -104,7 +104,7 @@ class StringExpressionEvaluatorTest {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("Int");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 1L);
+    assertEquals(1L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
@@ -112,7 +112,7 @@ class StringExpressionEvaluatorTest {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(INT);
     when(amd.getExpression()).thenReturn("Long");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 10);
+    assertEquals(10, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
@@ -120,7 +120,7 @@ class StringExpressionEvaluatorTest {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("String");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
+    assertEquals(12L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test

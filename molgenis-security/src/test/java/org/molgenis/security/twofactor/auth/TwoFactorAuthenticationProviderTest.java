@@ -60,7 +60,7 @@ class TwoFactorAuthenticationProviderTest {
     Authentication auth = twoFactorAuthenticationProviderImpl.authenticate(authToken);
     assertNotNull(auth);
     assertTrue(auth.isAuthenticated());
-    assertEquals(auth.getName(), "admin");
+    assertEquals("admin", auth.getName());
   }
 
   @Test
@@ -77,7 +77,7 @@ class TwoFactorAuthenticationProviderTest {
     Authentication auth = twoFactorAuthenticationProviderImpl.authenticate(authToken);
     assertNotNull(auth);
     assertTrue(auth.isAuthenticated());
-    assertEquals(auth.getName(), "admin");
+    assertEquals("admin", auth.getName());
   }
 
   @Test

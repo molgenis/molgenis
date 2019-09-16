@@ -59,7 +59,7 @@ class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTest {
     when(entityTypeFactory.createDecoratedRepository(decoratedRepository))
         .thenReturn(decoratedDecoratedRepository);
     assertEquals(
-        systemRepositoryDecoratorRegistryImpl.decorate(repository), decoratedDecoratedRepository);
+        decoratedDecoratedRepository, systemRepositoryDecoratorRegistryImpl.decorate(repository));
   }
 
   @Test
@@ -71,6 +71,6 @@ class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
-    assertEquals(systemRepositoryDecoratorRegistryImpl.decorate(repository), repository);
+    assertEquals(repository, systemRepositoryDecoratorRegistryImpl.decorate(repository));
   }
 }

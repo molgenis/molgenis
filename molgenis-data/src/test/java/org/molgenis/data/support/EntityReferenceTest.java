@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Integer.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,24 +53,24 @@ class EntityReferenceTest {
 
   @Test
   void testGetEntityType() {
-    assertEquals(entityReference.getEntityType(), entityType);
+    assertEquals(entityType, entityReference.getEntityType());
   }
 
   @Test
   void testGetAttributeNames() {
     assertEquals(
-        newArrayList(entityReference.getAttributeNames()), asList(ID_ATTR_NAME, LABEL_ATTR_NAME));
+        asList(ID_ATTR_NAME, LABEL_ATTR_NAME), newArrayList(entityReference.getAttributeNames()));
   }
 
   @Test
   void testGetIdValue() {
-    assertEquals(entityReference.getIdValue(), "entityId");
+    assertEquals("entityId", entityReference.getIdValue());
   }
 
   @Test
   void testSetIdValue() {
     entityReference.setIdValue("newEntityId");
-    assertEquals(entityReference.getIdValue(), "newEntityId");
+    assertEquals("newEntityId", entityReference.getIdValue());
   }
 
   @Test
@@ -100,7 +101,7 @@ class EntityReferenceTest {
   @Test
   void testGetLabelValueLabelAttributeIsIdAttribute() {
     when(entityType.getLabelAttribute()).thenReturn(idAttribute);
-    assertEquals(entityReference.getLabelValue(), "entityId");
+    assertEquals("entityId", entityReference.getLabelValue());
   }
 
   @Test
@@ -110,7 +111,7 @@ class EntityReferenceTest {
 
   @Test
   void testGetIdAttribute() {
-    assertEquals(entityReference.get(ID_ATTR_NAME), "entityId");
+    assertEquals("entityId", entityReference.get(ID_ATTR_NAME));
   }
 
   @Test
@@ -121,7 +122,7 @@ class EntityReferenceTest {
 
   @Test
   void testGetStringIdAttribute() {
-    assertEquals(entityReference.get(ID_ATTR_NAME), "entityId");
+    assertEquals("entityId", entityReference.get(ID_ATTR_NAME));
   }
 
   @Test
@@ -133,7 +134,7 @@ class EntityReferenceTest {
   void testGetIntIdAttribute() {
     when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
     EntityReference entityReference = new EntityReference(entityType, 123);
-    assertEquals(entityReference.getInt(ID_ATTR_NAME), Integer.valueOf(123));
+    assertEquals(valueOf(123), entityReference.getInt(ID_ATTR_NAME));
   }
 
   @Test
@@ -145,7 +146,7 @@ class EntityReferenceTest {
   void testGetLongIdAttribute() {
     when(idAttribute.getDataType()).thenReturn(AttributeType.LONG);
     EntityReference entityReference = new EntityReference(entityType, 123L);
-    assertEquals(entityReference.getLong(ID_ATTR_NAME), Long.valueOf(123L));
+    assertEquals(Long.valueOf(123L), entityReference.getLong(ID_ATTR_NAME));
   }
 
   @Test
@@ -203,7 +204,7 @@ class EntityReferenceTest {
   @Test
   void testSetIdAttribute() {
     entityReference.set(ID_ATTR_NAME, "newEntityId");
-    assertEquals(entityReference.getIdValue(), "newEntityId");
+    assertEquals("newEntityId", entityReference.getIdValue());
   }
 
   @Test
@@ -220,6 +221,6 @@ class EntityReferenceTest {
     when(entity.getAttributeNames()).thenReturn(singletonList(ID_ATTR_NAME)).getMock();
     when(entity.get(ID_ATTR_NAME)).thenReturn("newEntityId");
     entityReference.set(entity);
-    assertEquals(entityReference.getIdValue(), "newEntityId");
+    assertEquals("newEntityId", entityReference.getIdValue());
   }
 }

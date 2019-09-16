@@ -46,8 +46,8 @@ class EntityTypeReferencedExceptionTest extends ExceptionMessageTest {
     EntityTypeReferencedException ex =
         new EntityTypeReferencedException(entityTypeDependencyMap, mock(Throwable.class));
     assertEquals(
-        ex.getMessage(),
-        "dependencies:MyEntityType0=MyRefEntityType0,MyRefEntityType1;MyEntityType1=MyRefEntityType2");
+        "dependencies:MyEntityType0=MyRefEntityType0,MyRefEntityType1;MyEntityType1=MyRefEntityType2",
+        ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

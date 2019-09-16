@@ -26,7 +26,7 @@ class UnknownPermissionQueryParamExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new UnknownPermissionQueryParamException("type");
-    assertEquals(ex.getMessage(), "key:type");
+    assertEquals("key:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

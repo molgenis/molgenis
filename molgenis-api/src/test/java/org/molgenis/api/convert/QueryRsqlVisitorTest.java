@@ -46,7 +46,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
 
     Query query = Query.builder().setItem(selector).setOperator(EQUALS).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -57,7 +57,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
 
     Query query = Query.builder().setItem(selector).setOperator(EQUALS).setValue(null).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -69,7 +69,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
 
     Query query =
         Query.builder().setItem(selector).setOperator(NOT_EQUALS).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -80,7 +80,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, arguments);
 
     Query query = Query.builder().setItem(selector).setOperator(IN).setValue(arguments).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -91,7 +91,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, arguments);
 
     Query query = Query.builder().setItem(selector).setOperator(NOT_IN).setValue(arguments).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -102,7 +102,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
 
     Query query = Query.builder().setItem(selector).setOperator(MATCHES).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -123,7 +123,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
 
     Query query = Query.builder().setItem(null).setOperator(MATCHES).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -135,7 +135,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
 
     Query query =
         Query.builder().setItem(selector).setOperator(CONTAINS).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   static Iterator<Object[]> testVisitComparisonNodeLessThanProvider() {
@@ -152,7 +152,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
 
     Query query =
         Query.builder().setItem(selector).setOperator(LESS_THAN).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   static Iterator<Object[]> testVisitComparisonNodeLessThanOrEqualProvider() {
@@ -173,7 +173,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
             .setOperator(LESS_THAN_OR_EQUAL_TO)
             .setValue(argument)
             .build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   static Iterator<Object[]> testVisitComparisonNodeGreaterThanProvider() {
@@ -190,7 +190,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
 
     Query query =
         Query.builder().setItem(selector).setOperator(GREATER_THAN).setValue(argument).build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   static Iterator<Object[]> testVisitComparisonNodeGreaterThanOrEqualProvider() {
@@ -211,7 +211,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
             .setOperator(GREATER_THAN_OR_EQUAL_TO)
             .setValue(argument)
             .build();
-    assertEquals(queryRsqlVisitor.visit(node), query);
+    assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
   @Test
@@ -243,7 +243,7 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
                     Query.builder().setOperator(MATCHES).setValue(argument0).build(),
                     Query.builder().setOperator(MATCHES).setValue(argument1).build()))
             .build();
-    assertEquals(queryRsqlVisitor.visit(orNode), query);
+    assertEquals(query, queryRsqlVisitor.visit(orNode));
   }
 
   @Test
@@ -265,6 +265,6 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
                     Query.builder().setOperator(MATCHES).setValue(argument0).build(),
                     Query.builder().setOperator(MATCHES).setValue(argument1).build()))
             .build();
-    assertEquals(queryRsqlVisitor.visit(andNode), query);
+    assertEquals(query, queryRsqlVisitor.visit(andNode));
   }
 }

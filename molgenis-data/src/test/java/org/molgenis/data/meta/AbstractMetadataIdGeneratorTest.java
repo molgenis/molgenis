@@ -18,6 +18,6 @@ class AbstractMetadataIdGeneratorTest {
   @Test
   void testGenerateHashcode() {
     String id = "0123456789";
-    assertEquals(abstractMetadataIdGenerator.generateHashcode(id), "c6c784a6");
+    assertEquals("c6c784a6", abstractMetadataIdGenerator.generateHashcode(id));
   }
 }

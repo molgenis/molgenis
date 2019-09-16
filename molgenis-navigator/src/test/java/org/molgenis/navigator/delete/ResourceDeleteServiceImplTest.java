@@ -93,14 +93,14 @@ class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
     assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
+        new HashSet<>(asList(entityTypeA0, entityTypeA1)),
+        entityTypeCaptor.getValue().collect(toSet()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
     assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
+        new HashSet<>(asList(packageA, packageB)), packageCaptor.getValue().collect(toSet()));
 
     verify(progress).status("started");
     verify(progress).status("success");
@@ -128,7 +128,7 @@ class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
     assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
+        new HashSet<>(asList(packageA, packageB)), packageCaptor.getValue().collect(toSet()));
 
     verifyNoMoreInteractions(dataService);
   }
@@ -155,8 +155,8 @@ class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
     assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
+        new HashSet<>(asList(entityTypeA0, entityTypeA1)),
+        entityTypeCaptor.getValue().collect(toSet()));
 
     verifyNoMoreInteractions(dataService);
   }

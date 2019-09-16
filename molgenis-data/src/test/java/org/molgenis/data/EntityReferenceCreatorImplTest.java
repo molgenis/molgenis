@@ -48,9 +48,9 @@ class EntityReferenceCreatorImplTest {
     when(dataService.findOneById(entityTypeId, id)).thenReturn(entity);
 
     Entity entityReference = entityManagerImpl.getReference(entityType, id);
-    assertEquals(entityReference.getIdValue(), id);
+    assertEquals(id, entityReference.getIdValue());
     verifyNoMoreInteractions(dataService);
-    assertEquals(label, entityReference.getLabelValue());
+    assertEquals(entityReference.getLabelValue(), label);
     verify(dataService, times(1)).findOneById(entityTypeId, id);
   }
 
@@ -79,16 +79,16 @@ class EntityReferenceCreatorImplTest {
     assertTrue(it.hasNext());
 
     Entity entityReference0 = it.next();
-    assertEquals(entityReference0.getIdValue(), id0);
+    assertEquals(id0, entityReference0.getIdValue());
     verifyNoMoreInteractions(dataService);
-    assertEquals(entityReference0.getLabelValue(), label0);
+    assertEquals(label0, entityReference0.getLabelValue());
     verify(dataService, times(1)).findOneById(entityTypeId, id0);
 
     assertTrue(it.hasNext());
     Entity entityReference1 = it.next();
-    assertEquals(entityReference1.getIdValue(), id1);
+    assertEquals(id1, entityReference1.getIdValue());
     verifyNoMoreInteractions(dataService);
-    assertEquals(entityReference1.getLabelValue(), label1);
+    assertEquals(label1, entityReference1.getLabelValue());
     verify(dataService, times(1)).findOneById(entityTypeId, id1);
 
     assertFalse(it.hasNext());

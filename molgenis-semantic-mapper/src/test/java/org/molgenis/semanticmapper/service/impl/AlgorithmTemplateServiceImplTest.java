@@ -2,6 +2,8 @@ package org.molgenis.semanticmapper.service.impl;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,7 +13,6 @@ import static org.molgenis.script.core.ScriptParameterMetadata.SCRIPT_PARAMETER;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -104,9 +105,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
     model.put(param0Name, sourceAttr0Name);
     model.put(param1Name, sourceAttr1Name);
     AlgorithmTemplate expectedAlgorithmTemplate = new AlgorithmTemplate(script0, model);
-    assertEquals(
-        templateStream.collect(Collectors.toList()),
-        Stream.of(expectedAlgorithmTemplate).collect(Collectors.toList()));
+    assertEquals(of(expectedAlgorithmTemplate).collect(toList()), templateStream.collect(toList()));
   }
 
   @Configuration

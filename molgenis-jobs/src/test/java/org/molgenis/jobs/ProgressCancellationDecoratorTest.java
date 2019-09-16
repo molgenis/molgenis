@@ -1,5 +1,6 @@
 package org.molgenis.jobs;
 
+import static java.lang.Long.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -29,7 +30,7 @@ class ProgressCancellationDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testDelegate() {
-    assertEquals(progressCancellationDecorator.delegate(), delegateProgress);
+    assertEquals(delegateProgress, progressCancellationDecorator.delegate());
   }
 
   @Test
@@ -91,7 +92,7 @@ class ProgressCancellationDecoratorTest extends AbstractMockitoTest {
   @Test
   void testTimeRunning() {
     when(delegateProgress.timeRunning()).thenReturn(123L);
-    assertEquals(progressCancellationDecorator.timeRunning(), Long.valueOf(123L));
+    assertEquals(valueOf(123L), progressCancellationDecorator.timeRunning());
   }
 
   @Test
@@ -104,7 +105,7 @@ class ProgressCancellationDecoratorTest extends AbstractMockitoTest {
   void testGetJobExecution() {
     JobExecution jobExecution = mock(JobExecution.class);
     when(delegateProgress.getJobExecution()).thenReturn(jobExecution);
-    assertEquals(progressCancellationDecorator.getJobExecution(), jobExecution);
+    assertEquals(jobExecution, progressCancellationDecorator.getJobExecution());
   }
 
   @Test

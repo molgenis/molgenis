@@ -16,6 +16,7 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
 
 import java.util.Arrays;
@@ -354,15 +355,15 @@ class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         sortaServiceImpl.findOntologyTermEntities(ONTOLOGY_IRI, firstInput);
     Iterator<Entity> iterator_test1 = ontologyTerms_test1.iterator();
 
-    assertEquals(iterator_test1.hasNext(), true);
+    assertEquals(true, iterator_test1.hasNext());
     Entity firstMatch_test1 = iterator_test1.next();
-    assertEquals(firstMatch_test1.getDouble(COMBINED_SCORE).intValue(), 100);
+    assertEquals(100, firstMatch_test1.getDouble(COMBINED_SCORE).intValue());
 
-    assertEquals(iterator_test1.hasNext(), true);
+    assertEquals(true, iterator_test1.hasNext());
     Entity secondMatch_test1 = iterator_test1.next();
-    assertEquals(secondMatch_test1.getDouble(COMBINED_SCORE).intValue(), new Double(85).intValue());
+    assertEquals(new Double(85).intValue(), secondMatch_test1.getDouble(COMBINED_SCORE).intValue());
 
-    assertEquals(iterator_test1.hasNext(), false);
+    assertEquals(false, iterator_test1.hasNext());
 
     // Test two: match the database annotation of input with ontology terms
     Entity secondInput = new DynamicEntity(entityType);
@@ -373,11 +374,11 @@ class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         sortaServiceImpl.findOntologyTermEntities(ONTOLOGY_IRI, secondInput);
     Iterator<Entity> iterator_test2 = ontologyTerms_test2.iterator();
 
-    assertEquals(iterator_test2.hasNext(), true);
+    assertEquals(true, iterator_test2.hasNext());
     Entity firstMatch_test2 = iterator_test2.next();
-    assertEquals(firstMatch_test2.getDouble(COMBINED_SCORE).intValue(), 100);
+    assertEquals(100, firstMatch_test2.getDouble(COMBINED_SCORE).intValue());
 
-    assertEquals(iterator_test2.hasNext(), false);
+    assertEquals(false, iterator_test2.hasNext());
 
     // Test three: match only the name of input with ontology terms, since the name contains
     // multiple synonyms
@@ -389,11 +390,11 @@ class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         sortaServiceImpl.findOntologyTermEntities(ONTOLOGY_IRI, thirdInput);
     Iterator<Entity> iterator_test3 = ontologyTerms_test3.iterator();
 
-    assertEquals(iterator_test3.hasNext(), true);
+    assertEquals(true, iterator_test3.hasNext());
     Entity firstMatch_test3 = iterator_test3.next();
-    assertEquals(firstMatch_test3.getDouble(COMBINED_SCORE).intValue(), 100);
+    assertEquals(100, firstMatch_test3.getDouble(COMBINED_SCORE).intValue());
 
-    assertEquals(iterator_test3.hasNext(), false);
+    assertEquals(false, iterator_test3.hasNext());
   }
 
   @Test
@@ -402,34 +403,31 @@ class SortaServiceImplTest extends AbstractMolgenisSpringTest {
 
     Iterator<Entity> iterator = allOntologyEntities.iterator();
 
-    assertEquals(iterator.hasNext(), true);
+    assertEquals(true, iterator.hasNext());
 
     Entity ontologyEntity = iterator.next();
 
-    assertEquals(ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI), ONTOLOGY_IRI);
+    assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI));
 
-    assertEquals(iterator.hasNext(), false);
+    assertEquals(false, iterator.hasNext());
   }
 
   @Test
   void getOntologyEntity() {
     Entity ontologyEntity = sortaServiceImpl.getOntologyEntity(ONTOLOGY_IRI);
-    assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI));
+    assertEquals(ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI), ONTOLOGY_IRI);
   }
 
   @Test
   void getOntologyTermEntity() {
     Entity firstOntologyTermEntity =
         sortaServiceImpl.getOntologyTermEntity(ONTOLOGY_IRI + 1, ONTOLOGY_IRI);
-    assertEquals(
-        firstOntologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME),
-        "hearing impairment");
+    assertEquals("hearing impairment", firstOntologyTermEntity.getString(ONTOLOGY_TERM_NAME));
 
     Entity secondOntologyTermEntity =
         sortaServiceImpl.getOntologyTermEntity(ONTOLOGY_IRI + 2, ONTOLOGY_IRI);
     assertEquals(
-        secondOntologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME),
-        "mixed hearing impairment");
+        "mixed hearing impairment", secondOntologyTermEntity.getString(ONTOLOGY_TERM_NAME));
   }
 
   @Configuration

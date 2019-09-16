@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.metadata.manager.model.EditorEntityType.create;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -133,7 +134,7 @@ class EntityTypeMapperTest {
     @SuppressWarnings("unchecked")
     Iterable<Attribute> attributes = mock(Iterable.class);
     when(attributeMapper.toAttributes(editorAttributes, editorEntityType)).thenReturn(attributes);
-    assertEquals(entityType, entityTypeMapper.toEntityType(editorEntityType));
+    assertEquals(entityTypeMapper.toEntityType(editorEntityType), entityType);
     verify(entityType).setId(id);
     verify(entityType).setLabel(label);
     verify(entityType).setLabel(i18nLabelLangEn, i18nLabelValue);
@@ -265,7 +266,7 @@ class EntityTypeMapperTest {
             editorIdAttribute,
             editorLabelAttribute,
             editorLookupAttributes);
-    assertEquals(editorEntityType, expectedEditorEntityType);
+    assertEquals(expectedEditorEntityType, editorEntityType);
   }
 
   @Test
@@ -314,8 +315,7 @@ class EntityTypeMapperTest {
         entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
     assertEquals(
-        editorEntityType,
-        EditorEntityType.create(
+        create(
             id,
             null,
             ImmutableMap.of(),
@@ -325,11 +325,12 @@ class EntityTypeMapperTest {
             backend,
             null,
             null,
-            ImmutableList.of(),
-            ImmutableList.of(),
-            ImmutableList.of(),
+            of(),
+            of(),
+            of(),
             editorIdAttribute,
             editorLabelAttribute,
-            ImmutableList.of()));
+            of()),
+        editorEntityType);
   }
 }

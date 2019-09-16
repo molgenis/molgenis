@@ -1,7 +1,9 @@
 package org.molgenis.data.security.auth;
 
+import static java.lang.Integer.valueOf;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,7 +68,7 @@ class UserRepositoryDecoratorTest extends AbstractMockitoTest {
               List<Entity> entitiesList = entities.collect(toList());
               return entitiesList.size();
             });
-    assertEquals(userRepositoryDecorator.add(Stream.of(user0, user1)), Integer.valueOf(2));
+    assertEquals(valueOf(2), userRepositoryDecorator.add(of(user0, user1)));
     verify(passwordEncoder, times(2)).encode(password);
   }
 
@@ -132,7 +134,7 @@ class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
-    assertEquals(captor.getValue().collect(toList()), singletonList(user));
+    assertEquals(singletonList(user), captor.getValue().collect(toList()));
     verify(user).setPassword("passwordHash");
   }
 
@@ -151,7 +153,7 @@ class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
-    assertEquals(captor.getValue().collect(toList()), singletonList(user));
+    assertEquals(singletonList(user), captor.getValue().collect(toList()));
     verify(user).setPassword("currentPasswordHash");
   }
 }

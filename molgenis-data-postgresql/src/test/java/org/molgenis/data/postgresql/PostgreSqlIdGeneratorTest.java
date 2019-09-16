@@ -44,7 +44,7 @@ class PostgreSqlIdGeneratorTest {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     String id = postgreSqlIdGenerator.generateId(entityType);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 
   static Iterator<Object[]> generateIdAttributeProvider() {
@@ -67,6 +67,6 @@ class PostgreSqlIdGeneratorTest {
     when(attr.getIdentifier()).thenReturn(attrId);
     when(attr.getName()).thenReturn(attrName);
     String id = postgreSqlIdGenerator.generateId(attr);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 }

@@ -36,7 +36,7 @@ class AggregateAnonymizerRepositoryDecoratorTest {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
     when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
-    assertEquals(aggregateResult, aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery));
+    assertEquals(aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery), aggregateResult);
     verifyZeroInteractions(aggregateAnonymizer);
     verifyZeroInteractions(aggregateResult);
   }
@@ -52,6 +52,6 @@ class AggregateAnonymizerRepositoryDecoratorTest {
     when(aggregateAnonymizer.anonymize(aggregateResult, threshold))
         .thenReturn(anonymizedAggregateResult);
     assertEquals(
-        anonymizedAggregateResult, aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery));
+        aggregateAnonymizerRepoDecorator.aggregate(aggregateQuery), anonymizedAggregateResult);
   }
 }

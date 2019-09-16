@@ -24,7 +24,7 @@ class MolgenisPasswordEncoderTest {
     BCryptPasswordEncoder bCryptPasswordEncoder = mock(BCryptPasswordEncoder.class);
     when(bCryptPasswordEncoder.encode(password)).thenReturn(encodedPassword);
     assertEquals(
-        new MolgenisPasswordEncoder(bCryptPasswordEncoder).encode(password), encodedPassword);
+        encodedPassword, new MolgenisPasswordEncoder(bCryptPasswordEncoder).encode(password));
   }
 
   @Test

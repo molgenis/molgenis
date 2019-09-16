@@ -51,9 +51,9 @@ class PackageFactoryTest extends AbstractEntityFactoryTest {
 
     Package actual = factory.create(packageValue);
 
-    assertEquals(actual.getId(), "name");
-    assertEquals(actual.getLabel(), "label");
-    assertEquals(actual.getDescription(), "description");
+    assertEquals("name", actual.getId());
+    assertEquals("label", actual.getLabel());
+    assertEquals("description", actual.getDescription());
   }
 
   @Test
@@ -62,8 +62,8 @@ class PackageFactoryTest extends AbstractEntityFactoryTest {
 
     Package actual = factory.create(packageValue);
 
-    assertEquals(actual.getId(), "name");
-    assertEquals(actual.getLabel(), "label");
+    assertEquals("name", actual.getId());
+    assertEquals("label", actual.getLabel());
     assertNull(actual.getDescription());
   }
 }

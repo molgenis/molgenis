@@ -13,6 +13,6 @@ class UnexpectedPermissionExceptionTest {
     Permission permission = mock(Permission.class);
     when(permission.toString()).thenReturn("test");
     assertEquals(
-        new UnexpectedPermissionException(permission).getMessage(), "Illegal permission 'test'");
+        "Illegal permission 'test'", new UnexpectedPermissionException(permission).getMessage());
   }
 }

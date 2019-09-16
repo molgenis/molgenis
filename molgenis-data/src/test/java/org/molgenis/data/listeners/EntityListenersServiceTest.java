@@ -128,8 +128,8 @@ class EntityListenersServiceTest {
       entityListenersService.register(repoFullName);
       assertTrue(entityListenersService.isEmpty(repoFullName));
       assertEquals(
-          mde.getMessage(),
-          "Repository [EntityRepo] is not registered, please contact your administrator");
+          "Repository [EntityRepo] is not registered, please contact your administrator",
+          mde.getMessage());
       return;
     }
     fail();

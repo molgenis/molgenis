@@ -1,5 +1,6 @@
 package org.molgenis.data.validation;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -217,7 +218,7 @@ class RepositoryValidationDecoratorTest {
   @Test
   void query() throws Exception {
     assertEquals(
-        repositoryValidationDecorator.query().getRepository(), repositoryValidationDecorator);
+        repositoryValidationDecorator, repositoryValidationDecorator.query().getRepository());
   }
 
   @Test
@@ -328,8 +329,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)");
+          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -364,7 +365,7 @@ class RepositoryValidationDecoratorTest {
       throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-      assertEquals(e.getViolations(), violations);
+      assertEquals(violations, e.getViolations());
     }
   }
 
@@ -397,8 +398,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -462,8 +463,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -536,8 +537,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)");
+          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -616,8 +617,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 1)");
+          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -672,8 +673,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -782,8 +783,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -880,7 +881,7 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
-      assertEquals(e.getViolations(), violations);
+      assertEquals(violations, e.getViolations());
     }
   }
 
@@ -921,8 +922,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1001,8 +1002,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1169,8 +1170,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 2)");
+          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -1304,8 +1305,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 2)");
+          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -1368,8 +1369,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1491,8 +1492,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 2)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -1555,8 +1556,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1618,7 +1619,7 @@ class RepositoryValidationDecoratorTest {
       throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
-      assertEquals(e.getViolations(), violations);
+      assertEquals(violations, e.getViolations());
     }
   }
 
@@ -1651,8 +1652,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1716,8 +1717,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1789,8 +1790,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)");
+          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1869,8 +1870,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 1)");
+          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -1925,8 +1926,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2035,8 +2036,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2114,8 +2115,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyStringAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyStringAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2268,8 +2269,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyXrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyXrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2503,8 +2504,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyMrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyMrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2601,7 +2602,7 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
-      assertEquals(e.getViolations(), violations);
+      assertEquals(violations, e.getViolations());
     }
   }
 
@@ -2642,8 +2643,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'xrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2722,8 +2723,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)");
+          "The attribute 'mrefAttr' of entity 'entity' can not be null. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -2890,8 +2891,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 2)");
+          "Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -3025,8 +3026,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 2)");
+          "Unknown xref value 'id1' for attribute 'mrefAttr' of entity 'entity'. (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -3089,8 +3090,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -3212,8 +3213,8 @@ class RepositoryValidationDecoratorTest {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       verify(entityAttributesValidator, times(1)).validate(entity1, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 2)");
+          "Duplicate value 'unique0' for unique attribute 'uniqueStringAttr' from entity 'entity' (entity 2)",
+          e.getMessage());
     }
   }
 
@@ -3276,8 +3277,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(entity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)");
+          "Duplicate value 'idref0' for unique attribute 'uniqueXrefAttr' from entity 'entity' (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -3363,8 +3364,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyStringAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyStringAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -3532,8 +3533,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyXrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyXrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -3706,8 +3707,8 @@ class RepositoryValidationDecoratorTest {
     } catch (MolgenisValidationException e) {
       verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityType);
       assertEquals(
-          e.getMessage(),
-          "The attribute 'readonlyMrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)");
+          "The attribute 'readonlyMrefAttr' of entity 'entity' can not be changed it is readonly. (entity 1)",
+          e.getMessage());
     }
   }
 
@@ -3720,7 +3721,7 @@ class RepositoryValidationDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds);
-    assertEquals(expectedEntities.collect(toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -3733,7 +3734,7 @@ class RepositoryValidationDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = repositoryValidationDecorator.findAll(entityIds, fetch);
-    assertEquals(expectedEntities.collect(toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
@@ -3754,7 +3755,7 @@ class RepositoryValidationDecoratorTest {
     Fetch fetch = new Fetch();
     Entity entity = mock(Entity.class);
     when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
-    assertEquals(entity, myRepositoryValidationDecorator.findOneById(id, fetch));
+    assertEquals(myRepositoryValidationDecorator.findOneById(id, fetch), entity);
     verify(decoratedRepository, times(1)).findOneById(id, fetch);
   }
 
@@ -3765,7 +3766,7 @@ class RepositoryValidationDecoratorTest {
     Query<Entity> query = mock(Query.class);
     when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = repositoryValidationDecorator.findAll(query);
-    assertEquals(entities.collect(toList()), Arrays.asList(entity0));
+    assertEquals(asList(entity0), entities.collect(toList()));
   }
 
   @Test
@@ -3826,7 +3827,7 @@ class RepositoryValidationDecoratorTest {
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(captor.capture());
     verify(defaultValueReferenceValidator).validateEntitiesNotReferenced(entityStream, entityType);
-    assertEquals(captor.getValue().collect(toList()), singletonList(entity));
+    assertEquals(singletonList(entity), captor.getValue().collect(toList()));
   }
 
   @Test
@@ -3871,7 +3872,7 @@ class RepositoryValidationDecoratorTest {
     verify(delegateRepository).deleteAll(captor.capture());
     verify(defaultValueReferenceValidator)
         .validateEntitiesNotReferencedById(entityIdStream, entityType);
-    assertEquals(captor.getValue().collect(toList()), singletonList(entityId));
+    assertEquals(singletonList(entityId), captor.getValue().collect(toList()));
   }
 
   @Test

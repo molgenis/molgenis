@@ -69,7 +69,7 @@ class MappingGeneratorTest extends AbstractMockitoTest {
     FieldMapping fieldMapping =
         FieldMapping.builder().setName(attrIdentifier).setType(mappingType).build();
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
   static Iterator<Object[]> createMappingProviderAnalyzeNGrams() {
@@ -115,7 +115,7 @@ class MappingGeneratorTest extends AbstractMockitoTest {
                         .build()))
             .build();
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
   static Iterator<Object[]> createMappingProviderDepth() {
@@ -181,7 +181,7 @@ class MappingGeneratorTest extends AbstractMockitoTest {
     initDocumentIdGeneratorMock();
     Mapping mapping = mappingGenerator.createMapping(entityType);
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
   private static EntityType createEntityType(String attrIdentifier, AttributeType type) {

@@ -1,5 +1,6 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,7 +15,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -51,7 +51,7 @@ class EntityTypeMetadataCopierTest extends AbstractMockitoTest {
 
     copier.copy(entityType, state);
 
-    assertEquals(state.copiedAttributes(), ImmutableMap.of("id", idAttrCopy));
+    assertEquals(of("id", idAttrCopy), state.copiedAttributes());
   }
 
   private static EntityType mockEntityTypeMetadata() {

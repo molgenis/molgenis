@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.importer.MetadataAction.IGNORE;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,24 +65,24 @@ class OntologyImportServiceTest extends AbstractMockitoTest {
         ontologyImportService.doImport(
             repositoryCollection, MetadataAction.IGNORE, DataAction.ADD, null);
 
-    assertEquals(entityImportReport.getNewEntities(), emptyList());
+    assertEquals(emptyList(), entityImportReport.getNewEntities());
     assertEquals(
-        entityImportReport.getNrImportedEntitiesMap(), of(entityTypeId0, 1, entityTypeId1, 1));
+        of(entityTypeId0, 1, entityTypeId1, 1), entityImportReport.getNrImportedEntitiesMap());
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityTypeId0Captor = ArgumentCaptor.forClass(Stream.class);
     verify(targetRepository0).add(entityTypeId0Captor.capture());
-    assertEquals(entityTypeId0Captor.getValue().collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entityTypeId0Captor.getValue().collect(toList()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityTypeId1Captor = ArgumentCaptor.forClass(Stream.class);
     verify(targetRepository1).add(entityTypeId1Captor.capture());
-    assertEquals(entityTypeId1Captor.getValue().collect(toList()), singletonList(entity1));
+    assertEquals(singletonList(entity1), entityTypeId1Captor.getValue().collect(toList()));
   }
 
   @Test
   void getMetadataAction() {
     RepositoryCollection source = mock(RepositoryCollection.class);
-    assertEquals(ontologyImportService.getMetadataAction(source), MetadataAction.IGNORE);
+    assertEquals(IGNORE, ontologyImportService.getMetadataAction(source));
   }
 }

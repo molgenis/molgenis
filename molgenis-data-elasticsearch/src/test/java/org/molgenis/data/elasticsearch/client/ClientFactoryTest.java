@@ -43,7 +43,7 @@ class ClientFactoryTest extends AbstractMockitoTest {
             preBuildClientFactory);
     Client client = clientFactory.createClient();
 
-    assertEquals(client, connectedClient);
+    assertEquals(connectedClient, client);
     verify(preBuildClientFactory, times(3)).build(clusterName, null);
     verify(unConnectedClient, times(2)).close();
   }

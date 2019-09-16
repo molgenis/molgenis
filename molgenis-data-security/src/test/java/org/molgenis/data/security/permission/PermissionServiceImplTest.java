@@ -1,6 +1,8 @@
 package org.molgenis.data.security.permission;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,8 +12,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.EntityTypeIdentity.ENTITY_TYPE;
 import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
+import static org.molgenis.data.security.PackageIdentity.PACKAGE;
 import static org.molgenis.data.security.permission.EntityHelper.PLUGIN;
+import static org.molgenis.data.security.permission.model.LabelledType.create;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.READMETA;
@@ -39,12 +44,10 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.data.security.permission.model.LabelledPermission;
-import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.ObjectIdentityService;
@@ -101,11 +104,11 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("entityType2"), READ_METADATA);
     assertEquals(
-        permissionsApiService.getLabelledTypes(),
         new HashSet<>(
-            Arrays.asList(
-                LabelledType.create("entity-test1", "entityType1", "label1"),
-                LabelledType.create("entity-test2", "entityType2", "label2"))));
+            asList(
+                create("entity-test1", "entityType1", "label1"),
+                create("entity-test2", "entityType2", "label2"))),
+        permissionsApiService.getLabelledTypes());
   }
 
   @Test
@@ -120,37 +123,37 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     doReturn("label1").when(entityHelper).getLabel("classId", "test1");
     doReturn("label2").when(entityHelper).getLabel("classId", "test2");
     assertEquals(
-        permissionsApiService.getObjects("entity-type", 1, 10),
         new HashSet<>(
-            Arrays.asList(
+            asList(
                 LabelledObject.create("test2", "label2"),
-                LabelledObject.create("test1", "label1"))));
+                LabelledObject.create("test1", "label1"))),
+        permissionsApiService.getObjects("entity-type", 1, 10));
   }
 
   @Test
   void testGetSuitablePermissionsForTypeEntityType() {
     assertEquals(
-        permissionsApiService.getSuitablePermissionsForType(EntityTypeIdentity.ENTITY_TYPE),
-        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
+        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA),
+        permissionsApiService.getSuitablePermissionsForType(ENTITY_TYPE));
   }
 
   @Test
   void testGetSuitablePermissionsForTypePackage() {
     assertEquals(
-        permissionsApiService.getSuitablePermissionsForType(PackageIdentity.PACKAGE),
-        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA));
+        newHashSet(READMETA, COUNT, READ, WRITE, WRITEMETA),
+        permissionsApiService.getSuitablePermissionsForType(PACKAGE));
   }
 
   @Test
   void testGetSuitablePermissionsForTypePlugin() {
-    assertEquals(permissionsApiService.getSuitablePermissionsForType(PLUGIN), newHashSet(READ));
+    assertEquals(newHashSet(READ), permissionsApiService.getSuitablePermissionsForType(PLUGIN));
   }
 
   @Test
   void testGetSuitablePermissionsForTypeEntity() {
     assertEquals(
-        permissionsApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"),
-        newHashSet(READ, WRITE));
+        newHashSet(READ, WRITE),
+        permissionsApiService.getSuitablePermissionsForType("entity-row_level_secured_entity"));
   }
 
   @Test
@@ -200,10 +203,10 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
 
     assertEquals(
+        expected,
         newHashSet(
             permissionsApiService.getPermissionsForObject(
-                new ObjectIdentityImpl("entity-typeId", "identifier"), sids, true)),
-        expected);
+                new ObjectIdentityImpl("entity-typeId", "identifier"), sids, true)));
   }
 
   @Test
@@ -260,7 +263,7 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
                 "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
     when(userRoleTools.getInheritedSids(sids)).thenReturn(sids);
 
-    assertEquals(newHashSet(permissionsApiService.getPermissions(sids, true)), expected);
+    assertEquals(expected, newHashSet(permissionsApiService.getPermissions(sids, true)));
   }
 
   @Test
@@ -315,7 +318,7 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     Map<String, HashSet<LabelledPermission>> expected =
         Collections.singletonMap("identifier", newHashSet(permission1, permission2));
     assertEquals(
-        permissionsApiService.getPermissionsForType("entity-typeId", sids, 4, 20), expected);
+        expected, permissionsApiService.getPermissionsForType("entity-typeId", sids, 4, 20));
   }
 
   @Test
@@ -370,7 +373,7 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     Map<String, HashSet<LabelledPermission>> expected =
         Collections.singletonMap("identifier", newHashSet(permission1, permission2));
     assertEquals(
-        permissionsApiService.getPermissionsForType("entity-typeId", sids, false), expected);
+        expected, permissionsApiService.getPermissionsForType("entity-typeId", sids, false));
   }
 
   @Test
@@ -424,8 +427,7 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     Map<String, HashSet<LabelledPermission>> expected =
         Collections.singletonMap("identifier", newHashSet(permission1, permission2));
     assertEquals(
-        permissionsApiService.getPermissionsForType("entity-typeId", Collections.emptySet(), false),
-        expected);
+        expected, permissionsApiService.getPermissionsForType("entity-typeId", emptySet(), false));
   }
 
   @Test

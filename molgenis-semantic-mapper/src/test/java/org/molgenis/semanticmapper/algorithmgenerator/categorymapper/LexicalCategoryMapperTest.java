@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.algorithmgenerator.categorymapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.semanticmapper.algorithmgenerator.bean.Category.create;
 
 import com.google.common.collect.Lists;
 import java.util.Arrays;
@@ -21,22 +22,20 @@ public class LexicalCategoryMapperTest {
     Category femaleCategory = Category.create("1", "FEMALE");
     List<Category> targetCategories1 = Lists.newArrayList(maleCategory, femaleCategory);
     assertEquals(
-        lexicalCategoryMapper.findBestCategoryMatch(
-            Category.create("1", "male"), targetCategories1),
-        maleCategory);
+        maleCategory,
+        lexicalCategoryMapper.findBestCategoryMatch(create("1", "male"), targetCategories1));
     assertEquals(
-        lexicalCategoryMapper.findBestCategoryMatch(
-            Category.create("2", "female"), targetCategories1),
-        femaleCategory);
+        femaleCategory,
+        lexicalCategoryMapper.findBestCategoryMatch(create("2", "female"), targetCategories1));
 
     Category neverStrokeCategory = Category.create("0", "Never had stroke");
     Category hasStrokeCategory = Category.create("1", "Has has stroke");
     List<Category> targetCategories2 = Lists.newArrayList(neverStrokeCategory, hasStrokeCategory);
     assertEquals(
-        lexicalCategoryMapper.findBestCategoryMatch(Category.create("1", "no"), targetCategories2),
-        neverStrokeCategory);
+        neverStrokeCategory,
+        lexicalCategoryMapper.findBestCategoryMatch(create("1", "no"), targetCategories2));
     assertEquals(
-        lexicalCategoryMapper.findBestCategoryMatch(Category.create("1", "yes"), targetCategories2),
-        hasStrokeCategory);
+        hasStrokeCategory,
+        lexicalCategoryMapper.findBestCategoryMatch(create("1", "yes"), targetCategories2));
   }
 }

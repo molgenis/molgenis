@@ -24,6 +24,6 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest {
     doReturn("A").when(entity).get(VcfAttributes.ALT);
     doReturn(".").when(entity).get(VcfAttributes.QUAL);
     doReturn("PASS").when(entity).get(VcfAttributes.FILTER);
-    assertEquals(VcfUtils.createId(entity), "VWnsXKOj5B7PBk4dwFLsQw");
+    assertEquals("VWnsXKOj5B7PBk4dwFLsQw", VcfUtils.createId(entity));
   }
 }

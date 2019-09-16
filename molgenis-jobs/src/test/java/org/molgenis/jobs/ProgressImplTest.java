@@ -105,7 +105,7 @@ class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.success();
 
     verify(mailSender).send(any(SimpleMailMessage.class));
-    assertEquals(jobExecution.getProgressMessage(), "Job finished. (Mail not sent: fail!)");
+    assertEquals("Job finished. (Mail not sent: fail!)", jobExecution.getProgressMessage());
   }
 
   @Test
@@ -122,7 +122,7 @@ class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.failed(exceptionMessage, ex);
 
     verify(mailSender).send(any(SimpleMailMessage.class));
-    assertEquals(jobExecution.getProgressMessage(), exceptionMessage + " (Mail not sent: fail!)");
+    assertEquals(exceptionMessage + " (Mail not sent: fail!)", jobExecution.getProgressMessage());
   }
 
   @Test
@@ -145,7 +145,7 @@ class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.canceled();
 
     verify(mailSender).send(any(SimpleMailMessage.class));
-    assertEquals(jobExecution.getProgressMessage(), "Downloading... (Mail not sent: fail!)");
+    assertEquals("Downloading... (Mail not sent: fail!)", jobExecution.getProgressMessage());
   }
 
   @Configuration

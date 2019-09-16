@@ -29,7 +29,7 @@ class UnknownEnumValueExceptionTest extends ExceptionMessageTest {
   void testGetMessage() {
     UnknownEnumValueException ex =
         new UnknownEnumValueException("MyEntityType", "myAttributeName", mock(Throwable.class));
-    assertEquals(ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName");
+    assertEquals("entityTypeId:MyEntityType attributeName:myAttributeName", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

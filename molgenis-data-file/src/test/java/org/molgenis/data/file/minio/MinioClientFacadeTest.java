@@ -54,7 +54,7 @@ class MinioClientFacadeTest extends AbstractMockitoTest {
     String objectName = "MyObjectName";
     ObjectStat objectStat = mock(ObjectStat.class);
     when(minioClient.statObject(bucketName, objectName)).thenReturn(objectStat);
-    assertEquals(minioClientFacade.statObject(objectName), objectStat);
+    assertEquals(objectStat, minioClientFacade.statObject(objectName));
   }
 
   @Test
@@ -75,6 +75,6 @@ class MinioClientFacadeTest extends AbstractMockitoTest {
     String objectName = "MyObjectName";
     InputStream inputStream = mock(InputStream.class);
     when(minioClient.getObject(bucketName, objectName)).thenReturn(inputStream);
-    assertEquals(minioClientFacade.getObject(objectName), inputStream);
+    assertEquals(inputStream, minioClientFacade.getObject(objectName));
   }
 }

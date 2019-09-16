@@ -32,7 +32,7 @@ class ValueAlreadyExistsExceptionTest extends ExceptionMessageTest {
         new ValueAlreadyExistsException(
             "MyEntityType", "myAttributeName", "myValue", mock(Throwable.class));
     assertEquals(
-        ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue");
+        "entityTypeId:MyEntityType attributeName:myAttributeName value:myValue", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

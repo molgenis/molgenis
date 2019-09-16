@@ -52,7 +52,7 @@ class OneClickImporterServiceTest {
 
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -67,7 +67,7 @@ class OneClickImporterServiceTest {
 
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -86,10 +86,10 @@ class OneClickImporterServiceTest {
             newArrayList("Fries", null, "Vegan food", "Pizza", null, "Spinache"));
 
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
 
-    assertEquals(6, c1.getDataValues().size());
-    assertEquals(6, c2.getDataValues().size());
+    assertEquals(c1.getDataValues().size(), 6);
+    assertEquals(c2.getDataValues().size(), 6);
   }
 
   @Test
@@ -146,7 +146,7 @@ class OneClickImporterServiceTest {
             "Age", 4, newArrayList(26.0, null, null, null, null, 22.0, 27.0, null, 53.0, 32.0));
 
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2, c3, c4, c5));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -174,7 +174,7 @@ class OneClickImporterServiceTest {
             newArrayList("being cool day", "bike day", "sleep day", "bye bye day", "work day"));
 
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -195,7 +195,7 @@ class OneClickImporterServiceTest {
             newArrayList("arrow functions", "Oldschool syntax", "Lambda Magician", "Root access"));
 
     DataCollection expected = DataCollection.create("simple-valid", newArrayList(c1, c2));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -255,7 +255,7 @@ class OneClickImporterServiceTest {
 
     DataCollection expected =
         DataCollection.create("complex-valid", newArrayList(c1, c2, c3, c4, c5));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test

@@ -54,7 +54,7 @@ class PackageRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(packageCaptor.capture());
-    assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
+    assertEquals(singletonList(package_), packageCaptor.getValue().collect(toList()));
     verify(packageValidator).validate(package_);
   }
 
@@ -94,7 +94,7 @@ class PackageRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(packageCaptor.capture());
-    assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
+    assertEquals(singletonList(package_), packageCaptor.getValue().collect(toList()));
     verify(packageValidator).validate(package_);
   }
 
@@ -134,7 +134,7 @@ class PackageRepositoryValidationDecoratorTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(packageCaptor.capture());
-    assertEquals(packageCaptor.getValue().collect(toList()), singletonList(package_));
+    assertEquals(singletonList(package_), packageCaptor.getValue().collect(toList()));
     verify(packageValidator).validate(package_);
   }
 

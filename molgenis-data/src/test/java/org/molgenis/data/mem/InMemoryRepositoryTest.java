@@ -1,5 +1,8 @@
 package org.molgenis.data.mem;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Integer.valueOf;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -8,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +52,7 @@ class InMemoryRepositoryTest {
     when(entity1.get("id")).thenReturn("id1");
     when(entity1.getString("id")).thenReturn("id1");
     Stream<Entity> entities = Stream.of(entity0, entity1);
-    assertEquals(inMemoryRepository.add(entities), Integer.valueOf(2));
+    assertEquals(valueOf(2), inMemoryRepository.add(entities));
   }
 
   @Test
@@ -71,7 +73,7 @@ class InMemoryRepositoryTest {
     inMemoryRepository.delete(Stream.of(entity0));
 
     // get all
-    assertEquals(Lists.newArrayList(inMemoryRepository.iterator()), singletonList(entity1));
+    assertEquals(singletonList(entity1), newArrayList(inMemoryRepository.iterator()));
   }
 
   @Test
@@ -94,8 +96,7 @@ class InMemoryRepositoryTest {
     inMemoryRepository.update(Stream.of(entity0));
 
     // get all
-    assertEquals(
-        Lists.newArrayList(inMemoryRepository.iterator()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), newArrayList(inMemoryRepository.iterator()));
   }
 
   @Test
@@ -109,7 +110,7 @@ class InMemoryRepositoryTest {
       Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
       inMemoryRepository.add(entity);
       Fetch fetch = new Fetch();
-      assertEquals(inMemoryRepository.findOneById(id, fetch), entity);
+      assertEquals(entity, inMemoryRepository.findOneById(id, fetch));
     }
   }
 
@@ -141,7 +142,7 @@ class InMemoryRepositoryTest {
       inMemoryRepository.add(entity1);
       List<Entity> entities =
           inMemoryRepository.findAll(Stream.of(id0, id1, "bogus")).collect(Collectors.toList());
-      assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+      assertEquals(asList(entity0, entity1), newArrayList(entities));
     }
   }
 
@@ -163,7 +164,7 @@ class InMemoryRepositoryTest {
           inMemoryRepository
               .findAll(Stream.of(id0, id1, "bogus"), fetch)
               .collect(Collectors.toList());
-      assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+      assertEquals(asList(entity0, entity1), newArrayList(entities));
     }
   }
 
@@ -182,7 +183,7 @@ class InMemoryRepositoryTest {
       inMemoryRepository.add(entity1);
       List<Entity> entities =
           inMemoryRepository.findAll(new QueryImpl<>()).collect(Collectors.toList());
-      assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+      assertEquals(asList(entity0, entity1), newArrayList(entities));
     }
   }
 
@@ -213,7 +214,7 @@ class InMemoryRepositoryTest {
               .findAll(new QueryImpl<>().eq("attr", "a"))
               .filter(Objects::nonNull)
               .collect(Collectors.toList());
-      assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+      assertEquals(asList(entity0, entity1), newArrayList(entities));
     }
   }
 

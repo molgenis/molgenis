@@ -1,5 +1,6 @@
 package org.molgenis.web.menu;
 
+import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.util.Collections;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -61,12 +61,12 @@ class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
     when(userPermissionEvaluator.hasPermission(
             any(PluginIdentity.class), eq(PluginPermission.VIEW_PLUGIN)))
         .thenReturn(true);
-    assertEquals(menuReaderService.findMenuItemPath("p1_0"), "/menu/root/p1_0");
-    assertEquals(menuReaderService.findMenuItemPath("p1_1"), "/menu/root/p1_1");
-    assertEquals(menuReaderService.findMenuItemPath("p2_0"), "/menu/p1_1/p2_0");
-    assertEquals(menuReaderService.findMenuItemPath("p2_1"), "/menu/p1_1/p2_1");
-    assertEquals(menuReaderService.findMenuItemPath("p3_0"), "/menu/p2_0/p3_0");
-    assertEquals(menuReaderService.findMenuItemPath("p3_1"), "/menu/p2_0/p3_1");
+    assertEquals("/menu/root/p1_0", menuReaderService.findMenuItemPath("p1_0"));
+    assertEquals("/menu/root/p1_1", menuReaderService.findMenuItemPath("p1_1"));
+    assertEquals("/menu/p1_1/p2_0", menuReaderService.findMenuItemPath("p2_0"));
+    assertEquals("/menu/p1_1/p2_1", menuReaderService.findMenuItemPath("p2_1"));
+    assertEquals("/menu/p2_0/p3_0", menuReaderService.findMenuItemPath("p3_0"));
+    assertEquals("/menu/p2_0/p3_1", menuReaderService.findMenuItemPath("p3_1"));
     assertNull(menuReaderService.findMenuItemPath("non_existing"));
   }
 
@@ -103,6 +103,6 @@ class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
     when(userPermissionEvaluator.hasPermission(any(), eq(PluginPermission.VIEW_PLUGIN)))
         .thenReturn(true);
 
-    assertEquals(menuReaderService.getMenu(), Optional.of(menu));
+    assertEquals(of(menu), menuReaderService.getMenu());
   }
 }

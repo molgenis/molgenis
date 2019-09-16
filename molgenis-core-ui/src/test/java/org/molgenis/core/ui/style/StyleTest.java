@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 class StyleTest {
   @Test
   void createLocal() {
-    assertEquals(Style.createLocal("bootstrap.min.css").getName(), "bootstrap");
-    assertEquals(Style.createLocal("bootstrap-yeti.min.css").getName(), "yeti");
-    assertEquals(Style.createLocal("mystyle.css").getName(), "mystyle");
-    assertEquals(Style.createLocal("my-style.css").getName(), "my-style");
+    assertEquals("bootstrap", Style.createLocal("bootstrap.min.css").getName());
+    assertEquals("yeti", Style.createLocal("bootstrap-yeti.min.css").getName());
+    assertEquals("mystyle", Style.createLocal("mystyle.css").getName());
+    assertEquals("my-style", Style.createLocal("my-style.css").getName());
   }
 }

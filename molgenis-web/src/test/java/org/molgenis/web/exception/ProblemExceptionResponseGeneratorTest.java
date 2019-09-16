@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.web.exception.ExceptionResponseType.PROBLEM;
+import static org.molgenis.web.exception.Problem.Error.builder;
 
 import java.net.URI;
 import javax.validation.ConstraintViolation;
@@ -43,7 +44,7 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
 
   @Test
   void testGetType() {
-    assertEquals(problemExceptionResponseGenerator.getType(), PROBLEM);
+    assertEquals(PROBLEM, problemExceptionResponseGenerator.getType());
   }
 
   @Test
@@ -61,8 +62,8 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
     httpHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
     ResponseEntity<Problem> responseEntity = new ResponseEntity<>(problem, httpHeaders, httpStatus);
     assertEquals(
-        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, false),
-        responseEntity);
+        responseEntity,
+        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, false));
   }
 
   @Test
@@ -84,8 +85,8 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
     httpHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
     ResponseEntity<Problem> responseEntity = new ResponseEntity<>(problem, httpHeaders, httpStatus);
     assertEquals(
-        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, false),
-        responseEntity);
+        responseEntity,
+        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, false));
   }
 
   @Test
@@ -111,8 +112,8 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
     httpHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
     ResponseEntity<Problem> responseEntity = new ResponseEntity<>(problem, httpHeaders, httpStatus);
     assertEquals(
-        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, true),
-        responseEntity);
+        responseEntity,
+        problemExceptionResponseGenerator.createExceptionResponse(exception, httpStatus, true));
   }
 
   @Test
@@ -135,13 +136,12 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
 
     ResponseEntity<Problem> problemResponse =
         problemExceptionResponseGenerator.createExceptionResponse(bindException, httpStatus, false);
-    assertEquals(problemResponse.getStatusCode(), httpStatus);
+    assertEquals(httpStatus, problemResponse.getStatusCode());
     Problem problem = problemResponse.getBody();
     assertTrue(problem.getType().toString().endsWith("/input-invalid"));
     assertEquals(
-        problem.getErrors(),
-        singletonList(
-            Problem.Error.builder().setErrorCode(errorCode).setDetail(errorMessage).build()));
+        singletonList(builder().setErrorCode(errorCode).setDetail(errorMessage).build()),
+        problem.getErrors());
   }
 
   @Test
@@ -165,12 +165,12 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
     when(contextMessageSource.getMessage(code, arguments)).thenReturn(errorMessage);
     ResponseEntity<Problem> problemResponse =
         problemExceptionResponseGenerator.createExceptionResponse(bindException, httpStatus, false);
-    assertEquals(problemResponse.getStatusCode(), httpStatus);
+    assertEquals(httpStatus, problemResponse.getStatusCode());
     Problem problem = problemResponse.getBody();
     assertTrue(problem.getType().toString().endsWith("/input-invalid"));
     assertEquals(
-        problem.getErrors(),
-        singletonList(Problem.Error.builder().setErrorCode(code).setDetail(errorMessage).build()));
+        singletonList(builder().setErrorCode(code).setDetail(errorMessage).build()),
+        problem.getErrors());
   }
 
   @Test
@@ -203,17 +203,17 @@ class ProblemExceptionResponseGeneratorTest extends AbstractMockitoTest {
 
     ResponseEntity<Problem> problemResponse =
         problemExceptionResponseGenerator.createExceptionResponse(bindException, httpStatus, false);
-    assertEquals(problemResponse.getStatusCode(), httpStatus);
+    assertEquals(httpStatus, problemResponse.getStatusCode());
     Problem problem = problemResponse.getBody();
     assertTrue(problem.getType().toString().endsWith("/input-invalid"));
     assertEquals(
-        problem.getErrors(),
         singletonList(
-            Problem.Error.builder()
+            builder()
                 .setErrorCode(errorCode)
                 .setField(field)
                 .setValue(value)
                 .setDetail(errorMessage)
-                .build()));
+                .build()),
+        problem.getErrors());
   }
 }

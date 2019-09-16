@@ -23,8 +23,8 @@ class I18nUtilsTest {
 
   @Test
   void getLanguageCode() {
-    assertEquals(I18nUtils.getLanguageCode("test-nl"), "nl");
-    assertEquals(I18nUtils.getLanguageCode("test-xxx"), "xxx");
+    assertEquals("nl", I18nUtils.getLanguageCode("test-nl"));
+    assertEquals("xxx", I18nUtils.getLanguageCode("test-xxx"));
     assertNull(I18nUtils.getLanguageCode("test"));
   }
 }

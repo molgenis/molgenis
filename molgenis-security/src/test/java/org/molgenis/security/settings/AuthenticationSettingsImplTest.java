@@ -34,14 +34,14 @@ class AuthenticationSettingsImplTest extends AbstractMockitoTest {
     when(entity.getBoolean("signup")).thenReturn(true);
     when(dataService.findOneById("sys_set_auth", "auth")).thenReturn(entity);
     assertEquals(
-        newArrayList(authenticationSettingsImpl.getOidcClients()), singletonList(oidcClient));
+        singletonList(oidcClient), newArrayList(authenticationSettingsImpl.getOidcClients()));
   }
 
   @Test
   void testGetOidcClientsSignUpDisabled() {
     Entity entity = mock(Entity.class);
     when(dataService.findOneById("sys_set_auth", "auth")).thenReturn(entity);
-    assertEquals(newArrayList(authenticationSettingsImpl.getOidcClients()), emptyList());
+    assertEquals(emptyList(), newArrayList(authenticationSettingsImpl.getOidcClients()));
   }
 
   @Test
@@ -50,6 +50,6 @@ class AuthenticationSettingsImplTest extends AbstractMockitoTest {
     when(dataService.findOneById("sys_set_auth", "auth")).thenReturn(entity);
     doReturn(true).when(entity).getBoolean("signup");
     doReturn(true).when(entity).getBoolean("signup_moderation");
-    assertEquals(newArrayList(authenticationSettingsImpl.getOidcClients()), emptyList());
+    assertEquals(emptyList(), newArrayList(authenticationSettingsImpl.getOidcClients()));
   }
 }

@@ -22,12 +22,12 @@ class MolgenisUiUtilsTest {
 
     String currentUri = MolgenisUiUtils.getCurrentUri();
     assertNotNull(currentUri);
-    assertEquals(currentUri, uri + "?" + queryString);
+    assertEquals(uri + "?" + queryString, currentUri);
 
     request.setQueryString(null);
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
     currentUri = MolgenisUiUtils.getCurrentUri();
     assertNotNull(currentUri);
-    assertEquals(currentUri, uri);
+    assertEquals(uri, currentUri);
   }
 }

@@ -208,8 +208,8 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
     Entity entity = dataService.findOneById(ENTITY_TYPE_ID, "0");
     assertNotNull(entity);
     List<Entity> entities = newArrayList(entity.getEntities(ATTR_XREF));
-    assertEquals(entities.size(), 1);
-    assertEquals(entities.get(0).getIdValue(), "0");
+    assertEquals(1, entities.size());
+    assertEquals("0", entities.get(0).getIdValue());
   }
 
   @WithMockUser(username = USERNAME)
@@ -230,7 +230,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
     Entity entity = dataService.findOneById(ENTITY_TYPE_ID, "0");
     assertNotNull(entity);
     Entity refEntity = entity.getEntity(ATTR_MREF);
-    assertEquals(refEntity.getIdValue(), "0");
+    assertEquals("0", refEntity.getIdValue());
   }
 
   @SuppressWarnings("deprecation")

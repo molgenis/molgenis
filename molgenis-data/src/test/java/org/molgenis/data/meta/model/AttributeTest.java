@@ -198,7 +198,7 @@ class AttributeTest extends AbstractSystemEntityTest {
 
     Attribute parentAttr = mock(Attribute.class);
     attribute.setParent(parentAttr);
-    assertEquals(attribute.getParent(), parentAttr);
+    assertEquals(parentAttr, attribute.getParent());
 
     verify(currentParentAttr).removeChild(attribute);
     verifyNoMoreInteractions(currentParentAttr);
@@ -269,7 +269,6 @@ class AttributeTest extends AbstractSystemEntityTest {
     attribute = new Attribute(entityType);
     String expression = getIdAttributeValidationExpression();
     assertEquals(
-        expression,
         "$('isIdAttribute').eq(false).or($('isIdAttribute').isNull()).or($('isIdAttribute').eq(true)"
             + ".and("
             + "$('type').eq('email')"
@@ -279,7 +278,8 @@ class AttributeTest extends AbstractSystemEntityTest {
             + ".or($('type').eq('string'))"
             + ".or($('type').isNull())"
             + ")"
-            + ".and($('isNullable').eq(false))).value()");
+            + ".and($('isNullable').eq(false))).value()",
+        expression);
   }
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6566

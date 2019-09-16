@@ -54,6 +54,6 @@ class RecoveryAuthenticationProviderTest {
     Authentication auth = recoveryAuthenticationProvider.authenticate(authToken);
     assertNotNull(auth);
     assertTrue(auth.isAuthenticated());
-    assertEquals(auth.getName(), "admin");
+    assertEquals("admin", auth.getName());
   }
 }

@@ -112,7 +112,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .extract()
             .response();
     JsonPath path = actual.getBody().jsonPath();
-    assertEquals(path.get().toString(), response1);
+    assertEquals(response1, path.get().toString());
 
     String update = "{permissions:[{permission:WRITE,user:" + testUserName + "}]}";
     given()
@@ -135,7 +135,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .extract()
             .response();
     JsonPath path2 = actual2.getBody().jsonPath();
-    assertEquals(path2.get().toString(), response2);
+    assertEquals(response2, path2.get().toString());
 
     String delete = "{user:" + testUserName + "}";
     given()
@@ -157,7 +157,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .response();
 
     JsonPath path3 = actual3.getBody().jsonPath();
-    assertEquals(path3.getJsonObject("").toString(), response3);
+    assertEquals(response3, path3.getJsonObject("").toString());
   }
 
   @Test
@@ -194,7 +194,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .response();
 
     JsonPath path = actual.getBody().jsonPath();
-    assertEquals(path.getJsonObject("").toString(), response);
+    assertEquals(response, path.getJsonObject("").toString());
 
     String response2 =
         "{data={permissions=[{user="
@@ -216,7 +216,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .response();
 
     JsonPath path2 = actual2.getBody().jsonPath();
-    assertEquals(path2.getJsonObject("").toString(), response2);
+    assertEquals(response2, path2.getJsonObject("").toString());
   }
 
   // patch for type (multiple at once) - get for type - delete as admin
@@ -286,7 +286,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .extract()
             .response();
     JsonPath path = actual.getBody().jsonPath();
-    assertEquals(path.getJsonObject("data").toString(), response1);
+    assertEquals(response1, path.getJsonObject("data").toString());
   }
 
   @Test
@@ -309,7 +309,7 @@ class PermissionAPIIT extends AbstractApiTests {
             .extract()
             .response();
     JsonPath path = actual.getBody().jsonPath();
-    assertEquals(path.getJsonObject("data").toString(), "[{id=1, label=1}, {id=2, label=2}]");
+    assertEquals("[{id=1, label=1}, {id=2, label=2}]", path.getJsonObject("data").toString());
   }
 
   @Test

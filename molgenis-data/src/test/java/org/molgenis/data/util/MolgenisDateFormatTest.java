@@ -1,9 +1,11 @@
 package org.molgenis.data.util;
 
+import static java.time.Instant.parse;
 import static java.time.ZoneId.systemDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,7 +38,7 @@ class MolgenisDateFormatTest {
   @ParameterizedTest
   @MethodSource("parseInstantDataProvider")
   void testParseInstant(String text, String expected) {
-    assertEquals(MolgenisDateFormat.parseInstant(text), Instant.parse(expected));
+    assertEquals(parse(expected), parseInstant(text));
   }
 
   static Object[][] parseLocalDateDataProvider() {
@@ -53,6 +55,6 @@ class MolgenisDateFormatTest {
   @ParameterizedTest
   @MethodSource("parseLocalDateDataProvider")
   void testParseLocalDate(String text, String expected) {
-    assertEquals(MolgenisDateFormat.parseLocalDate(text), LocalDate.parse(expected));
+    assertEquals(LocalDate.parse(expected), parseLocalDate(text));
   }
 }

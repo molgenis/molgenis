@@ -53,8 +53,8 @@ class ScriptRunnerControllerTest extends AbstractMockitoTest {
     Map<String, Object> parameters = newHashMap();
     parameters.put("arg1", "value1");
     ResponseEntity responseEntity = controller.submitScript("test", parameters);
-    assertEquals(responseEntity.getStatusCodeValue(), 200);
-    assertEquals(responseEntity.getBody(), "/api/v2/sys_job_test/ID");
+    assertEquals(200, responseEntity.getStatusCodeValue());
+    assertEquals("/api/v2/sys_job_test/ID", responseEntity.getBody());
     verify(jobExecutor).submit(scriptJobExecution);
     verify(scriptJobExecution).setName("test");
     verify(scriptJobExecution).setParameters(gson.toJson(parameters));

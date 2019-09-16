@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.permission.model.LabelledObjectIdentity.create;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.exception.InvalidTypeIdException;
-import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 
@@ -31,14 +31,14 @@ class EntityHelperTest extends AbstractMockitoTest {
 
   @Test
   void testGetEntityTypeIdFromType() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entity-typeId"), "typeId");
+    assertEquals("typeId", entityHelper.getEntityTypeIdFromType("entity-typeId"));
   }
 
   @Test
   void testGetObjectIdentity() {
     assertEquals(
-        entityHelper.getObjectIdentity("typeId", "identifier"),
-        new ObjectIdentityImpl("typeId", "identifier"));
+        new ObjectIdentityImpl("typeId", "identifier"),
+        entityHelper.getObjectIdentity("typeId", "identifier"));
   }
 
   @Test
@@ -49,7 +49,7 @@ class EntityHelperTest extends AbstractMockitoTest {
     when(repository.getEntityType()).thenReturn(entityType);
 
     when(dataService.getRepository("typeId")).thenReturn(repository);
-    assertEquals(entityHelper.getLabel("entity-typeId"), "typeLabel");
+    assertEquals("typeLabel", entityHelper.getLabel("entity-typeId"));
   }
 
   @Test
@@ -60,7 +60,7 @@ class EntityHelperTest extends AbstractMockitoTest {
     when(entity.getLabelValue()).thenReturn("label");
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
-    assertEquals(entityHelper.getLabel("entity-typeId", "identifier"), "label");
+    assertEquals("label", entityHelper.getLabel("entity-typeId", "identifier"));
   }
 
   @Test
@@ -74,10 +74,9 @@ class EntityHelperTest extends AbstractMockitoTest {
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
     assertEquals(
+        create("entity-typeId", "typeId", "typeLabel", "identifier", "label"),
         entityHelper.getLabelledObjectIdentity(
-            new ObjectIdentityImpl("entity-typeId", "identifier")),
-        LabelledObjectIdentity.create(
-            "entity-typeId", "typeId", "typeLabel", "identifier", "label"));
+            new ObjectIdentityImpl("entity-typeId", "identifier")));
   }
 
   @Test
@@ -116,27 +115,27 @@ class EntityHelperTest extends AbstractMockitoTest {
 
   @Test
   void testGetEntityTypeIdFromClassPlugin() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("plugin"), "sys_Plugin");
+    assertEquals("sys_Plugin", entityHelper.getEntityTypeIdFromType("plugin"));
   }
 
   @Test
   void testGetEntityTypeIdFromClassET() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entityType"), "sys_md_EntityType");
+    assertEquals("sys_md_EntityType", entityHelper.getEntityTypeIdFromType("entityType"));
   }
 
   @Test
   void testGetEntityTypeIdFromClassGroup() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("group"), "sys_sec_Group");
+    assertEquals("sys_sec_Group", entityHelper.getEntityTypeIdFromType("group"));
   }
 
   @Test
   void testGetEntityTypeIdFromClassPack() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("package"), "sys_md_Package");
+    assertEquals("sys_md_Package", entityHelper.getEntityTypeIdFromType("package"));
   }
 
   @Test
   void testGetEntityTypeIdFromClassEntity() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entity-test"), "test");
+    assertEquals("test", entityHelper.getEntityTypeIdFromType("entity-test"));
   }
 
   @Test

@@ -1,5 +1,7 @@
 package org.molgenis.data.cache.l1;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -88,7 +90,7 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
 
     // Entity has not been added to cache, return no CacheHit
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
 
     // Entity has been added to cache, return entity
     l1Cache.put(repository, entity1);
@@ -98,7 +100,7 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     // Cleanup after transaction and expect the cache to be cleared, return no CacheHit
     l1Cache.doCleanupAfterCompletion(transactionID);
     actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -118,9 +120,9 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.evict(Stream.of(EntityKey.create(entity1), EntityKey.create(entity2)));
 
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
     result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -142,7 +144,7 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     actualEntity = l1Cache.get(repository, entityID1, entityType).get();
     assertTrue(EntityUtils.equals(actualEntity.getValue(), entity1));
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -162,9 +164,9 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.evictAll(entityType);
 
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
     result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @Test
@@ -175,7 +177,7 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     // Entity has been deleted once, return empty
     l1Cache.putDeletion(create(entity1));
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.of(CacheHit.empty()));
+    assertEquals(of(CacheHit.empty()), actualEntity);
 
     // Cleanup transaction
     l1Cache.doCleanupAfterCompletion(transactionID);
@@ -190,7 +192,7 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.put(repository, entity1);
     l1Cache.evictAll(entityType);
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
 
     // Cleanup transaction
     l1Cache.doCleanupAfterCompletion(transactionID);

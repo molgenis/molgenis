@@ -32,7 +32,7 @@ class IntermediateParseResultsTest extends AbstractMockitoTest {
 
     when(entityTypeFactory.create("entityType")).thenReturn(entityType);
 
-    assertEquals(intermediateParseResults.addEntityType("entityType"), entityType);
+    assertEquals(entityType, intermediateParseResults.addEntityType("entityType"));
     verify(entityType).setLabel("entityType");
   }
 

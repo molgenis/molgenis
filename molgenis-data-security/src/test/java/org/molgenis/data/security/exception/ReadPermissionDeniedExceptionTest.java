@@ -26,7 +26,7 @@ class ReadPermissionDeniedExceptionTest extends ExceptionMessageTest {
   @Test
   void testGetMessage() {
     CodedRuntimeException ex = new ReadPermissionDeniedException("type");
-    assertEquals(ex.getMessage(), "typeId:type");
+    assertEquals("typeId:type", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

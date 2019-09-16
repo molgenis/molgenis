@@ -35,12 +35,12 @@ class SystemEntityTypeTest {
     testEMD.setAttributeFactory(attributeFactory);
     testEMD.bootstrap(entityTypeMetaData);
 
-    assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
-    assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
+    assertEquals("idAttr", testEMD.getIdAttribute().getName());
+    assertEquals("labelAttr", testEMD.getLabelAttribute().getName());
 
     Set<String> lookupAttributes = newHashSet();
     testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-    assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
+    assertEquals(newHashSet("lookupAttr1", "lookupAttr2"), lookupAttributes);
   }
 
   @Test
@@ -49,12 +49,12 @@ class SystemEntityTypeTest {
     testEMD.setAttributeFactory(attributeFactory);
     testEMD.bootstrap(entityTypeMetaData);
 
-    assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
-    assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
+    assertEquals("idAttr", testEMD.getIdAttribute().getName());
+    assertEquals("labelAttr", testEMD.getLabelAttribute().getName());
 
     Set<String> lookupAttributes = newHashSet();
     testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-    assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
+    assertEquals(newHashSet("lookupAttr1", "lookupAttr2"), lookupAttributes);
   }
 
   private class TestNestedCompoundEMD extends SystemEntityType {

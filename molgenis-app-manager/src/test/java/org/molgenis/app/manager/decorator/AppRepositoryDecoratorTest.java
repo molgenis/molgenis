@@ -60,7 +60,7 @@ class AppRepositoryDecoratorTest {
 
   @Test
   void testDelegate() {
-    assertEquals(appRepositoryDecorator.delegate(), repository);
+    assertEquals(repository, appRepositoryDecorator.delegate());
   }
 
   @Test

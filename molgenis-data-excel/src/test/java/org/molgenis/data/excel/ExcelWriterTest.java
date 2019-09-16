@@ -37,10 +37,10 @@ class ExcelWriterTest extends AbstractMolgenisSpringTest {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0xD0);
-    assertEquals(b[1] & 0xff, 0xCF);
-    assertEquals(b[2] & 0xff, 0x11);
-    assertEquals(b[3] & 0xff, 0xE0);
+    assertEquals(0xD0, b[0] & 0xff);
+    assertEquals(0xCF, b[1] & 0xff);
+    assertEquals(0x11, b[2] & 0xff);
+    assertEquals(0xE0, b[3] & 0xff);
   }
 
   @Test
@@ -48,10 +48,10 @@ class ExcelWriterTest extends AbstractMolgenisSpringTest {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory, FileFormat.XLS).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0xD0);
-    assertEquals(b[1] & 0xff, 0xCF);
-    assertEquals(b[2] & 0xff, 0x11);
-    assertEquals(b[3] & 0xff, 0xE0);
+    assertEquals(0xD0, b[0] & 0xff);
+    assertEquals(0xCF, b[1] & 0xff);
+    assertEquals(0x11, b[2] & 0xff);
+    assertEquals(0xE0, b[3] & 0xff);
   }
 
   @Test
@@ -59,10 +59,10 @@ class ExcelWriterTest extends AbstractMolgenisSpringTest {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory, FileFormat.XLSX).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0x50);
-    assertEquals(b[1] & 0xff, 0x4B);
-    assertEquals(b[2] & 0xff, 0x03);
-    assertEquals(b[3] & 0xff, 0x04);
+    assertEquals(0x50, b[0] & 0xff);
+    assertEquals(0x4B, b[1] & 0xff);
+    assertEquals(0x03, b[2] & 0xff);
+    assertEquals(0x04, b[3] & 0xff);
   }
 
   @Test

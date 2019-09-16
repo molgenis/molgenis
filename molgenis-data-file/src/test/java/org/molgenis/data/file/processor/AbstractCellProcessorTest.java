@@ -3,6 +3,7 @@ package org.molgenis.data.file.processor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.file.processor.AbstractCellProcessor.processCell;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,16 +28,16 @@ class AbstractCellProcessorTest {
 
   @Test
   void processCell_null() {
-    assertEquals(AbstractCellProcessor.processCell("val", false, null), "val");
+    assertEquals("val", processCell("val", false, null));
   }
 
   @Test
   void processCell_header() {
-    assertEquals(AbstractCellProcessor.processCell("col", true, processors), "COL");
+    assertEquals("COL", processCell("col", true, processors));
   }
 
   @Test
   void processCell_data() {
-    assertEquals(AbstractCellProcessor.processCell("val", false, processors), "VAL");
+    assertEquals("VAL", processCell("val", false, processors));
   }
 }

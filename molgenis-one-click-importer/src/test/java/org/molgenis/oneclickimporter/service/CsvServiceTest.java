@@ -30,9 +30,9 @@ class CsvServiceTest {
     expected.add(new String[] {"Fleur", "Lambda Magician"});
     expected.add(new String[] {"Dennis", "Root access"});
 
-    assertEquals(actual.size(), expected.size());
+    assertEquals(expected.size(), actual.size());
     for (int i = 0; i < actual.size(); ++i) {
-      assertArrayEquals(actual.get(i), expected.get(i));
+      assertArrayEquals(expected.get(i), actual.get(i));
     }
   }
 

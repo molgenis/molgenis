@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.processor.CellProcessor;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -103,17 +103,17 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   void getAttribute() {
     Attribute attr = excelSheetReader.getEntityType().getAttribute("col1");
     assertNotNull(attr);
-    assertEquals(attr.getDataType(), AttributeType.STRING);
-    assertEquals(attr.getName(), "col1");
+    assertEquals(STRING, attr.getDataType());
+    assertEquals("col1", attr.getName());
   }
 
   @Test
   void getAttributes() {
     Iterator<Attribute> it = excelSheetReader.getEntityType().getAttributes().iterator();
     assertTrue(it.hasNext());
-    assertEquals(it.next().getName(), "col1");
+    assertEquals("col1", it.next().getName());
     assertTrue(it.hasNext());
-    assertEquals(it.next().getName(), "col2");
+    assertEquals("col2", it.next().getName());
     assertFalse(it.hasNext());
   }
 
@@ -129,7 +129,7 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Test
   void getLabel() {
-    assertEquals(excelSheetReader.getEntityType().getLabel(), "test");
+    assertEquals("test", excelSheetReader.getEntityType().getLabel());
   }
 
   @Test
@@ -139,12 +139,12 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Test
   void getName() {
-    assertEquals(excelSheetReader.getName(), "test");
+    assertEquals("test", excelSheetReader.getName());
   }
 
   @Test
   void getNrRows() {
-    assertEquals(excelSheetReader.getNrRows(), 5);
+    assertEquals(5, excelSheetReader.getNrRows());
   }
 
   @Test
@@ -153,24 +153,24 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
     assertTrue(it.hasNext());
 
     Entity row1 = it.next();
-    assertEquals(row1.get("col1"), "val1");
-    assertEquals(row1.get("col2"), "val2");
+    assertEquals("val1", row1.get("col1"));
+    assertEquals("val2", row1.get("col2"));
     assertTrue(it.hasNext());
 
     Entity row2 = it.next();
-    assertEquals(row2.get("col1"), "val3");
-    assertEquals(row2.get("col2"), "val4");
+    assertEquals("val3", row2.get("col1"));
+    assertEquals("val4", row2.get("col2"));
     assertTrue(it.hasNext());
 
     Entity row3 = it.next();
-    assertEquals(row3.get("col1"), "XXX");
-    assertEquals(row3.get("col2"), "val6");
+    assertEquals("XXX", row3.get("col1"));
+    assertEquals("val6", row3.get("col2"));
     assertTrue(it.hasNext());
 
     // test number cell (col1) and formula cell (col2)
     Entity row4 = it.next();
-    assertEquals(row4.get("col1"), "1.2");
-    assertEquals(row4.get("col2"), "2.4");
+    assertEquals("1.2", row4.get("col1"));
+    assertEquals("2.4", row4.get("col2"));
     assertFalse(it.hasNext());
   }
 
@@ -209,7 +209,7 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
           new ExcelRepository(
               fileName, workbook.getSheet("case-sensitivity"), entityTypeFactory, attrMetaFactory);
       Entity entity = excelRepository.iterator().next();
-      assertEquals(entity.get("Header"), "Value #0");
+      assertEquals("Value #0", entity.get("Header"));
       assertNull(entity.get("hEADER"));
     }
   }
@@ -218,32 +218,32 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   void attributesAndIterator() {
     Iterator<Attribute> headerIt = excelSheetReader.getEntityType().getAttributes().iterator();
     assertTrue(headerIt.hasNext());
-    assertEquals(headerIt.next().getName(), "col1");
+    assertEquals("col1", headerIt.next().getName());
     assertTrue(headerIt.hasNext());
-    assertEquals(headerIt.next().getName(), "col2");
+    assertEquals("col2", headerIt.next().getName());
 
     Iterator<Entity> it = excelSheetReader.iterator();
     assertTrue(it.hasNext());
 
     Entity row1 = it.next();
-    assertEquals(row1.get("col1"), "val1");
-    assertEquals(row1.get("col2"), "val2");
+    assertEquals("val1", row1.get("col1"));
+    assertEquals("val2", row1.get("col2"));
     assertTrue(it.hasNext());
 
     Entity row2 = it.next();
-    assertEquals(row2.get("col1"), "val3");
-    assertEquals(row2.get("col2"), "val4");
+    assertEquals("val3", row2.get("col1"));
+    assertEquals("val4", row2.get("col2"));
     assertTrue(it.hasNext());
 
     Entity row3 = it.next();
-    assertEquals(row3.get("col1"), "XXX");
-    assertEquals(row3.get("col2"), "val6");
+    assertEquals("XXX", row3.get("col1"));
+    assertEquals("val6", row3.get("col2"));
     assertTrue(it.hasNext());
 
     // test number cell (col1) and formula cell (col2)
     Entity row4 = it.next();
-    assertEquals(row4.get("col1"), "1.2");
-    assertEquals(row4.get("col2"), "2.4");
+    assertEquals("1.2", row4.get("col1"));
+    assertEquals("2.4", row4.get("col2"));
     assertFalse(it.hasNext());
   }
 }

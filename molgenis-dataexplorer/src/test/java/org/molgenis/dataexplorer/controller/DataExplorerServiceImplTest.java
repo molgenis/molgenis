@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.dataexplorer.controller.Module.AGGREGATION;
+import static org.molgenis.dataexplorer.controller.Module.DATA;
+import static org.molgenis.dataexplorer.controller.Module.REPORT;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +44,7 @@ class DataExplorerServiceImplTest extends AbstractMockitoTest {
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType), EntityTypePermission.READ_DATA))
         .thenReturn(true);
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.DATA));
+    assertEquals(singletonList(DATA), dataExplorerServiceImpl.getModules(entityType));
   }
 
   @Test
@@ -51,7 +54,7 @@ class DataExplorerServiceImplTest extends AbstractMockitoTest {
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType), EntityTypePermission.AGGREGATE_DATA))
         .thenReturn(true);
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.AGGREGATION));
+    assertEquals(singletonList(AGGREGATION), dataExplorerServiceImpl.getModules(entityType));
   }
 
   @Test
@@ -62,7 +65,7 @@ class DataExplorerServiceImplTest extends AbstractMockitoTest {
             new EntityTypeIdentity(entityType), EntityTypeReportPermission.VIEW_REPORT))
         .thenReturn(true);
     when(dataExplorerSettings.getEntityReport("MyEntityType")).thenReturn("MyEntityReport");
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.REPORT));
+    assertEquals(singletonList(REPORT), dataExplorerServiceImpl.getModules(entityType));
   }
 
   private EntityType getMockEntityType() {

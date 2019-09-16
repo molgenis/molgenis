@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.api.data.v3.Entities.builder;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
@@ -109,7 +111,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
-    assertEquals(dataServiceV3Impl.find(entityTypeId, entityId, filter, expand), entity);
+    assertEquals(entity, dataServiceV3Impl.find(entityTypeId, entityId, filter, expand));
   }
 
   @SuppressWarnings("unchecked")
@@ -136,7 +138,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
-    assertEquals(dataServiceV3Impl.find(entityTypeId, entityId, filter, expand), entity);
+    assertEquals(entity, dataServiceV3Impl.find(entityTypeId, entityId, filter, expand));
   }
 
   @SuppressWarnings("unchecked")
@@ -218,8 +220,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     Entities actual = dataServiceV3Impl.findAll(entityTypeId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(
-        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
   }
 
   @SuppressWarnings("unchecked")
@@ -298,8 +299,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(
-        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
   }
 
   @SuppressWarnings("unchecked")
@@ -381,8 +381,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(
-        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
+    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
   }
 
   @SuppressWarnings("unchecked")
@@ -446,8 +445,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(
-        actual, Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build());
+    assertEquals(builder().setEntities(emptyList()).setTotal(0).build(), actual);
   }
 
   @SuppressWarnings("unchecked")

@@ -44,7 +44,7 @@ class UserAccountServiceImplTest {
   void getCurrentUser() {
     User existingUser = mock(User.class);
     when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
-    assertEquals(userAccountServiceImpl.getCurrentUser(), existingUser);
+    assertEquals(existingUser, userAccountServiceImpl.getCurrentUser());
   }
 
   @Test

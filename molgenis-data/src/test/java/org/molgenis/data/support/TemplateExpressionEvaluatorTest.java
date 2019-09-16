@@ -50,7 +50,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getBoolean("attr")).thenReturn(true).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my true");
+    assertEquals("my true", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -70,7 +70,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getEntity("attr")).thenReturn(refEntity).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my value");
+    assertEquals("my value", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -95,7 +95,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getEntity("attr")).thenReturn(refEntity).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my value and otherValue");
+    assertEquals("my value and otherValue", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -121,7 +121,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
             .thenReturn(asList(refEntity0, refEntity1))
             .getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my value0,value1");
+    assertEquals("my value0,value1", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -149,7 +149,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
             .thenReturn(LocalDate.parse("2000-12-31"))
             .getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my 2000-12-31");
+    assertEquals("my 2000-12-31", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -162,7 +162,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
             .thenReturn(Instant.parse("2015-05-22T06:12:13Z"))
             .getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my 2015-05-22T06:12:13Z");
+    assertEquals("my 2015-05-22T06:12:13Z", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -172,7 +172,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getDouble("attr")).thenReturn(1.23).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my 1.23");
+    assertEquals("my 1.23", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -182,7 +182,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getString("attr")).thenReturn("value").getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my value");
+    assertEquals("my value", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -192,7 +192,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getInt("attr")).thenReturn(123).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my 123");
+    assertEquals("my 123", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test
@@ -202,7 +202,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getLong("attr")).thenReturn(123L).getMock();
     when(entity.getEntityType()).thenReturn(entityType);
-    assertEquals(templateExpressionEvaluator.evaluate(entity), "my 123");
+    assertEquals("my 123", templateExpressionEvaluator.evaluate(entity));
   }
 
   @Test

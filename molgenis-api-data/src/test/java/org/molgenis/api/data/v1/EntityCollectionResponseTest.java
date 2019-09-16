@@ -37,13 +37,13 @@ class EntityCollectionResponseTest {
     EntityCollectionResponse response =
         new EntityCollectionResponse(
             pager, null, "/test", entityType, permissionService, dataService);
-    assertEquals(response.getNextHref(), "/test?start=10&num=10");
+    assertEquals("/test?start=10&num=10", response.getNextHref());
 
     pager = new EntityPager(10, 10, 25L, null);
     response =
         new EntityCollectionResponse(
             pager, null, "/test", entityType, permissionService, dataService);
-    assertEquals(response.getNextHref(), "/test?start=20&num=10");
+    assertEquals("/test?start=20&num=10", response.getNextHref());
 
     pager = new EntityPager(0, 25, 25L, null);
     response =
@@ -64,12 +64,12 @@ class EntityCollectionResponseTest {
     response =
         new EntityCollectionResponse(
             pager, null, "/test", entityType, permissionService, dataService);
-    assertEquals(response.getPrevHref(), "/test?start=0&num=15");
+    assertEquals("/test?start=0&num=15", response.getPrevHref());
 
     pager = new EntityPager(30, 15, 30L, null);
     response =
         new EntityCollectionResponse(
             pager, null, "/test", entityType, permissionService, dataService);
-    assertEquals(response.getPrevHref(), "/test?start=15&num=15");
+    assertEquals("/test?start=15&num=15", response.getPrevHref());
   }
 }

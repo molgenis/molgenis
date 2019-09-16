@@ -29,7 +29,7 @@ class AbstractEntityDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testDelegate() {
-    assertEquals(testEntity.delegate(), delegateEntity);
+    assertEquals(delegateEntity, testEntity.delegate());
   }
 
   @Test

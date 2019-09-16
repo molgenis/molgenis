@@ -25,6 +25,7 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlQueryValue;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -377,7 +378,7 @@ class PostgreSqlUtilsTest {
   @ParameterizedTest
   @MethodSource("getPostgreSqlValueProvider")
   void getPostgreSqlValue(Attribute attr, Object postgreSqlValue) {
-    assertEquals(PostgreSqlUtils.getPostgreSqlValue(entity, attr), postgreSqlValue);
+    assertEquals(postgreSqlValue, PostgreSqlUtils.getPostgreSqlValue(entity, attr));
   }
 
   @Test
@@ -441,7 +442,7 @@ class PostgreSqlUtilsTest {
   @ParameterizedTest
   @MethodSource("getPostgreSqlValueQueryProvider")
   void getPostgreSqlValueQuery(Object value, Attribute attr, Object postgreSqlValue) {
-    assertEquals(PostgreSqlUtils.getPostgreSqlQueryValue(value, attr), postgreSqlValue);
+    assertEquals(postgreSqlValue, getPostgreSqlQueryValue(value, attr));
   }
 
   @Test

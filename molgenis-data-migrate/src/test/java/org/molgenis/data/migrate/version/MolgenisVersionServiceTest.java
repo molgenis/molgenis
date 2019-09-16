@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.migrate.version.MolgenisVersionService.VERSION;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +29,7 @@ class MolgenisVersionServiceTest extends AbstractMockitoTest {
 
   @Test
   void testGetAppVersion() {
-    assertEquals(molgenisVersionService.getAppVersion(), MolgenisVersionService.VERSION);
+    assertEquals(VERSION, molgenisVersionService.getAppVersion());
   }
 
   @Test
@@ -41,7 +42,7 @@ class MolgenisVersionServiceTest extends AbstractMockitoTest {
     when(statement.executeQuery("SELECT \"id\" FROM \"Version\"")).thenReturn(resultSet);
     when(resultSet.next()).thenReturn(true);
     when(resultSet.getInt("id")).thenReturn(30);
-    assertEquals(molgenisVersionService.getSchemaVersion(), 30);
+    assertEquals(30, molgenisVersionService.getSchemaVersion());
   }
 
   @Test

@@ -52,7 +52,7 @@ class HasPermissionDirectiveTest {
         new TemplateModel[0],
         out -> out.write("PERMISSION"));
 
-    assertEquals(envWriter.toString(), "PERMISSION");
+    assertEquals("PERMISSION", envWriter.toString());
   }
 
   @Test
@@ -71,6 +71,6 @@ class HasPermissionDirectiveTest {
         new TemplateModel[0],
         out -> out.write("PERMISSION"));
 
-    assertEquals(envWriter.toString(), "");
+    assertEquals("", envWriter.toString());
   }
 }

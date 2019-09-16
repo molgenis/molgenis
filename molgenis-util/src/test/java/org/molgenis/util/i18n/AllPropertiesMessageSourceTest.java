@@ -1,10 +1,10 @@
 package org.molgenis.util.i18n;
 
+import static com.google.common.collect.ImmutableSetMultimap.of;
 import static java.util.Locale.ENGLISH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,15 +26,14 @@ class AllPropertiesMessageSourceTest {
   @Test
   void testGetAllMessageIds() throws Exception {
     assertEquals(
-        propertiesMessageSource.getAllMessageIds(),
-        ImmutableSetMultimap.of(
-            "test", "EN_ONLY", "test", "EN_PLUS_NL", "test", "BIOBANK_UTF8", "test", "NL_ONLY"));
+        of("test", "EN_ONLY", "test", "EN_PLUS_NL", "test", "BIOBANK_UTF8", "test", "NL_ONLY"),
+        propertiesMessageSource.getAllMessageIds());
   }
 
   @Test
   void testGetMessageSpecifiedInBundle() throws Exception {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("NL_ONLY", DUTCH), "alleen Nederlands");
+        "alleen Nederlands", propertiesMessageSource.resolveCodeWithoutArguments("NL_ONLY", DUTCH));
   }
 
   @Test
@@ -50,17 +49,17 @@ class AllPropertiesMessageSourceTest {
   @Test
   void testGetMessageSpecifiedInBoth() throws Exception {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", ENGLISH),
-        "English plus Dutch");
+        "English plus Dutch",
+        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", ENGLISH));
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", new Locale("nl")),
-        "Engels plus Nederlands");
+        "Engels plus Nederlands",
+        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", new Locale("nl")));
   }
 
   @Test
   void testGetMessageUTF8() {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("BIOBANK_UTF8", ENGLISH),
-        "Biøbånk\uD83D\uDC00");
+        "Biøbånk\uD83D\uDC00",
+        propertiesMessageSource.resolveCodeWithoutArguments("BIOBANK_UTF8", ENGLISH));
   }
 }

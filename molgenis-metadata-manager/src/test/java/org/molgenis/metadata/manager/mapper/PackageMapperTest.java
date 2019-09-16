@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.metadata.manager.model.EditorPackageIdentifier.create;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class PackageMapperTest {
     String id = "id0";
     EditorPackageIdentifier packageIdentifier = EditorPackageIdentifier.create(id, "label");
     Package package_ = packageMapper.toPackageReference(packageIdentifier);
-    assertEquals(package_.getIdValue(), id);
+    assertEquals(id, package_.getIdValue());
   }
 
   @Test
@@ -57,7 +58,7 @@ class PackageMapperTest {
     when(package_.getId()).thenReturn(id);
     when(package_.getLabel()).thenReturn(label);
     EditorPackageIdentifier editorPackage = packageMapper.toEditorPackage(package_);
-    assertEquals(editorPackage, EditorPackageIdentifier.create(id, label));
+    assertEquals(create(id, label), editorPackage);
   }
 
   @Test

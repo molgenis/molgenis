@@ -44,7 +44,7 @@ class BeaconInfoServiceImplTest {
     when(dataService.findAll(BEACON, Beacon.class)).thenReturn(Stream.of(beacon));
 
     List<BeaconResponse> expectedBeaconList = newArrayList(beaconResponse);
-    assertEquals(beaconInfoService.getAvailableBeacons(), expectedBeaconList);
+    assertEquals(expectedBeaconList, beaconInfoService.getAvailableBeacons());
   }
 
   @Test
@@ -59,7 +59,7 @@ class BeaconInfoServiceImplTest {
 
     when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
 
-    assertEquals(beaconInfoService.info("beacon"), beaconResponse);
+    assertEquals(beaconResponse, beaconInfoService.info("beacon"));
   }
 
   @Test

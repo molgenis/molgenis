@@ -121,7 +121,7 @@ class PostgreSqlRepositoryTest {
     long count = 123L;
     when(jdbcTemplate.queryForObject(sql, new Object[] {queryValue}, Long.class)).thenReturn(count);
 
-    assertEquals(postgreSqlRepo.count(query), count);
+    assertEquals(count, postgreSqlRepo.count(query));
   }
 
   @Test
@@ -174,7 +174,7 @@ class PostgreSqlRepositoryTest {
     Entity entity0 = mock(Entity.class);
     when(jdbcTemplate.query(sql, new Object[] {queryValue}, rowMapper))
         .thenReturn(singletonList(entity0));
-    assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), postgreSqlRepo.findAll(query).collect(toList()));
   }
 
   @Test
@@ -295,7 +295,7 @@ class PostgreSqlRepositoryTest {
         postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType, mrefIDs);
     mrefIdRowCallbackHandler.processRow(row);
 
-    assertEquals(mrefIDs.asMap(), result);
+    assertEquals(result, mrefIDs.asMap());
   }
 
   static Object[][] provideInvalidMrefIds() {

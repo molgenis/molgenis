@@ -32,6 +32,6 @@ class PackageMapperTest extends AbstractMockitoTest {
     doReturn("Label").when(pack).get(PackageMetadata.LABEL);
     List<Object> expected = newArrayList("packId", "Label", "Description", "parentId", "tag1,tag2");
     List<Object> actual = PackageMapper.map(pack);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

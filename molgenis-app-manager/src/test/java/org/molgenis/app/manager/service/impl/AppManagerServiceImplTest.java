@@ -130,7 +130,7 @@ class AppManagerServiceImplTest {
     List<AppResponse> actual = appManagerServiceImpl.getApps();
     List<AppResponse> expected = newArrayList(appResponse);
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -157,7 +157,7 @@ class AppManagerServiceImplTest {
     when(query.eq("name", name).findOne()).thenReturn(app);
 
     AppResponse expectedAppResponse = AppResponse.create(app);
-    assertEquals(appManagerServiceImpl.getAppByName(name), expectedAppResponse);
+    assertEquals(expectedAppResponse, appManagerServiceImpl.getAppByName(name));
   }
 
   @Test
@@ -211,7 +211,7 @@ class AppManagerServiceImplTest {
       appManagerServiceImpl.deleteApp("test");
       fail();
     } catch (AppForIDDoesNotExistException actual) {
-      assertEquals(actual.getId(), "test");
+      assertEquals("test", actual.getId());
     }
   }
 
@@ -231,7 +231,7 @@ class AppManagerServiceImplTest {
         .getFileUnchecked(tmpDirName + File.separator + "config.json");
     when(configFile.exists()).thenReturn(true);
 
-    assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
+    assertEquals(tmpDirName, appManagerServiceImpl.uploadApp(zipData, fileName, "app"));
 
     verify(fileStore).createDirectory(tmpDirName);
   }

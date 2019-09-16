@@ -67,11 +67,11 @@ class PackagePersisterTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> addCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq(PACKAGE), addCaptor.capture());
-    assertEquals(addCaptor.getValue().collect(toList()), singletonList(newPackage));
+    assertEquals(singletonList(newPackage), addCaptor.getValue().collect(toList()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> updateCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).update(eq(PACKAGE), updateCaptor.capture());
-    assertEquals(updateCaptor.getValue().collect(toList()), singletonList(updatedPackage));
+    assertEquals(singletonList(updatedPackage), updateCaptor.getValue().collect(toList()));
   }
 }

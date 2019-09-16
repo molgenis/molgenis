@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.file.BlobMetadata.create;
 
 import io.minio.ObjectStat;
 import io.minio.errors.ErrorResponseException;
@@ -23,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.molgenis.data.file.BlobMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,7 +54,7 @@ class MinioBlobStoreTest extends AbstractMockitoTest {
     long size = 3L;
     ObjectStat objectStat = when(mock(ObjectStat.class).length()).thenReturn(size).getMock();
     when(minioClientFacade.statObject(blobId)).thenReturn(objectStat);
-    assertEquals(minioBlobStore.store(fromChannel), BlobMetadata.create(blobId, size));
+    assertEquals(create(blobId, size), minioBlobStore.store(fromChannel));
     verify(minioClientFacade)
         .putObject(eq(blobId), any(InputStream.class), eq("application/octet-stream"));
   }

@@ -1,6 +1,9 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Boolean.TRUE;
+import static java.lang.Integer.valueOf;
+import static java.time.LocalDate.parse;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -10,6 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.DataConverter.convert;
+import static org.molgenis.data.DataConverter.toBoolean;
+import static org.molgenis.data.DataConverter.toInstant;
+import static org.molgenis.data.DataConverter.toInt;
+import static org.molgenis.data.DataConverter.toList;
+import static org.molgenis.data.DataConverter.toLong;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
@@ -45,12 +54,12 @@ class DataConverterTest {
 
   @Test
   void testToIntInteger() {
-    assertEquals(DataConverter.toInt(123), Integer.valueOf(123));
+    assertEquals(valueOf(123), toInt(123));
   }
 
   @Test
   void testToIntString() {
-    assertEquals(DataConverter.toInt("123"), Integer.valueOf(123));
+    assertEquals(valueOf(123), toInt("123"));
   }
 
   @Test
@@ -60,12 +69,12 @@ class DataConverterTest {
 
   @Test
   void testToLongLong() {
-    assertEquals(DataConverter.toLong(123L), Long.valueOf(123L));
+    assertEquals(Long.valueOf(123L), toLong(123L));
   }
 
   @Test
   void testToLongString() {
-    assertEquals(DataConverter.toLong("123"), Long.valueOf(123L));
+    assertEquals(Long.valueOf(123L), toLong("123"));
   }
 
   @Test
@@ -75,12 +84,12 @@ class DataConverterTest {
 
   @Test
   void testToBooleanBoolean() {
-    assertEquals(DataConverter.toBoolean(Boolean.TRUE), Boolean.TRUE);
+    assertEquals(TRUE, toBoolean(TRUE));
   }
 
   @Test
   void testToBooleanString() {
-    assertEquals(DataConverter.toBoolean("true"), Boolean.TRUE);
+    assertEquals(TRUE, toBoolean("true"));
   }
 
   @Test
@@ -108,12 +117,12 @@ class DataConverterTest {
   @Test
   void testToLocalDateLocalDate() {
     LocalDate localDate = LocalDate.now();
-    assertEquals(DataConverter.toLocalDate(localDate), localDate);
+    assertEquals(localDate, DataConverter.toLocalDate(localDate));
   }
 
   @Test
   void testToLocalDateString() {
-    assertEquals(DataConverter.toLocalDate("2015-06-04"), LocalDate.parse("2015-06-04"));
+    assertEquals(parse("2015-06-04"), DataConverter.toLocalDate("2015-06-04"));
   }
 
   @Test
@@ -124,13 +133,12 @@ class DataConverterTest {
   @Test
   void testToInstantInstant() {
     Instant instant = Instant.now();
-    assertEquals(DataConverter.toInstant(instant), instant);
+    assertEquals(instant, toInstant(instant));
   }
 
   @Test
   void testToInstantString() {
-    assertEquals(
-        DataConverter.toInstant("1986-08-12T06:12:13Z"), Instant.parse("1986-08-12T06:12:13Z"));
+    assertEquals(Instant.parse("1986-08-12T06:12:13Z"), toInstant("1986-08-12T06:12:13Z"));
   }
 
   @Test
@@ -140,24 +148,24 @@ class DataConverterTest {
 
   @Test
   void testToStringString() {
-    assertEquals(DataConverter.toString("abc"), "abc");
+    assertEquals("abc", DataConverter.toString("abc"));
   }
 
   @Test
   void testToStringIterable() {
-    assertEquals(DataConverter.toString(asList("a", "b", "c")), "a,b,c");
+    assertEquals("a,b,c", DataConverter.toString(asList("a", "b", "c")));
   }
 
   @Test
   void testToStringInt() {
-    assertEquals(DataConverter.toString(123), "123");
+    assertEquals("123", DataConverter.toString(123));
   }
 
   @Test
   void convertLocalDate() {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getDataType()).thenReturn(DATE);
-    assertEquals(DataConverter.convert("2015-06-04", attr), LocalDate.parse("2015-06-04"));
+    assertEquals(parse("2015-06-04"), convert("2015-06-04", attr));
   }
 
   static Iterator<Object[]> convertObjectAttributeProvider() {
@@ -172,44 +180,42 @@ class DataConverterTest {
   void convertObjectAttribute(Object source, AttributeType attrType, Object convertedValue) {
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(attrType);
-    assertEquals(DataConverter.convert(source, attr), convertedValue);
+    assertEquals(convertedValue, convert(source, attr));
   }
 
   @Test
   void toLocalDate() {
-    assertEquals(DataConverter.toLocalDate("2015-06-04"), LocalDate.parse("2015-06-04"));
+    assertEquals(parse("2015-06-04"), DataConverter.toLocalDate("2015-06-04"));
   }
 
   @Test
   void convertDateTime() {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getDataType()).thenReturn(DATE_TIME);
-    assertEquals(
-        DataConverter.convert("2015-05-22T11:12:13+0500", attr),
-        Instant.parse("2015-05-22T06:12:13Z"));
+    assertEquals(Instant.parse("2015-05-22T06:12:13Z"), convert("2015-05-22T11:12:13+0500", attr));
   }
 
   @Test
   void testToListNull() {
-    assertEquals(DataConverter.toList(null), emptyList());
+    assertEquals(emptyList(), toList(null));
   }
 
   @Test
   void testToListIterableString() {
     String value0 = "0";
     String value1 = "1";
-    assertEquals(DataConverter.toList(asList(value0, value1)), asList(value0, value1));
+    assertEquals(asList(value0, value1), toList(asList(value0, value1)));
   }
 
   @Test
   void testToListString() {
     String value = "a,b,c";
-    assertEquals(DataConverter.toList(value), asList("a", "b", "c"));
+    assertEquals(asList("a", "b", "c"), toList(value));
   }
 
   @Test
   void testToListOther() {
-    assertEquals(DataConverter.toList(0L), singletonList("0"));
+    assertEquals(singletonList("0"), toList(0L));
   }
 
   @Test
@@ -232,6 +238,6 @@ class DataConverterTest {
   @Test
   void toStringIterable() {
     Iterable<String> iterable = () -> asList("str1", "str2").iterator();
-    assertEquals(DataConverter.toString(iterable), "str1,str2");
+    assertEquals("str1,str2", DataConverter.toString(iterable));
   }
 }

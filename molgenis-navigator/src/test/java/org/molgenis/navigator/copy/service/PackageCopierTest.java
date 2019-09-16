@@ -1,5 +1,6 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
@@ -15,7 +16,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictableIdGeneratorMock;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -150,10 +150,9 @@ class PackageCopierTest extends AbstractMockitoTest {
     verify(dataService).add(PACKAGE, packageC);
     verify(progress, times(5)).increment(1);
     assertEquals(
-        state.copiedPackages(),
-        ImmutableMap.of(
-            "A", packageA, "Aa", packageAa, "Ab", packageAb, "Aba", packageAba, "C", packageC));
-    assertEquals(state.entityTypesInPackages(), asList(entityType1, entityType2, entityType3));
+        of("A", packageA, "Aa", packageAa, "Ab", packageAb, "Aba", packageAba, "C", packageC),
+        state.copiedPackages());
+    assertEquals(asList(entityType1, entityType2, entityType3), state.entityTypesInPackages());
   }
 
   private void setupMetadataServiceAnswers(List<Package> packageMocks) {

@@ -1,10 +1,11 @@
 package org.molgenis.util;
 
+import static com.google.common.collect.Iterators.size;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.molgenis.util.HugeSet.THRESHOLD;
 
-import com.google.common.collect.Iterators;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,13 +33,13 @@ class HugeSetTest {
   @Test
   void add() {
     hugeSet.add("test");
-    assertEquals(hugeSet.size(), 1);
+    assertEquals(1, hugeSet.size());
   }
 
   @Test
   void addLarge() {
     fillToThreshold();
-    assertEquals(hugeSet.size(), HugeSet.THRESHOLD);
+    assertEquals(THRESHOLD, hugeSet.size());
   }
 
   @Test
@@ -92,7 +93,7 @@ class HugeSetTest {
     hugeSet.addAll(contents);
 
     Iterator<String> it = hugeSet.iterator();
-    assertEquals(Iterators.size(it), contents.size());
+    assertEquals(contents.size(), size(it));
 
     for (String s : hugeSet) {
       assertTrue(contents.contains(s));
@@ -107,7 +108,7 @@ class HugeSetTest {
     IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(contents::add);
 
     Iterator<String> it = hugeSet.iterator();
-    assertEquals(Iterators.size(it), contents.size());
+    assertEquals(contents.size(), size(it));
 
     for (String s : hugeSet) {
       assertTrue(contents.contains(s));
@@ -119,14 +120,14 @@ class HugeSetTest {
     List<String> contents = Arrays.asList("test1", "test2", "test3");
     hugeSet.addAll(contents);
     hugeSet.remove("test1");
-    assertEquals(hugeSet.size(), 2);
+    assertEquals(2, hugeSet.size());
   }
 
   @Test
   void removeLarge() {
     fillToThreshold();
     hugeSet.remove("1");
-    assertEquals(hugeSet.size(), HugeSet.THRESHOLD - 1);
+    assertEquals(THRESHOLD - 1, hugeSet.size());
   }
 
   @Test
@@ -134,7 +135,7 @@ class HugeSetTest {
     List<String> contents = Arrays.asList("test1", "test2", "test3");
     hugeSet.addAll(contents);
     hugeSet.removeAll(contents);
-    assertEquals(hugeSet.size(), 0);
+    assertEquals(0, hugeSet.size());
   }
 
   @Test
@@ -145,7 +146,7 @@ class HugeSetTest {
     IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(contents::add);
 
     hugeSet.removeAll(contents);
-    assertEquals(hugeSet.size(), 0);
+    assertEquals(0, hugeSet.size());
   }
 
   @Test
@@ -153,27 +154,27 @@ class HugeSetTest {
     List<String> contents = Arrays.asList("test1", "test2", "test3");
     hugeSet.addAll(contents);
     hugeSet.retainAll(Arrays.asList("test2", "test3"));
-    assertEquals(hugeSet.size(), 2);
+    assertEquals(2, hugeSet.size());
   }
 
   @Test
   void retainAllLarge() {
     fillToThreshold();
     hugeSet.retainAll(Arrays.asList("2", "3"));
-    assertEquals(hugeSet.size(), 2);
+    assertEquals(2, hugeSet.size());
   }
 
   @Test
   void toArray() {
     List<String> contents = Arrays.asList("test1", "test2", "test3");
     hugeSet.addAll(contents);
-    assertEquals(hugeSet.toArray().length, 3);
+    assertEquals(3, hugeSet.toArray().length);
   }
 
   @Test
   void toArrayLarge() {
     fillToThreshold();
-    assertEquals(hugeSet.toArray().length, HugeSet.THRESHOLD);
+    assertEquals(THRESHOLD, hugeSet.toArray().length);
   }
 
   private void fillToThreshold() {

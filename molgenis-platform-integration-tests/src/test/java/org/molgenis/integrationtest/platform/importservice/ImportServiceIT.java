@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform.importservice;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +89,8 @@ public abstract class ImportServiceIT {
       EntityImportReport importReport,
       Map<String, Integer> entityTypeCountMap,
       Set<String> addedEntityTypeIds) {
-    assertEquals(ImmutableSet.copyOf(importReport.getNewEntities()), addedEntityTypeIds);
-    assertEquals(importReport.getNrImportedEntitiesMap(), entityTypeCountMap);
+    assertEquals(addedEntityTypeIds, copyOf(importReport.getNewEntities()));
+    assertEquals(entityTypeCountMap, importReport.getNrImportedEntitiesMap());
   }
 
   static File getFile(String resourceName) {
@@ -116,9 +116,9 @@ public abstract class ImportServiceIT {
     Map<Object, Entity> importedEntities =
         findAllAsList(entityName).stream().collect(toMap(Entity::getIdValue, Function.identity()));
     assertEquals(
-        entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))), expectedFirstRow);
+        expectedFirstRow, entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))));
     assertEquals(
-        entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))), expectedLastRow);
+        expectedLastRow, entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))));
   }
 
   List<Entity> findAllAsList(String entityName) {

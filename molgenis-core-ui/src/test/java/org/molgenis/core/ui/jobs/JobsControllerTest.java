@@ -58,8 +58,8 @@ class JobsControllerTest extends AbstractMockitoTest {
   void testCreateJobExecutionViewHref() {
     when(menuReaderService.findMenuItemPath(JobsController.ID)).thenReturn("/menu/jobs");
     assertEquals(
-        jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345),
-        "/menu/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345");
+        "/menu/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345",
+        jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345));
   }
 
   @Test

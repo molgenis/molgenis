@@ -59,10 +59,10 @@ class JsonValidatorTest extends AbstractMockitoSpringContextTests {
       jsonValidator.validate("{\"p1\":\"10\"}", schema);
     } catch (JsonValidationException expected) {
       assertEquals(
-          expected.getViolations(),
           newHashSet(
               new ConstraintViolation("#/p1: expected type: Number, found: String"),
-              new ConstraintViolation("#: required key [p2] not found")));
+              new ConstraintViolation("#: required key [p2] not found")),
+          expected.getViolations());
     }
   }
 }

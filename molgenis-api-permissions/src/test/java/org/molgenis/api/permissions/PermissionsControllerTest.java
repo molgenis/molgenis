@@ -130,8 +130,8 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[{\"id\":\"test2\",\"label\":\"label2\"},{\"id\":\"test1\",\"label\":\"label1\"}]}");
+        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[{\"id\":\"test2\",\"label\":\"label2\"},{\"id\":\"test1\",\"label\":\"label1\"}]}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
@@ -174,8 +174,8 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}}");
+        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
@@ -216,8 +216,8 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
@@ -263,8 +263,8 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
@@ -297,8 +297,8 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"}]}}");
+        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test

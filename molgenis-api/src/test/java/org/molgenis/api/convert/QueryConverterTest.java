@@ -38,7 +38,7 @@ class QueryConverterTest extends AbstractMockitoTest {
         new ComparisonNode(new ComparisonOperator("=="), "item", singletonList("value"));
     Query query = Query.builder().setItem("item").setOperator(Operator.EQUALS).build();
     when(node.accept(rsqlVisitor)).thenReturn(query);
-    assertEquals(queryConverter.convert(rsqlQuery), query);
+    assertEquals(query, queryConverter.convert(rsqlQuery));
     verify(rsqlVisitor).visit(node, null);
   }
 

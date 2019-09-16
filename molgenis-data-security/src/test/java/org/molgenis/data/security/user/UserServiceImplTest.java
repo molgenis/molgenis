@@ -1,12 +1,12 @@
 package org.molgenis.data.security.user;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
-import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -79,7 +79,7 @@ class UserServiceImplTest extends AbstractMockitoSpringContextTests {
             USER, new QueryImpl<User>().eq(UserMetadata.USERNAME, username), User.class))
         .thenReturn(existingUser);
 
-    assertEquals(molgenisUserServiceImpl.getUser(username), existingUser);
+    assertEquals(existingUser, molgenisUserServiceImpl.getUser(username));
   }
 
   @Test
@@ -88,6 +88,6 @@ class UserServiceImplTest extends AbstractMockitoSpringContextTests {
 
     when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(existingUser));
 
-    assertEquals(molgenisUserServiceImpl.getUsers(), Collections.singletonList(existingUser));
+    assertEquals(singletonList(existingUser), molgenisUserServiceImpl.getUsers());
   }
 }

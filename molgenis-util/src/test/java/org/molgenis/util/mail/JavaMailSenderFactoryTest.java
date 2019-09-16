@@ -4,6 +4,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.molgenis.util.mail.JavaMailSenderFactory.MAIL_SMTP_AUTH;
+import static org.molgenis.util.mail.JavaMailSenderFactory.MAIL_SMTP_FROM_ADDRESS;
+import static org.molgenis.util.mail.JavaMailSenderFactory.MAIL_SMTP_QUITWAIT;
+import static org.molgenis.util.mail.JavaMailSenderFactory.MAIL_SMTP_STARTTLS_ENABLE;
 
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,19 +39,16 @@ class JavaMailSenderFactoryTest extends AbstractMockitoTest {
   void testCreateMailSenderWithDefaultProperties() {
     JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
 
-    assertEquals(actual.getHost(), "host");
-    assertEquals(actual.getPort(), 1234);
-    assertEquals(actual.getUsername(), "username");
-    assertEquals(actual.getPassword(), "password");
-    assertEquals(actual.getDefaultEncoding(), "UTF-8");
+    assertEquals("host", actual.getHost());
+    assertEquals(1234, actual.getPort());
+    assertEquals("username", actual.getUsername());
+    assertEquals("password", actual.getPassword());
+    assertEquals("UTF-8", actual.getDefaultEncoding());
     final Properties actualProperties = actual.getJavaMailProperties();
-    assertEquals(
-        actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_STARTTLS_ENABLE), "true");
-    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_QUITWAIT), "false");
-    assertEquals(actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_AUTH), "true");
-    assertEquals(
-        actualProperties.getProperty(JavaMailSenderFactory.MAIL_SMTP_FROM_ADDRESS),
-        "molgenis@gmail.com");
+    assertEquals("true", actualProperties.getProperty(MAIL_SMTP_STARTTLS_ENABLE));
+    assertEquals("false", actualProperties.getProperty(MAIL_SMTP_QUITWAIT));
+    assertEquals("true", actualProperties.getProperty(MAIL_SMTP_AUTH));
+    assertEquals("molgenis@gmail.com", actualProperties.getProperty(MAIL_SMTP_FROM_ADDRESS));
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/6516
@@ -55,13 +56,13 @@ class JavaMailSenderFactoryTest extends AbstractMockitoTest {
   void testCreateMailSenderWithoutUsernamePassword() {
     JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
 
-    assertEquals(actual.getHost(), "host");
-    assertEquals(actual.getPort(), 1234);
-    assertEquals(actual.getDefaultEncoding(), "UTF-8");
+    assertEquals("host", actual.getHost());
+    assertEquals(1234, actual.getPort());
+    assertEquals("UTF-8", actual.getDefaultEncoding());
     final Properties actualProperties = actual.getJavaMailProperties();
-    assertEquals(actualProperties.getProperty("mail.smtp.starttls.enable"), "true");
-    assertEquals(actualProperties.getProperty("mail.smtp.quitwait"), "false");
-    assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
+    assertEquals("true", actualProperties.getProperty("mail.smtp.starttls.enable"));
+    assertEquals("false", actualProperties.getProperty("mail.smtp.quitwait"));
+    assertEquals("true", actualProperties.getProperty("mail.smtp.auth"));
   }
 
   @Test
@@ -73,16 +74,16 @@ class JavaMailSenderFactoryTest extends AbstractMockitoTest {
 
     JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
 
-    assertEquals(actual.getHost(), "host");
-    assertEquals(actual.getPort(), 1234);
-    assertEquals(actual.getUsername(), "username");
-    assertEquals(actual.getPassword(), "password");
-    assertEquals(actual.getDefaultEncoding(), "UTF-8");
+    assertEquals("host", actual.getHost());
+    assertEquals(1234, actual.getPort());
+    assertEquals("username", actual.getUsername());
+    assertEquals("password", actual.getPassword());
+    assertEquals("UTF-8", actual.getDefaultEncoding());
     final Properties actualProperties = actual.getJavaMailProperties();
-    assertEquals(actualProperties.getProperty("mail.smtp.starttls.enable"), "false");
-    assertEquals(actualProperties.getProperty("mail.smtp.quitwait"), "false");
-    assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
-    assertEquals(actualProperties.getProperty("mail.debug"), "true");
+    assertEquals("false", actualProperties.getProperty("mail.smtp.starttls.enable"));
+    assertEquals("false", actualProperties.getProperty("mail.smtp.quitwait"));
+    assertEquals("true", actualProperties.getProperty("mail.smtp.auth"));
+    assertEquals("true", actualProperties.getProperty("mail.debug"));
   }
 
   @Test
@@ -91,6 +92,6 @@ class JavaMailSenderFactoryTest extends AbstractMockitoTest {
         assertThrows(
             IllegalStateException.class,
             () -> javaMailSenderFactory.validateConnection(mailSettings));
-    assertEquals("Unable to ping to host", exception.getMessage());
+    assertEquals(exception.getMessage(), "Unable to ping to host");
   }
 }

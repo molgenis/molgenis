@@ -29,7 +29,7 @@ class ExistingNullValueExceptionTest extends ExceptionMessageTest {
   void testGetMessage() {
     ExistingNullValueException ex =
         new ExistingNullValueException("MyEntityType", "myAttributeName", mock(Throwable.class));
-    assertEquals(ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName");
+    assertEquals("entityTypeId:MyEntityType attributeName:myAttributeName", ex.getMessage());
   }
 
   static Object[][] languageMessageProvider() {

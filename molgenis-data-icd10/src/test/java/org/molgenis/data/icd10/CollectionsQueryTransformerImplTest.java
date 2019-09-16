@@ -88,7 +88,7 @@ class CollectionsQueryTransformerImplTest extends AbstractMockitoTest {
     Query<Entity> transformedQuery =
         collectionsQueryTransformerImpl.transformQuery(
             query, ICD10_ENTITY_TYPE_ID, EXPAND_ATTRIBUTE);
-    assertEquals(transformedQuery, expectedTransformedQuery);
+    assertEquals(expectedTransformedQuery, transformedQuery);
   }
 
   static Iterator<Object[]> transformableQueryProvider() {
@@ -161,6 +161,6 @@ class CollectionsQueryTransformerImplTest extends AbstractMockitoTest {
     Query<Entity> transformedQuery =
         collectionsQueryTransformerImpl.transformQuery(
             query, ICD10_ENTITY_TYPE_ID, EXPAND_ATTRIBUTE);
-    assertEquals(transformedQuery, expectedTransformedQuery);
+    assertEquals(expectedTransformedQuery, transformedQuery);
   }
 }

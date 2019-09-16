@@ -81,7 +81,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
     registry.addFactory(factory1);
     registry.addFactory(factory2);
 
-    assertEquals(registry.getFactoryIds().collect(toSet()), newHashSet("test1", "test2"));
+    assertEquals(newHashSet("test1", "test2"), registry.getFactoryIds().collect(toSet()));
   }
 
   @Test
@@ -103,7 +103,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
 
     DynamicRepositoryDecoratorFactory returnedFactory = registry.getFactory("test");
 
-    assertEquals(returnedFactory, factory);
+    assertEquals(factory, returnedFactory);
   }
 
   @Test
@@ -141,7 +141,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
 
     registry.addFactory(dynamicRepositoryDecoratorFactory);
 
-    assertEquals(registry.decorate(repository).getName(), "decoratedRepositoryName");
+    assertEquals("decoratedRepositoryName", registry.decorate(repository).getName());
   }
 
   @Test
@@ -156,7 +156,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
         .thenReturn(query);
     when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(null);
 
-    assertEquals(registry.decorate(repository).getName(), "repositoryName");
+    assertEquals("repositoryName", registry.decorate(repository).getName());
   }
 
   @Test
@@ -174,7 +174,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
 
     Map<String, Map<String, Object>> parameterMap = registry.getParameterMap(config);
 
-    assertEquals(parameterMap, expected);
+    assertEquals(expected, parameterMap);
   }
 
   @Test
@@ -191,6 +191,6 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
 
     Map<String, Map<String, Object>> parameterMap = registry.getParameterMap(config);
 
-    assertEquals(parameterMap, expected);
+    assertEquals(expected, parameterMap);
   }
 }

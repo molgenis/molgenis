@@ -7,6 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.ContentDisposition.parse;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.valueOf;
 
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +22,6 @@ import org.molgenis.data.file.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -48,7 +48,7 @@ class FilesServiceImplTest extends AbstractMockitoTest {
     FileMeta fileMeta = mock(FileMeta.class);
     when(dataService.findOneById("sys_FileMeta", fileId, FileMeta.class)).thenReturn(fileMeta);
 
-    assertEquals(filesApiServiceImpl.getFileMeta(fileId), fileMeta);
+    assertEquals(fileMeta, filesApiServiceImpl.getFileMeta(fileId));
   }
 
   @Test
@@ -81,7 +81,7 @@ class FilesServiceImplTest extends AbstractMockitoTest {
     String filename = "myfile.bin";
     httpServletRequest.addHeader("x-molgenis-filename", filename);
 
-    assertEquals(filesApiServiceImpl.upload(httpServletRequest).get(), fileMeta);
+    assertEquals(fileMeta, filesApiServiceImpl.upload(httpServletRequest).get());
     verify(fileMeta).setContentType(contentType);
     verify(fileMeta).setSize(1L);
     verify(fileMeta).setFilename(filename);
@@ -100,10 +100,10 @@ class FilesServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById("sys_FileMeta", fileId, FileMeta.class)).thenReturn(fileMeta);
 
     ResponseEntity<StreamingResponseBody> responseEntity = filesApiServiceImpl.download(fileId);
-    assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-    assertEquals(responseEntity.getHeaders().getContentType(), MediaType.valueOf(contentType));
+    assertEquals(OK, responseEntity.getStatusCode());
+    assertEquals(valueOf(contentType), responseEntity.getHeaders().getContentType());
     assertEquals(
-        responseEntity.getHeaders().getContentDisposition(),
-        ContentDisposition.parse("attachment; filename=\"filename\""));
+        parse("attachment; filename=\"filename\""),
+        responseEntity.getHeaders().getContentDisposition());
   }
 }

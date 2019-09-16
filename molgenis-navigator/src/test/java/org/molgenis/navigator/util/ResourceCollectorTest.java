@@ -76,8 +76,8 @@ class ResourceCollectorTest extends AbstractMockitoTest {
 
     ResourceCollection collection = resourceCollector.get(asList(id1, id2, id3, id4, id5));
 
-    assertEquals(collection.getEntityTypes(), asList(entityType1, entityType2, entityType3));
-    assertEquals(collection.getPackages(), asList(package1, package2));
+    assertEquals(asList(entityType1, entityType2, entityType3), collection.getEntityTypes());
+    assertEquals(asList(package1, package2), collection.getPackages());
   }
 
   @Test

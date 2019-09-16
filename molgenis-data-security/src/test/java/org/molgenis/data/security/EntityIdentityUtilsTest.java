@@ -9,6 +9,8 @@ import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.security.EntityIdentityUtils.toIdType;
+import static org.molgenis.data.security.EntityIdentityUtils.toType;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -23,12 +25,12 @@ class EntityIdentityUtilsTest {
   void testToTypeEntityType() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("MyEntityTypeId");
-    assertEquals(EntityIdentityUtils.toType(entityType), "entity-MyEntityTypeId");
+    assertEquals("entity-MyEntityTypeId", toType(entityType));
   }
 
   @Test
   void testToTypeString() {
-    assertEquals(EntityIdentityUtils.toType("MyEntityTypeId"), "entity-MyEntityTypeId");
+    assertEquals("entity-MyEntityTypeId", toType("MyEntityTypeId"));
   }
 
   static Iterator<Object[]> testToIdTypeProvider() {
@@ -48,6 +50,6 @@ class EntityIdentityUtilsTest {
     Attribute idAttribute =
         when(mock(Attribute.class).getDataType()).thenReturn(attributeType).getMock();
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
-    assertEquals(EntityIdentityUtils.toIdType(entityType), expectedIdType);
+    assertEquals(expectedIdType, toIdType(entityType));
   }
 }

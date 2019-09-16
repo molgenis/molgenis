@@ -43,7 +43,7 @@ class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
     BlobMetadata blobMetadata = mock(BlobMetadata.class);
     ReadableByteChannel readableByteChannel = mock(ReadableByteChannel.class);
     when(blobStore.store(readableByteChannel)).thenReturn(blobMetadata);
-    assertEquals(transactionalBlobStoreDecorator.store(readableByteChannel), blobMetadata);
+    assertEquals(blobMetadata, transactionalBlobStoreDecorator.store(readableByteChannel));
   }
 
   @Test
@@ -58,7 +58,7 @@ class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
     String blobId = "MyBlobId";
     ReadableByteChannel readableByteChannel = mock(ReadableByteChannel.class);
     when(blobStore.newChannel(blobId)).thenReturn(readableByteChannel);
-    assertEquals(transactionalBlobStoreDecorator.newChannel(blobId), readableByteChannel);
+    assertEquals(readableByteChannel, transactionalBlobStoreDecorator.newChannel(blobId));
   }
 
   @Test

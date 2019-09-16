@@ -52,7 +52,7 @@ class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
+    assertEquals(systemEntityType, systemEntityTypeRegistry.getSystemEntityType(entityTypeId));
   }
 
   @Test
@@ -84,8 +84,8 @@ class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
     assertEquals(
-        systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()),
-        singletonList(systemEntityType));
+        singletonList(systemEntityType),
+        systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()));
   }
 
   @Test
@@ -98,7 +98,7 @@ class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(false);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().count(), 0);
+    assertEquals(0, systemEntityTypeRegistry.getSystemEntityTypes().count());
   }
 
   @Test
@@ -128,7 +128,7 @@ class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
+    assertEquals(attr, systemEntityTypeRegistry.getSystemAttribute("attr"));
   }
 
   @Test
@@ -178,7 +178,7 @@ class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
+    assertEquals(attr, systemEntityTypeRegistry.getSystemAttribute("attr"));
   }
 
   @Test

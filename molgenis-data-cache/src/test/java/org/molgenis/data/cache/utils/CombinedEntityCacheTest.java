@@ -1,12 +1,13 @@
 package org.molgenis.data.cache.utils;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 import com.google.common.cache.Cache;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -32,13 +33,13 @@ class CombinedEntityCacheTest extends AbstractMockitoTest {
   @Test
   void getIfPresentIntegerIdEntityNotPresentInCache() {
     when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(null);
-    assertEquals(entityCache.getIfPresent(entityType, 123), Optional.empty());
+    assertEquals(empty(), entityCache.getIfPresent(entityType, 123));
   }
 
   @Test
   void getIfPresentIntegerIdDeletionLoggedInCache() {
     when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(CacheHit.empty());
-    assertEquals(entityCache.getIfPresent(entityType, 123), Optional.of(CacheHit.empty()));
+    assertEquals(of(CacheHit.empty()), entityCache.getIfPresent(entityType, 123));
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")

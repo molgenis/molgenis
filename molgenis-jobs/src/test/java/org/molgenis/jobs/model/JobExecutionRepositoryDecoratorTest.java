@@ -137,7 +137,7 @@ class JobExecutionRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<JobExecution>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(jobExecution));
+    assertEquals(singletonList(jobExecution), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -167,7 +167,7 @@ class JobExecutionRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityIdStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(entityIdStreamCaptor.capture());
-    assertEquals(entityIdStreamCaptor.getValue().collect(toList()), singletonList(jobExecutionId));
+    assertEquals(singletonList(jobExecutionId), entityIdStreamCaptor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")

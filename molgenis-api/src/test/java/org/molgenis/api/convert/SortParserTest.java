@@ -3,37 +3,36 @@ package org.molgenis.api.convert;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.model.Sort.Order.Direction.DESC;
+import static org.molgenis.api.model.Sort.create;
 
 import org.junit.jupiter.api.Test;
-import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.Sort.Order;
-import org.molgenis.api.model.Sort.Order.Direction;
 
 class SortParserTest {
 
   @Test
   void testSortminus() throws ParseException {
-    assertEquals(new SortParser("-abc").parse(), Sort.create("abc", Direction.DESC));
+    assertEquals(create("abc", DESC), new SortParser("-abc").parse());
   }
 
   @Test
   void testSortNoPrefix() throws ParseException {
-    assertEquals(new SortParser("abc").parse(), Sort.create("abc"));
+    assertEquals(create("abc"), new SortParser("abc").parse());
   }
 
   @Test
   void testSortPrefixCombi1() throws ParseException {
     assertEquals(
-        new SortParser("abc,-def,ghi").parse(),
-        Sort.create(
-            asList(Order.create("abc"), Order.create("def", Direction.DESC), Order.create("ghi"))));
+        create(asList(Order.create("abc"), Order.create("def", DESC), Order.create("ghi"))),
+        new SortParser("abc,-def,ghi").parse());
   }
 
   @Test
   void testSortPrefixCombi2() throws ParseException {
     assertEquals(
-        new SortParser("abc,def,ghi").parse(),
-        Sort.create(asList(Order.create("abc"), Order.create("def"), Order.create("ghi"))));
+        create(asList(Order.create("abc"), Order.create("def"), Order.create("ghi"))),
+        new SortParser("abc,def,ghi").parse());
   }
 
   @Test

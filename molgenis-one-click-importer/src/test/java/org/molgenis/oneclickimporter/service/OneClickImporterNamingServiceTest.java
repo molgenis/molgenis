@@ -38,7 +38,7 @@ class OneClickImporterNamingServiceTest {
     String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
     String expected = "label";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -57,7 +57,7 @@ class OneClickImporterNamingServiceTest {
     String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
     String expected = "label (1)";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -88,7 +88,7 @@ class OneClickImporterNamingServiceTest {
     String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
     String expected = "label (5)";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -113,23 +113,23 @@ class OneClickImporterNamingServiceTest {
     String actual = oneClickImporterNamingService.getLabelWithPostFix(label);
     String expected = "label (2)";
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
   void testCreateValidIdFromFileName() {
     oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
     assertEquals(
-        oneClickImporterNamingService.createValidIdFromFileName("test-file1.xlsx"), "test_file1");
+        "test_file1", oneClickImporterNamingService.createValidIdFromFileName("test-file1.xlsx"));
     assertEquals(
-        oneClickImporterNamingService.createValidIdFromFileName("test-f@#.xlsx"), "test_f_#");
+        "test_f_#", oneClickImporterNamingService.createValidIdFromFileName("test-f@#.xlsx"));
     assertEquals(
-        oneClickImporterNamingService.createValidIdFromFileName("test!##%.xlsx"), "test_##_");
+        "test_##_", oneClickImporterNamingService.createValidIdFromFileName("test!##%.xlsx"));
   }
 
   @Test
   void testAsValidAttributeName() {
     oneClickImporterNamingService = new OneClickImporterNamingServiceImpl(dataService);
-    assertEquals(oneClickImporterNamingService.asValidColumnName("name#!3"), "name#_3");
+    assertEquals("name#_3", oneClickImporterNamingService.asValidColumnName("name#!3"));
   }
 }

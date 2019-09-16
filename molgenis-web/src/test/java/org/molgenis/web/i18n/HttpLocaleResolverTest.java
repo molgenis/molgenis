@@ -43,14 +43,14 @@ class HttpLocaleResolverTest extends AbstractMockitoSpringContextTests {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     String username = "user";
     when(userLocaleResolver.resolveLocale(username)).thenReturn(Locale.GERMAN);
-    assertEquals(httpLocaleResolver.resolveLocale(httpServletRequest), Locale.GERMAN);
+    assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
   }
 
   @Test
   void testResolveLocaleNotAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(fallbackLocaleSupplier.get()).thenReturn(Locale.GERMAN);
-    assertEquals(httpLocaleResolver.resolveLocale(httpServletRequest), Locale.GERMAN);
+    assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
   }
 
   @WithMockUser

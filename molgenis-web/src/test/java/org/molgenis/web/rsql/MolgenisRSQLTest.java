@@ -43,13 +43,13 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q = molgenisRSQL.createQuery("name==piet", repository);
-    assertEquals(q, new QueryImpl<>().eq("name", "piet"));
+    assertEquals(new QueryImpl<>().eq("name", "piet"), q);
 
     q = molgenisRSQL.createQuery("name=='piet paulusma'", repository);
-    assertEquals(q, new QueryImpl<>().eq("name", "piet paulusma"));
+    assertEquals(new QueryImpl<>().eq("name", "piet paulusma"), q);
 
     q = molgenisRSQL.createQuery("age==87", repository);
-    assertEquals(q, new QueryImpl<>().eq("age", 87));
+    assertEquals(new QueryImpl<>().eq("age", 87), q);
   }
 
   @Test
@@ -65,7 +65,7 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q = molgenisRSQL.createQuery("age>=87", repository);
-    assertEquals(q, new QueryImpl<>().ge("age", 87));
+    assertEquals(new QueryImpl<>().ge("age", 87), q);
   }
 
   @Test
@@ -74,7 +74,7 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q = molgenisRSQL.createQuery("age>87", repository);
-    assertEquals(q, new QueryImpl<>().gt("age", 87));
+    assertEquals(new QueryImpl<>().gt("age", 87), q);
   }
 
   @Test
@@ -83,7 +83,7 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q = molgenisRSQL.createQuery("age<=87", repository);
-    assertEquals(q, new QueryImpl<>().le("age", 87));
+    assertEquals(new QueryImpl<>().le("age", 87), q);
   }
 
   @Test
@@ -92,7 +92,7 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(ageAttr).when(entityType).getAttribute("age");
 
     Query<Entity> q = molgenisRSQL.createQuery("age<87", repository);
-    assertEquals(q, new QueryImpl<>().lt("age", 87));
+    assertEquals(new QueryImpl<>().lt("age", 87), q);
   }
 
   @Test
@@ -105,10 +105,10 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     // ';' and 'and' or synonyms
 
     Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", repository);
-    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
+    assertEquals(new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest(), q);
 
     q = molgenisRSQL.createQuery("name==piet;age==87", repository);
-    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest());
+    assertEquals(new QueryImpl<>().nest().eq("name", "piet").and().eq("age", 87).unnest(), q);
   }
 
   @Test
@@ -121,10 +121,10 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     // ',' and 'or' or synonyms
 
     Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", repository);
-    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
+    assertEquals(new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest(), q);
 
     q = molgenisRSQL.createQuery("name==piet,age==87", repository);
-    assertEquals(q, new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest());
+    assertEquals(new QueryImpl<>().nest().eq("name", "piet").or().eq("age", 87).unnest(), q);
   }
 
   @Test
@@ -155,7 +155,6 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     Query<Entity> q =
         molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", repository);
     assertEquals(
-        q,
         new QueryImpl<>()
             .nest()
             .nest()
@@ -169,7 +168,8 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
             .and()
             .gt("age", 100)
             .unnest()
-            .unnest());
+            .unnest(),
+        q);
   }
 
   @Test
@@ -183,6 +183,6 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(genderAttr).when(entityType).getAttribute("gender");
 
     Query<Entity> q = molgenisRSQL.createQuery("gender==2", repository);
-    assertEquals(q, new QueryImpl<>().eq("gender", 2));
+    assertEquals(new QueryImpl<>().eq("gender", 2), q);
   }
 }

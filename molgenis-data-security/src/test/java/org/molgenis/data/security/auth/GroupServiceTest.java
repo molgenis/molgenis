@@ -138,7 +138,7 @@ class GroupServiceTest extends AbstractMockitoTest {
     verify(dataService).add(GROUP, group);
     verify(dataService).add(eq(ROLE), roleCaptor.capture());
     verify(dataService).add(PackageMetadata.PACKAGE, aPackage);
-    assertEquals(roleCaptor.getValue().collect(toList()), asList(managerRole, editorRole));
+    assertEquals(asList(managerRole, editorRole), roleCaptor.getValue().collect(toList()));
 
     verify(managerRole).setGroup(group);
     verify(managerRole).setIncludes(asList(defaultManagerRole, editorRole));
@@ -174,7 +174,7 @@ class GroupServiceTest extends AbstractMockitoTest {
   @Test
   void testGetGroups() {
     when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group));
-    assertEquals(groupService.getGroups(), singletonList(group));
+    assertEquals(singletonList(group), groupService.getGroups());
   }
 
   @Test
@@ -184,7 +184,7 @@ class GroupServiceTest extends AbstractMockitoTest {
     Query<Group> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
     when(query.eq(GroupMetadata.NAME, "devs").fetch(fetch).findOne()).thenReturn(group);
-    assertEquals(groupService.getGroup("devs"), group);
+    assertEquals(group, groupService.getGroup("devs"));
   }
 
   @Test

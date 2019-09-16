@@ -200,6 +200,6 @@ class SearchAllServiceTest {
             .setPackages(singletonList(packageResult))
             .build();
 
-    assertEquals(searchAllService.searchAll("test"), result);
+    assertEquals(result, searchAllService.searchAll("test"));
   }
 }

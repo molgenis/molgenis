@@ -1,14 +1,14 @@
 package org.molgenis.data.csv;
 
+import static com.google.common.collect.Iterators.size;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -38,14 +38,13 @@ class CsvIteratorTest extends AbstractMolgenisSpringTest {
   void testIteratorFromCsvFile() throws IOException {
     File csvFile = new ClassPathResource("testdata.csv").getFile();
     CsvIterator it = new CsvIterator(csvFile, "testdata", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
 
     it = new CsvIterator(csvFile, "testdata", null, null, entityType);
     Entity entity = it.next();
-    assertEquals(entity.get("col1"), "val1");
-    assertEquals(entity.get("col2"), "val2");
+    assertEquals("val1", entity.get("col1"));
+    assertEquals("val2", entity.get("col2"));
   }
 
   @SuppressWarnings("deprecation")
@@ -91,50 +90,45 @@ class CsvIteratorTest extends AbstractMolgenisSpringTest {
   void testIteratorFromZipFile() throws IOException {
     File zipFile = new ClassPathResource("zipFile.zip").getFile();
     CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
   }
 
   @Test
   void testIteratorFromZipFileWithFolder() throws IOException {
     File zipFile = new ClassPathResource("zipFileWithFolder.zip").getFile();
     CsvIterator it = new CsvIterator(zipFile, "testdata", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
   }
 
   @Test
   void testIteratorFromCsvFileWithBom() throws IOException {
     File csvFile = new ClassPathResource("testDataWithBom.csv").getFile();
     CsvIterator it = new CsvIterator(csvFile, "testdata", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
 
     it = new CsvIterator(csvFile, "testdata", null, null, entityType);
     Entity entity = it.next();
-    assertEquals(entity.get("col1"), "val1");
-    assertEquals(entity.get("col2"), "val2");
+    assertEquals("val1", entity.get("col1"));
+    assertEquals("val2", entity.get("col2"));
   }
 
   @Test
   void testIteratorFromZipFileWithBom() throws IOException {
     File zipFile = new ClassPathResource("zipFileWithBom.zip").getFile();
     CsvIterator it = new CsvIterator(zipFile, "testDataWithBom", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
   }
 
   @Test
   void testIteratorFromZipFileWithFolderWithBom() throws IOException {
     File zipFile = new ClassPathResource("zipFileWithFolderWithBom.zip").getFile();
     CsvIterator it = new CsvIterator(zipFile, "testDataWithBom", null, null, entityType);
-    assertEquals(
-        it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
-    assertEquals(Iterators.size(it), 5);
+    assertEquals(newLinkedHashSet(asList("col1", "col2")), it.getColNamesMap().keySet());
+    assertEquals(5, size(it));
   }
 
   @SuppressWarnings("deprecation")
