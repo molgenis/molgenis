@@ -49,6 +49,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -125,8 +126,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         });
   }
 
-  @AfterEach
-  public void tearDownAfterAll(ApplicationContext applicationContext) {
+  @AfterAll
+  public static void tearDownAfterAll(ApplicationContext applicationContext) {
     runAsSystem(
         () -> {
           depopulate(applicationContext);
