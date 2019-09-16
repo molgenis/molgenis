@@ -109,10 +109,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   private static List<Entity> staticRefEntities;
 
   @Autowired private TestEntityStaticMetaData entityTypeStatic;
-  @Autowired private TestRefEntityStaticMetaData refEntityTypeStatic;
 
   @Autowired private EntityTestHarness entityTestHarness;
-  @Autowired private PermissionService permissionService;
   @Autowired private DataService dataService;
   @Autowired private FileMetaFactory fileMetaFactory;
   private static FileMeta secretFile;
@@ -156,6 +154,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
+  @Test
   @Order(3)
   public void testWritePublicFile() {
     FileMeta updated = fileMetaFactory.create(publicFile);
@@ -472,7 +471,6 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  @Test
   @ParameterizedTest
   @MethodSource("findQueryOperatorAnd")
   @Order(22)
@@ -879,7 +877,6 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         .containsPattern("permission:ADD_DATA entityTypeId:DataServiceItEntityType");
   }
 
-  @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME_WRITE)
   @Test
   @Order(43)
@@ -917,6 +914,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(46)
   public void testUpdate() {
     Entity entity = dataService.findOneById(entityType.getId(), "3");
+    assertNotNull(entity);
     entity.set(ATTR_STRING, "updatedstring1");
     entity.set(ATTR_BOOL, true);
     entity.set(ATTR_CATEGORICAL, refEntities.get(0));
@@ -944,8 +942,10 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(47)
   public void testUpdateStream() {
     Entity entity4 = dataService.findOneById(entityType.getId(), "4");
+    assertNotNull(entity4);
     entity4.set(ATTR_STRING, "string4");
     Entity entity5 = dataService.findOneById(entityType.getId(), "5");
+    assertNotNull(entity5);
     entity5.set(ATTR_STRING, "string5");
     dataService.update(entityType.getId(), Stream.of(entity4, entity5));
     assertEquals(
