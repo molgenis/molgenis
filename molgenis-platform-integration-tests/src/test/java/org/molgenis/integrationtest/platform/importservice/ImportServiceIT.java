@@ -55,7 +55,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {PlatformITConfig.class, ImportServiceIT.Config.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
 @Rollback
 public abstract class ImportServiceIT {
