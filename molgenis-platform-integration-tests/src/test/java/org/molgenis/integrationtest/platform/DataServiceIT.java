@@ -348,9 +348,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  //  @Test(groups = "readtest")
   @ParameterizedTest
   @MethodSource("findQueryOperatorEq")
+  @Order(21)
   public void testFindQueryOperatorEq(
       String attrName, Object value, List<Integer> expectedEntityIndices) {
 
@@ -371,9 +371,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  //  @Test(groups = "readtest")
   @ParameterizedTest
   @MethodSource("findQueryOperatorGreater")
+  @Order(22)
   public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).gt(ATTR_INT, value).findAll();
@@ -398,7 +398,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorGreaterEqual")
-  @Order(21)
+  @Order(23)
   public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).ge(ATTR_INT, value).findAll();
@@ -422,9 +422,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  //  @Test(groups = "readtest")
   @ParameterizedTest
   @MethodSource("findQueryOperatorRange")
+  @Order(24)
   public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).rng(ATTR_INT, low, high).findAll();
@@ -447,9 +447,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME_READ)
-  //  @Test(groups = "readtest")
   @ParameterizedTest
   @MethodSource("findQueryOperatorNot")
+  @Order(25)
   public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).not().eq(ATTR_INT, value).findAll();
@@ -473,7 +473,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorAnd")
-  @Order(22)
+  @Order(26)
   public void testFindQueryOperatorAnd(
       String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -504,7 +504,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorOr")
-  @Order(23)
+  @Order(27)
   public void testFindQueryOperatorOr(
       String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -539,7 +539,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorNested")
-  @Order(24)
+  @Order(28)
   public void testFindQueryOperatorNested(
       boolean boolValue, String strValue, int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
@@ -575,7 +575,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorLess")
-  @Order(25)
+  @Order(29)
   public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).lt(ATTR_INT, value).findAll();
@@ -596,7 +596,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorLessEqual")
-  @Order(26)
+  @Order(30)
   public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).le(ATTR_INT, value).findAll();
@@ -617,7 +617,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorLike")
-  @Order(27)
+  @Order(31)
   public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).like(ATTR_STRING, likeStr).findAll();
@@ -641,7 +641,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorIn")
-  @Order(28)
+  @Order(32)
   public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).in(ATTR_ID, ids).findAll();
@@ -662,7 +662,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_READ)
   @ParameterizedTest
   @MethodSource("findQueryOperatorSearch")
-  @Order(29)
+  @Order(33)
   public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices) {
     Supplier<Stream<Entity>> found =
         () -> dataService.query(entityType.getId()).search(ATTR_HTML, searchStr).findAll();
@@ -676,7 +676,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(30)
+  @Order(34)
   public void testFindQueryLimitOffsetSort() {
     List<Entity> foundAsList =
         dataService
@@ -694,7 +694,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(31)
+  @Order(35)
   public void testFindQueryTypedStatic() {
     List<TestEntityStatic> entities =
         dataService
@@ -709,7 +709,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(32)
+  @Order(36)
   public void testFindOneTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -721,7 +721,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(33)
+  @Order(37)
   public void testFindOneFetchTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -736,7 +736,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(34)
+  @Order(38)
   public void testFindOneQueryTypedStatic() {
     Entity entity = staticEntities.get(0);
     TestEntityStatic testEntityStatic =
@@ -750,7 +750,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(35)
+  @Order(39)
   public void testFindAllByIdsTyped() {
     Supplier<Stream<TestEntityStatic>> retrieved =
         () ->
@@ -766,7 +766,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(36)
+  @Order(40)
   public void testAggregateOneDimensional() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl().query(new QueryImpl<>()).attrX(entityType.getAttribute(ATTR_BOOL));
@@ -780,7 +780,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(37)
+  @Order(41)
   public void testAggregateOneDimensionalDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -797,7 +797,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(38)
+  @Order(42)
   public void testAggregateTwoDimensional() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -814,7 +814,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(39)
+  @Order(43)
   public void testAggregateTwoDimensionalDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -830,7 +830,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(40)
+  @Order(44)
   public void testAggregateTwoDimensionalQuery() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -847,7 +847,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(41)
+  @Order(45)
   public void testAggregateTwoDimensionalQueryDistinct() {
     AggregateQuery aggregateQuery =
         new AggregateQueryImpl()
@@ -866,7 +866,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_READ)
   @Test
-  @Order(42)
+  @Order(46)
   public void testAddNotAllowed() {
     Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
     Exception exception =
@@ -879,7 +879,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(43)
+  @Order(47)
   public void testDeleteReferencedEntity() {
     Exception exception =
         assertThrows(
@@ -891,7 +891,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(44)
+  @Order(48)
   public void testAdd() {
     Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
     dataService.add(entityType.getId(), entity);
@@ -900,7 +900,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(45)
+  @Order(49)
   public void testAddStream() {
     Entity entity4 = entityTestHarness.createEntity(entityType, 4, refEntities.get(0));
     Entity entity5 = entityTestHarness.createEntity(entityType, 5, refEntities.get(0));
@@ -911,7 +911,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(46)
+  @Order(50)
   public void testUpdate() {
     Entity entity = dataService.findOneById(entityType.getId(), "3");
     assertNotNull(entity);
@@ -939,7 +939,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(47)
+  @Order(51)
   public void testUpdateStream() {
     Entity entity4 = dataService.findOneById(entityType.getId(), "4");
     assertNotNull(entity4);
@@ -956,7 +956,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(48)
+  @Order(52)
   public void testDelete() {
     dataService.deleteById(entityType.getId(), "3");
     org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "3"));
@@ -964,7 +964,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(49)
+  @Order(53)
   public void testDeleteStream() {
     dataService.deleteAll(entityType.getId(), Stream.of("3", "4"));
     org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "3"));
@@ -972,7 +972,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(50)
+  @Order(54)
   public void testDeleteById() {
     dataService.deleteById(entityType.getId(), "2");
     org.junit.jupiter.api.Assertions.assertNull(dataService.findOneById(entityType.getId(), "2"));
@@ -980,7 +980,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(51)
+  @Order(55)
   public void testDeleteAll() {
     dataService.deleteAll(entityType.getId());
     assertEquals(0, dataService.count(entityType.getId()));
