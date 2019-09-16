@@ -8,7 +8,7 @@ pipeline {
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
         YUM_REPOSITORY_SNAPSHOTS = "https://${env.LOCAL_REGISTRY}/repository/yum-snapshots/"
         YUM_REPOSITORY_RELEASES = "https://${env.LOCAL_REGISTRY}/repository/yum-releases/"
-        CHART_VERSION = '1.5.1'
+        CHART_VERSION = '1.5.2'
         TIMESTAMP = sh(returnStdout: true, script: "date -u +'%F_%H-%M-%S'").trim()
     }
     stages {
@@ -205,7 +205,7 @@ pipeline {
                             unstash 'rancher-config'
                         }
                         container('rancher') {
-                            sh "rancher context switch test-molgenis"
+//                            sh "rancher context switch test-molgenis"
                             sh "rancher apps upgrade --set image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
