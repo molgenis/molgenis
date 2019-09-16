@@ -520,6 +520,7 @@ public class RestControllerV2 {
    */
   @Deprecated
   @GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
+  @Transactional(readOnly = true)
   public Map<String, String> getL10nStrings() {
     Map<String, String> translations = new HashMap<>();
 
