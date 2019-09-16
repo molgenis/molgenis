@@ -55,9 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(
     classes = {
@@ -68,7 +66,6 @@ import org.springframework.test.context.TestExecutionListeners;
       EntityTypeCopier.class,
       EntityTypeMetadataCopier.class
     })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 class CopyServiceIT extends AbstractMockitoSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);

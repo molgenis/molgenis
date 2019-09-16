@@ -17,9 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -29,7 +27,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 @ContextConfiguration(classes = {MultipleAnnotationIT.Config.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 public class MultipleAnnotationIT extends AbstractMockitoSpringContextTests {
   @Autowired private BeanClass bean;
 

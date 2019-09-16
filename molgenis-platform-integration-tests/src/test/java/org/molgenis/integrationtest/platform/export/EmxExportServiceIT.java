@@ -12,7 +12,6 @@ import java.util.List;
 import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -26,16 +25,13 @@ import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.integrationtest.utils.TestProgress;
 import org.molgenis.integrationtest.utils.TestTimeZoneProvider;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {
       PlatformITConfig.class,
@@ -44,9 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
       ImportI18nConfig.class,
       TestTimeZoneProvider.class
     })
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class EmxExportServiceIT {
+public class EmxExportServiceIT extends AbstractMockitoSpringContextTests {
 
   private static final String USERNAME = "emx_user";
   private static final String ROLE_SU = "SU";

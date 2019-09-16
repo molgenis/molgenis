@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -41,19 +40,16 @@ import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFact
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {
       PlatformITConfig.class,
@@ -61,9 +57,8 @@ import org.springframework.transaction.annotation.Transactional;
       PostFixingRepositoryDecoratorFactory.class,
       JsonTestConfig.class
     })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
-public class DynamicDecoratorIT {
+public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(DynamicDecoratorIT.class);
 
   private static final String USERNAME = "dynamic-decorator-user";

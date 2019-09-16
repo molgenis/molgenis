@@ -90,14 +90,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.transaction.annotation.Transactional;
 
 @TestMethodOrder(OrderAnnotation.class)
 @ContextConfiguration(classes = {PlatformITConfig.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
 public class DataServiceIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME_READ = "dataService-user-read";

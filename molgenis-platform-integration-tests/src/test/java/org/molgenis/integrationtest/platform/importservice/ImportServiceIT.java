@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -39,6 +38,7 @@ import org.molgenis.ontology.core.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +48,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {PlatformITConfig.class, ImportServiceIT.Config.class})
 @Transactional
 @Rollback
-public abstract class ImportServiceIT {
+public abstract class ImportServiceIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
   static final String ROLE_SU = "SU";
