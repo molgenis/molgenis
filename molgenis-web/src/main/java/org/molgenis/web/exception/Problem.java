@@ -28,6 +28,10 @@ abstract class Problem {
 
   @Nullable
   @CheckForNull
+  abstract List<Error> getErrors();
+
+  @Nullable
+  @CheckForNull
   abstract List<String> getStackTrace();
 
   public static Problem create(
@@ -37,6 +41,7 @@ abstract class Problem {
       @Nullable @CheckForNull String newDetail,
       @Nullable @CheckForNull URI newInstance,
       @Nullable @CheckForNull String newErrorCode,
+      @Nullable @CheckForNull List<Error> newErrors,
       @Nullable @CheckForNull List<String> newStackTrace) {
     return builder()
         .setType(newType)
@@ -45,6 +50,7 @@ abstract class Problem {
         .setDetail(newDetail)
         .setInstance(newInstance)
         .setErrorCode(newErrorCode)
+        .setErrors(newErrors)
         .setStackTrace(newStackTrace)
         .build();
   }
@@ -68,8 +74,45 @@ abstract class Problem {
 
     public abstract Builder setErrorCode(String newErrorCode);
 
+    public abstract Builder setErrors(List<Problem.Error> errors);
+
     public abstract Builder setStackTrace(List<String> newStackTrace);
 
     public abstract Problem build();
+  }
+
+  @AutoValue
+  abstract static class Error {
+    @Nullable
+    @CheckForNull
+    abstract String getErrorCode();
+
+    @Nullable
+    @CheckForNull
+    abstract String getField();
+
+    @Nullable
+    @CheckForNull
+    abstract String getValue();
+
+    abstract String getDetail();
+
+    public static Builder builder() {
+      return new AutoValue_Problem_Error.Builder();
+    }
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+
+      public abstract Builder setErrorCode(String newErrorCode);
+
+      public abstract Builder setField(String newField);
+
+      public abstract Builder setValue(String newValue);
+
+      public abstract Builder setDetail(String newDetail);
+
+      public abstract Problem.Error build();
+    }
   }
 }

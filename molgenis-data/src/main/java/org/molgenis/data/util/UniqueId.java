@@ -4,7 +4,10 @@ import com.eaio.uuid.UUIDGen;
 import java.nio.ByteBuffer;
 
 /**
- * Copied from https://github.com/mumrah/flake-java/blob/master/src/uniq/UniqueId.java
+ * Unique identifier generator. Important: one instance generates unique identifiers, different
+ * instances might generate the same identifiers.
+ *
+ * <p>Derived from https://github.com/mumrah/flake-java/blob/master/src/uniq/UniqueId.java
  *
  * <p>See also
  * http://boundary.com/blog/2012/01/12/flake-a-decentralized-k-ordered-unique-id-generator-in-erlang/

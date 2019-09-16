@@ -182,11 +182,11 @@ CATALINA_OPTS=-Xmx2g -Xms1g
 ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
-* Select the OpenJDK 11 JRE in the 'JRE' property
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.
 * Select On Update: Redeploy, don't ask (This is the action that will triggered when you press the blue reload button in the run view)
 * Select On frame deactivation: Update resources (This is the action that will be triggered whenever you tab out of IntelliJ)
 (If you get update classes and resources to work, let us know!!)
+* Select the OpenJDK 11 JRE in the 'JRE' property
 * Select your favorite browser in the pulldown.
 * Save the configuration
 * In the tool bar, select the `molgenis-app [exploded]` configuration and press the play button.
