@@ -91,12 +91,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @TestMethodOrder(OrderAnnotation.class)
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @Transactional
+@Commit
 public class DataServiceIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME_READ = "dataService-user-read";
   private static final String USERNAME_WRITE = "dataService-user-write";
@@ -880,18 +883,6 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @WithMockUser(username = USERNAME_WRITE)
   @Test
   @Order(47)
-  public void testDeleteReferencedEntity() {
-    Exception exception =
-        assertThrows(
-            ValueReferencedException.class,
-            () -> dataService.delete(refEntityType.getId(), refEntities.get(0)));
-    assertThat(exception.getMessage())
-        .containsPattern("entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0");
-  }
-
-  @WithMockUser(username = USERNAME_WRITE)
-  @Test
-  @Order(48)
   public void testAdd() {
     Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));
     dataService.add(entityType.getId(), entity);
@@ -900,7 +891,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(49)
+  @Order(48)
   public void testAddStream() {
     Entity entity4 = entityTestHarness.createEntity(entityType, 4, refEntities.get(0));
     Entity entity5 = entityTestHarness.createEntity(entityType, 5, refEntities.get(0));
@@ -911,7 +902,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(50)
+  @Order(49)
   public void testUpdate() {
     Entity entity = dataService.findOneById(entityType.getId(), "3");
     assertNotNull(entity);
@@ -939,7 +930,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME_WRITE)
   @Test
-  @Order(51)
+  @Order(50)
   public void testUpdateStream() {
     Entity entity4 = dataService.findOneById(entityType.getId(), "4");
     assertNotNull(entity4);
@@ -952,6 +943,19 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         2L,
         dataService.count(
             entityType.getId(), new QueryImpl<>().in(ATTR_STRING, asList("string4", "string5"))));
+  }
+
+  @WithMockUser(username = USERNAME_WRITE)
+  @Test
+  @Order(51)
+  public void testDeleteReferencedEntity() {
+    dataService.delete(refEntityType.getId(), refEntities.get(0));
+    Exception exception =
+        assertThrows(
+            ValueReferencedException.class,
+            TestTransaction::end);
+    assertThat(exception.getMessage())
+        .containsPattern("entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0");
   }
 
   @WithMockUser(username = USERNAME_WRITE)
