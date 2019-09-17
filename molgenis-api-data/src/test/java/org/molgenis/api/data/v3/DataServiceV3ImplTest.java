@@ -119,9 +119,6 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     assertThrows(
         RepositoryConstraintViolationException.class,
         () -> dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value")));
-
-    verify(entityManagerV3).populate(entityType, entity, Collections.singletonMap("attr", "value"));
-    verify(repository).add(entity);
   }
 
   @SuppressWarnings("unchecked")
