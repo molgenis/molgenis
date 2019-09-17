@@ -5,18 +5,18 @@ import static java.util.Objects.requireNonNull;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
-import org.molgenis.api.meta.model.AttributeResponse;
 import org.molgenis.api.meta.model.AttributesResponse;
+import org.molgenis.api.meta.model.CreateEntityTypeRequest;
 import org.molgenis.api.meta.model.EntityTypeResponse;
 import org.molgenis.api.meta.model.EntityTypesResponse;
-import org.molgenis.api.meta.model.ReadAttributeRequest;
 import org.molgenis.api.meta.model.ReadAttributesRequest;
 import org.molgenis.api.meta.model.ReadEntityTypeRequest;
 import org.molgenis.api.meta.model.ReadEntityTypesRequest;
 import org.molgenis.api.model.Sort;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,9 +27,9 @@ class MetaApiController extends ApiController {
   static final String API_META_PATH = ApiNamespace.API_PATH + '/' + API_META_ID;
 
   private final MetadataServiceImpl metadataService;
-  private final EntityTypeV1Mapper entityTypeMapper;
+  private final MetadataV1Mapper entityTypeMapper;
 
-  MetaApiController(MetadataServiceImpl metadataService, EntityTypeV1Mapper entityTypeMapper) {
+  MetaApiController(MetadataServiceImpl metadataService, MetadataV1Mapper entityTypeMapper) {
     super(API_META_ID, 1);
     this.metadataService = requireNonNull(metadataService);
     this.entityTypeMapper = requireNonNull(entityTypeMapper);
@@ -44,7 +44,7 @@ class MetaApiController extends ApiController {
     EntityTypes entityTypes =
         metadataService.findEntityTypes(entitiesRequest.getQ().orElse(null), sort, size, page);
 
-    return entityTypeMapper.map(entityTypes, size, page, entityTypes.getTotal());
+    return entityTypeMapper.toEntityTypeResponse(entityTypes, size, page, entityTypes.getTotal());
   }
 
   @GetMapping("/{entityTypeId}")
@@ -52,7 +52,13 @@ class MetaApiController extends ApiController {
 
     EntityType entityType = metadataService.findEntityType(readEntityTypeRequest.getEntityTypeId());
 
-    return entityTypeMapper.map(entityType);
+    return entityTypeMapper.toEntityTypeResponse(entityType);
+  }
+
+  @PostMapping("/")
+  public void createEntityType(@RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+    EntityType entityType = entityTypeMapper.toEntityType(createEntityTypeRequest);
+    metadataService.createEntityType(entityType);
   }
 
   @GetMapping("/{entityTypeId}/attributes")
@@ -70,15 +76,5 @@ class MetaApiController extends ApiController {
             page);
 
     return entityTypeMapper.mapAttributes(attributes, size, page, attributes.getTotal());
-  }
-
-  @GetMapping("/{entityTypeId}/attributes/{attributeId}")
-  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
-
-    Attribute attribute =
-        metadataService.findAttribute(
-            readAttributeRequest.getEntityTypeId(), readAttributeRequest.getAttributeId());
-
-    return entityTypeMapper.mapAttribute(attribute);
   }
 }

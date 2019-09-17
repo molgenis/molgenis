@@ -1,13 +1,13 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.meta;
 
 import org.molgenis.api.model.Sort.Order;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 
-public class SortV3Mapper {
-  SortV3Mapper() {}
+public class SortMapper {
+  SortMapper() {}
 
-  Sort map(org.molgenis.api.model.Sort sort) {
+  public Sort map(org.molgenis.api.model.Sort sort) {
     Sort newSort = new Sort();
     sort.getOrders()
         .forEach(

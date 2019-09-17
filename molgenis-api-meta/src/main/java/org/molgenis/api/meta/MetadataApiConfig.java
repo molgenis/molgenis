@@ -2,6 +2,7 @@ package org.molgenis.api.meta;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.api.convert.SortConverter;
 import org.molgenis.web.rsql.RSQLValueParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,5 +21,15 @@ public class MetadataApiConfig implements WebMvcConfigurer {
   @Bean
   public QueryMapper queryMapper() {
     return new QueryMapper(rsqlValueParser);
+  }
+
+  @Bean
+  public SortConverter metadataSortConverter() {
+    return new SortConverter();
+  }
+
+  @Bean
+  public SortMapper metadataSortMapper() {
+    return new SortMapper();
   }
 }

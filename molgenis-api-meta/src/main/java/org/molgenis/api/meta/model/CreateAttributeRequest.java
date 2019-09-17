@@ -1,102 +1,39 @@
 package org.molgenis.api.meta.model;
 
-import com.google.auto.value.AutoValue;
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
 
-@AutoValue
-@AutoGson(autoValueClass = AutoValue_CreateAttributeRequest.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class CreateAttributeRequest {
-  public abstract String getId();
+@SuppressWarnings("squid:S1610") // classes without fields should be converted to interfaces
+public class CreateAttributeRequest {
+  String id;
+  String name;
+  String type;
+  String parent;
+  String refEntityType;
+  boolean cascadeDelete;
+  String mappedByAttribute;
+  String orderBy;
+  String expression;
+  boolean nullable;
+  boolean auto;
+  boolean visible;
+  I18nValue label;
+  I18nValue description;
+  boolean aggregatable;
+  List<String> enumOptions;
+  Long rangeMin;
+  Long rangeMax;
+  boolean readonly;
+  boolean unique;
+  String nullableExpression;
+  String visibleExpression;
+  String validationExpression;
+  String defaultValue;
+  Integer sequenceNumber;
 
-  @Nullable
-  @CheckForNull
-  public abstract String getName();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getType();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getParent();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getRefEntityType();
-
-  public abstract Boolean getCascadeDelete();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getMappedByAttribute();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getOrderBy();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getExpression();
-
-  public abstract Boolean getNullable();
-
-  public abstract Boolean getAuto();
-
-  public abstract Boolean getVisible();
-
-  @Nullable
-  @CheckForNull
-  public abstract I18nValue getLabel();
-
-  @Nullable
-  @CheckForNull
-  public abstract I18nValue getDescription();
-
-  public abstract Boolean getAggregatable();
-
-  @Nullable
-  @CheckForNull
-  public abstract List<String> getEnumOptions();
-
-  @Nullable
-  @CheckForNull
-  public abstract Long getRangeMin();
-
-  @Nullable
-  @CheckForNull
-  public abstract Long getRangeMax();
-
-  public abstract Boolean getReadonly();
-
-  public abstract Boolean getUnique();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getNullableExpression();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getVisibleExpression();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getValidationExpression();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getDefaultValue();
-
-  public abstract Integer getSequenceNumber();
-
-  public static CreateAttributeRequest create(
+  public CreateAttributeRequest(
       String id,
-      @Nullable @CheckForNull String name,
-      @Nullable @CheckForNull String type,
+      String name,
+      String type,
       String parent,
       String refEntityType,
       boolean cascadeDelete,
@@ -106,44 +43,143 @@ public abstract class CreateAttributeRequest {
       boolean nullable,
       boolean auto,
       boolean visible,
-      @Nullable @CheckForNull I18nValue label,
-      @Nullable @CheckForNull I18nValue description,
+      I18nValue label,
+      I18nValue description,
       boolean aggregatable,
-      @Nullable @CheckForNull List<String> enumOptions,
-      @Nullable @CheckForNull Long rangeMin,
-      @Nullable @CheckForNull Long rangeMax,
+      List<String> enumOptions,
+      Long rangeMin,
+      Long rangeMax,
       boolean readonly,
       boolean unique,
-      @Nullable @CheckForNull String nullableExpression,
-      @Nullable @CheckForNull String visibleExpression,
-      @Nullable @CheckForNull String validationExpression,
-      @Nullable @CheckForNull String defaultValue,
+      String nullableExpression,
+      String visibleExpression,
+      String validationExpression,
+      String defaultValue,
       Integer sequenceNumber) {
-    return new AutoValue_CreateAttributeRequest(
-        id,
-        name,
-        type,
-        parent,
-        refEntityType,
-        cascadeDelete,
-        mappedByAttribute,
-        orderBy,
-        expression,
-        nullable,
-        auto,
-        visible,
-        label,
-        description,
-        aggregatable,
-        enumOptions,
-        rangeMin,
-        rangeMax,
-        readonly,
-        unique,
-        nullableExpression,
-        visibleExpression,
-        validationExpression,
-        defaultValue,
-        sequenceNumber);
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.parent = parent;
+    this.refEntityType = refEntityType;
+    this.cascadeDelete = cascadeDelete;
+    this.mappedByAttribute = mappedByAttribute;
+    this.orderBy = orderBy;
+    this.expression = expression;
+    this.nullable = nullable;
+    this.auto = auto;
+    this.visible = visible;
+    this.label = label;
+    this.description = description;
+    this.aggregatable = aggregatable;
+    this.enumOptions = enumOptions;
+    this.rangeMin = rangeMin;
+    this.rangeMax = rangeMax;
+    this.readonly = readonly;
+    this.unique = unique;
+    this.nullableExpression = nullableExpression;
+    this.visibleExpression = visibleExpression;
+    this.validationExpression = validationExpression;
+    this.defaultValue = defaultValue;
+    this.sequenceNumber = sequenceNumber;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getParent() {
+    return parent;
+  }
+
+  public String getRefEntityType() {
+    return refEntityType;
+  }
+
+  public Boolean isCascadeDelete() {
+    return cascadeDelete;
+  }
+
+  public String getMappedByAttribute() {
+    return mappedByAttribute;
+  }
+
+  public String getOrderBy() {
+    return orderBy;
+  }
+
+  public String getExpression() {
+    return expression;
+  }
+
+  public Boolean isNullable() {
+    return nullable;
+  }
+
+  public Boolean isAuto() {
+    return auto;
+  }
+
+  public Boolean isVisible() {
+    return visible;
+  }
+
+  public I18nValue getLabel() {
+    return label;
+  }
+
+  public I18nValue getDescription() {
+    return description;
+  }
+
+  public Boolean isAggregatable() {
+    return aggregatable;
+  }
+
+  public List<String> getEnumOptions() {
+    return enumOptions;
+  }
+
+  public Long getRangeMin() {
+    return rangeMin;
+  }
+
+  public Long getRangeMax() {
+    return rangeMax;
+  }
+
+  public Boolean isReadonly() {
+    return readonly;
+  }
+
+  public Boolean isUnique() {
+    return unique;
+  }
+
+  public String getNullableExpression() {
+    return nullableExpression;
+  }
+
+  public String getVisibleExpression() {
+    return visibleExpression;
+  }
+
+  public String getValidationExpression() {
+    return validationExpression;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public Integer getSequenceNumber() {
+    return sequenceNumber;
   }
 }

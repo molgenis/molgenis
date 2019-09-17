@@ -4,8 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import org.molgenis.api.data.v3.FetchMapper;
-import org.molgenis.api.data.v3.SortV3Mapper;
+import java.util.Optional;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.Repository;
@@ -24,21 +23,16 @@ public class MetadataServiceImpl {
 
   private final MetaDataService metadataService;
   private final QueryMapper queryMapper;
-  private final SortV3Mapper sortMapperV3; // FIXME: write our own?
-  private final FetchMapper fetchMapper;
-  private final EntityTypeMetadata entityTypeMetadata;
+  private final SortMapper sortMapper;
 
   MetadataServiceImpl(
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
-      SortV3Mapper sortMapperV3,
-      FetchMapper fetchMapper,
-      EntityTypeMetadata entityTypeMetadata) {
+      SortMapper sortMapper,
+      MetadataV1Mapper entityTypeMapper) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
-    this.sortMapperV3 = requireNonNull(sortMapperV3);
-    this.fetchMapper = requireNonNull(fetchMapper);
-    this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
+    this.sortMapper = requireNonNull(sortMapper);
   }
 
   public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
@@ -60,7 +54,7 @@ public class MetadataServiceImpl {
         new QueryImpl<>(molgenisQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapperV3.map(sort));
+    findQuery.sort(sortMapper.map(sort));
     List<org.molgenis.data.meta.model.EntityType> entityTypes =
         repository.findAll(findQuery).collect(toList());
 
@@ -115,7 +109,7 @@ public class MetadataServiceImpl {
     org.molgenis.data.Query<Attribute> findQuery = new QueryImpl<>(molgenisQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapperV3.map(sort));
+    findQuery.sort(sortMapper.map(sort));
     List<org.molgenis.data.meta.model.Attribute> attributes =
         repository.findAll(findQuery).collect(toList());
 
@@ -128,7 +122,16 @@ public class MetadataServiceImpl {
     return Attributes.builder().setAttributes(attributes).setTotal(count).build();
   }
 
-  public Attribute findAttribute(String entityTypeId, String attributeId) {
+  public Attribute findAttribute(String entityTypeId, String attributeName) {
+    Optional<EntityType> entityType = metadataService.getEntityType(entityTypeId);
+    if (entityType.isPresent()) {
+      // FIXME: get by id or name
+      return entityType.get().getAttribute(attributeName);
+    }
     return null;
+  }
+
+  public void createEntityType(EntityType entityType) {
+    metadataService.addEntityType(entityType);
   }
 }

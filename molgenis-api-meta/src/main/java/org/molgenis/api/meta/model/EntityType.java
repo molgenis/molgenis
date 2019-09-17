@@ -45,8 +45,6 @@ public abstract class EntityType {
   @CheckForNull
   public abstract Integer getIndexingDepth();
 
-  @Nullable
-  @CheckForNull
   public static EntityType.Builder builder() {
     return new AutoValue_EntityType.Builder();
   }

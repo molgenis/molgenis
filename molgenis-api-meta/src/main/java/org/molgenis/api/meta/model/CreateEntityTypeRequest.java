@@ -1,73 +1,79 @@
 package org.molgenis.api.meta.model;
 
-import com.google.auto.value.AutoValue;
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
 
-@AutoValue
-@AutoGson(autoValueClass = AutoValue_CreateEntityTypeRequest.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class CreateEntityTypeRequest {
-  public abstract String getId();
+public class CreateEntityTypeRequest {
+  String id;
+  I18nValue label;
+  I18nValue description;
+  Boolean isAbstract;
+  String aPackage;
+  String entityTypeParent;
+  List<CreateAttributeRequest> attributes;
+  String idAttribute;
+  String labelAttribute;
+  List<String> lookupAttributes;
 
-  @Nullable
-  @CheckForNull
-  public abstract I18nValue getLabel();
-
-  @Nullable
-  @CheckForNull
-  public abstract I18nValue getDescription();
-
-  public abstract boolean isAbstract();
-
-  public abstract String getBackend();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getPackage();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getEntityTypeParent();
-
-  public abstract List<CreateAttributeRequest> getAttributes();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getIdAttribute();
-
-  @Nullable
-  @CheckForNull
-  public abstract String getLabelAttribute();
-
-  public abstract List<String> getLookupAttributes();
-
-  public static CreateEntityTypeRequest create(
+  public CreateEntityTypeRequest(
       String id,
-      @Nullable @CheckForNull I18nValue label,
-      @Nullable @CheckForNull I18nValue description,
-      boolean isAbstract,
-      String backend,
-      @Nullable @CheckForNull String aPackage,
-      @Nullable @CheckForNull String entityTypeParent,
+      I18nValue label,
+      I18nValue description,
+      Boolean isAbstract,
+      String aPackage,
+      String entityTypeParent,
       List<CreateAttributeRequest> attributes,
-      @Nullable @CheckForNull String idAttribute,
-      @Nullable @CheckForNull String labelAttribute,
+      String idAttribute,
+      String labelAttribute,
       List<String> lookupAttributes) {
-    return new AutoValue_CreateEntityTypeRequest(
-        id,
-        label,
-        description,
-        isAbstract,
-        backend,
-        aPackage,
-        entityTypeParent,
-        attributes,
-        idAttribute,
-        labelAttribute,
-        lookupAttributes);
+    this.id = id;
+    this.label = label;
+    this.description = description;
+    this.isAbstract = isAbstract;
+    this.aPackage = aPackage;
+    this.entityTypeParent = entityTypeParent;
+    this.attributes = attributes;
+    this.idAttribute = idAttribute;
+    this.labelAttribute = labelAttribute;
+    this.lookupAttributes = lookupAttributes;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public I18nValue getLabel() {
+    return label;
+  }
+
+  public I18nValue getDescription() {
+    return description;
+  }
+
+  public Boolean isAbstract() {
+    return isAbstract;
+  }
+
+  public String getPackage() {
+    return aPackage;
+  }
+
+  public String getEntityTypeParent() {
+    return entityTypeParent;
+  }
+
+  public List<CreateAttributeRequest> getAttributes() {
+    return attributes;
+  }
+
+  public String getIdAttribute() {
+    return idAttribute;
+  }
+
+  public String getLabelAttribute() {
+    return labelAttribute;
+  }
+
+  public List<String> getLookupAttributes() {
+    return lookupAttributes;
   }
 }
