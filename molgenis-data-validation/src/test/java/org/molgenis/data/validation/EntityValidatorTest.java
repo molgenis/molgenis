@@ -2,6 +2,8 @@ package org.molgenis.data.validation;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,10 +13,10 @@ import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
@@ -22,14 +24,12 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.validation.Errors;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class EntityValidatorTest extends AbstractMockitoTest {
   @Mock private ExpressionValidator expressionValidator;
   private EntityValidator entityValidator;
 
-  @BeforeMethod
+  @BeforeEach
   public void setUpBeforeMethod() {
     entityValidator = new EntityValidator(expressionValidator);
   }
