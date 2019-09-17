@@ -16,10 +16,10 @@
       "detail": "Unexpected token ')' while parsing the selection, line '1' position '26'."
     },
     {
-      "errorCode": "API03",
+      "errorCode": "API05",
       "field": "q",
       "value": "id=invalid=1",
-      "detail": "An error occurred while parsing the RSQL: 'cz.jirutka.rsql.parser.UnknownOperatorException: Unknown operator: =invalid='."
+      "detail": "Invalid query operator '=invalid='."
     },
     {
       "errorCode": "API01",

@@ -1,6 +1,7 @@
 package org.molgenis.api.convert;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -46,5 +47,13 @@ class QueryConverterTest extends AbstractMockitoTest {
   void testCreateQueryParseException() {
     String rsqlQuery = "illegalQuery";
     assertThrows(QueryParseException.class, () -> queryConverter.convert(rsqlQuery));
+  }
+
+  @Test
+  void testCreateQueryUnknownQueryOperatorException() {
+    String rsqlQuery = "item=illegalOperator=value";
+    Exception exception =
+        assertThrows(UnknownQueryOperatorException.class, () -> queryConverter.convert(rsqlQuery));
+    assertThat(exception.getMessage()).containsPattern("operator:=illegalOperator=");
   }
 }

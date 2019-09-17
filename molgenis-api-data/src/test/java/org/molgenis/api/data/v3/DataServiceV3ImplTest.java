@@ -1,15 +1,16 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.api.data.v3.Entities.builder;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 
@@ -38,7 +39,10 @@ import org.molgenis.data.meta.MetadataAccessException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.RepositoryConstraintViolationException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.validation.Errors;
 
 class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
@@ -46,13 +50,19 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Mock private QueryV3Mapper queryMapperV3;
   @Mock private SortV3Mapper sortMapperV3;
   @Mock private FetchMapper fetchMapper;
+  @Mock private EntityValidator entityValidator;
   private DataServiceV3Impl dataServiceV3Impl;
 
   @BeforeEach
   void setUpBeforeMethod() {
     dataServiceV3Impl =
         new DataServiceV3Impl(
-            metaDataService, entityManagerV3, queryMapperV3, sortMapperV3, fetchMapper);
+            metaDataService,
+            entityManagerV3,
+            queryMapperV3,
+            sortMapperV3,
+            fetchMapper,
+            entityValidator);
   }
 
   @Test
@@ -75,6 +85,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
   @Test
   void testCreateUnknownRepo() {
     when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.empty());
+
     assertThrows(
         UnknownRepositoryException.class,
         () -> dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value")));
@@ -85,6 +96,29 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     assertThrows(
         MetadataAccessException.class,
         () -> dataServiceV3Impl.create("sys_md_EntityType", emptyMap()));
+  }
+
+  @Test
+  void testCreateInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+    doAnswer(
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+    assertThrows(
+        RepositoryConstraintViolationException.class,
+        () -> dataServiceV3Impl.create("entityTypeId", Collections.singletonMap("attr", "value")));
   }
 
   @SuppressWarnings("unchecked")
@@ -111,7 +145,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
-    assertEquals(entity, dataServiceV3Impl.find(entityTypeId, entityId, filter, expand));
+    assertEquals(dataServiceV3Impl.find(entityTypeId, entityId, filter, expand), entity);
   }
 
   @SuppressWarnings("unchecked")
@@ -138,7 +172,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
-    assertEquals(entity, dataServiceV3Impl.find(entityTypeId, entityId, filter, expand));
+    assertEquals(dataServiceV3Impl.find(entityTypeId, entityId, filter, expand), entity);
   }
 
   @SuppressWarnings("unchecked")
@@ -220,7 +254,8 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
 
     Entities actual = dataServiceV3Impl.findAll(entityTypeId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
   }
 
   @SuppressWarnings("unchecked")
@@ -299,7 +334,8 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
   }
 
   @SuppressWarnings("unchecked")
@@ -381,7 +417,8 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(builder().setEntities(asList(entity1, entity2)).setTotal(100).build(), actual);
+    assertEquals(
+        actual, Entities.builder().setEntities(asList(entity1, entity2)).setTotal(100).build());
   }
 
   @SuppressWarnings("unchecked")
@@ -445,7 +482,8 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
         dataServiceV3Impl.findSubresources(
             entityTypeId, entityId, fieldId, q, filter, expand, sort, 10, 1);
 
-    assertEquals(builder().setEntities(emptyList()).setTotal(0).build(), actual);
+    assertEquals(
+        actual, Entities.builder().setEntities(Collections.emptyList()).setTotal(0).build());
   }
 
   @SuppressWarnings("unchecked")
@@ -640,6 +678,39 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testUpdateInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(entityManagerV3.create(entityType)).thenReturn(entity);
+
+    doAnswer(
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+
+    assertThrows(
+        RepositoryConstraintViolationException.class,
+        () ->
+            dataServiceV3Impl.update(
+                "entityTypeId", "entityId", Collections.singletonMap("attr", "value")));
+  }
+
+  @Test
   void testUpdatePartially() {
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
@@ -692,6 +763,39 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     assertThrows(
         MetadataAccessException.class,
         () -> dataServiceV3Impl.updatePartial("sys_md_EntityType", "myEntityTypeId", emptyMap()));
+  }
+
+  @Test
+  void testUpdatePartiallyInvalid() {
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Entity entity = mock(Entity.class);
+    Attribute idAttribute = mock(Attribute.class);
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(metaDataService.getRepository("entityTypeId")).thenReturn(Optional.of(repository));
+
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(idAttribute.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttribute);
+
+    when(repository.findOneById("entityId")).thenReturn(entity);
+
+    doAnswer(
+            answer -> {
+              Errors errors = answer.getArgument(1);
+              errors.reject("MyErrorCode");
+              return null;
+            })
+        .when(entityValidator)
+        .validate(eq(entity), any(Errors.class));
+
+    assertThrows(
+        RepositoryConstraintViolationException.class,
+        () ->
+            dataServiceV3Impl.updatePartial(
+                "entityTypeId", "entityId", Collections.singletonMap("attr", "value")));
   }
 
   @SuppressWarnings("unchecked")
