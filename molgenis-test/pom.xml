@@ -12,6 +12,10 @@
   <name>test</name>
   <description>Utility test classes.</description>
 
+  <properties>
+    <sonar.skip>true</sonar.skip>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
