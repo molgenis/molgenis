@@ -1,31 +1,33 @@
 package org.molgenis.data.listeners;
 
-import static org.testng.Assert.assertEquals;
+import static java.lang.Integer.valueOf;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityListenerRepositoryDecoratorTest {
+class EntityListenerRepositoryDecoratorTest {
   private Repository<Entity> delegateRepository;
   private EntityListenerRepositoryDecorator entityListenerRepositoryDecorator;
   private EntityListenersService entityListenersService = new EntityListenersService();
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = Mockito.mock(Repository.class);
     Mockito.when(delegateRepository.getName()).thenReturn("entityFullName");
     entityListenerRepositoryDecorator =
@@ -33,33 +35,35 @@ public class EntityListenerRepositoryDecoratorTest {
     Mockito.when(entityListenerRepositoryDecorator.getName()).thenReturn("entityFullName");
   }
 
-  @AfterMethod
-  public void afterMethod() {
+  @AfterEach
+  void afterMethod() {
     entityListenerRepositoryDecorator = null;
   }
 
   @SuppressWarnings("resource")
-  @Test(expectedExceptions = NullPointerException.class)
-  public void EntityListenerRepositoryDecorator() {
-    new EntityListenerRepositoryDecorator(null, entityListenersService);
+  @Test
+  void EntityListenerRepositoryDecorator() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new EntityListenerRepositoryDecorator(null, entityListenersService));
   }
 
   @Test
-  public void testQuery() throws Exception {
+  void testQuery() {
     assertEquals(
-        entityListenerRepositoryDecorator.query().getRepository(),
-        entityListenerRepositoryDecorator);
+        entityListenerRepositoryDecorator,
+        entityListenerRepositoryDecorator.query().getRepository());
   }
 
   @Test
-  public void addStream() {
+  void addStream() {
     Stream<Entity> entities = Stream.empty();
     Mockito.when(delegateRepository.add(entities)).thenReturn(123);
-    Assert.assertEquals(entityListenerRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), entityListenerRepositoryDecorator.add(entities));
   }
 
   @Test
-  public void deleteStream() {
+  void deleteStream() {
     Stream<Entity> entities = Stream.empty();
     entityListenerRepositoryDecorator.delete(entities);
     Mockito.verify(delegateRepository, Mockito.times(1)).delete(entities);
@@ -67,7 +71,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings("resource")
   @Test
-  public void updateEntityWithListener() {
+  void updateEntityWithListener() {
     @SuppressWarnings("unchecked")
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
@@ -86,7 +90,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings("resource")
   @Test
-  public void updateEntityWithListeners() {
+  void updateEntityWithListeners() {
     @SuppressWarnings("unchecked")
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
@@ -109,7 +113,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings("resource")
   @Test
-  public void updateEntityWithoutListener() {
+  void updateEntityWithoutListener() {
     @SuppressWarnings("unchecked")
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
@@ -128,7 +132,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings("resource")
   @Test
-  public void updateEntityNoListeners() {
+  void updateEntityNoListeners() {
     @SuppressWarnings("unchecked")
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
@@ -143,7 +147,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings({"resource", "unchecked", "rawtypes"})
   @Test
-  public void updateStreamWithListeners() {
+  void updateStreamWithListeners() {
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
     EntityListenerRepositoryDecorator entityListenerRepositoryDecorator =
@@ -162,8 +166,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository).update(captor.capture());
-    Assert.assertEquals(
-        captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
 
     Mockito.verify(entityListener0, Mockito.times(1)).postUpdate(entity0);
     Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
@@ -171,7 +174,7 @@ public class EntityListenerRepositoryDecoratorTest {
 
   @SuppressWarnings({"resource", "unchecked", "rawtypes"})
   @Test
-  public void updateStreamWithSomeListeners() {
+  void updateStreamWithSomeListeners() {
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
     EntityListenerRepositoryDecorator entityListenerRepositoryDecorator =
@@ -187,14 +190,13 @@ public class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository).update(captor.capture());
-    Assert.assertEquals(
-        captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
     Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
   }
 
   @SuppressWarnings({"resource", "unchecked", "rawtypes"})
   @Test
-  public void updateStreamNoListeners() {
+  void updateStreamNoListeners() {
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
     EntityListenerRepositoryDecorator entityListenerRepositoryDecorator =
@@ -207,13 +209,12 @@ public class EntityListenerRepositoryDecoratorTest {
 
     ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
     Mockito.verify(decoratedRepository, Mockito.times(1)).update(captor.capture());
-    Assert.assertEquals(
-        captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), captor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("resource")
   @Test
-  public void removeEntityListener() {
+  void removeEntityListener() {
     @SuppressWarnings("unchecked")
     Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
     Mockito.when(decoratedRepository.getName()).thenReturn("entityFullName");
@@ -232,7 +233,7 @@ public class EntityListenerRepositoryDecoratorTest {
   }
 
   @Test
-  public void findAllStream() {
+  void findAllStream() {
     Object id0 = "id0";
     Object id1 = "id1";
     Entity entity0 = Mockito.mock(Entity.class);
@@ -240,12 +241,11 @@ public class EntityListenerRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     Mockito.when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds);
-    Assert.assertEquals(
-        expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
-  public void findAllStreamFetch() {
+  void findAllStreamFetch() {
     Fetch fetch = new Fetch();
     Object id0 = "id0";
     Object id1 = "id1";
@@ -255,22 +255,21 @@ public class EntityListenerRepositoryDecoratorTest {
     Mockito.when(delegateRepository.findAll(entityIds, fetch))
         .thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds, fetch);
-    Assert.assertEquals(
-        expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
   }
 
   @Test
-  public void findAllAsStream() {
+  void findAllAsStream() {
     Entity entity0 = Mockito.mock(Entity.class);
     @SuppressWarnings("unchecked")
     Query<Entity> query = Mockito.mock(Query.class);
     Mockito.when(delegateRepository.findAll(query)).thenReturn(Stream.of(entity0));
     Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
-    Assert.assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+    assertEquals(singletonList(entity0), entities.collect(toList()));
   }
 
   @Test
-  public void streamFetch() {
+  void streamFetch() {
     Fetch fetch = new Fetch();
     @SuppressWarnings("unchecked")
     Consumer<List<Entity>> consumer = Mockito.mock(Consumer.class);

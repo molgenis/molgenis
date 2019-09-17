@@ -5,12 +5,12 @@ import static java.util.Arrays.asList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.script.core.config.ScriptTestConfig;
 import org.molgenis.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {ScriptTestConfig.class})
 public class ScriptTest extends AbstractSystemEntityTest {
@@ -31,7 +31,7 @@ public class ScriptTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, Script.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }

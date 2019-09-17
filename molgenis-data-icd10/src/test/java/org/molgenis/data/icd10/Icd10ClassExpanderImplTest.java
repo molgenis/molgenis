@@ -1,33 +1,32 @@
 package org.molgenis.data.icd10;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class Icd10ClassExpanderImplTest {
+class Icd10ClassExpanderImplTest {
   private Icd10ClassExpanderImpl icd10ClassExpanderImpl;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     icd10ClassExpanderImpl = new Icd10ClassExpanderImpl();
   }
 
-  @DataProvider(name = "testExpandClassesProvider")
   @SuppressWarnings("squid:S1192") // using literal string multiple times
-  public static Iterator<Object[]> testExpandClassesProvider() {
+  static Iterator<Object[]> testExpandClassesProvider() {
     Entity entityA = createEntity("A");
     Entity entityB = createEntity("B");
     Entity entityC = createEntity("C");
@@ -64,13 +63,13 @@ public class Icd10ClassExpanderImplTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "testExpandClassesProvider")
-  public void testExpandClasses(
+  @ParameterizedTest
+  @MethodSource("testExpandClassesProvider")
+  void testExpandClasses(
       Collection<Entity> diseaseClasses, Collection<Entity> expectedExpandedDiseaseClasses) {
     Collection<Entity> expandedDiseaseClasses =
         icd10ClassExpanderImpl.expandClasses(diseaseClasses);
-    assertEquals(
-        Sets.newHashSet(expandedDiseaseClasses), Sets.newHashSet(expectedExpandedDiseaseClasses));
+    assertEquals(newHashSet(expectedExpandedDiseaseClasses), newHashSet(expandedDiseaseClasses));
   }
 
   private static Entity createEntity(String idValue) {

@@ -16,6 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.core.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.security.auth.User;
@@ -45,13 +48,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
-public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
+class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private FeedbackController feedbackController;
 
   @Autowired private UserService userService;
@@ -69,8 +69,8 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   private MockMvc mockMvcFeedback;
   private SecurityContext previousContext;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     reset(mailSender, appSettings, userService, reCaptchaService);
     when(appSettings.getTitle()).thenReturn("app123");
     mockMvcFeedback =
@@ -86,13 +86,13 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
     SecurityContextHolder.setContext(testContext);
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  void tearDownAfterClass() {
     SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
-  public void initFeedbackAnonymous() throws Exception {
+  void initFeedbackAnonymous() throws Exception {
     SecurityContextHolder.getContext()
         .setAuthentication(new TestingAuthenticationToken("anonymous", null));
 
@@ -110,7 +110,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void initFeedbackLoggedIn() throws Exception {
+  void initFeedbackLoggedIn() throws Exception {
     List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
     User user = userFactory.create();
     user.setFirstName("First");
@@ -128,7 +128,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void initFeedbackLoggedInDetailsUnknown() throws Exception {
+  void initFeedbackLoggedInDetailsUnknown() throws Exception {
     User user = userFactory.create();
     when(userService.getUser("userName")).thenReturn(user);
     List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
@@ -143,7 +143,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void submit() throws Exception {
+  void submit() throws Exception {
     List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
     when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
@@ -171,7 +171,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void submitFeedbackNotSpecified() throws Exception {
+  void submitFeedbackNotSpecified() throws Exception {
     mockMvcFeedback
         .perform(
             MockMvcRequestBuilders.post(FeedbackController.URI)
@@ -185,7 +185,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void submitAuthenticationErrorWhileSendingMail() throws Exception {
+  void submitAuthenticationErrorWhileSendingMail() throws Exception {
     List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
     when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
@@ -221,7 +221,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void submitErrorWhileSendingMail() throws Exception {
+  void submitErrorWhileSendingMail() throws Exception {
     List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
     when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
@@ -257,7 +257,7 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void submitInvalidCaptcha() throws Exception {
+  void submitInvalidCaptcha() throws Exception {
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
     when(reCaptchaService.validate("invalidCaptcha")).thenReturn(false);
     mockMvcFeedback
@@ -282,30 +282,30 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import(UserTestConfig.class)
-  public static class Config {
+  static class Config {
     @Bean
-    public FeedbackController feedbackController() {
+    FeedbackController feedbackController() {
       return new FeedbackController(
           molgenisUserService(), appSettings(), reCaptchaService(), mailSender(), messageSource());
     }
 
     @Bean
-    public UserService molgenisUserService() {
+    UserService molgenisUserService() {
       return mock(UserService.class);
     }
 
     @Bean
-    public AppSettings appSettings() {
+    AppSettings appSettings() {
       return mock(AppSettings.class);
     }
 
     @Bean
-    public ReCaptchaService reCaptchaService() {
+    ReCaptchaService reCaptchaService() {
       return mock(ReCaptchaService.class);
     }
 
     @Bean
-    public TestAllPropertiesMessageSource messageSource() {
+    TestAllPropertiesMessageSource messageSource() {
       TestAllPropertiesMessageSource testAllPropertiesMessageSource =
           new TestAllPropertiesMessageSource(new MessageFormatFactory());
       testAllPropertiesMessageSource.addMolgenisNamespaces("feedback");
@@ -313,12 +313,12 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public MailSender mailSender() {
+    MailSender mailSender() {
       return mock(MailSender.class);
     }
 
     @Bean
-    public StaticContentService staticContentService() {
+    StaticContentService staticContentService() {
       return mock(StaticContentService.class);
     }
   }

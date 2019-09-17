@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,10 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.google.gson.Gson;
 import java.io.File;
 import java.nio.file.Files;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,13 +31,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {UiContextControllerTest.Config.class, GsonConfig.class})
-public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class UiContextControllerTest extends AbstractMockitoSpringContextTests {
 
   private MockMvc mockMvc;
 
@@ -47,10 +46,16 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
   private SecurityContext previousContext;
 
   @Configuration
-  public static class Config {}
+  static class Config {}
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
+    previousContext = SecurityContextHolder.getContext();
+    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+    Authentication authentication = mock(AnonymousAuthenticationToken.class);
+    testContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(testContext);
+
     UiContextController uiContextController =
         new UiContextController(appSettings, cookieWallService, "mock-version", "mock date-time");
     mockMvc =
@@ -60,22 +65,13 @@ public class UiContextControllerTest extends AbstractMockitoTestNGSpringContextT
             .build();
   }
 
-  @BeforeClass
-  public void setUpBeforeClass() {
-    previousContext = SecurityContextHolder.getContext();
-    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
-    Authentication authentication = mock(AnonymousAuthenticationToken.class);
-    testContext.setAuthentication(authentication);
-    SecurityContextHolder.setContext(testContext);
-  }
-
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  void tearDownAfterClass() {
     SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
-  public void testGetContext() throws Exception {
+  void testGetContext() throws Exception {
 
     File resource = new ClassPathResource("exampleMenu.json").getFile();
     String menu = new String(Files.readAllBytes(resource.toPath()));

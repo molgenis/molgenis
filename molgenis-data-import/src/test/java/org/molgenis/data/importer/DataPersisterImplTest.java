@@ -1,7 +1,11 @@
 package org.molgenis.data.importer;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
@@ -13,12 +17,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.importer.PersistResult.create;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
@@ -35,10 +40,8 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataPersisterImplTest extends AbstractMockitoTest {
+class DataPersisterImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
   private DataService dataService;
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
@@ -50,13 +53,13 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
   @Mock private EntityType entityType1;
   @Mock private EntityType entityType2;
 
-  public DataPersisterImplTest() {
+  DataPersisterImplTest() {
     super(Strictness.WARN);
   }
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     dataService = mock(DataService.class);
     dataPersisterImpl =
         new DataPersisterImpl(metaDataService, dataService, entityTypeDependencyResolver);
@@ -116,19 +119,17 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
         .update(anyString(), any(Stream.class));
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testGenericDataPersisterImpl() {
-    new DataPersisterImpl(null, null, null);
+  @Test
+  void testGenericDataPersisterImpl() {
+    assertThrows(NullPointerException.class, () -> new DataPersisterImpl(null, null, null));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaNoneDataAdd() {
+  void testPersistMetaNoneDataAdd() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -140,24 +141,25 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Abstract entity type 'Entity type #0' with id 'entityTypeId0' cannot contain entities")
-  public void testPersistMetaNoneDataAddAbstractEntityType() {
+  @Test
+  void testPersistMetaNoneDataAddAbstractEntityType() {
     when(entityType0.getLabel()).thenReturn("Entity type #0");
     when(entityType0.isAbstract()).thenReturn(true);
-    dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Abstract entity type 'Entity type #0' with id 'entityTypeId0' cannot contain entities");
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaNoneDataUpdate() {
+  void testPersistMetaNoneDataUpdate() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPDATE);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -170,14 +172,12 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaNoneDataUpdateMappedByAttributes() {
+  void testPersistMetaNoneDataUpdateMappedByAttributes() {
     when(entityType0.hasMappedByAttributes()).thenReturn(true);
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPDATE);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     // stream consumed, cannot verify content
@@ -193,7 +193,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaNoneDataUpsert() {
+  void testPersistMetaNoneDataUpsert() {
     Repository<Entity> repository0 = mock(Repository.class);
     when(dataService.getRepository(entityType0.getId())).thenReturn(repository0);
     Repository<Entity> repository1 = mock(Repository.class);
@@ -201,9 +201,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPSERT);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, repository0, repository1);
     inOrder.verify(repository1).upsertBatch(anyList());
@@ -214,12 +212,10 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaAddDataAdd() {
+  void testPersistMetaAddDataAdd() {
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.ADD, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).addEntityType(entityType2);
@@ -235,14 +231,12 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaAddDataAddMappedByAttributes() {
+  void testPersistMetaAddDataAddMappedByAttributes() {
     when(entityType0.hasMappedByAttributes()).thenReturn(true);
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.ADD, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).addEntityType(entityType2);
@@ -259,7 +253,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaUpdateDataAdd() {
+  void testPersistMetaUpdateDataAdd() {
     EntityType existingEntityType0 = mock(EntityType.class);
     when(existingEntityType0.getId()).thenReturn("entityTypeId0");
     EntityType existingEntityType1 = mock(EntityType.class);
@@ -283,9 +277,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.UPDATE, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).updateEntityType(entityType2);
@@ -300,7 +292,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPersistMetaUpsertDataAdd() {
+  void testPersistMetaUpsertDataAdd() {
     String entityType0Id = entityType0.getId();
     EntityType existingEntityType0 = mock(EntityType.class);
     when(existingEntityType0.getId()).thenReturn(entityType0Id);
@@ -327,9 +319,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
 
     PersistResult persistResult =
         dataPersisterImpl.persist(dataProvider, MetadataMode.UPSERT, DataMode.ADD);
-    assertEquals(
-        persistResult,
-        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+    assertEquals(create(of(entityType0.getId(), 2L, entityType1.getId(), 3L)), persistResult);
 
     InOrder inOrder = inOrder(metaDataService, dataService);
     inOrder.verify(metaDataService).updateEntityType(entityType2);

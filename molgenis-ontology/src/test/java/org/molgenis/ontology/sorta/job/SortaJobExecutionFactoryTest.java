@@ -1,5 +1,6 @@
 package org.molgenis.ontology.sorta.job;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractEntityFactoryTest;
 import org.molgenis.jobs.model.JobExecutionMetaData;
@@ -7,7 +8,6 @@ import org.molgenis.jobs.model.JobPackage;
 import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {

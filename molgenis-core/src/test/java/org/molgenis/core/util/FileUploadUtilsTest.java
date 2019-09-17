@@ -1,11 +1,12 @@
 package org.molgenis.core.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.springframework.util.FileCopyUtils.copyToString;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,28 +14,27 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.http.Part;
-import org.springframework.util.FileCopyUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class FileUploadUtilsTest {
+class FileUploadUtilsTest {
   private Part part;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     part = mock(Part.class);
   }
 
   @Test
-  public void getOriginalFileName() {
+  void getOriginalFileName() {
     when(part.getHeader("content-disposition"))
         .thenReturn("form-data; name=\"upload\"; filename=\"example.xls\"");
     String filename = FileUploadUtils.getOriginalFileName(part);
-    assertEquals(filename, "example.xls");
+    assertEquals("example.xls", filename);
   }
 
   @Test
-  public void getOriginalFileNameIE() {
+  void getOriginalFileNameIE() {
     // In internet explorer the filename part of the disposition contains the path
     when(part.getHeader("content-disposition"))
         .thenReturn(
@@ -46,17 +46,17 @@ public class FileUploadUtilsTest {
                 + File.separator
                 + "example.xls\"");
     String filename = FileUploadUtils.getOriginalFileName(part);
-    assertEquals(filename, "example.xls");
+    assertEquals("example.xls", filename);
   }
 
   @Test
-  public void getOriginalFileNameWithMissingHeader() {
+  void getOriginalFileNameWithMissingHeader() {
     when(part.getHeader("content-disposition")).thenReturn(null);
     assertNull(FileUploadUtils.getOriginalFileName(part));
   }
 
   @Test
-  public void getOriginalFileNameNoFileSelected() {
+  void getOriginalFileNameNoFileSelected() {
     when(part.getHeader("content-disposition"))
         .thenReturn("form-data; name=\"upload\"; filename=\"\"");
     String filename = FileUploadUtils.getOriginalFileName(part);
@@ -64,7 +64,7 @@ public class FileUploadUtilsTest {
   }
 
   @Test
-  public void saveToTempFile() throws UnsupportedEncodingException, IOException {
+  void saveToTempFile() throws UnsupportedEncodingException, IOException {
     String fileContent = "Hey dude";
     when(part.getHeader("content-disposition"))
         .thenReturn("form-data; name=\"upload\"; filename=\"example.txt\"");
@@ -75,7 +75,7 @@ public class FileUploadUtilsTest {
     try {
       assertNotNull(tempFile);
       assertTrue(tempFile.exists());
-      assertEquals(FileCopyUtils.copyToString(new FileReader(tempFile)), fileContent);
+      assertEquals(fileContent, copyToString(new FileReader(tempFile)));
     } finally {
       tempFile.delete();
     }

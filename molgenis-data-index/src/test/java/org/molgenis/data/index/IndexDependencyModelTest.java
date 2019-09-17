@@ -1,47 +1,37 @@
 package org.molgenis.data.index;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Mockito.reset;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class IndexDependencyModelTest {
+@ExtendWith(MockitoExtension.class)
+class IndexDependencyModelTest {
   @Mock private EntityType entity0;
   @Mock private EntityType entity1;
   @Mock private EntityType entity2;
   @Mock private EntityType entity3;
   @Mock private EntityType entity4;
 
-  @BeforeClass
-  public void beforeClass() {
-    initMocks(this);
-  }
-
-  @BeforeMethod
-  public void beforeMethod() {
-    reset(entity0, entity1, entity2, entity3, entity4);
+  @Test
+  void testGetEntityTypesDependentOnDeepReferences() {
     when(entity0.getId()).thenReturn("0");
     when(entity1.getId()).thenReturn("1");
     when(entity2.getId()).thenReturn("2");
     when(entity3.getId()).thenReturn("3");
     when(entity4.getId()).thenReturn("4");
-  }
 
-  @Test
-  public void testGetEntityTypesDependentOnDeepReferences() throws Exception {
     when(entity1.getIndexingDepth()).thenReturn(1);
     when(entity2.getIndexingDepth()).thenReturn(1);
     when(entity3.getIndexingDepth()).thenReturn(3);
@@ -57,15 +47,18 @@ public class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("1", "3", "4"));
+    assertEquals(of("1", "3", "4"), dependencies);
   }
 
   @Test
-  public void testGetEntityTypesDependentOnDeepExtension() throws Exception {
+  void testGetEntityTypesDependentOnDeepExtension() {
+    when(entity0.getId()).thenReturn("0");
+    when(entity1.getId()).thenReturn("1");
+    when(entity2.getId()).thenReturn("2");
+    when(entity3.getId()).thenReturn("3");
+    when(entity4.getId()).thenReturn("4");
+
     when(entity0.getIndexingDepth()).thenReturn(1);
-    when(entity1.getIndexingDepth()).thenReturn(1);
-    when(entity2.getIndexingDepth()).thenReturn(1);
-    when(entity3.getIndexingDepth()).thenReturn(1);
     when(entity4.getIndexingDepth()).thenReturn(1);
 
     List<EntityType> entityTypes = ImmutableList.of(entity0, entity1, entity2, entity3, entity4);
@@ -83,11 +76,13 @@ public class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("3").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("0", "4"));
+    assertEquals(of("0", "4"), dependencies);
   }
 
   @Test
-  public void testGetEntityTypesDependentOnCircular() throws Exception {
+  void testGetEntityTypesDependentOnCircular() {
+    when(entity0.getId()).thenReturn("0");
+
     when(entity0.getIndexingDepth()).thenReturn(1);
 
     List<EntityType> entityTypes = ImmutableList.of(entity0);
@@ -96,11 +91,13 @@ public class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of("0"));
+    assertEquals(of("0"), dependencies);
   }
 
   @Test
-  public void testGetEntityTypesDependentOnCircularZeroDepth() throws Exception {
+  void testGetEntityTypesDependentOnCircularZeroDepth() {
+    when(entity0.getId()).thenReturn("0");
+
     when(entity0.getIndexingDepth()).thenReturn(0);
 
     List<EntityType> entityTypes = ImmutableList.of(entity0);
@@ -109,7 +106,7 @@ public class IndexDependencyModelTest {
 
     IndexDependencyModel dependencyModel = new IndexDependencyModel(entityTypes);
     Set<String> dependencies = dependencyModel.getEntityTypesDependentOn("0").collect(toSet());
-    assertEquals(dependencies, ImmutableSet.of());
+    assertEquals(of(), dependencies);
   }
 
   private void addReferences(EntityType referringEntity, List<EntityType> refEntities) {

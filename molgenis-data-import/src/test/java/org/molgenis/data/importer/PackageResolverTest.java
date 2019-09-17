@@ -1,22 +1,23 @@
 package org.molgenis.data.importer;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_NAME;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_PARENT;
-import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.importer.emx.exception.MissingRootPackageException;
 import org.molgenis.data.importer.emx.exception.PackageResolveException;
-import org.testng.annotations.Test;
 
-public class PackageResolverTest {
+class PackageResolverTest {
 
   @Test
-  public void testResolvePackages() {
+  void testResolvePackages() {
     Entity parent = mock(Entity.class);
     when(parent.getString(EMX_PACKAGE_NAME)).thenReturn("parent");
     when(parent.getString(EMX_PACKAGE_PARENT)).thenReturn("");
@@ -34,8 +35,8 @@ public class PackageResolverTest {
     assertTrue(PackageResolver.resolvePackages(packageRepo).containsAll(packageRepo));
   }
 
-  @Test(expectedExceptions = PackageResolveException.class)
-  public void testResolvePackagesUnresolvable() {
+  @Test
+  void testResolvePackagesUnresolvable() {
     Entity parent = mock(Entity.class);
     when(parent.getString(EMX_PACKAGE_NAME)).thenReturn("parent");
     when(parent.getString(EMX_PACKAGE_PARENT)).thenReturn("");
@@ -47,11 +48,13 @@ public class PackageResolverTest {
     when(child.getString(EMX_PACKAGE_PARENT)).thenReturn("parent_middle");
 
     List packageRepo = Arrays.asList(parent, middle, child);
-    PackageResolver.resolvePackages(packageRepo).containsAll(packageRepo);
+    assertThrows(
+        PackageResolveException.class,
+        () -> PackageResolver.resolvePackages(packageRepo).containsAll(packageRepo));
   }
 
-  @Test(expectedExceptions = MissingRootPackageException.class)
-  public void testResolvePackagesNoRoot() {
+  @Test
+  void testResolvePackagesNoRoot() {
     Entity middle = mock(Entity.class);
     when(middle.getString(EMX_PACKAGE_NAME)).thenReturn("parent_middle");
     when(middle.getString(EMX_PACKAGE_PARENT)).thenReturn("parent");
@@ -60,6 +63,8 @@ public class PackageResolverTest {
     when(child.getString(EMX_PACKAGE_PARENT)).thenReturn("parent_middle");
 
     List packageRepo = Arrays.asList(middle, child);
-    PackageResolver.resolvePackages(packageRepo).containsAll(packageRepo);
+    assertThrows(
+        MissingRootPackageException.class,
+        () -> PackageResolver.resolvePackages(packageRepo).containsAll(packageRepo));
   }
 }

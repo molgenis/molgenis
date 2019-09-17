@@ -1,6 +1,11 @@
 package org.molgenis.data.index;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -12,13 +17,11 @@ import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -35,11 +38,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionConstants;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
+class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl;
   @Mock private IndexActionGroupFactory indexActionGroupFactory;
   @Mock private IndexActionGroup indexActionGroup;
@@ -48,8 +48,8 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Captor private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     TransactionSynchronizationManager.bindResource(
         TransactionConstants.TRANSACTION_ID_RESOURCE_NAME, "1");
     indexActionRegisterServiceImpl =
@@ -57,15 +57,15 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
             dataService, indexActionFactory, indexActionGroupFactory, new IndexingStrategy());
   }
 
-  @AfterMethod
-  public void afterMethod() {
+  @AfterEach
+  void afterMethod() {
     TransactionSynchronizationManager.unbindResource(
         TransactionConstants.TRANSACTION_ID_RESOURCE_NAME);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRegisterCreateSingleEntityNoReferences() {
+  void testRegisterCreateSingleEntityNoReferences() {
     when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
     when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 
@@ -91,13 +91,11 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
 
     verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
     verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
-    assertEquals(
-        indexActionStreamCaptor.getValue().collect(Collectors.toList()),
-        Lists.newArrayList(indexAction));
+    assertEquals(newArrayList(indexAction), indexActionStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
-  public void testRegisterAndForget() {
+  void testRegisterAndForget() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityTypeId");
     indexActionRegisterServiceImpl.register(entityType, 123);
@@ -114,7 +112,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRegisterExcludedEntities() {
+  void testRegisterExcludedEntities() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityTypeId");
     indexActionRegisterServiceImpl.addExcludedEntity("ABC");
@@ -124,7 +122,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isEntityDirtyTrue() {
+  void isEntityDirtyTrue() {
     String entityTypeId = "myEntityTypeId";
     int entityId = 123;
     EntityType entityType = mock(EntityType.class);
@@ -135,7 +133,7 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isEntityDirtyFalse() {
+  void isEntityDirtyFalse() {
     String entityTypeId = "myEntityTypeId";
     String entityId = "id";
     String otherId = "otherID";

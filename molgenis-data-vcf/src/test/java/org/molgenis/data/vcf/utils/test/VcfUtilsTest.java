@@ -1,15 +1,15 @@
 package org.molgenis.data.vcf.utils.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {VcfUtilsTest.Config.class})
 public class VcfUtilsTest extends AbstractMolgenisSpringTest {
@@ -24,6 +24,6 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest {
     doReturn("A").when(entity).get(VcfAttributes.ALT);
     doReturn(".").when(entity).get(VcfAttributes.QUAL);
     doReturn("PASS").when(entity).get(VcfAttributes.FILTER);
-    assertEquals(VcfUtils.createId(entity), "VWnsXKOj5B7PBk4dwFLsQw");
+    assertEquals("VWnsXKOj5B7PBk4dwFLsQw", VcfUtils.createId(entity));
   }
 }

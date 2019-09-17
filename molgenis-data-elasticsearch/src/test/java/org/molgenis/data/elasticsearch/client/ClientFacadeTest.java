@@ -5,6 +5,8 @@ import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.TRACE;
 import static ch.qos.logback.classic.Level.WARN;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doThrow;
@@ -50,6 +52,9 @@ import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchShardTarget;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.generator.model.Document;
@@ -62,17 +67,12 @@ import org.molgenis.data.index.exception.IndexAlreadyExistsException;
 import org.molgenis.data.index.exception.IndexException;
 import org.molgenis.data.index.exception.UnknownIndexException;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  * Unit tests for the exception flows of the ClientFacade. We assume the other flows are
  * sufficiently covered by the integration tests.
  */
-public class ClientFacadeTest {
+class ClientFacadeTest {
   @Mock private Client client;
 
   @Mock private AdminClient adminClient;
@@ -147,22 +147,14 @@ public class ClientFacadeTest {
         event -> message.equals(event.getFormattedMessage()) && level == event.getLevel());
   }
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  void setUp() throws Exception {
     initMocks(this);
     when(mockAppender.getName()).thenReturn("MOCK");
     originalLogLevel = logbackLogger.getLevel();
     logbackLogger.setLevel(Level.ALL);
     logbackLogger.addAppender(mockAppender);
-  }
 
-  @AfterClass
-  public void afterClass() {
-    logbackLogger.setLevel(originalLogLevel);
-  }
-
-  @BeforeMethod
-  public void setUp() throws Exception {
     reset(
         client,
         adminClient,
@@ -194,11 +186,13 @@ public class ClientFacadeTest {
     when(adminClient.indices()).thenReturn(indicesAdminClient);
   }
 
-  @AfterMethod
-  public void tearDown() throws Exception {}
+  @AfterEach
+  void tearDown() throws Exception {
+    logbackLogger.setLevel(originalLogLevel);
+  }
 
-  @Test(expectedExceptions = IndexAlreadyExistsException.class)
-  public void testCreateIndexAlreadyExists() {
+  @Test
+  void testCreateIndexAlreadyExists() {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
@@ -214,13 +208,13 @@ public class ClientFacadeTest {
     when(createIndexRequestBuilder.get())
         .thenThrow(new ResourceAlreadyExistsException("Index already exists"));
 
-    clientFacade.createIndex(index, indexSettings, mappings);
+    assertThrows(
+        IndexAlreadyExistsException.class,
+        () -> clientFacade.createIndex(index, indexSettings, mappings));
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error creating index 'indexname'\\.")
-  public void testCreateIndexThrowsElasticsearchException() {
+  @Test
+  void testCreateIndexThrowsElasticsearchException() {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
@@ -236,11 +230,14 @@ public class ClientFacadeTest {
     when(createIndexRequestBuilder.get())
         .thenThrow(new ElasticsearchException("error creating index"));
 
-    clientFacade.createIndex(index, indexSettings, mappings);
+    Exception exception =
+        assertThrows(
+            IndexException.class, () -> clientFacade.createIndex(index, indexSettings, mappings));
+    assertThat(exception.getMessage()).containsPattern("Error creating index 'indexname'\\.");
   }
 
   @Test
-  public void testCreateIndexResponseNotAcknowledgedNoExceptions() {
+  void testCreateIndexResponseNotAcknowledgedNoExceptions() {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
@@ -269,103 +266,98 @@ public class ClientFacadeTest {
     verify(mockAppender).doAppend(matcher(DEBUG, "Created index 'indexname'."));
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error determining index\\(es\\) 'index' existence\\.")
-  public void testIndexesExistThrowsException() {
+  @Test
+  void testIndexesExistThrowsException() {
     Index index = Index.create("index");
 
     when(indicesAdminClient.prepareExists("index")).thenReturn(indicesExistsRequestBuilder);
     when(indicesExistsRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.indexesExist(index);
+    Exception exception =
+        assertThrows(IndexException.class, () -> clientFacade.indexesExist(index));
+    assertThat(exception.getMessage())
+        .containsPattern("Error determining index\\(es\\) 'index' existence\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
-  public void testDeleteIndexThrowsException() {
+  @Test
+  void testDeleteIndexThrowsException() {
     Index index = Index.create("index");
 
     when(indicesAdminClient.prepareDelete("index")).thenReturn(deleteIndexRequestBuilder);
     when(deleteIndexRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.deleteIndex(index);
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
+    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
-  public void testDeleteIndexNotAcknowledged() {
+  @Test
+  void testDeleteIndexNotAcknowledged() {
     Index index = Index.create("index");
 
     when(indicesAdminClient.prepareDelete("index")).thenReturn(deleteIndexRequestBuilder);
     when(deleteIndexRequestBuilder.get()).thenReturn(deleteIndexResponse);
     when(deleteIndexResponse.isAcknowledged()).thenReturn(false);
 
-    clientFacade.deleteIndex(index);
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
+    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
-  public void testRefreshIndicesThrowsException() {
+  @Test
+  void testRefreshIndicesThrowsException() {
     when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
     when(refreshRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.refreshIndexes();
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
+    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "One or more indexes '_all' not found\\.")
-  public void testRefreshIndicesNotFound() {
+  @Test
+  void testRefreshIndicesNotFound() {
     when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
     when(refreshRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
 
-    clientFacade.refreshIndexes();
+    Exception exception =
+        assertThrows(UnknownIndexException.class, () -> clientFacade.refreshIndexes());
+    assertThat(exception.getMessage()).containsPattern("One or more indexes '_all' not found\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
-  public void testRefreshIndicesFailedShards() {
+  @Test
+  void testRefreshIndicesFailedShards() {
     when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
     when(refreshRequestBuilder.get()).thenReturn(refreshResponse);
     when(refreshResponse.getFailedShards()).thenReturn(1);
     when(refreshResponse.getShardFailures()).thenReturn(singleShardFailure);
 
-    clientFacade.refreshIndexes();
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
+    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
-  public void testGetCountThrowsException() {
+  @Test
+  void testGetCountThrowsException() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.getCount(index);
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
+    assertThat(exception.getMessage())
+        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
-  public void testGetCountThrowsResourceNotFoundException() {
+  @Test
+  void testGetCountThrowsResourceNotFoundException() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
 
-    clientFacade.getCount(index);
+    Exception exception =
+        assertThrows(UnknownIndexException.class, () -> clientFacade.getCount(index));
+    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
-  public void testGetGetCountFailedShards() {
+  @Test
+  void testGetGetCountFailedShards() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -373,13 +365,13 @@ public class ClientFacadeTest {
     when(searchResponse.getFailedShards()).thenReturn(1);
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
 
-    clientFacade.getCount(index);
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
+    assertThat(exception.getMessage())
+        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Timeout while counting docs in index\\(es\\) 'index'\\.")
-  public void testGetGetCountTimeout() {
+  @Test
+  void testGetGetCountTimeout() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -387,14 +379,13 @@ public class ClientFacadeTest {
     when(searchResponse.getFailedShards()).thenReturn(0);
     when(searchResponse.isTimedOut()).thenReturn(true);
 
-    clientFacade.getCount(index);
+    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
+    assertThat(exception.getMessage())
+        .containsPattern("Timeout while counting docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp =
-          "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.")
-  public void testSearchTimedOut() {
+  @Test
+  void testSearchTimedOut() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -403,14 +394,17 @@ public class ClientFacadeTest {
     when(searchResponse.isTimedOut()).thenReturn(true);
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp =
-          "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
-  public void testSearchFailedShards() {
+  @Test
+  void testSearchFailedShards() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -419,66 +413,80 @@ public class ClientFacadeTest {
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
+    assertThat(exception.getMessage())
+        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
-  public void testSearchIndexNotFound() {
+  @Test
+  void testSearchIndexNotFound() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
+    Exception exception =
+        assertThrows(
+            UnknownIndexException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
+    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp =
-          "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
-  public void testSearchThrowsException() {
+  @Test
+  void testSearchThrowsException() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
+    assertThat(exception.getMessage())
+        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
-  public void testAggregateThrowsException() {
+  @Test
+  void testAggregateThrowsException() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () ->
+                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
+    assertThat(exception.getMessage())
+        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
-  public void testAggregateThrowsResourceNotFoundException() {
+  @Test
+  void testAggregateThrowsResourceNotFoundException() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
     when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
+    Exception exception =
+        assertThrows(
+            UnknownIndexException.class,
+            () ->
+                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
+    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
-  public void testAggregateResultHasShardFailures() {
+  @Test
+  void testAggregateResultHasShardFailures() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -487,13 +495,17 @@ public class ClientFacadeTest {
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () ->
+                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
+    assertThat(exception.getMessage())
+        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Timeout aggregating docs in index\\(es\\) 'index'\\.")
-  public void testAggregateTimeout() {
+  @Test
+  void testAggregateTimeout() {
     Index index = Index.create("index");
 
     when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
@@ -502,14 +514,17 @@ public class ClientFacadeTest {
     when(searchResponse.isTimedOut()).thenReturn(true);
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
+    Exception exception =
+        assertThrows(
+            IndexException.class,
+            () ->
+                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
+    assertThat(exception.getMessage())
+        .containsPattern("Timeout aggregating docs in index\\(es\\) 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp =
-          "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.")
-  public void testExplainThrowsException() {
+  @Test
+  void testExplainThrowsException() {
     SearchHit searchHit = SearchHit.create("id", "index");
 
     when(client.prepareExplain("index", "index", "id")).thenReturn(explainRequestBuilder);
@@ -517,13 +532,15 @@ public class ClientFacadeTest {
     when(explainRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    clientFacade.explain(searchHit, queryBuilder);
+    Exception exception =
+        assertThrows(IndexException.class, () -> clientFacade.explain(searchHit, queryBuilder));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
-  public void testIndexThrowsException() {
+  @Test
+  void testIndexThrowsException() {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
@@ -537,13 +554,14 @@ public class ClientFacadeTest {
 
     when(indexRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.index(index, document);
+    Exception exception =
+        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
+    assertThat(exception.getMessage())
+        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "Index 'index' not found\\.")
-  public void testIndexThrowsResourceNotFoundException() {
+  @Test
+  void testIndexThrowsResourceNotFoundException() {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
@@ -557,13 +575,13 @@ public class ClientFacadeTest {
 
     when(indexRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
 
-    clientFacade.index(index, document);
+    Exception exception =
+        assertThrows(UnknownIndexException.class, () -> clientFacade.index(index, document));
+    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
-  public void testIndexShardFailure() {
+  @Test
+  void testIndexShardFailure() {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
@@ -581,13 +599,14 @@ public class ClientFacadeTest {
     when(shardInfo.getSuccessful()).thenReturn(0);
     when(shardInfo.getFailures()).thenReturn(singleShardIndexResponseFailure);
 
-    clientFacade.index(index, document);
+    Exception exception =
+        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
+    assertThat(exception.getMessage())
+        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = IndexException.class,
-      expectedExceptionsMessageRegExp = "Error deleting doc with id 'id' in index 'index'\\.")
-  public void testDeleteThrowsException() {
+  @Test
+  void testDeleteThrowsException() {
     Index index = Index.create("index");
 
     when(document.getId()).thenReturn("id");
@@ -599,13 +618,14 @@ public class ClientFacadeTest {
 
     when(deleteRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
 
-    clientFacade.deleteById(index, document);
+    Exception exception =
+        assertThrows(IndexException.class, () -> clientFacade.deleteById(index, document));
+    assertThat(exception.getMessage())
+        .containsPattern("Error deleting doc with id 'id' in index 'index'\\.");
   }
 
-  @Test(
-      expectedExceptions = UnknownIndexException.class,
-      expectedExceptionsMessageRegExp = "Index 'index' not found\\.")
-  public void testDeleteResourceNotFound() {
+  @Test
+  void testDeleteResourceNotFound() {
     Index index = Index.create("index");
 
     when(document.getId()).thenReturn("id");
@@ -617,11 +637,13 @@ public class ClientFacadeTest {
 
     when(deleteRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
 
-    clientFacade.deleteById(index, document);
+    Exception exception =
+        assertThrows(UnknownIndexException.class, () -> clientFacade.deleteById(index, document));
+    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
   }
 
   @Test
-  public void testCloseThrowsException() throws Exception {
+  void testCloseThrowsException() throws Exception {
     doThrow(new ElasticsearchException("exception")).when(client).close();
 
     clientFacade.close();

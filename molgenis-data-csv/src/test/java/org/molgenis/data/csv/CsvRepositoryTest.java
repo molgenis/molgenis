@@ -1,16 +1,18 @@
 package org.molgenis.data.csv;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -21,10 +23,8 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
+class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -37,12 +37,12 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   private static File emptylines;
   private static File emptylinessinglecol;
 
-  public CsvRepositoryTest() {
+  CsvRepositoryTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeClass
-  public static void beforeClass() throws IOException {
+  @BeforeAll
+  static void beforeClass() throws IOException {
     test = new ClassPathResource("test.csv").getFile();
     testdata = new ClassPathResource("testdata.csv").getFile();
     novalues = new ClassPathResource("novalues.csv").getFile();
@@ -54,7 +54,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
 
   @SuppressWarnings("StatementWithEmptyBody")
   @Test
-  public void addCellProcessor_header() throws IOException {
+  void addCellProcessor_header() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
     when(processor.process("col1")).thenReturn("col1");
@@ -71,7 +71,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
 
   @SuppressWarnings("StatementWithEmptyBody")
   @Test
-  public void addCellProcessor_data() throws IOException {
+  void addCellProcessor_data() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
     try (CsvRepository csvRepository =
@@ -84,58 +84,58 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void metaData() throws IOException {
+  void metaData() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null)) {
-      assertEquals(csvRepository.getName(), "testdata");
+      assertEquals("testdata", csvRepository.getName());
       Iterator<Attribute> it = csvRepository.getEntityType().getAttributes().iterator();
       assertTrue(it.hasNext());
-      assertEquals(it.next().getName(), "col1");
+      assertEquals("col1", it.next().getName());
       assertTrue(it.hasNext());
-      assertEquals(it.next().getName(), "col2");
+      assertEquals("col2", it.next().getName());
       assertFalse(it.hasNext());
     }
   }
 
   /** Test based on au.com.bytecode.opencsv.CSVReaderTest */
   @Test
-  public void iterator() throws IOException {
+  void iterator() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
 
       assertTrue(it.hasNext());
       Entity entity = it.next();
-      assertEquals(entity.get("col1"), "val1");
-      assertEquals(entity.get("col2"), "val2");
+      assertEquals("val1", entity.get("col1"));
+      assertEquals("val2", entity.get("col2"));
 
       assertTrue(it.hasNext());
       entity = it.next();
-      assertEquals(entity.get("col1"), "a,a");
-      assertEquals(entity.get("col2"), "b");
+      assertEquals("a,a", entity.get("col1"));
+      assertEquals("b", entity.get("col2"));
       assertTrue(it.hasNext());
 
       assertTrue(it.hasNext());
       entity = it.next();
       assertNull(entity.get("col1"));
-      assertEquals(entity.get("col2"), "a");
+      assertEquals("a", entity.get("col2"));
 
       assertTrue(it.hasNext());
       entity = it.next();
-      assertEquals(entity.get("col1"), "\"");
-      assertEquals(entity.get("col2"), "\"\"");
+      assertEquals("\"", entity.get("col1"));
+      assertEquals("\"\"", entity.get("col2"));
 
       assertTrue(it.hasNext());
       entity = it.next();
-      assertEquals(entity.get("col1"), ",");
-      assertEquals(entity.get("col2"), ",,");
+      assertEquals(",", entity.get("col1"));
+      assertEquals(",,", entity.get("col2"));
 
       assertFalse(it.hasNext());
     }
   }
 
   @Test
-  public void iterator_noValues() throws IOException {
+  void iterator_noValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -144,7 +144,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iterator_emptyValues() throws IOException {
+  void iterator_emptyValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -154,36 +154,36 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iterator_tsv() throws IOException {
+  void iterator_tsv() throws IOException {
     try (CsvRepository tsvRepository =
         new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = tsvRepository.iterator();
       Entity entity = it.next();
-      assertEquals(entity.get("col1"), "val1");
-      assertEquals(entity.get("col2"), "val2");
+      assertEquals("val1", entity.get("col1"));
+      assertEquals("val2", entity.get("col2"));
       assertFalse(it.hasNext());
     }
   }
 
   @Test
-  public void iterator_emptylines() throws IOException {
+  void iterator_emptylines() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
       Entity entity = it.next();
-      assertEquals(entity.get("col1"), "val1");
-      assertEquals(entity.get("col2"), "val2");
+      assertEquals("val1", entity.get("col1"));
+      assertEquals("val2", entity.get("col2"));
       assertFalse(it.hasNext());
     }
   }
 
   @Test
-  public void iterator_emptylines_singlecol() throws IOException {
+  void iterator_emptylines_singlecol() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
       Entity entity = it.next();
-      assertEquals(entity.get("col1"), "val1");
+      assertEquals("val1", entity.get("col1"));
 
       assertTrue(it.hasNext());
       entity = it.next();
@@ -194,12 +194,12 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorCaseSensitity() throws IOException {
+  void iteratorCaseSensitity() throws IOException {
     File csvFile = ResourceUtils.getFile("case-sensitivity.csv");
     try (CsvRepository csvRepository =
         new CsvRepository(csvFile, entityTypeFactory, attrMetaFactory, null)) {
       Entity entity = csvRepository.iterator().next();
-      assertEquals(entity.get("Header"), "Value #0");
+      assertEquals("Value #0", entity.get("Header"));
       assertNull(entity.get("hEADER"));
     }
   }

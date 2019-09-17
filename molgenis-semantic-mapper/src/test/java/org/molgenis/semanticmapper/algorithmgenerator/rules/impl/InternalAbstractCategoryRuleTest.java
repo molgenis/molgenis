@@ -3,12 +3,12 @@ package org.molgenis.semanticmapper.algorithmgenerator.rules.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.Category;
-import org.testng.annotations.Test;
 
-public class InternalAbstractCategoryRuleTest {
+class InternalAbstractCategoryRuleTest {
   @Test
-  public void testCreateNumericQualityIndicatorDoesNotThrowNPE() {
+  void testCreateNumericQualityIndicatorDoesNotThrowNPE() {
     InternalAbstractCategoryRule rule = new NegativeCategoryRule();
 
     Category target = mock(Category.class);

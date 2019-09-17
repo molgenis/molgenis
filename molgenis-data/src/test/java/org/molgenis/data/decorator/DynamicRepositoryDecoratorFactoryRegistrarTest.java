@@ -5,19 +5,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.context.ApplicationContext;
-import org.testng.annotations.Test;
 
-public class DynamicRepositoryDecoratorFactoryRegistrarTest extends AbstractMockitoTest {
+class DynamicRepositoryDecoratorFactoryRegistrarTest extends AbstractMockitoTest {
   @Mock DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry;
   @Mock DynamicRepositoryDecoratorFactory decoratorFactory1;
   @Mock DynamicRepositoryDecoratorFactory decoratorFactory2;
   @Mock ApplicationContext context;
 
   @Test
-  public void testRegister() {
+  void testRegister() {
     Map<String, DynamicRepositoryDecoratorFactory> map = new HashMap<>();
     map.put("decoratorFactory1", decoratorFactory1);
     map.put("decoratorFactory2", decoratorFactory2);

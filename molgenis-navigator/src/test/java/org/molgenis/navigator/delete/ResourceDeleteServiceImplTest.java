@@ -3,6 +3,8 @@ package org.molgenis.navigator.delete;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -13,10 +15,11 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -28,27 +31,25 @@ import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
+class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private ContextMessageSource contextMessageSource;
   private ResourceDeleteServiceImpl resourceDeleteServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     resourceDeleteServiceImpl = new ResourceDeleteServiceImpl(dataService, contextMessageSource);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testResourceDeleteServiceImpl() {
-    new ResourceDeleteServiceImpl(null, null);
+  @Test
+  void testResourceDeleteServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new ResourceDeleteServiceImpl(null, null));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteResourcesPackagesAndEntityTypes() {
+  void testDeleteResourcesPackagesAndEntityTypes() {
     EntityType entityTypeA0 = mock(EntityType.class);
     EntityType entityTypeA1 = mock(EntityType.class);
 
@@ -92,14 +93,14 @@ public class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
     assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
+        new HashSet<>(asList(entityTypeA0, entityTypeA1)),
+        entityTypeCaptor.getValue().collect(toSet()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
     assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
+        new HashSet<>(asList(packageA, packageB)), packageCaptor.getValue().collect(toSet()));
 
     verify(progress).status("started");
     verify(progress).status("success");
@@ -108,7 +109,7 @@ public class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteResourcesPackages() {
+  void testDeleteResourcesPackages() {
     Package packageA = mock(Package.class);
     Package packageB = mock(Package.class);
 
@@ -127,14 +128,14 @@ public class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
     assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
+        new HashSet<>(asList(packageA, packageB)), packageCaptor.getValue().collect(toSet()));
 
     verifyNoMoreInteractions(dataService);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteResourcesEntityTypes() {
+  void testDeleteResourcesEntityTypes() {
 
     EntityType entityTypeA0 = mock(EntityType.class);
     EntityType entityTypeA1 = mock(EntityType.class);
@@ -154,14 +155,14 @@ public class ResourceDeleteServiceImplTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
     assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
+        new HashSet<>(asList(entityTypeA0, entityTypeA1)),
+        entityTypeCaptor.getValue().collect(toSet()));
 
     verifyNoMoreInteractions(dataService);
   }
 
   @Test
-  public void testDeleteResourcesNothing() {
+  void testDeleteResourcesNothing() {
     resourceDeleteServiceImpl.delete(emptyList(), mock(Progress.class));
     verifyZeroInteractions(dataService);
   }

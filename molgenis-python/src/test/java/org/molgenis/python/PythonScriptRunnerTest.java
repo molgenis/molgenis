@@ -1,25 +1,25 @@
 package org.molgenis.python;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertFalse;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.script.core.Script;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PythonScriptRunnerTest extends AbstractMockitoTest {
+class PythonScriptRunnerTest extends AbstractMockitoTest {
   @Mock private PythonScriptExecutor pythonScriptExecutor;
   private PythonScriptRunner pythonScriptRunner;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     pythonScriptRunner = new PythonScriptRunner(pythonScriptExecutor);
   }
 
   @Test
-  public void testHasFileOutput() {
+  void testHasFileOutput() {
     assertFalse(pythonScriptRunner.hasFileOutput(mock(Script.class)));
   }
 }

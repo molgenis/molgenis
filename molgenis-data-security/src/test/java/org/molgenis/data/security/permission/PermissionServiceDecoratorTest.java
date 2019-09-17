@@ -1,18 +1,23 @@
 package org.molgenis.data.security.permission;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityPermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import java.util.Collections;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.model.LabelledType;
@@ -31,14 +36,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
+class PermissionServiceDecoratorTest extends AbstractMockitoTest {
 
-  private SecurityContext originalSecurityContext;
+  private static SecurityContext originalSecurityContext;
   @Mock MutableAclService mutableAclService;
   @Mock MutableAclClassService mutableAclClassService;
   @Mock PermissionService permissionService;
@@ -47,13 +48,13 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   private PermissionServiceDecorator permissionServiceDecorator;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     originalSecurityContext = SecurityContextHolder.getContext();
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     permissionServiceDecorator =
         new PermissionServiceDecorator(
             permissionService,
@@ -79,12 +80,12 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     SecurityContextHolder.setContext(securityContext);
   }
 
-  private void resetContext() {
+  private static void resetContext() {
     SecurityContextHolder.setContext(originalSecurityContext);
   }
 
   @Test
-  public void testGetTypes() {
+  void testGetTypes() {
     LabelledType type1 = LabelledType.create("entity-type1", "type1", "label");
     LabelledType type2 = LabelledType.create("entity-type2", "type2", "label");
     LabelledType type3 = LabelledType.create("entity-type3", "type3", "label");
@@ -98,11 +99,11 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity("type3"), READ);
-    assertEquals(permissionServiceDecorator.getLabelledTypes(), Sets.newHashSet(type1, type3));
+    assertEquals(newHashSet(type1, type3), permissionServiceDecorator.getLabelledTypes());
   }
 
   @Test
-  public void testGetPermissionsForObject() {
+  void testGetPermissionsForObject() {
     setUser();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -114,7 +115,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateAcl() {
+  void testCreateAcl() {
     setSu();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     permissionServiceDecorator.createAcl(objectIdentity);
@@ -123,7 +124,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreatePermission() {
+  void testCreatePermission() {
     setSu();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -142,7 +143,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreatePermissions() {
+  void testCreatePermissions() {
     setSu();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -159,7 +160,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdatePermission() {
+  void testUpdatePermission() {
     setUser();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -177,7 +178,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdatePermissions() {
+  void testUpdatePermissions() {
     setUser();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -193,7 +194,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeletePermission() {
+  void testDeletePermission() {
     setSu();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -208,7 +209,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddType() {
+  void testAddType() {
     setSu();
     permissionServiceDecorator.addType("entity-typeId");
     verify(permissionService).addType("entity-typeId");
@@ -216,7 +217,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteType() {
+  void testDeleteType() {
     setSu();
     permissionServiceDecorator.deleteType("entity-typeId");
     verify(permissionService).deleteType("entity-typeId");
@@ -224,7 +225,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetPermissionsForType() {
+  void testGetPermissionsForType() {
     setUser();
     Sid sid = new PrincipalSid("user");
     permissionServiceDecorator.getPermissionsForType(
@@ -235,7 +236,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetPermissionsForType1() {
+  void testGetPermissionsForType1() {
     setUser();
     Sid sid = new PrincipalSid("user");
     permissionServiceDecorator.getPermissionsForType(
@@ -246,7 +247,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetPermissions() {
+  void testGetPermissions() {
     setUser();
     Sid sid = new PrincipalSid("user");
     permissionServiceDecorator.getPermissions(Collections.singleton(sid), false);
@@ -255,7 +256,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetObjects() {
+  void testGetObjects() {
     setSu();
     permissionServiceDecorator.getObjects("entity-typeId", 10, 10);
     verify(permissionService).getObjects("entity-typeId", 10, 10);
@@ -263,7 +264,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetSuitablePermissionsForType() {
+  void testGetSuitablePermissionsForType() {
     setUser();
     when(entityHelper.getEntityTypeIdFromType("entity-typeId")).thenReturn("typeId");
     when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("typeId"), READ_METADATA))
@@ -273,7 +274,7 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testExists() {
+  void testExists() {
     setUser();
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("type", "identifier");
     Sid sid = new PrincipalSid("user");
@@ -282,8 +283,8 @@ public class PermissionServiceDecoratorTest extends AbstractMockitoTest {
     resetContext();
   }
 
-  @AfterClass
-  public void tearDown() {
+  @AfterAll
+  static void tearDown() {
     resetContext();
   }
 }

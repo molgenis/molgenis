@@ -5,6 +5,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
@@ -13,12 +15,14 @@ import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
@@ -29,11 +33,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.validation.ConstraintViolation;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class EntityAttributesValidatorTest extends AbstractMockitoTest {
+class EntityAttributesValidatorTest extends AbstractMockitoTest {
   @Mock private ExpressionValidator expressionValidator;
 
   private EntityAttributesValidator entityAttributesValidator;
@@ -41,12 +42,12 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
   private EntityType intRangeMinMeta;
   private EntityType intRangeMaxMeta;
 
-  public EntityAttributesValidatorTest() {
+  EntityAttributesValidatorTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     expressionValidator = mock(ExpressionValidator.class);
     entityAttributesValidator = new EntityAttributesValidator(expressionValidator);
 
@@ -75,7 +76,7 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void checkRangeMinOnly() {
+  void checkRangeMinOnly() {
     Entity entity = new DynamicEntity(intRangeMinMeta);
     entity.set("id", "123");
     entity.set("intrangemin", 2);
@@ -85,17 +86,17 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void checkRangeMinOnlyInvalid() {
+  void checkRangeMinOnlyInvalid() {
     Entity entity = new DynamicEntity(intRangeMinMeta);
     entity.set("id", "123");
     entity.set("intrangemin", -1);
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity, intRangeMinMeta);
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   @Test
-  public void checkRangeMaxOnly() {
+  void checkRangeMaxOnly() {
     Entity entity = new DynamicEntity(intRangeMaxMeta);
     entity.set("id", "123");
     entity.set("intrangemin", 0);
@@ -105,22 +106,22 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void checkRangeMaxOnlyInvalid() {
+  void checkRangeMaxOnlyInvalid() {
     Entity entity = new DynamicEntity(intRangeMaxMeta);
     entity.set("id", "123");
     entity.set("intrangemin", 2);
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity, intRangeMaxMeta);
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
-  @DataProvider(name = "checkXrefValidProvider")
-  public static Iterator<Object[]> checkXrefValidProvider() {
+  static Iterator<Object[]> checkXrefValidProvider() {
     return newArrayList(new Object[] {XREF}, new Object[] {CATEGORICAL}).iterator();
   }
 
-  @Test(dataProvider = "checkXrefValidProvider")
-  public void checkXrefValid(AttributeType attrType) {
+  @ParameterizedTest
+  @MethodSource("checkXrefValidProvider")
+  void checkXrefValid(AttributeType attrType) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -152,11 +153,12 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 0);
+    assertEquals(0, constraints.size());
   }
 
-  @Test(dataProvider = "checkXrefValidProvider")
-  public void checkXrefEntityWrongType(AttributeType attrType) {
+  @ParameterizedTest
+  @MethodSource("checkXrefValidProvider")
+  void checkXrefEntityWrongType(AttributeType attrType) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -198,16 +200,16 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
-  @DataProvider(name = "checkMrefValidProvider")
-  public static Iterator<Object[]> checkMrefValidProvider() {
+  static Iterator<Object[]> checkMrefValidProvider() {
     return newArrayList(new Object[] {MREF}, new Object[] {ONE_TO_MANY}).iterator();
   }
 
-  @Test(dataProvider = "checkMrefValidProvider")
-  public void checkMrefValid(AttributeType attrType) {
+  @ParameterizedTest
+  @MethodSource("checkMrefValidProvider")
+  void checkMrefValid(AttributeType attrType) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -243,11 +245,12 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 0);
+    assertEquals(0, constraints.size());
   }
 
-  @Test(dataProvider = "checkMrefValidProvider")
-  public void checkMrefValidWrongType(AttributeType attrType) {
+  @ParameterizedTest
+  @MethodSource("checkMrefValidProvider")
+  void checkMrefValidWrongType(AttributeType attrType) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -292,11 +295,12 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
-  @Test(dataProvider = "checkMrefValidProvider")
-  public void checkMrefNullValue(AttributeType attrType) {
+  @ParameterizedTest
+  @MethodSource("checkMrefValidProvider")
+  void checkMrefNullValue(AttributeType attrType) {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refId").getMock();
     when(refIdAttr.getDataType()).thenReturn(STRING);
 
@@ -332,11 +336,11 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Set<ConstraintViolation> constraints =
         entityAttributesValidator.validate(entity0, entity0.getEntityType());
-    assertEquals(constraints.size(), 1);
+    assertEquals(1, constraints.size());
   }
 
   @Test
-  public void validateNullableExpression() {
+  void validateNullableExpression() {
     String expression0 = "expression0";
     String expression1 = "expression1";
     String expression2 = "expression2";
@@ -370,11 +374,11 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
                 "Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1"),
             new ConstraintViolation(
                 "Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2"));
-    assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
+    assertEquals(expectedConstraintViolations, newHashSet(constraintViolations));
   }
 
   @Test
-  public void testValidateIdValueNull() {
+  void testValidateIdValueNull() {
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("My entity");
     EntityType entityType = mock(EntityType.class);
@@ -386,43 +390,43 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest {
     Set<ConstraintViolation> constraintViolations =
         entityAttributesValidator.validate(entity, entityType);
     assertEquals(
-        constraintViolations,
         singleton(
             new ConstraintViolation(
-                "Invalid [string] value [null] for attribute [id] of entity [My entity] with type [MyEntityTypeId].")));
+                "Invalid [string] value [null] for attribute [id] of entity [My entity] with type [MyEntityTypeId].")),
+        constraintViolations);
   }
 
   @Test
-  public void testGetDataValuesForTypeDecimal() {
+  void testGetDataValuesForTypeDecimal() {
     String attributeName = "attr";
     double value = 1.23;
     Entity entity = mock(Entity.class);
     when(entity.getDouble(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.DECIMAL);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   @Test
-  public void testGetDataValuesForTypeInt() {
+  void testGetDataValuesForTypeInt() {
     String attributeName = "attr";
     int value = 123;
     Entity entity = mock(Entity.class);
     when(entity.getInt(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.INT);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   @Test
-  public void testGetDataValuesForTypeLong() {
+  void testGetDataValuesForTypeLong() {
     String attributeName = "attr";
     long value = 123L;
     Entity entity = mock(Entity.class);
     when(entity.getLong(attributeName)).thenReturn(value);
     Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
     when(attribute.getDataType()).thenReturn(AttributeType.LONG);
-    assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+    assertEquals(value, entityAttributesValidator.getDataValuesForType(entity, attribute));
   }
 
   private Attribute createMockAttribute(

@@ -1,11 +1,12 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.jobs.model.JobExecutionMetaData.CANCELING;
 import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
@@ -15,12 +16,12 @@ import static org.molgenis.jobs.model.JobExecutionMetaData.PENDING;
 import static org.molgenis.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.STATUS;
 import static org.molgenis.jobs.model.ScheduledJobTypeMetadata.SCHEDULED_JOB_TYPE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -40,11 +41,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {JobBootstrapperTest.Config.class, JobBootstrapper.class})
-public class JobBootstrapperTest extends AbstractMolgenisSpringTest {
+class JobBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private JobBootstrapper jobBootstrapper;
 
   @Autowired private DataService dataService;
@@ -73,17 +72,17 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest {
 
   @Autowired private Config config;
 
-  public JobBootstrapperTest() {
+  JobBootstrapperTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     config.resetMocks();
   }
 
   @Test
-  public void testBootstrap() {
+  void testBootstrap() {
     when(systemEntityTypeRegistry.getSystemEntityTypes())
         .thenReturn(Stream.of(fileIngestJobExecutionType));
     when(fileIngestJobExecutionType.getExtends()).thenReturn(jobExecutionType);
@@ -142,7 +141,7 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Mock private JobFactory fileIngestJobFactory;
 
     @Mock private ScheduledJobType fileIngestScheduledJobType;
@@ -153,27 +152,27 @@ public class JobBootstrapperTest extends AbstractMolgenisSpringTest {
       reset(jobScheduler, fileIngestScheduledJobType, fileIngestJobFactory);
     }
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public JobFactory fileIngestJobFactory() {
+    JobFactory fileIngestJobFactory() {
       return fileIngestJobFactory;
     }
 
     @Bean
-    public ScheduledJobType jobType() {
+    ScheduledJobType jobType() {
       return fileIngestScheduledJobType;
     }
 
     @Bean
-    public JobScheduler jobScheduler() {
+    JobScheduler jobScheduler() {
       return jobScheduler;
     }
 
     @Bean
-    public SystemEntityTypeRegistry systemEntityTypeRegistry() {
+    SystemEntityTypeRegistry systemEntityTypeRegistry() {
       return mock(SystemEntityTypeRegistry.class);
     }
   }

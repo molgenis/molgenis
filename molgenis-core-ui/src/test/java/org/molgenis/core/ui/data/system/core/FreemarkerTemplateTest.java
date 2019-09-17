@@ -1,9 +1,10 @@
 package org.molgenis.core.ui.data.system.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
@@ -11,7 +12,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -20,13 +20,13 @@ import org.testng.annotations.Test;
       FreemarkerTemplateFactory.class,
       RootSystemPackage.class
     })
-public class FreemarkerTemplateTest extends AbstractSystemEntityTest {
+class FreemarkerTemplateTest extends AbstractSystemEntityTest {
 
   @Autowired FreemarkerTemplateMetadata metadata;
   @Autowired FreemarkerTemplateFactory factory;
 
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata,
         FreemarkerTemplate.class,
@@ -36,17 +36,17 @@ public class FreemarkerTemplateTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testGetNameWithoutExtensionEndsWithFtl() throws Exception {
+  void testGetNameWithoutExtensionEndsWithFtl() throws Exception {
     FreemarkerTemplate freemarkerTemplate = getFreemarkerTemplateSpy();
     when(freemarkerTemplate.getName()).thenReturn("template.ftl");
-    assertEquals(freemarkerTemplate.getNameWithoutExtension(), "template");
+    assertEquals("template", freemarkerTemplate.getNameWithoutExtension());
   }
 
   @Test
-  public void testGetNameWithoutExtensionNotEndsWithFtl() throws Exception {
+  void testGetNameWithoutExtensionNotEndsWithFtl() throws Exception {
     FreemarkerTemplate freemarkerTemplate = getFreemarkerTemplateSpy();
     when(freemarkerTemplate.getName()).thenReturn("template");
-    assertEquals(freemarkerTemplate.getNameWithoutExtension(), "template");
+    assertEquals("template", freemarkerTemplate.getNameWithoutExtension());
   }
 
   private FreemarkerTemplate getFreemarkerTemplateSpy() {

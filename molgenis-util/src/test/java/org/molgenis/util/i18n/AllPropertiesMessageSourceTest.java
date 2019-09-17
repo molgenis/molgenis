@@ -1,66 +1,65 @@
 package org.molgenis.util.i18n;
 
+import static com.google.common.collect.ImmutableSetMultimap.of;
 import static java.util.Locale.ENGLISH;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import java.util.Locale;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class AllPropertiesMessageSourceTest {
+class AllPropertiesMessageSourceTest {
   private AllPropertiesMessageSource propertiesMessageSource;
   private Locale DUTCH = new Locale("nl");
 
-  @BeforeMethod
-  public void setUp() throws Exception {
+  @BeforeEach
+  void setUp() throws Exception {
     propertiesMessageSource = new AllPropertiesMessageSource();
     propertiesMessageSource.addMolgenisNamespaces("test");
   }
 
-  @AfterMethod
-  public void tearDown() throws Exception {}
+  @AfterEach
+  void tearDown() throws Exception {}
 
   @Test
-  public void testGetAllMessageIds() throws Exception {
+  void testGetAllMessageIds() throws Exception {
     assertEquals(
-        propertiesMessageSource.getAllMessageIds(),
-        ImmutableSetMultimap.of(
-            "test", "EN_ONLY", "test", "EN_PLUS_NL", "test", "BIOBANK_UTF8", "test", "NL_ONLY"));
+        of("test", "EN_ONLY", "test", "EN_PLUS_NL", "test", "BIOBANK_UTF8", "test", "NL_ONLY"),
+        propertiesMessageSource.getAllMessageIds());
   }
 
   @Test
-  public void testGetMessageSpecifiedInBundle() throws Exception {
+  void testGetMessageSpecifiedInBundle() throws Exception {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("NL_ONLY", DUTCH), "alleen Nederlands");
+        "alleen Nederlands", propertiesMessageSource.resolveCodeWithoutArguments("NL_ONLY", DUTCH));
   }
 
   @Test
-  public void testGetMessageSpecifiedInOtherBundle() throws Exception {
+  void testGetMessageSpecifiedInOtherBundle() throws Exception {
     assertNull(propertiesMessageSource.resolveCodeWithoutArguments("EN_ONLY", new Locale("nl")));
   }
 
   @Test
-  public void testGetMessageNotSpecified() throws Exception {
+  void testGetMessageNotSpecified() throws Exception {
     assertNull(propertiesMessageSource.resolveCodeWithoutArguments("MISSING", new Locale("nl")));
   }
 
   @Test
-  public void testGetMessageSpecifiedInBoth() throws Exception {
+  void testGetMessageSpecifiedInBoth() throws Exception {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", ENGLISH),
-        "English plus Dutch");
+        "English plus Dutch",
+        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", ENGLISH));
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", new Locale("nl")),
-        "Engels plus Nederlands");
+        "Engels plus Nederlands",
+        propertiesMessageSource.resolveCodeWithoutArguments("EN_PLUS_NL", new Locale("nl")));
   }
 
   @Test
-  public void testGetMessageUTF8() {
+  void testGetMessageUTF8() {
     assertEquals(
-        propertiesMessageSource.resolveCodeWithoutArguments("BIOBANK_UTF8", ENGLISH),
-        "Biøbånk\uD83D\uDC00");
+        "Biøbånk\uD83D\uDC00",
+        propertiesMessageSource.resolveCodeWithoutArguments("BIOBANK_UTF8", ENGLISH));
   }
 }

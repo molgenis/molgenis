@@ -1,5 +1,6 @@
 package org.molgenis.genomebrowser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,22 +9,21 @@ import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.CH
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.POS;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.REF;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class GenomeBrowserTrackTest extends AbstractMockitoTestNGSpringContextTests {
+public class GenomeBrowserTrackTest extends AbstractMockitoSpringContextTests {
   @Test
   public void testToTrack() {
     EntityType entity = mock(EntityType.class);
@@ -71,6 +71,6 @@ public class GenomeBrowserTrackTest extends AbstractMockitoTestNGSpringContextTe
     String expected =
         "{\"name\":\"label\",\"entity\":\"molgenisEntityType\",\"tier_type\":\"molgenis\",\"uri\":\"/api/v2/molgenisEntityType\",\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"position\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"],\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"featureInfoPlugin\":function(f, info) {if (f.id) {info.add('Label', makeElement('a', f.id, {href: 'https://www.theonion.com/', target:'_newtab'}))}}}";
 
-    assertEquals(track.toTrackString(), expected);
+    assertEquals(expected, track.toTrackString());
   }
 }

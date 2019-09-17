@@ -1,16 +1,18 @@
 package org.molgenis.searchall.controller;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -24,10 +26,8 @@ import org.molgenis.searchall.model.PackageResult;
 import org.molgenis.searchall.model.Result;
 import org.molgenis.searchall.service.SearchAllService;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class SearchAllServiceTest {
+class SearchAllServiceTest {
   private DataService dataService;
   private SearchAllService searchAllService;
   private EntityType entity1;
@@ -47,8 +47,8 @@ public class SearchAllServiceTest {
   private Attribute attr4;
   private Attribute attr5;
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     dataService = mock(DataService.class);
     searchAllService = new SearchAllService(dataService);
 
@@ -147,7 +147,7 @@ public class SearchAllServiceTest {
   }
 
   @Test
-  public void testFindAll() throws Exception {
+  void testFindAll() throws Exception {
     when(dataService.findAll(PackageMetadata.PACKAGE, Package.class))
         .thenReturn(Stream.of(pack1, pack2, pack3, pack_sys));
     when(dataService.findAll(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class))
@@ -200,6 +200,6 @@ public class SearchAllServiceTest {
             .setPackages(singletonList(packageResult))
             .build();
 
-    assertEquals(searchAllService.searchAll("test"), result);
+    assertEquals(result, searchAllService.searchAll("test"));
   }
 }

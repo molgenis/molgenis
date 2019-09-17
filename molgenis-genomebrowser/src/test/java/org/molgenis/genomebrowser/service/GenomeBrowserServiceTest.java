@@ -1,5 +1,7 @@
 package org.molgenis.genomebrowser.service;
 
+import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -8,11 +10,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.genomebrowser.GenomeBrowserTrack.create;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.ALT;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.CHROM;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.POS;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.REF;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.MolgenisReferenceMode.ALL;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -33,26 +39,24 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContextTests {
+class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
   @Mock DataService dataService;
   @Mock UserPermissionEvaluator userPermissionEvaluator;
 
-  @BeforeMethod
-  public void beforeMethode() {
+  @BeforeEach
+  void beforeMethode() {
     reset(dataService);
   }
 
   @Test
-  public void testGetReferenceTracks() {
+  void testGetReferenceTracks() {
     when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA)))
         .thenReturn(true);
     EntityType entity = mock(EntityType.class);
@@ -95,12 +99,12 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
 
-    assertEquals(result.size(), 1);
-    assertEquals(result.get("ref_id"), reference);
+    assertEquals(1, result.size());
+    assertEquals(reference, result.get("ref_id"));
   }
 
   @Test
-  public void testGetReferenceTracksAll() {
+  void testGetReferenceTracksAll() {
     when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA)))
         .thenReturn(true);
     EntityType entity = mock(EntityType.class);
@@ -189,43 +193,43 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
     GenomeBrowserService genomeBrowserService =
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
-    assertEquals(result.size(), 2);
+    assertEquals(2, result.size());
     assertEquals(
-        result.get("type2"),
-        GenomeBrowserTrack.create(
+        create(
             "type2",
             "label2",
             "refLabel",
             type2,
-            GenomeBrowserSettings.TrackType.VARIANT,
-            Collections.emptyList(),
-            GenomeBrowserSettings.MolgenisReferenceMode.ALL,
+            VARIANT,
+            emptyList(),
+            ALL,
             refGenomeBrowserAttributes1,
             null,
             null,
             null,
             null,
-            null));
+            null),
+        result.get("type2"));
     assertEquals(
-        result.get("type1"),
-        GenomeBrowserTrack.create(
+        create(
             "type1",
             "label1",
             "refLabel",
             type1,
-            GenomeBrowserSettings.TrackType.VARIANT,
-            Collections.emptyList(),
-            GenomeBrowserSettings.MolgenisReferenceMode.ALL,
+            VARIANT,
+            emptyList(),
+            ALL,
             refGenomeBrowserAttributes2,
             null,
             null,
             null,
             null,
-            null));
+            null),
+        result.get("type1"));
   }
 
   @Test
-  public void testGetReferenceTracksNone() {
+  void testGetReferenceTracksNone() {
     when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA)))
         .thenReturn(true);
     EntityType entity = mock(EntityType.class);
@@ -268,12 +272,12 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
 
-    assertEquals(result.size(), 0);
+    assertEquals(0, result.size());
     verify(dataService, never()).getMeta();
   }
 
   @Test
-  public void testGetReferenceTracksNoPermission() {
+  void testGetReferenceTracksNoPermission() {
     when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA)))
         .thenReturn(false);
     EntityType entity = mock(EntityType.class);
@@ -316,7 +320,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
     GenomeBrowserService genomeBrowserService =
         new GenomeBrowserService(dataService, userPermissionEvaluator);
     Map<String, GenomeBrowserTrack> result = genomeBrowserService.getReferenceTracks(track);
-    assertEquals(result.size(), 0);
+    assertEquals(0, result.size());
     verify(dataService, never()).getMeta();
   }
 }

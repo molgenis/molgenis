@@ -1,27 +1,29 @@
 package org.molgenis.data.support;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import com.google.gson.JsonSyntaxException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AttributeValueConversionException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
-public class StringExpressionEvaluatorTest {
-  private Entity entity;
-  private EntityType entityType;
+class StringExpressionEvaluatorTest {
+  private static Entity entity;
+  private static EntityType entityType;
 
-  @BeforeTest
-  public void createEntity() {
+  @BeforeAll
+  static void createEntity() {
     entityType = when(mock(EntityType.class).getId()).thenReturn("Source").getMock();
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("Identifier").getMock();
 
@@ -51,19 +53,19 @@ public class StringExpressionEvaluatorTest {
   }
 
   @Test
-  public void testStringEvaluatorConstructorChecksIfAttributeHasExpression() {
+  void testStringEvaluatorConstructorChecksIfAttributeHasExpression() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     try {
       new StringExpressionEvaluator(amd, entityType);
       fail("Expected NPE");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "Attribute has no expression.");
+      assertEquals("Attribute has no expression.", expected.getMessage());
     }
   }
 
   @Test
-  public void testStringEvaluatorConstructorChecksIfExpressionIsMap() {
+  void testStringEvaluatorConstructorChecksIfExpressionIsMap() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("{}");
@@ -75,7 +77,7 @@ public class StringExpressionEvaluatorTest {
   }
 
   @Test
-  public void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute() {
+  void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("bogus");
@@ -84,53 +86,56 @@ public class StringExpressionEvaluatorTest {
       fail("expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Expression for attribute '#CHROM' references non-existant attribute 'bogus'.");
+          "Expression for attribute '#CHROM' references non-existant attribute 'bogus'.",
+          expected.getMessage());
     }
   }
 
   @Test
-  public void testStringEvaluatorLookupAttributeAndConvertFromIntToString() {
+  void testStringEvaluatorLookupAttributeAndConvertFromIntToString() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("Int");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), "1");
+    assertEquals("1", new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
-  public void testStringEvaluatorLookupAttributeAndConvertFromIntToLong() {
+  void testStringEvaluatorLookupAttributeAndConvertFromIntToLong() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("Int");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 1L);
+    assertEquals(1L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
-  public void testStringEvaluatorLookupAttributeAndConvertFromLongToInt() {
+  void testStringEvaluatorLookupAttributeAndConvertFromLongToInt() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(INT);
     when(amd.getExpression()).thenReturn("Long");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 10);
+    assertEquals(10, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
   @Test
-  public void testStringEvaluatorLookupAttributeAndConvertFromStringToLong() {
+  void testStringEvaluatorLookupAttributeAndConvertFromStringToLong() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("String");
-    assertEquals(new StringExpressionEvaluator(amd, entityType).evaluate(entity), 12L);
+    assertEquals(12L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
   }
 
-  @Test(
-      expectedExceptions = AttributeValueConversionException.class,
-      expectedExceptionsMessageRegExp =
-          "Conversion failure in entity type \\[test\\] attribute \\[id\\]; Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"")
-  public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails() {
+  @Test
+  void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
     when(amd.getName()).thenReturn("id");
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("NonNumericString");
     when(amd.getEntity()).thenReturn(entityType);
-    new StringExpressionEvaluator(amd, entityType).evaluate(entity);
+    Exception exception =
+        assertThrows(
+            AttributeValueConversionException.class,
+            () -> new StringExpressionEvaluator(amd, entityType).evaluate(entity));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Conversion failure in entity type \\[test\\] attribute \\[id\\]; Failed to convert from type \\[java.lang.String\\] to type \\[java.lang.Long\\] for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"");
   }
 }

@@ -2,23 +2,24 @@ package org.molgenis.data.elasticsearch.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.net.InetSocketAddress;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.retry.support.RetryTemplate;
-import org.testng.annotations.Test;
 
-public class ClientFactoryTest extends AbstractMockitoTest {
+class ClientFactoryTest extends AbstractMockitoTest {
   @Mock private PreBuiltTransportClientFactory preBuildClientFactory;
   @Mock private PreBuiltTransportClient unConnectedClient;
   @Mock private PreBuiltTransportClient connectedClient;
@@ -26,7 +27,7 @@ public class ClientFactoryTest extends AbstractMockitoTest {
   private RetryTemplate retryTemplate = new RetryTemplate();
 
   @Test
-  public void testCreateClient() throws Exception {
+  void testCreateClient() throws Exception {
     initMockClient();
     int port = 8032;
     String clusterName = "testCluster";
@@ -42,19 +43,23 @@ public class ClientFactoryTest extends AbstractMockitoTest {
             preBuildClientFactory);
     Client client = clientFactory.createClient();
 
-    assertEquals(client, connectedClient);
+    assertEquals(connectedClient, client);
     verify(preBuildClientFactory, times(3)).build(clusterName, null);
     verify(unConnectedClient, times(2)).close();
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testCreateClientNullAddresses() {
-    new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory);
+  @Test
+  void testCreateClientNullAddresses() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory));
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testCreateClientEmptyAddresses() {
-    new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory);
+  @Test
+  void testCreateClientEmptyAddresses() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory));
   }
 
   private void initMockClient() {

@@ -1,22 +1,24 @@
 package org.molgenis.data;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class ExistingNullValueExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class ExistingNullValueExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new ExistingNullValueException("MyEntityType", "myAttributeName", mock(Throwable.class)),
         lang,
@@ -24,15 +26,13 @@ public class ExistingNullValueExceptionTest extends ExceptionMessageTest {
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     ExistingNullValueException ex =
         new ExistingNullValueException("MyEntityType", "myAttributeName", mock(Throwable.class));
-    assertEquals(ex.getMessage(), "entityTypeId:MyEntityType attributeName:myAttributeName");
+    assertEquals("entityTypeId:MyEntityType attributeName:myAttributeName", ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en", "The attribute 'myAttributeName' of entity 'MyEntityType' contains null values."

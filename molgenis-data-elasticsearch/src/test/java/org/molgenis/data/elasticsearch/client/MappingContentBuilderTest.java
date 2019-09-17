@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static java.util.Collections.singletonList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,23 +9,23 @@ import java.util.Iterator;
 import java.util.List;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.data.elasticsearch.generator.model.MappingType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class MappingContentBuilderTest {
+class MappingContentBuilderTest {
   private MappingContentBuilder mappingContentBuilder;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     mappingContentBuilder = new MappingContentBuilder(XContentType.JSON);
   }
 
-  @DataProvider(name = "createMappingProvider")
-  public static Iterator<Object[]> createMappingProvider() {
+  static Iterator<Object[]> createMappingProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {MappingType.BOOLEAN, JSON_BOOLEAN});
     dataItems.add(new Object[] {MappingType.DATE, JSON_DATE});
@@ -37,16 +37,17 @@ public class MappingContentBuilderTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createMappingProvider")
-  public void testCreateMapping(MappingType mappingType, String expectedJson) throws IOException {
+  @ParameterizedTest
+  @MethodSource("createMappingProvider")
+  void testCreateMapping(MappingType mappingType, String expectedJson) throws IOException {
     Mapping mapping =
         createMapping(FieldMapping.builder().setName("field").setType(mappingType).build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
-    assertEquals(xContentBuilder.string(), expectedJson);
+    assertEquals(expectedJson, xContentBuilder.string());
   }
 
   @Test
-  public void testCreateMappingNested() throws IOException {
+  void testCreateMappingNested() throws IOException {
     FieldMapping nestedFieldMapping =
         FieldMapping.builder().setName("nestedField").setType(MappingType.BOOLEAN).build();
     Mapping mapping =
@@ -57,7 +58,7 @@ public class MappingContentBuilderTest {
                 .setNestedFieldMappings(singletonList(nestedFieldMapping))
                 .build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
-    assertEquals(xContentBuilder.string(), JSON_NESTED);
+    assertEquals(JSON_NESTED, xContentBuilder.string());
   }
 
   private static Mapping createMapping(FieldMapping fieldMapping) {

@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -14,17 +16,15 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TransactionalRepositoryDecoratorTest {
+class TransactionalRepositoryDecoratorTest {
   private TransactionalRepositoryDecorator<Entity> transactionalRepo;
   private Repository<Entity> delegateRepository;
   private PlatformTransactionManager transactionManager;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = mock(Repository.class);
     transactionManager = mock(PlatformTransactionManager.class);
     transactionalRepo =
@@ -32,7 +32,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void forEachBatched() throws Exception {
+  void forEachBatched() {
     @SuppressWarnings("unchecked")
     Consumer<List<Entity>> consumer = mock(Consumer.class);
     int batchSize = 1000;
@@ -42,7 +42,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void forEachBatchedFetch() throws Exception {
+  void forEachBatchedFetch() {
     Fetch fetch = mock(Fetch.class);
     @SuppressWarnings("unchecked")
     Consumer<List<Entity>> consumer = mock(Consumer.class);
@@ -53,14 +53,14 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void count() throws Exception {
+  void count() {
     transactionalRepo.count();
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
     verify(delegateRepository).count();
   }
 
   @Test
-  public void countQuery() throws Exception {
+  void countQuery() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     transactionalRepo.count(query);
@@ -69,7 +69,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findAllQuery() throws Exception {
+  void findAllQuery() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     transactionalRepo.findAll(query);
@@ -78,7 +78,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findAllStream() throws Exception {
+  void findAllStream() {
     @SuppressWarnings("unchecked")
     Stream<Object> entityIds = mock(Stream.class);
     transactionalRepo.findAll(entityIds);
@@ -87,7 +87,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findAllStreamFetch() throws Exception {
+  void findAllStreamFetch() {
     @SuppressWarnings("unchecked")
     Stream<Object> entityIds = mock(Stream.class);
     Fetch fetch = mock(Fetch.class);
@@ -97,7 +97,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOne() throws Exception {
+  void findOne() {
     @SuppressWarnings("unchecked")
     Query<Entity> query = mock(Query.class);
     transactionalRepo.findOne(query);
@@ -106,7 +106,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOneById() throws Exception {
+  void findOneById() {
     Object id = mock(Object.class);
     transactionalRepo.findOneById(id);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -114,7 +114,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOneByIdFetch() throws Exception {
+  void findOneByIdFetch() {
     Object id = mock(Object.class);
     Fetch fetch = mock(Fetch.class);
     transactionalRepo.findOneById(id, fetch);
@@ -123,7 +123,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void aggregate() throws Exception {
+  void aggregate() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     transactionalRepo.aggregate(aggregateQuery);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -131,7 +131,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void update() throws Exception {
+  void update() {
     Entity entity = mock(Entity.class);
     transactionalRepo.update(entity);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -139,7 +139,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void updateStream() throws Exception {
+  void updateStream() {
     @SuppressWarnings("unchecked")
     Stream<Entity> entityStream = mock(Stream.class);
     transactionalRepo.update(entityStream);
@@ -148,7 +148,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void delete() throws Exception {
+  void delete() {
     Entity entity = mock(Entity.class);
     transactionalRepo.delete(entity);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -156,7 +156,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteStream() throws Exception {
+  void deleteStream() {
     @SuppressWarnings("unchecked")
     Stream<Entity> entityStream = mock(Stream.class);
     transactionalRepo.delete(entityStream);
@@ -165,7 +165,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteById() throws Exception {
+  void deleteById() {
     Object id = mock(Object.class);
     transactionalRepo.deleteById(id);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -173,14 +173,14 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteAll() throws Exception {
+  void deleteAll() {
     transactionalRepo.deleteAll();
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
     verify(delegateRepository).deleteAll();
   }
 
   @Test
-  public void deleteAllStream() throws Exception {
+  void deleteAllStream() {
     @SuppressWarnings("unchecked")
     Stream<Object> entityIds = mock(Stream.class);
     transactionalRepo.deleteAll(entityIds);
@@ -189,7 +189,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void add() throws Exception {
+  void add() {
     Entity entity = mock(Entity.class);
     transactionalRepo.add(entity);
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
@@ -197,7 +197,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void addStream() throws Exception {
+  void addStream() {
     @SuppressWarnings("unchecked")
     Stream<Entity> entityStream = mock(Stream.class);
     transactionalRepo.add(entityStream);
@@ -206,7 +206,7 @@ public class TransactionalRepositoryDecoratorTest {
   }
 
   @Test
-  public void iterator() throws Exception {
+  void iterator() {
     transactionalRepo.iterator();
     verify(transactionManager).getTransaction(any(TransactionDefinition.class));
     verify(delegateRepository).iterator();

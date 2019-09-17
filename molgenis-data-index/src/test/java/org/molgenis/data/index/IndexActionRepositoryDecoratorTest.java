@@ -1,6 +1,9 @@
 package org.molgenis.data.index;
 
+import static java.lang.Integer.valueOf;
 import static java.util.Collections.singleton;
+import static java.util.EnumSet.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -8,18 +11,16 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.testng.Assert.assertEquals;
 
-import java.util.EnumSet;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class IndexActionRepositoryDecoratorTest {
+class IndexActionRepositoryDecoratorTest {
   private Repository<Entity> delegateRepository;
   private IndexActionRegisterService indexActionRegisterService;
   private IndexActionRepositoryDecorator indexActionRepositoryDecorator;
@@ -28,8 +29,8 @@ public class IndexActionRepositoryDecoratorTest {
   private EntityType inversedByEntity;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     delegateRepository = mock(Repository.class);
     when(delegateRepository.getName()).thenReturn("entity");
     when(delegateRepository.getCapabilities()).thenReturn(singleton(MANAGABLE));
@@ -41,7 +42,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void updateEntity() {
+  void updateEntity() {
     initEntityMeta();
 
     Entity entity0 = mock(Entity.class);
@@ -53,7 +54,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void updateEntityBidi() {
+  void updateEntityBidi() {
     initEntityMetaBidi();
 
     Entity entity0 = mock(Entity.class);
@@ -67,13 +68,12 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void getCapabilities() {
-    assertEquals(
-        indexActionRepositoryDecorator.getCapabilities(), EnumSet.of(INDEXABLE, MANAGABLE));
+  void getCapabilities() {
+    assertEquals(of(INDEXABLE, MANAGABLE), indexActionRepositoryDecorator.getCapabilities());
   }
 
   @Test
-  public void updateStreamEntities() {
+  void updateStreamEntities() {
     initEntityMeta();
 
     Stream<Entity> entities = Stream.empty();
@@ -84,7 +84,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void updateStreamEntitiesBidi() {
+  void updateStreamEntitiesBidi() {
     initEntityMetaBidi();
 
     Stream<Entity> entities = Stream.empty();
@@ -97,7 +97,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntity() {
+  void deleteEntity() {
     initEntityMeta();
 
     Entity entity0 = mock(Entity.class);
@@ -109,7 +109,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntityBidi() {
+  void deleteEntityBidi() {
     initEntityMetaBidi();
 
     Entity mappedByEntity0 = mock(Entity.class);
@@ -130,7 +130,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteStreamEntities() {
+  void deleteStreamEntities() {
     initEntityMeta();
 
     Stream<Entity> entities = Stream.empty();
@@ -141,7 +141,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteStreamEntitiesBidi() {
+  void deleteStreamEntitiesBidi() {
     initEntityMetaBidi();
 
     Stream<Entity> entities = Stream.empty();
@@ -154,7 +154,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntityById() {
+  void deleteEntityById() {
     initEntityMeta();
 
     Entity entity0 = mock(Entity.class);
@@ -166,7 +166,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntityByIdBidi() {
+  void deleteEntityByIdBidi() {
     initEntityMetaBidi();
 
     Entity entity0 = mock(Entity.class);
@@ -180,7 +180,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntityByIdStream() {
+  void deleteEntityByIdStream() {
     initEntityMeta();
 
     Stream<Object> ids = Stream.empty();
@@ -191,7 +191,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteEntityByIdStreamBidi() {
+  void deleteEntityByIdStreamBidi() {
     initEntityMetaBidi();
 
     Stream<Object> ids = Stream.empty();
@@ -204,7 +204,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteAll() {
+  void deleteAll() {
     initEntityMeta();
 
     indexActionRepositoryDecorator.deleteAll();
@@ -214,7 +214,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteAllBidi() {
+  void deleteAllBidi() {
     initEntityMetaBidi();
 
     indexActionRepositoryDecorator.deleteAll();
@@ -226,7 +226,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void addEntity() {
+  void addEntity() {
     initEntityMeta();
 
     Entity entity0 = mock(Entity.class);
@@ -238,7 +238,7 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void addEntityBidi() {
+  void addEntityBidi() {
     initEntityMetaBidi();
 
     Entity mappedByEntity0 = mock(Entity.class);
@@ -259,24 +259,24 @@ public class IndexActionRepositoryDecoratorTest {
   }
 
   @Test
-  public void addEntitiesStream() {
+  void addEntitiesStream() {
     initEntityMeta();
 
     Stream<Entity> entities = Stream.empty();
     when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), indexActionRepositoryDecorator.add(entities));
     verify(delegateRepository, times(1)).add(entities);
     verify(indexActionRegisterService).register(entityType, null);
     verifyNoMoreInteractions(indexActionRegisterService);
   }
 
   @Test
-  public void addEntitiesStreamBidi() {
+  void addEntitiesStreamBidi() {
     initEntityMetaBidi();
 
     Stream<Entity> entities = Stream.empty();
     when(delegateRepository.add(entities)).thenReturn(123);
-    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    assertEquals(valueOf(123), indexActionRepositoryDecorator.add(entities));
     verify(delegateRepository, times(1)).add(entities);
     verify(indexActionRegisterService).register(entityType, null);
     verify(indexActionRegisterService).register(mappedByEntity, null);

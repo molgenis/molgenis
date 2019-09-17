@@ -1,22 +1,25 @@
 package org.molgenis.oneclickimporter.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadFile;
-import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.oneclickimporter.service.impl.CsvServiceImpl;
-import org.testng.annotations.Test;
 
-public class CsvServiceTest {
+class CsvServiceTest {
   private CsvService csvService = new CsvServiceImpl();
 
   @Test
-  public void buildLinesFromFileTest()
+  void buildLinesFromFileTest()
       throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
     List<String[]> actual =
         csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/simple-valid.csv"));
@@ -27,23 +30,33 @@ public class CsvServiceTest {
     expected.add(new String[] {"Fleur", "Lambda Magician"});
     expected.add(new String[] {"Dennis", "Root access"});
 
-    assertEquals(actual, expected);
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < actual.size(); ++i) {
+      assertArrayEquals(expected.get(i), actual.get(i));
+    }
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = "CSV-file: \\[empty-file.csv\\] is empty")
-  public void buildLinesWithEmptyFile()
+  @Test
+  void buildLinesWithEmptyFile()
       throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
-    csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/empty-file.csv"));
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/empty-file.csv")));
+    assertThat(exception.getMessage()).containsPattern("CSV-file: \\[empty-file.csv\\] is empty");
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Header was found, but no data is present in file \\[header-without-data.csv\\]")
-  public void buildLinesWithHeaderOnly()
+  @Test
+  void buildLinesWithHeaderOnly()
       throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
-    csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/header-without-data.csv"));
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () ->
+                csvService.buildLinesFromFile(
+                    loadFile(CsvServiceTest.class, "/header-without-data.csv")));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Header was found, but no data is present in file \\[header-without-data.csv\\]");
   }
 }

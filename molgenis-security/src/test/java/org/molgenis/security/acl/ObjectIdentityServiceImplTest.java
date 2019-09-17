@@ -1,7 +1,8 @@
 package org.molgenis.security.acl;
 
+import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
-import static org.testng.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,21 +20,19 @@ import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
+class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
 
   @Mock NamedParameterJdbcTemplate jdbcTemplate;
   private ObjectIdentityServiceImpl objectIdentityService;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     objectIdentityService = new ObjectIdentityServiceImpl(jdbcTemplate);
   }
 
   @Test
-  public void testGetNrOfObjectIdentities() {
+  void testGetNrOfObjectIdentities() {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("classId", "classId");
     doReturn(new Integer(12))
@@ -40,11 +41,11 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
             "SELECT COUNT( DISTINCT acl_object_identity.object_id_identity) FROM acl_object_identity LEFT JOIN acl_class ON acl_object_identity.object_id_class = acl_class.id LEFT JOIN acl_entry ON acl_entry.acl_object_identity = acl_object_identity.id LEFT JOIN acl_sid ON acl_entry.sid = acl_sid.id WHERE acl_class.class = :classId",
             paramMap,
             Integer.class);
-    assertEquals(objectIdentityService.getNrOfObjectIdentities("classId").intValue(), 12);
+    assertEquals(12, objectIdentityService.getNrOfObjectIdentities("classId").intValue());
   }
 
   @Test
-  public void testGetNrOfObjectIdentities1() {
+  void testGetNrOfObjectIdentities1() {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("classId", "classId");
     paramMap.put("sids", Collections.singletonList("ROLE_role1"));
@@ -56,14 +57,11 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
             Integer.class);
     Sid sid = new GrantedAuthoritySid("ROLE_role1");
     assertEquals(
-        objectIdentityService
-            .getNrOfObjectIdentities("classId", Collections.singleton(sid))
-            .intValue(),
-        12);
+        12, objectIdentityService.getNrOfObjectIdentities("classId", singleton(sid)).intValue());
   }
 
   @Test
-  public void testGetObjectIdentities() {
+  void testGetObjectIdentities() {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("classId", "classId");
     paramMap.put("limit", 10);
@@ -84,11 +82,11 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
     List<ObjectIdentity> expected =
         Arrays.asList(
             new ObjectIdentityImpl("classId", "test1"), new ObjectIdentityImpl("classId", "test2"));
-    assertEquals(objectIdentityService.getObjectIdentities("classId", 10, 20), expected);
+    assertEquals(expected, objectIdentityService.getObjectIdentities("classId", 10, 20));
   }
 
   @Test
-  public void testGetObjectIdentities1() {
+  void testGetObjectIdentities1() {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("classId", "classId");
     paramMap.put("sids", Collections.singletonList("user1"));
@@ -113,12 +111,11 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
         Arrays.asList(
             new ObjectIdentityImpl("classId", "test1"), new ObjectIdentityImpl("classId", "test2"));
     assertEquals(
-        objectIdentityService.getObjectIdentities("classId", Collections.singleton(sid), 10, 20),
-        expected);
+        expected, objectIdentityService.getObjectIdentities("classId", singleton(sid), 10, 20));
   }
 
   @Test
-  public void testGetObjectIdentities2() {
+  void testGetObjectIdentities2() {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("classId", "classId");
     List<Map<String, Object>> result = new ArrayList<>();
@@ -145,11 +142,11 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
     List<ObjectIdentity> expected =
         Arrays.asList(
             new ObjectIdentityImpl("classId", "test1"), new ObjectIdentityImpl("classId", "test2"));
-    assertEquals(objectIdentityService.getObjectIdentities("classId"), expected);
+    assertEquals(expected, objectIdentityService.getObjectIdentities("classId"));
   }
 
   @Test
-  public void testGetObjectIdentities3() {
+  void testGetObjectIdentities3() {
     List<Map<String, Object>> result = new ArrayList<>();
     Map<String, Object> result1 = new HashMap<>();
     result1.put("object_id_identity", "test1");
@@ -180,7 +177,6 @@ public class ObjectIdentityServiceImplTest extends AbstractMolgenisSpringTest {
     List<ObjectIdentity> expected =
         Arrays.asList(
             new ObjectIdentityImpl("classId", "test1"), new ObjectIdentityImpl("classId", "test2"));
-    assertEquals(
-        objectIdentityService.getObjectIdentities("classId", Collections.singleton(sid)), expected);
+    assertEquals(expected, objectIdentityService.getObjectIdentities("classId", singleton(sid)));
   }
 }

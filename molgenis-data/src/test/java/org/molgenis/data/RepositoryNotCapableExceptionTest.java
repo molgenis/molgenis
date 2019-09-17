@@ -2,27 +2,26 @@ package org.molgenis.data;
 
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class RepositoryNotCapableExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class RepositoryNotCapableExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new RepositoryNotCapableException("MyRepository", WRITABLE), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "Repository 'MyRepository' does not support 'writing'."};
     Object[] nlParams = {"nl", "Opslagplaats 'MyRepository' ondersteunt geen 'schrijven'."};
     return new Object[][] {enParams, nlParams};

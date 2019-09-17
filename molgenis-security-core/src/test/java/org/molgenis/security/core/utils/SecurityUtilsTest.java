@@ -1,19 +1,24 @@
 package org.molgenis.security.core.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,18 +26,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SecurityUtilsTest {
-  private Authentication authentication;
+class SecurityUtilsTest {
+  private static Authentication authentication;
   private UserDetails userDetails;
-  private SecurityContext previousContext;
+  private static SecurityContext previousContext;
 
-  @BeforeClass
-  public void setUpBeforeClass() {
+  @BeforeAll
+  static void setUpBeforeClass() {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     authentication = mock(Authentication.class);
@@ -41,8 +42,8 @@ public class SecurityUtilsTest {
   }
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     reset(authentication);
 
     GrantedAuthority authority1 = mock(GrantedAuthority.class);
@@ -59,13 +60,14 @@ public class SecurityUtilsTest {
         .thenReturn(Arrays.asList(authority1, authority2));
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterAll
+  static void tearDownAfterClass() {
     SecurityContextHolder.setContext(previousContext);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
-  public void currentUserIsAuthenticated_true() {
+  void currentUserIsAuthenticated_true() {
     when(authentication.isAuthenticated()).thenReturn(true);
     GrantedAuthority authorityUser = mock(GrantedAuthority.class);
     when(authorityUser.getAuthority()).thenReturn(AUTHORITY_USER);
@@ -75,14 +77,14 @@ public class SecurityUtilsTest {
   }
 
   @Test
-  public void currentUserIsAuthenticated_false() {
+  void currentUserIsAuthenticated_false() {
     when(authentication.isAuthenticated()).thenReturn(false);
     assertFalse(SecurityUtils.currentUserIsAuthenticated());
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void currentUserIsAuthenticated_falseAnonymous() {
+  void currentUserIsAuthenticated_falseAnonymous() {
     Authentication anonymousAuthentication = mock(AnonymousAuthenticationToken.class);
     when(anonymousAuthentication.isAuthenticated()).thenReturn(true);
     GrantedAuthority authoritySu = mock(GrantedAuthority.class);
@@ -93,14 +95,14 @@ public class SecurityUtilsTest {
   }
 
   @Test
-  public void currentUserIsSu_false() {
+  void currentUserIsSu_false() {
     assertFalse(SecurityUtils.currentUserIsSu());
     assertFalse(SecurityUtils.currentUserIsSuOrSystem());
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void currentUserIsSu_true() {
+  void currentUserIsSu_true() {
     GrantedAuthority authoritySu = mock(GrantedAuthority.class);
     when(authoritySu.getAuthority()).thenReturn(AUTHORITY_SU);
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
@@ -111,7 +113,7 @@ public class SecurityUtilsTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void currentUserIsSystemTrue() {
+  void currentUserIsSystemTrue() {
     GrantedAuthority authoritySystem = mock(GrantedAuthority.class);
     when(authoritySystem.getAuthority()).thenReturn(ROLE_SYSTEM);
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
@@ -121,19 +123,19 @@ public class SecurityUtilsTest {
   }
 
   @Test
-  public void currentUserIsSystemFalse() {
+  void currentUserIsSystemFalse() {
     when(userDetails.getUsername()).thenReturn("user");
     assertFalse(SecurityUtils.currentUserIsSystem());
     assertFalse(SecurityUtils.currentUserIsSuOrSystem());
   }
 
   @Test
-  public void getCurrentUsernameUserDetails() {
-    assertEquals(SecurityUtils.getCurrentUsername(), userDetails.getUsername());
+  void getCurrentUsernameUserDetails() {
+    assertEquals(userDetails.getUsername(), getCurrentUsername());
   }
 
   @Test
-  public void getCurrentUsernameSystemPrincipal() {
+  void getCurrentUsernameSystemPrincipal() {
     try {
       SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
       assertNull(SecurityUtils.getCurrentUsername());
@@ -143,7 +145,7 @@ public class SecurityUtilsTest {
   }
 
   @Test
-  public void isUserInRole() {
+  void isUserInRole() {
     assertTrue(SecurityUtils.currentUserHasRole("authority1"));
     assertTrue(SecurityUtils.currentUserHasRole("authority2"));
     assertTrue(SecurityUtils.currentUserHasRole("authority1", "authority2"));

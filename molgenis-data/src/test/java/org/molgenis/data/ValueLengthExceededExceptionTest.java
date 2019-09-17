@@ -1,35 +1,35 @@
 package org.molgenis.data;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertNull;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class ValueLengthExceededExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class ValueLengthExceededExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new ValueLengthExceededException(mock(Throwable.class)), lang, message);
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     ValueLengthExceededException ex = new ValueLengthExceededException(mock(Throwable.class));
     assertNull(ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {"en", "One of the values being added is too long."},
       new Object[] {"nl", "Een van de toegevoegde waarden is te lang."}

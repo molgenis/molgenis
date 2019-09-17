@@ -1,15 +1,15 @@
 package org.molgenis.i18n;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.util.i18n.PropertiesMessageSource;
-import org.testng.annotations.Test;
 
-public class PropertiesMessageSourceTest {
+class PropertiesMessageSourceTest {
   PropertiesMessageSource propertiesMessageSource = new PropertiesMessageSource(" naMespace\t");
 
   @Test
-  public void testGetNamespace() {
-    assertEquals(propertiesMessageSource.getNamespace(), "namespace");
+  void testGetNamespace() {
+    assertEquals("namespace", propertiesMessageSource.getNamespace());
   }
 }

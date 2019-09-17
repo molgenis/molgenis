@@ -1,8 +1,10 @@
 package org.molgenis.api.identities;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -36,7 +38,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.GroupIdentity;
@@ -61,7 +68,6 @@ import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
@@ -71,20 +77,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.NestedServletException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @ContextConfiguration(classes = {GroupRestControllerTest.Config.class, GsonConfig.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class GroupRestControllerTest {
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private GroupPermissionService groupPermissionService;
@@ -115,16 +117,16 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Autowired private Gson gson;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     TestAllPropertiesMessageSource messageSource =
         new TestAllPropertiesMessageSource(new MessageFormatFactory());
     messageSource.addMolgenisNamespaces("data-security", "data", "security");
     MessageSourceHolder.setMessageSource(messageSource);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     GroupRestController groupRestController =
         new GroupRestController(
             groupValueFactory,
@@ -143,7 +145,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Test
   @WithMockUser("henkie")
-  public void testCreateGroup() throws Exception {
+  void testCreateGroup() throws Exception {
     when(groupService.isGroupNameAvailable(any())).thenReturn(true);
     mockMvc
         .perform(
@@ -160,11 +162,9 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     verify(roleMembershipService).addUserToRole("henkie", "DEVS_MANAGER");
   }
 
-  @Test(
-      expectedExceptions = GroupNameNotAvailableException.class,
-      expectedExceptionsMessageRegExp = "groupName:devs")
+  @Test
   @WithMockUser("henkie")
-  public void testCreateGroupUnavailableGroupName() throws Throwable {
+  void testCreateGroupUnavailableGroupName() throws Throwable {
     when(groupService.isGroupNameAvailable(any())).thenReturn(false);
     try {
       mockMvc
@@ -177,12 +177,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
       verifyNoMoreInteractions(groupService);
       verifyNoMoreInteractions(groupPermissionService);
       verifyNoMoreInteractions(roleMembershipService);
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupNameNotAvailableException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("groupName:devs");
     }
   }
 
   @Test
-  public void testGetGroups() throws Exception {
+  void testGetGroups() throws Exception {
     when(groupService.getGroups()).thenReturn(singletonList(group));
     when(group.getName()).thenReturn("devs");
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(true);
@@ -197,7 +203,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testGetGroupPermissionDenied() throws Exception {
+  void testGetGroupPermissionDenied() throws Exception {
     when(groupService.getGroups()).thenReturn(singletonList(group));
     when(group.getName()).thenReturn("devs");
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(false);
@@ -209,7 +215,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testGetMembers() throws Exception {
+  void testGetMembers() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -237,23 +243,26 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(jsonPath("$[0].role.roleLabel", is("Developers Editor")));
   }
 
-  @Test(
-      expectedExceptions = GroupPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:VIEW_MEMBERSHIP groupName:devs")
-  public void testGetMembersPermissionDenied() throws Throwable {
+  @Test
+  void testGetMembersPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP))
         .thenReturn(false);
     try {
       mockMvc.perform(get(GROUP_END_POINT + "/devs/member"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupPermissionDeniedException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("permission:VIEW_MEMBERSHIP groupName:devs");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Group id:devs attribute:Name")
-  public void testGetMembersUnknownGroup() throws Throwable {
+  @Test
+  void testGetMembersUnknownGroup() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP))
         .thenReturn(true);
     when(groupMetadata.getId()).thenReturn("Group");
@@ -264,12 +273,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     try {
       mockMvc.perform(get(GROUP_END_POINT + "/devs/member"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Group id:devs attribute:Name");
     }
   }
 
   @Test
-  public void testAddMembership() throws Exception {
+  void testAddMembership() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -291,10 +306,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     verify(groupService).addMember(group, user, editor);
   }
 
-  @Test(
-      expectedExceptions = GroupPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:ADD_MEMBERSHIP groupName:devs")
-  public void testAddMembershipPermissionDenied() throws Throwable {
+  @Test
+  void testAddMembershipPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
         .thenReturn(false);
     try {
@@ -303,14 +316,19 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .contentType(APPLICATION_JSON_UTF8)
               .content(gson.toJson(addGroupMember("user", "DEVS_EDITOR"))));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupPermissionDeniedException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("permission:ADD_MEMBERSHIP groupName:devs");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Group id:devs attribute:Name")
-  public void testAddMembershipUnknownGroup() throws Throwable {
+  @Test
+  void testAddMembershipUnknownGroup() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
         .thenReturn(true);
 
@@ -325,14 +343,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .contentType(APPLICATION_JSON_UTF8)
               .content(gson.toJson(addGroupMember("user", "DEVS_EDITOR"))));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Group id:devs attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Role id:DEVS_EDITOR attribute:Name")
-  public void testAddMembershipUnknownRole() throws Throwable {
+  @Test
+  void testAddMembershipUnknownRole() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
         .thenReturn(true);
 
@@ -349,14 +371,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .contentType(APPLICATION_JSON_UTF8)
               .content(gson.toJson(addGroupMember("user", "DEVS_EDITOR"))));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Role id:DEVS_EDITOR attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:User id:henkie attribute:Name")
-  public void testAddMembershipUnknownUser() throws Throwable {
+  @Test
+  void testAddMembershipUnknownUser() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -372,12 +398,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .contentType(APPLICATION_JSON_UTF8)
               .content(gson.toJson(addGroupMember("user", "DEVS_EDITOR"))));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:User id:henkie attribute:Name");
     }
   }
 
   @Test
-  public void testRemoveMembership() throws Exception {
+  void testRemoveMembership() throws Exception {
     when(groupService.getGroup("devs")).thenReturn(group);
     when(userService.getUser("henkie")).thenReturn(user);
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
@@ -388,23 +420,26 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     verify(groupService).removeMember(group, user);
   }
 
-  @Test(
-      expectedExceptions = GroupPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:REMOVE_MEMBERSHIP groupName:devs")
-  public void testRemoveMembershipPermissionDenied() throws Throwable {
+  @Test
+  void testRemoveMembershipPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(false);
     try {
       mockMvc.perform(delete("/api/identities/group/devs/member/henkie"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupPermissionDeniedException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("permission:REMOVE_MEMBERSHIP groupName:devs");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Group id:devs attribute:Name")
-  public void testRemoveMembershipUnknownGroup() throws Throwable {
+  @Test
+  void testRemoveMembershipUnknownGroup() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(true);
     when(groupMetadata.getId()).thenReturn("Group");
@@ -415,14 +450,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     try {
       mockMvc.perform(delete("/api/identities/group/devs/member/henkie"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Group id:devs attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_sec_User id:henkie attribute:null")
-  public void testRemoveMembershipUnknownUser() throws Throwable {
+  @Test
+  void testRemoveMembershipUnknownUser() throws Throwable {
     when(groupService.getGroup("devs")).thenReturn(group);
     when(userService.getUser("henkie"))
         .thenThrow(new UnknownEntityException(UserMetadata.USER, "henkie"));
@@ -431,14 +470,19 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     try {
       mockMvc.perform(delete("/api/identities/group/devs/member/henkie"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("type:sys_sec_User id:henkie attribute:null");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Role Membership id:henkie attribute:User")
-  public void testRemoveMembershipNotAMember() throws Throwable {
+  @Test
+  void testRemoveMembershipNotAMember() throws Throwable {
     when(groupService.getGroup("devs")).thenReturn(group);
     when(userService.getUser("henkie")).thenReturn(user);
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
@@ -452,12 +496,19 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     try {
       mockMvc.perform(delete("/api/identities/group/devs/member/henkie"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("type:Role Membership id:henkie attribute:User");
     }
   }
 
   @Test
-  public void testUpdateMembership() throws Exception {
+  void testUpdateMembership() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -475,10 +526,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
     verify(groupService).updateMemberRole(group, user, editor);
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Group id:devs attribute:Name")
-  public void testUpdateMembershipUnknownGroup() throws Throwable {
+  @Test
+  void testUpdateMembershipUnknownGroup() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
     when(groupMetadata.getId()).thenReturn("Group");
@@ -493,14 +542,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
               .contentType(APPLICATION_JSON_UTF8));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Group id:devs attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:User id:henkie attribute:Name")
-  public void testUpdateMembershipUnknownUser() throws Throwable {
+  @Test
+  void testUpdateMembershipUnknownUser() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -517,14 +570,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
               .contentType(APPLICATION_JSON_UTF8));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:User id:henkie attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Role id:DEVS_EDITOR attribute:Name")
-  public void testUpdateMembershipUnknownRole() throws Throwable {
+  @Test
+  void testUpdateMembershipUnknownRole() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -541,14 +598,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
               .contentType(APPLICATION_JSON_UTF8));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Role id:DEVS_EDITOR attribute:Name");
     }
   }
 
-  @Test(
-      expectedExceptions = GroupPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:UPDATE_MEMBERSHIP groupName:devs")
-  public void testUpdateMembershipPermissionDenied() throws Throwable {
+  @Test
+  void testUpdateMembershipPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(false);
 
@@ -558,14 +619,19 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .contentType(APPLICATION_JSON_UTF8)
               .content(gson.toJson(updateGroupMember("DEVS_MANAGER"))));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupPermissionDeniedException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage())
+          .containsPattern("permission:UPDATE_MEMBERSHIP groupName:devs");
     }
   }
 
-  @Test(
-      expectedExceptions = NotAValidGroupRoleException.class,
-      expectedExceptionsMessageRegExp = "role:DEVS_EDITOR group:devs")
-  public void testUpdateMembershipNotAValidGroupRole() throws Throwable {
+  @Test
+  void testUpdateMembershipNotAValidGroupRole() throws Throwable {
     when(groupService.getGroup("devs")).thenReturn(group);
     when(userService.getUser("henkie")).thenReturn(user);
     when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
@@ -584,12 +650,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
               .content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
               .contentType(APPLICATION_JSON_UTF8));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              NotAValidGroupRoleException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("role:DEVS_EDITOR group:devs");
     }
   }
 
   @Test
-  public void testUpdateExtendsRole() throws Exception {
+  void testUpdateExtendsRole() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -607,7 +679,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testRemoveExtendsRole() throws Exception {
+  void testRemoveExtendsRole() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(true);
     when(groupService.getGroup("devs")).thenReturn(group);
@@ -622,7 +694,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testGetGroupRoles() throws Exception {
+  void testGetGroupRoles() throws Exception {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(true);
 
     when(editor.getLabel()).thenReturn("role-label");
@@ -639,21 +711,25 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(jsonPath("$[0].roleLabel", is("role-label")));
   }
 
-  @Test(
-      expectedExceptions = GroupPermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:VIEW groupName:devs")
-  public void testGetGroupRolesPermissionDenied() throws Throwable {
+  @Test
+  void testGetGroupRolesPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(false);
     try {
       mockMvc.perform(get(GROUP_END_POINT + "/devs/role/"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              GroupPermissionDeniedException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("permission:VIEW groupName:devs");
     }
   }
 
   @Test
   @WithMockUser(roles = {"MANAGER"})
-  public void testGetUsers() throws Exception {
+  void testGetUsers() throws Exception {
     when(user.getId()).thenReturn("id");
     when(user.getUsername()).thenReturn("name");
 
@@ -671,7 +747,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testPermissions() throws Exception {
+  void testPermissions() throws Exception {
     Set<Permission> set = new HashSet<>(Collections.singletonList(GroupPermission.ADD_MEMBERSHIP));
 
     when(userPermissionEvaluator.getPermissions(
@@ -686,10 +762,10 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Configuration
-  public static class Config {}
+  static class Config {}
 
   @Test
-  public void testDeleteGroup() throws Exception {
+  void testDeleteGroup() throws Exception {
     mockMvc
         .perform(delete(GROUP_END_POINT + "/devs").contentType(APPLICATION_JSON_UTF8))
         .andExpect(status().isNoContent());
