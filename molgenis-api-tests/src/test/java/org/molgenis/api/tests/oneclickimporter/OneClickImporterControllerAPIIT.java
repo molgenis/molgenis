@@ -1,6 +1,5 @@
 package org.molgenis.api.tests.oneclickimporter;
 
-import static com.google.common.io.Resources.getResource;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -32,9 +31,7 @@ import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,8 +53,8 @@ class OneClickImporterControllerAPIIT extends AbstractApiTests {
       "one_click_importer_test_user_password";
   private static final String API_V2 = "api/v2/";
 
-  private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "OneClickImport_complex-valid.xlsx";
-  private static final String ONE_CLICK_IMPORT_CSV_FILE = "OneClickImport_complex-valid.csv";
+  private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
+  private static final String ONE_CLICK_IMPORT_CSV_FILE = "/OneClickImport_complex-valid.csv";
 
   private static String testUserToken;
   private static String adminToken;
@@ -109,9 +106,8 @@ class OneClickImporterControllerAPIIT extends AbstractApiTests {
     oneClickImportTest(ONE_CLICK_IMPORT_CSV_FILE);
   }
 
-  private void oneClickImportTest(String fileToImport) throws URISyntaxException, IOException {
-    URL resourceUrl = getResource(OneClickImporterControllerAPIIT.class, fileToImport);
-    File file = new File(new URI(resourceUrl.toString()).getPath());
+  private void oneClickImportTest(String fileToImport) throws IOException {
+    File file = ResourceUtils.getFile(OneClickImporterControllerAPIIT.class, fileToImport);
 
     // Post the file to be imported
     ValidatableResponse response =
