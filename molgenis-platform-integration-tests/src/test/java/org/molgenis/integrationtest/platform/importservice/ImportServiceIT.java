@@ -52,7 +52,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(classes = {PlatformITConfig.class, ImportServiceIT.Config.class})
 @Transactional
-@Rollback
 public abstract class ImportServiceIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
