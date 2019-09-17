@@ -1,15 +1,17 @@
 package org.molgenis.dataexplorer.download;
 
-import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Arrays.asList;
 import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.ImmutableMap;
@@ -30,6 +32,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -40,11 +46,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
+class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private AttributeFactory attributeFactory;
   @Mock private EntityType entityType;
@@ -59,13 +62,14 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
 
   private DataExplorerDownloadHandler dataExplorerDownloadHandler;
 
-  @BeforeMethod
-  public void beforeTest() throws IOException {
+  @BeforeEach
+  void beforeTest() throws IOException {
     dataExplorerDownloadHandler = new DataExplorerDownloadHandler(dataService, attributeFactory);
   }
 
-  @Test(dataProvider = "writeToExcelDataProvider")
-  public void testWriteToCSV(
+  @ParameterizedTest
+  @MethodSource("writeToExcelDataProvider")
+  void testWriteToCSV(
       DataRequest.ColNames colNames,
       DataRequest.EntityValues entityValues,
       Map<String, List<List<String>>> expected)
@@ -110,11 +114,8 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
     verifyNoMoreInteractions(refEntity1, refEntity2, attribute1, attribute2);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Total number of cells for this download exceeds the maximum of 500000 for .xlsx downloads, please use .csv instead")
-  public void testWriteToExcelTooManyCells() throws Exception {
+  @Test
+  void testWriteToExcelTooManyCells() throws Exception {
     when(dataService.count("sys_set_thousandgenomes", query)).thenReturn(2500001L);
     when(dataService.getEntityType("sys_set_thousandgenomes")).thenReturn(entityType);
     when(entityType.getAtomicAttributes()).thenReturn(asList(attribute1, attribute2, attribute3));
@@ -129,11 +130,16 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
     dataRequest.setColNames(DataRequest.ColNames.ATTRIBUTE_NAMES);
     dataRequest.setEntityValues(DataRequest.EntityValues.ENTITY_LABELS);
 
-    dataExplorerDownloadHandler.writeToExcel(dataRequest, mock(OutputStream.class));
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> dataExplorerDownloadHandler.writeToExcel(dataRequest, mock(OutputStream.class)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Total number of cells for this download exceeds the maximum of 500000 for .xlsx downloads, please use .csv instead");
   }
 
-  @DataProvider
-  public static Object[][] writeToExcelDataProvider() {
+  static Object[][] writeToExcelDataProvider() {
     return new Object[][] {
       new Object[] {
         DataRequest.ColNames.ATTRIBUTE_NAMES,
@@ -178,8 +184,9 @@ public class DataExplorerDownloadHandlerTest extends AbstractMockitoTest {
     };
   }
 
-  @Test(dataProvider = "writeToExcelDataProvider")
-  public void testWriteToExcel(
+  @ParameterizedTest
+  @MethodSource("writeToExcelDataProvider")
+  void testWriteToExcel(
       DataRequest.ColNames colNames,
       DataRequest.EntityValues entityValues,
       Map<String, List<List<String>>> expected)

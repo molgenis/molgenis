@@ -4,7 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.beacon.controller.model.BeaconAlleleRequest;
 import org.molgenis.beacon.controller.model.BeaconAlleleResponse;
@@ -21,21 +22,19 @@ import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
+class BeaconControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   private MockMvc mockMvc;
@@ -44,10 +43,8 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
 
   @Mock private BeaconQueryService beaconQueryService;
 
-  @BeforeMethod
+  @BeforeEach
   private void beforeMethod() {
-    initMocks(this);
-
     BeaconController beaconController = new BeaconController(beaconInfoService, beaconQueryService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(beaconController)
@@ -56,7 +53,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getAllBeaconsTest() throws Exception {
+  void getAllBeaconsTest() throws Exception {
     List<BeaconDatasetResponse> beaconDatasets =
         newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
     BeaconResponse beaconResponse =
@@ -74,7 +71,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void infoTest() throws Exception {
+  void infoTest() throws Exception {
     List<BeaconDatasetResponse> beaconDatasets =
         newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
     BeaconResponse beaconResponse =
@@ -92,7 +89,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getQueryTest() throws Exception {
+  void getQueryTest() throws Exception {
     BeaconAlleleRequest request = BeaconAlleleRequest.create("1", 100L, "A", "T");
     BeaconAlleleResponse response = BeaconAlleleResponse.create("beaconA", true, null, request);
 
@@ -113,7 +110,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testPostQuery() throws Exception {
+  void testPostQuery() throws Exception {
     BeaconAlleleRequest request = BeaconAlleleRequest.create("1", 100L, "A", "T");
     BeaconAlleleResponse response = BeaconAlleleResponse.create("beaconA", true, null, request);
 

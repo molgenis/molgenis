@@ -1,19 +1,20 @@
 package org.molgenis.api.convert;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class SortParseExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class SortParseExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("api");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     Token token = new Token();
     token.beginLine = 1;
     token.beginColumn = 10;
@@ -27,9 +28,7 @@ public class SortParseExceptionTest extends ExceptionMessageTest {
     assertExceptionMessageEquals(new SortParseException(parseException), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en", "Unexpected token 'IMAGE' while parsing the sort, line '1' position '10'."

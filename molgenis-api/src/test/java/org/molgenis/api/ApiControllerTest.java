@@ -1,41 +1,41 @@
 package org.molgenis.api;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ApiControllerTest {
+class ApiControllerTest {
   @Test
-  public void testGetApiId() {
+  void testGetApiId() {
     String apiId = "myapi";
     ApiController apiController = new ApiController(apiId, 1) {};
-    assertEquals(apiController.getApiId(), apiId);
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testGetApiIdIllegalCharacters() {
-    String apiId = "my+api";
-    new ApiController(apiId, 1) {};
+    assertEquals(apiId, apiController.getApiId());
   }
 
   @Test
-  public void testGetApiVersion() {
+  void testGetApiIdIllegalCharacters() {
+    String apiId = "my+api";
+    assertThrows(IllegalArgumentException.class, () -> new ApiController(apiId, 1) {});
+  }
+
+  @Test
+  void testGetApiVersion() {
     int apiVersion = 2;
     ApiController apiController = new ApiController("myapi", apiVersion) {};
-    assertEquals(apiController.getApiVersion(), apiVersion);
+    assertEquals(apiVersion, apiController.getApiVersion());
   }
 
   @Test
-  public void testGetApiVersionEmpty() {
+  void testGetApiVersionEmpty() {
     int apiVersion = 2;
     ApiController apiController = new ApiController("", apiVersion) {};
-    assertEquals(apiController.getApiVersion(), apiVersion);
+    assertEquals(apiVersion, apiController.getApiVersion());
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testGetApiVersionIllegalVersion() {
+  @Test
+  void testGetApiVersionIllegalVersion() {
     int apiVersion = -1;
-    ApiController apiController = new ApiController("myapi", apiVersion) {};
-    assertEquals(apiController.getApiVersion(), apiVersion);
+    assertThrows(IllegalArgumentException.class, () -> new ApiController("myapi", apiVersion) {});
   }
 }

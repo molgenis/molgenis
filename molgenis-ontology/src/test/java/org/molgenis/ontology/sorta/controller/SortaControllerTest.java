@@ -1,14 +1,17 @@
 package org.molgenis.ontology.sorta.controller;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
@@ -31,10 +34,8 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.ui.Model;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SortaControllerTest extends AbstractMockitoTest {
+class SortaControllerTest extends AbstractMockitoTest {
 
   @Mock private OntologyService ontologyService;
   @Mock private SortaService sortaService;
@@ -61,8 +62,8 @@ public class SortaControllerTest extends AbstractMockitoTest {
   @Mock private JobExecutor jobExecutor;
   private SortaController sortaController;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     sortaController =
         new SortaController(
             ontologyService,
@@ -83,15 +84,18 @@ public class SortaControllerTest extends AbstractMockitoTest {
             jobExecutor);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testSortaController() {
-    new SortaController(
-        null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-        null);
+  @Test
+  void testSortaController() {
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new SortaController(
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null));
   }
 
   @Test
-  public void testInit() {
+  void testInit() {
     String username = "username";
     User user = when(mock(User.class).getUsername()).thenReturn(username).getMock();
     when(userAccountService.getCurrentUser()).thenReturn(user);
@@ -104,12 +108,12 @@ public class SortaControllerTest extends AbstractMockitoTest {
         .thenReturn(Stream.of(sortaJobExecution));
 
     Model model = mock(Model.class);
-    assertEquals("sorta-match-view", sortaController.init(model));
+    assertEquals(sortaController.init(model), "sorta-match-view");
     verify(model).addAttribute("existingTasks", singletonList(sortaJobExecution));
   }
 
   @Test
-  public void testGetJobs() {
+  void testGetJobs() {
     String username = "username";
     User user = when(mock(User.class).getUsername()).thenReturn(username).getMock();
     when(userAccountService.getCurrentUser()).thenReturn(user);
@@ -120,15 +124,15 @@ public class SortaControllerTest extends AbstractMockitoTest {
             .eq("user", username)
             .findAll())
         .thenReturn(Stream.of(sortaJobExecution));
-    assertEquals(sortaController.getJobs(), singletonList(sortaJobExecution));
+    assertEquals(singletonList(sortaJobExecution), sortaController.getJobs());
   }
 
   @Test
-  public void testMatchTask() {
+  void testMatchTask() {
     List<Ontology> ontologies = singletonList(mock(Ontology.class));
     when(ontologyService.getOntologies()).thenReturn(ontologies);
     Model model = mock(Model.class);
-    assertEquals("sorta-match-view", sortaController.matchTask(model));
+    assertEquals(sortaController.matchTask(model), "sorta-match-view");
     verify(model).addAttribute("ontologies", ontologies);
   }
 }

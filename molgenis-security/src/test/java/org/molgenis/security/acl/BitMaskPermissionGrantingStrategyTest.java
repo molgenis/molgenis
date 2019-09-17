@@ -1,26 +1,26 @@
 package org.molgenis.security.acl;
 
 import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.WRITE;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.Permission;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class BitMaskPermissionGrantingStrategyTest {
-  @DataProvider(name = "permissionsMatchProvider")
-  public Object[][] permissionsMatchProvider() {
+class BitMaskPermissionGrantingStrategyTest {
+  static Object[][] permissionsMatchProvider() {
     return new Object[][] {{READ, new CumulativePermission().set(READ).set(WRITE)}, {READ, READ}};
   }
 
-  @Test(dataProvider = "permissionsMatchProvider")
-  public void testPermissionsMatch(Permission acePermission, Permission testedPermission) {
+  @ParameterizedTest
+  @MethodSource("permissionsMatchProvider")
+  void testPermissionsMatch(Permission acePermission, Permission testedPermission) {
     assertTrue(
         BitMaskPermissionGrantingStrategy.containsPermission(
             acePermission.getMask(), testedPermission.getMask()),
@@ -29,8 +29,7 @@ public class BitMaskPermissionGrantingStrategyTest {
             acePermission, testedPermission));
   }
 
-  @DataProvider(name = "permissionsDontMatchProvider")
-  public Object[][] permissionsDontMatchProvider() {
+  static Object[][] permissionsDontMatchProvider() {
     return new Object[][] {
       {READ, WRITE},
       {COUNT, new CumulativePermission().set(READ).set(WRITE).set(WRITEMETA)},
@@ -38,8 +37,9 @@ public class BitMaskPermissionGrantingStrategyTest {
     };
   }
 
-  @Test(dataProvider = "permissionsDontMatchProvider")
-  public void testPermissionsDontMatch(Permission acePermission, Permission testedPermission) {
+  @ParameterizedTest
+  @MethodSource("permissionsDontMatchProvider")
+  void testPermissionsDontMatch(Permission acePermission, Permission testedPermission) {
     assertFalse(
         BitMaskPermissionGrantingStrategy.containsPermission(
             acePermission.getMask(), testedPermission.getMask()),

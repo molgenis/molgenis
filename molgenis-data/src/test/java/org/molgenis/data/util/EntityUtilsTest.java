@@ -3,6 +3,9 @@ package org.molgenis.data.util;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -25,8 +28,7 @@ import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,6 +36,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Sort;
@@ -42,12 +47,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class EntityUtilsTest {
-  @DataProvider(name = "testEqualsEntityTypeProvider")
-  public static Iterator<Object[]> testEqualsEntityTypeProvider() {
+class EntityUtilsTest {
+  static Iterator<Object[]> testEqualsEntityTypeProvider() {
     EntityType entityType = createEqualsEntityType();
 
     List<Object[]> dataList = new ArrayList<>();
@@ -124,14 +126,14 @@ public class EntityUtilsTest {
     return entityType;
   }
 
-  @Test(dataProvider = "testEqualsEntityTypeProvider")
-  public void testEqualsEntityType(
-      EntityType entityType, EntityType otherEntityType, boolean equals) {
-    assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
+  @ParameterizedTest
+  @MethodSource("testEqualsEntityTypeProvider")
+  void testEqualsEntityType(EntityType entityType, EntityType otherEntityType, boolean equals) {
+    assertEquals(equals, EntityUtils.equals(entityType, otherEntityType));
   }
 
   @Test
-  public void getTypedValueStringAttributeEntityManagerOneToMany() {
+  void getTypedValueStringAttributeEntityManagerOneToMany() {
     String valueStr = "0,1,2";
     Attribute attr = mock(Attribute.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -149,12 +151,11 @@ public class EntityUtilsTest {
     when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
     when(entityManager.getReference(refEntityType, 2)).thenReturn(entity2);
     assertEquals(
-        EntityUtils.getTypedValue(valueStr, attr, entityManager),
-        newArrayList(entity0, entity1, entity2));
+        newArrayList(entity0, entity1, entity2), getTypedValue(valueStr, attr, entityManager));
   }
 
   @Test
-  public void getTypedValueStringAttributeEntityManagerXref() {
+  void getTypedValueStringAttributeEntityManagerXref() {
     String valueStr = "0";
     Attribute attr = mock(Attribute.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -167,11 +168,11 @@ public class EntityUtilsTest {
     Entity entity = mock(Entity.class);
     EntityManager entityManager = mock(EntityManager.class);
     when(entityManager.getReference(refEntityType, valueStr)).thenReturn(entity);
-    assertEquals(EntityUtils.getTypedValue(valueStr, attr, entityManager), entity);
+    assertEquals(entity, getTypedValue(valueStr, attr, entityManager));
   }
 
   @Test
-  public void attributeEqualsNoIdentifierCheck() {
+  void attributeEqualsNoIdentifierCheck() {
     Attribute attr = getMockAttr("attr");
     Attribute otherAttr = getMockAttr("otherAttr");
     when(attr.getIdentifier()).thenReturn("1");
@@ -179,13 +180,13 @@ public class EntityUtilsTest {
     assertFalse(EntityUtils.equals(attr, otherAttr, true));
   }
 
-  @Test(dataProvider = "testEqualsAttributeProvider")
-  public void testEqualsAttribute(Attribute attr, Attribute otherAttr, boolean shouldEqual) {
-    assertEquals(EntityUtils.equals(attr, otherAttr), shouldEqual);
+  @ParameterizedTest
+  @MethodSource("testEqualsAttributeProvider")
+  void testEqualsAttribute(Attribute attr, Attribute otherAttr, boolean shouldEqual) {
+    assertEquals(shouldEqual, EntityUtils.equals(attr, otherAttr));
   }
 
-  @DataProvider(name = "testEqualsAttributeProvider")
-  public Iterator<Object[]> testEqualsAttributeProvider() {
+  static Iterator<Object[]> testEqualsAttributeProvider() {
     List<Object[]> testCases = newArrayList();
 
     { // one attr null
@@ -643,14 +644,14 @@ public class EntityUtilsTest {
     return testCases.iterator();
   }
 
-  @Test(dataProvider = "testEqualsAttributeNoIdentifierCheckProvider")
-  public void testEqualsAttributeNoIdentifierCheck(
+  @ParameterizedTest
+  @MethodSource("testEqualsAttributeNoIdentifierCheckProvider")
+  void testEqualsAttributeNoIdentifierCheck(
       Attribute attr, Attribute otherAttr, boolean shouldEqual) {
-    assertEquals(EntityUtils.equals(attr, otherAttr, false), shouldEqual);
+    assertEquals(shouldEqual, EntityUtils.equals(attr, otherAttr, false));
   }
 
-  @DataProvider(name = "testEqualsAttributeNoIdentifierCheckProvider")
-  public Iterator<Object[]> testEqualsAttributeNoIdentifierCheckProvider() {
+  static Iterator<Object[]> testEqualsAttributeNoIdentifierCheckProvider() {
     List<Object[]> testCases = newArrayList();
 
     {
@@ -719,8 +720,7 @@ public class EntityUtilsTest {
   }
 
   // TODO COMPOUND
-  @DataProvider(name = "testIsNullValueProvider")
-  public Iterator<Object[]> testIsNullValueProvider() {
+  static Iterator<Object[]> testIsNullValueProvider() {
     String attrName = "attr";
     List<Object[]> dataList = new ArrayList<>();
     {
@@ -846,24 +846,29 @@ public class EntityUtilsTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "testIsNullValueProvider")
-  public void isNullValue(Entity entity, Attribute attribute, boolean expectedIsNullValue) {
-    assertEquals(EntityUtils.isNullValue(entity, attribute), expectedIsNullValue);
+  @ParameterizedTest
+  @MethodSource("testIsNullValueProvider")
+  void isNullValue(Entity entity, Attribute attribute, boolean expectedIsNullValue) {
+    assertEquals(expectedIsNullValue, EntityUtils.isNullValue(entity, attribute));
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void isNullValueCompoundAttribute() {
-    EntityUtils.isNullValue(
-        getIsNullValueMockEntity(), getIsNullValueMockAttribute("attribute", COMPOUND));
+  @Test
+  void isNullValueCompoundAttribute() {
+    assertThrows(
+        RuntimeException.class,
+        () ->
+            EntityUtils.isNullValue(
+                getIsNullValueMockEntity(), getIsNullValueMockAttribute("attribute", COMPOUND)));
   }
 
-  private Entity getIsNullValueMockEntity() {
+  private static Entity getIsNullValueMockEntity() {
     Entity entity = mock(Entity.class);
     when(entity.toString()).thenReturn("entity");
     return entity;
   }
 
-  private Attribute getIsNullValueMockAttribute(String attributeName, AttributeType attributeType) {
+  private static Attribute getIsNullValueMockAttribute(
+      String attributeName, AttributeType attributeType) {
     Attribute attribute = mock(Attribute.class);
     when(attribute.getName()).thenReturn(attributeName);
     when(attribute.getDataType()).thenReturn(attributeType);
@@ -871,13 +876,13 @@ public class EntityUtilsTest {
     return attribute;
   }
 
-  private Attribute getMockAttr(String toString) {
+  private static Attribute getMockAttr(String toString) {
     Attribute attr = getMockAttr();
     when(attr.toString()).thenReturn(toString);
     return attr;
   }
 
-  private Attribute getMockAttr() {
+  private static Attribute getMockAttr() {
     EntityType entityType =
         when(mock(EntityType.class).getId()).thenReturn("entityTypeId").getMock();
     Attribute attr = mock(Attribute.class);

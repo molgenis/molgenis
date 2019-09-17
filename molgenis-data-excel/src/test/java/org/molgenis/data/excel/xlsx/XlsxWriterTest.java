@@ -2,12 +2,13 @@ package org.molgenis.data.excel.xlsx;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,40 +20,40 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class XlsxWriterTest extends AbstractMockitoTest {
+class XlsxWriterTest extends AbstractMockitoTest {
   @Mock private Workbook workbook;
   @Mock private Sheet sheet;
   private XlsxWriter xlsxWriter;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     File file = new File("path");
     xlsxWriter = new XlsxWriter(file.toPath(), workbook, TimeZone.getTimeZone("Europe/Paris"));
   }
 
   @Test
-  public void testHasSheetTrue() {
+  void testHasSheetTrue() {
     Sheet sheet = mock(Sheet.class);
     when(workbook.getSheet("test")).thenReturn(sheet);
     assertTrue(xlsxWriter.hasSheet("test"));
   }
 
   @Test
-  public void testHasSheetFalse() {
+  void testHasSheetFalse() {
     when(workbook.getSheet("test")).thenReturn(null);
     assertFalse(xlsxWriter.hasSheet("test"));
   }
 
   @Test
-  public void testCreateSheet() {
+  void testCreateSheet() {
     Cell cell0 = mock(Cell.class);
     Cell cell1 = mock(Cell.class);
     Row row = mock(Row.class);
@@ -68,7 +69,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testWriteRowsStream() {
+  void testWriteRowsStream() {
     int[] number = {-1};
     Cell cell0 = mock(Cell.class);
     Cell cell1 = mock(Cell.class);
@@ -106,13 +107,13 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testClose() throws IOException {
+  void testClose() throws IOException {
     xlsxWriter.close();
     verify(workbook).close();
   }
 
   @Test
-  public void testSetCellValueInt() {
+  void testSetCellValueInt() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, 1);
@@ -121,7 +122,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueString() {
+  void testSetCellValueString() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, "1");
@@ -130,7 +131,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueLong() {
+  void testSetCellValueLong() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, 1L);
@@ -139,7 +140,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueDouble() {
+  void testSetCellValueDouble() {
     Cell cell = mock(Cell.class);
     double test = 1.123;
 
@@ -149,7 +150,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueLocalDate() {
+  void testSetCellValueLocalDate() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
@@ -158,7 +159,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueInstant() {
+  void testSetCellValueInstant() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
@@ -166,9 +167,9 @@ public class XlsxWriterTest extends AbstractMockitoTest {
     verify(cell).setCellValue("1970-01-01T01:16:40+0100");
   }
 
-  @Test(expectedExceptions = UnsupportedValueException.class)
-  public void testSetCellValueUnsupported() {
+  @Test
+  void testSetCellValueUnsupported() {
     Cell cell = mock(Cell.class);
-    xlsxWriter.setCellValue(cell, emptyList());
+    assertThrows(UnsupportedValueException.class, () -> xlsxWriter.setCellValue(cell, emptyList()));
   }
 }

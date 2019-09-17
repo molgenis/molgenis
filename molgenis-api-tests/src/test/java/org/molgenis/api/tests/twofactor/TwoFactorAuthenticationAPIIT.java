@@ -12,26 +12,26 @@ import io.restassured.response.ValidatableResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
+class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationAPIIT.class);
 
   // Request parameters
   private static final String PATH = "api/v1/";
 
   // User credentials
-  private String testUsername;
+  private static String testUsername;
   private static final String TWO_FA_AUTH_TEST_USER_PASSWORD = "two_fa_auth_test_user_password";
 
-  private String adminToken;
-  private String testUserToken;
+  private static String adminToken;
+  private static String testUserToken;
 
   /**
    * Pass down system properties via the mvn commandline argument
@@ -40,8 +40,8 @@ public class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
    * -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl" -DREST_TEST_ADMIN_NAME="admin"
    * -DREST_TEST_ADMIN_PW="admin"
    */
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -50,7 +50,7 @@ public class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void test2faEnforced() {
+  void test2faEnforced() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
 
     try {
@@ -78,7 +78,7 @@ public class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void test2faEnabled() {
+  void test2faEnabled() {
     toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
 
     try {
@@ -104,8 +104,8 @@ public class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
     }
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Clean up permissions
     removeRightsForUser(adminToken, testUsername);
 

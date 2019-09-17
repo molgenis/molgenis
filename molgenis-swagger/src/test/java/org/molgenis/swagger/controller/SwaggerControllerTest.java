@@ -2,35 +2,32 @@ package org.molgenis.swagger.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.token.TokenService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.i18n.LanguageService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.Model;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @SecurityTestExecutionListeners
-public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
+class SwaggerControllerTest extends AbstractMockitoSpringContextTests {
   @Mock private MetaDataService metaDataService;
   @Mock private TokenService tokenService;
   @Mock private HttpServletResponse response;
@@ -40,21 +37,20 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
 
   private SwaggerController swaggerController;
 
-  @BeforeMethod
-  public void beforeMethod() throws IOException {
-    initMocks(this);
+  @BeforeEach
+  void beforeMethod() {
     reset(metaDataService, type1, type2, tokenService);
     swaggerController = new SwaggerController(metaDataService, tokenService);
   }
 
   @Test
   @WithMockUser
-  public void testInit() throws Exception {
+  void testInit() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
     when(tokenService.generateAndStoreToken("user", "For Swagger UI")).thenReturn("ABCDEFG");
-    assertEquals("view-swagger-ui", swaggerController.init(model));
+    assertEquals(swaggerController.init(model), "view-swagger-ui");
     verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
     verify(model).addAttribute("baseUrl", "http://localhost");
     verify(model).addAttribute("token", "ABCDEFG");
@@ -62,18 +58,18 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testInitWithoutUser() throws Exception {
+  void testInitWithoutUser() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-    assertEquals("view-swagger-ui", swaggerController.init(model));
+    assertEquals(swaggerController.init(model), "view-swagger-ui");
     verify(model).addAttribute("molgenisUrl", "http://localhost/plugin/swagger/swagger.yml");
     verify(model).addAttribute("baseUrl", "http://localhost");
     verifyNoMoreInteractions(model);
   }
 
   @Test
-  public void testSwagger() {
+  void testSwagger() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -81,7 +77,7 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
     when(type2.getId()).thenReturn("abc_EntityType1ëæ");
     when(metaDataService.getEntityTypes()).thenReturn(Stream.of(type1, type2));
 
-    assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals(swaggerController.swagger(model, response), "view-swagger");
 
     verify(model).addAttribute("scheme", "http");
     verify(model).addAttribute("host", "localhost");
@@ -94,7 +90,7 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testSwaggerHostAddsPort() throws URISyntaxException {
+  void testSwaggerHostAddsPort() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setScheme("http");
     request.setMethod("GET");
@@ -104,7 +100,7 @@ public class SwaggerControllerTest extends AbstractTestNGSpringContextTests {
 
     when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
 
-    assertEquals("view-swagger", swaggerController.swagger(model, response));
+    assertEquals(swaggerController.swagger(model, response), "view-swagger");
 
     verify(model).addAttribute("scheme", "http");
     verify(model).addAttribute("host", "localhost:8080");

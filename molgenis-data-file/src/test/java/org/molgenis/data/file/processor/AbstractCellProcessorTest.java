@@ -1,19 +1,20 @@
 package org.molgenis.data.file.processor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.data.file.processor.AbstractCellProcessor.processCell;
 
 import java.util.Arrays;
 import java.util.List;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class AbstractCellProcessorTest {
+class AbstractCellProcessorTest {
   private List<CellProcessor> processors;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     CellProcessor headerProcessor = mock(CellProcessor.class);
     when(headerProcessor.processHeader()).thenReturn(true);
     when(headerProcessor.process("col")).thenReturn("COL");
@@ -26,17 +27,17 @@ public class AbstractCellProcessorTest {
   }
 
   @Test
-  public void processCell_null() {
-    assertEquals(AbstractCellProcessor.processCell("val", false, null), "val");
+  void processCell_null() {
+    assertEquals("val", processCell("val", false, null));
   }
 
   @Test
-  public void processCell_header() {
-    assertEquals(AbstractCellProcessor.processCell("col", true, processors), "COL");
+  void processCell_header() {
+    assertEquals("COL", processCell("col", true, processors));
   }
 
   @Test
-  public void processCell_data() {
-    assertEquals(AbstractCellProcessor.processCell("val", false, processors), "VAL");
+  void processCell_data() {
+    assertEquals("VAL", processCell("val", false, processors));
   }
 }

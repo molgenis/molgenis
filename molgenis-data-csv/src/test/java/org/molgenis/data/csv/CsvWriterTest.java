@@ -1,14 +1,17 @@
 package org.molgenis.data.csv;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.processor.CellProcessor;
@@ -17,10 +20,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class CsvWriterTest extends AbstractMolgenisSpringTest {
+class CsvWriterTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -28,20 +29,20 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest {
   private EntityType entityType;
 
   @SuppressWarnings("resource")
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void CsvWriter() {
-    new CsvWriter((Writer) null);
+  @Test
+  void CsvWriter() {
+    assertThrows(IllegalArgumentException.class, () -> new CsvWriter((Writer) null));
   }
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityType = entityTypeFactory.create();
     entityType.addAttribute(attrMetaFactory.create().setName("col1"));
     entityType.addAttribute(attrMetaFactory.create().setName("col2"));
   }
 
   @Test
-  public void addCellProcessor() throws IOException {
+  void addCellProcessor() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
@@ -54,7 +55,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void addCellProcessor_data() throws IOException {
+  void addCellProcessor_data() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
@@ -72,7 +73,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void add() throws IOException {
+  void add() throws IOException {
     StringWriter strWriter = new StringWriter();
     try (CsvWriter csvWriter = new CsvWriter(strWriter)) {
       csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
@@ -80,12 +81,12 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest {
       entity.set("col1", "val1");
       entity.set("col2", "val2");
       csvWriter.add(entity);
-      assertEquals(strWriter.toString(), "\"col1\",\"col2\"\n\"val1\",\"val2\"\n");
+      assertEquals("\"col1\",\"col2\"\n\"val1\",\"val2\"\n", strWriter.toString());
     }
   }
 
   @Test
-  public void testLabels() throws IOException {
+  void testLabels() throws IOException {
     StringWriter strWriter = new StringWriter();
     try (CsvWriter csvWriter = new CsvWriter(strWriter)) {
       csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
@@ -93,12 +94,12 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest {
       entity.set("col1", "val1");
       entity.set("col2", "val2");
       csvWriter.add(entity);
-      assertEquals(strWriter.toString(), "\"label1\",\"label2\"\n\"val1\",\"val2\"\n");
+      assertEquals("\"label1\",\"label2\"\n\"val1\",\"val2\"\n", strWriter.toString());
     }
   }
 
   @Test
-  public void close() throws IOException {
+  void close() throws IOException {
     // FIXME enable when double closing bug in opencsv is fixed
     // Writer writer = mock(Writer.class);
     // CsvWriter csvWriter = new CsvWriter(writer);

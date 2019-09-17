@@ -1,6 +1,7 @@
 package org.molgenis.security.account;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -9,6 +10,8 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.PasswordResetTokenMetadata.PASSWORD_RESET_TOKEN;
 
 import java.time.Instant;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -18,24 +21,22 @@ import org.molgenis.data.security.auth.PasswordResetTokenMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
+class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
   @Mock private PasswordResetTokenFactory passwordResetTokenFactory;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private DataService dataService;
   private PasswordResetTokenRepositoryImpl passwordResetTokenRepositoryImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     passwordResetTokenRepositoryImpl =
         new PasswordResetTokenRepositoryImpl(
             passwordResetTokenFactory, passwordEncoder, dataService);
   }
 
   @Test
-  public void testCreateToken() {
+  void testCreateToken() {
     User user = when(mock(User.class).isActive()).thenReturn(true).getMock();
 
     @SuppressWarnings("unchecked")
@@ -57,7 +58,7 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateTokenDeleteExistingToken() {
+  void testCreateTokenDeleteExistingToken() {
     User user = when(mock(User.class).isActive()).thenReturn(true).getMock();
 
     PasswordResetToken existingPasswordResetToken = mock(PasswordResetToken.class);
@@ -80,14 +81,16 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     verify(dataService).add(PASSWORD_RESET_TOKEN, passwordResetToken);
   }
 
-  @Test(expectedExceptions = PasswordResetTokenCreationException.class)
-  public void testCreateTokenInactiveUser() {
+  @Test
+  void testCreateTokenInactiveUser() {
     User user = mock(User.class);
-    passwordResetTokenRepositoryImpl.createToken(user);
+    assertThrows(
+        PasswordResetTokenCreationException.class,
+        () -> passwordResetTokenRepositoryImpl.createToken(user));
   }
 
   @Test
-  public void testValidateToken() {
+  void testValidateToken() {
     User user = mock(User.class);
     String token = "MyToken";
 
@@ -106,8 +109,8 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     passwordResetTokenRepositoryImpl.validateToken(user, token);
   }
 
-  @Test(expectedExceptions = ExpiredPasswordResetTokenException.class)
-  public void testValidateTokenExpired() {
+  @Test
+  void testValidateTokenExpired() {
     User user = mock(User.class);
     String token = "MyToken";
 
@@ -123,11 +126,13 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     when(passwordResetToken.getExpirationDate()).thenReturn(Instant.now().minus(1, HOURS));
     when(passwordEncoder.matches(token, tokenHash)).thenReturn(true);
 
-    passwordResetTokenRepositoryImpl.validateToken(user, token);
+    assertThrows(
+        ExpiredPasswordResetTokenException.class,
+        () -> passwordResetTokenRepositoryImpl.validateToken(user, token));
   }
 
-  @Test(expectedExceptions = InvalidPasswordResetTokenException.class)
-  public void testValidateTokenInvalid() {
+  @Test
+  void testValidateTokenInvalid() {
     User user = mock(User.class);
     String token = "MyToken";
     @SuppressWarnings("unchecked")
@@ -140,11 +145,13 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     String tokenHash = "MyTokenHash";
     when(passwordResetToken.getToken()).thenReturn(tokenHash);
 
-    passwordResetTokenRepositoryImpl.validateToken(user, token);
+    assertThrows(
+        InvalidPasswordResetTokenException.class,
+        () -> passwordResetTokenRepositoryImpl.validateToken(user, token));
   }
 
-  @Test(expectedExceptions = UnknownPasswordResetTokenException.class)
-  public void testValidateTokenUnknown() {
+  @Test
+  void testValidateTokenUnknown() {
     User user = mock(User.class);
     String token = "MyToken";
 
@@ -155,11 +162,13 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     when(passwordResetTokenQuery.eq(PasswordResetTokenMetadata.USER, user).findOne())
         .thenReturn(null);
 
-    passwordResetTokenRepositoryImpl.validateToken(user, token);
+    assertThrows(
+        UnknownPasswordResetTokenException.class,
+        () -> passwordResetTokenRepositoryImpl.validateToken(user, token));
   }
 
   @Test
-  public void testDeleteToken() {
+  void testDeleteToken() {
     User user = mock(User.class);
     String token = "MyToken";
 
@@ -179,8 +188,8 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     verify(dataService).delete(PASSWORD_RESET_TOKEN, passwordResetToken);
   }
 
-  @Test(expectedExceptions = InvalidPasswordResetTokenException.class)
-  public void testDeleteTokenInvalid() {
+  @Test
+  void testDeleteTokenInvalid() {
     User user = mock(User.class);
     String token = "MyToken";
 
@@ -194,6 +203,8 @@ public class PasswordResetTokenRepositoryImplTest extends AbstractMockitoTest {
     String tokenHash = "MyTokenHash";
     when(passwordResetToken.getToken()).thenReturn(tokenHash);
 
-    passwordResetTokenRepositoryImpl.deleteToken(user, token);
+    assertThrows(
+        InvalidPasswordResetTokenException.class,
+        () -> passwordResetTokenRepositoryImpl.deleteToken(user, token));
   }
 }

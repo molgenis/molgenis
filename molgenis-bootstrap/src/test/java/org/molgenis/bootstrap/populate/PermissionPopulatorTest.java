@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap.populate;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,6 +9,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.model.Permission;
@@ -18,26 +21,24 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PermissionPopulatorTest extends AbstractMockitoTest {
+class PermissionPopulatorTest extends AbstractMockitoTest {
   @Mock private PermissionService permissionService;
 
   private PermissionPopulator permissionPopulator;
 
-  @BeforeMethod
+  @BeforeEach
   private void setUpBeforeMethod() {
     permissionPopulator = new PermissionPopulator(permissionService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testPermissionPopulator() {
-    new PermissionPopulator(null);
+  @Test
+  void testPermissionPopulator() {
+    assertThrows(NullPointerException.class, () -> new PermissionPopulator(null));
   }
 
   @Test
-  public void testPopulate() {
+  void testPopulate() {
     ApplicationContext applicationContext = mock(ApplicationContext.class);
 
     ObjectIdentity objectIdentity0 = new ObjectIdentityImpl("type", "id0");

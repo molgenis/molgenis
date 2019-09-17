@@ -1,5 +1,8 @@
 package org.molgenis.core.ui.style;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -9,8 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.style.StyleServiceImpl.BOOTSTRAP_FALL_BACK_THEME;
 import static org.molgenis.core.ui.style.StyleSheetMetadata.STYLE_SHEET;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -34,10 +37,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.core.io.FileSystemResource;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class StyleServiceTest extends AbstractMockitoTest {
+class StyleServiceTest extends AbstractMockitoTest {
   private static final String THEME_MOLGENIS_NAME = "molgenis";
   private static final String THEME_MOLGENIS = "bootstrap-" + THEME_MOLGENIS_NAME + ".min.css";
 
@@ -49,15 +50,15 @@ public class StyleServiceTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   private StyleServiceImpl styleServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     styleServiceImpl =
         new StyleServiceImpl(
             appSettings, idGenerator, fileStore, fileMetaFactory, styleSheetFactory, dataService);
   }
 
   @Test
-  public void testGetAvailableStyles() {
+  void testGetAvailableStyles() {
     StyleSheet styleSheet = mock(StyleSheet.class);
     List<StyleSheet> styleSheets = Collections.singletonList(styleSheet);
     when(styleSheet.getName()).thenReturn(THEME_MOLGENIS);
@@ -70,18 +71,18 @@ public class StyleServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetSelectedStyleUndefined() {
+  void testSetSelectedStyleUndefined() {
     styleServiceImpl.setSelectedStyle("undefined");
     verify(appSettings, never()).setBootstrapTheme(anyString());
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testSetSelectedStyleUnknownStyle() {
-    styleServiceImpl.setSelectedStyle("unknown");
+  @Test
+  void testSetSelectedStyleUnknownStyle() {
+    assertThrows(NullPointerException.class, () -> styleServiceImpl.setSelectedStyle("unknown"));
   }
 
   @Test
-  public void testSetSelectedStyle() {
+  void testSetSelectedStyle() {
     String newTheme = "yeti";
     StyleSheet yetiSheet = mock(StyleSheet.class);
     List<StyleSheet> styleSheets = Collections.singletonList(yetiSheet);
@@ -93,11 +94,11 @@ public class StyleServiceTest extends AbstractMockitoTest {
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
     verify(appSettings).setBootstrapTheme(argument.capture());
-    assertEquals("bootstrap-" + newTheme + ".min.css", argument.getValue());
+    assertEquals(argument.getValue(), "bootstrap-" + newTheme + ".min.css");
   }
 
   @Test
-  public void testGetSelectedStyle() {
+  void testGetSelectedStyle() {
     when(appSettings.getBootstrapTheme()).thenReturn(THEME_MOLGENIS);
 
     StyleSheet styleSheet = mock(StyleSheet.class);
@@ -106,12 +107,12 @@ public class StyleServiceTest extends AbstractMockitoTest {
     when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class))
         .thenReturn(styleSheets.stream());
 
-    assertEquals(styleServiceImpl.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
+    assertEquals(THEME_MOLGENIS_NAME, styleServiceImpl.getSelectedStyle().getName());
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = MolgenisStyleException.class)
-  public void addStylesWithExistingId() throws IOException, MolgenisStyleException {
+  @Test
+  void addStylesWithExistingId() throws IOException, MolgenisStyleException {
     String styleId = "style";
     String bs3FileName = "any";
     String bs4FileName = "any";
@@ -123,12 +124,14 @@ public class StyleServiceTest extends AbstractMockitoTest {
     Repository<Entity> styleSheetRepository = mock(Repository.class);
     when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
     when(styleSheetRepository.findOneById(styleId)).thenReturn(styleSheet);
-    styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
+    assertThrows(
+        MolgenisStyleException.class,
+        () -> styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data));
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  public void addBootstrap3And4Styles() throws IOException, MolgenisStyleException {
+  void addBootstrap3And4Styles() throws IOException, MolgenisStyleException {
     // setup
     String styleId = "my-style.min.css";
     String bs3FileName = "bs3FileName";
@@ -169,7 +172,7 @@ public class StyleServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  public void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException {
+  void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException {
     // setup
     String styleId = "my-style.min.css";
     String bs3FileName = "bs3FileName";
@@ -205,20 +208,21 @@ public class StyleServiceTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = MolgenisStyleException.class)
-  public void getUnknownThemeData() throws MolgenisStyleException {
+  @Test
+  void getUnknownThemeData() {
     String styleName = "no-body";
     Query<StyleSheet> expectedQuery =
         new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
     when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
 
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
-    styleServiceImpl.getThemeData(styleName, version);
+    assertThrows(
+        MolgenisStyleException.class, () -> styleServiceImpl.getThemeData(styleName, version));
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap3ThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap3ThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     FileMeta fileMeta = mock(FileMeta.class);
@@ -236,12 +240,12 @@ public class StyleServiceTest extends AbstractMockitoTest {
     when(fileStore.getFile(fileId)).thenReturn(file);
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap4ThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap4ThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     FileMeta fileMeta = mock(FileMeta.class);
@@ -259,12 +263,12 @@ public class StyleServiceTest extends AbstractMockitoTest {
 
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap4FallBackThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap4FallBackThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     StyleSheet fallBackTheme = mock(StyleSheet.class);
@@ -287,6 +291,6 @@ public class StyleServiceTest extends AbstractMockitoTest {
 
     FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
-    assertEquals(themeData.getPath(), mockFilePath);
+    assertEquals(mockFilePath, themeData.getPath());
   }
 }

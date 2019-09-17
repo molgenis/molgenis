@@ -3,15 +3,14 @@ package org.molgenis.util.mail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MailSenderImplTest extends AbstractMockitoTest {
+class MailSenderImplTest extends AbstractMockitoTest {
   private MailSenderImpl mailSender;
 
   @Mock private MailSettings mailSettings;
@@ -20,20 +19,20 @@ public class MailSenderImplTest extends AbstractMockitoTest {
   @Mock private SimpleMailMessage simpleMailMessage;
   @Mock private SimpleMailMessage secondSimpleMailMessage;
 
-  @BeforeMethod
-  public void beforeMethod() throws IOException {
+  @BeforeEach
+  void beforeMethod() {
     mailSender = new MailSenderImpl(mailSettings, mailSenderFactory);
   }
 
   @Test
-  public void testSendSingleMessage() {
+  void testSendSingleMessage() {
     when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
     mailSender.send(simpleMailMessage);
     verify(actualMailSender).send(simpleMailMessage);
   }
 
   @Test
-  public void testSendTwoMessages() {
+  void testSendTwoMessages() {
     when(mailSenderFactory.createMailSender(mailSettings)).thenReturn(actualMailSender);
     mailSender.send(simpleMailMessage, secondSimpleMailMessage);
     verify(actualMailSender).send(simpleMailMessage, secondSimpleMailMessage);

@@ -1,7 +1,7 @@
 package org.molgenis.semanticsearch.explain.service;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -11,40 +11,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.lucene.search.Explanation;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.util.ResourceUtils;
-import org.testng.annotations.Test;
 
-public class ExplainServiceHelperTest {
+class ExplainServiceHelperTest {
 
   ExplainServiceHelper explainServiceHelper = new ExplainServiceHelper();
 
   @Test
-  public void discoverMatchedQueries() throws JsonSyntaxException, IOException {
+  void discoverMatchedQueries() throws JsonSyntaxException, IOException {
     Explanation explanation =
         new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"), Explanation.class);
     Set<String> discoverMatchedQueries = explainServiceHelper.findMatchedWords(explanation);
-    assertEquals(discoverMatchedQueries.size(), 2);
+    assertEquals(2, discoverMatchedQueries.size());
     assertTrue(discoverMatchedQueries.contains("high blood"));
     assertTrue(discoverMatchedQueries.contains("medic"));
   }
 
   @Test
-  public void getMatchedWord() {
+  void getMatchedWord() {
     assertEquals(
+        "blood",
         explainServiceHelper.getMatchedWord(
-            "weight(label:blood in 20697) [PerFieldSimilarity], result of:"),
-        "blood");
+            "weight(label:blood in 20697) [PerFieldSimilarity], result of:"));
     assertEquals(
+        "blood",
         explainServiceHelper.getMatchedWord(
-            "weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"),
-        "blood");
+            "weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"));
   }
 
   @Test
-  public void testFindQuery() {
+  void testFindQuery() {
     QueryRule queryRule_1 =
         new QueryRule(AttributeMetadata.LABEL, Operator.FUZZY_MATCH, "hypertension");
     QueryRule queryRule_2 =

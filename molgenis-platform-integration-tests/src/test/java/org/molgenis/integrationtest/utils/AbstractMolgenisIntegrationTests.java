@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.utils;
 
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.integrationtest.config.SecurityITConfig.SUPERUSER_NAME;
 import static org.molgenis.integrationtest.config.SecurityITConfig.TOKEN_DESCRIPTION;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -8,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.io.IOException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.integrationtest.config.BootStrapperTestConfig;
@@ -16,6 +17,7 @@ import org.molgenis.integrationtest.config.PostgreSqlTestConfig;
 import org.molgenis.integrationtest.config.SecurityITConfig;
 import org.molgenis.integrationtest.config.WebAppITConfig;
 import org.molgenis.security.core.token.TokenService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,17 +28,14 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = AbstractMolgenisIntegrationTests.Config.class)
-public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpringContextTests {
+public abstract class AbstractMolgenisIntegrationTests extends AbstractMockitoSpringContextTests {
   @Autowired protected WebApplicationContext context;
 
   protected MockMvc mockMvc;
@@ -47,9 +46,8 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 
   private String adminToken;
 
-  @BeforeMethod
+  @BeforeEach
   public void superBeforeMethod() {
-    initMocks(this);
     if (mockMvc == null) {
       mockMvc = webAppContextSetup(context).apply(springSecurity()).alwaysDo(print()).build();
 
@@ -67,14 +65,14 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
    */
   public abstract void beforeMethod();
 
-  @AfterClass
-  public void superAfterClass() throws IOException {
+  @AfterEach
+  public void superAfterEach() throws IOException {
     fileStore.deleteDirectory(fileStore.getStorageDir());
-    afterClass();
+    afterEach();
   }
 
   /** Use this class to implement in your own integration test. */
-  public abstract void afterClass();
+  public abstract void afterEach();
 
   protected String getAdminToken() {
     if (adminToken == null) {

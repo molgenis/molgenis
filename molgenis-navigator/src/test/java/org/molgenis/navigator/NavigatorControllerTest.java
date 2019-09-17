@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Locale;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
@@ -27,7 +29,7 @@ import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +39,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class NavigatorControllerTest extends AbstractMockitoSpringContextTests {
 
   private MockMvc mockMvc;
 
@@ -58,8 +58,8 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @BeforeMethod
-  public void before() {
+  @BeforeEach
+  void before() {
     NavigatorController navigatorController =
         new NavigatorController(
             menuReaderService, appSettings, userAccountService, navigatorService);
@@ -72,7 +72,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
 
   /** Test that a get call to the plugin returns the correct view */
   @Test
-  public void testInit() throws Exception {
+  void testInit() throws Exception {
     when(menuReaderService.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
     when(appSettings.getLanguageCode()).thenReturn("de");
     User user = mock(User.class);
@@ -91,7 +91,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testGetResources() throws Exception {
+  void testGetResources() throws Exception {
     String folderId = "myFolderId";
     Folder folder = Folder.create(folderId, "label", null);
     when(navigatorService.getFolder(folderId)).thenReturn(folder);
@@ -106,7 +106,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testGetResourcesRootFolder() throws Exception {
+  void testGetResourcesRootFolder() throws Exception {
     when(navigatorService.getFolder(null)).thenReturn(null);
     when(navigatorService.getResources(null)).thenReturn(getMockResources());
 
@@ -119,7 +119,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testSearchResources() throws Exception {
+  void testSearchResources() throws Exception {
     String query = "text";
     when(navigatorService.findResources(query)).thenReturn(getMockResources());
 
@@ -132,7 +132,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testCopyResources() throws Exception {
+  void testCopyResources() throws Exception {
     String targetFolderId = "myFolderId";
     List<ResourceIdentifier> resources = getMockResourceIdentifiers();
 
@@ -151,7 +151,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testDownloadResources() throws Exception {
+  void testDownloadResources() throws Exception {
     List<ResourceIdentifier> resources = getMockResourceIdentifiers();
 
     JobExecution jobExecution = mock(JobExecution.class);
@@ -169,7 +169,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testMoveResources() throws Exception {
+  void testMoveResources() throws Exception {
     String targetFolderId = "myFolderId";
     List<ResourceIdentifier> resources = getMockResourceIdentifiers();
 
@@ -183,7 +183,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testUpdateResource() throws Exception {
+  void testUpdateResource() throws Exception {
     String json =
         "{\"resource\":{\"id\":\"p0\",\"type\":\"PACKAGE\",\"label\":\"label\",\"description\":\"description\"}}";
     mockMvc
@@ -201,7 +201,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   }
 
   @Test
-  public void testDelete() throws Exception {
+  void testDelete() throws Exception {
     String json =
         "{\"resources\": [{\"type\": \"PACKAGE\", \"id\": \"p0\"},{\"type\": \"PACKAGE\", \"id\": \"p1\"},{\"type\": \"ENTITY_TYPE\", \"id\": \"e0\"},{\"type\": \"ENTITY_TYPE\", \"id\": \"e1\"}]}";
     mockMvc

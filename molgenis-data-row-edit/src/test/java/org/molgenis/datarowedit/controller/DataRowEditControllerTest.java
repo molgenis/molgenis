@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
@@ -17,12 +19,10 @@ import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @Configuration
 @EnableWebMvc
-public class DataRowEditControllerTest {
+class DataRowEditControllerTest {
   private MockMvc mockMvc;
 
   @Mock private MenuReaderService menuReaderService;
@@ -31,8 +31,8 @@ public class DataRowEditControllerTest {
 
   @Mock private UserAccountService userAccountService;
 
-  @BeforeMethod
-  public void before() {
+  @BeforeEach
+  void before() {
     initMocks(this);
 
     when(menuReaderService.findMenuItemPath(DataRowEditController.ID))
@@ -48,7 +48,7 @@ public class DataRowEditControllerTest {
   }
 
   @Test
-  public void testInit() throws Exception {
+  void testInit() throws Exception {
     mockMvc
         .perform(get(DataRowEditController.URI))
         .andExpect(status().isOk())

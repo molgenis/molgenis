@@ -3,31 +3,33 @@ package org.molgenis.test;
 import static java.util.Objects.requireNonNull;
 import static org.mockito.Mockito.mockitoSession;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-public class AbstractMockitoTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
+@ExtendWith(SpringExtension.class)
+public class AbstractMockitoSpringContextTests {
   private final Strictness strictness;
 
   private MockitoSession mockitoSession;
 
-  public AbstractMockitoTestNGSpringContextTests() {
+  public AbstractMockitoSpringContextTests() {
     this(Strictness.STRICT_STUBS);
   }
 
-  public AbstractMockitoTestNGSpringContextTests(Strictness strictness) {
+  public AbstractMockitoSpringContextTests(Strictness strictness) {
     this.strictness = requireNonNull(strictness);
   }
 
-  @BeforeMethod
+  @BeforeEach
   public void initMocks() {
     mockitoSession = mockitoSession().initMocks(this).strictness(strictness).startMocking();
   }
 
-  @AfterMethod
+  @AfterEach
   public void tearDownAfterMethod() {
     mockitoSession.finishMocking();
   }

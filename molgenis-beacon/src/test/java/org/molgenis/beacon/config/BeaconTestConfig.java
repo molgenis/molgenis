@@ -12,4 +12,4 @@ import org.springframework.context.annotation.Import;
   GenomeBrowserAttributesMetadata.class,
   GenomeBrowserPackage.class
 })
-public class BeaconTestConfig {}
+class BeaconTestConfig {}

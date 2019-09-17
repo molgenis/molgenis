@@ -1,7 +1,13 @@
 package org.molgenis.security.core;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.security.core.SidUtils.createRoleAuthority;
+import static org.molgenis.security.core.SidUtils.createSecurityContextSid;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -10,73 +16,70 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SidUtilsTest {
+class SidUtilsTest {
 
   private SecurityContext previousContext;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     SecurityContextHolder.setContext(testContext);
   }
 
-  @AfterMethod
-  public void tearDownAfterMethod() {
+  @AfterEach
+  void tearDownAfterMethod() {
     SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
-  public void createSecurityContextSidUser() {
+  void createSecurityContextSidUser() {
     String principal = "username";
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
-    assertEquals(SidUtils.createSecurityContextSid(), new PrincipalSid(principal));
+    assertEquals(new PrincipalSid(principal), createSecurityContextSid());
   }
 
   @Test
-  public void createSecurityContextSidSystem() {
+  void createSecurityContextSidSystem() {
     SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
-    assertEquals(SidUtils.createSecurityContextSid(), new GrantedAuthoritySid("ROLE_SYSTEM"));
+    assertEquals(new GrantedAuthoritySid("ROLE_SYSTEM"), createSecurityContextSid());
   }
 
   @Test
-  public void createSecurityContextSidAnonymous() {
+  void createSecurityContextSidAnonymous() {
     SecurityContextHolder.getContext().setAuthentication(null);
-    assertEquals(SidUtils.createSecurityContextSid(), new GrantedAuthoritySid("ROLE_ANONYMOUS"));
+    assertEquals(new GrantedAuthoritySid("ROLE_ANONYMOUS"), createSecurityContextSid());
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void createSecurityContextNoPrincipal() {
+  @Test
+  void createSecurityContextNoPrincipal() {
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken(null, null));
-    SidUtils.createSecurityContextSid();
+    assertThrows(NullPointerException.class, SidUtils::createSecurityContextSid);
   }
 
   @Test
-  public void testCreateSidUser() {
+  void testCreateSidUser() {
     Sid sid = SidUtils.createUserSid("username");
-    assertEquals(sid, new PrincipalSid("username"));
+    assertEquals(new PrincipalSid("username"), sid);
   }
 
   @Test
-  public void testCreateSidUsernameAnonymous() {
+  void testCreateSidUsernameAnonymous() {
     Sid sid = SidUtils.createUserSid("anonymous");
-    assertEquals(sid, new GrantedAuthoritySid("ROLE_ANONYMOUS"));
+    assertEquals(new GrantedAuthoritySid("ROLE_ANONYMOUS"), sid);
   }
 
   @Test
-  public void testCreateSidRole() {
+  void testCreateSidRole() {
     Sid sid = SidUtils.createRoleSid("NAME");
-    assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")));
+    assertEquals(new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")), sid);
   }
 
   @Test
-  public void testCreateRoleAuthority() {
-    assertEquals("ROLE_NAME", SidUtils.createRoleAuthority("NAME"));
+  void testCreateRoleAuthority() {
+    assertEquals(createRoleAuthority("NAME"), "ROLE_NAME");
   }
 }

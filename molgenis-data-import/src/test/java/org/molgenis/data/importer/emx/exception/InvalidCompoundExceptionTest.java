@@ -1,30 +1,27 @@
 package org.molgenis.data.importer.emx.exception;
 
-import static org.testng.Assert.*;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class InvalidCompoundExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class InvalidCompoundExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-import");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new InvalidCompoundException("attr", "attrName", "entityTypeId", "attributes", 3),
         lang,
         message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en",

@@ -2,7 +2,7 @@ package org.molgenis.integrationtest.platform.export;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -24,15 +25,12 @@ import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.integrationtest.utils.TestProgress;
 import org.molgenis.integrationtest.utils.TestTimeZoneProvider;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -42,9 +40,8 @@ import org.testng.annotations.Test;
       ImportI18nConfig.class,
       TestTimeZoneProvider.class
     })
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContextTests {
+public class EmxExportServiceIT extends AbstractMockitoSpringContextTests {
 
   private static final String USERNAME = "emx_user";
   private static final String ROLE_SU = "SU";
@@ -111,7 +108,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
             new XSSFExcelExtractor(actualWorkbook).getText().replaceAll("\t", "");
         String expectedWorkbookString =
             new XSSFExcelExtractor(expected).getText().replaceAll("\t", "");
-        assertEquals(actualWorkbookString, expectedWorkbookString);
+        assertEquals(expectedWorkbookString, actualWorkbookString);
       }
     }
 
@@ -121,9 +118,9 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
             4,
             "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata.",
             "");
-    assertEquals(progress.getMessage(), expectedProgress.getMessage());
-    assertEquals(progress.getProgress(), expectedProgress.getProgress());
-    assertEquals(progress.getProgressMax(), expectedProgress.getProgressMax());
-    assertEquals(progress.getResultUrl(), expectedProgress.getResultUrl());
+    assertEquals(expectedProgress.getMessage(), progress.getMessage());
+    assertEquals(expectedProgress.getProgress(), progress.getProgress());
+    assertEquals(expectedProgress.getProgressMax(), progress.getProgressMax());
+    assertEquals(expectedProgress.getResultUrl(), progress.getResultUrl());
   }
 }

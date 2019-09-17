@@ -1,11 +1,14 @@
 package org.molgenis.jobs.schedule;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -29,11 +32,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {JobSchedulerTest.Config.class})
-public class JobSchedulerTest extends AbstractMolgenisSpringTest {
+class JobSchedulerTest extends AbstractMolgenisSpringTest {
   @Autowired private Config config;
 
   @Autowired private JobScheduler jobScheduler;
@@ -50,8 +51,8 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
   private ScheduledJob scheduledJob;
   private JobKey jobKey = JobKey.jobKey(id, JobScheduler.SCHEDULED_JOB_GROUP);
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     config.resetMocks();
     reset(scheduledJobType);
     scheduledJob = scheduledJobFactory.create();
@@ -60,7 +61,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void runNow() throws SchedulerException {
+  void runNow() throws SchedulerException {
     when(dataService.findOneById(SCHEDULED_JOB, id, ScheduledJob.class)).thenReturn(scheduledJob);
     when(quartzScheduler.checkExists(jobKey)).thenReturn(false);
 
@@ -70,16 +71,16 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
         .scheduleJob(ArgumentMatchers.any(JobDetail.class), ArgumentMatchers.any(Trigger.class));
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:sys_job_ScheduledJob id:id attribute:null")
-  public void runNowUnknownEntity() {
+  @Test
+  void runNowUnknownEntity() {
     when(dataService.findOneById(SCHEDULED_JOB, id)).thenReturn(null);
-    jobScheduler.runNow(id);
+    Exception exception = assertThrows(UnknownEntityException.class, () -> jobScheduler.runNow(id));
+    assertThat(exception.getMessage())
+        .containsPattern("type:sys_job_ScheduledJob id:id attribute:null");
   }
 
   @Test
-  public void runNowExists() throws SchedulerException {
+  void runNowExists() throws SchedulerException {
 
     when(dataService.findOneById(SCHEDULED_JOB, id, ScheduledJob.class)).thenReturn(scheduledJob);
     when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
@@ -90,7 +91,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void schedule() throws SchedulerException {
+  void schedule() throws SchedulerException {
     ScheduledJob scheduledJob = scheduledJobFactory.create();
     scheduledJob.setId(id);
     scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
@@ -107,7 +108,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void scheduleInactive() throws SchedulerException {
+  void scheduleInactive() throws SchedulerException {
     ScheduledJob scheduledJob = scheduledJobFactory.create();
     scheduledJob.setId(id);
     scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
@@ -123,8 +124,8 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
         .scheduleJob(ArgumentMatchers.any(JobDetail.class), ArgumentMatchers.any(Trigger.class));
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void scheduleInvalidCronExpression() throws SchedulerException {
+  @Test
+  void scheduleInvalidCronExpression() throws SchedulerException {
     ScheduledJob scheduledJob = scheduledJobFactory.create();
     scheduledJob.setId(id);
     scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "XXX");
@@ -132,11 +133,11 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
     scheduledJob.set(ScheduledJobMetadata.ACTIVE, false);
     scheduledJob.setType(scheduledJobType);
 
-    jobScheduler.schedule(scheduledJob);
+    assertThrows(MolgenisValidationException.class, () -> jobScheduler.schedule(scheduledJob));
   }
 
   @Test
-  public void scheduleExisting() throws SchedulerException {
+  void scheduleExisting() throws SchedulerException {
     ScheduledJob scheduledJob = scheduledJobFactory.create();
     scheduledJob.setId(id);
     scheduledJob.set(ScheduledJobMetadata.CRON_EXPRESSION, "	0/20 * * * * ?");
@@ -155,7 +156,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void unschedule() throws SchedulerException {
+  void unschedule() throws SchedulerException {
     String id = "id";
     when(dataService.findOneById(SCHEDULED_JOB, id, ScheduledJob.class)).thenReturn(scheduledJob);
     jobScheduler.unschedule(id);
@@ -164,26 +165,26 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({SecurityPackage.class, JobTestConfig.class})
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
     @Mock private Scheduler quartzScheduler;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
-    public void resetMocks() {
+    void resetMocks() {
       reset(quartzScheduler);
     }
 
     @Bean
-    public JobScheduler jobScheduler() {
+    JobScheduler jobScheduler() {
       return new JobScheduler(quartzScheduler(), dataService);
     }
 
     @Bean
-    public Scheduler quartzScheduler() {
+    Scheduler quartzScheduler() {
       return quartzScheduler;
     }
   }

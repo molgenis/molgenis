@@ -3,10 +3,10 @@ package org.molgenis.test;
 import static java.util.Objects.requireNonNull;
 import static org.mockito.Mockito.mockitoSession;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 
 public class AbstractMockitoTest {
   private final Strictness strictness;
@@ -23,13 +23,13 @@ public class AbstractMockitoTest {
     this.strictness = requireNonNull(strictness);
   }
 
-  @BeforeMethod
-  public void initMocks() {
+  @BeforeEach
+  protected void initMocks() {
     mockitoSession = mockitoSession().initMocks(this).strictness(strictness).startMocking();
   }
 
-  @AfterMethod
-  public void tearDownAfterMethod() {
+  @AfterEach
+  protected void tearDownAfterMethod() {
     mockitoSession.finishMocking();
   }
 }

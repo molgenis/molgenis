@@ -1,15 +1,17 @@
 package org.molgenis.core.ui.freemarker;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplateFactory;
@@ -22,18 +24,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = RepositoryTemplateLoaderTest.Config.class)
-public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
+class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   @Configuration
   @Import({FreemarkerTemplateMetadata.class, FreemarkerTemplateFactory.class})
   static class Config {
     @Autowired private DataService dataService;
 
     @Bean
-    public RepositoryTemplateLoader repositoryTemplateLoader() {
+    RepositoryTemplateLoader repositoryTemplateLoader() {
       return new RepositoryTemplateLoader(dataService);
     }
   }
@@ -48,8 +48,8 @@ public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   private FreemarkerTemplate template1Modified;
   private FreemarkerTemplate template2;
 
-  @BeforeMethod
-  public void init() {
+  @BeforeEach
+  void init() {
     template1 = freemarkerTemplateFactory.create();
     template1.setId("1234");
     template1.setName("template1");
@@ -66,13 +66,13 @@ public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
     template2.setValue("template2\ncontents");
   }
 
-  @BeforeMethod
-  public void reset() {
+  @BeforeEach
+  void reset() {
     Mockito.reset(dataService);
   }
 
   @Test
-  public void loadAndRead() throws IOException {
+  void loadAndRead() throws IOException {
     when(dataService.findOne(
             FREEMARKER_TEMPLATE,
             new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
@@ -85,7 +85,7 @@ public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void lastModifiedEqualsMinusOne() throws IOException {
+  void lastModifiedEqualsMinusOne() throws IOException {
     when(dataService.findOne(
             FREEMARKER_TEMPLATE,
             new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
@@ -96,7 +96,7 @@ public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void newSourceReturnedWhenContentChanges() throws IOException {
+  void newSourceReturnedWhenContentChanges() throws IOException {
     when(dataService.findOne(
             FREEMARKER_TEMPLATE,
             new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
@@ -116,7 +116,7 @@ public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void sourceBelongsToContentAndCanBeReadMultipleTimes() throws IOException {
+  void sourceBelongsToContentAndCanBeReadMultipleTimes() throws IOException {
     when(dataService.findOne(
             FREEMARKER_TEMPLATE,
             new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),

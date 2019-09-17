@@ -1,10 +1,10 @@
 package org.molgenis.dataexplorer.negotiator.config;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -19,7 +19,7 @@ public class NegotiatorConfigTest extends AbstractSystemEntityTest {
   @Autowired NegotiatorConfigFactory factory;
 
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, NegotiatorConfig.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }

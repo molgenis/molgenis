@@ -21,7 +21,7 @@
   <url>http://www.molgenis.org</url>
   <licenses>
     <license>
-      <name>GNU Library or Lesser General Public License (LGPL)</name>
+      <name>GNU Library or Lesser General License (LGPL)</name>
     </license>
   </licenses>
   <scm>
@@ -74,9 +74,9 @@
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.3</elasticsearch.version>
-    <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
     <mockito.version>3.0.0</mockito.version>
+    <junit-jupiter.version>5.5.2</junit-jupiter.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
     <!-- Java 11 support -->
@@ -112,7 +112,6 @@
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
-    <hamcrest-all.version>1.3</hamcrest-all.version>
     <awaitility.version>3.0.0</awaitility.version>
     <greenmail-webapp.version>1.5.5</greenmail-webapp.version>
 
@@ -923,14 +922,9 @@
         <version>${findbugs-jsr305.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>${testng.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest-all</artifactId>
-        <version>${hamcrest.version}</version>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>

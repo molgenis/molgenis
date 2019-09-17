@@ -2,16 +2,18 @@ package org.molgenis.data.security.permission.inheritance;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.permission.inheritance.InheritanceTestUtils.getInheritedPermissionsResult;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -29,22 +31,20 @@ import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 // Check InheritanceTestUtils for a description of the test setup
-public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
+class PermissionInheritanceResolverTest extends AbstractMockitoTest {
   @Mock private UserRoleTools userRoleTools;
   @Mock private EntityHelper entityHelper;
   private PermissionInheritanceResolver resolver;
 
-  @BeforeMethod
+  @BeforeEach
   private void setUpBeforeMethod() {
     resolver = new PermissionInheritanceResolver(userRoleTools, entityHelper);
   }
 
   @Test
-  public void testGetInheritedPermissions() {
+  void testGetInheritedPermissions() {
     Sid user = mock(PrincipalSid.class);
     Sid role1Sid = new GrantedAuthoritySid("ROLE_role1");
     Sid role2Sid = new GrantedAuthoritySid("ROLE_role2");
@@ -64,11 +64,11 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     InheritedPermissionsResult expected =
         getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
 
-    assertEquals(resolver.getInheritedPermissionsResults(entityAcl, user), expected);
+    assertEquals(expected, resolver.getInheritedPermissionsResults(entityAcl, user));
   }
 
   @Test
-  public void testConvertToInheritedPermissions() {
+  void testConvertToInheritedPermissions() {
     Sid role1Sid = new GrantedAuthoritySid("ROLE_role1");
     Sid role2Sid = new GrantedAuthoritySid("ROLE_role2");
     Sid role3Sid = new GrantedAuthoritySid("ROLE_role3");
@@ -117,8 +117,9 @@ public class PermissionInheritanceResolverTest extends AbstractMockitoTest {
     LabelledPermission role2Permission =
         LabelledPermission.create(role2Sid, null, PermissionSet.WRITE, Collections.emptySet());
 
-    List<LabelledPermission> expected = Arrays.asList(role2Permission, packPermission);
+    Set<LabelledPermission> expected =
+        new HashSet<>(Arrays.asList(role2Permission, packPermission));
 
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

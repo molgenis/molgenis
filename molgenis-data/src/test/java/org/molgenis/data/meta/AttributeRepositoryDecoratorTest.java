@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -13,10 +15,8 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest {
+class AttributeRepositoryDecoratorTest extends AbstractMockitoTest {
   private AttributeRepositoryDecorator repo;
   @Mock private Repository<Attribute> delegateRepository;
   @Mock private DataService dataService;
@@ -28,13 +28,13 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private RepositoryCollection backend1;
   @Mock private RepositoryCollection backend2;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     repo = new AttributeRepositoryDecorator(delegateRepository, dataService);
   }
 
   @Test
-  public void updateNonSystemAbstractEntity() {
+  void updateNonSystemAbstractEntity() {
     when(dataService.getMeta()).thenReturn(metadataService);
     when(metadataService.getConcreteChildren(abstractEntityType))
         .thenReturn(Stream.of(concreteEntityType1, concreteEntityType2));

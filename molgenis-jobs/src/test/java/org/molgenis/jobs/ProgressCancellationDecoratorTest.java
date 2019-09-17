@@ -1,112 +1,115 @@
 package org.molgenis.jobs;
 
+import static java.lang.Long.valueOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.concurrent.CancellationException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ProgressCancellationDecoratorTest extends AbstractMockitoTest {
+class ProgressCancellationDecoratorTest extends AbstractMockitoTest {
   private ProgressCancellationDecorator progressCancellationDecorator;
   @Mock private Progress delegateProgress;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     progressCancellationDecorator = new ProgressCancellationDecorator(delegateProgress);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testProgressCancellationDecorator() {
-    new ProgressCancellationDecorator(null);
+  @Test
+  void testProgressCancellationDecorator() {
+    assertThrows(NullPointerException.class, () -> new ProgressCancellationDecorator(null));
   }
 
   @Test
-  public void testDelegate() {
-    assertEquals(progressCancellationDecorator.delegate(), delegateProgress);
+  void testDelegate() {
+    assertEquals(delegateProgress, progressCancellationDecorator.delegate());
   }
 
   @Test
-  public void testStart() {
+  void testStart() {
     progressCancellationDecorator.start();
     verify(delegateProgress).start();
   }
 
   @Test
-  public void testSetProgressMax() {
+  void testSetProgressMax() {
     progressCancellationDecorator.setProgressMax(123);
     verify(delegateProgress).setProgressMax(123);
   }
 
   @Test
-  public void testProgress() {
+  void testProgress() {
     progressCancellationDecorator.progress(123, "message");
     verify(delegateProgress).progress(123, "message");
   }
 
-  @Test(expectedExceptions = CancellationException.class)
-  public void testProgressCanceled() {
+  @Test
+  void testProgressCanceled() {
     progressCancellationDecorator.canceling();
-    progressCancellationDecorator.progress(123, "message");
+    assertThrows(
+        CancellationException.class, () -> progressCancellationDecorator.progress(123, "message"));
   }
 
   @Test
-  public void testIncrement() {
+  void testIncrement() {
     progressCancellationDecorator.increment(123);
     verify(delegateProgress).increment(123);
   }
 
   @Test
-  public void testStatus() {
+  void testStatus() {
     progressCancellationDecorator.status("message");
     verify(delegateProgress).status("message");
   }
 
   @Test
-  public void testFailed() {
+  void testFailed() {
     Throwable throwable = mock(Throwable.class);
     progressCancellationDecorator.failed("message", throwable);
     verify(delegateProgress).failed("message", throwable);
   }
 
   @Test
-  public void testCanceled() {
+  void testCanceled() {
     progressCancellationDecorator.canceled();
     verify(delegateProgress).canceled();
   }
 
   @Test
-  public void testSuccess() {
+  void testSuccess() {
     progressCancellationDecorator.success();
     verify(delegateProgress).success();
   }
 
   @Test
-  public void testTimeRunning() {
+  void testTimeRunning() {
     when(delegateProgress.timeRunning()).thenReturn(123L);
-    assertEquals(progressCancellationDecorator.timeRunning(), Long.valueOf(123L));
+    assertEquals(valueOf(123L), progressCancellationDecorator.timeRunning());
   }
 
   @Test
-  public void testSetResultUrl() {
+  void testSetResultUrl() {
     progressCancellationDecorator.setResultUrl("https://my.url.org/");
     verify(delegateProgress).setResultUrl("https://my.url.org/");
   }
 
   @Test
-  public void testGetJobExecution() {
+  void testGetJobExecution() {
     JobExecution jobExecution = mock(JobExecution.class);
     when(delegateProgress.getJobExecution()).thenReturn(jobExecution);
-    assertEquals(progressCancellationDecorator.getJobExecution(), jobExecution);
+    assertEquals(jobExecution, progressCancellationDecorator.getJobExecution());
   }
 
   @Test
-  public void testCanceling() {
+  void testCanceling() {
     progressCancellationDecorator.canceling();
     verify(delegateProgress).canceling();
   }

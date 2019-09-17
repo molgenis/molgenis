@@ -7,25 +7,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class UserRepositoryValidationDecoratorTest extends AbstractMockitoTest {
+class UserRepositoryValidationDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<User> delegateRepository;
   @Mock private UserValidator userValidator;
   private UserRepositoryValidationDecorator userRepositoryValidationDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     userRepositoryValidationDecorator =
         new UserRepositoryValidationDecorator(delegateRepository, userValidator);
   }
 
   @Test
-  public void testAdd() {
+  void testAdd() {
     User user = mock(User.class);
     userRepositoryValidationDecorator.add(user);
     verify(userValidator).validate(user);
@@ -33,7 +33,7 @@ public class UserRepositoryValidationDecoratorTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testAddStream() {
+  void testAddStream() {
     User user = mock(User.class);
 
     when(delegateRepository.add(any(Stream.class)))
@@ -46,7 +46,7 @@ public class UserRepositoryValidationDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     String userId = "MyUserId";
     User user = mock(User.class);
     when(user.getId()).thenReturn(userId);
@@ -60,7 +60,7 @@ public class UserRepositoryValidationDecoratorTest extends AbstractMockitoTest {
 
   @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
   @Test
-  public void testUpdateStream() {
+  void testUpdateStream() {
     String userId = "MyUserId";
     User user = mock(User.class);
     when(user.getId()).thenReturn(userId);

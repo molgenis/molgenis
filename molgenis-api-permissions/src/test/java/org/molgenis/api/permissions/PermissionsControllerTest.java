@@ -1,9 +1,9 @@
 package org.molgenis.api.permissions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.api.permissions.PermissionsController.BASE_URI;
 import static org.molgenis.api.permissions.PermissionsController.DEFAULT_PAGE;
 import static org.molgenis.api.permissions.PermissionsController.DEFAULT_PAGESIZE;
@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import cz.jirutka.rsql.parser.RSQLParser;
@@ -24,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -51,12 +52,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
+class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @Mock private PermissionService permissionsService;
@@ -70,9 +69,8 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   private GrantedAuthoritySid role2;
   private ObjectIdentityImpl objectIdentity;
 
-  @BeforeMethod
+  @BeforeEach
   private void beforeMethod() {
-    initMocks(this);
     RSQLParser rsqlParser = new RSQLParser();
     PermissionsController controller =
         new PermissionsController(
@@ -91,7 +89,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreateAcl() throws Exception {
+  void testCreateAcl() throws Exception {
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     mockMvc
         .perform(post(BASE_URI + "/" + OBJECTS + "/typeId/identifier"))
@@ -101,14 +99,14 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetTypes() throws Exception {
+  void testGetTypes() throws Exception {
     mockMvc.perform(get(BASE_URI + "/" + TYPES)).andExpect(status().isOk());
 
     verify(permissionsService).getLabelledTypes();
   }
 
   @Test
-  public void testGetPermissionsForType() throws Exception {
+  void testGetPermissionsForType() throws Exception {
     mockMvc
         .perform(get(BASE_URI + "/" + TYPES + "/permissions/typeId?q=user==test"))
         .andExpect(status().isOk());
@@ -117,7 +115,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetAclsForType() throws Exception {
+  void testGetAclsForType() throws Exception {
     when(permissionsService.getObjects("typeId", DEFAULT_PAGE, DEFAULT_PAGESIZE))
         .thenReturn(
             Sets.newHashSet(
@@ -132,12 +130,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[{\"id\":\"test2\",\"label\":\"label2\"},{\"id\":\"test1\",\"label\":\"label1\"}]}");
+        "{\"page\":{\"size\":100,\"totalElements\":80,\"totalPages\":1,\"number\":1},\"links\":{\"self\":\"http://localhost/api/permissions/objects/typeId?page=1&pageSize=100\"},\"data\":[{\"id\":\"test2\",\"label\":\"label2\"},{\"id\":\"test1\",\"label\":\"label1\"}]}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
-  public void testGetAcePermission() throws Exception {
+  void testGetAcePermission() throws Exception {
     Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
     Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
     Set<LabelledPermission> objectPermissionResponses =
@@ -176,12 +174,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}}");
+        "{\"data\":{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
-  public void testGetAcePermissions() throws Exception {
+  void testGetAcePermissions() throws Exception {
     Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
     Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
     Set<LabelledPermission> objectPermissionResponses =
@@ -218,12 +216,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"links\":{\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
-  public void testGetAcePermissionsPaged() throws Exception {
+  void testGetAcePermissionsPaged() throws Exception {
     Sid sid1 = new GrantedAuthoritySid("ROLE_role1");
     Sid sid2 = new GrantedAuthoritySid("ROLE_role2");
     Set<LabelledPermission> objectPermissionResponses =
@@ -265,12 +263,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}");
+        "{\"page\":{\"size\":10,\"totalElements\":80,\"totalPages\":8,\"number\":2},\"links\":{\"previous\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=1&pageSize=10\",\"self\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=2&pageSize=10\",\"next\":\"http://localhost/api/permissions/typeId?q=user==user1,role=in=(role1,role2)&page=3&pageSize=10\"},\"data\":{\"id\":\"typeId\",\"label\":\"typeLabel\",\"objects\":[{\"id\":\"identifier\",\"label\":\"label\",\"permissions\":[{\"role\":\"role2\",\"permission\":\"WRITE\"},{\"role\":\"role1\",\"permission\":\"READ\"}]}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
-  public void testGetAllPermissionsForUser() throws Exception {
+  void testGetAllPermissionsForUser() throws Exception {
     Set<LabelledPermission> objectPermissionResponses =
         Sets.newHashSet(
             LabelledPermission.create(
@@ -299,12 +297,12 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
             .andReturn();
 
     assertEquals(
-        result.getResponse().getContentAsString(),
-        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"}]}}");
+        "{\"data\":{\"permissions\":[{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"READ\"},{\"user\":\"user1\",\"object\":{\"id\":\"identifier\",\"label\":\"label\"},\"type\":{\"id\":\"typeId\",\"entityType\":\"entityTypeId\",\"label\":\"typeLabel\"},\"permission\":\"WRITE\"}]}}",
+        result.getResponse().getContentAsString());
   }
 
   @Test
-  public void testUpdatePermission() throws Exception {
+  void testUpdatePermission() throws Exception {
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     String requestJson =
         "{"
@@ -334,7 +332,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testUpdatePermissionsForType() throws Exception {
+  void testUpdatePermissionsForType() throws Exception {
     String requestJson =
         "{"
             + "objects:[{"
@@ -381,7 +379,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreatePermissionsForType() throws Exception {
+  void testCreatePermissionsForType() throws Exception {
     String requestJson =
         "{"
             + "objects:[{"
@@ -427,7 +425,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreatePermission() throws Exception {
+  void testCreatePermission() throws Exception {
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     String requestJson =
         "{"
@@ -457,7 +455,7 @@ public class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testDeletePermission() throws Exception {
+  void testDeletePermission() throws Exception {
     when(entityHelper.getObjectIdentity("typeId", "identifier")).thenReturn(objectIdentity);
     String requestJson = "{" + "user:user1" + "}";
     mockMvc

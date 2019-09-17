@@ -1,27 +1,26 @@
 package org.molgenis.data.transaction;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.UnknownRepositoryCollectionException;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 public class UnknownRepositoryCollectionExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new UnknownRepositoryCollectionException("MyRepositoryCollection"), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "Unknown repository collection 'MyRepositoryCollection'."};
     Object[] nlParams = {"nl", "Onbekende opslagplaats verzameling 'MyRepositoryCollection'."};
     return new Object[][] {enParams, nlParams};

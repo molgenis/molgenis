@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
@@ -25,11 +27,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /** Created by mslofstra on 30/01/2018. */
-public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest {
+class ImportWizardControllerMockMVCTest extends AbstractMockitoTest {
   @Mock private ImportWizardController controller;
   @Mock private UploadWizardPage uploadWizardPage;
   @Mock private OptionsWizardPage optionsWizardPage;
@@ -49,8 +49,8 @@ public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest {
 
   private MockMvc mockMvc;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     controller =
         new ImportWizardController(
             uploadWizardPage,
@@ -68,7 +68,7 @@ public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testInvalidAction() throws Exception {
+  void testInvalidAction() throws Exception {
     MockMultipartFile vcfFile = new MockMultipartFile("file", "abcd".getBytes());
     when(fileStore.store(any(InputStream.class), eq(""))).thenReturn(file);
     mockMvc
@@ -81,7 +81,7 @@ public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testRepositoryExists() throws Exception {
+  void testRepositoryExists() throws Exception {
     MockMultipartFile vcfFile = new MockMultipartFile("file", "file.vcf", null, "abcd".getBytes());
     when(importServiceFactory.getSupportedFileExtensions())
         .thenReturn(Collections.singleton("vcf"));

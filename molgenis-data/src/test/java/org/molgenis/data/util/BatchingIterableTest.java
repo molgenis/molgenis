@@ -1,28 +1,28 @@
 package org.molgenis.data.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class BatchingIterableTest {
-  public static List<Integer> ITEMS_LIST;
+class BatchingIterableTest {
+  private static List<Integer> ITEMS_LIST;
 
-  @BeforeClass
-  public static void setUpBeforeClass() {
+  @BeforeAll
+  static void setUpBeforeClass() {
     ITEMS_LIST = Arrays.asList(1, 2, 3, 4);
   }
 
   // parameterized test testing combinations of offset, limit, batchSize
-  @DataProvider(name = "iteratorTest")
-  public static Iterator<Object[]> createData1() {
+  static Iterator<Object[]> createData1() {
     List<Object[]> paramList = new ArrayList<>();
 
     for (int batchSize = 1; batchSize < ITEMS_LIST.size() + 1; ++batchSize) {
@@ -39,10 +39,11 @@ public class BatchingIterableTest {
     return paramList.iterator();
   }
 
-  @Test(dataProvider = "iteratorTest")
-  public void iterator(int offset, int limit, int batchSize) {
+  @ParameterizedTest
+  @MethodSource("createData1")
+  void iterator(int offset, int limit, int batchSize) {
     Iterable<Integer> iterable =
-        new BatchingIterable<Integer>(batchSize, offset, limit) {
+        new BatchingIterable<>(batchSize, offset, limit) {
           @Override
           protected List<Integer> getBatch(int offset, int batchSize) {
             List<Integer> batchList;
@@ -60,7 +61,7 @@ public class BatchingIterableTest {
     int actualNrItems = 0;
     for (Integer anIterable : iterable) {
       int intValue = anIterable;
-      assertEquals(intValue, expectedValue++);
+      assertEquals(expectedValue++, intValue);
       ++actualNrItems;
     }
 
@@ -76,9 +77,9 @@ public class BatchingIterableTest {
   }
 
   @Test
-  public void iteratorNoResults() {
+  void iteratorNoResults() {
     Iterable<Integer> iterable =
-        new BatchingIterable<Integer>(1000, 0, 10) {
+        new BatchingIterable<>(1000, 0, 10) {
           @Override
           protected List<Integer> getBatch(int offset, int batchSize) {
             return Collections.emptyList();

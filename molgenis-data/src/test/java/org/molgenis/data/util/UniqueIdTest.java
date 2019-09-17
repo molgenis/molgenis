@@ -1,12 +1,12 @@
 package org.molgenis.data.util;
 
-import static org.testng.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class UniqueIdTest {
+class UniqueIdTest {
   @Test
-  public void testGetId() {
+  void testGetId() {
     UniqueId uniqueId = new UniqueId();
     assertNotEquals(uniqueId.getId(), uniqueId.getId());
   }

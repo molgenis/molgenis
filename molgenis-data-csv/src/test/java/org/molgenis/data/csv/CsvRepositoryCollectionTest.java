@@ -1,40 +1,41 @@
 package org.molgenis.data.csv;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.testng.annotations.Test;
 
-public class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
+class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException {
+  void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException {
     File csvFile = new ClassPathResource("testdata.csv").getFile();
     CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
     repo.setEntityTypeFactory(entityTypeFactory);
     repo.setAttributeFactory(attrMetaFactory);
     assertNotNull(repo.getEntityTypeIds());
-    assertEquals(Iterables.size(repo.getEntityTypeIds()), 1);
-    assertEquals(Iterables.get(repo.getEntityTypeIds(), 0), "testdata");
+    assertEquals(1, size(repo.getEntityTypeIds()));
+    assertEquals("testdata", get(repo.getEntityTypeIds(), 0));
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  public void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException {
+  void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException {
     File zip = File.createTempFile("file", ".zip");
     try (FileOutputStream fos = new FileOutputStream(zip)) {
       fos.write(
@@ -487,7 +488,7 @@ public class CsvRepositoryCollectionTest extends AbstractMolgenisSpringTest {
     repo.setEntityTypeFactory(entityTypeFactory);
     repo.setAttributeFactory(attrMetaFactory);
     assertNotNull(repo.getEntityTypeIds());
-    assertEquals(Iterables.size(repo.getEntityTypeIds()), 3);
+    assertEquals(3, size(repo.getEntityTypeIds()));
     assertNotNull(repo.getRepository("0"));
     assertNotNull(repo.getRepository("1"));
   }

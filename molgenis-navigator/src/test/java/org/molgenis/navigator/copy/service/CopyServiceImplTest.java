@@ -3,6 +3,8 @@ package org.molgenis.navigator.copy.service;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -14,6 +16,8 @@ import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE;
 import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE_ABSTRACT;
 import static org.molgenis.navigator.model.ResourceType.PACKAGE;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.UnknownPackageException;
@@ -28,10 +32,8 @@ import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class CopyServiceImplTest extends AbstractMockitoTest {
+class CopyServiceImplTest extends AbstractMockitoTest {
 
   @Mock private ResourceCollector resourceCollector;
   @Mock private MetaDataService metadataService;
@@ -40,8 +42,8 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
   @Mock private ContextMessageSource contextMessageSource;
   private CopyServiceImpl copyService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     copyService =
         new CopyServiceImpl(
             resourceCollector,
@@ -51,21 +53,23 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
             contextMessageSource);
   }
 
-  @Test(
-      expectedExceptions = CopyFailedException.class,
-      expectedExceptionsMessageRegExp =
-          "The target package is a subpackage of the package being copied")
-  public void testCopyFailed() {
+  @Test
+  void testCopyFailed() {
     ResourceCollection collection = mock(ResourceCollection.class);
     when(collection.getPackages()).thenReturn(singletonList(mock(Package.class)));
     when(resourceCollector.get(any())).thenReturn(collection);
     doThrow(new RecursiveCopyException()).when(packageCopier).copy(any(), any());
 
-    copyService.copy(emptyList(), null, mock(Progress.class));
+    Exception exception =
+        assertThrows(
+            CopyFailedException.class,
+            () -> copyService.copy(emptyList(), null, mock(Progress.class)));
+    assertThat(exception.getMessage())
+        .containsPattern("The target package is a subpackage of the package being copied");
   }
 
   @Test
-  public void testMaxProgress() {
+  void testMaxProgress() {
     ResourceIdentifier id1 = create(ENTITY_TYPE, "e1");
     ResourceIdentifier id2 = create(ENTITY_TYPE_ABSTRACT, "e2");
     ResourceIdentifier id3 = create(PACKAGE, "p1");
@@ -87,7 +91,7 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCopy() {
+  void testCopy() {
     ResourceIdentifier id1 = create(ENTITY_TYPE, "e1");
     ResourceIdentifier id2 = create(ENTITY_TYPE_ABSTRACT, "e2");
     ResourceIdentifier id3 = create(PACKAGE, "p1");
@@ -106,7 +110,7 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testProgressMessages() {
+  void testProgressMessages() {
     ResourceIdentifier id1 = create(ENTITY_TYPE, "e1");
     ResourceIdentifier id2 = create(PACKAGE, "p1");
     EntityType entityType1 = mock(EntityType.class);
@@ -125,11 +129,13 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
     verify(progress).status("success");
   }
 
-  @Test(
-      expectedExceptions = UnknownPackageException.class,
-      expectedExceptionsMessageRegExp = "package:it_emx_datawipes")
-  public void testUnknownTargetPackage() {
-    copyService.copy(emptyList(), "it_emx_datawipes", mock(Progress.class));
+  @Test
+  void testUnknownTargetPackage() {
+    Exception exception =
+        assertThrows(
+            UnknownPackageException.class,
+            () -> copyService.copy(emptyList(), "it_emx_datawipes", mock(Progress.class)));
+    assertThat(exception.getMessage()).containsPattern("package:it_emx_datawipes");
   }
 
   private void setupContextMessageSourceAnswers() {

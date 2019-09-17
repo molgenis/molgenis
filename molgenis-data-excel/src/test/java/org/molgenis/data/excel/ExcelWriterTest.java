@@ -1,15 +1,17 @@
 package org.molgenis.data.excel;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
@@ -19,52 +21,52 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.Test;
 
-public class ExcelWriterTest extends AbstractMolgenisSpringTest {
+class ExcelWriterTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrMetaFactory;
 
   @SuppressWarnings("resource")
-  @Test(expectedExceptions = NullPointerException.class)
-  public void ExcelWriter() {
-    new ExcelWriter((OutputStream) null, attrMetaFactory);
+  @Test
+  void ExcelWriter() {
+    assertThrows(
+        NullPointerException.class, () -> new ExcelWriter((OutputStream) null, attrMetaFactory));
   }
 
   @Test
-  public void ExcelWriterFileFormat_default() throws IOException {
+  void ExcelWriterFileFormat_default() throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0xD0);
-    assertEquals(b[1] & 0xff, 0xCF);
-    assertEquals(b[2] & 0xff, 0x11);
-    assertEquals(b[3] & 0xff, 0xE0);
+    assertEquals(0xD0, b[0] & 0xff);
+    assertEquals(0xCF, b[1] & 0xff);
+    assertEquals(0x11, b[2] & 0xff);
+    assertEquals(0xE0, b[3] & 0xff);
   }
 
   @Test
-  public void ExcelWriterFileFormat_XLS() throws IOException {
+  void ExcelWriterFileFormat_XLS() throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory, FileFormat.XLS).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0xD0);
-    assertEquals(b[1] & 0xff, 0xCF);
-    assertEquals(b[2] & 0xff, 0x11);
-    assertEquals(b[3] & 0xff, 0xE0);
+    assertEquals(0xD0, b[0] & 0xff);
+    assertEquals(0xCF, b[1] & 0xff);
+    assertEquals(0x11, b[2] & 0xff);
+    assertEquals(0xE0, b[3] & 0xff);
   }
 
   @Test
-  public void ExcelWriterFileFormat_XLSX() throws IOException {
+  void ExcelWriterFileFormat_XLSX() throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     new ExcelWriter(bos, attrMetaFactory, FileFormat.XLSX).close();
     byte[] b = bos.toByteArray();
-    assertEquals(b[0] & 0xff, 0x50);
-    assertEquals(b[1] & 0xff, 0x4B);
-    assertEquals(b[2] & 0xff, 0x03);
-    assertEquals(b[3] & 0xff, 0x04);
+    assertEquals(0x50, b[0] & 0xff);
+    assertEquals(0x4B, b[1] & 0xff);
+    assertEquals(0x03, b[2] & 0xff);
+    assertEquals(0x04, b[3] & 0xff);
   }
 
   @Test
-  public void addCellProcessor_header() throws IOException {
+  void addCellProcessor_header() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
@@ -81,7 +83,7 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void addCellProcessor_data() throws IOException {
+  void addCellProcessor_data() throws IOException {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
     OutputStream os = mock(OutputStream.class);
@@ -107,7 +109,7 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void close() throws IOException {
+  void close() throws IOException {
     OutputStream os = mock(OutputStream.class);
     ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
     excelWriter.close();
@@ -115,18 +117,18 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void createSheet() throws IOException {
+  void createSheet() throws IOException {
     OutputStream os = mock(OutputStream.class);
     try (ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory)) {
       assertNotNull(excelWriter.createWritable("sheet", null));
     }
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void createSheet_null() throws IOException {
+  @Test
+  void createSheet_null() throws IOException {
     OutputStream os = mock(OutputStream.class);
     try (ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory)) {
-      assertNotNull(excelWriter.createWritable(null, null));
+      assertThrows(IllegalArgumentException.class, () -> excelWriter.createWritable(null, null));
     }
   }
 }

@@ -6,12 +6,12 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -21,6 +21,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -44,19 +48,14 @@ import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.navigator.util.ResourceCollector;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -67,8 +66,7 @@ import org.testng.annotations.Test;
       EntityTypeCopier.class,
       EntityTypeMetadataCopier.class
     })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class CopyServiceIT extends AbstractTestNGSpringContextTests {
+class CopyServiceIT extends AbstractMockitoSpringContextTests {
 
   private static final Logger LOG = LoggerFactory.getLogger(CopyServiceIT.class);
 
@@ -91,8 +89,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   private Package packageA;
   private Package packageB;
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     runAsSystem(
         () -> {
           addPackages();
@@ -104,7 +102,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyPackage() {
+  void testCopyPackage() {
     String targetPackageId = "target1";
     addTargetPackage(targetPackageId);
 
@@ -119,39 +117,39 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
-    assertEquals(packages.size(), 1);
+    assertEquals(1, packages.size());
 
     Package packageACopy = packages.get(0);
-    assertEquals(packageACopy.getLabel(), "Package A");
+    assertEquals("Package A", packageACopy.getLabel());
     List<EntityType> entityTypesInACopy = newArrayList(packageACopy.getEntityTypes());
     List<Package> packagesInACopy = newArrayList(packageACopy.getChildren());
-    assertEquals(entityTypesInACopy.size(), 1);
-    assertEquals(packagesInACopy.size(), 1);
+    assertEquals(1, entityTypesInACopy.size());
+    assertEquals(1, packagesInACopy.size());
 
     Package packageBCopy = packagesInACopy.get(0);
-    assertEquals(packageBCopy.getLabel(), "Package B (child of A)");
+    assertEquals("Package B (child of A)", packageBCopy.getLabel());
     List<EntityType> entityTypesInBCopy = newArrayList(packageBCopy.getEntityTypes());
     List<Package> packagesInBCopy = newArrayList(packageBCopy.getChildren());
-    assertEquals(entityTypesInBCopy.size(), 1);
-    assertEquals(packagesInBCopy.size(), 0);
+    assertEquals(1, entityTypesInBCopy.size());
+    assertEquals(0, packagesInBCopy.size());
 
     EntityType entityTypeACopy = entityTypesInACopy.get(0);
     EntityType entityTypeBCopy = entityTypesInBCopy.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeBCopy.getLabel(), "EntityType B (referenced by A)");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals("EntityType B (referenced by A)", entityTypeBCopy.getLabel());
+    assertEquals(ENTITY_TYPE_B, entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
     assertEquals(
-        entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), entityTypeBCopy.getId());
+        entityTypeBCopy.getId(), entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 4);
+    assertEquals(4, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     List<Object> entitiesOfB =
         dataService.findAll(entityTypeBCopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfB, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfB);
 
     cleanupTargetPackage(targetPackageId);
   }
@@ -159,7 +157,7 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   @Test
-  public void testCopyEntityType() {
+  void testCopyEntityType() {
     String targetPackageId = "target2";
     addTargetPackage(targetPackageId);
     ResourceIdentifier id = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, ENTITY_TYPE_A);
@@ -174,19 +172,19 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
-    assertEquals(packages.size(), 0);
-    assertEquals(entityTypes.size(), 1);
+    assertEquals(0, packages.size());
+    assertEquals(1, entityTypes.size());
 
     EntityType entityTypeACopy = entityTypes.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
-    assertEquals(entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), ENTITY_TYPE_B);
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals(ENTITY_TYPE_B, entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
+    assertEquals(ENTITY_TYPE_B, entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 1);
+    assertEquals(1, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     cleanupTargetPackage(targetPackageId);
   }
@@ -195,10 +193,10 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     return () -> progress.getProgress() == progress.getProgressMax();
   }
 
+  @Disabled // FIXME: reenable this test when fixed to preform in a stable manner
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
-  @Test(enabled = false) // FIXME: reenable this test when fixed to preform in a stable manner
-  public void testCopyBoth() {
+  void testCopyBoth() {
     String targetPackageId = "target3";
     addTargetPackage(targetPackageId);
 
@@ -215,33 +213,33 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     Package targetPackage = metadataService.getPackage(targetPackageId).get();
     List<Package> packages = newArrayList(targetPackage.getChildren());
     List<EntityType> entityTypes = newArrayList(targetPackage.getEntityTypes());
-    assertEquals(packages.size(), 1);
-    assertEquals(entityTypes.size(), 1);
+    assertEquals(1, packages.size());
+    assertEquals(1, entityTypes.size());
     Package packageBCopy = packages.get(0);
 
-    assertEquals(packageBCopy.getLabel(), "Package B (child of A)");
+    assertEquals("Package B (child of A)", packageBCopy.getLabel());
     List<EntityType> entityTypesInBCopy = newArrayList(packageBCopy.getEntityTypes());
     List<Package> packagesInBCopy = newArrayList(packageBCopy.getChildren());
-    assertEquals(entityTypesInBCopy.size(), 1);
-    assertEquals(packagesInBCopy.size(), 0);
+    assertEquals(1, entityTypesInBCopy.size());
+    assertEquals(0, packagesInBCopy.size());
 
     EntityType entityTypeACopy = entityTypes.get(0);
     EntityType entityTypeBCopy = entityTypesInBCopy.get(0);
-    assertEquals(entityTypeACopy.getLabel(), "EntityType A");
-    assertEquals(entityTypeBCopy.getLabel(), "EntityType B (referenced by A)");
-    assertEquals(entityTypeA.getAttribute("xref_attr").getRefEntity().getId(), entityTypeB.getId());
+    assertEquals("EntityType A", entityTypeACopy.getLabel());
+    assertEquals("EntityType B (referenced by A)", entityTypeBCopy.getLabel());
+    assertEquals(entityTypeB.getId(), entityTypeA.getAttribute("xref_attr").getRefEntity().getId());
     assertEquals(
-        entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId(), entityTypeBCopy.getId());
+        entityTypeBCopy.getId(), entityTypeACopy.getAttribute("xref_attr").getRefEntity().getId());
 
-    assertEquals(progress.getProgress(), 3);
+    assertEquals(3, progress.getProgress());
 
     List<Object> entitiesOfA =
         dataService.findAll(entityTypeACopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfA, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfA);
 
     List<Object> entitiesOfB =
         dataService.findAll(entityTypeBCopy.getId()).map(Entity::getIdValue).collect(toList());
-    assertEquals(entitiesOfB, asList("0", "1", "2"));
+    assertEquals(asList("0", "1", "2"), entitiesOfB);
 
     cleanupTargetPackage(targetPackageId);
   }
@@ -301,8 +299,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     waitForWorkToBeFinished(indexService, LOG);
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  void tearDownAfterClass() {
     runAsSystem(() -> dataService.deleteAll(PACKAGE, Stream.of(PACKAGE_A)));
     waitForWorkToBeFinished(indexService, LOG);
   }

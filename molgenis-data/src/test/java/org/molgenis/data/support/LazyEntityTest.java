@@ -1,24 +1,26 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class LazyEntityTest {
+class LazyEntityTest {
   private static final String ENTITY_NAME = "entity";
   private static final String ID_ATTR_NAME = "id";
 
@@ -30,8 +32,8 @@ public class LazyEntityTest {
   private LazyEntity lazyEntity;
   private Entity entity;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(ENTITY_NAME);
     idAttr = mock(Attribute.class);
@@ -39,193 +41,193 @@ public class LazyEntityTest {
     when(entityType.getIdAttribute()).thenReturn(idAttr);
     dataService = mock(DataService.class);
     entity = mock(Entity.class);
-    when(dataService.findOneById(ENTITY_NAME, id)).thenReturn(entity);
     id = 1;
+    when(dataService.findOneById(ENTITY_NAME, id)).thenReturn(entity);
     lazyEntity = new LazyEntity(entityType, dataService, id);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void LazyEntity() {
-    new LazyEntity(null, null, null);
+  @Test
+  void LazyEntity() {
+    assertThrows(NullPointerException.class, () -> new LazyEntity(null, null, null));
   }
 
   @Test
-  public void get() {
+  void get() {
     String attrName = "attr";
     Object value = mock(Object.class);
     when(entity.get(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.get(attrName));
-    assertEquals(value, lazyEntity.get(attrName));
+    assertEquals(lazyEntity.get(attrName), value);
+    assertEquals(lazyEntity.get(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getIdAttr() {
-    assertEquals(id, lazyEntity.get(ID_ATTR_NAME));
+  void getIdAttr() {
+    assertEquals(lazyEntity.get(ID_ATTR_NAME), id);
   }
 
   @Test
-  public void getAttributeNames() {
+  void getAttributeNames() {
     Entity entity = new DynamicEntity(entityType);
     Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
     Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
     when(entityType.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
-    assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
+    assertEquals(asList("attr0", "attr1"), newArrayList(entity.getAttributeNames()));
   }
 
   @Test
-  public void getBoolean() {
+  void getBoolean() {
     String attrName = "attr";
     Boolean value = Boolean.TRUE;
     when(entity.getBoolean(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getBoolean(attrName));
-    assertEquals(value, lazyEntity.getBoolean(attrName));
+    assertEquals(lazyEntity.getBoolean(attrName), value);
+    assertEquals(lazyEntity.getBoolean(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getDouble() {
+  void getDouble() {
     String attrName = "attr";
     Double value = 0d;
     when(entity.getDouble(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getDouble(attrName));
-    assertEquals(value, lazyEntity.getDouble(attrName));
+    assertEquals(lazyEntity.getDouble(attrName), value);
+    assertEquals(lazyEntity.getDouble(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getEntitiesString() {
+  void getEntitiesString() {
     String attrName = "attr";
     @SuppressWarnings("unchecked")
     Iterable<Entity> entities = mock(Iterable.class);
     when(entity.getEntities(attrName)).thenReturn(entities);
-    assertEquals(entities, lazyEntity.getEntities(attrName));
-    assertEquals(entities, lazyEntity.getEntities(attrName));
+    assertEquals(lazyEntity.getEntities(attrName), entities);
+    assertEquals(lazyEntity.getEntities(attrName), entities);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getEntitiesStringClassE() {
+  void getEntitiesStringClassE() {
     String attrName = "attr";
     @SuppressWarnings("unchecked")
     Iterable<Entity> entities = mock(Iterable.class);
     when(entity.getEntities(attrName, Entity.class)).thenReturn(entities);
-    assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
-    assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
+    assertEquals(lazyEntity.getEntities(attrName, Entity.class), entities);
+    assertEquals(lazyEntity.getEntities(attrName, Entity.class), entities);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getEntityString() {
+  void getEntityString() {
     String attrName = "attr";
     Entity value = mock(Entity.class);
     when(entity.getEntity(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getEntity(attrName));
-    assertEquals(value, lazyEntity.getEntity(attrName));
+    assertEquals(lazyEntity.getEntity(attrName), value);
+    assertEquals(lazyEntity.getEntity(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getEntityStringClassE() {
+  void getEntityStringClassE() {
     String attrName = "attr";
     Entity value = mock(Entity.class);
     when(entity.getEntity(attrName, Entity.class)).thenReturn(value);
-    assertEquals(value, lazyEntity.getEntity(attrName, Entity.class));
-    assertEquals(value, lazyEntity.getEntity(attrName, Entity.class));
+    assertEquals(lazyEntity.getEntity(attrName, Entity.class), value);
+    assertEquals(lazyEntity.getEntity(attrName, Entity.class), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getEntityType() {
-    assertEquals(entityType, lazyEntity.getEntityType());
+  void getEntityType() {
+    assertEquals(lazyEntity.getEntityType(), entityType);
   }
 
   @Test
-  public void getIdValue() {
-    assertEquals(id, lazyEntity.getIdValue());
+  void getIdValue() {
+    assertEquals(lazyEntity.getIdValue(), id);
   }
 
   @Test
-  public void getInt() {
+  void getInt() {
     String attrName = "attr";
     Integer value = 0;
     when(entity.getInt(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getInt(attrName));
-    assertEquals(value, lazyEntity.getInt(attrName));
+    assertEquals(lazyEntity.getInt(attrName), value);
+    assertEquals(lazyEntity.getInt(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getIntIdAttr() {
-    assertEquals(id, lazyEntity.getInt(ID_ATTR_NAME));
+  void getIntIdAttr() {
+    assertEquals(lazyEntity.getInt(ID_ATTR_NAME), id);
   }
 
   @Test
-  public void getLabelValue() {
+  void getLabelValue() {
     String value = "label";
     when(entity.getLabelValue()).thenReturn(value);
-    assertEquals(value, lazyEntity.getLabelValue());
-    assertEquals(value, lazyEntity.getLabelValue());
+    assertEquals(lazyEntity.getLabelValue(), value);
+    assertEquals(lazyEntity.getLabelValue(), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getLabelValueLabelAttrIsIdAttr() {
+  void getLabelValueLabelAttrIsIdAttr() {
     when(entityType.getLabelAttribute()).thenReturn(idAttr);
-    assertEquals(id.toString(), lazyEntity.getLabelValue().toString());
+    assertEquals(lazyEntity.getLabelValue().toString(), id.toString());
     verifyNoMoreInteractions(dataService);
   }
 
   @Test
-  public void getLong() {
+  void getLong() {
     String attrName = "attr";
     Long value = 0L;
     when(entity.getLong(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getLong(attrName));
-    assertEquals(value, lazyEntity.getLong(attrName));
+    assertEquals(lazyEntity.getLong(attrName), value);
+    assertEquals(lazyEntity.getLong(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getString() {
+  void getString() {
     String attrName = "attr";
     String value = "str";
     when(entity.getString(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getString(attrName));
-    assertEquals(value, lazyEntity.getString(attrName));
+    assertEquals(lazyEntity.getString(attrName), value);
+    assertEquals(lazyEntity.getString(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getStringIdAttr() {
+  void getStringIdAttr() {
     String strId = "1";
     when(dataService.findOneById(ENTITY_NAME, strId)).thenReturn(entity);
     lazyEntity = new LazyEntity(entityType, dataService, strId);
-    assertEquals(strId, lazyEntity.getString(ID_ATTR_NAME));
+    assertEquals(lazyEntity.getString(ID_ATTR_NAME), strId);
   }
 
   @Test
-  public void getLocalDate() {
+  void getLocalDate() {
     String attrName = "attr";
     LocalDate value = LocalDate.now();
     when(entity.getLocalDate(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getLocalDate(attrName));
-    assertEquals(value, lazyEntity.getLocalDate(attrName));
+    assertEquals(lazyEntity.getLocalDate(attrName), value);
+    assertEquals(lazyEntity.getLocalDate(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void getInstant() {
+  void getInstant() {
     String attrName = "attr";
     Instant value = Instant.now();
     when(entity.getInstant(attrName)).thenReturn(value);
-    assertEquals(value, lazyEntity.getInstant(attrName));
-    assertEquals(value, lazyEntity.getInstant(attrName));
+    assertEquals(lazyEntity.getInstant(attrName), value);
+    assertEquals(lazyEntity.getInstant(attrName), value);
     verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
   }
 
   @Test
-  public void setStringObject() {
+  void setStringObject() {
     String attrName = "attr";
     Object value = mock(Object.class);
     lazyEntity.set(attrName, value);
@@ -235,7 +237,7 @@ public class LazyEntityTest {
   }
 
   @Test
-  public void setEntity() {
+  void setEntity() {
     Entity value = mock(Entity.class);
     lazyEntity.set(value);
     lazyEntity.set(value);
