@@ -950,10 +950,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(51)
   public void testDeleteReferencedEntity() {
     dataService.delete(refEntityType.getId(), refEntities.get(0));
-    Exception exception =
-        assertThrows(
-            ValueReferencedException.class,
-            TestTransaction::end);
+    Exception exception = assertThrows(ValueReferencedException.class, TestTransaction::end);
     assertThat(exception.getMessage())
         .containsPattern("entityTypeId:DataServiceItEntityType attributeName:ref_id_attr value:0");
   }
