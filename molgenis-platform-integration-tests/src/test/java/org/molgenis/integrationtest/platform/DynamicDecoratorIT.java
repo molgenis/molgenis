@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -44,6 +44,7 @@ import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -64,21 +65,22 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "dynamic-decorator-user";
 
   @Autowired private DataService dataService;
-  @Autowired private IndexJobScheduler indexService;
-  @Autowired private MetaDataService metaDataService;
-  @Autowired private EntityTestHarness testHarness;
   @Autowired private DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry;
   @Autowired private DecoratorConfigurationFactory decoratorConfigurationFactory;
   @Autowired private DecoratorParametersFactory decoratorParametersFactory;
   @Autowired private PermissionService testPermissionService;
 
-  private EntityType refEntityTypeDynamic;
-  private EntityType entityTypeDynamic;
-  private DynamicDecorator addingDynamicDecorator;
-  private DynamicDecorator postfixDynamicDecorator;
+  private static EntityType refEntityTypeDynamic;
+  private static EntityType entityTypeDynamic;
+  private static DynamicDecorator addingDynamicDecorator;
+  private static DynamicDecorator postfixDynamicDecorator;
 
-  @BeforeEach
-  public void setUp() {
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    EntityTestHarness testHarness = applicationContext.getBean(EntityTestHarness.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+    DataService dataService = applicationContext.getBean(DataService.class);
+
     refEntityTypeDynamic =
         testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
     entityTypeDynamic =
@@ -97,7 +99,7 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
           dataService.add(refEntityTypeDynamic.getId(), refs.stream());
           dataService.add(entityTypeDynamic.getId(), entities.stream());
 
-          waitForWorkToBeFinished(indexService, LOG);
+          waitForWorkToBeFinished(applicationContext, LOG);
 
           addingDynamicDecorator =
               dataService.findOneById("sys_dec_DynamicDecorator", "add", DynamicDecorator.class);
@@ -165,8 +167,11 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
     assertEquals(entity.getInt("int_attr").intValue(), 12);
   }
 
-  @AfterEach
-  public void tearDownAfterClass() {
+  @AfterAll
+  public static void tearDownAfterClass(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeDynamic.getId());
@@ -176,7 +181,7 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
           metaDataService.deleteEntityType(entityTypeDynamic.getId());
           metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
         });
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForWorkToBeFinished(applicationContext, LOG);
   }
 
   private void populatePermissions() {
@@ -201,6 +206,15 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
             testPermissionService.createPermission(
                 Permission.create(entry.getKey(), sid, entry.getValue()));
           });
+    }
+  }
+
+  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    try {
+      indexJobScheduler.waitForAllIndicesStable();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
   }
 }

@@ -42,8 +42,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -66,42 +67,45 @@ import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @Transactional
 public class OneToManyIT extends AbstractMockitoSpringContextTests {
-  private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
   private static final String USERNAME = "onetomany-user";
 
   @Autowired private IndexJobScheduler indexService;
   @Autowired private OneToManyTestHarness oneToManyTestHarness;
   @Autowired private DataService dataService;
 
-  @BeforeEach
-  public void setUp() {
-    populateUserPermissions();
-    waitForWorkToBeFinished(indexService, LOG);
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    populateUserPermissions(applicationContext);
+    waitForWorkToBeFinished(applicationContext, LOG);
   }
 
-  @AfterEach
-  public void afterMethod() {
+  @AfterAll
+  public static void tearDownAfterAll(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
     runAsSystem(
         () -> {
-          deleteBooksThenAuthors(1);
-          deleteBooksThenAuthors(2);
-          deleteBooksThenAuthors(3);
-          deleteBooksThenAuthors(4);
+          deleteBooksThenAuthors(dataService, 1);
+          deleteBooksThenAuthors(dataService, 2);
+          deleteBooksThenAuthors(dataService, 3);
+          deleteBooksThenAuthors(dataService, 4);
           dataService.deleteAll(PersonMetaData1.NAME);
           dataService.deleteAll(PersonMetaData2.NAME);
           dataService.deleteAll(PersonMetaData3.NAME);
           dataService.deleteAll(PersonMetaData4.NAME);
         });
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForWorkToBeFinished(applicationContext, LOG);
   }
 
   @WithMockUser(username = USERNAME)
@@ -148,8 +152,10 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
             .getIdValue());
   }
 
+  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
-  @Test
+  @ParameterizedTest
+  @MethodSource("allTestCaseDataProvider")
   public void testPersonInsert(TestCaseType testCase) {
     List<Entity> persons = importPersons(testCase);
 
@@ -288,7 +294,8 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
-  @Test
+  @ParameterizedTest
+  @MethodSource("allTestCaseDataProvider")
   public void testUpdateAuthorValue(TestCaseType testCase) {
     OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
     String bookName = authorsAndBooks.getBookMetaData().getId();
@@ -319,8 +326,10 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
         stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()));
   }
 
+  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
-  @Test
+  @ParameterizedTest
+  @MethodSource("allTestCaseDataProvider")
   public void testUpdateParentValue(TestCaseType testCase) {
     List<Entity> persons = importPersons(testCase);
     String personName = persons.get(0).getEntityType().getId();
@@ -410,6 +419,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedAuthor3.getEntities(ATTR_BOOKS)));
   }
 
+  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderAscending() {
@@ -437,6 +447,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
   }
 
+  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderDescending() {
@@ -464,7 +475,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedPerson3.getEntities(ATTR_CHILDREN)));
   }
 
-  private void deleteBooksThenAuthors(int testCase) {
+  private static void deleteBooksThenAuthors(DataService dataService, int testCase) {
     dataService.deleteAll("sys" + PACKAGE_SEPARATOR + "Book" + testCase);
     dataService.deleteAll("sys" + PACKAGE_SEPARATOR + "Author" + testCase);
   }
@@ -499,20 +510,19 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     return new Object[][] {{XREF_NULLABLE}, {XREF_REQUIRED}, {ASCENDING_ORDER}, {DESCENDING_ORDER}};
   }
 
-  @Autowired private PermissionService testPermissionService;
-
-  private void populateUserPermissions() {
+  private static void populateUserPermissions(ApplicationContext applicationContext) {
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
     Sid sid = SidUtils.createUserSid(USERNAME);
     for (Entry<ObjectIdentity, PermissionSet> entry : getPermissionMap().entrySet()) {
       runAsSystem(
           () -> {
-            testPermissionService.createPermission(
+            permissionService.createPermission(
                 Permission.create(entry.getKey(), sid, entry.getValue()));
           });
     }
   }
 
-  private Map<ObjectIdentity, PermissionSet> getPermissionMap() {
+  private static Map<ObjectIdentity, PermissionSet> getPermissionMap() {
     Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
 
     for (int i = 1; i <= ONE_TO_MANY_CASES; i++) {

@@ -52,8 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -86,15 +86,18 @@ import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @TestMethodOrder(OrderAnnotation.class)
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @Transactional
+@Commit
 public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "metaDataService-user";
 
@@ -107,29 +110,30 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   public static final String ENTITY_TYPE_1 = "entityType1";
   private static List<Entity> refEntities;
 
-  @Autowired private IndexJobScheduler indexJobScheduler;
-  @Autowired private PermissionService testPermissionService;
-  @Autowired private EntityTestHarness entityTestHarness;
   @Autowired private MetaDataService metaDataService;
   @Autowired private DataService dataService;
   @Autowired private AttributeFactory attributeFactory;
   @Autowired private EntityTypeFactory entityTypeFactory;
-  @Autowired private PackageFactory packageFactory;
 
-  private Package packNoPermission;
-  private Package packPermission;
+  private static Package packNoPermission;
+  private static Package packPermission;
 
-  @BeforeEach
-  public void setUpBeforeEach() throws InterruptedException {
-    // bootstrapper has finished but indexing of bootstrapped data might be in progress
-    indexJobScheduler.waitForAllIndicesStable();
-
-    runAsSystem(this::populate);
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    runAsSystem(
+        () -> {
+          populate(applicationContext);
+          waitForAllIndicesStable(applicationContext);
+        });
   }
 
-  @AfterEach
-  public void tearDownAfterEach() {
-    runAsSystem(this::depopulate);
+  @AfterAll
+  public static void tearDownAfterAll(ApplicationContext applicationContext) {
+    runAsSystem(
+        () -> {
+          depopulate(applicationContext);
+          waitForAllIndicesStable(applicationContext);
+        });
   }
 
   @WithMockUser(username = USERNAME)
@@ -343,7 +347,6 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
         metaDataService
             .getEntityType(ENTITY_TYPE_ID)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
-    ;
     Attribute attribute = entityType.getAttribute("newAttribute");
     attribute.setLabel("updated-label");
     attribute.setEntity(entityType);
@@ -358,6 +361,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @WithMockUser(username = USERNAME)
+  @Test
   @Order(10)
   public void testDeleteAttribute() {
     EntityType entityType =
@@ -376,18 +380,17 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
     org.junit.jupiter.api.Assertions.assertNull(updatedEntityType.getAttribute("newAttribute"));
   }
 
-  private void populate() {
-    populateData();
-    populateDataPermissions();
-
-    try {
-      indexJobScheduler.waitForAllIndicesStable();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+  private static void populate(ApplicationContext applicationContext) {
+    populateData(applicationContext);
+    populateDataPermissions(applicationContext);
   }
 
-  private void populateData() {
+  private static void populateData(ApplicationContext applicationContext) {
+    EntityTestHarness entityTestHarness = applicationContext.getBean(EntityTestHarness.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+    DataService dataService = applicationContext.getBean(DataService.class);
+    PackageFactory packageFactory = applicationContext.getBean(PackageFactory.class);
+
     EntityType refEntityType =
         entityTestHarness.createDynamicRefEntityType("metaDataServiceRefEntityType");
     metaDataService.createRepository(refEntityType);
@@ -408,7 +411,9 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
     metaDataService.addPackage(packPermission);
   }
 
-  private void populateDataPermissions() {
+  private static void populateDataPermissions(ApplicationContext applicationContext) {
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
+
     Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
     permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
     permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITEMETA);
@@ -421,12 +426,12 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
 
     Sid sid = SidUtils.createUserSid(USERNAME);
     for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
-      testPermissionService.createPermission(
-          Permission.create(entry.getKey(), sid, entry.getValue()));
+      permissionService.createPermission(Permission.create(entry.getKey(), sid, entry.getValue()));
     }
   }
 
-  private void depopulate() {
+  private static void depopulate(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
     List<EntityType> entityTypes =
         dataService
             .findAll(
@@ -441,7 +446,10 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
             .collect(toList());
     dataService.getMeta().deleteEntityType(entityTypes);
     dataService.delete(PackageMetadata.PACKAGE, Stream.of(packNoPermission, packPermission));
+  }
 
+  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
     try {
       indexJobScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {

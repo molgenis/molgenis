@@ -9,6 +9,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,7 +40,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -80,6 +82,7 @@ import org.molgenis.util.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -87,9 +90,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
-@Transactional
+//@Transactional
 public class PlatformIT extends AbstractMockitoSpringContextTests {
-  private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
   private static final String USERNAME = "platform-user";
 
@@ -106,12 +109,16 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
   @Autowired private ElasticsearchService searchService;
   @Autowired private MetaDataService metaDataService;
   @Autowired private EntityListenersService entityListenersService;
-  @Autowired private LanguageFactory languageFactory;
   @Autowired private AttributeFactory attributeFactory;
   @Autowired private IndexActionRegisterServiceImpl indexActionRegisterService;
   @Autowired private L10nStringFactory l10nStringFactory;
   @Autowired private PackageFactory packageFactory;
   @Autowired private PermissionService testPermissionService;
+
+  static void waitForWorkToBeFinished(ApplicationContext applicationContext, Logger log) {
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    waitForWorkToBeFinished(indexJobScheduler, log);
+  }
 
   /** Wait till the whole index is stable. Index job is done a-synchronized. */
   static void waitForWorkToBeFinished(IndexJobScheduler indexService, Logger log) {
@@ -141,8 +148,13 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     }
   }
 
-  @BeforeEach
-  public void beforeMethod() {
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    EntityTestHarness testHarness = applicationContext.getBean(EntityTestHarness.class);
+    EntitySelfXrefTestHarness entitySelfXrefTestHarness =
+        applicationContext.getBean(EntitySelfXrefTestHarness.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+
     refEntityTypeStatic = testHarness.createStaticRefTestEntityType();
     entityTypeStatic = testHarness.createStaticTestEntityType();
     refEntityTypeDynamic = testHarness.createDynamicRefEntityType("PlatformITRefEntityType");
@@ -154,15 +166,18 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
 
     runAsSystem(
         () -> {
-          addDefaultLanguages();
+          addDefaultLanguages(applicationContext);
           metaDataService.addEntityType(refEntityTypeDynamic);
           metaDataService.addEntityType(entityTypeDynamic);
           metaDataService.addEntityType(selfXrefEntityType);
           entitySelfXrefTestHarness.addSelfReference(selfXrefEntityType);
           metaDataService.updateEntityType(selfXrefEntityType);
         });
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForWorkToBeFinished(applicationContext, LOG);
+  }
 
+  @BeforeEach
+  public void setUpBeforeEach() {
     entityTypeDynamic =
         runAsSystem(
             () ->
@@ -171,8 +186,12 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
                     .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())));
   }
 
-  @AfterEach
-  public void afterMethod() throws InterruptedException {
+  @AfterAll
+  public static void setUpAfterAll(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeStatic.getId());
@@ -181,12 +200,12 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
           dataService.deleteAll(refEntityTypeDynamic.getId());
           dataService.deleteAll(selfXrefEntityType.getId());
         });
-    waitForIndexToBeStable(entityTypeStatic, indexService, LOG);
-    waitForIndexToBeStable(refEntityTypeStatic, indexService, LOG);
-    waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
-    waitForIndexToBeStable(refEntityTypeDynamic, indexService, LOG);
-    waitForIndexToBeStable(selfXrefEntityType, indexService, LOG);
-    cleanupUserPermissions();
+    waitForIndexToBeStable(entityTypeStatic, indexJobScheduler, LOG);
+    waitForIndexToBeStable(refEntityTypeStatic, indexJobScheduler, LOG);
+    waitForIndexToBeStable(entityTypeDynamic, indexJobScheduler, LOG);
+    waitForIndexToBeStable(refEntityTypeDynamic, indexJobScheduler, LOG);
+    waitForIndexToBeStable(selfXrefEntityType, indexJobScheduler, LOG);
+    cleanupUserPermissions(applicationContext);
 
     runAsSystem(
         () -> {
@@ -196,10 +215,14 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
           metaDataService.deleteEntityType(
               asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType));
         });
-    indexService.waitForAllIndicesStable();
+
+    waitForWorkToBeFinished(applicationContext, LOG);
   }
 
-  private void addDefaultLanguages() {
+  private static void addDefaultLanguages(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    LanguageFactory languageFactory = applicationContext.getBean(LanguageFactory.class);
+
     if (dataService.count(LANGUAGE) == 0) {
       dataService.add(
           LANGUAGE,
@@ -274,7 +297,7 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
             .getName());
 
     assertEquals("en", getCurrentUserLanguageCode());
-    assertEquals(
+    assertArrayEquals(
         new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"},
         getLanguageCodes().toArray());
 
@@ -897,23 +920,24 @@ public class PlatformIT extends AbstractMockitoSpringContextTests {
     }
   }
 
-  private void cleanupUserPermissions() {
+  private static void cleanupUserPermissions(ApplicationContext applicationContext) {
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
     Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
         getObjectIdentityPermissionSetMap();
     Sid sid = createUserSid(requireNonNull(USERNAME));
     for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
       runAsSystem(
           () -> {
-            if (!testPermissionService
+            if (!permissionService
                 .getPermissionsForObject(entry.getKey(), singleton(sid), false)
                 .isEmpty()) {
-              testPermissionService.deletePermission(sid, entry.getKey());
+              permissionService.deletePermission(sid, entry.getKey());
             }
           });
     }
   }
 
-  private Map<ObjectIdentity, PermissionSet> getObjectIdentityPermissionSetMap() {
+  private static Map<ObjectIdentity, PermissionSet> getObjectIdentityPermissionSetMap() {
     Map<ObjectIdentity, PermissionSet> entityTypePermissionMap = new HashMap<>();
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
