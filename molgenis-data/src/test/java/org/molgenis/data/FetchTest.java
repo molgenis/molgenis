@@ -3,6 +3,7 @@ package org.molgenis.data;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
@@ -18,21 +19,21 @@ class FetchTest {
 
   @Test
   void equalsFalse() {
-    assertFalse(new Fetch().field("field0").equals(new Fetch().field("field1")));
+    assertNotEquals(new Fetch().field("field0"), new Fetch().field("field1"));
   }
 
   @Test
   void equalsSubFetchTrue() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertTrue(new Fetch().field(field, subFetch).equals(new Fetch().field(field, subFetch)));
+    assertEquals(new Fetch().field(field, subFetch), new Fetch().field(field, subFetch));
   }
 
   @Test
   void equalsSubFetchFalse() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertFalse(new Fetch().field(field, subFetch).equals(new Fetch().field(field)));
+    assertNotEquals(new Fetch().field(field, subFetch), new Fetch().field(field));
   }
 
   @Test
@@ -73,11 +74,11 @@ class FetchTest {
 
     Iterator<Entry<String, Fetch>> it = fetch.iterator();
     assertTrue(it.hasNext());
-    assertEquals(it.next().getKey(), "field0");
+    assertEquals("field0", it.next().getKey());
     assertTrue(it.hasNext());
-    assertEquals(it.next().getKey(), "field1");
+    assertEquals("field1", it.next().getKey());
     assertTrue(it.hasNext());
-    assertEquals(it.next().getKey(), "field2");
+    assertEquals("field2", it.next().getKey());
     assertFalse(it.hasNext());
   }
 }

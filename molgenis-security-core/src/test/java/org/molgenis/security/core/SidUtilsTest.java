@@ -80,6 +80,6 @@ class SidUtilsTest {
 
   @Test
   void testCreateRoleAuthority() {
-    assertEquals(createRoleAuthority("NAME"), "ROLE_NAME");
+    assertEquals("ROLE_NAME", createRoleAuthority("NAME"));
   }
 }

@@ -1,6 +1,5 @@
 package org.molgenis.security.twofactor.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_SELF;
@@ -90,7 +89,7 @@ class TwoFactorAuthenticationServiceImplTest {
 
     when(userSecret.getSecret()).thenReturn("secretKey");
     boolean isConfigured = twoFactorAuthenticationServiceImpl.isConfiguredForUser();
-    assertEquals(isConfigured, true);
+    assertTrue(isConfigured);
   }
 
   @Test

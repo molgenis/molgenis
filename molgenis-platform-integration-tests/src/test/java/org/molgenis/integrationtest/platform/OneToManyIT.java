@@ -196,7 +196,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
+          emptyList(), newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
 
       Entity author2Retrieved =
           dataService.findOneById(
@@ -231,7 +231,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
+          emptyList(), newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
 
       Entity author2Retrieved =
           dataService.findOneById(
@@ -263,7 +263,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
+          emptyList(), newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());
@@ -285,7 +285,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
           dataService.findOneById(
               authorsAndBooks.getAuthorMetaData().getId(), author1.getIdValue());
       assertEquals(
-          newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)), emptyList());
+          emptyList(), newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
       dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getId());

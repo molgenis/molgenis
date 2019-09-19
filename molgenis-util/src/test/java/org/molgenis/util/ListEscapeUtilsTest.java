@@ -46,32 +46,32 @@ class ListEscapeUtilsTest {
 
   @Test
   void toStringList() {
-    assertEquals(ListEscapeUtils.toString(singletonList("a")), "a");
-    assertEquals(ListEscapeUtils.toString(asList("a", "b", "c")), "a,b,c");
+    assertEquals("a", ListEscapeUtils.toString(singletonList("a")));
+    assertEquals("a,b,c", ListEscapeUtils.toString(asList("a", "b", "c")));
 
-    assertEquals(ListEscapeUtils.toString(singletonList(",")), "\\,");
-    assertEquals(ListEscapeUtils.toString(singletonList("a,b")), "a\\,b");
+    assertEquals("\\,", ListEscapeUtils.toString(singletonList(",")));
+    assertEquals("a\\,b", ListEscapeUtils.toString(singletonList("a,b")));
 
-    assertEquals(ListEscapeUtils.toString(singletonList("\\")), "\\\\");
-    assertEquals(ListEscapeUtils.toString(singletonList("a\\b")), "a\\\\b");
+    assertEquals("\\\\", ListEscapeUtils.toString(singletonList("\\")));
+    assertEquals("a\\\\b", ListEscapeUtils.toString(singletonList("a\\b")));
 
-    assertEquals(ListEscapeUtils.toString(asList("a", "b", "")), "a,b,");
-    assertEquals(ListEscapeUtils.toString(asList("a", "", "c")), "a,,c");
-    assertEquals(ListEscapeUtils.toString(asList("", "b", "c")), ",b,c");
+    assertEquals("a,b,", ListEscapeUtils.toString(asList("a", "b", "")));
+    assertEquals("a,,c", ListEscapeUtils.toString(asList("a", "", "c")));
+    assertEquals(",b,c", ListEscapeUtils.toString(asList("", "b", "c")));
 
-    assertEquals(ListEscapeUtils.toString(asList("a", "b", null)), "a,b,");
-    assertEquals(ListEscapeUtils.toString(asList("a", null, "c")), "a,,c");
-    assertEquals(ListEscapeUtils.toString(asList(null, "b", "c")), ",b,c");
+    assertEquals("a,b,", ListEscapeUtils.toString(asList("a", "b", null)));
+    assertEquals("a,,c", ListEscapeUtils.toString(asList("a", null, "c")));
+    assertEquals(",b,c", ListEscapeUtils.toString(asList(null, "b", "c")));
 
-    assertEquals(ListEscapeUtils.toString(emptyList()), "");
-    assertEquals(ListEscapeUtils.toString(null), null);
+    assertEquals("", ListEscapeUtils.toString(emptyList()), "");
+    assertNull(ListEscapeUtils.toString(null));
   }
 
   @Test
   void toStringListcharchar() {
-    assertEquals(ListEscapeUtils.toString(asList("a", "b", "c"), ',', '/'), "a,b,c");
-    assertEquals(ListEscapeUtils.toString(singletonList("a,b,c"), ',', '/'), "a/,b/,c");
-    assertEquals(ListEscapeUtils.toString(singletonList("/"), ',', '/'), "//");
+    assertEquals("a,b,c", ListEscapeUtils.toString(asList("a", "b", "c"), ',', '/'));
+    assertEquals("a/,b/,c", ListEscapeUtils.toString(singletonList("a,b,c"), ',', '/'));
+    assertEquals("//", ListEscapeUtils.toString(singletonList("/"), ',', '/'));
   }
 
   @Test

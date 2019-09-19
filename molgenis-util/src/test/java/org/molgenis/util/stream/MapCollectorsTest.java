@@ -31,6 +31,6 @@ class MapCollectorsTest {
                 Stream.of("a1", "a2")
                     .collect(
                         MapCollectors.toLinkedMap(str -> str.charAt(0), str -> str.charAt(1))));
-    assertEquals(exception.getMessage(), "Duplicate key detected with values '1' and '2'");
+    assertEquals("Duplicate key detected with values '1' and '2'", exception.getMessage());
   }
 }

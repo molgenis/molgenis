@@ -92,6 +92,6 @@ class JavaMailSenderFactoryTest extends AbstractMockitoTest {
         assertThrows(
             IllegalStateException.class,
             () -> javaMailSenderFactory.validateConnection(mailSettings));
-    assertEquals(exception.getMessage(), "Unable to ping to host");
+    assertEquals("Unable to ping to host", exception.getMessage());
   }
 }
