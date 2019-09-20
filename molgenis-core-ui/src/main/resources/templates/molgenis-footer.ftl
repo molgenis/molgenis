@@ -78,6 +78,8 @@
                   <#if molgenis_version??>version: '${molgenis_version}', </#if>
                   <#if molgenis_build_date??>buildDate: '${molgenis_build_date}', </#if>
                   <#if molgenis_app_version??>appVersion: '${molgenis_app_version}', </#if>
+                  <#if app_settings.googleAnalyticsTrackingId??>googleAnalyticsTrackingId: '${app_settings.googleAnalyticsTrackingId}', </#if>
+                  <#if app_settings.googleAnalyticsTrackingIdMolgenis??>googleAnalyticsTrackingIdMolgenis: '${app_settings.googleAnalyticsTrackingIdMolgenis}', </#if>
                 }
               }
             };
