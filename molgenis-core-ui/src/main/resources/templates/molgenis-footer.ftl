@@ -35,6 +35,22 @@
                 <p class="text-muted text-center small ga-opted-out hidden">
                     <em>You have opted out of Google Analytics.</em>
                 </p>
+                <script>
+                    // Set to the same value as the web property used on the site
+                    const gaProperty = '${app_settings.footer?string}' || '${app_settings.footer?string}';
+
+                    // Disable tracking if the opt-out cookie exists.
+                    const disableStr = 'ga-disable-' + gaProperty;
+                    if (document.cookie.indexOf(disableStr + '=true') > -1) {
+                        window[disableStr] = true;
+                    }
+
+                    // Opt-out function
+                    function gaOptout() {
+                        document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+                        window[disableStr] = true;
+                    }
+                </script>
             </#if>
         </div>
     </div>
