@@ -88,8 +88,8 @@ class OneClickImporterServiceTest {
     DataCollection expected = DataCollection.create("Sheet1", newArrayList(c1, c2));
     assertEquals(expected, actual);
 
-    assertEquals(c1.getDataValues().size(), 6);
-    assertEquals(c2.getDataValues().size(), 6);
+    assertEquals(6, c1.getDataValues().size());
+    assertEquals(6, c2.getDataValues().size());
   }
 
   @Test

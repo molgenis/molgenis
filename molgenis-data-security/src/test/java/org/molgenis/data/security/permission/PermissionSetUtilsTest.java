@@ -16,27 +16,27 @@ class PermissionSetUtilsTest {
 
   @Test
   void testParamValueToPermissionSetRead() {
-    assertEquals(paramValueToPermissionSet("read"), READ);
+    assertEquals(READ, paramValueToPermissionSet("read"));
   }
 
   @Test
   void testParamValueToPermissionSetWrite() {
-    assertEquals(paramValueToPermissionSet("write"), WRITE);
+    assertEquals(WRITE, paramValueToPermissionSet("write"));
   }
 
   @Test
   void testParamValueToPermissionSetWritemeta() {
-    assertEquals(paramValueToPermissionSet("writemeta"), WRITEMETA);
+    assertEquals(WRITEMETA, paramValueToPermissionSet("writemeta"));
   }
 
   @Test
   void testParamValueToPermissionSetReadmeta() {
-    assertEquals(paramValueToPermissionSet("readmeta"), READMETA);
+    assertEquals(READMETA, paramValueToPermissionSet("readmeta"));
   }
 
   @Test
   void testParamValueToPermissionSetCount() {
-    assertEquals(paramValueToPermissionSet("count"), COUNT);
+    assertEquals(COUNT, paramValueToPermissionSet("count"));
   }
 
   @Test

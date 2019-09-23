@@ -108,7 +108,7 @@ class SortaControllerTest extends AbstractMockitoTest {
         .thenReturn(Stream.of(sortaJobExecution));
 
     Model model = mock(Model.class);
-    assertEquals(sortaController.init(model), "sorta-match-view");
+    assertEquals("sorta-match-view", sortaController.init(model));
     verify(model).addAttribute("existingTasks", singletonList(sortaJobExecution));
   }
 
@@ -132,7 +132,7 @@ class SortaControllerTest extends AbstractMockitoTest {
     List<Ontology> ontologies = singletonList(mock(Ontology.class));
     when(ontologyService.getOntologies()).thenReturn(ontologies);
     Model model = mock(Model.class);
-    assertEquals(sortaController.matchTask(model), "sorta-match-view");
+    assertEquals("sorta-match-view", sortaController.matchTask(model));
     verify(model).addAttribute("ontologies", ontologies);
   }
 }

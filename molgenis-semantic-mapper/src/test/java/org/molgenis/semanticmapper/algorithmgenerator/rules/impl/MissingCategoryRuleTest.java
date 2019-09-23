@@ -44,7 +44,7 @@ class MissingCategoryRuleTest {
   void removeIllegalChars() {
     assertEquals("dont", rule.removeIllegalChars("don`t"));
     assertEquals("dont", rule.removeIllegalChars("don&%$t"));
-    assertNotEquals(rule.removeIllegalChars("don1t"), "dont");
+    assertNotEquals("dont", rule.removeIllegalChars("don1t"));
   }
 
   @Test
