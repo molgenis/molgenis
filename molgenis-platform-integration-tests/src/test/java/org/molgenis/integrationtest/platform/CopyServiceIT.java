@@ -193,7 +193,7 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
     return () -> progress.getProgress() == progress.getProgressMax();
   }
 
-  @Disabled // FIXME: reenable this test when fixed to preform in a stable manner
+  @Test
   @WithMockUser(username = USERNAME)
   @SuppressWarnings({"OptionalGetWithoutIsPresent"})
   void testCopyBoth() {
