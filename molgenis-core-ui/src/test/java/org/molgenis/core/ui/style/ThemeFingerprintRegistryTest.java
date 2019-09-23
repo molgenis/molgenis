@@ -1,31 +1,31 @@
 package org.molgenis.core.ui.style;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class ThemeFingerprintRegistryTest {
+class ThemeFingerprintRegistryTest {
   private StyleService styleService;
   private ThemeFingerprintRegistry themeFingerprintRegistry;
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     styleService = mock(StyleService.class);
     themeFingerprintRegistry = new ThemeFingerprintRegistry(styleService);
   }
 
   @Test
-  public void getFingerprint() throws IOException, MolgenisStyleException {
+  void getFingerprint() throws IOException, MolgenisStyleException {
     String theme = "bootstrap-theme-name.min.css";
     String version = "bootstrap-3";
     String themeUri = "css/theme/" + version + "/" + theme;
@@ -46,6 +46,6 @@ public class ThemeFingerprintRegistryTest {
     verifyNoMoreInteractions(styleService);
 
     // verify stable key
-    assertEquals(firstResult, secondResult);
+    assertEquals(secondResult, firstResult);
   }
 }

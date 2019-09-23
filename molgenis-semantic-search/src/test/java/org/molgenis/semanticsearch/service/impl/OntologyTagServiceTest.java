@@ -3,6 +3,7 @@ package org.molgenis.semanticsearch.service.impl;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -10,16 +11,18 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.data.semantic.Relation.forIRI;
+import static org.molgenis.ontology.core.model.OntologyTerm.create;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
@@ -47,12 +50,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
-public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
+class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
   @Autowired private Config config;
 
   private OntologyTagServiceImpl ontologyTagService;
@@ -92,12 +93,12 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
           "Gene annotation (chromosome)",
           "This includes basic information. e.g. chromosome number...");
 
-  public OntologyTagServiceTest() {
+  OntologyTagServiceTest() {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     config.resetMocks();
 
     chromosomeNameTagEntity = tagFactory.create();
@@ -123,7 +124,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetTagsForAttribute() {
+  void testGetTagsForAttribute() {
     EntityType emd = entityTypeFactory.create("org.molgenis.SNP");
     Attribute attribute = attrFactory.create().setName("Chr");
     attribute.setTags(asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
@@ -151,11 +152,11 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     expected.put(instanceOf, chromosomeName);
     expected.put(instanceOf, geneAnnotation);
 
-    assertEquals(ontologyTagService.getTagsForAttribute(emd, attribute), expected);
+    assertEquals(expected, ontologyTagService.getTagsForAttribute(emd, attribute));
   }
 
   @Test
-  public void testGetTagEntity() {
+  void testGetTagEntity() {
     Tag expected = tagFactory.create();
     expected.set(TagMetadata.ID, "1233");
     expected.set(TagMetadata.OBJECT_IRI, "http://edamontology.org/data_3031");
@@ -182,11 +183,11 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
             "http://edamontology.org"))
         .thenReturn(expected);
 
-    assertEquals(ontologyTagService.getTagEntity(tag), expected);
+    assertEquals(expected, ontologyTagService.getTagEntity(tag));
   }
 
   @Test
-  public void testAddAttributeTag() {
+  void testAddAttributeTag() {
     EntityType emd = entityTypeFactory.create("org.molgenis.SNP");
     Attribute attribute = attrFactory.create().setName("Chr");
 
@@ -214,13 +215,13 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
 
     ArgumentCaptor<Attribute> captor = forClass(Attribute.class);
     verify(dataService, times(1)).update(eq(ATTRIBUTE_META_DATA), captor.capture());
-    assertEquals(captor.getValue().getName(), "Chr");
+    assertEquals("Chr", captor.getValue().getName());
     assertEquals(
-        captor.getValue().getTags(), asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
+        asList(geneAnnotationTagEntity, chromosomeNameTagEntity), captor.getValue().getTags());
   }
 
   @Test
-  public void testRemoveAttributeTag() {
+  void testRemoveAttributeTag() {
     EntityType emd = entityTypeFactory.create("org.molgenis.SNP");
     Attribute attribute = attrFactory.create().setName("Chr");
 
@@ -240,11 +241,11 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     ArgumentCaptor<Attribute> captor = forClass(Attribute.class);
     verify(dataService, times(1)).update(eq(ATTRIBUTE_META_DATA), captor.capture());
     assertEquals(
-        captor.getValue().getTags(), asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
+        asList(chromosomeNameTagEntity, geneAnnotationTagEntity), captor.getValue().getTags());
   }
 
   @Test
-  public void testGetTagsForPackage() {
+  void testGetTagsForPackage() {
     Package p = packageFactory.create("test", "desc");
 
     Package pack = packageFactory.create();
@@ -256,21 +257,21 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.findOneById(PACKAGE, "test")).thenReturn(pack);
 
     assertEquals(
-        ontologyTagService.getTagsForPackage(p),
         singletonList(
             new SemanticTag<>(
                 "1234",
                 p,
-                Relation.forIRI("http://molgenis.org/biobankconnect/instanceOf"),
-                OntologyTerm.create(
+                forIRI("http://molgenis.org/biobankconnect/instanceOf"),
+                create(
                     "http://edamontology.org/data_0987",
                     "Chromosome name",
                     "Name of a chromosome."),
-                Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))));
+                Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology."))),
+        ontologyTagService.getTagsForPackage(p));
   }
 
   @Test
-  public void testRemoveAllTagsFromEntity() {
+  void testRemoveAllTagsFromEntity() {
     Attribute att = mock(Attribute.class);
     when(att.getName()).thenReturn("Chr");
     EntityType entityTypeEntity = mock(EntityType.class);
@@ -287,7 +288,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testTagAttributesInEntity() {
+  void testTagAttributesInEntity() {
     Map<String, OntologyTag> attributeTagMap = Maps.newHashMap();
     Map<Attribute, OntologyTerm> tags = Maps.newHashMap();
 
@@ -323,19 +324,19 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     updatedEntity.setTags(asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
     updatedEntity.setName("Chr");
 
-    assertEquals(ontologyTagService.tagAttributesInEntity("test", tags), attributeTagMap);
+    assertEquals(attributeTagMap, ontologyTagService.tagAttributesInEntity("test", tags));
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Mock private DataService dataService;
 
     @Mock private OntologyService ontologyService;
 
     @Mock private TagRepository tagRepository;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean

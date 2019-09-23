@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -11,11 +12,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -27,10 +29,8 @@ import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.PluginController;
 import org.springframework.context.ApplicationContext;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PluginPopulatorTest extends AbstractMockitoTest {
+class PluginPopulatorTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private PluginFactory pluginFactory;
   @Captor private ArgumentCaptor<List<Plugin>> updateStreamArgumentCaptor;
@@ -44,13 +44,13 @@ public class PluginPopulatorTest extends AbstractMockitoTest {
 
   private PluginPopulator pluginPopulator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     pluginPopulator = new PluginPopulator(dataService, pluginFactory);
   }
 
   @Test
-  public void testPopulate() {
+  void testPopulate() {
     PluginController pluginController0 =
         when(mock(PluginController.class).getId()).thenReturn(NEW_PLUGIN).getMock();
     PluginController pluginController1 =
@@ -84,15 +84,15 @@ public class PluginPopulatorTest extends AbstractMockitoTest {
 
     verify(pluginRepository).upsertBatch(updateStreamArgumentCaptor.capture());
     assertEquals(
-        newHashSet(updateStreamArgumentCaptor.getValue()), newHashSet(newPlugin, changedPlugin));
+        newHashSet(newPlugin, changedPlugin), newHashSet(updateStreamArgumentCaptor.getValue()));
     verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
     assertEquals(
-        deleteStreamArgumentCaptor.getValue().collect(toList()), singletonList(deletedPlugin));
+        singletonList(deletedPlugin), deleteStreamArgumentCaptor.getValue().collect(toList()));
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testPopulateDoNotRemoveExistingAppPlugin() {
+  void testPopulateDoNotRemoveExistingAppPlugin() {
     Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn(DELETED_PLUGIN).getMock();
     Plugin existingAppPlugin =
         when(mock(Plugin.class).getId()).thenReturn(EXISTING_APP_PLUGIN).getMock();
@@ -105,6 +105,6 @@ public class PluginPopulatorTest extends AbstractMockitoTest {
     verify(pluginRepository, times(0)).upsertBatch(any(List.class));
     verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
     assertEquals(
-        deleteStreamArgumentCaptor.getValue().collect(toList()), newArrayList(deletedPlugin));
+        newArrayList(deletedPlugin), deleteStreamArgumentCaptor.getValue().collect(toList()));
   }
 }

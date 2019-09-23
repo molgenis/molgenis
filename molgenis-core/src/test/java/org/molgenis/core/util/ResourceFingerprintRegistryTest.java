@@ -1,14 +1,14 @@
 package org.molgenis.core.util;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ResourceFingerprintRegistryTest {
+class ResourceFingerprintRegistryTest {
   @Test
-  public void getFingerprint() throws IOException {
+  void getFingerprint() throws IOException {
     assertEquals(
-        new ResourceFingerprintRegistry().getFingerprint(getClass(), "/resource.txt"), "czpzLA");
+        "czpzLA", new ResourceFingerprintRegistry().getFingerprint(getClass(), "/resource.txt"));
   }
 }

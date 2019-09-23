@@ -12,6 +12,7 @@ import org.molgenis.data.DataAlreadyExistsException;
 import org.molgenis.data.DataConstraintViolationException;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.exception.PermissionDeniedException;
+import org.molgenis.data.validation.RepositoryConstraintViolationException;
 import org.molgenis.util.exception.BadRequestException;
 import org.molgenis.util.exception.ForbiddenException;
 import org.springframework.core.Ordered;
@@ -40,7 +41,11 @@ public class GlobalControllerExceptionHandler extends SpringExceptionHandler {
     return logAndHandleException(e, CONFLICT, handlerMethod);
   }
 
-  @ExceptionHandler({BadRequestException.class, DataConstraintViolationException.class})
+  @ExceptionHandler({
+    BadRequestException.class,
+    DataConstraintViolationException.class,
+    RepositoryConstraintViolationException.class
+  })
   public Object handleBadRequestException(Exception e, HandlerMethod handlerMethod) {
     return logAndHandleException(e, BAD_REQUEST, handlerMethod);
   }

@@ -1,15 +1,17 @@
 package org.molgenis.script;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.data.meta.model.EntityType;
@@ -19,10 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ScriptRunnerControllerTest extends AbstractMockitoTest {
+class ScriptRunnerControllerTest extends AbstractMockitoTest {
 
   @Mock private ScriptJobExecutionFactory scriptJobExecutionFactory;
   @Mock private JobExecutor jobExecutor;
@@ -32,8 +32,8 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
   private ScriptRunnerController controller;
   private Gson gson; // no mock since this is a final class
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -49,19 +49,19 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSubmitScript() {
+  void testSubmitScript() {
     Map<String, Object> parameters = newHashMap();
     parameters.put("arg1", "value1");
     ResponseEntity responseEntity = controller.submitScript("test", parameters);
-    assertEquals(responseEntity.getStatusCodeValue(), 200);
-    assertEquals(responseEntity.getBody(), "/api/v2/sys_job_test/ID");
+    assertEquals(200, responseEntity.getStatusCodeValue());
+    assertEquals("/api/v2/sys_job_test/ID", responseEntity.getBody());
     verify(jobExecutor).submit(scriptJobExecution);
     verify(scriptJobExecution).setName("test");
     verify(scriptJobExecution).setParameters(gson.toJson(parameters));
   }
 
   @Test
-  public void testStartScript() throws IOException {
+  void testStartScript() throws IOException {
     Map<String, Object> parameters = newHashMap();
     parameters.put("arg1", "value1");
     HttpServletResponse response = mock(HttpServletResponse.class);

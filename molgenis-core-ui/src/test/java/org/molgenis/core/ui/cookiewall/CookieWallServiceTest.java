@@ -1,33 +1,34 @@
 package org.molgenis.core.ui.cookiewall;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.settings.AppSettings;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class CookieWallServiceTest {
+class CookieWallServiceTest {
 
   private CookieWallService service;
 
   private AppSettings appSettings;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     appSettings = mock(AppSettings.class);
     service = new CookieWallService(appSettings);
   }
 
   @Test
-  public void noCookieWallIfIpAnonymization() {
+  void noCookieWallIfIpAnonymization() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(true);
     assertFalse(service.showCookieWall());
   }
 
   @Test
-  public void noCookieWallIfNotAnonymizationButNoTrackingSet() {
+  void noCookieWallIfNotAnonymizationButNoTrackingSet() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(false);
     when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn(null);
     when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn(null);
@@ -36,7 +37,7 @@ public class CookieWallServiceTest {
   }
 
   @Test
-  public void cookieWallIfNotAnonymizationAndTrackingSet() {
+  void cookieWallIfNotAnonymizationAndTrackingSet() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(false);
     when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn("set");
     when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn(null);
@@ -45,7 +46,7 @@ public class CookieWallServiceTest {
   }
 
   @Test
-  public void cookieWallIfNotAnonymizationAndMolgenisTrackingSet() {
+  void cookieWallIfNotAnonymizationAndMolgenisTrackingSet() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(false);
     when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn(null);
     when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn("set");
@@ -54,7 +55,7 @@ public class CookieWallServiceTest {
   }
 
   @Test
-  public void noCookieWallIfNotAnonymizationAndMolgenisTrackingSetButPrivacyFriendly() {
+  void noCookieWallIfNotAnonymizationAndMolgenisTrackingSetButPrivacyFriendly() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(false);
     when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn(null);
     when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn("set");
@@ -64,7 +65,7 @@ public class CookieWallServiceTest {
   }
 
   @Test
-  public void noCookieWallIfNotAnonymizationAndUserTrackingSetButPrivacyFriendly() {
+  void noCookieWallIfNotAnonymizationAndUserTrackingSetButPrivacyFriendly() {
     when(appSettings.getGoogleAnalyticsIpAnonymization()).thenReturn(false);
     when(appSettings.getGoogleAnalyticsTrackingId()).thenReturn("set");
     when(appSettings.getGoogleAnalyticsTrackingIdMolgenis()).thenReturn(null);

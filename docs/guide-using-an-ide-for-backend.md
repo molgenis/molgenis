@@ -165,6 +165,7 @@ Check: [deploy backend services](guide-development-deploy-backend-services.md)
   Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
   Fill in your home-directory in the *molgenis.home*-key.
 ```properties
+environment=development
 molgenis.home=**your own version of the data dir**
 opencpu.uri.host=localhost
 elasticsearch.transport.addresses=localhost:9300
@@ -172,11 +173,12 @@ db_uri=jdbc:postgresql://localhost/molgenis
 db_user=molgenis
 db_password=molgenis
 admin.password=admin
+admin.email=**your own email address**
 MINIO_BUCKET_NAME=molgenis
 MINIO_ENDPOINT=http://localhost:9000
 MINIO_ACCESS_KEY=molgenis
 MINIO_SECRET_KEY=molgenis
-CATALINA_OPTS=-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+CATALINA_OPTS=-Xmx2g -Xms1g 
 ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
@@ -192,7 +194,7 @@ CATALINA_OPTS=-Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
 This'll build and deploy MOLGENIS to tomcat and open it in the browser. Whenever you tab from MOLGENIS to the browser, all modified resources will be copied to the deployed exploded war.
 A browser reload should display the changes.
 
-> When you have 2 run configurations (e.g. run in debug and run normally) you need to apply the configuration displayed above.
+> **MULTIPLE RUN CONFIGURATIONS** When you have 2 run configurations (e.g. run in debug and run normally) you need to apply the configuration displayed above.
 
 > In some cases IntelliJ might not pick up all changes in the file system made during the
   build process. This may result in an error referencing a missing jar file. This can be fixed by

@@ -1,6 +1,8 @@
 package org.molgenis.api.tests.rest.v2;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.CREATED;
 import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
@@ -20,8 +22,6 @@ import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPer
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEMX;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.collections.Maps.newHashMap;
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
@@ -36,15 +36,20 @@ import java.util.Properties;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /** Tests each endpoint of the V2 Rest Api through http calls */
-public class RestControllerV2APIIT extends AbstractApiTests {
+@TestMethodOrder(OrderAnnotation.class)
+class RestControllerV2APIIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(RestControllerV2APIIT.class);
 
   private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
@@ -53,17 +58,17 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
   private static final String API_V2 = "api/v2/";
 
-  private String testUserName;
-  private String testUserToken;
-  private String adminToken;
+  private static String testUserName;
+  private static String testUserToken;
+  private static String adminToken;
 
   // Fields to store created entity ids from import test, used during cleanup to remove the entities
-  private List<String> importedEntities = new ArrayList<>();
-  private List<String> importPackages = new ArrayList<>();
-  private List<String> importJobIds = new ArrayList<>();
+  private static List<String> importedEntities = new ArrayList<>();
+  private static List<String> importPackages = new ArrayList<>();
+  private static List<String> importJobIds = new ArrayList<>();
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -104,32 +109,33 @@ public class RestControllerV2APIIT extends AbstractApiTests {
     testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
-  @Test(enabled = false) // TODO
-  public void testGetVersion() {
+  @Disabled
+  @Test // TODO
+  void testGetVersion() {
     //	@Autowired
     //	@GetMapping("/version")
     //	@ResponseBody
-    //	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String
+    //	Map<String, String> getVersion(@Value("${molgenis.version:@null}") String
     // molgenisVersion,
     //			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
   }
 
   @Test
-  public void testRetrieveEntity() {
+  void testRetrieveEntity() {
     ValidatableResponse response =
         given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2/ref1").then();
     validateRetrieveEntityWithoutAttributeFilter(response);
   }
 
   @Test
-  public void testRetrieveEntityPost() {
+  void testRetrieveEntityPost() {
     ValidatableResponse response =
         given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2/ref1?_method=GET").then();
     validateRetrieveEntityWithoutAttributeFilter(response);
   }
 
   @Test
-  public void testRetrieveEntityWithAttributeFilter() {
+  void testRetrieveEntityWithAttributeFilter() {
     ValidatableResponse response =
         given(testUserToken)
             .param("attrs", newArrayList("label"))
@@ -139,7 +145,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityIncludingCategories() {
+  void testRetrieveEntityIncludingCategories() {
     ValidatableResponse response =
         given(testUserToken)
             .param("includeCategories", newArrayList("true"))
@@ -152,7 +158,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityExcludingCategoriesResultsInNoCategoricalOptions() {
+  void testRetrieveEntityExcludingCategoriesResultsInNoCategoricalOptions() {
     ValidatableResponse response =
         given(testUserToken)
             .param("includeCategories", newArrayList("false"))
@@ -164,7 +170,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityWithoutSettingCategoriesResultsInNoCategoricalOptions() {
+  void testRetrieveEntityWithoutSettingCategoriesResultsInNoCategoricalOptions() {
     ValidatableResponse response =
         given(testUserToken)
             .param("attrs", newArrayList("xcategorical_value"))
@@ -175,7 +181,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityWithAttributeFilterPost() {
+  void testRetrieveEntityWithAttributeFilterPost() {
     ValidatableResponse response =
         given(testUserToken)
             .param("attrs", newArrayList("label"))
@@ -185,7 +191,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteEntity() {
+  void testDeleteEntity() {
     given(testUserToken)
         .delete(API_V2 + "base_v2APITest1/ref1")
         .then()
@@ -208,7 +214,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testDeleteEntityCollection() {
+  void testDeleteEntityCollection() {
     Map<String, List<String>> requestBody = newHashMap();
     requestBody.put("entityIds", newArrayList("ref1", "ref2", "ref3", "ref4"));
     given(testUserToken)
@@ -225,39 +231,40 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testRetrieveEntityCollection() {
+  void testRetrieveEntityCollection() {
     ValidatableResponse response =
         given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2").then();
     validateRetrieveEntityCollection(response);
   }
 
   @Test
-  public void testRetrieveEntityCollectionPost() {
+  void testRetrieveEntityCollectionPost() {
     ValidatableResponse response =
         given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2?_method=GET").then();
     validateRetrieveEntityCollection(response);
   }
 
   @Test
-  public void testRetrieveEntityAttributeMeta() {
+  void testRetrieveEntityAttributeMeta() {
     ValidatableResponse response =
         given(testUserToken).get(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value").then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
   @Test
-  public void testRetrieveEntityAttributeMetaPost() {
+  void testRetrieveEntityAttributeMetaPost() {
     ValidatableResponse response =
         given(testUserToken).post(API_V2 + "V2_API_TypeTestRefAPIV2/meta/value?_method=GET").then();
     validateRetrieveEntityAttributeMeta(response);
   }
 
-  @Test(enabled = false) // FIXME
-  public void testCreateEntities() {
+  @Disabled
+  @Test // FIXME
+  void testCreateEntities() {
     //		@Transactional
     //		@PostMapping(value = "/{entityName}", produces = APPLICATION_JSON_VALUE)
     //		@ResponseBody
-    //		public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName")
+    //		EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName")
     // String entityName,
     //			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response)
     // throws Exception
@@ -293,7 +300,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testCopyEntity() {
+  void testCopyEntity() {
     Map<String, String> request = newHashMap();
     request.put("newEntityName", "base_CopiedEntity");
 
@@ -313,10 +320,11 @@ public class RestControllerV2APIIT extends AbstractApiTests {
             Matchers.equalTo("Copied!"));
   }
 
-  @Test(enabled = false) // FIXME
-  public void testUpdateEntities() {
+  @Disabled
+  @Test // FIXME
+  void testUpdateEntities() {
     //		@PutMapping(value = "/{entityName}")
-    //		public synchronized void updateEntities(@PathVariable("entityName") String entityName,
+    //		synchronized void updateEntities(@PathVariable("entityName") String entityName,
     //			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response)
     // throws Exception
 
@@ -335,11 +343,12 @@ public class RestControllerV2APIIT extends AbstractApiTests {
         .statusCode(OKE);
   }
 
-  @Test(enabled = false) // TODO
-  public void testUpdateAttribute() {
+  @Disabled
+  @Test // TODO
+  void testUpdateAttribute() {
     //	@PutMapping(value = "/{entityName}/{attributeName}")
     //	@ResponseStatus(OK)
-    //	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
+    //	synchronized void updateAttribute(@PathVariable("entityName") String entityName,
     //			@PathVariable("attributeName") String attributeName,
     //			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response)
     // throws Exception
@@ -348,13 +357,13 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetI18nStrings() {
+  void testGetI18nStrings() {
     ValidatableResponse response = given(testUserToken).get(API_V2 + "i18n").then();
     validateGetI18nStrings(response);
   }
 
   @Test
-  public void testGetL10nStrings() {
+  void testGetL10nStrings() {
     given(testUserToken)
         .get(API_V2 + "i18n/form/en")
         .then()
@@ -383,7 +392,7 @@ public class RestControllerV2APIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetL10nProperties() throws IOException {
+  void testGetL10nProperties() throws IOException {
     String response =
         given(testUserToken)
             .accept(TEXT_PLAIN_VALUE)
@@ -401,11 +410,12 @@ public class RestControllerV2APIIT extends AbstractApiTests {
     Properties expectedProperties = new Properties();
     expectedProperties.load(new InputStreamReader(is, "UTF-8"));
 
-    assertEquals(responseProperties, expectedProperties);
+    assertEquals(expectedProperties, responseProperties);
   }
 
   @Test
-  public void testRegisterMissingResourceStrings() {
+  @Order(1)
+  void testRegisterMissingResourceStrings() {
     given(testUserToken)
         .contentType("application/x-www-form-urlencoded;charset=UTF-8")
         .formParam("my_test_key", "test")
@@ -423,8 +433,9 @@ public class RestControllerV2APIIT extends AbstractApiTests {
             Matchers.equalTo("apiv2test"));
   }
 
-  @Test(dependsOnMethods = "testRegisterMissingResourceStrings")
-  public void testDeleteNamespace() {
+  @Test
+  @Order(2)
+  void testDeleteNamespace() {
     given(testUserToken)
         .delete(API_V2 + "i18n/apiv2test")
         .then()
@@ -835,8 +846,8 @@ public class RestControllerV2APIIT extends AbstractApiTests {
         Matchers.equalTo("No questionnaires found"));
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Delete imported file
     // TODO at the moment the Rest API has no way to remove/delete a file.
 

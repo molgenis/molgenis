@@ -1,5 +1,6 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,20 +8,20 @@ import static org.mockito.Mockito.when;
 
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.springframework.security.core.Authentication;
-import org.testng.annotations.Test;
 
-public class JobExecutionTemplateTest extends AbstractMockitoTest {
+class JobExecutionTemplateTest extends AbstractMockitoTest {
   @Mock private Job<?> job;
   @Mock private Progress progress;
   @Mock private Authentication authentication;
   private Locale locale = Locale.ENGLISH;
 
   @Test
-  public void testCall() {
+  void testCall() {
     JobExecutionContext jobExecutionContext =
         JobExecutionContext.builder().setAuthentication(authentication).setLocale(locale).build();
 
@@ -30,39 +31,37 @@ public class JobExecutionTemplateTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = JobExecutionException.class)
-  public void testCallCancellation() throws Exception {
+  @Test
+  void testCallCancellation() throws Exception {
     JobExecutionContext jobExecutionContext =
         JobExecutionContext.builder().setAuthentication(authentication).setLocale(locale).build();
     doThrow(new CancellationException()).when(job).call(progress);
 
-    try {
-      new JobExecutionTemplate().call(job, progress, jobExecutionContext);
-    } finally {
-      verify(progress).canceled();
-    }
+    assertThrows(
+        JobExecutionException.class,
+        () -> new JobExecutionTemplate().call(job, progress, jobExecutionContext));
+    verify(progress).canceled();
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = JobExecutionException.class)
-  public void testCallException() throws Exception {
+  @Test
+  void testCallException() throws Exception {
     JobExecutionContext jobExecutionContext =
         JobExecutionContext.builder().setAuthentication(authentication).setLocale(locale).build();
     String message = "MyMessage";
     Exception exception = new Exception(message);
     doThrow(exception).when(job).call(progress);
 
-    try {
-      new JobExecutionTemplate().call(job, progress, jobExecutionContext);
-    } finally {
-      verify(progress).start();
-      verify(progress).failed(message, exception);
-    }
+    assertThrows(
+        JobExecutionException.class,
+        () -> new JobExecutionTemplate().call(job, progress, jobExecutionContext));
+    verify(progress).start();
+    verify(progress).failed(message, exception);
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = JobExecutionException.class)
-  public void testCallCodedException() throws Exception {
+  @Test
+  void testCallCodedException() throws Exception {
     JobExecutionContext jobExecutionContext =
         JobExecutionContext.builder().setAuthentication(authentication).setLocale(locale).build();
     String message = "MyMessage";
@@ -72,11 +71,10 @@ public class JobExecutionTemplateTest extends AbstractMockitoTest {
     when(codedRuntimeException.getErrorCode()).thenReturn(errorCode);
     doThrow(codedRuntimeException).when(job).call(progress);
 
-    try {
-      new JobExecutionTemplate().call(job, progress, jobExecutionContext);
-    } finally {
-      verify(progress).start();
-      verify(progress).failed("MyMessage (M01)", codedRuntimeException);
-    }
+    assertThrows(
+        JobExecutionException.class,
+        () -> new JobExecutionTemplate().call(job, progress, jobExecutionContext));
+    verify(progress).start();
+    verify(progress).failed("MyMessage (M01)", codedRuntimeException);
   }
 }

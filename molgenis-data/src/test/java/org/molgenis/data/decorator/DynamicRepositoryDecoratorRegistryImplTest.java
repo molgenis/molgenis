@@ -4,6 +4,9 @@ import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -12,11 +15,12 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
-import static org.testng.Assert.assertEquals;
 
 import com.google.gson.Gson;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -36,8 +40,6 @@ import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -46,7 +48,7 @@ import org.testng.annotations.Test;
       DynamicDecoratorMetadata.class,
       DecoratorParametersMetadata.class
     })
-public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringTest {
+class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringTest {
   @Autowired DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
   @Autowired DecoratorParametersMetadata decoratorParametersMetadata;
@@ -61,8 +63,8 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 
   private DynamicRepositoryDecoratorRegistryImpl registry;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     registry = new DynamicRepositoryDecoratorRegistryImpl(dataService, new Gson());
 
     // fake the bootstrapping event to tell the registry that bootstrapping is finished.
@@ -70,7 +72,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
   }
 
   @Test
-  public void testAddFactory() {
+  void testAddFactory() {
     DynamicRepositoryDecoratorFactory factory1 = mock(DynamicRepositoryDecoratorFactory.class);
     when(factory1.getId()).thenReturn("test1");
     DynamicRepositoryDecoratorFactory factory2 = mock(DynamicRepositoryDecoratorFactory.class);
@@ -79,41 +81,41 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
     registry.addFactory(factory1);
     registry.addFactory(factory2);
 
-    assertEquals(registry.getFactoryIds().collect(toSet()), newHashSet("test1", "test2"));
+    assertEquals(newHashSet("test1", "test2"), registry.getFactoryIds().collect(toSet()));
   }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Duplicate decorator id \\[test\\]")
-  public void testAddDuplicateFactory() {
+  @Test
+  void testAddDuplicateFactory() {
     DynamicRepositoryDecoratorFactory factory = mock(DynamicRepositoryDecoratorFactory.class);
     when(factory.getId()).thenReturn("test");
 
     registry.addFactory(factory);
-    registry.addFactory(factory);
+    Exception exception =
+        assertThrows(IllegalArgumentException.class, () -> registry.addFactory(factory));
+    assertThat(exception.getMessage()).containsPattern("Duplicate decorator id \\[test\\]");
   }
 
   @Test
-  public void testGetFactory() {
+  void testGetFactory() {
     DynamicRepositoryDecoratorFactory factory = mock(DynamicRepositoryDecoratorFactory.class);
     when(factory.getId()).thenReturn("test");
     registry.addFactory(factory);
 
     DynamicRepositoryDecoratorFactory returnedFactory = registry.getFactory("test");
 
-    assertEquals(returnedFactory, factory);
+    assertEquals(factory, returnedFactory);
   }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Decorator \\[test\\] does not exist")
-  public void testGetNonExistingFactory() {
-    registry.getFactory("test");
+  @Test
+  void testGetNonExistingFactory() {
+    Exception exception =
+        assertThrows(IllegalArgumentException.class, () -> registry.getFactory("test"));
+    assertThat(exception.getMessage()).containsPattern("Decorator \\[test\\] does not exist");
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testDecorate() {
+  void testDecorate() {
     when(entityType.getId()).thenReturn("entityTypeId");
     when(repository.getEntityType()).thenReturn(entityType);
 
@@ -139,11 +141,11 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 
     registry.addFactory(dynamicRepositoryDecoratorFactory);
 
-    assertEquals(registry.decorate(repository).getName(), "decoratedRepositoryName");
+    assertEquals("decoratedRepositoryName", registry.decorate(repository).getName());
   }
 
   @Test
-  public void testDecorateNoDecorator() {
+  void testDecorateNoDecorator() {
     when(repository.getEntityType()).thenReturn(entityType);
     when(repository.getName()).thenReturn("repositoryName");
     when(entityType.getId()).thenReturn("entityTypeId");
@@ -154,11 +156,11 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
         .thenReturn(query);
     when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(null);
 
-    assertEquals(registry.decorate(repository).getName(), "repositoryName");
+    assertEquals("repositoryName", registry.decorate(repository).getName());
   }
 
   @Test
-  public void getParameterMap() {
+  void getParameterMap() {
     DecoratorConfiguration config = mock(DecoratorConfiguration.class);
     DecoratorParameters params1 = mock(DecoratorParameters.class, Mockito.RETURNS_DEEP_STUBS);
     DecoratorParameters params2 = mock(DecoratorParameters.class, Mockito.RETURNS_DEEP_STUBS);
@@ -172,11 +174,11 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 
     Map<String, Map<String, Object>> parameterMap = registry.getParameterMap(config);
 
-    assertEquals(parameterMap, expected);
+    assertEquals(expected, parameterMap);
   }
 
   @Test
-  public void getParametersMapWithNullValue() {
+  void getParametersMapWithNullValue() {
     DecoratorConfiguration config = mock(DecoratorConfiguration.class);
     DecoratorParameters params1 = mock(DecoratorParameters.class, Mockito.RETURNS_DEEP_STUBS);
     DecoratorParameters params2 = mock(DecoratorParameters.class, Mockito.RETURNS_DEEP_STUBS);
@@ -189,6 +191,6 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 
     Map<String, Map<String, Object>> parameterMap = registry.getParameterMap(config);
 
-    assertEquals(parameterMap, expected);
+    assertEquals(expected, parameterMap);
   }
 }

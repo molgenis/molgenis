@@ -1,28 +1,27 @@
 package org.molgenis.data.elasticsearch.generator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DocumentIdGeneratorTest {
+class DocumentIdGeneratorTest {
   private DocumentIdGenerator documentIdGenerator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     documentIdGenerator = new DocumentIdGenerator();
   }
 
-  @DataProvider(name = "generateIdEntityTypeProvider")
-  public static Iterator<Object[]> generateIdEntityTypeProvider() {
+  static Iterator<Object[]> generateIdEntityTypeProvider() {
     List<Object[]> dataList = new ArrayList<>(4);
     dataList.add(new Object[] {"myEntity", "myentity_061f7aef"});
     dataList.add(new Object[] {"_my|En%ti-ty/", "myentity_d8309562"});
@@ -31,16 +30,16 @@ public class DocumentIdGeneratorTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "generateIdEntityTypeProvider")
-  public void testGenerateIdEntityType(String entityTypeId, String expectedId) {
+  @ParameterizedTest
+  @MethodSource("generateIdEntityTypeProvider")
+  void testGenerateIdEntityType(String entityTypeId, String expectedId) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
     String id = documentIdGenerator.generateId(entityType);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 
-  @DataProvider(name = "generateIdAttributeTypeProvider")
-  public static Iterator<Object[]> generateIdAttributeProvider() {
+  static Iterator<Object[]> generateIdAttributeProvider() {
     List<Object[]> dataList = new ArrayList<>(4);
     dataList.add(new Object[] {"012345", "abcdef", "myAttr", "myAttr_9b8532fc"});
     dataList.add(new Object[] {"543210", "abcdef", "myAttr", "myAttr_7700a7f7"});
@@ -56,8 +55,9 @@ public class DocumentIdGeneratorTest {
     return dataList.iterator();
   }
 
-  @Test(dataProvider = "generateIdAttributeTypeProvider")
-  public void testGenerateIdAttribute(
+  @ParameterizedTest
+  @MethodSource("generateIdAttributeProvider")
+  void testGenerateIdAttribute(
       String entityTypeId, String attrId, String attrName, String expectedId) {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
@@ -67,6 +67,6 @@ public class DocumentIdGeneratorTest {
     when(attr.getIdentifier()).thenReturn(attrId);
     when(attr.getName()).thenReturn(attrName);
     String id = documentIdGenerator.generateId(attr);
-    assertEquals(id, expectedId);
+    assertEquals(expectedId, id);
   }
 }

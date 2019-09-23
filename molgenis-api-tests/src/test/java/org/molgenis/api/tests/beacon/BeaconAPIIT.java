@@ -16,30 +16,30 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.beacon.controller.BeaconController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.testng.collections.Maps;
 
-public class BeaconAPIIT extends AbstractApiTests {
+class BeaconAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(BeaconAPIIT.class);
 
   // User credentials
   private static final String BEACON_TEST_USER_PASSWORD = "beacon_test_user_password";
 
-  private String adminToken;
-  private String userToken;
+  private static String adminToken;
+  private static String userToken;
 
-  private Gson gson = new Gson();
+  private static Gson gson = new Gson();
 
   private static final String SYS_BEACONS_BEACON_ORGANIZATION = "sys_beacons_BeaconOrganization";
   private static final String SYS_BEACONS_BEACON_DATASET = "sys_beacons_BeaconDataset";
@@ -51,7 +51,7 @@ public class BeaconAPIIT extends AbstractApiTests {
 
   private static final String BEACON_SET = "beacon_set";
   private static final String BEACON_SET_SAMPLE = "beacon_setSample";
-  private String testUsername;
+  private static String testUsername;
 
   /**
    * Pass down system properties via the mvn commandline argument
@@ -59,8 +59,8 @@ public class BeaconAPIIT extends AbstractApiTests {
    * <p>example: mvn test -Dtest="BeaconAPIIT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl"
    * -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
    */
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -130,7 +130,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testBeaconList() {
+  void testBeaconList() {
     given(userToken)
         .when()
         .get(BeaconController.URI + "/list")
@@ -140,7 +140,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetBeaconById() {
+  void testGetBeaconById() {
     given(userToken)
         .when()
         .get(BeaconController.URI + "/" + MY_FIRST_BEACON)
@@ -150,7 +150,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetQueryBeaconById() {
+  void testGetQueryBeaconById() {
     given(userToken)
         .when()
         .get(
@@ -164,7 +164,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testGetQueryBeaconByIdUnknownBeacon() {
+  void testGetQueryBeaconByIdUnknownBeacon() {
     given(userToken)
         .when()
         .get(
@@ -176,7 +176,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testPostQueryBeaconById() {
+  void testPostQueryBeaconById() {
     given(userToken)
         .contentType(APPLICATION_JSON_VALUE)
         .when()
@@ -194,7 +194,7 @@ public class BeaconAPIIT extends AbstractApiTests {
   }
 
   @Test
-  public void testPostQueryBeaconByIdUnknownBeacon() {
+  void testPostQueryBeaconByIdUnknownBeacon() {
     given(userToken)
         .contentType(APPLICATION_JSON_VALUE)
         .when()
@@ -211,8 +211,8 @@ public class BeaconAPIIT extends AbstractApiTests {
         .body("error.message", equalTo("Unknown beacon [MyFirst]"));
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Cleanup beacon config
     removeEntityFromTable(adminToken, SYS_BEACON, MY_FIRST_BEACON);
     removeEntityFromTable(adminToken, SYS_BEACONS_BEACON_DATASET, MY_FIRST_BEACON_DATASET);

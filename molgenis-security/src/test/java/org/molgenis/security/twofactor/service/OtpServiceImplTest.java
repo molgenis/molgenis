@@ -1,55 +1,47 @@
 package org.molgenis.security.twofactor.service;
 
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.settings.AppSettings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {OtpServiceImplTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class OtpServiceImplTest extends AbstractTestNGSpringContextTests {
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SecurityTestExecutionListeners
+class OtpServiceImplTest {
 
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";
 
-  @Autowired private OtpService otpService;
-  @Autowired private AppSettings appSettings;
+  private OtpServiceImpl otpServiceImpl;
+  @Mock private AppSettings appSettings;
 
-  @Test(expectedExceptions = InvalidVerificationCodeException.class)
-  public void testTryVerificationKeyFailed() {
-    boolean isValid = otpService.tryVerificationCode("", "secretKey");
-    assertFalse(isValid);
+  @BeforeEach
+  void setUpBeforeEach() {
+    otpServiceImpl = new OtpServiceImpl(appSettings);
+  }
+
+  @Test
+  void testTryVerificationKeyFailed() {
+    assertThrows(
+        InvalidVerificationCodeException.class,
+        () -> otpServiceImpl.tryVerificationCode("", "secretKey"));
   }
 
   @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void testGetAuthenticatorURI() {
+  void testGetAuthenticatorURI() {
     when(appSettings.getTitle()).thenReturn("MOLGENIS");
-    String uri = otpService.getAuthenticatorURI("secretKey");
+    String uri = otpServiceImpl.getAuthenticatorURI("secretKey");
     assertFalse(uri.isEmpty());
-  }
-
-  @Configuration
-  static class Config {
-    @Bean
-    public OtpService otpService() {
-      return new OtpServiceImpl(appSettings());
-    }
-
-    @Bean
-    public AppSettings appSettings() {
-      return mock(AppSettings.class);
-    }
   }
 }

@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -32,18 +34,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class VcfImportServiceIT extends ImportServiceIT {
+class VcfImportServiceIT extends ImportServiceIT {
   private static final String USERNAME = "vcf_user";
   private static final String VCF_PACKAGE_ID = "vcf";
 
   @Autowired private PackageFactory packageFactory;
 
-  @BeforeClass
-  public void beforeClass() {
-    super.beforeClass();
+  @BeforeEach
+  public void beforeEach() {
+    super.beforeEach();
     Package vcfPackage = packageFactory.create(VCF_PACKAGE_ID);
     RunAsSystemAspect.runAsSystem(() -> dataService.add(PACKAGE, vcfPackage));
   }
@@ -59,7 +59,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportVcfWithoutSamplesAsNonSuperuser() {
+  void testDoImportVcfWithoutSamplesAsNonSuperuser() {
     populateUserPermissions();
     testDoImportVcfWithoutSamples();
   }
@@ -68,7 +68,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportVcfWithoutSamplesAsSuperuser() {
+  void testDoImportVcfWithoutSamplesAsSuperuser() {
     testDoImportVcfWithoutSamples();
   }
 
@@ -89,7 +89,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportVcfWithSamplesAsNonSuperuser() {
+  void testDoImportVcfWithSamplesAsNonSuperuser() {
     populateUserPermissions();
     testDoImportVcfWithSamples();
   }
@@ -98,7 +98,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportVcfWithSamplesAsSuperuser() {
+  void testDoImportVcfWithSamplesAsSuperuser() {
     testDoImportVcfWithSamples();
   }
 
@@ -121,7 +121,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportVcfGzWithSamplesAsNonSuperuser() {
+  void testDoImportVcfGzWithSamplesAsNonSuperuser() {
     populateUserPermissions();
     testDoImportVcfGzWithSamples();
   }
@@ -130,7 +130,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportVcfGzWithSamplesAsSuperuser() {
+  void testDoImportVcfGzWithSamplesAsSuperuser() {
     testDoImportVcfGzWithSamples();
   }
 

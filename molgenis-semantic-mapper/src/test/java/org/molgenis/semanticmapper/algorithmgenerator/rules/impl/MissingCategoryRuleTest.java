@@ -1,60 +1,64 @@
 package org.molgenis.semanticmapper.algorithmgenerator.rules.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.semanticmapper.algorithmgenerator.bean.Category;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MissingCategoryRuleTest {
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
+import org.molgenis.semanticmapper.algorithmgenerator.bean.Category;
+
+class MissingCategoryRuleTest {
   MissingCategoryRule rule = new MissingCategoryRule();
 
   @Test
-  public void isRuleApplied() {
-    Assert.assertTrue(
+  void isRuleApplied() {
+    assertTrue(
         rule.createCategoryMatchQuality(
                 Category.create("3", "dont know"), Category.create("3", "MIssing"))
             .isRuleApplied());
-    Assert.assertTrue(
+    assertTrue(
         rule.createCategoryMatchQuality(
                 Category.create("3", "UNKNOWN"), Category.create("3", "missing"))
             .isRuleApplied());
-    Assert.assertTrue(
+    assertTrue(
         rule.createCategoryMatchQuality(
                 Category.create("3", "not know"), Category.create("3", "missing"))
             .isRuleApplied());
-    Assert.assertTrue(
+    assertTrue(
         rule.createCategoryMatchQuality(
                 Category.create("3", "don`t know"), Category.create("3", "missing"))
             .isRuleApplied());
-    Assert.assertTrue(
+    assertTrue(
         rule.createCategoryMatchQuality(
                 Category.create("3", "don't know"), Category.create("3", "missing"))
             .isRuleApplied());
-    Assert.assertFalse(
+    assertFalse(
         rule.createCategoryMatchQuality(
                 Category.create("0", "has had stroke"), Category.create("1", "NO"))
             .isRuleApplied());
   }
 
   @Test
-  public void removeIllegalChars() {
-    Assert.assertEquals(rule.removeIllegalChars("don`t"), "dont");
-    Assert.assertEquals(rule.removeIllegalChars("don&%$t"), "dont");
-    Assert.assertNotEquals(rule.removeIllegalChars("don1t"), "dont");
+  void removeIllegalChars() {
+    assertEquals("dont", rule.removeIllegalChars("don`t"));
+    assertEquals("dont", rule.removeIllegalChars("don&%$t"));
+    assertNotEquals("dont", rule.removeIllegalChars("don1t"));
   }
 
   @Test
-  public void getMatchedTermFromTheRulelabelContainsWords() {
-    Assert.assertTrue(
+  void getMatchedTermFromTheRulelabelContainsWords() {
+    assertTrue(
         StringUtils.isNotBlank(
             rule.getMatchedTermFromTheRulelabelContainsWords("string unknown contain the word!")));
-    Assert.assertTrue(
+    assertTrue(
         StringUtils.isNotBlank(
             rule.getMatchedTermFromTheRulelabelContainsWords("string MISSING contain the word!")));
-    Assert.assertTrue(
+    assertTrue(
         StringUtils.isBlank(
             rule.getMatchedTermFromTheRulelabelContainsWords("string YES contain the word!")));
-    Assert.assertTrue(
+    assertTrue(
         StringUtils.isBlank(
             rule.getMatchedTermFromTheRulelabelContainsWords("string HAS contain the word!")));
   }

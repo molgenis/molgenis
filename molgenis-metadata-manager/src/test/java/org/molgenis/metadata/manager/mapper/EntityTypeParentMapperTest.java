@@ -1,12 +1,15 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
@@ -15,10 +18,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
 import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeParentMapperTest {
+class EntityTypeParentMapperTest {
   @Mock private AttributeReferenceMapper attributeReferenceMapper;
 
   @Mock private EntityTypeMetadata entityTypeMetadata;
@@ -27,20 +28,20 @@ public class EntityTypeParentMapperTest {
 
   private EntityTypeParentMapper entityTypeParentMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     entityTypeParentMapper =
         new EntityTypeParentMapper(attributeReferenceMapper, entityTypeMetadata, dataService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testEntityTypeParentMapper() {
-    new EntityTypeParentMapper(null, null, null);
+  @Test
+  void testEntityTypeParentMapper() {
+    assertThrows(NullPointerException.class, () -> new EntityTypeParentMapper(null, null, null));
   }
 
   @Test
-  public void testToEntityTypeReference() {
+  void testToEntityTypeReference() {
     String id = "id";
     String label = "label";
     @SuppressWarnings("unchecked")
@@ -49,16 +50,16 @@ public class EntityTypeParentMapperTest {
     EditorEntityTypeParent editorEntityTypeParent =
         EditorEntityTypeParent.create(id, label, attributes, parent);
     EntityType entityType = entityTypeParentMapper.toEntityTypeReference(editorEntityTypeParent);
-    assertEquals(entityType.getIdValue(), id);
+    assertEquals(id, entityType.getIdValue());
   }
 
   @Test
-  public void testToEntityTypeReferenceNull() {
+  void testToEntityTypeReferenceNull() {
     assertNull(entityTypeParentMapper.toEntityTypeReference(null));
   }
 
   @Test
-  public void testToEditorEntityTypeParent() {
+  void testToEditorEntityTypeParent() {
     String parentId = "parentId";
     String parentLabel = "parentLabel";
     EntityType parentEntityType = mock(EntityType.class);
@@ -95,11 +96,11 @@ public class EntityTypeParentMapperTest {
             label,
             editorAttributes,
             EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
-    assertEquals(editorEntityTypeParent, expectedEditorEntityTypeParent);
+    assertEquals(expectedEditorEntityTypeParent, editorEntityTypeParent);
   }
 
   @Test
-  public void testToEditorEntityTypeParentNull() {
+  void testToEditorEntityTypeParentNull() {
     assertNull(entityTypeParentMapper.toEditorEntityTypeParent(null));
   }
 }

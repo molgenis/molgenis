@@ -2,14 +2,17 @@ package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.ENTITY_MAPPINGS;
 import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.IDENTIFIER;
 import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.TARGET;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -36,13 +39,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /** Unit test for the MappingTargetRepository. Tests the MappingTargetRepository in isolation. */
 @ContextConfiguration(classes = {MappingTargetRepositoryImplTest.Config.class})
-public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
+class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -71,8 +71,8 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest 
 
   @Captor ArgumentCaptor<Collection<EntityMapping>> entityMappingCaptor;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     // POJOs
     EntityType sourceEntityType = entityTypeFactory.create("source");
     targetEntityType = entityTypeFactory.create("target");
@@ -101,43 +101,43 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest 
   }
 
   @Test
-  public void testToMappingTargets() {
+  void testToMappingTargets() {
     when(dataService.getEntityType("target")).thenReturn(targetEntityType);
     when(entityMappingRepository.toEntityMappings(entityMappingEntities))
         .thenReturn(entityMappings);
     when(dataService.hasRepository("target")).thenReturn(true);
 
-    assertEquals(mappingTargetRepository.toMappingTargets(mappingTargetEntities), mappingTargets);
+    assertEquals(mappingTargets, mappingTargetRepository.toMappingTargets(mappingTargetEntities));
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
     List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
 
-    assertEquals(mappingTargetEntities.size(), result.size());
+    assertEquals(result.size(), mappingTargetEntities.size());
     for (int i = 0; i < mappingTargetEntities.size(); ++i) {
-      Assert.assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
+      assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
     }
   }
 
   @Test
-  public void testInsert() {
+  void testInsert() {
     mappingTargets.get(0).setIdentifier(null);
 
     when(idGenerator.generateId()).thenReturn("mappingTargetID");
     when(entityMappingRepository.upsert(entityMappings)).thenReturn(entityMappingEntities);
     List<Entity> result = mappingTargetRepository.upsert(mappingTargets);
 
-    assertEquals(mappingTargetEntities.size(), result.size());
+    assertEquals(result.size(), mappingTargetEntities.size());
     for (int i = 0; i < mappingTargetEntities.size(); ++i) {
-      Assert.assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
+      assertTrue(EntityUtils.equals(mappingTargetEntities.get(i), result.get(i)));
     }
   }
 
   @Configuration
   @Import(MapperTestConfig.class)
-  public static class Config {
+  static class Config {
     @Bean
     DataService dataService() {
       return Mockito.mock(DataService.class);

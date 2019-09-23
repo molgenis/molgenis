@@ -1,21 +1,22 @@
 package org.molgenis.integrationtest.platform.importservice;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -37,28 +38,25 @@ import org.molgenis.ontology.core.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.BeforeClass;
 
 @ContextConfiguration(classes = {PlatformITConfig.class, ImportServiceIT.Config.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-@Rollback
-public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTests {
+public abstract class ImportServiceIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
   static final String ROLE_SU = "SU";
+
+  @Autowired ApplicationContext applicationContext;
 
   @Autowired UserFactory userFactory;
 
@@ -70,8 +68,8 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 
   @Autowired DataService dataService;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  public void beforeEach() {
     ContextRefreshedEvent contextRefreshedEvent = Mockito.mock(ContextRefreshedEvent.class);
     Mockito.when(contextRefreshedEvent.getApplicationContext()).thenReturn(applicationContext);
     importServiceRegistrar.register(contextRefreshedEvent);
@@ -84,8 +82,8 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
       EntityImportReport importReport,
       Map<String, Integer> entityTypeCountMap,
       Set<String> addedEntityTypeIds) {
-    assertEquals(ImmutableSet.copyOf(importReport.getNewEntities()), addedEntityTypeIds);
-    assertEquals(importReport.getNrImportedEntitiesMap(), entityTypeCountMap);
+    assertEquals(addedEntityTypeIds, copyOf(importReport.getNewEntities()));
+    assertEquals(entityTypeCountMap, importReport.getNrImportedEntitiesMap());
   }
 
   static File getFile(String resourceName) {
@@ -111,9 +109,9 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
     Map<Object, Entity> importedEntities =
         findAllAsList(entityName).stream().collect(toMap(Entity::getIdValue, Function.identity()));
     assertEquals(
-        entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))), expectedFirstRow);
+        expectedFirstRow, entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))));
     assertEquals(
-        entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))), expectedLastRow);
+        expectedLastRow, entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))));
   }
 
   List<Entity> findAllAsList(String entityName) {

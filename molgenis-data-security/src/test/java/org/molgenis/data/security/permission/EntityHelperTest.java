@@ -1,9 +1,13 @@
 package org.molgenis.data.security.permission;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.molgenis.data.security.permission.model.LabelledObjectIdentity.create;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -12,58 +16,55 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.exception.InvalidTypeIdException;
-import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityHelperTest extends AbstractMockitoTest {
+class EntityHelperTest extends AbstractMockitoTest {
   @Mock DataService dataService;
   @Mock Repository repository;
   private EntityHelper entityHelper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityHelper = new EntityHelper(dataService);
   }
 
   @Test
-  public void testGetEntityTypeIdFromType() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entity-typeId"), "typeId");
+  void testGetEntityTypeIdFromType() {
+    assertEquals("typeId", entityHelper.getEntityTypeIdFromType("entity-typeId"));
   }
 
   @Test
-  public void testGetObjectIdentity() {
+  void testGetObjectIdentity() {
     assertEquals(
-        entityHelper.getObjectIdentity("typeId", "identifier"),
-        new ObjectIdentityImpl("typeId", "identifier"));
+        new ObjectIdentityImpl("typeId", "identifier"),
+        entityHelper.getObjectIdentity("typeId", "identifier"));
   }
 
   @Test
-  public void testGetTypeLabel() {
+  void testGetTypeLabel() {
     Repository repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getLabel()).thenReturn("typeLabel");
     when(repository.getEntityType()).thenReturn(entityType);
 
     when(dataService.getRepository("typeId")).thenReturn(repository);
-    assertEquals(entityHelper.getLabel("entity-typeId"), "typeLabel");
+    assertEquals("typeLabel", entityHelper.getLabel("entity-typeId"));
   }
 
   @Test
-  public void testGetRowLabel() {
+  void testGetRowLabel() {
     Repository repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
-    assertEquals(entityHelper.getLabel("entity-typeId", "identifier"), "label");
+    assertEquals("label", entityHelper.getLabel("entity-typeId", "identifier"));
   }
 
   @Test
-  public void testGetLabelledObjectIdentity() {
+  void testGetLabelledObjectIdentity() {
     Repository repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getLabel()).thenReturn("typeLabel");
@@ -73,22 +74,24 @@ public class EntityHelperTest extends AbstractMockitoTest {
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
     assertEquals(
+        create("entity-typeId", "typeId", "typeLabel", "identifier", "label"),
         entityHelper.getLabelledObjectIdentity(
-            new ObjectIdentityImpl("entity-typeId", "identifier")),
-        LabelledObjectIdentity.create(
-            "entity-typeId", "typeId", "typeLabel", "identifier", "label"));
+            new ObjectIdentityImpl("entity-typeId", "identifier")));
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testCheckEntityExistsFail() {
+  @Test
+  void testCheckEntityExistsFail() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
     when(dataService.getRepository("typeId")).thenReturn(repository);
     when(repository.findOneById("identifier")).thenReturn(null);
-    entityHelper.checkEntityExists(new ObjectIdentityImpl("entity-typeId", "identifier"));
+    assertThrows(
+        UnknownEntityException.class,
+        () ->
+            entityHelper.checkEntityExists(new ObjectIdentityImpl("entity-typeId", "identifier")));
   }
 
   @Test
-  public void testCheckEntityExists() {
+  void testCheckEntityExists() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
 
     when(dataService.getRepository("typeId")).thenReturn(repository);
@@ -96,45 +99,47 @@ public class EntityHelperTest extends AbstractMockitoTest {
     entityHelper.checkEntityExists(new ObjectIdentityImpl("entity-typeId", "identifier"));
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class)
-  public void testCheckEntityTypeExistsFail() {
+  @Test
+  void testCheckEntityTypeExistsFail() {
     when(dataService.hasEntityType("typeId")).thenReturn(false);
-    entityHelper.checkEntityTypeExists("entity-typeId");
+    assertThrows(
+        UnknownEntityTypeException.class,
+        () -> entityHelper.checkEntityTypeExists("entity-typeId"));
   }
 
   @Test
-  public void testCheckEntityTypeExists() {
+  void testCheckEntityTypeExists() {
     when(dataService.hasEntityType("typeId")).thenReturn(true);
     entityHelper.checkEntityTypeExists("entity-typeId");
   }
 
   @Test
-  public void testGetEntityTypeIdFromClassPlugin() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("plugin"), "sys_Plugin");
+  void testGetEntityTypeIdFromClassPlugin() {
+    assertEquals("sys_Plugin", entityHelper.getEntityTypeIdFromType("plugin"));
   }
 
   @Test
-  public void testGetEntityTypeIdFromClassET() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entityType"), "sys_md_EntityType");
+  void testGetEntityTypeIdFromClassET() {
+    assertEquals("sys_md_EntityType", entityHelper.getEntityTypeIdFromType("entityType"));
   }
 
   @Test
-  public void testGetEntityTypeIdFromClassGroup() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("group"), "sys_sec_Group");
+  void testGetEntityTypeIdFromClassGroup() {
+    assertEquals("sys_sec_Group", entityHelper.getEntityTypeIdFromType("group"));
   }
 
   @Test
-  public void testGetEntityTypeIdFromClassPack() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("package"), "sys_md_Package");
+  void testGetEntityTypeIdFromClassPack() {
+    assertEquals("sys_md_Package", entityHelper.getEntityTypeIdFromType("package"));
   }
 
   @Test
-  public void testGetEntityTypeIdFromClassEntity() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("entity-test"), "test");
+  void testGetEntityTypeIdFromClassEntity() {
+    assertEquals("test", entityHelper.getEntityTypeIdFromType("entity-test"));
   }
 
-  @Test(expectedExceptions = InvalidTypeIdException.class)
-  public void testGetEntityTypeIdFromClassError() {
-    assertEquals(entityHelper.getEntityTypeIdFromType("error"), "");
+  @Test
+  void testGetEntityTypeIdFromClassError() {
+    assertThrows(InvalidTypeIdException.class, () -> entityHelper.getEntityTypeIdFromType("error"));
   }
 }

@@ -1,10 +1,14 @@
 package org.molgenis.bootstrap;
 
+import static java.lang.Integer.MIN_VALUE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
@@ -20,10 +24,8 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisBootstrapperTest extends AbstractMockitoTest {
+class MolgenisBootstrapperTest extends AbstractMockitoTest {
   @Mock private MolgenisUpgradeBootstrapper upgradeBootstrapper;
   @Mock private DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
   @Mock private TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar;
@@ -39,8 +41,8 @@ public class MolgenisBootstrapperTest extends AbstractMockitoTest {
 
   private MolgenisBootstrapper molgenisBootstrapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     molgenisBootstrapper =
         new MolgenisBootstrapper(
             upgradeBootstrapper,
@@ -57,14 +59,17 @@ public class MolgenisBootstrapperTest extends AbstractMockitoTest {
             bootstrappingEventPublisher);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testMolgenisBootstrapper() {
-    new MolgenisBootstrapper(
-        null, null, null, null, null, null, null, null, null, null, null, null);
+  @Test
+  void testMolgenisBootstrapper() {
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new MolgenisBootstrapper(
+                null, null, null, null, null, null, null, null, null, null, null, null));
   }
 
   @Test
-  public void testOnApplicationEvent() {
+  void testOnApplicationEvent() {
     ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
     ApplicationContext applicationContext = mock(ApplicationContext.class);
     when(event.getApplicationContext()).thenReturn(applicationContext);
@@ -87,7 +92,7 @@ public class MolgenisBootstrapperTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetOrder() {
-    assertEquals(molgenisBootstrapper.getOrder(), Integer.MIN_VALUE);
+  void testGetOrder() {
+    assertEquals(MIN_VALUE, molgenisBootstrapper.getOrder());
   }
 }

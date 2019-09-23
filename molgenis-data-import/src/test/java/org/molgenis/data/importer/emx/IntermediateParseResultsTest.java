@@ -1,43 +1,43 @@
 package org.molgenis.data.importer.emx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class IntermediateParseResultsTest extends AbstractMockitoTest {
+class IntermediateParseResultsTest extends AbstractMockitoTest {
   private IntermediateParseResults intermediateParseResults;
   @Mock private EntityTypeFactory entityTypeFactory;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
   }
 
   @Test
-  public void testAddEntityType() {
+  void testAddEntityType() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.setLabel(any())).thenReturn(entityType);
     when(entityType.setPackage(any())).thenReturn(entityType);
 
     when(entityTypeFactory.create("entityType")).thenReturn(entityType);
 
-    assertEquals(intermediateParseResults.addEntityType("entityType"), entityType);
+    assertEquals(entityType, intermediateParseResults.addEntityType("entityType"));
     verify(entityType).setLabel("entityType");
   }
 
   @Test
-  public void testSetDefaultLookupAttributes() {
+  void testSetDefaultLookupAttributes() {
     Attribute label = mock(Attribute.class);
     when(label.getName()).thenReturn("label");
     Attribute id = mock(Attribute.class);
@@ -52,7 +52,7 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetDefaultLookupAttributesIdEqualsLabel() {
+  void testSetDefaultLookupAttributesIdEqualsLabel() {
     Attribute label = mock(Attribute.class);
     when(label.getName()).thenReturn("id");
     Attribute id = mock(Attribute.class);
@@ -67,7 +67,7 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetDefaultLookupAttributesInvisibleId() {
+  void testSetDefaultLookupAttributesInvisibleId() {
     Attribute label = mock(Attribute.class);
     when(label.getName()).thenReturn("label");
     Attribute id = mock(Attribute.class);
@@ -76,7 +76,7 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getOwnLabelAttribute()).thenReturn(label);
     when(entityType.getOwnIdAttribute()).thenReturn(id);
-    intermediateParseResults.setDefaultLookupAttributes(entityType, 9);
+    IntermediateParseResults.setDefaultLookupAttributes(entityType, 9);
     verify(label).setLookupAttributeIndex(9);
     verify(id, times(0)).setLookupAttributeIndex(any());
   }

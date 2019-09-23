@@ -1,6 +1,7 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,21 +9,20 @@ import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.*;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.export.mapper.AttributeMapper;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class AttributeMapperTest extends AbstractMockitoTest {
+class AttributeMapperTest extends AbstractMockitoTest {
 
   @Test
-  public void testMapAttribute() {
+  void testMapAttribute() {
     Attribute attr = mock(Attribute.class);
     Attribute parent = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
@@ -106,11 +106,11 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testMapAttributeExpressionsAndRange() {
+  void testMapAttributeExpressionsAndRange() {
     Attribute attr = mock(Attribute.class);
     Attribute parent = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
@@ -192,11 +192,11 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testMapAttributeOneToMany() {
+  void testMapAttributeOneToMany() {
     Attribute attr = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -278,11 +278,11 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testMapAttributeEnum() {
+  void testMapAttributeEnum() {
     Attribute attr = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -364,11 +364,11 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null);
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testMapAttributeI18N() {
+  void testMapAttributeI18N() {
     Attribute attr = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
     EntityType refEntityType = mock(EntityType.class);
@@ -467,6 +467,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
             "xx Label",
             "xx description");
     List<Object> actual = AttributeMapper.map(attr);
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

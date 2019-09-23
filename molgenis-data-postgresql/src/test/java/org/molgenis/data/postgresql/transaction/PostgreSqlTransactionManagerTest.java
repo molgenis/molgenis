@@ -1,24 +1,24 @@
 package org.molgenis.data.postgresql.transaction;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import javax.sql.DataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.transaction.MolgenisTransaction;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PostgreSqlTransactionManagerTest {
+class PostgreSqlTransactionManagerTest {
   private PostgreSqlTransactionManager molgenisTransactionManager;
   private IdGenerator idGenerator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     idGenerator = mock(IdGenerator.class);
     DataSource dataSource = mock(DataSource.class);
     TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry =
@@ -29,7 +29,7 @@ public class PostgreSqlTransactionManagerTest {
   }
 
   @Test
-  public void doGetTransaction() {
+  void doGetTransaction() {
     String id = "unique_id";
     when(idGenerator.generateId()).thenReturn(id);
     Object trans = molgenisTransactionManager.doGetTransaction();
@@ -37,6 +37,6 @@ public class PostgreSqlTransactionManagerTest {
     assertTrue(trans instanceof MolgenisTransaction);
 
     MolgenisTransaction molgenisTransaction = (MolgenisTransaction) trans;
-    assertEquals(molgenisTransaction.getId(), id);
+    assertEquals(id, molgenisTransaction.getId());
   }
 }

@@ -7,27 +7,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.filter.ForwardedHeaderFilter;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class FairControllerTest extends AbstractTestNGSpringContextTests {
+class FairControllerTest extends AbstractMockitoSpringContextTests {
 
   private DataService dataService;
   private EntityModelWriter entityModelWriter;
@@ -36,8 +36,8 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @BeforeMethod
-  public void beforeTest() {
+  @BeforeEach
+  void beforeTest() {
     dataService = mock(DataService.class);
     entityModelWriter = mock(EntityModelWriter.class);
     FairController controller = new FairController(dataService, entityModelWriter);
@@ -51,7 +51,7 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getCatalogTest() throws Exception {
+  void getCatalogTest() throws Exception {
     reset(dataService);
 
     Entity answer = mock(Entity.class);
@@ -69,7 +69,7 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getCatalogTestUnknownCatalog() throws Exception {
+  void getCatalogTestUnknownCatalog() throws Exception {
     reset(dataService);
 
     this.mockMvc

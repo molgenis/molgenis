@@ -1,51 +1,51 @@
 package org.molgenis.api.data;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.data.Sort.Direction.ASC;
+import static org.molgenis.data.Sort.Direction.DESC;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Sort;
-import org.testng.annotations.Test;
 
-public class SortConverterTest {
+class SortConverterTest {
   @Test
-  public void convertSingleAttrDefault() {
-    assertEquals(new SortConverter().convert("attr"), new Sort().on("attr"));
+  void convertSingleAttrDefault() {
+    assertEquals(new Sort().on("attr"), new SortConverter().convert("attr"));
   }
 
   @Test
-  public void convertSingleAttrAsc() {
+  void convertSingleAttrAsc() {
+    assertEquals(new Sort().on("attr", ASC), new SortConverter().convert("attr:asc"));
+  }
+
+  @Test
+  void convertSingleAttrDesc() {
+    assertEquals(new Sort().on("attr", DESC), new SortConverter().convert("attr:desc"));
+  }
+
+  @Test
+  void convertMultiAttrDefault() {
+    assertEquals(new Sort().on("attr0").on("attr1"), new SortConverter().convert("attr0,attr1"));
+  }
+
+  @Test
+  void convertMultiAttrAsc() {
     assertEquals(
-        new SortConverter().convert("attr:asc"), new Sort().on("attr", Sort.Direction.ASC));
+        new Sort().on("attr0", ASC).on("attr1", ASC),
+        new SortConverter().convert("attr0:asc,attr1:asc"));
   }
 
   @Test
-  public void convertSingleAttrDesc() {
+  void convertMultiAttrDesc() {
     assertEquals(
-        new SortConverter().convert("attr:desc"), new Sort().on("attr", Sort.Direction.DESC));
+        new Sort().on("attr0", DESC).on("attr1", DESC),
+        new SortConverter().convert("attr0:desc,attr1:desc"));
   }
 
   @Test
-  public void convertMultiAttrDefault() {
-    assertEquals(new SortConverter().convert("attr0,attr1"), new Sort().on("attr0").on("attr1"));
-  }
-
-  @Test
-  public void convertMultiAttrAsc() {
+  void convertMultiAttrAscAndDesc() {
     assertEquals(
-        new SortConverter().convert("attr0:asc,attr1:asc"),
-        new Sort().on("attr0", Sort.Direction.ASC).on("attr1", Sort.Direction.ASC));
-  }
-
-  @Test
-  public void convertMultiAttrDesc() {
-    assertEquals(
-        new SortConverter().convert("attr0:desc,attr1:desc"),
-        new Sort().on("attr0", Sort.Direction.DESC).on("attr1", Sort.Direction.DESC));
-  }
-
-  @Test
-  public void convertMultiAttrAscAndDesc() {
-    assertEquals(
-        new SortConverter().convert("attr0:asc,attr1:desc"),
-        new Sort().on("attr0", Sort.Direction.ASC).on("attr1", Sort.Direction.DESC));
+        new Sort().on("attr0", ASC).on("attr1", DESC),
+        new SortConverter().convert("attr0:asc,attr1:desc"));
   }
 }

@@ -14,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
@@ -26,12 +28,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @Configuration
 @EnableWebMvc
-public class AppManagerControllerTest {
+class AppManagerControllerTest {
   private MockMvc mockMvc;
 
   @Mock private AppManagerService appManagerService;
@@ -40,8 +40,8 @@ public class AppManagerControllerTest {
 
   private AppResponse appResponse;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
 
     App app = mock(App.class);
@@ -65,7 +65,7 @@ public class AppManagerControllerTest {
   }
 
   @Test
-  public void testInit() throws Exception {
+  void testInit() throws Exception {
     mockMvc
         .perform(get(AppManagerController.URI))
         .andExpect(status().is(200))
@@ -73,7 +73,7 @@ public class AppManagerControllerTest {
   }
 
   @Test
-  public void testGetApps() throws Exception {
+  void testGetApps() throws Exception {
     when(appManagerService.getApps()).thenReturn(newArrayList(appResponse));
     mockMvc
         .perform(get(AppManagerController.URI + "/apps"))
@@ -85,7 +85,7 @@ public class AppManagerControllerTest {
   }
 
   @Test
-  public void testActivateApp() throws Exception {
+  void testActivateApp() throws Exception {
     App app = mock(App.class);
     when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
     mockMvc.perform(post(AppManagerController.URI + "/activate/id")).andExpect(status().is(200));
@@ -94,7 +94,7 @@ public class AppManagerControllerTest {
   }
 
   @Test
-  public void testDeactivateApp() throws Exception {
+  void testDeactivateApp() throws Exception {
     App app = mock(App.class);
     when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
     mockMvc.perform(post(AppManagerController.URI + "/deactivate/id")).andExpect(status().is(200));
@@ -103,13 +103,13 @@ public class AppManagerControllerTest {
   }
 
   @Test
-  public void testDeleteApp() throws Exception {
+  void testDeleteApp() throws Exception {
     mockMvc.perform(delete(AppManagerController.URI + "/delete/id")).andExpect(status().is(200));
     verify(dataService).deleteById(AppMetadata.APP, "id");
   }
 
   @Test
-  public void testUploadApp() throws Exception {
+  void testUploadApp() throws Exception {
     AppConfig appConfig = mock(AppConfig.class);
     when(appConfig.getName()).thenReturn("");
     when(appManagerService.checkAndObtainConfig(null, null)).thenReturn(appConfig);

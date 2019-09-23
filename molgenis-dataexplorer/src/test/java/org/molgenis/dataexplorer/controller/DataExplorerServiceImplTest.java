@@ -1,10 +1,16 @@
 package org.molgenis.dataexplorer.controller;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.dataexplorer.controller.Module.AGGREGATION;
+import static org.molgenis.dataexplorer.controller.Module.DATA;
+import static org.molgenis.dataexplorer.controller.Module.REPORT;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -13,55 +19,53 @@ import org.molgenis.dataexplorer.EntityTypeReportPermission;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataExplorerServiceImplTest extends AbstractMockitoTest {
+class DataExplorerServiceImplTest extends AbstractMockitoTest {
   @Mock private DataExplorerSettings dataExplorerSettings;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
 
   private DataExplorerServiceImpl dataExplorerServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     dataExplorerServiceImpl =
         new DataExplorerServiceImpl(dataExplorerSettings, userPermissionEvaluator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testDataExplorerServiceImpl() {
-    new DataExplorerServiceImpl(null, null);
+  @Test
+  void testDataExplorerServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new DataExplorerServiceImpl(null, null));
   }
 
   @Test
-  public void testGetModulesData() {
+  void testGetModulesData() {
     EntityType entityType = getMockEntityType();
     when(dataExplorerSettings.getModData()).thenReturn(true);
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType), EntityTypePermission.READ_DATA))
         .thenReturn(true);
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.DATA));
+    assertEquals(singletonList(DATA), dataExplorerServiceImpl.getModules(entityType));
   }
 
   @Test
-  public void testGetModulesAggregation() {
+  void testGetModulesAggregation() {
     EntityType entityType = getMockEntityType();
     when(dataExplorerSettings.getModAggregates()).thenReturn(true);
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType), EntityTypePermission.AGGREGATE_DATA))
         .thenReturn(true);
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.AGGREGATION));
+    assertEquals(singletonList(AGGREGATION), dataExplorerServiceImpl.getModules(entityType));
   }
 
   @Test
-  public void testGetModulesReport() {
+  void testGetModulesReport() {
     EntityType entityType = getMockEntityType();
     when(dataExplorerSettings.getModReports()).thenReturn(true);
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType), EntityTypeReportPermission.VIEW_REPORT))
         .thenReturn(true);
     when(dataExplorerSettings.getEntityReport("MyEntityType")).thenReturn("MyEntityReport");
-    assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.REPORT));
+    assertEquals(singletonList(REPORT), dataExplorerServiceImpl.getModules(entityType));
   }
 
   private EntityType getMockEntityType() {

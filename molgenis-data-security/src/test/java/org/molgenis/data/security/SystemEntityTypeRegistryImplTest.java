@@ -3,13 +3,17 @@ package org.molgenis.data.security;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
@@ -17,31 +21,29 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
+class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
   @Mock private UserPermissionEvaluator permissionService;
 
   private SystemEntityTypeRegistryImpl systemEntityTypeRegistry;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     systemEntityTypeRegistry = new SystemEntityTypeRegistryImpl(permissionService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testSystemEntityTypeRegistryImpl() {
-    new SystemEntityTypeRegistryImpl(null);
+  @Test
+  void testSystemEntityTypeRegistryImpl() {
+    assertThrows(NullPointerException.class, () -> new SystemEntityTypeRegistryImpl(null));
   }
 
   @Test
-  public void testGetSystemEntityTypeNotExists() {
+  void testGetSystemEntityTypeNotExists() {
     assertNull(systemEntityTypeRegistry.getSystemEntityType("unknownEntityTypeId"));
   }
 
   @Test
-  public void testGetSystemEntityTypePermitted() {
+  void testGetSystemEntityTypePermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -50,13 +52,11 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
+    assertEquals(systemEntityType, systemEntityTypeRegistry.getSystemEntityType(entityTypeId));
   }
 
-  @Test(
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
-  public void testGetSystemEntityTypeNotPermitted() {
+  @Test
+  void testGetSystemEntityTypeNotPermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -65,11 +65,16 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(false);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+    Exception exception =
+        assertThrows(
+            EntityTypePermissionDeniedException.class,
+            () -> systemEntityTypeRegistry.getSystemEntityType(entityTypeId));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:READ_METADATA entityTypeId:entityType");
   }
 
   @Test
-  public void testGetSystemEntityTypesPermitted() {
+  void testGetSystemEntityTypesPermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -79,12 +84,12 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
     assertEquals(
-        systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()),
-        singletonList(systemEntityType));
+        singletonList(systemEntityType),
+        systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()));
   }
 
   @Test
-  public void testGetSystemEntityTypesNotPermitted() {
+  void testGetSystemEntityTypesNotPermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -93,11 +98,11 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(false);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().count(), 0);
+    assertEquals(0, systemEntityTypeRegistry.getSystemEntityTypes().count());
   }
 
   @Test
-  public void testHasSystemEntityTypeExists() {
+  void testHasSystemEntityTypeExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -106,13 +111,13 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasSystemEntityTypeNotExists() {
+  void testHasSystemEntityTypeNotExists() {
     String entityTypeId = "unknownEntityType";
     assertFalse(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId));
   }
 
   @Test
-  public void testGetSystemAttributePermittedExists() {
+  void testGetSystemAttributePermittedExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -123,11 +128,11 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
+    assertEquals(attr, systemEntityTypeRegistry.getSystemAttribute("attr"));
   }
 
   @Test
-  public void testGetSystemAttributePermittedNotExists() {
+  void testGetSystemAttributePermittedNotExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -137,10 +142,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
     assertNull(systemEntityTypeRegistry.getSystemAttribute("attr"));
   }
 
-  @Test(
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
-  public void testGetSystemAttributeNotPermitted() {
+  @Test
+  void testGetSystemAttributeNotPermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -151,11 +154,16 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(false);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
+    Exception exception =
+        assertThrows(
+            EntityTypePermissionDeniedException.class,
+            () -> systemEntityTypeRegistry.getSystemAttribute("attr"));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:READ_METADATA entityTypeId:entityType");
   }
 
   @Test
-  public void testGetSystemAttributeCompound() {
+  void testGetSystemAttributeCompound() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -170,11 +178,11 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
         .thenReturn(true);
 
     systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
-    assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
+    assertEquals(attr, systemEntityTypeRegistry.getSystemAttribute("attr"));
   }
 
   @Test
-  public void testGetSystemAttributeCompoundNotExists() {
+  void testGetSystemAttributeCompoundNotExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -191,7 +199,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasSystemAttributePermittedExists() {
+  void testHasSystemAttributePermittedExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -203,7 +211,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasSystemAttributePermittedNotExists() {
+  void testHasSystemAttributePermittedNotExists() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);
@@ -214,7 +222,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasSystemAttributeNotPermitted() {
+  void testHasSystemAttributeNotPermitted() {
     String entityTypeId = "entityType";
     SystemEntityType systemEntityType = mock(SystemEntityType.class);
     when(systemEntityType.getId()).thenReturn(entityTypeId);

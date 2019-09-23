@@ -4,6 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
@@ -14,16 +16,15 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -52,8 +53,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
 public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
@@ -80,7 +79,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     super(Strictness.WARN);
   }
 
-  @BeforeMethod
+  @BeforeEach
   public void beforeMethod() {
     config.resetMocks();
     indexJobService = new IndexJobService(dataService, indexService, entityTypeFactory);
@@ -128,8 +127,8 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   public void testCreateQueryGetAllIndexActions() {
     Query<IndexAction> q = IndexJobService.createQueryGetAllIndexActions("testme");
     assertEquals(
-        q.toString(),
-        "rules=['indexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]");
+        "rules=['indexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]",
+        q.toString());
   }
 
   @Test
@@ -150,7 +149,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
     indexJobService.executeJob(progress, transactionId);
-    assertEquals(indexAction.getIndexStatus(), FINISHED);
+    assertEquals(FINISHED, indexAction.getIndexStatus());
 
     verify(indexService).deleteById(testEntityType, "entityId");
 
@@ -181,7 +180,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     indexActionGroup.setCount(1);
 
     indexJobService.executeJob(progress, transactionId);
-    assertEquals(indexAction.getIndexStatus(), FINISHED);
+    assertEquals(FINISHED, indexAction.getIndexStatus());
 
     verify(this.indexService).index(testEntityType, toIndexEntity);
 
@@ -214,7 +213,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     indexActionGroup.setCount(1);
 
     indexJobService.executeJob(progress, transactionId);
-    assertEquals(indexAction.getIndexStatus(), FINISHED);
+    assertEquals(FINISHED, indexAction.getIndexStatus());
     verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
     verify(progress).status("Start indexing for transaction id: [aabbcc]");
     verify(progress).setProgressMax(1);
@@ -228,7 +227,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
 
     // make sure both the actions and the action job got deleted
     verify(dataService).delete(eq(INDEX_ACTION), streamCaptor.capture());
-    assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(indexAction));
+    assertEquals(newArrayList(indexAction), streamCaptor.getValue().collect(toList()));
     verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
   }
 
@@ -248,7 +247,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     indexActionGroup.setCount(1);
 
     indexJobService.executeJob(progress, transactionId);
-    assertEquals(indexAction.getIndexStatus(), FINISHED);
+    assertEquals(FINISHED, indexAction.getIndexStatus());
     verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
     verify(progress).status("Start indexing for transaction id: [aabbcc]");
     verify(progress).setProgressMax(1);
@@ -262,7 +261,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
 
     // make sure both the actions and the action job got deleted
     verify(dataService).delete(eq(INDEX_ACTION), streamCaptor.capture());
-    assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(indexAction));
+    assertEquals(newArrayList(indexAction), streamCaptor.getValue().collect(toList()));
     verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
 
     verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
@@ -292,12 +291,12 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     when(indexService.hasIndex(any(EntityType.class))).thenReturn(true);
 
     indexJobService.executeJob(progress, transactionId);
-    assertEquals(indexAction.getIndexStatus(), FINISHED);
+    assertEquals(FINISHED, indexAction.getIndexStatus());
 
     ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
     verify(this.indexService).deleteIndex(entityTypeCaptor.capture());
     EntityType actualEntityType = entityTypeCaptor.getValue();
-    assertEquals(actualEntityType.getId(), entityTypeId);
+    assertEquals(entityTypeId, actualEntityType.getId());
 
     verify(progress).status("Start indexing for transaction id: [aabbcc]");
     verify(progress).setProgressMax(1);
@@ -360,8 +359,8 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     verify(indexService).refreshIndex();
 
     // Make sure the action status got updated and that the actionJob didn't get deleted
-    assertEquals(indexAction1.getIndexStatus(), FINISHED);
-    assertEquals(indexAction2.getIndexStatus(), FAILED);
+    assertEquals(FINISHED, indexAction1.getIndexStatus());
+    assertEquals(FAILED, indexAction2.getIndexStatus());
     verify(dataService, atLeast(1)).update(INDEX_ACTION, indexAction1);
     verify(dataService, atLeast(1)).update(INDEX_ACTION, indexAction2);
     verify(dataService, never()).delete(INDEX_ACTION_GROUP, indexActionGroup);
@@ -378,7 +377,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     @Mock private MetaDataService mds;
 
     public Config() {
-      initMocks(this);
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean

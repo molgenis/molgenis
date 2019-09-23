@@ -1,23 +1,23 @@
 package org.molgenis.data.populate;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AutoValuePopulatorTest {
+class AutoValuePopulatorTest {
   private static final String ATTR_ID = "id";
   private static final String ATTR_DATE_AUTO_DEFAULT = "date_auto-default";
   private static final String ATTR_DATE_AUTO_FALSE = "date_auto-false";
@@ -29,8 +29,8 @@ public class AutoValuePopulatorTest {
   private EntityType entityType;
   private AutoValuePopulator autoValuePopulator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     Attribute attrId = when(mock(Attribute.class).getName()).thenReturn(ATTR_ID).getMock();
     when(attrId.getDataType()).thenReturn(STRING);
@@ -91,7 +91,7 @@ public class AutoValuePopulatorTest {
   }
 
   @Test
-  public void populateAutoValues() {
+  void populateAutoValues() {
     Entity entity = new DynamicEntity(entityType);
     autoValuePopulator.populate(entity);
 

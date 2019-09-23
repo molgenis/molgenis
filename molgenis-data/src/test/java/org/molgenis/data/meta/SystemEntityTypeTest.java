@@ -1,28 +1,28 @@
 package org.molgenis.data.meta;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.IdGenerator;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SystemEntityTypeTest {
+class SystemEntityTypeTest {
   AttributeFactory attributeFactory;
   EntityTypeMetadata entityTypeMetaData;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     attributeFactory = mock(AttributeFactory.class);
     entityTypeMetaData = mock(EntityTypeMetadata.class);
 
@@ -30,31 +30,31 @@ public class SystemEntityTypeTest {
   }
 
   @Test
-  public void testAssignRolesToAttributeParts() {
+  void testAssignRolesToAttributeParts() {
     TestCompoundEMD testEMD = new TestCompoundEMD("Test");
     testEMD.setAttributeFactory(attributeFactory);
     testEMD.bootstrap(entityTypeMetaData);
 
-    assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
-    assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
+    assertEquals("idAttr", testEMD.getIdAttribute().getName());
+    assertEquals("labelAttr", testEMD.getLabelAttribute().getName());
 
     Set<String> lookupAttributes = newHashSet();
     testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-    assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
+    assertEquals(newHashSet("lookupAttr1", "lookupAttr2"), lookupAttributes);
   }
 
   @Test
-  public void testAssignRolesToAttributePartsNested() {
+  void testAssignRolesToAttributePartsNested() {
     TestNestedCompoundEMD testEMD = new TestNestedCompoundEMD("Test");
     testEMD.setAttributeFactory(attributeFactory);
     testEMD.bootstrap(entityTypeMetaData);
 
-    assertEquals(testEMD.getIdAttribute().getName(), "idAttr");
-    assertEquals(testEMD.getLabelAttribute().getName(), "labelAttr");
+    assertEquals("idAttr", testEMD.getIdAttribute().getName());
+    assertEquals("labelAttr", testEMD.getLabelAttribute().getName());
 
     Set<String> lookupAttributes = newHashSet();
     testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-    assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
+    assertEquals(newHashSet("lookupAttr1", "lookupAttr2"), lookupAttributes);
   }
 
   private class TestNestedCompoundEMD extends SystemEntityType {

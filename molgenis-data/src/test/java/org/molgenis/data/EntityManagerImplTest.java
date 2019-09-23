@@ -1,31 +1,32 @@
 package org.molgenis.data;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityManagerImplTest {
+class EntityManagerImplTest {
   private DataService dataService;
   private EntityManagerImpl entityManagerImpl;
   private EntityFactoryRegistry entityFactoryRegistry;
   private EntityPopulator entityPopulator;
   private EntityReferenceCreator entityReferenceCreator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     dataService = mock(DataService.class);
     entityFactoryRegistry = mock(EntityFactoryRegistry.class);
     entityPopulator = mock(EntityPopulator.class);
@@ -35,13 +36,12 @@ public class EntityManagerImplTest {
             dataService, entityFactoryRegistry, entityPopulator, entityReferenceCreator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void EntityManagerImpl() {
-    new EntityManagerImpl(null, null, null, null);
+  void EntityManagerImpl() {
+    assertThrows(NullPointerException.class, () -> new EntityManagerImpl(null, null, null, null));
   }
 
   @Test
-  public void getReference() {
+  void getReference() {
     EntityType entityType = mock(EntityType.class);
     Object id = mock(Object.class);
     entityManagerImpl.getReference(entityType, id);
@@ -49,7 +49,7 @@ public class EntityManagerImplTest {
   }
 
   @Test
-  public void getReferences() {
+  void getReferences() {
     EntityType entityType = mock(EntityType.class);
     Iterable<?> ids = mock(Iterable.class);
     entityManagerImpl.getReferences(entityType, ids);
@@ -57,7 +57,7 @@ public class EntityManagerImplTest {
   }
 
   @Test
-  public void resolveReferencesNoFetch() {
+  void resolveReferencesNoFetch() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 
     Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
@@ -65,11 +65,11 @@ public class EntityManagerImplTest {
     Stream<Entity> entities = Stream.of(entity0, entity1);
 
     Fetch fetch = null;
-    assertEquals(entities, entityManagerImpl.resolveReferences(entityType, entities, fetch));
+    assertEquals(entityManagerImpl.resolveReferences(entityType, entities, fetch), entities);
   }
 
   @Test
-  public void resolveReferencesStreamNoFetch() {
+  void resolveReferencesStreamNoFetch() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
     Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
     when(labelAttr.getDataType()).thenReturn(STRING);
@@ -82,6 +82,6 @@ public class EntityManagerImplTest {
     Fetch fetch = null;
     Stream<Entity> entities =
         entityManagerImpl.resolveReferences(entityType, Stream.of(entity0, entity1), fetch);
-    assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), entities.collect(toList()));
   }
 }

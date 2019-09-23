@@ -1,5 +1,6 @@
 package org.molgenis.oneclickimporter.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -11,12 +12,13 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -35,10 +37,8 @@ import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.impl.EntityServiceImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class EntityServiceImplTest {
+class EntityServiceImplTest {
   @Mock private EntityTypeFactory entityTypeFactory;
 
   @Mock private AttributeFactory attributeFactory;
@@ -65,13 +65,13 @@ public class EntityServiceImplTest {
 
   private EntityService entityService;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
   }
 
   @Test
-  public void testCreateEntity() {
+  void testCreateEntity() {
     String tableName = "super-powers";
     List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
     List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
@@ -154,7 +154,7 @@ public class EntityServiceImplTest {
             userPermissionEvaluator);
 
     EntityType entityType = entityService.createEntityType(dataCollection, "package_");
-    assertEquals(entityType.getId(), generatedId);
+    assertEquals(generatedId, entityType.getId());
 
     verify(table).setPackage(package_);
     verify(table).setId(generatedId);

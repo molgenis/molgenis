@@ -21,34 +21,39 @@ import java.time.LocalDate;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.test.TestResourceUtils;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class EntityControllerIT extends AbstractApiTest {
+@TestMethodOrder(OrderAnnotation.class)
+class EntityControllerIT extends AbstractApiTest {
   private static final Logger LOG = getLogger(EntityControllerIT.class);
 
-  @BeforeClass
-  public static void setUpBeforeClass() {
+  @BeforeAll
+  protected static void setUpBeforeClass() {
     AbstractApiTest.setUpBeforeClass();
 
     importData();
   }
 
-  @AfterClass
-  public static void tearDownAfterClass() {
+  @AfterAll
+  protected static void tearDownAfterClass() {
     deleteData();
 
     AbstractApiTest.tearDownAfterClass();
   }
 
   @Test
-  public void testCreateResource() {
+  @Order(1)
+  void testCreateResource() {
     JSONArray jsonArray = new JSONArray();
     jsonArray.add("str1");
     jsonArray.add("str2");
@@ -76,8 +81,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .header(LOCATION, RestAssured.baseURI + "/api/data/v3_MyDataset/25");
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResource() throws IOException {
+  @Test
+  @Order(2)
+  void testRetrieveResource() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(), "retrieveResource.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
@@ -89,8 +95,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResourceSubResource() throws IOException {
+  @Test
+  @Order(3)
+  void testRetrieveResourceSubResource() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
@@ -104,8 +111,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResourceCollection() throws IOException {
+  @Test
+  @Order(4)
+  void testRetrieveResourceCollection() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
@@ -120,8 +128,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResourceCollectionFilterExpand() throws IOException {
+  @Test
+  @Order(5)
+  void testRetrieveResourceCollectionFilterExpand() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
@@ -136,8 +145,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResourceCollectionSortQuery() throws IOException {
+  @Test
+  @Order(6)
+  void testRetrieveResourceCollectionSortQuery() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
@@ -151,8 +161,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testCreateResource")
-  public void testRetrieveResourceCollectionInvalidInput() throws IOException {
+  @Test
+  @Order(7)
+  void testRetrieveResourceCollectionInvalidInput() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
@@ -170,16 +181,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson, JSONCompareMode.LENIENT));
   }
 
-  @Test(
-      dependsOnMethods = {
-        "testRetrieveResource",
-        "testRetrieveResourceSubResource",
-        "testRetrieveResourceCollection",
-        "testRetrieveResourceCollectionFilterExpand",
-        "testRetrieveResourceCollectionSortQuery",
-        "testRetrieveResourceCollectionInvalidInput"
-      })
-  public void testUpdateResource() throws IOException {
+  @Test
+  @Order(8)
+  void testUpdateResource() throws IOException {
     JSONArray jsonArray = new JSONArray();
 
     JSONObject jsonObject = new JSONObject();
@@ -214,8 +218,9 @@ public class EntityControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  @Test(dependsOnMethods = "testUpdateResource")
-  public void testPartialUpdateResource() {
+  @Test
+  @Order(9)
+  void testPartialUpdateResource() {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("myString", "String 25 - updated partially");
 
@@ -232,31 +237,16 @@ public class EntityControllerIT extends AbstractApiTest {
         .body("data.myString", Matchers.equalTo("String 25 - updated partially"));
   }
 
-  @Test(dependsOnMethods = "testPartialUpdateResource")
-  public void deleteResource() {
+  @Test
+  @Order(10)
+  void deleteResource() {
     given().delete("/api/data/v3_MyDataset/25").then().statusCode(NO_CONTENT.value());
     given().get("/api/data/v3_MyDataset/25").then().statusCode(NOT_FOUND.value());
   }
 
-  @Test(dependsOnMethods = "deleteResourceCollectionQuery")
-  public void deleteResourceCollection() throws IOException {
-    given().delete("/api/data/v3_MyDataset").then().statusCode(NO_CONTENT.value());
-
-    String expectedJson =
-        TestResourceUtils.getRenderedString(
-            getClass(),
-            "deleteResourceCollection.json",
-            ImmutableMap.of("baseUri", RestAssured.baseURI));
-
-    given()
-        .get("/api/data/v3_MyDataset")
-        .then()
-        .statusCode(HttpStatus.OK.value())
-        .body(isEqualJson(expectedJson));
-  }
-
-  @Test(dependsOnMethods = "deleteResource")
-  public void deleteResourceCollectionQuery() throws IOException {
+  @Test
+  @Order(11)
+  void deleteResourceCollectionQuery() throws IOException {
     given()
         .delete("/api/data/v3_MyDataset?q=label=in=('Row%201','Row%202','Row%203','Row%204')")
         .then()
@@ -268,6 +258,24 @@ public class EntityControllerIT extends AbstractApiTest {
             "deleteResourceCollectionQuery.json",
             ImmutableMap.of(
                 "baseUri", RestAssured.baseURI, "autoDate", LocalDate.now().toString()));
+
+    given()
+        .get("/api/data/v3_MyDataset")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
+  }
+
+  @Test
+  @Order(12)
+  void deleteResourceCollection() throws IOException {
+    given().delete("/api/data/v3_MyDataset").then().statusCode(NO_CONTENT.value());
+
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "deleteResourceCollection.json",
+            ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
         .get("/api/data/v3_MyDataset")

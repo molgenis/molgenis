@@ -1,24 +1,26 @@
 package org.molgenis.data.validation.meta;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PackageValidatorTest {
+class PackageValidatorTest {
   private PackageValidator packageValidator;
   private SystemPackageRegistry systemPackageRegistry;
   private Package systemPackage;
   private Package testPackage;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     systemPackageRegistry = mock(SystemPackageRegistry.class);
     packageValidator = new PackageValidator(systemPackageRegistry);
     systemPackage = when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM).getMock();
@@ -26,14 +28,14 @@ public class PackageValidatorTest {
   }
 
   @Test
-  public void testValidateNonSystemPackage() {
+  void testValidateNonSystemPackage() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
     when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
     packageValidator.validate(package_);
   }
 
   @Test
-  public void testValidateSystemPackageInRegistry() {
+  void testValidateSystemPackageInRegistry() {
     Package package_ =
         when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
     when(package_.getParent()).thenReturn(systemPackage);
@@ -43,32 +45,32 @@ public class PackageValidatorTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Modifying system packages is not allowed")
-  public void testValidateSystemPackageNotInRegistry() {
+  @Test
+  void testValidateSystemPackageNotInRegistry() {
     Package package_ =
         when(mock(Package.class).getId()).thenReturn(PACKAGE_SYSTEM + '_' + "myPackage").getMock();
     when(package_.getParent()).thenReturn(systemPackage);
     when(package_.getRootPackage()).thenReturn(systemPackage);
     when(systemPackageRegistry.containsPackage(package_)).thenReturn(false);
-    packageValidator.validate(package_);
+    Exception exception =
+        assertThrows(MolgenisValidationException.class, () -> packageValidator.validate(package_));
+    assertThat(exception.getMessage()).containsPattern("Modifying system packages is not allowed");
   }
 
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Invalid name: \\[0package\\] Names must start with a letter.")
-  public void testValidatePackageInvalidName() {
+  @Test
+  void testValidatePackageInvalidName() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("0package").getMock();
     when(package_.getParent()).thenReturn(testPackage);
     when(package_.getRootPackage()).thenReturn(testPackage);
-    packageValidator.validate(package_);
+    Exception exception =
+        assertThrows(MolgenisDataException.class, () -> packageValidator.validate(package_));
+    assertThat(exception.getMessage())
+        .containsPattern("Invalid name: \\[0package\\] Names must start with a letter.");
   }
 
   @Test
-  public void testValidatePackageValidName() {
+  void testValidatePackageValidName() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("test_myPackage").getMock();
     when(package_.getParent()).thenReturn(testPackage);
     when(package_.getRootPackage()).thenReturn(testPackage);
@@ -76,38 +78,40 @@ public class PackageValidatorTest {
   }
 
   @Test
-  public void testValidatePackageValidNameNoParent() {
+  void testValidatePackageValidNameNoParent() {
     Package package_ = when(mock(Package.class).getId()).thenReturn("myPackage").getMock();
     when(package_.getParent()).thenReturn(null);
     packageValidator.validate(package_);
   }
 
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Package 'Child' with id 'child' parent contains cycles")
-  public void testValidatePackageParentParentIsSelf() {
+  @Test
+  void testValidatePackageParentParentIsSelf() {
     Package aPackage = when(mock(Package.class).getId()).thenReturn("child").getMock();
     when(aPackage.getLabel()).thenReturn("Child");
     when(aPackage.getParent()).thenReturn(aPackage);
-    packageValidator.validate(aPackage);
+    Exception exception =
+        assertThrows(MolgenisValidationException.class, () -> packageValidator.validate(aPackage));
+    assertThat(exception.getMessage())
+        .containsPattern("Package 'Child' with id 'child' parent contains cycles");
   }
 
   @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Package 'Child' with id 'child' parent contains cycles")
-  public void testValidatePackageParentCycle() {
+  @Test
+  void testValidatePackageParentCycle() {
     Package packageParent = when(mock(Package.class).getId()).thenReturn("parent").getMock();
     Package aPackage = when(mock(Package.class).getId()).thenReturn("child").getMock();
     when(aPackage.getLabel()).thenReturn("Child");
     when(aPackage.getParent()).thenReturn(packageParent);
     when(packageParent.getParent()).thenReturn(aPackage);
-    packageValidator.validate(aPackage);
+    Exception exception =
+        assertThrows(MolgenisValidationException.class, () -> packageValidator.validate(aPackage));
+    assertThat(exception.getMessage())
+        .containsPattern("Package 'Child' with id 'child' parent contains cycles");
   }
 
   @Test
-  public void testValidatePackageParentOk() {
+  void testValidatePackageParentOk() {
     Package packageParent = when(mock(Package.class).getId()).thenReturn("parent").getMock();
     Package aPackage = when(mock(Package.class).getId()).thenReturn("child").getMock();
     when(aPackage.getParent()).thenReturn(packageParent);

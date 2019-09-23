@@ -1,35 +1,36 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JobsServiceImplTest extends AbstractMockitoTest {
+class JobsServiceImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private JobExecutor jobExecutor;
   private JobsServiceImpl jobsService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     jobsService = new JobsServiceImpl(dataService, jobExecutor);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testJobServiceImpl() {
-    new JobsServiceImpl(null, null);
+  @Test
+  void testJobServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new JobsServiceImpl(null, null));
   }
 
   @Test
-  public void testCancel() {
+  void testCancel() {
     String jobExecutionType = "MyJobExecutionType";
     String jobExecutionId = "MyJobExecutionId";
 
@@ -48,8 +49,8 @@ public class JobsServiceImplTest extends AbstractMockitoTest {
     verify(jobExecutor).cancel(jobExecution);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testCancelUnknownJobExecution() {
+  @Test
+  void testCancelUnknownJobExecution() {
     String jobExecutionType = "MyJobExecutionType";
     String jobExecutionId = "MyJobExecutionId";
 
@@ -59,15 +60,18 @@ public class JobsServiceImplTest extends AbstractMockitoTest {
     when(jobExecutionMetadata.getExtends()).thenReturn(jobExecutionMetadataParent);
     when(dataService.getEntityType(jobExecutionType)).thenReturn(jobExecutionMetadata);
 
-    jobsService.cancel(jobExecutionType, jobExecutionId);
+    assertThrows(
+        UnknownEntityException.class, () -> jobsService.cancel(jobExecutionType, jobExecutionId));
   }
 
-  @Test(expectedExceptions = InvalidJobExecutionTypeException.class)
-  public void testCancelInvalidJobExecutionType() {
+  @Test
+  void testCancelInvalidJobExecutionType() {
     String jobExecutionType = "MyJobExecutionType";
     String jobExecutionId = "MyJobExecutionId";
     EntityType jobExecutionMetadata = mock(EntityType.class);
     when(dataService.getEntityType(jobExecutionType)).thenReturn(jobExecutionMetadata);
-    jobsService.cancel(jobExecutionType, jobExecutionId);
+    assertThrows(
+        InvalidJobExecutionTypeException.class,
+        () -> jobsService.cancel(jobExecutionType, jobExecutionId));
   }
 }

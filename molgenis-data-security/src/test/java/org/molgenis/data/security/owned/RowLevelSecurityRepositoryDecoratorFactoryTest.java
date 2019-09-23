@@ -1,10 +1,13 @@
 package org.molgenis.data.security.owned;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -13,29 +16,29 @@ import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RowLevelSecurityRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
+class RowLevelSecurityRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
   @Mock private MutableAclService mutableAclService;
   @Mock private MutableAclClassService mutableAclClassService;
   private RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     rowLevelSecurityRepositoryDecoratorFactory =
         new RowLevelSecurityRepositoryDecoratorFactory(
             userPermissionEvaluator, mutableAclService, mutableAclClassService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testRowLevelSecurityRepositoryDecoratorFactory() {
-    new RowLevelSecurityRepositoryDecoratorFactory(null, null, null);
+  @Test
+  void testRowLevelSecurityRepositoryDecoratorFactory() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new RowLevelSecurityRepositoryDecoratorFactory(null, null, null));
   }
 
   @Test
-  public void testCreateDecoratedRepositoryRowLevelSecurityEnabled() {
+  void testCreateDecoratedRepositoryRowLevelSecurityEnabled() {
     Repository<Entity> repository = getRepositoryMock();
     when(mutableAclClassService.hasAclClass("entity-entityTypeId")).thenReturn(true);
     assertTrue(
@@ -44,11 +47,11 @@ public class RowLevelSecurityRepositoryDecoratorFactoryTest extends AbstractMock
   }
 
   @Test
-  public void testCreateDecoratedRepositoryRowLevelSecurityDisabled() {
+  void testCreateDecoratedRepositoryRowLevelSecurityDisabled() {
     Repository<Entity> repository = getRepositoryMock();
     assertEquals(
-        rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(repository),
-        repository);
+        repository,
+        rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(repository));
   }
 
   private Repository<Entity> getRepositoryMock() {
