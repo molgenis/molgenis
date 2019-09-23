@@ -44,7 +44,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -151,7 +150,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
             .getIdValue());
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @ParameterizedTest
   @MethodSource("allTestCaseDataProvider")
@@ -325,7 +323,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
         stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @ParameterizedTest
   @MethodSource("allTestCaseDataProvider")
@@ -418,7 +415,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedAuthor3.getEntities(ATTR_BOOKS)));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderAscending() {
@@ -446,7 +442,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderDescending() {

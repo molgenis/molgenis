@@ -51,7 +51,9 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
   @Override
   public Integer add(Stream<Entity> entities) {
     evictBiDiReferencedEntityTypes();
-    if (cacheable) {
+    // do not add to cache if entityType contains self referencing bidirectionals, since those have
+    // not been processed yet.
+    if (cacheable && !containsSelfReferencingBidirectionals()) {
       String entityId = getEntityType().getId();
       entities = entities.peek(entity -> l1Cache.put(entityId, entity));
     }
@@ -61,7 +63,10 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
   @Override
   public void add(Entity entity) {
     evictBiDiReferencedEntities(entity);
-    if (cacheable) l1Cache.put(getEntityType().getId(), entity);
+    // do not add to cache if entityType contains self referencing bidirectionals, since those have
+    // not been processed yet.
+    if (cacheable && !containsSelfReferencingBidirectionals())
+      l1Cache.put(getEntityType().getId(), entity);
     delegate().add(entity);
   }
 
@@ -120,14 +125,19 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
   @Override
   public void update(Entity entity) {
     evictBiDiReferencedEntityTypes();
-    if (cacheable) l1Cache.put(getEntityType().getId(), entity);
+    // do not add to cache if entityType contains self referencing bidirectionals, since those have
+    // not been processed yet.
+    if (cacheable && !containsSelfReferencingBidirectionals())
+      l1Cache.put(getEntityType().getId(), entity);
     delegate().update(entity);
   }
 
   @Override
   public void update(Stream<Entity> entities) {
     evictBiDiReferencedEntityTypes();
-    if (cacheable) {
+    // do not add to cache if entityType contains self referencing bidirectionals, since those have
+    // not been processed yet.
+    if (cacheable && !containsSelfReferencingBidirectionals()) {
       entities =
           entities.filter(
               entity -> {
@@ -187,6 +197,17 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
         .getInversedByAttributes()
         .map(Attribute::getRefEntity)
         .forEach(l1Cache::evictAll);
+  }
+
+  private boolean containsSelfReferencingBidirectionals() {
+    return getEntityType()
+            .getMappedByAttributes()
+            .map(Attribute::getRefEntity)
+            .anyMatch(entityType -> entityType.equals(getEntityType()))
+        || getEntityType()
+            .getInversedByAttributes()
+            .map(Attribute::getRefEntity)
+            .anyMatch(entityType -> entityType.equals(getEntityType()));
   }
 
   /**
