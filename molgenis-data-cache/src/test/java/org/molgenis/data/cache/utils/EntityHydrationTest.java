@@ -40,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -54,6 +55,7 @@ import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {TestHarnessConfig.class})
 class EntityHydrationTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTestHarness entityTestHarness;
@@ -64,10 +66,6 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
   private EntityHydration entityHydration;
 
   @Captor private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
-
-  EntityHydrationTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

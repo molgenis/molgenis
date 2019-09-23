@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -51,6 +52,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = OntologyTagServiceTest.Config.class)
 class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
@@ -92,10 +94,6 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
           "http://edamontology.org/data_0919",
           "Gene annotation (chromosome)",
           "This includes basic information. e.g. chromosome number...");
-
-  OntologyTagServiceTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

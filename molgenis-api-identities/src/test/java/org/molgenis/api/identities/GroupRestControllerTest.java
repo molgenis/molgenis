@@ -41,9 +41,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.GroupIdentity;
@@ -68,6 +66,7 @@ import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
@@ -78,15 +77,13 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.NestedServletException;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @ContextConfiguration(classes = {GroupRestControllerTest.Config.class, GsonConfig.class})
-class GroupRestControllerTest {
+class GroupRestControllerTest extends AbstractMockitoSpringContextTests {
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private GroupPermissionService groupPermissionService;

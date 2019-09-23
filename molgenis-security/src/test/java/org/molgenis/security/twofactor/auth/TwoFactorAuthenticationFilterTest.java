@@ -13,13 +13,12 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
@@ -27,11 +26,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class TwoFactorAuthenticationFilterTest {
+class TwoFactorAuthenticationFilterTest extends AbstractMockitoSpringContextTests {
 
   @Mock private AuthenticationSettings authenticationSettings;
   @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;

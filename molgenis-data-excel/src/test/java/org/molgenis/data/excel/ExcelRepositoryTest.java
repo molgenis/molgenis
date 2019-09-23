@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -32,6 +33,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
@@ -41,10 +43,6 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
 
   private Workbook workbook;
   private InputStream is;
-
-  ExcelRepositoryTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() throws InvalidFormatException, IOException {

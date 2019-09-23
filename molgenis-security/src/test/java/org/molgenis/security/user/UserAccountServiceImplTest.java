@@ -11,20 +11,17 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class UserAccountServiceImplTest {
+class UserAccountServiceImplTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME_USER = "username";
   private static Authentication authentication;
 

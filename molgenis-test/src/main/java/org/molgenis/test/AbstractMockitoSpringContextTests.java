@@ -11,7 +11,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-public class AbstractMockitoSpringContextTests {
+public class AbstractMockitoSpringContextTests extends AbstractMockitoTest {
   private final Strictness strictness;
 
   private MockitoSession mockitoSession;

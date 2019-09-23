@@ -42,6 +42,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -60,7 +61,7 @@ import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.test.AbstractMockitoTest;
 
-@SuppressWarnings("deprecation")
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MetaDataServiceImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private RepositoryCollectionRegistry repoCollectionRegistry;
@@ -69,10 +70,6 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
   @Mock private PackagePersister packagePersister;
 
   private MetaDataServiceImpl metaDataServiceImpl;
-
-  MetaDataServiceImplTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

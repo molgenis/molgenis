@@ -9,9 +9,7 @@ import static org.molgenis.security.twofactor.TwoFactorAuthenticationController.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProviderImpl;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProvider;
@@ -22,19 +20,18 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class TwoFactorAuthenticationControllerTest {
+class TwoFactorAuthenticationControllerTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";
 

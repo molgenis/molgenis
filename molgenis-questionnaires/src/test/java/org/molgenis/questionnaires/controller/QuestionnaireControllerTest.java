@@ -19,6 +19,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
@@ -42,6 +43,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
 class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
@@ -62,10 +64,6 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
   private static final String QUESTIONNAIRE_ID = "test_quest";
 
   private MockMvc mockMvc;
-
-  QuestionnaireControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   private void beforeMethod() {

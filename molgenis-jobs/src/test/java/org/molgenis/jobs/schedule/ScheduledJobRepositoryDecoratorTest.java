@@ -15,22 +15,19 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.validation.JsonValidator;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class ScheduledJobRepositoryDecoratorTest {
+class ScheduledJobRepositoryDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String SCHEMA =
       "{\"properties\": {\n" + "\"text\": {\n\"type\": \"string\"}}";
   private static final String PARAMETERS = "{\"text\": \"test\"}";

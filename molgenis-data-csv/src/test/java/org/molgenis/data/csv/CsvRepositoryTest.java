@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -24,6 +25,7 @@ import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
@@ -36,10 +38,6 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   private static File testtsv;
   private static File emptylines;
   private static File emptylinessinglecol;
-
-  CsvRepositoryTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeAll
   static void beforeClass() throws IOException {

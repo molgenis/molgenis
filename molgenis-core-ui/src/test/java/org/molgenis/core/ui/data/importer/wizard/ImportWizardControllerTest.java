@@ -42,17 +42,16 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @ContextConfiguration(classes = {ImportWizardControllerTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 

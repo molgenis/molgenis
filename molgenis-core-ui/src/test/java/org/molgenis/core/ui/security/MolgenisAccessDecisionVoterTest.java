@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -21,16 +22,13 @@ import org.molgenis.web.menu.MenuReaderService;
 import org.molgenis.web.menu.model.Menu;
 import org.springframework.security.web.FilterInvocation;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MolgenisAccessDecisionVoterTest extends AbstractMockitoTest {
   @Mock MenuReaderService menuReaderService;
   @Mock UserPermissionEvaluator userPermissionEvaluator;
   @Mock Menu menu;
 
   private MolgenisAccessDecisionVoter voter;
-
-  MolgenisAccessDecisionVoterTest() {
-    super(Strictness.LENIENT);
-  }
 
   @BeforeEach
   void setUp() {

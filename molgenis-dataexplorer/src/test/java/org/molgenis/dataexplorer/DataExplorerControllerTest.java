@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -62,6 +63,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
 class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
@@ -96,10 +98,6 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
   @Mock private Package parentPackage;
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
-
-  DataExplorerControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeTest() {
