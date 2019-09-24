@@ -19,6 +19,7 @@ public class LanguageTest extends AbstractSystemEntityTest {
   @Autowired LanguageMetadata metadata;
   @Autowired LanguageFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

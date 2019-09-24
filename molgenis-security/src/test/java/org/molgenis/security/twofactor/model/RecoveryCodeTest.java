@@ -19,6 +19,7 @@ public class RecoveryCodeTest extends AbstractSystemEntityTest {
   @Autowired RecoveryCodeMetadata metadata;
   @Autowired RecoveryCodeFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

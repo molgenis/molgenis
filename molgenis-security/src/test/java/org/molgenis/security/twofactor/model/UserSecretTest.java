@@ -19,6 +19,7 @@ public class UserSecretTest extends AbstractSystemEntityTest {
   @Autowired UserSecretMetadata metadata;
   @Autowired UserSecretFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

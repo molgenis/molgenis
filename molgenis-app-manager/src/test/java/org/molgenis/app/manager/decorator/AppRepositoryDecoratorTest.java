@@ -31,6 +31,7 @@ class AppRepositoryDecoratorTest {
   void testDelete() {
     App app = mock(App.class);
     appRepositoryDecorator.delete(app);
+    verify(repository).delete(app);
   }
 
   @Test

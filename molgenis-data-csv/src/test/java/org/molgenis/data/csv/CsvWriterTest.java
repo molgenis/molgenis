@@ -97,13 +97,4 @@ class CsvWriterTest extends AbstractMolgenisSpringTest {
       assertEquals("\"label1\",\"label2\"\n\"val1\",\"val2\"\n", strWriter.toString());
     }
   }
-
-  @Test
-  void close() throws IOException {
-    // FIXME enable when double closing bug in opencsv is fixed
-    // Writer writer = mock(Writer.class);
-    // CsvWriter csvWriter = new CsvWriter(writer);
-    // csvWriter.close();
-    // verify(writer).close();
-  }
 }

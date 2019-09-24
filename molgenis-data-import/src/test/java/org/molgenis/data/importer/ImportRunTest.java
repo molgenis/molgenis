@@ -41,6 +41,7 @@ class ImportRunTest extends AbstractSystemEntityTest {
     assertTrue(importRun.getNotify());
   }
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(
