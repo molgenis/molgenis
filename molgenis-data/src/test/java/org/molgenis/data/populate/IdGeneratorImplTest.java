@@ -1,27 +1,26 @@
 package org.molgenis.data.populate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.populate.IdGenerator.Strategy.LONG_SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SEQUENTIAL_UUID;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.base.Stopwatch;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class IdGeneratorImplTest {
+class IdGeneratorImplTest {
   private final IdGeneratorImpl idGeneratorImpl = new IdGeneratorImpl();
   private static final Logger LOG = LoggerFactory.getLogger(IdGeneratorImplTest.class);
 
-  @DataProvider(name = "generateIdDataProvider")
-  public Object[][] generateIdDataProvider() {
+  static Object[][] generateIdDataProvider() {
     return new Object[][] {
       {SEQUENTIAL_UUID, 1000000, 26},
       {SHORT_RANDOM, 1000, 8},
@@ -31,8 +30,9 @@ public class IdGeneratorImplTest {
     };
   }
 
-  @Test(dataProvider = "generateIdDataProvider")
-  public void testGenerateIds(IdGenerator.Strategy strategy, int numIds, int expectedLength) {
+  @ParameterizedTest
+  @MethodSource("generateIdDataProvider")
+  void testGenerateIds(IdGenerator.Strategy strategy, int numIds, int expectedLength) {
     // initialize
     idGeneratorImpl.generateId(strategy);
 

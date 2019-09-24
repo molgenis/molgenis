@@ -1,32 +1,35 @@
 package org.molgenis.data.util;
 
+import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.function.Function;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.MolgenisDataException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class GenericDependencyResolverTest {
+class GenericDependencyResolverTest {
   private GenericDependencyResolver genericDependencyResolver = new GenericDependencyResolver();
 
   @Mock private Function<Integer, Integer> getDepth;
 
   @Mock private Function<Integer, Set<Integer>> getDependants;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
   }
 
@@ -52,8 +55,9 @@ public class GenericDependencyResolverTest {
     }
   }
 
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testCyclicDependencies() {
+  @SuppressWarnings("deprecation")
+  @Test
+  void testCyclicDependencies() {
     DependentOn d1 = new DependentOn("1");
     DependentOn d2 = new DependentOn("2");
     DependentOn d3 = new DependentOn("3");
@@ -62,11 +66,15 @@ public class GenericDependencyResolverTest {
     d2.addDependency(d3);
     d3.addDependency(d1);
 
-    genericDependencyResolver.resolve(Sets.newHashSet(d1, d2, d3), DependentOn::getDependencies);
+    assertThrows(
+        MolgenisDataException.class,
+        () ->
+            genericDependencyResolver.resolve(
+                Sets.newHashSet(d1, d2, d3), DependentOn::getDependencies));
   }
 
   @Test
-  public void testResolveTransientDependency() {
+  void testResolveTransientDependency() {
     DependentOn d1 = new DependentOn("1");
     DependentOn d2 = new DependentOn("2");
     DependentOn d3 = new DependentOn("3");
@@ -75,13 +83,12 @@ public class GenericDependencyResolverTest {
     d2.addDependency(d3);
 
     assertEquals(
-        Lists.newArrayList(d3, d2, d1),
-        genericDependencyResolver.resolve(
-            Sets.newHashSet(d1, d2, d3), DependentOn::getDependencies));
+        genericDependencyResolver.resolve(newHashSet(d1, d2, d3), DependentOn::getDependencies),
+        newArrayList(d3, d2, d1));
   }
 
   @Test
-  public void testGetAllDependants() {
+  void testGetAllDependants() {
     when(getDepth.apply(1)).thenReturn(1);
     when(getDepth.apply(2)).thenReturn(1);
     when(getDepth.apply(3)).thenReturn(3);
@@ -94,26 +101,24 @@ public class GenericDependencyResolverTest {
     when(getDependants.apply(4)).thenReturn(emptySet());
 
     assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants),
-        ImmutableSet.of(1, 4, 3));
+        of(1, 4, 3), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
     verify(getDepth, never()).apply(0);
   }
 
   @Test
-  public void testGetAllDependantsCircular() {
+  void testGetAllDependantsCircular() {
     when(getDepth.apply(0)).thenReturn(1);
     when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
 
-    assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants), ImmutableSet.of(0));
+    assertEquals(of(0), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
   }
 
   @Test
-  public void testGetAllDependantsCircularZeroDepth() {
+  void testGetAllDependantsCircularZeroDepth() {
     when(getDepth.apply(0)).thenReturn(0);
     when(getDependants.apply(0)).thenReturn(ImmutableSet.of(0));
 
     assertEquals(
-        genericDependencyResolver.getAllDependants(0, getDepth, getDependants), emptySet());
+        emptySet(), genericDependencyResolver.getAllDependants(0, getDepth, getDependants));
   }
 }

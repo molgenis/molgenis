@@ -1,19 +1,19 @@
 package org.molgenis.data.icd10;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class Icd10ExpanderDecoratorTest extends AbstractMockitoTest {
+class Icd10ExpanderDecoratorTest extends AbstractMockitoTest {
   static final String ICD10_ENTITY_TYPE_ID = "icd10Entity";
   static final String EXPAND_ATTRIBUTE = "expandAttribute";
 
@@ -24,8 +24,8 @@ public class Icd10ExpanderDecoratorTest extends AbstractMockitoTest {
 
   private Icd10ExpanderDecorator icd10ExpanderDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(queryTransformer.transformQuery(query, ICD10_ENTITY_TYPE_ID, EXPAND_ATTRIBUTE))
         .thenReturn(transformedQuery);
     icd10ExpanderDecorator =
@@ -34,22 +34,22 @@ public class Icd10ExpanderDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCount() {
+  void testCount() {
     when(decoratedRepository.count(transformedQuery)).thenReturn(123L);
-    assertEquals(icd10ExpanderDecorator.count(query), 123L);
+    assertEquals(123L, icd10ExpanderDecorator.count(query));
   }
 
   @Test
-  public void testFindOne() {
+  void testFindOne() {
     Entity entity = mock(Entity.class);
     when(decoratedRepository.findOne(transformedQuery)).thenReturn(entity);
-    assertEquals(icd10ExpanderDecorator.findOne(query), entity);
+    assertEquals(entity, icd10ExpanderDecorator.findOne(query));
   }
 
   @Test
-  public void testFindAll() {
+  void testFindAll() {
     Stream<Entity> entities = Stream.empty();
     when(decoratedRepository.findAll(transformedQuery)).thenReturn(entities);
-    assertEquals(icd10ExpanderDecorator.findAll(query), entities);
+    assertEquals(entities, icd10ExpanderDecorator.findAll(query));
   }
 }

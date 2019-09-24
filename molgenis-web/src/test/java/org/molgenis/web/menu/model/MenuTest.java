@@ -2,18 +2,20 @@ package org.molgenis.web.menu.model;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.testng.Assert.assertEquals;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.molgenis.web.menu.model.Menu.create;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
-import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.util.AutoGson;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MenuTest {
+class MenuTest {
   private Menu menu;
   private Gson gson;
 
@@ -25,8 +27,8 @@ public class MenuTest {
   private Class<? extends MenuItem> menuItemAutoValueClass =
       (Class<? extends MenuItem>) MenuItem.class.getAnnotation(AutoGson.class).autoValueClass();
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     MenuItem p30 = MenuItem.create("p3_0", "lbl");
     MenuItem p31 = MenuItem.create("p3_1", "lbl");
 
@@ -48,24 +50,24 @@ public class MenuTest {
   }
 
   @Test
-  public void testFilterMenuNodeFiltersAllChildren() {
-    assertEquals(menu.filter(it -> false), Optional.of(Menu.create("root", "", emptyList())));
+  void testFilterMenuNodeFiltersAllChildren() {
+    assertEquals(of(create("root", "", emptyList())), menu.filter(it -> false));
   }
 
   @Test
-  public void getPath() {
-    assertEquals(menu.getPath("p1_0"), Optional.of(asList("root/p1_0".split("/"))));
-    assertEquals(menu.getPath("p1_1"), Optional.of(asList("root/p1_1".split("/"))));
-    assertEquals(menu.getPath("p2_0"), Optional.of(asList("p1_1/p2_0".split("/"))));
-    assertEquals(menu.getPath("p2_1"), Optional.of(asList("p1_1/p2_1".split("/"))));
-    assertEquals(menu.getPath("p3_0"), Optional.of(asList("p2_0/p3_0".split("/"))));
-    assertEquals(menu.getPath("p3_1"), Optional.of(asList("p2_0/p3_1".split("/"))));
-    assertEquals(menu.getPath("non_existing"), Optional.empty());
+  void getPath() {
+    assertEquals(of(asList("root/p1_0".split("/"))), menu.getPath("p1_0"));
+    assertEquals(of(asList("root/p1_1".split("/"))), menu.getPath("p1_1"));
+    assertEquals(of(asList("p1_1/p2_0".split("/"))), menu.getPath("p2_0"));
+    assertEquals(of(asList("p1_1/p2_1".split("/"))), menu.getPath("p2_1"));
+    assertEquals(of(asList("p2_0/p3_0".split("/"))), menu.getPath("p3_0"));
+    assertEquals(of(asList("p2_0/p3_1".split("/"))), menu.getPath("p3_1"));
+    assertEquals(empty(), menu.getPath("non_existing"));
   }
 
   @Test
-  public void toJsonAndBackAgain() {
+  void toJsonAndBackAgain() {
     String json = gson.toJson(menu);
-    assertEquals(gson.fromJson(json, menuAutoValueClass), menu);
+    assertEquals(menu, gson.fromJson(json, menuAutoValueClass));
   }
 }

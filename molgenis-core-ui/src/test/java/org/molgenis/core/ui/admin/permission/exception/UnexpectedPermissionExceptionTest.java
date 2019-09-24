@@ -1,18 +1,18 @@
 package org.molgenis.core.ui.admin.permission.exception;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.security.acls.model.Permission;
-import org.testng.annotations.Test;
 
-public class UnexpectedPermissionExceptionTest {
+class UnexpectedPermissionExceptionTest {
   @Test
-  public void testUnexpectedPermissionException() {
+  void testUnexpectedPermissionException() {
     Permission permission = mock(Permission.class);
     when(permission.toString()).thenReturn("test");
     assertEquals(
-        new UnexpectedPermissionException(permission).getMessage(), "Illegal permission 'test'");
+        "Illegal permission 'test'", new UnexpectedPermissionException(permission).getMessage());
   }
 }

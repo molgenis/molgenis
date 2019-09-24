@@ -1,25 +1,24 @@
 package org.molgenis.security.account;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PasswordResetTokenCreationExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class PasswordResetTokenCreationExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("security");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(new PasswordResetTokenCreationException(), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "Password reset failed."};
     Object[] nlParams = {"nl", "Wachtwoord reset niet geslaagd."};
     return new Object[][] {enParams, nlParams};

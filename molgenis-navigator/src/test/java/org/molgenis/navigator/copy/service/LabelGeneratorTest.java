@@ -1,36 +1,36 @@
 package org.molgenis.navigator.copy.service;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class LabelGeneratorTest {
+class LabelGeneratorTest {
   @Test
-  public void testGenerateLabelAlreadyUnique() {
+  void testGenerateLabelAlreadyUnique() {
     Set<String> existingLabels = newHashSet("labelA", "labelB", "labelC");
 
     String result = LabelGenerator.generateUniqueLabel("labelX", existingLabels);
 
-    assertEquals(result, "labelX");
+    assertEquals("labelX", result);
   }
 
   @Test
-  public void testGenerateUniqueLabel() {
+  void testGenerateUniqueLabel() {
     Set<String> existingLabels = newHashSet("labelA", "labelB", "labelC");
 
     String result = LabelGenerator.generateUniqueLabel("labelB", existingLabels);
 
-    assertEquals(result, "labelB (Copy)");
+    assertEquals("labelB (Copy)", result);
   }
 
   @Test
-  public void testGenerateUniqueLabelRecursive() {
+  void testGenerateUniqueLabelRecursive() {
     Set<String> existingLabels = newHashSet("labelA", "labelB", "labelB (Copy)", "labelC");
 
     String result = LabelGenerator.generateUniqueLabel("labelB", existingLabels);
 
-    assertEquals(result, "labelB (Copy) (Copy)");
+    assertEquals("labelB (Copy) (Copy)", result);
   }
 }

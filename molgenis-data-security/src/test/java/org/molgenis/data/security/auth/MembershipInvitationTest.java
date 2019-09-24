@@ -2,13 +2,13 @@ package org.molgenis.data.security.auth;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.data.security.auth.MembershipInvitationMetadata.Status;
 import org.molgenis.data.security.config.SecurityTestConfig;
 import org.molgenis.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {SecurityTestConfig.class})
 public class MembershipInvitationTest extends AbstractSystemEntityTest {
@@ -29,7 +29,7 @@ public class MembershipInvitationTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata,
         MembershipInvitation.class,

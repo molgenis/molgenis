@@ -28,6 +28,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
+import org.molgenis.data.validation.EntityErrors;
+import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.RepositoryConstraintViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +41,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   private final QueryV3Mapper queryMapperV3;
   private final SortV3Mapper sortMapperV3;
   private final FetchMapper fetchMapper;
+  private final EntityValidator entityValidator;
 
   private enum OperationType {
     READ,
@@ -49,12 +53,14 @@ class DataServiceV3Impl implements DataServiceV3 {
       EntityManagerV3 entityManagerV3,
       QueryV3Mapper queryMapperV3,
       SortV3Mapper sortMapperV3,
-      FetchMapper fetchMapper) {
+      FetchMapper fetchMapper,
+      EntityValidator entityValidator) {
     this.metaDataService = requireNonNull(metaDataService);
     this.entityManagerV3 = requireNonNull(entityManagerV3);
     this.queryMapperV3 = requireNonNull(queryMapperV3);
     this.sortMapperV3 = requireNonNull(sortMapperV3);
     this.fetchMapper = requireNonNull(fetchMapper);
+    this.entityValidator = requireNonNull(entityValidator);
   }
 
   @Transactional
@@ -66,6 +72,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     Entity entity = entityManagerV3.create(entityType);
     entityManagerV3.populate(entityType, entity, requestValues);
 
+    validate(entity);
     repository.add(entity);
     return entity;
   }
@@ -203,6 +210,8 @@ class DataServiceV3Impl implements DataServiceV3 {
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
 
+    validate(entity);
+
     repository.update(entity);
   }
 
@@ -221,6 +230,8 @@ class DataServiceV3Impl implements DataServiceV3 {
 
     entityManagerV3.populate(entityType, entity, requestValues);
     entity.setIdValue(typedEntityId);
+
+    validate(entity);
 
     repository.update(entity);
   }
@@ -266,5 +277,13 @@ class DataServiceV3Impl implements DataServiceV3 {
   private Object toTypedEntityId(EntityType entityType, String entityId) {
     Attribute idAttribute = entityType.getIdAttribute();
     return EntityUtils.getTypedValue(entityId, idAttribute);
+  }
+
+  private void validate(Entity entity) {
+    EntityErrors entityErrors = new EntityErrors(entity);
+    entityValidator.validate(entity, entityErrors);
+    if (entityErrors.hasErrors()) {
+      throw new RepositoryConstraintViolationException(entityErrors);
+    }
   }
 }

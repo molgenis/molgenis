@@ -1,10 +1,10 @@
 package org.molgenis.beacon.config;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractEntityFactoryTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
       BeaconPackage.class,
       BeaconTestConfig.class
     })
-public class BeaconOrganizationFactoryTest extends AbstractEntityFactoryTest {
+class BeaconOrganizationFactoryTest extends AbstractEntityFactoryTest {
 
   @Autowired BeaconOrganizationFactory factory;
 

@@ -1,18 +1,19 @@
 package org.molgenis.r;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.readAllBytes;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 import org.apache.http.Header;
@@ -21,20 +22,20 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RScriptExecutorTest extends AbstractMockitoTest {
+class RScriptExecutorTest extends AbstractMockitoTest {
   @Mock private CloseableHttpClient httpClient;
   @Mock private OpenCpuSettings openCpuSettings;
 
   private RScriptExecutor rScriptExecutor;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     when(openCpuSettings.getScheme()).thenReturn("http");
     when(openCpuSettings.getHost()).thenReturn("ocpu.molgenis.org");
     when(openCpuSettings.getPort()).thenReturn(80);
@@ -43,7 +44,7 @@ public class RScriptExecutorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testExecuteScriptValueOutput() throws IOException, URISyntaxException {
+  void testExecuteScriptValueOutput() throws IOException, URISyntaxException {
     CloseableHttpResponse executeScriptResponse = getExecuteScriptHttpResponse();
     CloseableHttpResponse getScriptResultResponse = getScriptResultHttpResponse();
     ArgumentCaptor<HttpUriRequest> requestsCaptor = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -52,18 +53,18 @@ public class RScriptExecutorTest extends AbstractMockitoTest {
 
     String script = "script";
     String resultValue = rScriptExecutor.executeScript(script, null);
-    assertEquals(resultValue, "value");
+    assertEquals("value", resultValue);
 
     List<HttpUriRequest> requests = requestsCaptor.getAllValues();
     assertEquals(
-        requests.get(0).getURI(),
-        new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
+        new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"),
+        requests.get(0).getURI());
     assertEquals(
-        requests.get(1).getURI(), new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/stdout"));
+        new URI("http://ocpu.molgenis.org:80/ocpu/tmp/sessionId/stdout"), requests.get(1).getURI());
   }
 
   @Test
-  public void testExecuteScriptFileOutput() throws IOException, URISyntaxException {
+  void testExecuteScriptFileOutput() throws IOException, URISyntaxException {
     CloseableHttpResponse executeScriptResponse = getExecuteScriptHttpResponse();
     CloseableHttpResponse getScriptResultResponse = getScriptResultHttpResponse();
     ArgumentCaptor<HttpUriRequest> requestsCaptor = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -79,12 +80,12 @@ public class RScriptExecutorTest extends AbstractMockitoTest {
       String script = "script";
       String resultValue = rScriptExecutor.executeScript(script, outputPath);
       assertNull(resultValue);
-      assertEquals(Files.readAllBytes(new File(outputPath).toPath()), "value".getBytes(UTF_8));
+      assertArrayEquals("value".getBytes(UTF_8), readAllBytes(new File(outputPath).toPath()));
 
       List<HttpUriRequest> requests = requestsCaptor.getAllValues();
       assertEquals(
-          requests.get(0).getURI(),
-          new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"));
+          new URI("http://ocpu.molgenis.org:80/ocpu/library/base/R/identity"),
+          requests.get(0).getURI());
       assertTrue(
           requests
               .get(1)

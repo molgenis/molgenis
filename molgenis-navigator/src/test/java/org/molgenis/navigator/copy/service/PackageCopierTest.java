@@ -1,9 +1,12 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,13 +15,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictableIdGeneratorMock;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
@@ -30,10 +33,8 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PackageCopierTest extends AbstractMockitoTest {
+class PackageCopierTest extends AbstractMockitoTest {
 
   @Mock(answer = RETURNS_DEEP_STUBS)
   DataService dataService;
@@ -43,13 +44,13 @@ public class PackageCopierTest extends AbstractMockitoTest {
 
   private PackageCopier copier;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     copier = new PackageCopier(dataService, idGenerator);
   }
 
-  @Test(expectedExceptions = RecursiveCopyException.class)
-  public void notContainsItself() {
+  @Test
+  void notContainsItself() {
     Package packageA = mock(Package.class);
     Package packageAa = mock(Package.class);
     Package packageAb = mock(Package.class);
@@ -58,11 +59,11 @@ public class PackageCopierTest extends AbstractMockitoTest {
     when(packageAb.getChildren()).thenReturn(singletonList(packageAba));
 
     CopyState state = CopyState.create(packageAba, mock(Progress.class));
-    copier.copy(singletonList(packageA), state);
+    assertThrows(RecursiveCopyException.class, () -> copier.copy(singletonList(packageA), state));
   }
 
   @Test
-  public void testUniqueLabel() {
+  void testUniqueLabel() {
     Package packageA = mock(Package.class);
     when(packageA.getLabel()).thenReturn("A");
     Package targetPackage = mock(Package.class);
@@ -77,7 +78,7 @@ public class PackageCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelNoChange() {
+  void testUniqueLabelNoChange() {
     Package packageA = mock(Package.class);
     when(packageA.getLabel()).thenReturn("A");
     Package targetPackage = mock(Package.class);
@@ -92,7 +93,7 @@ public class PackageCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelRootPackage() {
+  void testUniqueLabelRootPackage() {
     Package packageA = mock(Package.class);
     when(packageA.getLabel()).thenReturn("A");
     Package packageInRoot = mock(Package.class);
@@ -107,7 +108,7 @@ public class PackageCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCopyPackage() {
+  void testCopyPackage() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType1 = mock(EntityType.class);
     EntityType entityType2 = mock(EntityType.class);
@@ -149,10 +150,9 @@ public class PackageCopierTest extends AbstractMockitoTest {
     verify(dataService).add(PACKAGE, packageC);
     verify(progress, times(5)).increment(1);
     assertEquals(
-        state.copiedPackages(),
-        ImmutableMap.of(
-            "A", packageA, "Aa", packageAa, "Ab", packageAb, "Aba", packageAba, "C", packageC));
-    assertEquals(state.entityTypesInPackages(), asList(entityType1, entityType2, entityType3));
+        of("A", packageA, "Aa", packageAa, "Ab", packageAb, "Aba", packageAba, "C", packageC),
+        state.copiedPackages());
+    assertEquals(asList(entityType1, entityType2, entityType3), state.entityTypesInPackages());
   }
 
   private void setupMetadataServiceAnswers(List<Package> packageMocks) {

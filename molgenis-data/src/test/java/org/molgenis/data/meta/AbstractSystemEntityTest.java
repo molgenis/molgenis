@@ -1,10 +1,10 @@
 package org.molgenis.data.meta;
 
 import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.molgenis.data.meta.SystemEntityTestUtils.getReturnTypes;
 import static org.molgenis.data.meta.SystemEntityTestUtils.getTestValue;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.testng.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -17,6 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.gson.Gson;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.security.auth.User;
@@ -28,6 +30,7 @@ import org.molgenis.security.captcha.ReCaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,17 +38,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class})
-public class AccountControllerTest extends AbstractTestNGSpringContextTests {
+class AccountControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private AccountController authenticationController;
 
   @Autowired private AccountService accountService;
@@ -60,8 +60,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
 
   private MockMvc mockMvc;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
     freeMarkerViewResolver.setSuffix(".ftl");
     mockMvc =
@@ -78,7 +78,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getLoginForm() throws Exception {
+  void getLoginForm() throws Exception {
     this.mockMvc
         .perform(get("/account/login"))
         .andExpect(status().isOk())
@@ -86,7 +86,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getPasswordResetForm() throws Exception {
+  void getPasswordResetForm() throws Exception {
     this.mockMvc
         .perform(get("/account/password/reset"))
         .andExpect(status().isOk())
@@ -94,7 +94,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getRegisterForm() throws Exception {
+  void getRegisterForm() throws Exception {
     this.mockMvc
         .perform(get("/account/register"))
         .andExpect(status().isOk())
@@ -103,13 +103,13 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void activateUser() throws Exception {
+  void activateUser() throws Exception {
     this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
     verify(accountService).activateUser("123");
   }
 
   @Test
-  public void activateUserMolgenisUserException() throws Exception {
+  void activateUserMolgenisUserException() throws Exception {
     doThrow(new MolgenisUserException("message")).when(accountService).activateUser("123");
     this.mockMvc
         .perform(get("/account/activate/123"))
@@ -119,7 +119,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void registerUser_activationModeUser() throws Exception {
+  void registerUser_activationModeUser() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     when(authenticationSettings.getSignUpModeration()).thenReturn(false);
     when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
@@ -147,7 +147,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void registerUser_activationModeAdmin() throws Exception {
+  void registerUser_activationModeAdmin() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     when(authenticationSettings.getSignUpModeration()).thenReturn(true);
     when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
@@ -175,7 +175,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void registerUser_passwordNotEqualsConfirmPassword() throws Exception {
+  void registerUser_passwordNotEqualsConfirmPassword() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     this.mockMvc
         .perform(
@@ -193,7 +193,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void registerUser_invalidCaptcha() throws Exception {
+  void registerUser_invalidCaptcha() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
     this.mockMvc
@@ -211,7 +211,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void resetPassword() throws Exception {
+  void resetPassword() throws Exception {
     this.mockMvc
         .perform(
             post("/account/password/reset")
@@ -222,7 +222,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void registerUser_invalidUserField() throws Exception {
+  void registerUser_invalidUserField() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     this.mockMvc
         .perform(
@@ -238,9 +238,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public AccountController accountController() {
+    AccountController accountController() {
       return new AccountController(
           accountService(),
           reCaptchaV3Service(),
@@ -251,23 +251,23 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     }
 
     @Bean
-    public AccountService accountService() {
+    AccountService accountService() {
       return mock(AccountService.class);
     }
 
     @Bean
-    public ReCaptchaService reCaptchaV3Service() {
+    ReCaptchaService reCaptchaV3Service() {
       return mock(ReCaptchaService.class);
     }
 
     @Bean
-    public AuthenticationSettings authenticationSettings() {
+    AuthenticationSettings authenticationSettings() {
       return mock(AuthenticationSettings.class);
     }
 
     @SuppressWarnings("unchecked")
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       DataService dataService = mock(DataService.class);
       User user = mock(User.class);
       when(dataService.findAll(USER, new QueryImpl().eq(EMAIL, "admin@molgenis.org")))
@@ -277,24 +277,24 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     }
 
     @Bean
-    public UserService molgenisUserService() {
+    UserService molgenisUserService() {
       return mock(UserService.class);
     }
 
     @Bean
-    public UserFactory molgenisUserFactory() {
+    UserFactory molgenisUserFactory() {
       UserFactory userFactory = mock(UserFactory.class);
       when(userFactory.create()).thenAnswer(invocationOnMock -> mock(User.class));
       return userFactory;
     }
 
     @Bean
-    public AppSettings appSettings() {
+    AppSettings appSettings() {
       return mock(AppSettings.class);
     }
 
     @Bean
-    public PasswordResetter passwordResetter() {
+    PasswordResetter passwordResetter() {
       return mock(PasswordResetter.class);
     }
   }

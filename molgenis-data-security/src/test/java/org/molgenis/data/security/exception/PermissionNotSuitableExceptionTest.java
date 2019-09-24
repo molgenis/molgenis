@@ -1,35 +1,35 @@
 package org.molgenis.data.security.exception;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PermissionNotSuitableExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class PermissionNotSuitableExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-security");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new PermissionNotSuitableException("permission", "type"), lang, message);
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     CodedRuntimeException ex = new PermissionNotSuitableException("permission", "type");
-    assertEquals(ex.getMessage(), "permission:permission, typeId:type");
+    assertEquals("permission:permission, typeId:type", ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {"en", "The permission 'permission' cannot be used for type 'type'."}
     };

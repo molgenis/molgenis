@@ -1,32 +1,32 @@
 package org.molgenis.web.support;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.testng.Assert.assertEquals;
 
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import java.lang.reflect.Type;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntitySerializerTest {
+class EntitySerializerTest {
   private EntitySerializer entitySerializer;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entitySerializer = new EntitySerializer();
   }
 
   @Test
-  public void testSerialize() throws Exception {
+  void testSerialize() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entity");
 
@@ -90,6 +90,6 @@ public class EntitySerializerTest {
 
     String expectedJson =
         "{\"__entityTypeId\":\"entity\",\"oneToManyAttr\":[{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"xrefAttr\":{\"__entityTypeId\":\"refEntity\",\"__idValue\":\"xrefEntity0\",\"__labelValue\":\"xrefEntityLabel0\"}}";
-    assertEquals(entitySerializer.serialize(entity, type, context).toString(), expectedJson);
+    assertEquals(expectedJson, entitySerializer.serialize(entity, type, context).toString());
   }
 }

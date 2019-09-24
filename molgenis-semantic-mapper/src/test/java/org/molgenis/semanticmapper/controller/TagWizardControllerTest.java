@@ -3,6 +3,7 @@ package org.molgenis.semanticmapper.controller;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,8 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -23,30 +26,28 @@ import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.ui.Model;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TagWizardControllerTest extends AbstractMockitoTest {
+class TagWizardControllerTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private OntologyService ontologyService;
   @Mock private OntologyTagService ontologyTagService;
   @Mock private SemanticSearchService semanticSearchService;
   private TagWizardController tagWizardController;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     tagWizardController =
         new TagWizardController(
             dataService, ontologyService, ontologyTagService, semanticSearchService);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testTagWizardController() {
-    new TagWizardController(null, null, null, null);
+  @Test
+  void testTagWizardController() {
+    assertThrows(NullPointerException.class, () -> new TagWizardController(null, null, null, null));
   }
 
   @Test
-  public void testViewTagWizardFilterSystemEntityTypes() {
+  void testViewTagWizardFilterSystemEntityTypes() {
     when(ontologyService.getOntologies()).thenReturn(emptyList());
 
     String attributeName = "myAttribute";

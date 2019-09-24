@@ -1,10 +1,11 @@
 package org.molgenis.metrics;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Clock;
@@ -14,12 +15,12 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.aspectj.lang.JoinPoint.StaticPart;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisTimedAspectTest extends AbstractMockitoTest {
+class MolgenisTimedAspectTest extends AbstractMockitoTest {
 
   private MolgenisTimedAspect timedAspect;
   private SimpleMeterRegistry meterRegistry;
@@ -28,14 +29,14 @@ public class MolgenisTimedAspectTest extends AbstractMockitoTest {
   @Mock private MethodSignature signature;
   @Mock private StaticPart staticPart;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     meterRegistry = new SimpleMeterRegistry(SimpleConfig.DEFAULT, clock);
     timedAspect = new MolgenisTimedAspect(meterRegistry);
   }
 
   @Test
-  public void testExecuteAnnotatedMethod() throws Throwable {
+  void testExecuteAnnotatedMethod() throws Throwable {
     when(clock.monotonicTime()).thenReturn(0L, 100L);
     when(proceedingJoinPoint.getSignature()).thenReturn(signature);
     when(signature.getMethod()).thenReturn(AnnotatedMethod.class.getMethod("annotatedMethod"));
@@ -46,17 +47,17 @@ public class MolgenisTimedAspectTest extends AbstractMockitoTest {
     when(signature.getName()).thenReturn("annotatedMethod");
     when(proceedingJoinPoint.proceed()).thenReturn(42);
 
-    assertEquals(timedAspect.timedMethod(proceedingJoinPoint), 42);
+    assertEquals(42, timedAspect.timedMethod(proceedingJoinPoint));
 
     verify(proceedingJoinPoint, times(1)).proceed();
     Timer timer = meterRegistry.get("test.method").timer();
-    assertEquals(timer.count(), 1);
-    assertEquals(timer.max(NANOSECONDS), 100.0);
+    assertEquals(1, timer.count());
+    assertEquals(100.0, timer.max(NANOSECONDS));
   }
 
   @Test
-  public void testExecuteAnnotatedClass() throws Throwable {
-    when(clock.monotonicTime()).thenReturn(0L, 100L);
+  void testExecuteAnnotatedClass() throws Throwable {
+    doReturn(0L, 100L).when(clock).monotonicTime();
     when(proceedingJoinPoint.getSignature()).thenReturn(signature);
     when(signature.getMethod()).thenReturn(AnnotatedClass.class.getMethod("annotatedMethod"));
     when(proceedingJoinPoint.getStaticPart()).thenReturn(staticPart);
@@ -66,18 +67,18 @@ public class MolgenisTimedAspectTest extends AbstractMockitoTest {
     when(signature.getName()).thenReturn("annotatedMethod");
     when(proceedingJoinPoint.proceed()).thenReturn(42);
 
-    assertEquals(timedAspect.timedClassMethod(proceedingJoinPoint), 42);
+    assertEquals(42, timedAspect.timedClassMethod(proceedingJoinPoint));
 
     verify(proceedingJoinPoint, times(1)).proceed();
     Timer timer = meterRegistry.get("test.class").timer();
-    assertEquals(timer.count(), 1);
-    assertEquals(timer.max(NANOSECONDS), 100.0);
+    assertEquals(1, timer.count());
+    assertEquals(100.0, timer.max(NANOSECONDS));
   }
 
   /*
    A Method cannnot be mocked so we need to use a real one
   */
-  private class AnnotatedMethod {
+  public class AnnotatedMethod {
     @Timed(value = "test.method", description = "description")
     public int annotatedMethod() {
       return 1;
@@ -85,7 +86,7 @@ public class MolgenisTimedAspectTest extends AbstractMockitoTest {
   }
 
   @Timed(value = "test.class", description = "description")
-  private class AnnotatedClass {
+  public class AnnotatedClass {
     public int annotatedMethod() {
       return 1;
     }

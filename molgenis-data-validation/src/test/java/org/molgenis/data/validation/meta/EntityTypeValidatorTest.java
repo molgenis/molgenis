@@ -5,6 +5,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -13,6 +15,8 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataService;
@@ -22,10 +26,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeValidatorTest extends AbstractMockitoTest {
+class EntityTypeValidatorTest extends AbstractMockitoTest {
   private EntityTypeValidator entityTypeValidator;
   @Mock private DataService dataService;
   @Mock private EntityType entityType;
@@ -39,53 +41,59 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityTypeValidator = new EntityTypeValidator(dataService, systemEntityTypeRegistry);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Name \\[logout\\] is not allowed because it is a reserved keyword.")
-  public void testValidateEntityIdIsReservedKeyword() {
+  @Test
+  void testValidateEntityIdIsReservedKeyword() {
     when(entityType.getId()).thenReturn("logout");
-    EntityTypeValidator.validateEntityId(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateEntityId(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("Name \\[logout\\] is not allowed because it is a reserved keyword.");
   }
 
   @Test
-  public void testValidateEntityIdValid() {
+  void testValidateEntityIdValid() {
     when(entityType.getId()).thenReturn("entity");
     EntityTypeValidator.validateEntityId(entityType);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Label of EntityType \\[entity\\] is empty")
-  public void testValidateLabelIsEmpty() {
+  @Test
+  void testValidateLabelIsEmpty() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getLabel()).thenReturn("");
-    EntityTypeValidator.validateEntityLabel(entityType);
-  }
-
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Label of EntityType \\[entity\\] contains only white space")
-  public void testValidateLabelIsWhiteSpace() {
-    when(entityType.getId()).thenReturn("entity");
-    when(entityType.getLabel()).thenReturn("  ");
-    EntityTypeValidator.validateEntityLabel(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateEntityLabel(entityType));
+    assertThat(exception.getMessage()).containsPattern("Label of EntityType \\[entity\\] is empty");
   }
 
   @Test
-  public void testValidateLabelIsValid() {
+  void testValidateLabelIsWhiteSpace() {
+    when(entityType.getId()).thenReturn("entity");
+    when(entityType.getLabel()).thenReturn("  ");
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateEntityLabel(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("Label of EntityType \\[entity\\] contains only white space");
+  }
+
+  @Test
+  void testValidateLabelIsValid() {
     when(entityType.getLabel()).thenReturn(" Label ");
     EntityTypeValidator.validateEntityLabel(entityType);
   }
 
   @Test
-  public void testValidatePackageNonSystem() {
+  void testValidatePackageNonSystem() {
     when(entityType.getPackage()).thenReturn(aPackage);
     when(aPackage.getId()).thenReturn("nosys");
 
@@ -93,27 +101,29 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testValidatePackageNull() {
+  void testValidatePackageNull() {
     when(entityType.getPackage()).thenReturn(null);
 
     entityTypeValidator.validatePackage(entityType);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Adding entity \\[entity\\] to system package \\[sys\\] is not allowed")
-  public void testValidateSystemPackageInvalid() {
+  @Test
+  void testValidateSystemPackageInvalid() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getPackage()).thenReturn(aPackage);
     when(aPackage.getId()).thenReturn(PACKAGE_SYSTEM);
     when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(false);
 
-    entityTypeValidator.validatePackage(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> entityTypeValidator.validatePackage(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("Adding entity \\[entity\\] to system package \\[sys\\] is not allowed");
   }
 
   @Test
-  public void testValidateSystemPackageValid() {
+  void testValidateSystemPackageValid() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getPackage()).thenReturn(aPackage);
     when(aPackage.getId()).thenReturn(PACKAGE_SYSTEM);
@@ -122,36 +132,38 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     entityTypeValidator.validatePackage(entityType);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] does not contain any attributes. "
-              + "Did you use the correct package\\+entity name combination in both the entities as well as the attributes sheet\\?")
-  public void testValidateOwnAttributesNoAttributes() {
+  @Test
+  void testValidateOwnAttributesNoAttributes() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getAllAttributes()).thenReturn(emptyList());
 
-    EntityTypeValidator.validateOwnAttributes(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnAttributes(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[entity\\] does not contain any attributes. "
+                + "Did you use the correct package\\+entity name combination in both the entities as well as the attributes sheet\\?");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] contains multiple attributes with name \\[id\\]")
-  public void testValidateOwnAttributesAttributesWithSameName() {
+  @Test
+  void testValidateOwnAttributesAttributesWithSameName() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
     when(idAttr.getName()).thenReturn("id");
     when(labelAttr.getName()).thenReturn("id");
 
-    EntityTypeValidator.validateOwnAttributes(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnAttributes(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("EntityType \\[entity\\] contains multiple attributes with name \\[id\\]");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Attribute \\[label\\] of EntityType \\[entity\\] has a non-existing parent attribute \\[non-existing-parent\\]")
-  public void testValidateOwnAttributesNonExistingParent() {
+  @Test
+  void testValidateOwnAttributesNonExistingParent() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
     when(idAttr.getName()).thenReturn("id");
@@ -161,25 +173,32 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(parent.getName()).thenReturn("non-existing-parent");
     when(labelAttr.getParent()).thenReturn(parent);
 
-    EntityTypeValidator.validateOwnAttributes(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnAttributes(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Attribute \\[label\\] of EntityType \\[entity\\] has a non-existing parent attribute \\[non-existing-parent\\]");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "EntityType \\[entity\\] is missing required ID attribute")
-  public void testValidateOwnIdAttributeNull() {
+  @Test
+  void testValidateOwnIdAttributeNull() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnIdAttribute()).thenReturn(null);
 
-    EntityTypeValidator.validateOwnIdAttribute(
-        entityType, ImmutableMap.of("id", idAttr, "label", labelAttr));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnIdAttribute(
+                    entityType, ImmutableMap.of("id", idAttr, "label", labelAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern("EntityType \\[entity\\] is missing required ID attribute");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] ID attribute \\[id\\] is not part of the entity attributes")
-  public void testValidateOwnIdAttributeNotListedInAllAttributes() {
+  @Test
+  void testValidateOwnIdAttributeNotListedInAllAttributes() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
     String idAttributeIdentifier = "abcde";
@@ -187,15 +206,19 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(idAttr.getIdentifier()).thenReturn(idAttributeIdentifier);
     when(idAttr.getName()).thenReturn("id");
 
-    EntityTypeValidator.validateOwnIdAttribute(
-        entityType, ImmutableMap.of(labelAttributeIdentifier, labelAttr));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnIdAttribute(
+                    entityType, ImmutableMap.of(labelAttributeIdentifier, labelAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[entity\\] ID attribute \\[id\\] is not part of the entity attributes");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] ID attribute \\[id\\] type \\[COMPOUND\\] is not allowed")
-  public void testValidateOwnIdAttributeInvalidType() {
+  @Test
+  void testValidateOwnIdAttributeInvalidType() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
     String idAttributeIdentifier = "abcde";
@@ -203,15 +226,19 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(idAttr.getName()).thenReturn("id");
     when(idAttr.getDataType()).thenReturn(COMPOUND);
 
-    EntityTypeValidator.validateOwnIdAttribute(
-        entityType, ImmutableMap.of(idAttributeIdentifier, idAttr));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnIdAttribute(
+                    entityType, ImmutableMap.of(idAttributeIdentifier, idAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[entity\\] ID attribute \\[id\\] type \\[COMPOUND\\] is not allowed");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] ID attribute \\[id\\] is not a unique attribute")
-  public void testValidateOwnIdAttributeNotUnique() {
+  @Test
+  void testValidateOwnIdAttributeNotUnique() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
     String idAttributeIdentifier = "abcde";
@@ -220,15 +247,18 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(idAttr.getDataType()).thenReturn(STRING);
     when(idAttr.isUnique()).thenReturn(false);
 
-    EntityTypeValidator.validateOwnIdAttribute(
-        entityType, ImmutableMap.of(idAttributeIdentifier, idAttr));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnIdAttribute(
+                    entityType, ImmutableMap.of(idAttributeIdentifier, idAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern("EntityType \\[entity\\] ID attribute \\[id\\] is not a unique attribute");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] ID attribute \\[id\\] cannot be nillable")
-  public void testValidateOwnIdAttributeNillable() {
+  @Test
+  void testValidateOwnIdAttributeNillable() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
     String idAttributeIdentifier = "abcde";
@@ -238,74 +268,92 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(idAttr.isUnique()).thenReturn(true);
     when(idAttr.isNillable()).thenReturn(true);
 
-    EntityTypeValidator.validateOwnIdAttribute(
-        entityType, ImmutableMap.of(idAttributeIdentifier, idAttr));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnIdAttribute(
+                    entityType, ImmutableMap.of(idAttributeIdentifier, idAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern("EntityType \\[entity\\] ID attribute \\[id\\] cannot be nillable");
   }
 
   @Test
-  public void testValidateOwnIdAttributeNullAbstract() {
+  void testValidateOwnIdAttributeNullAbstract() {
     when(entityType.getOwnIdAttribute()).thenReturn(null);
     when(entityType.isAbstract()).thenReturn(true);
 
     EntityTypeValidator.validateOwnIdAttribute(entityType, emptyMap());
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "EntityType \\[entity\\] is missing required ID attribute")
-  public void testValidateOwnIdAttributeNullParentIdNull() {
+  @Test
+  void testValidateOwnIdAttributeNullParentIdNull() {
     when(entityType.getId()).thenReturn("entity");
-    EntityTypeValidator.validateOwnIdAttribute(entityType, emptyMap());
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnIdAttribute(entityType, emptyMap()));
+    assertThat(exception.getMessage())
+        .containsPattern("EntityType \\[entity\\] is missing required ID attribute");
   }
 
   @Test
-  public void testValidateOwnIdAttributeParentHasIdAttribute() {
+  void testValidateOwnIdAttributeParentHasIdAttribute() {
     when(entityType.getOwnIdAttribute()).thenReturn(null);
     when(entityType.getIdAttribute()).thenReturn(idAttr);
     EntityTypeValidator.validateOwnIdAttribute(entityType, emptyMap());
   }
 
   @Test
-  public void testValidateOwnLabelAttributeNullIdAttributeVisible() {
-    EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
-  }
-
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Label attribute \\[labelAttr\\] of EntityType \\[entity\\] must be visible.")
-  public void testValidateLabelAttributeHidden() {
-    when(entityType.getLabelAttribute()).thenReturn(labelAttr);
-    when(labelAttr.isVisible()).thenReturn(false);
-    when(entityType.getId()).thenReturn("entity");
-    when(labelAttr.getName()).thenReturn("labelAttr");
-    EntityTypeValidator.validateLabelAttribute(entityType);
-  }
-
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[entity\\] must define a label attribute because the identifier is hidden")
-  public void testValidateLabelAttributeNullIdAttributeInvisible() {
-    when(entityType.getIdAttribute()).thenReturn(idAttr);
-    when(idAttr.isVisible()).thenReturn(false);
-    when(entityType.getId()).thenReturn("entity");
-    EntityTypeValidator.validateLabelAttribute(entityType);
-  }
-
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Label attribute \\[label\\] is not one of the attributes of entity \\[entity\\]")
-  public void testValidateOwnLabelAttributeNotInAttributeMap() {
-    when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
-    when(entityType.getId()).thenReturn("entity");
-    when(labelAttr.getName()).thenReturn("label");
+  void testValidateOwnLabelAttributeNullIdAttributeVisible() {
     EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
   }
 
   @Test
-  public void testValidateOwnLabelAttributeValid() {
+  void testValidateLabelAttributeHidden() {
+    when(entityType.getLabelAttribute()).thenReturn(labelAttr);
+    when(labelAttr.isVisible()).thenReturn(false);
+    when(entityType.getId()).thenReturn("entity");
+    when(labelAttr.getName()).thenReturn("labelAttr");
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateLabelAttribute(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Label attribute \\[labelAttr\\] of EntityType \\[entity\\] must be visible.");
+  }
+
+  @Test
+  void testValidateLabelAttributeNullIdAttributeInvisible() {
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(idAttr.isVisible()).thenReturn(false);
+    when(entityType.getId()).thenReturn("entity");
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateLabelAttribute(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[entity\\] must define a label attribute because the identifier is hidden");
+  }
+
+  @Test
+  void testValidateOwnLabelAttributeNotInAttributeMap() {
+    when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
+    when(entityType.getId()).thenReturn("entity");
+    when(labelAttr.getName()).thenReturn("label");
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap()));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Label attribute \\[label\\] is not one of the attributes of entity \\[entity\\]");
+  }
+
+  @Test
+  void testValidateOwnLabelAttributeValid() {
     when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
     String labelAttributeId = "bcdef";
     when(labelAttr.getIdentifier()).thenReturn(labelAttributeId);
@@ -313,58 +361,66 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
         entityType, ImmutableMap.of(labelAttributeId, labelAttr));
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Label attribute \\[label\\] of entity type \\[entity\\] cannot be nillable")
-  public void testValidateOwnLabelAttributeNillable() {
+  @Test
+  void testValidateOwnLabelAttributeNillable() {
     when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
     when(entityType.getId()).thenReturn("entity");
     when(labelAttr.isNillable()).thenReturn(true);
     when(labelAttr.getIdentifier()).thenReturn("label");
     when(labelAttr.getName()).thenReturn("label");
-    EntityTypeValidator.validateOwnLabelAttribute(entityType, ImmutableMap.of("label", labelAttr));
-  }
-
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[package_name\\] must define a label attribute because the identifier is hidden")
-  public void testValidateLabelAttributeIdHidden() {
-    when(entityType.getLabelAttribute()).thenReturn(null);
-    when(entityType.getId()).thenReturn("package_name");
-    when(entityType.getIdAttribute()).thenReturn(idAttr);
-    EntityTypeValidator.validateLabelAttribute(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnLabelAttribute(
+                    entityType, ImmutableMap.of("label", labelAttr)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Label attribute \\[label\\] of entity type \\[entity\\] cannot be nillable");
   }
 
   @Test
-  public void testValidateOwnLabelAttributeAbstractEntity() {
+  void testValidateLabelAttributeIdHidden() {
+    when(entityType.getLabelAttribute()).thenReturn(null);
+    when(entityType.getId()).thenReturn("package_name");
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateLabelAttribute(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[package_name\\] must define a label attribute because the identifier is hidden");
+  }
+
+  @Test
+  void testValidateOwnLabelAttributeAbstractEntity() {
     when(entityType.getOwnLabelAttribute()).thenReturn(null);
     EntityTypeValidator.validateOwnLabelAttribute(entityType, newHashMap());
   }
 
   @Test
-  public void testValidateOwnLookupAttributesEmpty() {
+  void testValidateOwnLookupAttributesEmpty() {
     when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
     EntityTypeValidator.validateOwnLookupAttributes(entityType, emptyMap());
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Lookup attribute \\[lookup1\\] is not one of the attributes of entity \\[entity\\]")
-  public void testValidateOwnLookupAttributesNotInAttributeMap() {
+  @Test
+  void testValidateOwnLookupAttributesNotInAttributeMap() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(lookupAttr1));
     when(lookupAttr1.getName()).thenReturn("lookup1");
-    EntityTypeValidator.validateOwnLookupAttributes(entityType, emptyMap());
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateOwnLookupAttributes(entityType, emptyMap()));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Lookup attribute \\[lookup1\\] is not one of the attributes of entity \\[entity\\]");
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Lookup attribute \\[lookup2\\] of entity type \\[entity\\] must be visible")
-  public void testValidateOwnLookupAttributesInvisible() {
+  @Test
+  void testValidateOwnLookupAttributesInvisible() {
     when(entityType.getOwnLookupAttributes())
         .thenReturn(ImmutableList.of(lookupAttr1, lookupAttr2));
     String lookupAttr1Id = "abcde";
@@ -375,12 +431,20 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
     when(lookupAttr2.isVisible()).thenReturn(false);
     when(entityType.getId()).thenReturn("entity");
     when(lookupAttr2.getName()).thenReturn("lookup2");
-    EntityTypeValidator.validateOwnLookupAttributes(
-        entityType, ImmutableMap.of(lookupAttr1Id, lookupAttr1, lookupAttr2Id, lookupAttr2));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () ->
+                EntityTypeValidator.validateOwnLookupAttributes(
+                    entityType,
+                    ImmutableMap.of(lookupAttr1Id, lookupAttr1, lookupAttr2Id, lookupAttr2)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Lookup attribute \\[lookup2\\] of entity type \\[entity\\] must be visible");
   }
 
   @Test
-  public void testValidateOwnLookupAttributesValid() {
+  void testValidateOwnLookupAttributesValid() {
     when(entityType.getOwnLookupAttributes())
         .thenReturn(ImmutableList.of(lookupAttr1, lookupAttr2));
     String lookupAttr1Id = "abcde";
@@ -393,37 +457,42 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
         entityType, ImmutableMap.of(lookupAttr1Id, lookupAttr1, lookupAttr2Id, lookupAttr2));
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "EntityType \\[parent\\] is not abstract; EntityType \\[entity\\] can't extend it")
-  public void testValidateExtendsNonAbstract() {
+  @Test
+  void testValidateExtendsNonAbstract() {
     when(entityType.getExtends()).thenReturn(parent);
     when(parent.isAbstract()).thenReturn(false);
     when(entityType.getId()).thenReturn("entity");
     when(parent.getId()).thenReturn("parent");
-    EntityTypeValidator.validateExtends(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> EntityTypeValidator.validateExtends(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "EntityType \\[parent\\] is not abstract; EntityType \\[entity\\] can't extend it");
   }
 
   @Test
-  public void testValidateExtendsValid() {
+  void testValidateExtendsValid() {
     when(entityType.getExtends()).thenReturn(parent);
     when(parent.isAbstract()).thenReturn(true);
     EntityTypeValidator.validateExtends(entityType);
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp = "Unknown backend \\[BackendName\\]")
-  public void testValidateBackendInvalid() {
+  @Test
+  void testValidateBackendInvalid() {
     when(entityType.getBackend()).thenReturn("BackendName");
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.hasBackend("BackendName")).thenReturn(false);
-    entityTypeValidator.validateBackend(entityType);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> entityTypeValidator.validateBackend(entityType));
+    assertThat(exception.getMessage()).containsPattern("Unknown backend \\[BackendName\\]");
   }
 
   @Test
-  public void testValidateBackendValid() {
+  void testValidateBackendValid() {
     when(entityType.getBackend()).thenReturn("BackendName");
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.hasBackend("BackendName")).thenReturn(true);
@@ -431,7 +500,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testValidateValid() {
+  void testValidateValid() {
     when(entityType.getId()).thenReturn("entity");
     when(entityType.getLabel()).thenReturn("Label");
     when(entityType.getPackage()).thenReturn(null);

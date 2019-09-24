@@ -4,19 +4,21 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.GenericDependencyResolver;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeDependencyResolverTest {
+class EntityTypeDependencyResolverTest {
   private EntityTypeDependencyResolver entityTypeDependencyResolver;
 
   private EntityType entityType0;
@@ -29,8 +31,8 @@ public class EntityTypeDependencyResolverTest {
   private Attribute attr2;
   private Attribute attr3;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     // do not mock generic dependency resolver to simplify test writing
     GenericDependencyResolver genericDependencyResolver = new GenericDependencyResolver();
     entityTypeDependencyResolver = new EntityTypeDependencyResolver(genericDependencyResolver);
@@ -52,21 +54,21 @@ public class EntityTypeDependencyResolverTest {
   }
 
   @Test
-  public void resolveDependenciesEmptyInput() {
+  void resolveDependenciesEmptyInput() {
     List<EntityType> entityTypes = emptyList();
     List<EntityType> resolvedEntityMetas = entityTypeDependencyResolver.resolve(entityTypes);
-    assertEquals(resolvedEntityMetas, emptyList());
+    assertEquals(emptyList(), resolvedEntityMetas);
   }
 
   @Test
-  public void resolveDependenciesOneItemInput() {
+  void resolveDependenciesOneItemInput() {
     List<EntityType> entityTypes = singletonList(entityType0);
     List<EntityType> resolvedEntityMetas = entityTypeDependencyResolver.resolve(entityTypes);
-    assertEquals(resolvedEntityMetas, entityTypes);
+    assertEquals(entityTypes, resolvedEntityMetas);
   }
 
   @Test
-  public void resolveDependenciesInInput() {
+  void resolveDependenciesInInput() {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(null);
@@ -81,12 +83,12 @@ public class EntityTypeDependencyResolverTest {
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
-        entityTypeDependencyResolver.resolve(newArrayList(entityType2, entityType1, entityType0)),
-        newArrayList(entityType0, entityType1, entityType2));
+        newArrayList(entityType0, entityType1, entityType2),
+        entityTypeDependencyResolver.resolve(newArrayList(entityType2, entityType1, entityType0)));
   }
 
   @Test
-  public void resolveSomeDependenciesInInput() {
+  void resolveSomeDependenciesInInput() {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(null);
@@ -101,12 +103,12 @@ public class EntityTypeDependencyResolverTest {
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
-        entityTypeDependencyResolver.resolve(newArrayList(entityType2, entityType0)),
-        newArrayList(entityType0, entityType2));
+        newArrayList(entityType0, entityType2),
+        entityTypeDependencyResolver.resolve(newArrayList(entityType2, entityType0)));
   }
 
   @Test()
-  public void resolveDependenciesExtends3Level() {
+  void resolveDependenciesExtends3Level() {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(entityType1);
@@ -116,28 +118,28 @@ public class EntityTypeDependencyResolverTest {
     when(attr1.getMappedBy()).thenReturn(null);
 
     assertEquals(
+        newArrayList(entityType0, entityType1, entityType2, entityType3),
         entityTypeDependencyResolver.resolve(
-            newArrayList(entityType0, entityType1, entityType2, entityType3)),
-        newArrayList(entityType0, entityType1, entityType2, entityType3));
+            newArrayList(entityType0, entityType1, entityType2, entityType3)));
 
     assertEquals(
+        newArrayList(entityType0, entityType1, entityType2, entityType3),
         entityTypeDependencyResolver.resolve(
-            newArrayList(entityType1, entityType0, entityType2, entityType3)),
-        newArrayList(entityType0, entityType1, entityType2, entityType3));
+            newArrayList(entityType1, entityType0, entityType2, entityType3)));
 
     assertEquals(
+        newArrayList(entityType0, entityType1, entityType2, entityType3),
         entityTypeDependencyResolver.resolve(
-            newArrayList(entityType1, entityType2, entityType0, entityType3)),
-        newArrayList(entityType0, entityType1, entityType2, entityType3));
+            newArrayList(entityType1, entityType2, entityType0, entityType3)));
 
     assertEquals(
+        newArrayList(entityType0, entityType1, entityType2, entityType3),
         entityTypeDependencyResolver.resolve(
-            newArrayList(entityType1, entityType2, entityType3, entityType0)),
-        newArrayList(entityType0, entityType1, entityType2, entityType3));
+            newArrayList(entityType1, entityType2, entityType3, entityType0)));
   }
 
   @Test()
-  public void resolveDependenciesAddedNotDependedEntity() {
+  void resolveDependenciesAddedNotDependedEntity() {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(entityType1);
@@ -153,29 +155,29 @@ public class EntityTypeDependencyResolverTest {
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
+        newArrayList(entityType0, entityType1, entityType2, entityType3),
         entityTypeDependencyResolver.resolve(
-            newArrayList(entityType0, entityType2, entityType3, entityType1)),
-        newArrayList(entityType0, entityType1, entityType2, entityType3));
+            newArrayList(entityType0, entityType2, entityType3, entityType1)));
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Could not resolve dependencies of items \\[entity1, entity2, entity0, entity3\\]. Are there circular dependencies\\?")
-  public void resolveDependenciesEntityCircularExtends() {
+  @Test
+  void resolveDependenciesEntityCircularExtends() {
     when(entityType0.getExtends()).thenReturn(entityType3);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(entityType1);
     when(entityType3.getExtends()).thenReturn(entityType2);
 
-    entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1));
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Could not resolve dependencies of items \\[entity1, entity2, entity0, entity3\\]. Are there circular dependencies\\?");
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Could not resolve dependencies of items \\[entity1, entity2, entity0\\]. Are there circular dependencies\\?")
-  public void resolveDependenciesEntityCircularRefEntity() {
+  @Test
+  void resolveDependenciesEntityCircularRefEntity() {
     when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType1);
     when(attr1.hasRefEntity()).thenReturn(true);
@@ -183,12 +185,19 @@ public class EntityTypeDependencyResolverTest {
     when(attr2.hasRefEntity()).thenReturn(true);
     when(attr2.getRefEntity()).thenReturn(entityType0);
 
-    entityTypeDependencyResolver.resolve(
-        newArrayList(entityType1, entityType2, entityType3, entityType0));
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () ->
+                entityTypeDependencyResolver.resolve(
+                    newArrayList(entityType1, entityType2, entityType3, entityType0)));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Could not resolve dependencies of items \\[entity1, entity2, entity0\\]. Are there circular dependencies\\?");
   }
 
   @Test()
-  public void resolveDependenciesEntity() {
+  void resolveDependenciesEntity() {
     EntityType entityType4 = when(mock(EntityType.class).getId()).thenReturn("entity4").getMock();
     Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
     when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
@@ -202,12 +211,12 @@ public class EntityTypeDependencyResolverTest {
     when(attr3.getRefEntity()).thenReturn(entityType4);
 
     assertEquals(
-        entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
-        newArrayList(entityType0, entityType1, entityType2));
+        newArrayList(entityType0, entityType1, entityType2),
+        entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)));
   }
 
   @Test()
-  public void resolveDependenciesEntityExtendedDependencies() {
+  void resolveDependenciesEntityExtendedDependencies() {
     EntityType entityType4 = when(mock(EntityType.class).getId()).thenReturn("entity4").getMock();
     Attribute attr4 = when(mock(Attribute.class).getName()).thenReturn("attr4").getMock();
     when(entityType4.getOwnAllAttributes()).thenReturn(singleton(attr4));
@@ -231,7 +240,7 @@ public class EntityTypeDependencyResolverTest {
     when(entityType5.getExtends()).thenReturn(entityType6);
 
     assertEquals(
-        entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)),
-        newArrayList(entityType0, entityType1, entityType2));
+        newArrayList(entityType0, entityType1, entityType2),
+        entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1, entityType2)));
   }
 }

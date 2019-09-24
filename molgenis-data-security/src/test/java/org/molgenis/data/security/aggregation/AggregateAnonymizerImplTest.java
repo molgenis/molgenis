@@ -1,16 +1,16 @@
 package org.molgenis.data.security.aggregation;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.testng.annotations.Test;
 
-public class AggregateAnonymizerImplTest {
+class AggregateAnonymizerImplTest {
   @Test
-  public void anonymize() {
+  void anonymize() {
     int threshold = 10;
 
     List<List<Long>> matrix = Lists.newArrayList();
@@ -30,6 +30,6 @@ public class AggregateAnonymizerImplTest {
     expectedMatrix.add(Arrays.asList(11L, null, 90L, -1L, -1L));
 
     assertEquals(
-        result, new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold));
+        new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold), result);
   }
 }

@@ -3,48 +3,48 @@ package org.molgenis.data.security.auth;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.data.security.config.SecurityTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {SecurityTestConfig.class})
-public class TokenTest extends AbstractSystemEntityTest {
+class TokenTest extends AbstractSystemEntityTest {
 
   @Autowired TokenMetadata metadata;
   @Autowired TokenFactory factory;
 
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, Token.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }
 
   private Token token;
 
-  @BeforeMethod
-  public void setup() {
+  @BeforeEach
+  void setup() {
     token = factory.create();
   }
 
   @Test
-  public void testIsExpiredNoExpirationDate() {
+  void testIsExpiredNoExpirationDate() {
     assertFalse(token.isExpired());
   }
 
   @Test
-  public void testIsExpiredExpirationDateInFuture() {
+  void testIsExpiredExpirationDateInFuture() {
     token.setExpirationDate(now().plus(1, MINUTES));
     assertFalse(token.isExpired());
   }
 
   @Test
-  public void testIsExpiredExpirationDateInPast() {
+  void testIsExpiredExpirationDateInPast() {
     token.setExpirationDate(now().minus(1, SECONDS));
     assertTrue(token.isExpired());
   }

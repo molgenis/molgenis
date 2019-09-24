@@ -7,6 +7,8 @@ import static org.molgenis.web.exception.ExceptionResponseType.ERROR_MESSAGES;
 import static org.molgenis.web.exception.ExceptionResponseType.MODEL_AND_VIEW;
 import static org.molgenis.web.exception.ExceptionResponseType.PROBLEM;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.ApiController;
 import org.molgenis.test.AbstractMockitoTest;
@@ -15,21 +17,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
+class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
   @Mock private ExceptionResponseGeneratorRegistry exceptionResponseGeneratorRegistry;
   private ExceptionHandlerFacadeImpl exceptionHandlerFacadeImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     exceptionHandlerFacadeImpl = new ExceptionHandlerFacadeImpl(exceptionResponseGeneratorRegistry);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLogAndHandleExceptionHandlerMethodProblem() {
+  void testLogAndHandleExceptionHandlerMethodProblem() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -45,7 +45,7 @@ public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLogAndHandleExceptionHandlerMethodErrorMessages() {
+  void testLogAndHandleExceptionHandlerMethodErrorMessages() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -62,7 +62,7 @@ public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testLogAndHandleExceptionHandlerMethodModelAndView() {
+  void testLogAndHandleExceptionHandlerMethodModelAndView() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -77,7 +77,7 @@ public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testLogAndHandleExceptionHttpServletRequestProblem() {
+  void testLogAndHandleExceptionHttpServletRequestProblem() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     MockHttpServletRequest request = new MockHttpServletRequest();
@@ -92,7 +92,7 @@ public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testLogAndHandleExceptionHttpServletRequestErrorMessages() {
+  void testLogAndHandleExceptionHttpServletRequestErrorMessages() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     MockHttpServletRequest request = new MockHttpServletRequest();
@@ -107,7 +107,7 @@ public class ExceptionHandlerFacadeImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testLogAndHandleExceptionHttpServletRequestModelAndView() {
+  void testLogAndHandleExceptionHttpServletRequestModelAndView() {
     Exception e = mock(Exception.class);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     MockHttpServletRequest request = new MockHttpServletRequest();

@@ -28,28 +28,31 @@ import java.util.List;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.tests.AbstractApiTests;
-import org.molgenis.api.tests.rest.v1.RestControllerIT;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-public class RestControllerV2IT extends AbstractApiTests {
-  private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
+@TestMethodOrder(OrderAnnotation.class)
+class RestControllerV2IT extends AbstractApiTests {
+  private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2IT.class);
 
   private static final String API_V2 = "api/v2/";
 
   private static final String REST_TEST_USER_PASSWORD = "Blahdiblah";
 
-  private String testUsername;
-  private String testUserToken;
-  private String adminToken;
+  private static String testUsername;
+  private static String testUserToken;
+  private static String adminToken;
 
-  private List<String> testEntities =
+  private static List<String> testEntities =
       newArrayList(
           "it_emx_datatypes_TypeTestv2",
           "it_emx_datatypes_TypeTestRefv2",
@@ -61,8 +64,8 @@ public class RestControllerV2IT extends AbstractApiTests {
    * -Dtest="RestControllerV2IT" -DREST_TEST_HOST="https://molgenis01.gcc.rug.nl"
    * -DREST_TEST_ADMIN_NAME="admin" -DREST_TEST_ADMIN_PW="admin"
    */
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     AbstractApiTests.setUpBeforeClass();
     adminToken = AbstractApiTests.getAdminToken();
 
@@ -98,7 +101,8 @@ public class RestControllerV2IT extends AbstractApiTests {
   }
 
   @Test
-  public void testApiCorsPreflightRequest() {
+  @Order(1)
+  void testApiCorsPreflightRequest() {
     given()
         .header("Access-Control-Request-Method", "DELETE ")
         .header("Access-Control-Request-Headers", "x-molgenis-token")
@@ -114,7 +118,8 @@ public class RestControllerV2IT extends AbstractApiTests {
   }
 
   @Test
-  public void batchRetrieveEntityCollectionTemplateExpression() {
+  @Order(2)
+  void batchRetrieveEntityCollectionTemplateExpression() {
     ValidatableResponse response =
         given(testUserToken).get(API_V2 + "it_emx_datatypes_TypeTestv2").then();
 
@@ -133,7 +138,8 @@ public class RestControllerV2IT extends AbstractApiTests {
   }
 
   @Test
-  public void batchCreate() {
+  @Order(3)
+  void batchCreate() {
     JSONObject jsonObject = new JSONObject();
     JSONArray entities = new JSONArray();
 
@@ -163,7 +169,8 @@ public class RestControllerV2IT extends AbstractApiTests {
   }
 
   @Test
-  public void batchCreateLocation() {
+  @Order(4)
+  void batchCreateLocation() {
     JSONObject jsonObject = new JSONObject();
     JSONArray entities = new JSONArray();
 
@@ -191,8 +198,9 @@ public class RestControllerV2IT extends AbstractApiTests {
             Matchers.equalTo(expectedHref));
   }
 
-  @Test(dependsOnMethods = "batchCreate")
-  public void batchCreateTypeTest() {
+  @Test
+  @Order(5)
+  void batchCreateTypeTest() {
 
     JSONObject entities = readJsonFile("/createEntitiesv2.json");
 
@@ -212,8 +220,9 @@ public class RestControllerV2IT extends AbstractApiTests {
             Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2/57"));
   }
 
-  @Test(dependsOnMethods = "batchCreateTypeTest", priority = 3)
-  public void batchUpdate() {
+  @Test
+  @Order(6)
+  void batchUpdate() {
     JSONObject entities = readJsonFile("/updateEntitiesv2.json");
 
     given(testUserToken)
@@ -225,10 +234,9 @@ public class RestControllerV2IT extends AbstractApiTests {
         .statusCode(OKE);
   }
 
-  @Test(
-      dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"},
-      priority = 5)
-  public void batchUpdateOnlyOneAttribute() {
+  @Test
+  @Order(7)
+  void batchUpdateOnlyOneAttribute() {
     JSONObject jsonObject = new JSONObject();
     JSONArray entities = new JSONArray();
 
@@ -253,10 +261,9 @@ public class RestControllerV2IT extends AbstractApiTests {
         .statusCode(OKE);
   }
 
-  @Test(
-      dependsOnMethods = {"batchCreate", "batchCreateTypeTest", "batchUpdate"},
-      priority = 10)
-  public void batchDelete() {
+  @Test
+  @Order(8)
+  void batchDelete() {
     JSONObject jsonObject = new JSONObject();
     JSONArray entityIds = new JSONArray();
     entityIds.add("55");
@@ -274,7 +281,8 @@ public class RestControllerV2IT extends AbstractApiTests {
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6731
   @Test
-  public void testRetrieveSystemEntityCollectionAggregatesNotAllowed() {
+  @Order(9)
+  void testRetrieveSystemEntityCollectionAggregatesNotAllowed() {
     // @formatter:off
     given(testUserToken)
         .when()
@@ -286,7 +294,7 @@ public class RestControllerV2IT extends AbstractApiTests {
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6731
   @Test
-  public void testRetrieveSystemEntityCollectionAggregates() {
+  void testRetrieveSystemEntityCollectionAggregates() {
 
     given(testUserToken)
         .when()
@@ -296,8 +304,8 @@ public class RestControllerV2IT extends AbstractApiTests {
         .body("aggs.matrix[0][0]", Matchers.equalTo(1));
   }
 
-  @AfterClass(alwaysRun = true)
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     // Clean up TestEMX
     removeEntities(adminToken, testEntities);
 

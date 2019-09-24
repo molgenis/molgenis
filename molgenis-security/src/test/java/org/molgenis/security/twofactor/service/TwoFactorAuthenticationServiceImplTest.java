@@ -1,51 +1,122 @@
 package org.molgenis.security.twofactor.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 import java.time.Instant;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
 import org.molgenis.security.twofactor.model.UserSecretMetadata;
 import org.molgenis.settings.AppSettings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {TwoFactorAuthenticationServiceImplTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpringContextTests {
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@SecurityTestExecutionListeners
+class TwoFactorAuthenticationServiceImplTest {
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";
-  @Autowired private DataService dataService;
-  @Autowired private UserService userService;
-  @Autowired private UserSecretFactory userSecretFactory;
-  @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
-  private User molgenisUser = mock(User.class);
-  private UserSecret userSecret = mock(UserSecret.class);
 
+  @Mock private DataService dataService;
+  @Mock private UserService userService;
+  @Mock private UserSecretFactory userSecretFactory;
+  private TwoFactorAuthenticationService twoFactorAuthenticationServiceImpl;
+
+  @BeforeEach
+  void setUpBeforeMethod() {
+    twoFactorAuthenticationServiceImpl =
+        new TwoFactorAuthenticationServiceImpl(
+            new OtpServiceImpl(mock(AppSettings.class)),
+            dataService,
+            userService,
+            new IdGeneratorImpl(),
+            userSecretFactory);
+  }
+
+  @Test
+  void generateSecretKeyTest() {
+    String key = twoFactorAuthenticationServiceImpl.generateSecretKey();
+    assertTrue(key.matches("^[a-z0-9]+$"));
+  }
+
+  @Test
+  void generateWrongSecretKeyTest() {
+    String key = twoFactorAuthenticationServiceImpl.generateSecretKey();
+    assertTrue(!key.matches("^[A-Z0-9]+$"));
+  }
+
+  @Test
   @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  @BeforeMethod
-  @SuppressWarnings("unchecked")
-  public void setUpBeforeMethod() {
+  void setSecretKeyTest() {
+    User molgenisUser = mock(User.class);
+    UserSecret userSecret = mock(UserSecret.class);
+    when(molgenisUser.getId()).thenReturn("1324");
+    when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
+    Query<UserSecret> userSecretQuery = mock(Query.class, RETURNS_SELF);
+
+    String secretKey = "secretKey";
+    when(userSecretFactory.create()).thenReturn(userSecret);
+    twoFactorAuthenticationServiceImpl.saveSecretForUser(secretKey);
+  }
+
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  void isConfiguredForUserTest() {
+    User molgenisUser = mock(User.class);
+    UserSecret userSecret = mock(UserSecret.class);
+    when(molgenisUser.getId()).thenReturn("1324");
+    when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
+    Query<UserSecret> userSecretQuery = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(UserSecretMetadata.USER_SECRET, UserSecret.class))
+        .thenReturn(userSecretQuery);
+    when(userSecretQuery.eq(UserSecretMetadata.USER_ID, molgenisUser.getId()).findOne())
+        .thenReturn(userSecret);
+
+    when(userSecret.getSecret()).thenReturn("secretKey");
+    boolean isConfigured = twoFactorAuthenticationServiceImpl.isConfiguredForUser();
+    assertTrue(isConfigured);
+  }
+
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  void testUserIsBlocked() {
+    User molgenisUser = mock(User.class);
+    UserSecret userSecret = mock(UserSecret.class);
+    when(molgenisUser.getId()).thenReturn("1324");
+    when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
+    Query<UserSecret> userSecretQuery = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(UserSecretMetadata.USER_SECRET, UserSecret.class))
+        .thenReturn(userSecretQuery);
+    when(userSecretQuery.eq(UserSecretMetadata.USER_ID, molgenisUser.getId()).findOne())
+        .thenReturn(userSecret);
+
+    when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());
+    when(userSecret.getFailedLoginAttempts()).thenReturn(3);
+    assertThrows(
+        TooManyLoginAttemptsException.class,
+        () -> twoFactorAuthenticationServiceImpl.userIsBlocked());
+  }
+
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  void testDisableForUser() {
+    User molgenisUser = mock(User.class);
+    UserSecret userSecret = mock(UserSecret.class);
     when(molgenisUser.getUsername()).thenReturn(USERNAME);
     when(molgenisUser.getId()).thenReturn("1324");
     when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
@@ -54,93 +125,13 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
         .thenReturn(userSecretQuery);
     when(userSecretQuery.eq(UserSecretMetadata.USER_ID, molgenisUser.getId()).findOne())
         .thenReturn(userSecret);
-  }
 
-  @Test
-  public void generateSecretKeyTest() {
-    String key = twoFactorAuthenticationService.generateSecretKey();
-    assertTrue(key.matches("^[a-z0-9]+$"));
-  }
-
-  @Test
-  public void generateWrongSecretKeyTest() {
-    String key = twoFactorAuthenticationService.generateSecretKey();
-    assertTrue(!key.matches("^[A-Z0-9]+$"));
-  }
-
-  @Test
-  @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void setSecretKeyTest() {
-    String secretKey = "secretKey";
-    when(userSecretFactory.create()).thenReturn(userSecret);
-    twoFactorAuthenticationService.saveSecretForUser(secretKey);
-  }
-
-  @Test
-  @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void isConfiguredForUserTest() {
-    when(userSecret.getSecret()).thenReturn("secretKey");
-    boolean isConfigured = twoFactorAuthenticationService.isConfiguredForUser();
-    assertEquals(true, isConfigured);
-  }
-
-  @Test(expectedExceptions = TooManyLoginAttemptsException.class)
-  @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void testUserIsBlocked() {
-    when(userSecret.getLastFailedAuthentication()).thenReturn(Instant.now());
-    when(userSecret.getFailedLoginAttempts()).thenReturn(3);
-    boolean isBlocked = twoFactorAuthenticationService.userIsBlocked();
-    assertEquals(true, isBlocked);
-  }
-
-  @Test
-  @WithMockUser(value = USERNAME, roles = ROLE_SU)
-  public void testDisableForUser() {
     when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
     when(dataService
             .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
             .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
             .findOne())
         .thenReturn(userSecret);
-    twoFactorAuthenticationService.disableForUser();
-  }
-
-  @Configuration
-  static class Config {
-    @Bean
-    public TwoFactorAuthenticationService twoFactorAuthenticationService() {
-      return new TwoFactorAuthenticationServiceImpl(
-          otpService(), dataService(), userService(), idGenerator(), userSecretFactory());
-    }
-
-    @Bean
-    public OtpService otpService() {
-      return new OtpServiceImpl(appSettings());
-    }
-
-    @Bean
-    public DataService dataService() {
-      return mock(DataService.class);
-    }
-
-    @Bean
-    public UserService userService() {
-      return mock(UserServiceImpl.class);
-    }
-
-    @Bean
-    public IdGenerator idGenerator() {
-      return new IdGeneratorImpl();
-    }
-
-    @Bean
-    public AppSettings appSettings() {
-      return mock(AppSettings.class);
-    }
-
-    @Bean
-    public UserSecretFactory userSecretFactory() {
-      return mock(UserSecretFactory.class);
-    }
+    twoFactorAuthenticationServiceImpl.disableForUser();
   }
 }

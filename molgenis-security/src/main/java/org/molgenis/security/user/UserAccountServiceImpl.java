@@ -52,4 +52,14 @@ public class UserAccountServiceImpl implements UserAccountService {
     }
     return passwordEncoder.matches(password, currentUser.getPassword());
   }
+
+  /** Testability */
+  void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
+  /** Testability */
+  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
+  }
 }

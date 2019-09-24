@@ -2,13 +2,13 @@ package org.molgenis.integrationtest.platform;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -37,20 +40,16 @@ import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFact
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -59,29 +58,29 @@ import org.testng.annotations.Test;
       PostFixingRepositoryDecoratorFactory.class,
       JsonTestConfig.class
     })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
-public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContextTests {
+public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(DynamicDecoratorIT.class);
 
   private static final String USERNAME = "dynamic-decorator-user";
 
   @Autowired private DataService dataService;
-  @Autowired private IndexJobScheduler indexService;
-  @Autowired private MetaDataService metaDataService;
-  @Autowired private EntityTestHarness testHarness;
   @Autowired private DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry;
   @Autowired private DecoratorConfigurationFactory decoratorConfigurationFactory;
   @Autowired private DecoratorParametersFactory decoratorParametersFactory;
   @Autowired private PermissionService testPermissionService;
 
-  private EntityType refEntityTypeDynamic;
-  private EntityType entityTypeDynamic;
-  private DynamicDecorator addingDynamicDecorator;
-  private DynamicDecorator postfixDynamicDecorator;
+  private static EntityType refEntityTypeDynamic;
+  private static EntityType entityTypeDynamic;
+  private static DynamicDecorator addingDynamicDecorator;
+  private static DynamicDecorator postfixDynamicDecorator;
 
-  @BeforeClass
-  public void setUp() {
+  @BeforeAll
+  public static void setUpBeforeAll(ApplicationContext applicationContext) {
+    EntityTestHarness testHarness = applicationContext.getBean(EntityTestHarness.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+    DataService dataService = applicationContext.getBean(DataService.class);
+
     refEntityTypeDynamic =
         testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
     entityTypeDynamic =
@@ -100,7 +99,7 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
           dataService.add(refEntityTypeDynamic.getId(), refs.stream());
           dataService.add(entityTypeDynamic.getId(), entities.stream());
 
-          waitForWorkToBeFinished(indexService, LOG);
+          waitForWorkToBeFinished(applicationContext, LOG);
 
           addingDynamicDecorator =
               dataService.findOneById("sys_dec_DynamicDecorator", "add", DynamicDecorator.class);
@@ -168,8 +167,11 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
     assertEquals(12, entity.getInt("int_attr").intValue());
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterAll
+  public static void tearDownAfterClass(ApplicationContext applicationContext) {
+    DataService dataService = applicationContext.getBean(DataService.class);
+    MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+
     runAsSystem(
         () -> {
           dataService.deleteAll(entityTypeDynamic.getId());
@@ -179,7 +181,7 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
           metaDataService.deleteEntityType(entityTypeDynamic.getId());
           metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
         });
-    waitForWorkToBeFinished(indexService, LOG);
+    waitForWorkToBeFinished(applicationContext, LOG);
   }
 
   private void populatePermissions() {
@@ -204,6 +206,15 @@ public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContext
             testPermissionService.createPermission(
                 Permission.create(entry.getKey(), sid, entry.getValue()));
           });
+    }
+  }
+
+  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    try {
+      indexJobScheduler.waitForAllIndicesStable();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
   }
 }

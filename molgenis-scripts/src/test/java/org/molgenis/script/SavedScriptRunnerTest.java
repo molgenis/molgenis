@@ -3,17 +3,20 @@ package org.molgenis.script;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -30,10 +33,8 @@ import org.molgenis.script.core.ScriptRunnerFactory;
 import org.molgenis.script.core.ScriptType;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SavedScriptRunnerTest extends AbstractMockitoTest {
+class SavedScriptRunnerTest extends AbstractMockitoTest {
   @Mock private ScriptRunnerFactory scriptRunnerFactory;
   @Mock private DataService dataService;
   @Mock private FileStore fileStore;
@@ -41,15 +42,15 @@ public class SavedScriptRunnerTest extends AbstractMockitoTest {
   @Mock private FileMetaFactory fileMetaFactory;
   private SavedScriptRunner savedScriptRunner;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     savedScriptRunner =
         new SavedScriptRunner(
             scriptRunnerFactory, dataService, fileStore, tokenService, fileMetaFactory);
   }
 
   @Test
-  public void testRunScript() {
+  void testRunScript() {
     String scriptTypeName = "MyScriptType";
     ScriptType scriptType =
         when(mock(ScriptType.class).getName()).thenReturn(scriptTypeName).getMock();
@@ -74,7 +75,7 @@ public class SavedScriptRunnerTest extends AbstractMockitoTest {
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
-  public void testRunScriptOutputFile() throws IOException {
+  void testRunScriptOutputFile() throws IOException {
     String scriptTypeName = "MyScriptType";
     ScriptType scriptType =
         when(mock(ScriptType.class).getName()).thenReturn(scriptTypeName).getMock();
@@ -112,8 +113,8 @@ public class SavedScriptRunnerTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expectedExceptions = GenerateScriptException.class)
-  public void testRunScriptMissingParameterValues() {
+  @Test
+  void testRunScriptMissingParameterValues() {
     String scriptName = "MyScript";
 
     ScriptParameter scriptParameter =
@@ -127,11 +128,12 @@ public class SavedScriptRunnerTest extends AbstractMockitoTest {
     when(query.eq("name", scriptName).findOne()).thenReturn(script);
     when(dataService.query("sys_scr_Script", Script.class)).thenReturn(query);
 
-    savedScriptRunner.runScript(scriptName, emptyMap());
+    assertThrows(
+        GenerateScriptException.class, () -> savedScriptRunner.runScript(scriptName, emptyMap()));
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testRunScriptUnknownScript() {
+  @Test
+  void testRunScriptUnknownScript() {
     String scriptName = "MyScript";
 
     @SuppressWarnings("unchecked")
@@ -139,6 +141,7 @@ public class SavedScriptRunnerTest extends AbstractMockitoTest {
     when(query.eq("name", scriptName).findOne()).thenReturn(null);
     when(dataService.query("sys_scr_Script", Script.class)).thenReturn(query);
 
-    savedScriptRunner.runScript(scriptName, emptyMap());
+    assertThrows(
+        UnknownEntityException.class, () -> savedScriptRunner.runScript(scriptName, emptyMap()));
   }
 }

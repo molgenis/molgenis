@@ -13,9 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.amazon.bucket.config.AmazonBucketTestConfig;
-import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
@@ -34,11 +35,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {AmazonBucketIngesterTest.Config.class})
-public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
+class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
   @Autowired private AmazonBucketIngester amazonBucketIngester;
 
   @Autowired private ImportServiceFactory importServiceFactoryMock;
@@ -53,8 +52,8 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
   private Progress progress;
   private ImportService importServiceMock;
 
-  @BeforeTest
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
     progress = mock(Progress.class);
     importServiceMock = mock(ImportService.class);
@@ -62,7 +61,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void ingest() {
+  void ingest() {
     Map<String, Integer> imported = new HashMap<>();
     imported.put("test", 1);
     when(report.getNrImportedEntitiesMap()).thenReturn(imported);
@@ -73,7 +72,6 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
     when(importServiceMock.doImport(
             any(), eq(MetadataAction.UPSERT), eq(ADD_UPDATE_EXISTING), eq(null)))
         .thenReturn(report);
-    when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
     amazonBucketIngester.ingest(
         "jobExecutionID",
@@ -93,9 +91,9 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({AmazonBucketTestConfig.class})
-  public static class Config {
+  static class Config {
     @Bean
-    public AmazonBucketIngester ingester() {
+    AmazonBucketIngester ingester() {
       return new AmazonBucketIngester(
           importServiceFactory(),
           fileRepositoryCollectionFactory(),
@@ -105,29 +103,29 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public FileStore fileStore() {
+    FileStore fileStore() {
       return mock(FileStore.class);
     }
 
     @Bean
-    public ImportServiceFactory importServiceFactory() {
+    ImportServiceFactory importServiceFactory() {
       return mock(ImportServiceFactory.class);
     }
 
     @Bean
-    public FileRepositoryCollectionFactory fileRepositoryCollectionFactory() {
+    FileRepositoryCollectionFactory fileRepositoryCollectionFactory() {
       return mock(FileRepositoryCollectionFactory.class);
     }
 
     @Bean
-    public FileMetaFactory fileMetaFactory() {
+    FileMetaFactory fileMetaFactory() {
       FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
       when(fileMetaFactory.create(anyString())).thenReturn(mock(FileMeta.class));
       return fileMetaFactory;
     }
 
     @Bean
-    public AmazonBucketClient amazonBucketClient() {
+    AmazonBucketClient amazonBucketClient() {
 
       AmazonS3Client client = mock(AmazonS3Client.class);
 
@@ -152,7 +150,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    public SecurityPackage securityPackage() {
+    SecurityPackage securityPackage() {
       return mock(SecurityPackage.class);
     }
   }

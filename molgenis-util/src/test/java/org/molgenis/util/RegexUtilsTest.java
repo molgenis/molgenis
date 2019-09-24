@@ -1,30 +1,30 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class RegexUtilsTest {
-  private String javaCronJobRegex;
-  private String javaCommaSeparatedEmailListRegex;
+class RegexUtilsTest {
+  private static String javaCronJobRegex;
+  private static String javaCommaSeparatedEmailListRegex;
 
-  @BeforeClass
-  public void setup() {
-    this.javaCronJobRegex = toJavaRegex(RegexUtils.JAVA_SCRIPT_CRON_REGEX);
-    this.javaCommaSeparatedEmailListRegex =
+  @BeforeAll
+  static void setup() {
+    javaCronJobRegex = toJavaRegex(RegexUtils.JAVA_SCRIPT_CRON_REGEX);
+    javaCommaSeparatedEmailListRegex =
         toJavaRegex(RegexUtils.JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX);
   }
 
   @Test
-  public void cronJobRegex() {
+  void cronJobRegex() {
     assertTrue("0 0 12 * * ?".matches(javaCronJobRegex));
     assertTrue("".matches(javaCronJobRegex));
   }
 
   @Test
-  public void commaSeparatedEmailListRegex() {
+  void commaSeparatedEmailListRegex() {
     assertTrue("c.stroomberg@umcg.nl".matches(javaCommaSeparatedEmailListRegex));
     assertTrue(
         "c.stroomberg@umcg.nl, janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
@@ -43,7 +43,7 @@ public class RegexUtilsTest {
         "c.stroomberg@umcg.nl janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
   }
 
-  private String toJavaRegex(String javaScriptRegex) {
+  private static String toJavaRegex(String javaScriptRegex) {
     return javaScriptRegex.substring(1, javaScriptRegex.length() - 1);
   }
 }

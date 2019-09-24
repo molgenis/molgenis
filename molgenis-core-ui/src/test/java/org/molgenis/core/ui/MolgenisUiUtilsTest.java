@@ -1,17 +1,17 @@
 package org.molgenis.core.ui;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.Test;
 
-public class MolgenisUiUtilsTest {
+class MolgenisUiUtilsTest {
 
   @Test
-  public void getCurrentUri() {
+  void getCurrentUri() {
     String uri = "/menu/test";
     String queryString = "a=b&c=d";
 
@@ -22,12 +22,12 @@ public class MolgenisUiUtilsTest {
 
     String currentUri = MolgenisUiUtils.getCurrentUri();
     assertNotNull(currentUri);
-    assertEquals(currentUri, uri + "?" + queryString);
+    assertEquals(uri + "?" + queryString, currentUri);
 
     request.setQueryString(null);
     RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
     currentUri = MolgenisUiUtils.getCurrentUri();
     assertNotNull(currentUri);
-    assertEquals(currentUri, uri);
+    assertEquals(uri, currentUri);
   }
 }

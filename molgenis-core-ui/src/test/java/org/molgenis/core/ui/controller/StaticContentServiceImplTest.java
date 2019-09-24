@@ -1,14 +1,18 @@
 package org.molgenis.core.ui.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.settings.StaticContentMetadata.STATIC_CONTENT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
@@ -18,10 +22,8 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class StaticContentServiceImplTest extends AbstractMockitoTest {
+class StaticContentServiceImplTest extends AbstractMockitoTest {
   @Mock private StaticContentFactory staticContentFactory;
   @Mock private DataService dataService;
   @Mock private StaticContent staticContent;
@@ -29,22 +31,22 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
 
   private StaticContentServiceImpl staticContentService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     staticContentService =
         new StaticContentServiceImpl(dataService, staticContentFactory, permissionService);
   }
 
   @Test
-  public void getContent() {
+  void getContent() {
     when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class))
         .thenReturn(staticContent);
     when(staticContent.getContent()).thenReturn("<p>Welcome to Molgenis!</p>");
-    assertEquals(staticContentService.getContent("home"), "<p>Welcome to Molgenis!</p>");
+    assertEquals("<p>Welcome to Molgenis!</p>", staticContentService.getContent("home"));
   }
 
   @Test
-  public void isCurrentUserCanEditAnonymousFalse() {
+  void isCurrentUserCanEditAnonymousFalse() {
     doReturn(false)
         .when(permissionService)
         .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
@@ -52,7 +54,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isCurrentUserCanEditStaticContentPresentEditTrue() {
+  void isCurrentUserCanEditStaticContentPresentEditTrue() {
     doReturn(true)
         .when(permissionService)
         .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
@@ -65,7 +67,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isCurrentUserCanEditStaticContentNotPresentEditTrue() {
+  void isCurrentUserCanEditStaticContentNotPresentEditTrue() {
     doReturn(true)
         .when(permissionService)
         .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
@@ -76,7 +78,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isCurrentUserCanEditStaticContentPresentEditFalse() {
+  void isCurrentUserCanEditStaticContentPresentEditFalse() {
     doReturn(true)
         .when(permissionService)
         .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
@@ -86,19 +88,22 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void isCurrentUserCanEditStaticContentNotPresentEditFalse() {
+  void isCurrentUserCanEditStaticContentNotPresentEditFalse() {
     assertFalse(staticContentService.isCurrentUserCanEdit("home"));
   }
 
-  @Test(
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_StaticContent")
-  public void checkPermissionsThrowsException() {
-    this.staticContentService.checkPermissions("home");
+  @Test
+  void checkPermissionsThrowsException() {
+    Exception exception =
+        assertThrows(
+            EntityTypePermissionDeniedException.class,
+            () -> this.staticContentService.checkPermissions("home"));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:UPDATE_DATA entityTypeId:sys_StaticContent");
   }
 
   @Test
-  public void checkPermissionsNoException() {
+  void checkPermissionsNoException() {
     doReturn(true)
         .when(permissionService)
         .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.UPDATE_DATA);
@@ -106,7 +111,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void submitContentNoContentNoCreatePermissions() {
+  void submitContentNoContentNoCreatePermissions() {
     doReturn(staticContent).when(staticContentFactory).create("home");
     doThrow(new EntityTypePermissionDeniedException(EntityTypePermission.ADD_DATA, STATIC_CONTENT))
         .when(dataService)
@@ -115,7 +120,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void submitContentExistingContentNoUpdatePermissions() {
+  void submitContentExistingContentNoUpdatePermissions() {
     when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class))
         .thenReturn(staticContent);
     doThrow(
@@ -127,7 +132,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void submitContentExisting() {
+  void submitContentExisting() {
     when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class))
         .thenReturn(staticContent);
     assertTrue(this.staticContentService.submitContent("home", "<p>Updated Content!</p>"));
@@ -137,7 +142,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void submitContentNew() {
+  void submitContentNew() {
     when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(null);
     when(staticContentFactory.create("home")).thenReturn(staticContent);
 

@@ -1,67 +1,67 @@
 package org.molgenis.api.convert;
 
 import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.model.Sort.Order.Direction.DESC;
+import static org.molgenis.api.model.Sort.create;
 
-import org.molgenis.api.model.Sort;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.model.Sort.Order;
-import org.molgenis.api.model.Sort.Order.Direction;
-import org.testng.annotations.Test;
 
-public class SortParserTest {
+class SortParserTest {
 
   @Test
-  public void testSortminus() throws ParseException {
-    assertEquals(new SortParser("-abc").parse(), Sort.create("abc", Direction.DESC));
+  void testSortminus() throws ParseException {
+    assertEquals(create("abc", DESC), new SortParser("-abc").parse());
   }
 
   @Test
-  public void testSortNoPrefix() throws ParseException {
-    assertEquals(new SortParser("abc").parse(), Sort.create("abc"));
+  void testSortNoPrefix() throws ParseException {
+    assertEquals(create("abc"), new SortParser("abc").parse());
   }
 
   @Test
-  public void testSortPrefixCombi1() throws ParseException {
+  void testSortPrefixCombi1() throws ParseException {
     assertEquals(
-        new SortParser("abc,-def,ghi").parse(),
-        Sort.create(
-            asList(Order.create("abc"), Order.create("def", Direction.DESC), Order.create("ghi"))));
+        create(asList(Order.create("abc"), Order.create("def", DESC), Order.create("ghi"))),
+        new SortParser("abc,-def,ghi").parse());
   }
 
   @Test
-  public void testSortPrefixCombi2() throws ParseException {
+  void testSortPrefixCombi2() throws ParseException {
     assertEquals(
-        new SortParser("abc,def,ghi").parse(),
-        Sort.create(asList(Order.create("abc"), Order.create("def"), Order.create("ghi"))));
+        create(asList(Order.create("abc"), Order.create("def"), Order.create("ghi"))),
+        new SortParser("abc,def,ghi").parse());
   }
 
-  @Test(expectedExceptions = ParseException.class)
-  public void testSortillegal1() throws ParseException {
-    new SortParser("--abc").parse();
+  @Test
+  void testSortillegal1() {
+    assertThrows(ParseException.class, () -> new SortParser("--abc").parse());
   }
 
-  @Test(expectedExceptions = ParseException.class)
-  public void testSortillegal2() throws ParseException {
-    new SortParser("abc,--def,ghi").parse();
+  @Test
+  void testSortillegal2() {
+    assertThrows(ParseException.class, () -> new SortParser("abc,--def,ghi").parse());
   }
 
-  @Test(expectedExceptions = ParseException.class)
-  public void testSortillegal3() throws ParseException {
-    new SortParser("abc,,ghi").parse();
+  @Test
+  void testSortillegal3() {
+    assertThrows(ParseException.class, () -> new SortParser("abc,,ghi").parse());
   }
 
-  @Test(expectedExceptions = ParseException.class)
-  public void testSortillegal4() throws ParseException {
-    new SortParser("abc,def,").parse();
+  @Test
+  void testSortillegal4() {
+    assertThrows(ParseException.class, () -> new SortParser("abc,def,").parse());
   }
 
-  @Test(expectedExceptions = ParseException.class)
-  public void testSortillegal6() throws ParseException {
-    new SortParser(",abc").parse();
+  @Test
+  void testSortillegal6() {
+    assertThrows(ParseException.class, () -> new SortParser(",abc").parse());
   }
 
-  @Test(expectedExceptions = TokenMgrException.class)
-  public void testSortillegal5() throws ParseException {
-    new SortParser("*abc").parse();
+  @Test
+  void testSortillegal5() {
+    assertThrows(TokenMgrException.class, () -> new SortParser("*abc").parse());
   }
 }

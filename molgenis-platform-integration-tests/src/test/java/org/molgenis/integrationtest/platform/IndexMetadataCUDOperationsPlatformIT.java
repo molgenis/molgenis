@@ -1,16 +1,16 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.meta.AttributeType.EMAIL;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.getValueString;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -47,24 +47,24 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
     assertEquals(
+        1,
         searchService.count(
             metaDataService
-                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeStatic.getId())),
-            q1),
-        1);
+            q1));
 
     Query<Entity> q2 = new QueryImpl<>();
     q2.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId())
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
+        1,
         searchService.count(
             metaDataService
-                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
-            q2),
-        1);
+            q2));
   }
 
   /** Test delete only for dynamic entity metadata static entity metadata cannot be deleted */
@@ -81,12 +81,12 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
+        1,
         searchService.count(
             metaDataService
-                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
-            q),
-        1);
+            q));
 
     // 2. Delete sys_test_TypeTestDynamic metadata and wait on index
     runAsSystem(() -> dataService.getMeta().deleteEntityType(entityTypeDynamic.getId()));
@@ -118,12 +118,12 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
+        1,
         searchService.count(
             metaDataService
-                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
-            q),
-        1);
+            q));
 
     // 2. Change dataType value of ATTR_EMAIL
     Attribute toUpdateAttribute = entityTypeDynamic.getAttribute(EntityTestHarness.ATTR_EMAIL);
@@ -148,7 +148,7 @@ public class IndexMetadataCUDOperationsPlatformIT {
     q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
     q2.and();
     q2.eq(AttributeMetadata.TYPE, getValueString(STRING));
-    assertEquals(searchService.count(emdActual, q2), 1);
+    assertEquals(1, searchService.count(emdActual, q2));
 
     // 5. Reset context
     toUpdateAttribute.setDataType(EMAIL);
@@ -171,13 +171,12 @@ public class IndexMetadataCUDOperationsPlatformIT {
     Query<Entity> q = new QueryImpl<>();
     q.eq(EntityTypeMetadata.ID, emd.getId()).and().eq(EntityTypeMetadata.PACKAGE, emd.getPackage());
     assertEquals(
+        1,
         searchService.count(
             metaDataService
-                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
-                .orElseThrow(
-                    () -> new UnknownEntityTypeException(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
-            q),
-        1);
+                .getEntityType(ENTITY_TYPE_META_DATA)
+                .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA)),
+            q));
 
     // 2. Remove attribute
     Attribute toRemoveAttribute = emd.getAttribute(attributeName);
@@ -199,7 +198,7 @@ public class IndexMetadataCUDOperationsPlatformIT {
                         EntityTypeMetadata.ENTITY_TYPE_META_DATA,
                         AttributeMetadata.ATTRIBUTE_META_DATA));
     q2.eq(AttributeMetadata.ID, toRemoveAttribute.getIdValue());
-    assertEquals(searchService.count(emdActual, q2), 0);
+    assertEquals(0, searchService.count(emdActual, q2));
 
     // 5. Reset context
     emd.addAttribute(toRemoveAttribute);
@@ -249,8 +248,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
                 () ->
                     new UnknownEntityException(
                         EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId()));
-    assertNull(afterRemoveEntityType.getAttribute(compound.getName()));
-    assertNull(afterRemoveEntityType.getAttribute(compoundChild.getName()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        afterRemoveEntityType.getAttribute(compound.getName()));
+    org.junit.jupiter.api.Assertions.assertNull(
+        afterRemoveEntityType.getAttribute(compoundChild.getName()));
 
     EntityType attributeMetadata =
         metaDataService
@@ -265,7 +266,7 @@ public class IndexMetadataCUDOperationsPlatformIT {
     Query<Entity> childQuery =
         new QueryImpl<>().eq(AttributeMetadata.ID, compoundChild.getIdValue());
 
-    assertEquals(searchService.count(attributeMetadata, compoundQuery), 0);
-    assertEquals(searchService.count(attributeMetadata, childQuery), 0);
+    assertEquals(0, searchService.count(attributeMetadata, compoundQuery));
+    assertEquals(0, searchService.count(attributeMetadata, childQuery));
   }
 }

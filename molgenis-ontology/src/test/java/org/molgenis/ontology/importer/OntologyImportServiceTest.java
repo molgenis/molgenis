@@ -5,14 +5,17 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.data.importer.MetadataAction.IGNORE;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataAction;
@@ -24,22 +27,20 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OntologyImportServiceTest extends AbstractMockitoTest {
+class OntologyImportServiceTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
 
   private OntologyImportService ontologyImportService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     this.ontologyImportService = new OntologyImportService(dataService);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDoImport() {
+  void testDoImport() {
     String entityTypeId0 = "entityTypeId0";
     String entityTypeId1 = "entityTypeId1";
     Entity entity0 = mock(Entity.class);
@@ -64,24 +65,24 @@ public class OntologyImportServiceTest extends AbstractMockitoTest {
         ontologyImportService.doImport(
             repositoryCollection, MetadataAction.IGNORE, DataAction.ADD, null);
 
-    assertEquals(entityImportReport.getNewEntities(), emptyList());
+    assertEquals(emptyList(), entityImportReport.getNewEntities());
     assertEquals(
-        entityImportReport.getNrImportedEntitiesMap(), of(entityTypeId0, 1, entityTypeId1, 1));
+        of(entityTypeId0, 1, entityTypeId1, 1), entityImportReport.getNrImportedEntitiesMap());
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityTypeId0Captor = ArgumentCaptor.forClass(Stream.class);
     verify(targetRepository0).add(entityTypeId0Captor.capture());
-    assertEquals(entityTypeId0Captor.getValue().collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), entityTypeId0Captor.getValue().collect(toList()));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityTypeId1Captor = ArgumentCaptor.forClass(Stream.class);
     verify(targetRepository1).add(entityTypeId1Captor.capture());
-    assertEquals(entityTypeId1Captor.getValue().collect(toList()), singletonList(entity1));
+    assertEquals(singletonList(entity1), entityTypeId1Captor.getValue().collect(toList()));
   }
 
   @Test
-  public void getMetadataAction() {
+  void getMetadataAction() {
     RepositoryCollection source = mock(RepositoryCollection.class);
-    assertEquals(ontologyImportService.getMetadataAction(source), MetadataAction.IGNORE);
+    assertEquals(IGNORE, ontologyImportService.getMetadataAction(source));
   }
 }

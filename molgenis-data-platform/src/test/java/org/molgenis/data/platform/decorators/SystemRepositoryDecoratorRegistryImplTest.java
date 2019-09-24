@@ -1,29 +1,29 @@
 package org.molgenis.data.platform.decorators;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.SystemRepositoryDecoratorFactory;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTest {
+class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTest {
 
   private SystemRepositoryDecoratorRegistryImpl systemRepositoryDecoratorRegistryImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     systemRepositoryDecoratorRegistryImpl = new SystemRepositoryDecoratorRegistryImpl();
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDecorate() {
+  void testDecorate() {
     String grandparentEntityTypeId = "grandparentEntityTypeId";
     SystemEntityType grandparentEntityType = mock(SystemEntityType.class);
     when(grandparentEntityType.getId()).thenReturn(grandparentEntityTypeId);
@@ -59,11 +59,11 @@ public class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTe
     when(entityTypeFactory.createDecoratedRepository(decoratedRepository))
         .thenReturn(decoratedDecoratedRepository);
     assertEquals(
-        systemRepositoryDecoratorRegistryImpl.decorate(repository), decoratedDecoratedRepository);
+        decoratedDecoratedRepository, systemRepositoryDecoratorRegistryImpl.decorate(repository));
   }
 
   @Test
-  public void testDecorateNoFactory() {
+  void testDecorateNoFactory() {
     String entityTypeId = "entityTypeId";
     SystemEntityType entityType = mock(SystemEntityType.class);
     when(entityType.getId()).thenReturn(entityTypeId);
@@ -71,6 +71,6 @@ public class SystemRepositoryDecoratorRegistryImplTest extends AbstractMockitoTe
     @SuppressWarnings("unchecked")
     Repository<Entity> repository = mock(Repository.class);
     when(repository.getEntityType()).thenReturn(entityType);
-    assertEquals(systemRepositoryDecoratorRegistryImpl.decorate(repository), repository);
+    assertEquals(repository, systemRepositoryDecoratorRegistryImpl.decorate(repository));
   }
 }

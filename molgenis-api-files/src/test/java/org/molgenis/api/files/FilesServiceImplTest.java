@@ -1,13 +1,19 @@
 package org.molgenis.api.files;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.springframework.http.ContentDisposition.parse;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.valueOf;
 
 import java.util.concurrent.ExecutionException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
@@ -16,55 +22,50 @@ import org.molgenis.data.file.BlobStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class FilesServiceImplTest extends AbstractMockitoTest {
+class FilesServiceImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private BlobStore blobStore;
   @Mock private FileMetaFactory fileMetaFactory;
   private FilesServiceImpl filesApiServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     filesApiServiceImpl = new FilesServiceImpl(dataService, blobStore, fileMetaFactory);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testFilesApiServiceImpl() {
-    new FilesServiceImpl(null, null, null);
+  @Test
+  void testFilesApiServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new FilesServiceImpl(null, null, null));
   }
 
   @Test
-  public void testGetFileMeta() {
+  void testGetFileMeta() {
     String fileId = "MyFileId";
     FileMeta fileMeta = mock(FileMeta.class);
     when(dataService.findOneById("sys_FileMeta", fileId, FileMeta.class)).thenReturn(fileMeta);
 
-    assertEquals(filesApiServiceImpl.getFileMeta(fileId), fileMeta);
+    assertEquals(fileMeta, filesApiServiceImpl.getFileMeta(fileId));
   }
 
   @Test
-  public void testDeleteFile() {
+  void testDeleteFile() {
     String fileId = "MyFileId";
     filesApiServiceImpl.delete(fileId);
     verify(dataService).deleteById("sys_FileMeta", fileId);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testGetFileMetaUnknown() {
+  @Test
+  void testGetFileMetaUnknown() {
     String fileId = "MyFileId";
-    filesApiServiceImpl.getFileMeta(fileId);
+    assertThrows(UnknownEntityException.class, () -> filesApiServiceImpl.getFileMeta(fileId));
   }
 
   @Test
-  public void testUpload() throws ExecutionException, InterruptedException {
+  void testUpload() throws ExecutionException, InterruptedException {
     String blobId = "MyBlobId";
     BlobMetadata blobMetadata = when(mock(BlobMetadata.class).getId()).thenReturn(blobId).getMock();
     when(blobMetadata.getSize()).thenReturn(1L);
@@ -80,7 +81,7 @@ public class FilesServiceImplTest extends AbstractMockitoTest {
     String filename = "myfile.bin";
     httpServletRequest.addHeader("x-molgenis-filename", filename);
 
-    assertEquals(filesApiServiceImpl.upload(httpServletRequest).get(), fileMeta);
+    assertEquals(fileMeta, filesApiServiceImpl.upload(httpServletRequest).get());
     verify(fileMeta).setContentType(contentType);
     verify(fileMeta).setSize(1L);
     verify(fileMeta).setFilename(filename);
@@ -89,7 +90,7 @@ public class FilesServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDownload() {
+  void testDownload() {
     String fileId = "MyFileId";
     String contentType = "application/octet-stream";
     String filename = "filename";
@@ -99,10 +100,10 @@ public class FilesServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById("sys_FileMeta", fileId, FileMeta.class)).thenReturn(fileMeta);
 
     ResponseEntity<StreamingResponseBody> responseEntity = filesApiServiceImpl.download(fileId);
-    assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-    assertEquals(responseEntity.getHeaders().getContentType(), MediaType.valueOf(contentType));
+    assertEquals(OK, responseEntity.getStatusCode());
+    assertEquals(valueOf(contentType), responseEntity.getHeaders().getContentType());
     assertEquals(
-        responseEntity.getHeaders().getContentDisposition(),
-        ContentDisposition.parse("attachment; filename=\"filename\""));
+        parse("attachment; filename=\"filename\""),
+        responseEntity.getHeaders().getContentDisposition());
   }
 }

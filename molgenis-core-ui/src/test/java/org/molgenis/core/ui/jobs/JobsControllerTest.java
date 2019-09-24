@@ -1,13 +1,15 @@
 package org.molgenis.core.ui.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -19,10 +21,8 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.menu.MenuReaderService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JobsControllerTest extends AbstractMockitoTest {
+class JobsControllerTest extends AbstractMockitoTest {
   @Mock private JobsService jobsService;
   @Mock private UserAccountService userAccountService;
   @Mock private DataService dataService;
@@ -33,8 +33,8 @@ public class JobsControllerTest extends AbstractMockitoTest {
 
   private JobsController jobsController;
 
-  @BeforeMethod
-  public void beforeClass() {
+  @BeforeEach
+  void beforeClass() {
     jobsController =
         new JobsController(
             jobsService,
@@ -47,7 +47,7 @@ public class JobsControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCancel() {
+  void testCancel() {
     String jobExecutionType = "MyJobExecutionType";
     String jobExecutionId = "MyJobExecutionId";
     jobsController.cancel(jobExecutionType, jobExecutionId);
@@ -55,21 +55,21 @@ public class JobsControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateJobExecutionViewHref() {
+  void testCreateJobExecutionViewHref() {
     when(menuReaderService.findMenuItemPath(JobsController.ID)).thenReturn("/menu/jobs");
     assertEquals(
-        jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345),
-        "/menu/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345");
+        "/menu/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345",
+        jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345));
   }
 
   @Test
-  public void testIsAllowedJobExecutionEntityTypeNoParent() {
+  void testIsAllowedJobExecutionEntityTypeNoParent() {
     EntityType entityType = mock(EntityType.class);
     assertFalse(jobsController.isAllowedJobExecutionEntityType(entityType));
   }
 
   @Test
-  public void testIsAllowedJobExecutionEntityTypeParentIsNotJobExecutionEntityType() {
+  void testIsAllowedJobExecutionEntityTypeParentIsNotJobExecutionEntityType() {
     EntityType entityType = mock(EntityType.class);
     EntityType extendsEntityType =
         when(mock(EntityType.class).getId()).thenReturn("not_sys_job_JobExecution").getMock();
@@ -78,7 +78,7 @@ public class JobsControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testIsAllowedJobExecutionEntityTypeNoReadDataPermissions() {
+  void testIsAllowedJobExecutionEntityTypeNoReadDataPermissions() {
     when(jobMetaDataMetaData.getId()).thenReturn("sys_job_JobExecution");
     EntityType entityType =
         when(mock(EntityType.class).getId()).thenReturn("MyJobExecution").getMock();
@@ -89,7 +89,7 @@ public class JobsControllerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testIsAllowedJobExecutionEntityTypeReadDataPermissions() {
+  void testIsAllowedJobExecutionEntityTypeReadDataPermissions() {
     when(jobMetaDataMetaData.getId()).thenReturn("sys_job_JobExecution");
     EntityType entityType =
         when(mock(EntityType.class).getId()).thenReturn("MyJobExecution").getMock();

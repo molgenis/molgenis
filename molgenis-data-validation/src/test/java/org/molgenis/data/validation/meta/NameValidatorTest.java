@@ -1,57 +1,60 @@
 package org.molgenis.data.validation.meta;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
-import org.testng.annotations.Test;
 
-public class NameValidatorTest {
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testValidateNameInvalidCharacters() {
-    NameValidator.validateEntityName("Invalid.Name");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testValidateNameStartsWithDigit() {
-    NameValidator.validateEntityName("6invalid");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testReservedKeyword() {
-    NameValidator.validateEntityName("base");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testI18nNameMilti() {
-    NameValidator.validateEntityName("test-en-nl");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testI18nTooLong() {
-    NameValidator.validateEntityName("test-xxxx");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testI18nMissing() {
-    NameValidator.validateEntityName("test-");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testI18nUpperCase() {
-    NameValidator.validateEntityName("test-NL");
-  }
-
-  @Test(expectedExceptions = MolgenisDataException.class)
-  public void testI18nNumber() {
-    NameValidator.validateEntityName("test-n2");
+class NameValidatorTest {
+  @Test
+  void testValidateNameInvalidCharacters() {
+    assertThrows(
+        MolgenisDataException.class, () -> NameValidator.validateEntityName("Invalid.Name"));
   }
 
   @Test
-  public void testI18nName() {
+  void testValidateNameStartsWithDigit() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("6invalid"));
+  }
+
+  @Test
+  void testReservedKeyword() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("base"));
+  }
+
+  @Test
+  void testI18nNameMilti() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-en-nl"));
+  }
+
+  @Test
+  void testI18nTooLong() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-xxxx"));
+  }
+
+  @Test
+  void testI18nMissing() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-"));
+  }
+
+  @Test
+  void testI18nUpperCase() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-NL"));
+  }
+
+  @Test
+  void testI18nNumber() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-n2"));
+  }
+
+  @Test
+  void testI18nName() {
     NameValidator.validateAttributeName("test-en");
     NameValidator.validateAttributeName("test-eng");
   }
 
   @Test
-  public void testUnderscoreAttr() {
+  void testUnderscoreAttr() {
     NameValidator.validateAttributeName("test_test");
   }
 }

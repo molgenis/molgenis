@@ -2,6 +2,8 @@ package org.molgenis.data.postgresql;
 
 import static org.mockito.Mockito.inOrder;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.molgenis.data.RepositoryCollection;
@@ -9,10 +11,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockitoTest {
+class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockitoTest {
   @Mock private EntityType entityType;
   @Mock private Attribute attr;
   @Mock private Attribute updatedAttr;
@@ -21,15 +21,15 @@ public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockito
   private PostgreSqlRepositoryCollectionDecorator repoCollectionDecorator;
   private InOrder inOrder;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     repoCollectionDecorator =
         new PostgreSqlRepositoryCollectionDecorator(repoCollection, entityTypeRegistry);
     inOrder = inOrder(repoCollection, entityTypeRegistry);
   }
 
   @Test
-  public void testCreateRepository() {
+  void testCreateRepository() {
     repoCollectionDecorator.createRepository(entityType);
 
     inOrder.verify(repoCollection).createRepository(entityType);
@@ -37,7 +37,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockito
   }
 
   @Test
-  public void testDeleteRepository() {
+  void testDeleteRepository() {
     repoCollectionDecorator.deleteRepository(entityType);
 
     inOrder.verify(repoCollection).deleteRepository(entityType);
@@ -45,7 +45,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockito
   }
 
   @Test
-  public void testAddAttribute() {
+  void testAddAttribute() {
     repoCollectionDecorator.addAttribute(entityType, attr);
 
     inOrder.verify(entityTypeRegistry).addAttribute(entityType, attr);
@@ -53,7 +53,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockito
   }
 
   @Test
-  public void testUpdateAttribute() {
+  void testUpdateAttribute() {
     repoCollectionDecorator.updateAttribute(entityType, attr, updatedAttr);
 
     inOrder.verify(entityTypeRegistry).updateAttribute(entityType, attr, updatedAttr);
@@ -61,7 +61,7 @@ public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockito
   }
 
   @Test
-  public void testDeleteAttribute() {
+  void testDeleteAttribute() {
     repoCollectionDecorator.deleteAttribute(entityType, attr);
 
     inOrder.verify(entityTypeRegistry).deleteAttribute(entityType, attr);

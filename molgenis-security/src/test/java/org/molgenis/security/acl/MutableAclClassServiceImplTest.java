@@ -1,34 +1,34 @@
 package org.molgenis.security.acl;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertFalse;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.model.AclCache;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MutableAclClassServiceImplTest extends AbstractMockitoTest {
+class MutableAclClassServiceImplTest extends AbstractMockitoTest {
   @Mock private JdbcTemplate jdbcTemplate;
   @Mock private AclCache aclCache;
   private MutableAclClassServiceImpl mutableAclClassService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     mutableAclClassService = new MutableAclClassServiceImpl(jdbcTemplate, aclCache);
   }
 
   @Test
-  public void testCreateAclClass() {
+  void testCreateAclClass() {
     String type = "MyType";
     mutableAclClassService.createAclClass(type, String.class);
     verify(jdbcTemplate)
@@ -38,7 +38,7 @@ public class MutableAclClassServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteAclClass() {
+  void testDeleteAclClass() {
     String type = "MyType";
     mutableAclClassService.deleteAclClass(type);
     verify(jdbcTemplate).update("delete from acl_class where class=?", type);
@@ -46,7 +46,7 @@ public class MutableAclClassServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasAclClassTrueWithAclClassCacheInvalidation() {
+  void testHasAclClassTrueWithAclClassCacheInvalidation() {
     String type = "MyType";
     when(jdbcTemplate.queryForObject(
             "select count(*) from acl_class WHERE class = ?", new Object[] {type}, Integer.class))
@@ -61,7 +61,7 @@ public class MutableAclClassServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHasAclClassFalseCached() {
+  void testHasAclClassFalseCached() {
     String type = "MyType";
     when(jdbcTemplate.queryForObject(
             "select count(*) from acl_class WHERE class = ?", new Object[] {type}, Integer.class))
@@ -75,11 +75,11 @@ public class MutableAclClassServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetAclClassTypes() {
+  void testGetAclClassTypes() {
     List<String> aclClassTypes = asList("MyType0", "MyType1");
     when(jdbcTemplate.queryForList("select class from acl_class", String.class))
         .thenReturn(aclClassTypes);
-    assertEquals(mutableAclClassService.getAclClassTypes(), aclClassTypes);
+    assertEquals(aclClassTypes, mutableAclClassService.getAclClassTypes());
     verifyZeroInteractions(aclCache);
   }
 }

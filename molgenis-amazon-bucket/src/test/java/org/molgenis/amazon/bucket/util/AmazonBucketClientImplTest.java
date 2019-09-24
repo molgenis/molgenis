@@ -17,22 +17,22 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.amazon.bucket.client.AmazonBucketClientImpl;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.util.ResourceUtils;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
-public class AmazonBucketClientImplTest {
+class AmazonBucketClientImplTest {
   private AmazonS3Client client;
   private FileStore fileStore;
   private S3Object s3Object;
   private HttpRequestBase httpRequestBase;
   private AmazonBucketClient amazonBucketClient;
 
-  @BeforeTest
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     client = mock(AmazonS3Client.class);
     fileStore = mock(FileStore.class);
     s3Object = mock(S3Object.class);
@@ -41,7 +41,7 @@ public class AmazonBucketClientImplTest {
   }
 
   @Test
-  public void downloadFileExactTest() throws IOException {
+  void downloadFileExactTest() throws IOException {
     when(client.getObject(any())).thenReturn(s3Object);
     when(s3Object.getObjectContent())
         .thenReturn(
@@ -54,7 +54,7 @@ public class AmazonBucketClientImplTest {
   }
 
   @Test
-  public void downloadFileExpression() throws IOException {
+  void downloadFileExpression() throws IOException {
     ObjectListing objectListing = mock(ObjectListing.class);
 
     S3ObjectSummary s3ObjectSummary1 = mock(S3ObjectSummary.class);
