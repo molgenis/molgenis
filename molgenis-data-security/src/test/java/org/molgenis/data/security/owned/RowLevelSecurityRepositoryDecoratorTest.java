@@ -46,13 +46,12 @@ import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {RowLevelSecurityRepositoryDecoratorTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 

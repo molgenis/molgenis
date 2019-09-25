@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -36,6 +37,7 @@ import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = TestHarnessConfig.class)
 class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   static final int NUMBER_OF_ENTITIES = 2500;
@@ -48,10 +50,6 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   @Captor private ArgumentCaptor<Iterable<Object>> cacheIdCaptor;
   @Captor private ArgumentCaptor<Stream<Object>> repoIdCaptor;
   private EntityType emd;
-
-  L2CacheRepositoryDecoratorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

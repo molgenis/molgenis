@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -39,6 +40,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class L3CacheTest extends AbstractMolgenisSpringTest {
   private L3Cache l3Cache;
 
@@ -63,10 +65,6 @@ class L3CacheTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attributeFactory;
-
-  L3CacheTest() {
-    super(Strictness.WARN);
-  }
 
   @SuppressWarnings("unchecked")
   @BeforeEach

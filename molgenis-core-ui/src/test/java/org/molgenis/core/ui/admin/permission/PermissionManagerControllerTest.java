@@ -40,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -83,6 +84,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
 class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
@@ -196,10 +198,6 @@ class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private MutableAclClassService mutableAclClassService;
 
   @Autowired private PermissionRegistry permissionRegistry;
-
-  PermissionManagerControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUp() {

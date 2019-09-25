@@ -14,15 +14,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.index.config.IndexTestConfig;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = {IndexTestConfig.class})
-class IndexingStrategyTest {
+class IndexingStrategyTest extends AbstractMockitoTest {
   @Mock private IndexDependencyModel dependencyModel;
 
   IndexingStrategy indexingStrategy;

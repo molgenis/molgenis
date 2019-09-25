@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -85,6 +86,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
 class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
@@ -136,10 +138,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
   private MockMvc mockMvc;
   private SecurityContext previousContext;
-
-  MappingServiceControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @AfterEach
   void tearDownAfterClass() {

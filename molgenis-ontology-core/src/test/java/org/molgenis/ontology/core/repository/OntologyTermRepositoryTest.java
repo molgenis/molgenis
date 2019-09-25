@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = OntologyTermRepositoryTest.Config.class)
 class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired DataService dataService;
@@ -56,10 +58,6 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private OntologyTermNodePathMetadata ontologyTermNodePathMetadata;
 
   private org.molgenis.ontology.core.meta.OntologyTerm ontologyTermEntity;
-
-  OntologyTermRepositoryTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeTest() {

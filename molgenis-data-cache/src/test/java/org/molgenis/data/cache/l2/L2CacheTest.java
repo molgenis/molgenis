@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -48,6 +49,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L2CacheTest.Config.class)
 class L2CacheTest extends AbstractMolgenisSpringTest {
   private L2Cache l2Cache;
@@ -66,10 +68,6 @@ class L2CacheTest extends AbstractMolgenisSpringTest {
   private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
   private List<Entity> testEntities;
   private EntityType emd;
-
-  L2CacheTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

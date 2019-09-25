@@ -47,6 +47,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -85,6 +86,7 @@ import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.test.AbstractMockitoTest;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class EmxMetadataParserTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private PackageFactory packageFactory;
@@ -99,12 +101,6 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
 
   private EmxMetadataParser emxMetadataParser;
-
-  // strict mode is non-trivial for this test class due to the nature of the code under test
-  @SuppressWarnings("deprecation")
-  EmxMetadataParserTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

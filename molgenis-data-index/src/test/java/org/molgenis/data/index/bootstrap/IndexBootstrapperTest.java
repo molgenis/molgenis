@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -45,6 +46,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {IndexBootstrapperTest.Config.class})
 class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private Config config;
@@ -55,10 +57,6 @@ class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeMetadata attributeMetadata;
 
   private IndexBootstrapper indexBootstrapper;
-
-  IndexBootstrapperTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

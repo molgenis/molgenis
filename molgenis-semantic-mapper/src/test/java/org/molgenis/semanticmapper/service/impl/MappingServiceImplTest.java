@@ -43,6 +43,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -78,6 +79,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(
     classes = {
       MappingServiceImplTest.Config.class,
@@ -122,10 +124,6 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   private EntityType geneMetaData;
 
   private Package package_;
-
-  MappingServiceImplTest() {
-    super(Strictness.WARN);
-  }
 
   @SuppressWarnings("unchecked")
   @BeforeEach

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -52,6 +53,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = SemanticSearchServiceImplTest.Config.class)
 class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
@@ -83,10 +85,6 @@ class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest {
   private List<OntologyTerm> ontologyTerms;
 
   private Attribute attribute;
-
-  SemanticSearchServiceImplTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void init() {
