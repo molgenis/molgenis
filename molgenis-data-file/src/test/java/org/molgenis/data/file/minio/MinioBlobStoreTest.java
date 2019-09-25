@@ -1,5 +1,6 @@
 package org.molgenis.data.file.minio;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,6 +78,6 @@ class MinioBlobStoreTest extends AbstractMockitoTest {
     String blobId = "MyBlobId";
     InputStream inputStream = mock(InputStream.class);
     when(minioClientFacade.getObject(blobId)).thenReturn(inputStream);
-    minioBlobStore.newChannel(blobId);
+    assertDoesNotThrow(() -> minioBlobStore.newChannel(blobId));
   }
 }

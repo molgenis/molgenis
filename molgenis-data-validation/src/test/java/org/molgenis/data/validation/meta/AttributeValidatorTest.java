@@ -2,6 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -15,6 +16,7 @@ import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
@@ -177,6 +179,7 @@ class AttributeValidatorTest {
   void testAllowedTransition(Attribute currentAttr, Attribute newAttr) {
     when(dataService.findOneById(ATTRIBUTE_META_DATA, newAttr.getIdentifier(), Attribute.class))
         .thenReturn(currentAttr);
+    assertDoesNotThrow(() -> attributeValidator.validate(newAttr, ValidationMode.UPDATE));
   }
 
   @Test
@@ -309,7 +312,7 @@ class AttributeValidatorTest {
   void testDefaultValueLong() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
-    when(attr.getDataType()).thenReturn(AttributeType.LONG);
+    when(attr.getDataType()).thenReturn(LONG);
     Exception exception =
         assertThrows(
             MolgenisValidationException.class,
@@ -322,7 +325,7 @@ class AttributeValidatorTest {
   void testDefaultValueLongValid() {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("123456");
-    when(attr.getDataType()).thenReturn(AttributeType.LONG);
+    when(attr.getDataType()).thenReturn(LONG);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -445,7 +448,7 @@ class AttributeValidatorTest {
     Attribute currentAttr3 = makeMockAttribute("attr3");
     when(currentAttr1.getDataType()).thenReturn(BOOL);
     when(currentAttr2.getDataType()).thenReturn(CATEGORICAL);
-    when(currentAttr3.getDataType()).thenReturn(COMPOUND);
+    when(currentAttr3.getDataType()).thenReturn(LONG);
 
     Attribute newAttr1 = makeMockAttribute("attr1");
     Attribute newAttr2 = makeMockAttribute("attr2");

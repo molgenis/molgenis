@@ -77,31 +77,6 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
-  void getHomeController() {
-    new HomeController();
-  }
-
-  @Test
-  void getNewsController() {
-    new NewsController();
-  }
-
-  @Test
-  void getReferencesController() {
-    new ReferencesController();
-  }
-
-  @Test
-  void getBackgroundController() {
-    new BackgroundController();
-  }
-
-  @Test
-  void getContactController() {
-    new ContactController();
-  }
-
-  @Test
   void initHome() throws Exception {
     this.initMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
   }

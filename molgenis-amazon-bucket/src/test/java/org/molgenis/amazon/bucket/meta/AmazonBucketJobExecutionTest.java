@@ -47,6 +47,7 @@ public class AmazonBucketJobExecutionTest extends AbstractSystemEntityTest {
     return attrs;
   }
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

@@ -1,6 +1,7 @@
 package org.molgenis.security.captcha;
 
 import static java.net.URI.create;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.http.client.methods.HttpPost;
@@ -18,6 +19,6 @@ class ReCaptchaHttpPostFactoryTest {
 
   @Test
   void testHttpPostCreateEmptyURI() {
-    factory.create("");
+    assertDoesNotThrow(() -> factory.create(""));
   }
 }

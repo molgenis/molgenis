@@ -1,5 +1,6 @@
 package org.molgenis.data.file;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -76,7 +77,7 @@ class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testDoCleanupAfterCompletion() {
-    transactionalBlobStoreDecorator.doCleanupAfterCompletion(TRANSACTION_ID);
-    // no exceptions
+    assertDoesNotThrow(
+        () -> transactionalBlobStoreDecorator.doCleanupAfterCompletion(TRANSACTION_ID));
   }
 }

@@ -18,6 +18,7 @@ class BeaconOrganizationTest extends AbstractSystemEntityTest {
   @Autowired BeaconOrganizationMetadata metadata;
   @Autowired BeaconOrganizationFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   public void testSystemEntity() {
     internalTestAttributes(

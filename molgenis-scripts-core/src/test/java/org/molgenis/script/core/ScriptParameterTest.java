@@ -12,6 +12,7 @@ public class ScriptParameterTest extends AbstractSystemEntityTest {
   @Autowired ScriptParameterMetadata metadata;
   @Autowired ScriptParameterFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

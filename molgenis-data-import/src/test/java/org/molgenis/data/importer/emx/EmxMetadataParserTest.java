@@ -50,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownTagException;
@@ -344,6 +345,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
     emxMetadataParser.setRange(emxAttrEntity, "emxEntityName", null, attr, 0);
+    verify(attr).setRange(new Range(1L, 2L));
   }
 
   @Test
