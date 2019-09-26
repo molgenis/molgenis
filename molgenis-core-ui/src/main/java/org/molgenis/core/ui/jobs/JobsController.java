@@ -2,7 +2,6 @@ package org.molgenis.core.ui.jobs;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.jobs.JobsController.URI;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
@@ -37,7 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(JobsController.URI)
 public class JobsController extends PluginController {
   public static final String ID = "jobs";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

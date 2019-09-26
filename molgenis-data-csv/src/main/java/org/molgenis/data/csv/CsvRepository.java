@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.file.processor.CellProcessor;
@@ -37,11 +38,6 @@ public class CsvRepository extends AbstractRepository {
   private Character separator = null;
 
   public CsvRepository(
-      String file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) {
-    this(new File(file), entityTypeFactory, attrMetaFactory, null);
-  }
-
-  public CsvRepository(
       File file,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
@@ -52,7 +48,7 @@ public class CsvRepository extends AbstractRepository {
         entityTypeFactory,
         attrMetaFactory,
         StringUtils.stripFilenameExtension(file.getName()),
-        null);
+        cellProcessors);
     this.separator = separator;
   }
 
@@ -66,7 +62,7 @@ public class CsvRepository extends AbstractRepository {
         entityTypeFactory,
         attrMetaFactory,
         StringUtils.stripFilenameExtension(file.getName()),
-        null);
+        cellProcessors);
   }
 
   public CsvRepository(
@@ -82,6 +78,7 @@ public class CsvRepository extends AbstractRepository {
     this.cellProcessors = cellProcessors;
   }
 
+  @NotNull
   @Override
   public Iterator<Entity> iterator() {
     return new CsvIterator(file, sheetName, cellProcessors, separator, getEntityType());

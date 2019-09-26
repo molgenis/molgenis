@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -45,12 +44,11 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
   private InputStream is;
 
   @BeforeEach
-  void beforeMethod() throws InvalidFormatException, IOException {
+  void beforeMethod() throws IOException {
     is = getClass().getResourceAsStream("/test.xls");
     workbook = WorkbookFactory.create(is);
     excelSheetReader =
-        new ExcelRepository(
-            "test.xls", workbook.getSheet("test"), entityTypeFactory, attrMetaFactory);
+        new ExcelRepository(workbook.getSheet("test"), entityTypeFactory, attrMetaFactory);
   }
 
   @AfterEach
@@ -65,10 +63,7 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
         MolgenisDataException.class,
         () ->
             new ExcelRepository(
-                "test.xls",
-                workbook.getSheet("test_mergedcells"),
-                entityTypeFactory,
-                attrMetaFactory));
+                workbook.getSheet("test_mergedcells"), entityTypeFactory, attrMetaFactory));
   }
 
   @Test
@@ -179,33 +174,31 @@ class ExcelRepositoryTest extends AbstractMolgenisSpringTest {
     it.next(); // 2
     it.next(); // 3
     it.next(); // 4
-    assertThrows(NoSuchElementException.class, () -> it.next()); // does not exist
+    assertThrows(NoSuchElementException.class, it::next); // does not exist
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  void iteratorDuplicateSheetHeader() throws IOException, InvalidFormatException {
+  void iteratorDuplicateSheetHeader() throws IOException {
     String fileName = "/duplicate-sheet-header.xlsx";
     try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
       Workbook workbook = WorkbookFactory.create(inputStream);
       ExcelRepository excelRepository =
-          new ExcelRepository(
-              fileName, workbook.getSheet("attributes"), entityTypeFactory, attrMetaFactory);
-      Exception exception =
-          assertThrows(MolgenisDataException.class, () -> excelRepository.iterator());
+          new ExcelRepository(workbook.getSheet("attributes"), entityTypeFactory, attrMetaFactory);
+      Exception exception = assertThrows(MolgenisDataException.class, excelRepository::iterator);
       assertThat(exception.getMessage())
           .containsPattern("Duplicate column header 'entity' in sheet 'attributes' not allowed");
     }
   }
 
   @Test
-  void iteratorHeaderCaseSensitive() throws IOException, InvalidFormatException {
+  void iteratorHeaderCaseSensitive() throws IOException {
     String fileName = "/case-sensitivity.xlsx";
     try (InputStream inputStream = getClass().getResourceAsStream(fileName)) {
       Workbook workbook = WorkbookFactory.create(inputStream);
       ExcelRepository excelRepository =
           new ExcelRepository(
-              fileName, workbook.getSheet("case-sensitivity"), entityTypeFactory, attrMetaFactory);
+              workbook.getSheet("case-sensitivity"), entityTypeFactory, attrMetaFactory);
       Entity entity = excelRepository.iterator().next();
       assertEquals("Value #0", entity.get("Header"));
       assertNull(entity.get("hEADER"));

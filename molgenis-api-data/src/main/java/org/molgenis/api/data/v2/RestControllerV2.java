@@ -8,7 +8,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.api.data.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
-import static org.molgenis.api.data.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -99,7 +98,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping(BASE_URI)
+@RequestMapping(RestControllerV2.BASE_URI)
 @Timed(value = "rest.v2", description = "Timing information for the REST API v2.", histogram = true)
 public class RestControllerV2 {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);

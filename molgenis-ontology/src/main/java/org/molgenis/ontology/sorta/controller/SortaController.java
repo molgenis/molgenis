@@ -15,7 +15,6 @@ import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.ontology.sorta.controller.SortaController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.IDENTIFIER;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.INPUT_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHED_TERM;
@@ -99,7 +98,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(SortaController.URI)
 public class SortaController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(SortaController.class);
 

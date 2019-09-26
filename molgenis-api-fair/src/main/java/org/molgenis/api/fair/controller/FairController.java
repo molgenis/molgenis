@@ -1,7 +1,6 @@
 package org.molgenis.api.fair.controller;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.fair.controller.FairController.BASE_URI;
 import static org.molgenis.core.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -27,7 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /** Serves metadata for the molgenis FAIR DataPoint. */
 @Controller
-@RequestMapping(BASE_URI)
+@RequestMapping(FairController.BASE_URI)
 public class FairController {
   private static final Logger LOG = LoggerFactory.getLogger(FairController.class);
 
