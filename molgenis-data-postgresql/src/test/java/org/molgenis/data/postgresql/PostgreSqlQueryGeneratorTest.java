@@ -86,6 +86,18 @@ class PostgreSqlQueryGeneratorTest {
   }
 
   @Test
+  void getSqlSetDataType() {
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+    when(entityType.getId()).thenReturn("entityTypeId");
+    Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+    when(attr.getIdentifier()).thenReturn("attrId");
+    when(attr.getDataType()).thenReturn(LONG);
+    assertEquals(
+        "ALTER TABLE \"entityTypeId#c34894ba\" ALTER COLUMN \"attr\" SET DATA TYPE bigint USING \"attr\"::bigint",
+        PostgreSqlQueryGenerator.getSqlSetDataType(entityType, attr));
+  }
+
+  @Test
   void getSqlCreateTable() {
     // ref entity with string id attribute
     Attribute refIdAttrStr = mock(Attribute.class);
@@ -325,6 +337,7 @@ class PostgreSqlQueryGeneratorTest {
         PostgreSqlQueryGenerator.getSqlCreateCheckConstraint(entityType, attr));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   void getSqlCreateCheckConstraintWrongDataType() {
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
