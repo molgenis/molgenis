@@ -8,23 +8,23 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.web.method.HandlerMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
+class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
   @Mock private ExceptionHandlerFacade exceptionHandlerFacade;
   private GlobalControllerExceptionHandler globalControllerExceptionHandler;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     globalControllerExceptionHandler = new GlobalControllerExceptionHandler(exceptionHandlerFacade);
   }
 
   @Test
-  public void testHandleNotFoundException() {
+  void testHandleNotFoundException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     globalControllerExceptionHandler.handleNotFoundException(e, method);
@@ -32,7 +32,7 @@ public class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleConflictException() {
+  void testHandleConflictException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     globalControllerExceptionHandler.handleConflictException(e, method);
@@ -40,7 +40,7 @@ public class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleBadRequestException() {
+  void testHandleBadRequestException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     globalControllerExceptionHandler.handleBadRequestException(e, method);
@@ -48,7 +48,7 @@ public class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleForbiddenException() {
+  void testHandleForbiddenException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     globalControllerExceptionHandler.handleForbiddenException(e, method);
@@ -56,7 +56,7 @@ public class GlobalControllerExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleUnauthorizedException() {
+  void testHandleUnauthorizedException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     globalControllerExceptionHandler.handleUnauthorizedException(e, method);

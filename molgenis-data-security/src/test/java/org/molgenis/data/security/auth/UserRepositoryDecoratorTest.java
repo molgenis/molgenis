@@ -1,7 +1,12 @@
 package org.molgenis.data.security.auth;
 
+import static java.lang.Integer.valueOf;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -12,34 +17,33 @@ import static org.molgenis.data.security.auth.UserRepositoryDecorator.DELETE_USE
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
+class UserRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<User> delegateRepository;
   @Mock private PasswordEncoder passwordEncoder;
 
   private UserRepositoryDecorator userRepositoryDecorator;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     userRepositoryDecorator = new UserRepositoryDecorator(delegateRepository, passwordEncoder);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testUserRepositoryDecorator() {
-    new UserRepositoryDecorator(null, null);
+  @Test
+  void testUserRepositoryDecorator() {
+    assertThrows(NullPointerException.class, () -> new UserRepositoryDecorator(null, null));
   }
 
   @Test
-  public void addEntity() {
+  void addEntity() {
     String password = "password";
     User user = mock(User.class);
     when(user.getPassword()).thenReturn(password);
@@ -50,7 +54,7 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void addStream() {
+  void addStream() {
     String password = "password";
     User user0 = mock(User.class);
     when(user0.getPassword()).thenReturn(password);
@@ -64,52 +68,58 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
               List<Entity> entitiesList = entities.collect(toList());
               return entitiesList.size();
             });
-    Assert.assertEquals(userRepositoryDecorator.add(Stream.of(user0, user1)), Integer.valueOf(2));
+    assertEquals(valueOf(2), userRepositoryDecorator.add(of(user0, user1)));
     verify(passwordEncoder, times(2)).encode(password);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = DELETE_USER_MSG)
-  public void delete() {
+  @Test
+  void delete() {
     User user = mock(User.class);
-    userRepositoryDecorator.delete(user);
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class, () -> userRepositoryDecorator.delete(user));
+    assertThat(exception.getMessage()).containsPattern(DELETE_USER_MSG);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = DELETE_USER_MSG)
-  public void deleteStream() {
+  @Test
+  void deleteStream() {
     User user = mock(User.class);
     Stream<User> entities = Stream.of(user);
-    userRepositoryDecorator.delete(entities);
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class, () -> userRepositoryDecorator.delete(entities));
+    assertThat(exception.getMessage()).containsPattern(DELETE_USER_MSG);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = DELETE_USER_MSG)
-  public void deleteById() {
+  @Test
+  void deleteById() {
     User user = mock(User.class);
-    userRepositoryDecorator.delete(user);
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class, () -> userRepositoryDecorator.delete(user));
+    assertThat(exception.getMessage()).containsPattern(DELETE_USER_MSG);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = DELETE_USER_MSG)
-  public void deleteAllStream() {
-    userRepositoryDecorator.deleteAll(Stream.of("1"));
+  @Test
+  void deleteAllStream() {
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> userRepositoryDecorator.deleteAll(Stream.of("1")));
+    assertThat(exception.getMessage()).containsPattern(DELETE_USER_MSG);
   }
 
-  @Test(
-      expectedExceptions = UnsupportedOperationException.class,
-      expectedExceptionsMessageRegExp = DELETE_USER_MSG)
-  public void deleteAll() {
-    userRepositoryDecorator.deleteAll();
+  @Test
+  void deleteAll() {
+    Exception exception =
+        assertThrows(
+            UnsupportedOperationException.class, () -> userRepositoryDecorator.deleteAll());
+    assertThat(exception.getMessage()).containsPattern(DELETE_USER_MSG);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  public void updateStream() {
+  void updateStream() {
     when(passwordEncoder.encode("password")).thenReturn("passwordHash");
 
     User currentUser = mock(User.class);
@@ -124,13 +134,13 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
-    Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
+    assertEquals(singletonList(user), captor.getValue().collect(toList()));
     verify(user).setPassword("passwordHash");
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  public void updateStreamUnchangedPassword() {
+  void updateStreamUnchangedPassword() {
     User currentUser = mock(User.class);
     when(currentUser.getPassword()).thenReturn("currentPasswordHash");
     when(userRepositoryDecorator.findOneById("1")).thenReturn(currentUser);
@@ -143,7 +153,7 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
-    Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
+    assertEquals(singletonList(user), captor.getValue().collect(toList()));
     verify(user).setPassword("currentPasswordHash");
   }
 }

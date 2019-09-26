@@ -6,28 +6,28 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.app.controller.ContentControllersTest.Config;
 import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
-public class ContentControllersTest extends AbstractTestNGSpringContextTests {
+class ContentControllersTest extends AbstractMockitoSpringContextTests {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @Autowired private HomeController homeController;
@@ -48,8 +48,8 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests {
   private MockMvc mockMvcReferences;
   private MockMvc mockMvcBackground;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     mockMvcHome =
         MockMvcBuilders.standaloneSetup(homeController)
             .setMessageConverters(gsonHttpMessageConverter)
@@ -77,78 +77,53 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void getHomeController() {
-    new HomeController();
-  }
-
-  @Test
-  public void getNewsController() {
-    new NewsController();
-  }
-
-  @Test
-  public void getReferencesController() {
-    new ReferencesController();
-  }
-
-  @Test
-  public void getBackgroundController() {
-    new BackgroundController();
-  }
-
-  @Test
-  public void getContactController() {
-    new ContactController();
-  }
-
-  @Test
-  public void initHome() throws Exception {
+  void initHome() throws Exception {
     this.initMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
   }
 
   @Test
-  public void initNews() throws Exception {
+  void initNews() throws Exception {
     this.initMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
   }
 
   @Test
-  public void initBackground() throws Exception {
+  void initBackground() throws Exception {
     this.initMethodTest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
   }
 
   @Test
-  public void initContact() throws Exception {
+  void initContact() throws Exception {
     this.initMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
   }
 
   @Test
-  public void initReferences() throws Exception {
+  void initReferences() throws Exception {
     this.initMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
   }
 
   @Test
-  public void initEditGetHome() throws Exception {
+  void initEditGetHome() throws Exception {
     this.initEditGetMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
   }
 
   @Test
-  public void initEditGetNews() throws Exception {
+  void initEditGetNews() throws Exception {
     this.initEditGetMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
   }
 
   @Test
-  public void initEditGetBackground() throws Exception {
+  void initEditGetBackground() throws Exception {
     this.initEditGetMethodTest(
         mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
   }
 
   @Test
-  public void initEditGetContact() throws Exception {
+  void initEditGetContact() throws Exception {
     this.initEditGetMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
   }
 
   @Test
-  public void initEditGetReferences() throws Exception {
+  void initEditGetReferences() throws Exception {
     this.initEditGetMethodTest(
         mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
   }
@@ -177,51 +152,51 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void initNotExistingURI() throws Exception {
+  void initNotExistingURI() throws Exception {
     mockMvcHome
         .perform(MockMvcRequestBuilders.get(HomeController.URI + "/NotExistingURI"))
         .andExpect(MockMvcResultMatchers.status().isNotFound());
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public HomeController homeController() {
+    HomeController homeController() {
       return new HomeController();
     }
 
     @Bean
-    public NewsController newsController() {
+    NewsController newsController() {
       return new NewsController();
     }
 
     @Bean
-    public BackgroundController backgroundController() {
+    BackgroundController backgroundController() {
       return new BackgroundController();
     }
 
     @Bean
-    public ContactController ContactController() {
+    ContactController ContactController() {
       return new ContactController();
     }
 
     @Bean
-    public ReferencesController referencesController() {
+    ReferencesController referencesController() {
       return new ReferencesController();
     }
 
     @Bean
-    public StaticContentService staticContentService() {
+    StaticContentService staticContentService() {
       return mock(StaticContentService.class);
     }
 
     @Bean
-    public FileStore fileStore() {
+    FileStore fileStore() {
       return mock(FileStore.class);
     }
 
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return mock(DataService.class);
     }
   }

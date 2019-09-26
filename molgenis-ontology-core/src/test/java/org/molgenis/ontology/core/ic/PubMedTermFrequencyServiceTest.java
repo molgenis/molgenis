@@ -1,27 +1,27 @@
 package org.molgenis.ontology.core.ic;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class PubMedTermFrequencyServiceTest {
+class PubMedTermFrequencyServiceTest {
   PubMedTermFrequencyService termFrequencyService = new PubMedTermFrequencyService();
 
   @Test
-  public void testRegexPattern() {
+  void testRegexPattern() {
     assertEquals(
+        4603,
         termFrequencyService
             .parseResponse(
                 "<eSearchResult><Count>4603</Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>")
-            .getOccurrence(),
-        4603);
+            .getOccurrence());
     assertEquals(
+        null,
         termFrequencyService.parseResponse(
-            "<eSearchResult><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
-        null);
+            "<eSearchResult><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"));
     assertEquals(
+        null,
         termFrequencyService.parseResponse(
-            "<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"),
-        null);
+            "<eSearchResult><Count></Count><RetMax>20</RetMax><RetStart>0</RetStart><IdList>"));
   }
 }

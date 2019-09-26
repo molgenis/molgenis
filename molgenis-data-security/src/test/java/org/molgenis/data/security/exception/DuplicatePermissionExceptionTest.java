@@ -1,28 +1,30 @@
 package org.molgenis.data.security.exception;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataAlreadyExistsException;
 import org.molgenis.util.exception.ExceptionMessageTest;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
+class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
 
   private ObjectIdentityImpl objectIdentity;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-security");
     objectIdentity = new ObjectIdentityImpl("type", "id");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new DuplicatePermissionException(objectIdentity, new GrantedAuthoritySid("ROLE_role1")),
         lang,
@@ -30,16 +32,14 @@ public class DuplicatePermissionExceptionTest extends ExceptionMessageTest {
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     DataAlreadyExistsException ex =
         new DuplicatePermissionException(objectIdentity, new GrantedAuthoritySid("ROLE_role1"));
     assertEquals(
-        ex.getMessage(), "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1]");
+        "typeId:type, identifier:id, sid:GrantedAuthoritySid[ROLE_role1]", ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en", "'role1' already has a permission on the resource with id 'id' of type 'type'."

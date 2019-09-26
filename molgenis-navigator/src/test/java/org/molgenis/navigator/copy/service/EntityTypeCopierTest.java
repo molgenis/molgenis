@@ -1,8 +1,10 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictableIdGeneratorMock;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -21,6 +22,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -35,10 +38,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.jobs.Progress;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeCopierTest extends AbstractMockitoTest {
+class EntityTypeCopierTest extends AbstractMockitoTest {
 
   @Mock(answer = RETURNS_DEEP_STUBS)
   private DataService dataService;
@@ -49,15 +50,15 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
 
   private EntityTypeCopier copier;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     copier =
         new EntityTypeCopier(
             dataService, idGenerator, entityTypeDependencyResolver, entityTypeMetadataCopier);
   }
 
   @Test
-  public void testUniqueLabel() {
+  void testUniqueLabel() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     Package targetPackage = mock(Package.class);
@@ -72,7 +73,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelNoChange() {
+  void testUniqueLabelNoChange() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     Package targetPackage = mock(Package.class);
@@ -87,7 +88,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUniqueLabelRootPackage() {
+  void testUniqueLabelRootPackage() {
     ignoreMetadataCopyResult();
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeInRoot = mock(EntityType.class);
@@ -105,7 +106,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void copySingleEntityType() {
+  void copySingleEntityType() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeCopy = mock(EntityType.class);
@@ -119,15 +120,15 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     copier.copy(singletonList(entityType), state);
 
     verify(entityTypeCopy).setId("id1");
-    assertEquals(state.copiedEntityTypes(), ImmutableMap.of("A", entityTypeCopy));
-    assertEquals(state.originalEntityTypeIds(), ImmutableMap.of("id1", "A"));
-    assertEquals(state.referenceDefaultValues(), emptyMap());
+    assertEquals(of("A", entityTypeCopy), state.copiedEntityTypes());
+    assertEquals(of("id1", "A"), state.originalEntityTypeIds());
+    assertEquals(emptyMap(), state.referenceDefaultValues());
     verify(dataService.getMeta()).addEntityType(entityTypeCopy);
     verify(progress, times(1)).increment(1);
   }
 
   @Test
-  public void copyEntityTypesWithInternalReferences() {
+  void copyEntityTypesWithInternalReferences() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityTypeA = mockEntityType("A");
     EntityType entityTypeB = mockEntityType("B");
@@ -151,17 +152,16 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     verify(entityTypeACopy).setId("id1");
     verify(entityTypeBCopy).setId("id2");
     verify(refAttrCopy).setRefEntity(entityTypeBCopy);
-    assertEquals(
-        state.copiedEntityTypes(), ImmutableMap.of("A", entityTypeACopy, "B", entityTypeBCopy));
-    assertEquals(state.originalEntityTypeIds(), ImmutableMap.of("id1", "A", "id2", "B"));
-    assertEquals(state.referenceDefaultValues(), emptyMap());
+    assertEquals(of("A", entityTypeACopy, "B", entityTypeBCopy), state.copiedEntityTypes());
+    assertEquals(of("id1", "A", "id2", "B"), state.originalEntityTypeIds());
+    assertEquals(emptyMap(), state.referenceDefaultValues());
     verify(dataService.getMeta()).addEntityType(entityTypeBCopy);
     verify(dataService.getMeta()).addEntityType(entityTypeACopy);
     verify(progress, times(2)).increment(1);
   }
 
   @Test
-  public void copyWithDefaultReferenceValue() {
+  void copyWithDefaultReferenceValue() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     EntityType entityTypeCopy = mock(EntityType.class);
@@ -180,12 +180,12 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
 
     copier.copy(singletonList(entityType), state);
 
-    assertEquals(state.referenceDefaultValues(), ImmutableMap.of("refAttr", "row1,row2,row3"));
+    assertEquals(of("refAttr", "row1,row2,row3"), state.referenceDefaultValues());
     verify(refAttrCopy).setDefaultValue("row1,row2,row3");
   }
 
   @Test
-  public void copyDoubleEntityType() {
+  void copyDoubleEntityType() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityTypeA = mock(EntityType.class);
     when(entityTypeA.getId()).thenReturn("A");
@@ -201,16 +201,16 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     copier.copy(singletonList(entityTypeA), state);
 
     verify(entityTypeACopy).setId("id1");
-    assertEquals(state.copiedEntityTypes(), ImmutableMap.of("A", entityTypeACopy));
-    assertEquals(state.originalEntityTypeIds(), ImmutableMap.of("id1", "A"));
-    assertEquals(state.referenceDefaultValues(), emptyMap());
+    assertEquals(of("A", entityTypeACopy), state.copiedEntityTypes());
+    assertEquals(of("id1", "A"), state.originalEntityTypeIds());
+    assertEquals(emptyMap(), state.referenceDefaultValues());
     verify(dataService.getMeta()).addEntityType(entityTypeACopy);
     verify(progress, times(1)).increment(1);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void copyData() {
+  void copyData() {
     setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType = mockEntityType("A");
     when(entityType.getId()).thenReturn("originalId");
@@ -243,8 +243,8 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream> streamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).add(eq("id1"), streamCaptor.capture());
     List<Entity> entities = (List<Entity>) streamCaptor.getValue().collect(Collectors.toList());
-    assertEquals(entities.get(0).getEntityType(), entityTypeCopy);
-    assertEquals(entities.get(1).getEntityType(), entityTypeCopy);
+    assertEquals(entityTypeCopy, entities.get(0).getEntityType());
+    assertEquals(entityTypeCopy, entities.get(1).getEntityType());
   }
 
   private void setupMetadataCopierAnswers(Map<EntityType, EntityType> mocks) {

@@ -6,6 +6,8 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,9 +32,7 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
-import static org.testng.Assert.assertEquals;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -40,6 +40,9 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataConverter;
@@ -52,12 +55,11 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /** Copy of standard QueryGeneratorTest but now with queries done on the referenced entity */
 // FIXME add nillable tests
-public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   private static final String FIELD_NGRAM_ANALYZED = "ngram";
 
   private EntityType entityType;
@@ -84,12 +86,8 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
 
   private QueryGenerator queryGenerator;
 
-  public QueryGeneratorReferencesTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     EntityType refEntityType = entityTypeFactory.create("ref_entity");
     String refIdAttributeName = "xid";
     refEntityType.addAttribute(attrFactory.create().setName(refIdAttributeName), ROLE_ID);
@@ -192,7 +190,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterDate() throws ParseException {
+  void generateOneQueryRuleGreaterDate() {
     String date = "2015-05-22";
     LocalDate value = LocalDate.parse(date);
     Query<Entity> q = new QueryImpl<>().gt(PREFIX + refDateAttributeName, value);
@@ -205,7 +203,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterDateTime() throws ParseException {
+  void generateOneQueryRuleGreaterDateTime() {
     Instant value = Instant.parse("2015-05-22T06:12:13Z");
     Query<Entity> q = new QueryImpl<>().gt(PREFIX + refDateTimeAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -219,7 +217,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterDecimal() {
+  void generateOneQueryRuleGreaterDecimal() {
     Double value = 1.23;
     Query<Entity> q = new QueryImpl<>().gt(PREFIX + refDecimalAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -233,7 +231,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterInt() {
+  void generateOneQueryRuleGreaterInt() {
     Integer value = 1;
     Query<Entity> q = new QueryImpl<>().gt(PREFIX + refIntAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -245,7 +243,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterLong() {
+  void generateOneQueryRuleGreaterLong() {
     Long value = 1L;
     Query<Entity> q = new QueryImpl<>().gt(PREFIX + refLongAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -259,7 +257,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleGreaterEqualDate() throws ParseException {
+  void generateOneQueryRuleGreaterEqualDate() {
     String date = "2015-05-22";
     LocalDate value = LocalDate.parse(date);
     Query<Entity> q;
@@ -275,7 +273,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleLesserEqualDecimal() {
+  void generateOneQueryRuleLesserEqualDecimal() {
     Double value = 1.23;
     Query<Entity> q = new QueryImpl<>().le(PREFIX + refDecimalAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -289,7 +287,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleLesserInt() {
+  void generateOneQueryRuleLesserInt() {
     Integer value = 1;
     Query<Entity> q = new QueryImpl<>().lt(PREFIX + refIntAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -300,15 +298,17 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     assertQueryBuilderEquals(query, expectedQuery);
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void generateOneQueryRuleInCategorical_Ids() {
+  @Test
+  void generateOneQueryRuleInCategorical_Ids() {
     Iterable<String> values = Arrays.asList("id0", "id1", "id2");
     Query<Entity> q = new QueryImpl<>().in(PREFIX + refCategoricalAttributeName, values);
-    queryGenerator.createQueryBuilder(q, entityType);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
-  public void generateOneQueryRuleLikeCompoundPartString() {
+  void generateOneQueryRuleLikeCompoundPartString() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().like(PREFIX + refCompoundPart0AttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -323,7 +323,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleEqualsBool() {
+  void generateOneQueryRuleEqualsBool() {
     Boolean value = Boolean.TRUE;
     Query<Entity> q = new QueryImpl<>().eq(PREFIX + refBoolAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -335,7 +335,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleEqualsString() {
+  void generateOneQueryRuleEqualsString() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().eq(PREFIX + refStringAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -348,15 +348,16 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     assertQueryBuilderEquals(query, expectedQuery);
   }
 
-  @Test(expectedExceptions = MolgenisQueryException.class)
-  public void generateOneQueryRuleEqualsCategorical() {
+  @Test
+  void generateOneQueryRuleEqualsCategorical() {
     String value = "id";
     Query<Entity> q = new QueryImpl<>().eq(PREFIX + refCategoricalAttributeName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
+    assertThrows(
+        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
-  public void generateOneQueryRuleNotEqualsEqualsBool() {
+  void generateOneQueryRuleNotEqualsEqualsBool() {
     Boolean value = Boolean.TRUE;
     Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refBoolAttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -371,22 +372,24 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     assertQueryBuilderEquals(query, expectedQuery);
   }
 
-  @Test(expectedExceptions = MolgenisQueryException.class)
-  public void generateOneQueryRuleNotEqualsCategorical() {
+  @Test
+  void generateOneQueryRuleNotEqualsCategorical() {
     String value = "id";
     Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refCategoricalAttributeName, value);
-    queryGenerator.createQueryBuilder(q, entityType);
-  }
-
-  @Test(expectedExceptions = MolgenisQueryException.class)
-  public void generateOneQueryRuleNotEqualsCompound() {
-    Object value = "value";
-    Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refCompoundAttributeName, value);
-    queryGenerator.createQueryBuilder(q, entityType);
+    assertThrows(
+        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
-  public void generateOneQueryRuleNotEqualsCompoundPartString() {
+  void generateOneQueryRuleNotEqualsCompound() {
+    Object value = "value";
+    Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refCompoundAttributeName, value);
+    assertThrows(
+        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
+  }
+
+  @Test
+  void generateOneQueryRuleNotEqualsCompoundPartString() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refCompoundPart0AttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -404,7 +407,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateOneQueryRuleRangeInt() {
+  void generateOneQueryRuleRangeInt() {
     Integer low = 3;
     Integer high = 9;
     Query<Entity> q = new QueryImpl<>().rng(PREFIX + refIntAttributeName, low, high);
@@ -418,15 +421,17 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     assertQueryBuilderEquals(query, expectedQuery);
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void generateOneQueryRuleSearchOneFieldCategorical() {
+  @Test
+  void generateOneQueryRuleSearchOneFieldCategorical() {
     String value = "text";
     Query<Entity> q = new QueryImpl<>().search(PREFIX + refCategoricalAttributeName, value);
-    queryGenerator.createQueryBuilder(q, entityType);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
-  public void generateOneQueryRuleSearchOneFieldCompoundPartString() {
+  void generateOneQueryRuleSearchOneFieldCompoundPartString() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().search(PREFIX + refCompoundPart0AttributeName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
@@ -439,7 +444,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateMultipleQueryRule() {
+  void generateMultipleQueryRule() {
     // query: ref.a or (b and ref.c)
     Boolean booleanValue = Boolean.TRUE;
     String stringValue = "str";
@@ -473,7 +478,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void generateMultipleQueryRuleMultipleNotClauses() {
+  void generateMultipleQueryRuleMultipleNotClauses() {
     // query: ref.a and not b and not ref.c
     Boolean booleanValue = Boolean.TRUE;
     String stringValue = "str";
@@ -508,6 +513,6 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected) {
     // QueryBuilder classes do not implement equals
     assertEquals(
-        actual.toString().replaceAll("\\s", ""), expected.toString().replaceAll("\\s", ""));
+        expected.toString().replaceAll("\\s", ""), actual.toString().replaceAll("\\s", ""));
   }
 }

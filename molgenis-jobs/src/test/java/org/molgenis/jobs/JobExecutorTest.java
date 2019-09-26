@@ -1,5 +1,6 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -11,6 +12,8 @@ import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.molgenis.data.DataService;
@@ -22,10 +25,8 @@ import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class JobExecutorTest extends AbstractMockitoTest {
+class JobExecutorTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private EntityManager entityManager;
   @Mock private ExecutorService executorService;
@@ -35,8 +36,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
   @Mock private JobExecutionRegistry jobExecutionRegistry;
   private JobExecutor jobExecutor;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     jobExecutor =
         new JobExecutor(
             dataService,
@@ -48,14 +49,15 @@ public class JobExecutorTest extends AbstractMockitoTest {
     jobExecutor.setJobExecutionTemplate(jobExecutionTemplate);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testJobExecutor() {
-    new JobExecutor(null, null, null, null, null, null);
+  @Test
+  void testJobExecutor() {
+    assertThrows(
+        NullPointerException.class, () -> new JobExecutor(null, null, null, null, null, null));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testExecuteScheduledJob() {
+  void testExecuteScheduledJob() {
     String scheduledJobId = "MyScheduledJobId";
 
     EntityType jobExecutionType = mock(EntityType.class);
@@ -95,15 +97,16 @@ public class JobExecutorTest extends AbstractMockitoTest {
     verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testExecuteScheduledJobUnknownJob() {
+  @Test
+  void testExecuteScheduledJobUnknownJob() {
     String scheduledJobId = "UnknownScheduledJobId";
-    jobExecutor.executeScheduledJob(scheduledJobId);
+    assertThrows(
+        UnknownEntityException.class, () -> jobExecutor.executeScheduledJob(scheduledJobId));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testSubmit() throws ExecutionException, InterruptedException {
+  void testSubmit() throws ExecutionException, InterruptedException {
     String jobExecutionEntityTypeId = "MyJobExecutionId";
     EntityType jobExecutionEntityType = mock(EntityType.class);
     when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
@@ -137,8 +140,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
     verify(jobExecutionRegistry).unregisterJobExecution(jobExecution);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
-  public void testSubmitJobCreationFails() {
+  @Test
+  void testSubmitJobCreationFails() {
     String jobExecutionEntityTypeId = "MyJobExecutionId";
     EntityType jobExecutionEntityType = mock(EntityType.class);
     when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
@@ -148,19 +151,16 @@ public class JobExecutorTest extends AbstractMockitoTest {
 
     doThrow(new RuntimeException()).when(jobFactoryRegistry).getJobFactory(jobExecution);
 
-    try {
-      jobExecutor.submit(jobExecution);
-    } finally {
-      verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
-      verify(jobExecution).setStatus(Status.FAILED);
-      verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
-    }
+    assertThrows(RuntimeException.class, () -> jobExecutor.submit(jobExecution));
+    verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+    verify(jobExecution).setStatus(Status.FAILED);
+    verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
   }
 
   // same as testSubmit but with other ExecutorService
   @SuppressWarnings("unchecked")
   @Test
-  public void testSubmitExecutorService() throws ExecutionException, InterruptedException {
+  void testSubmitExecutorService() throws ExecutionException, InterruptedException {
     ExecutorService myExecutorService = mock(ExecutorService.class);
 
     String jobExecutionEntityTypeId = "MyJobExecutionId";
@@ -197,7 +197,7 @@ public class JobExecutorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCancel() {
+  void testCancel() {
     JobExecution jobExecution = mock(JobExecution.class);
     Progress progress = mock(Progress.class);
     when(jobExecutionRegistry.getJobExecutionProgress(jobExecution)).thenReturn(progress);

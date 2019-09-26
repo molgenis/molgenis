@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>8.2.0-SNAPSHOT</version>
+    <version>8.3.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-web</artifactId>
   <packaging>jar</packaging>
@@ -45,6 +45,11 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-data-validation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-i18n</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

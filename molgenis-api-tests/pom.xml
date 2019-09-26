@@ -4,7 +4,7 @@
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
-    <version>8.2.0-SNAPSHOT</version>
+    <version>8.3.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-api-tests</artifactId>
   <description>API integration test test-module.</description>
@@ -314,11 +314,6 @@
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.el</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

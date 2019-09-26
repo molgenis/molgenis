@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.importservice;
 
 import static java.util.Collections.emptySet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.DataAction.ADD;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
@@ -32,9 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.testng.annotations.Test;
 
-public class OntologyImportServiceIT extends ImportServiceIT {
+class OntologyImportServiceIT extends ImportServiceIT {
   private static final String USERNAME = "ontology_user";
 
   @Override
@@ -48,7 +48,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportOboAsNonSuperuser() {
+  void testDoImportOboAsNonSuperuser() {
     populateUserPermissions();
     testDoImportObo();
   }
@@ -57,7 +57,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportOboAsSuperuser() {
+  void testDoImportOboAsSuperuser() {
     testDoImportObo();
   }
 
@@ -92,7 +92,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
   private void verifyOboAsSystem() {
     List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
     Ontology ontology = (Ontology) ontologies.get(0);
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
 
     List<Entity> synonyms =
         dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
@@ -114,12 +114,12 @@ public class OntologyImportServiceIT extends ImportServiceIT {
             .filter(s -> s.getString("ontologyTermName").equals(ontologyTermName))
             .findFirst();
     assertTrue(molOntCoreOpt.isPresent());
-    assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
+    assertEquals(ontologyTermIRI, molOntCoreOpt.get().getString("ontologyTermIRI"));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void testDoImportOwlAsNonSuperuser() {
+  void testDoImportOwlAsNonSuperuser() {
     populateUserPermissions();
     testDoImportOwl();
   }
@@ -128,7 +128,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
       username = USERNAME,
       roles = {ROLE_SU})
   @Test
-  public void testDoImportOwlAsSuperuser() {
+  void testDoImportOwlAsSuperuser() {
     testDoImportOwl();
   }
 
@@ -177,44 +177,44 @@ public class OntologyImportServiceIT extends ImportServiceIT {
     Entity team = teamOpt.get();
 
     // Verify organization
-    assertEquals(organization.getString("ontologyTermIRI"), "http://www.molgenis.org#Organization");
-    assertEquals(organization.getString("ontologyTermName"), "organization");
+    assertEquals("http://www.molgenis.org#Organization", organization.getString("ontologyTermIRI"));
+    assertEquals("organization", organization.getString("ontologyTermName"));
 
     // verify organization ontologyTermSynonym
     Iterable<Entity> ontologyTermSynonym = organization.getEntities("ontologyTermSynonym");
     List<Entity> termSynonymRefList = new ArrayList<>();
     ontologyTermSynonym.forEach(termSynonymRefList::add);
-    assertEquals(termSynonymRefList.size(), 1);
+    assertEquals(1, termSynonymRefList.size());
     Entity organizationOntologyTermSynonym =
         dataService.findOneById(
             "sys_ont_OntologyTermSynonym", termSynonymRefList.get(0).getIdValue());
-    assertEquals(organizationOntologyTermSynonym.getString("ontologyTermSynonym"), "organization");
+    assertEquals("organization", organizationOntologyTermSynonym.getString("ontologyTermSynonym"));
 
     // verify organization ontology
     Ontology ontology = (Ontology) organization.get("ontology");
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
 
     // Verify the team row
-    assertEquals(team.getString("ontologyTermIRI"), "http://www.molgenis.org#Team");
-    assertEquals(team.getString("ontologyTermName"), "team");
+    assertEquals("http://www.molgenis.org#Team", team.getString("ontologyTermIRI"));
+    assertEquals("team", team.getString("ontologyTermName"));
 
     // verify team dynamic annotations
     Iterable<Entity> dynamicAnnotationItr = team.getEntities("ontologyTermDynamicAnnotation");
     List<Entity> dynamicAnnotations = new ArrayList<>();
     dynamicAnnotationItr.forEach(dynamicAnnotations::add);
-    assertEquals(dynamicAnnotations.size(), 2);
+    assertEquals(2, dynamicAnnotations.size());
     Entity annotationOne =
         dataService.findOneById(
             "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(0).getIdValue());
-    assertEquals(annotationOne.getString("label"), "friday:2412423");
+    assertEquals("friday:2412423", annotationOne.getString("label"));
     Entity annotationTwo =
         dataService.findOneById(
             "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(1).getIdValue());
-    assertEquals(annotationTwo.getString("label"), "molgenis:1231424");
+    assertEquals("molgenis:1231424", annotationTwo.getString("label"));
 
     // verify team ontology
     ontology = (Ontology) team.get("ontology");
-    assertEquals(ontology.getOntologyName(), "ontology-small");
+    assertEquals("ontology-small", ontology.getOntologyName());
   }
 
   @Autowired private PermissionService testPermissionService;

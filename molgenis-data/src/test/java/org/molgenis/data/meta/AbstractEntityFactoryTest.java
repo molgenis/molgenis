@@ -1,9 +1,10 @@
 package org.molgenis.data.meta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.SystemEntityTestUtils.getRandomString;
-import static org.testng.Assert.*;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -14,7 +15,7 @@ public abstract class AbstractEntityFactoryTest extends AbstractMolgenisSpringTe
   protected void testCreate(EntityFactory entityFactory, Class expectedClass) {
     Entity actual = entityFactory.create();
     assertNotNull(actual);
-    assertEquals(actual.getClass(), expectedClass);
+    assertEquals(expectedClass, actual.getClass());
   }
 
   protected void testCreateWithId(EntityFactory entityFactory, Class expectedClass) {
@@ -22,8 +23,8 @@ public abstract class AbstractEntityFactoryTest extends AbstractMolgenisSpringTe
     //noinspection unchecked
     Entity actual = entityFactory.create(testId);
     assertNotNull(actual);
-    assertEquals(actual.getIdValue(), testId);
-    assertEquals(actual.getClass(), expectedClass);
+    assertEquals(testId, actual.getIdValue());
+    assertEquals(expectedClass, actual.getClass());
   }
 
   protected void testCreateWithEntity(EntityFactory entityFactory, Class expectedClass) {
@@ -33,8 +34,8 @@ public abstract class AbstractEntityFactoryTest extends AbstractMolgenisSpringTe
 
     Entity actual = entityFactory.create(entity);
     assertNotNull(actual);
-    assertEquals(actual.getIdValue(), entity.getIdValue());
-    assertEquals(actual.getClass(), expectedClass);
+    assertEquals(entity.getIdValue(), actual.getIdValue());
+    assertEquals(expectedClass, actual.getClass());
   }
 
   @SuppressWarnings("unused")

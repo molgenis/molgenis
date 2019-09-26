@@ -4,6 +4,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.isNull;
@@ -21,7 +24,6 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.postgresql.PostgreSqlExceptionTranslator.VALUE_TOO_LONG_MSG;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -34,6 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.molgenis.data.Entity;
@@ -49,12 +56,8 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class PostgreSqlRepositoryTest {
+class PostgreSqlRepositoryTest {
   private PostgreSqlRepository postgreSqlRepo;
   @Mock private JdbcTemplate jdbcTemplate;
   @Mock private PostgreSqlEntityFactory postgreSqlEntityFactory;
@@ -65,21 +68,21 @@ public class PostgreSqlRepositoryTest {
 
   private MockitoSession mockitoSession;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() throws Exception {
+  @BeforeEach
+  void setUpBeforeMethod() throws Exception {
     mockitoSession = mockitoSession().initMocks(this).strictness(STRICT_STUBS).startMocking();
     postgreSqlRepo =
         new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, entityType);
   }
 
-  @AfterMethod
-  public void afterMethod() {
+  @AfterEach
+  void afterMethod() {
     mockitoSession.finishMocking();
   }
 
   // TODO test all query operators for one-to-many
   @Test
-  public void countQueryOneToManyEquals() throws Exception {
+  void countQueryOneToManyEquals() throws Exception {
     String oneToManyAttrName = "oneToManyAttr";
     String refIdAttrName = "refEntityId";
     Attribute refIdAttr = mock(Attribute.class);
@@ -118,11 +121,11 @@ public class PostgreSqlRepositoryTest {
     long count = 123L;
     when(jdbcTemplate.queryForObject(sql, new Object[] {queryValue}, Long.class)).thenReturn(count);
 
-    assertEquals(postgreSqlRepo.count(query), count);
+    assertEquals(count, postgreSqlRepo.count(query));
   }
 
   @Test
-  public void findAllQueryOneToManyEquals() throws Exception {
+  void findAllQueryOneToManyEquals() throws Exception {
     String oneToManyAttrName = "oneToManyAttr";
     String refIdAttrName = "refEntityId";
     Attribute refIdAttr = mock(Attribute.class);
@@ -171,11 +174,11 @@ public class PostgreSqlRepositoryTest {
     Entity entity0 = mock(Entity.class);
     when(jdbcTemplate.query(sql, new Object[] {queryValue}, rowMapper))
         .thenReturn(singletonList(entity0));
-    assertEquals(postgreSqlRepo.findAll(query).collect(toList()), singletonList(entity0));
+    assertEquals(singletonList(entity0), postgreSqlRepo.findAll(query).collect(toList()));
   }
 
   @Test
-  public void testUpdateEntitiesExist() {
+  void testUpdateEntitiesExist() {
     Attribute idAttr = mock(Attribute.class);
     when(idAttr.getName()).thenReturn("attr");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -196,11 +199,8 @@ public class PostgreSqlRepositoryTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Cannot update \\[entity\\] with id \\[id1\\] because it does not exist")
-  public void testUpdateEntityDoesNotExist() {
+  @Test
+  void testUpdateEntityDoesNotExist() {
     Attribute idAttr = mock(Attribute.class);
     when(idAttr.getName()).thenReturn("attr");
     when(idAttr.getDataType()).thenReturn(STRING);
@@ -220,20 +220,25 @@ public class PostgreSqlRepositoryTest {
     when(jdbcTemplate.batchUpdate(any(String.class), any(BatchPreparedStatementSetter.class)))
         .thenReturn(new int[] {1});
 
-    postgreSqlRepo.update(Stream.of(entity0, entity1));
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> postgreSqlRepo.update(Stream.of(entity0, entity1)));
+    assertThat(exception.getMessage())
+        .containsPattern("Cannot update \\[entity\\] with id \\[id1\\] because it does not exist");
   }
 
   @SuppressWarnings("ConstantConditions")
-  @Test(
-      expectedExceptions = NullPointerException.class,
-      expectedExceptionsMessageRegExp = "PostgreSqlRepository.add\\(\\) failed: entity was null")
-  public void testAddEntityNull() {
+  @Test
+  void testAddEntityNull() {
     Entity entity = null;
-    postgreSqlRepo.add(entity);
+    Exception exception =
+        assertThrows(NullPointerException.class, () -> postgreSqlRepo.add(entity));
+    assertThat(exception.getMessage())
+        .containsPattern("PostgreSqlRepository.add\\(\\) failed: entity was null");
   }
 
-  @DataProvider(name = "provideValidMrefIds")
-  public Object[][] provideValidMrefIds() throws SQLException {
+  static Object[][] provideValidMrefIds() throws SQLException {
     ResultSet stringRow = mock(ResultSet.class);
     doReturn("idValue").when(stringRow).getString(1);
     doReturn("refValue").when(stringRow).getString(3);
@@ -253,11 +258,8 @@ public class PostgreSqlRepositoryTest {
     };
   }
 
-  @Test(
-      expectedExceptions = MolgenisValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "One of the mref values in entity type \\[test_entity\\] attribute \\[mref_attr\\] is too long.")
-  public void testMrefValueTooLong() {
+  @Test
+  void testMrefValueTooLong() {
     Attribute attr = mock(Attribute.class);
     when(attr.getName()).thenReturn("mref_attr");
 
@@ -274,11 +276,18 @@ public class PostgreSqlRepositoryTest {
     HashMap<String, Object> value = newHashMap();
     value.put("mref_attr", "TOOLONG");
 
-    postgreSqlRepo.addMrefs(newArrayList(value), attr);
+    Exception exception =
+        assertThrows(
+            MolgenisValidationException.class,
+            () -> postgreSqlRepo.addMrefs(newArrayList(value), attr));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "One of the mref values in entity type \\[test_entity\\] attribute \\[mref_attr\\] is too long.");
   }
 
-  @Test(dataProvider = "provideValidMrefIds")
-  public void testMrefIdRowCallbackHandlerString(
+  @ParameterizedTest
+  @MethodSource("provideValidMrefIds")
+  void testMrefIdRowCallbackHandlerString(
       AttributeType idType, AttributeType refType, ResultSet row, Map<Object, List<Object>> result)
       throws SQLException {
     Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
@@ -286,20 +295,22 @@ public class PostgreSqlRepositoryTest {
         postgreSqlRepo.getJunctionTableRowCallbackHandler(idType, refType, mrefIDs);
     mrefIdRowCallbackHandler.processRow(row);
 
-    assertEquals(mrefIDs.asMap(), result);
+    assertEquals(result, mrefIDs.asMap());
   }
 
-  @DataProvider(name = "provideInvalidMrefIds")
-  public Object[][] provideInvalidMrefIds() throws SQLException {
+  static Object[][] provideInvalidMrefIds() {
     return new Object[][] {{XREF, STRING}, {INT, MREF}};
   }
 
-  @Test(dataProvider = "provideInvalidMrefIds", expectedExceptions = UnexpectedEnumException.class)
-  public void testMrefIdRowCallbackHandlerInvalidType(AttributeType idType, AttributeType refType)
+  @ParameterizedTest
+  @MethodSource("provideInvalidMrefIds")
+  void testMrefIdRowCallbackHandlerInvalidType(AttributeType idType, AttributeType refType)
       throws SQLException {
     RowCallbackHandler mrefIdRowCallbackHandler =
         postgreSqlRepo.getJunctionTableRowCallbackHandler(
             idType, refType, ArrayListMultimap.create());
-    mrefIdRowCallbackHandler.processRow(mock(ResultSet.class));
+    assertThrows(
+        UnexpectedEnumException.class,
+        () -> mrefIdRowCallbackHandler.processRow(mock(ResultSet.class)));
   }
 }

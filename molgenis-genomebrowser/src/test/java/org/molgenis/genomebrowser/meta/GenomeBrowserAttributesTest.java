@@ -1,10 +1,10 @@
 package org.molgenis.genomebrowser.meta;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -18,8 +18,9 @@ public class GenomeBrowserAttributesTest extends AbstractSystemEntityTest {
   @Autowired GenomeBrowserAttributesMetadata metadata;
   @Autowired GenomeBrowserAttributesFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata,
         GenomeBrowserAttributes.class,

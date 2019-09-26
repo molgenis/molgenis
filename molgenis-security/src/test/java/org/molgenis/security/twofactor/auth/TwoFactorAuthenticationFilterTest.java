@@ -1,57 +1,52 @@
 package org.molgenis.security.twofactor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.security.user.UserServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserAccountServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = {TwoFactorAuthenticationFilterTest.Config.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
-public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests {
+@SecurityTestExecutionListeners
+class TwoFactorAuthenticationFilterTest extends AbstractMockitoSpringContextTests {
 
-  @Autowired private AuthenticationSettings authenticationSettings;
-  @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
-  @Autowired private TwoFactorAuthenticationFilter filter;
+  @Mock private AuthenticationSettings authenticationSettings;
+  @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;
+  @Mock private UserAccountService userAccountService;
+  private TwoFactorAuthenticationFilter filter;
 
   private MockHttpServletRequest request;
   private MockHttpServletResponse response;
   private FilterChain chain;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
+    filter =
+        new TwoFactorAuthenticationFilter(
+            authenticationSettings,
+            twoFactorAuthenticationService,
+            new DefaultRedirectStrategy(),
+            userAccountService);
     request = new MockHttpServletRequest();
     response = new MockHttpServletResponse();
     chain = mock(FilterChain.class);
@@ -59,7 +54,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
   @Test
   @WithMockUser(username = "user")
-  public void testDoFilterInternalIsConfigured() throws IOException, ServletException {
+  void testDoFilterInternalIsConfigured() throws IOException, ServletException {
     request.setRequestURI("/login");
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
     when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
@@ -69,16 +64,14 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
     String initialRedirectUrl =
         TwoFactorAuthenticationController.URI
             + TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI;
-    assertEquals(response.getRedirectedUrl(), initialRedirectUrl);
+    assertEquals(initialRedirectUrl, response.getRedirectedUrl());
   }
 
   @Test
   @WithMockUser(username = "user")
-  public void testDoFilterInternalIsConfiguredChangePassword()
-      throws IOException, ServletException {
+  void testDoFilterInternalIsConfiguredChangePassword() throws IOException, ServletException {
     request.setRequestURI("/account/password/change");
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
-    when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
 
     filter.doFilterInternal(request, response, chain);
 
@@ -87,7 +80,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
   @Test
   @WithMockUser(username = "user")
-  public void testDoFilterInternalIsNotConfigured() throws IOException, ServletException {
+  void testDoFilterInternalIsNotConfigured() throws IOException, ServletException {
     request.setRequestURI("/login");
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
     when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(false);
@@ -97,11 +90,11 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
     String configuredRedirectUrl =
         TwoFactorAuthenticationController.URI
             + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
-    assertEquals(response.getRedirectedUrl(), configuredRedirectUrl);
+    assertEquals(configuredRedirectUrl, response.getRedirectedUrl());
   }
 
   @Test
-  public void testDoFilterInternalNotAuthenticated() throws IOException, ServletException {
+  void testDoFilterInternalNotAuthenticated() throws IOException, ServletException {
     request.setRequestURI("/login");
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
 
@@ -111,7 +104,7 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
 
   @Test
   @WithMockUser
-  public void testDoFilterInternalRecoveryAuthenticated() throws IOException, ServletException {
+  void testDoFilterInternalRecoveryAuthenticated() throws IOException, ServletException {
     SecurityContext previous = SecurityContextHolder.getContext();
     try {
       SecurityContext testContext = SecurityContextHolder.createEmptyContext();
@@ -125,48 +118,6 @@ public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringConte
       verify(chain).doFilter(request, response);
     } finally {
       SecurityContextHolder.setContext(previous);
-    }
-  }
-
-  @Configuration
-  static class Config {
-    @Bean
-    public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
-      return new TwoFactorAuthenticationFilter(
-          authenticationSettings(),
-          twoFactorAuthenticationService(),
-          redirectStrategy(),
-          userAccountService());
-    }
-
-    @Bean
-    public TwoFactorAuthenticationService twoFactorAuthenticationService() {
-      return mock(TwoFactorAuthenticationServiceImpl.class);
-    }
-
-    @Bean
-    public AuthenticationSettings authenticationSettings() {
-      return mock(AuthenticationSettings.class);
-    }
-
-    @Bean
-    public RedirectStrategy redirectStrategy() {
-      return new DefaultRedirectStrategy();
-    }
-
-    @Bean
-    public UserAccountService userAccountService() {
-      return mock(UserAccountServiceImpl.class);
-    }
-
-    @Bean
-    public UserService userService() {
-      return mock(UserServiceImpl.class);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-      return new BCryptPasswordEncoder();
     }
   }
 }

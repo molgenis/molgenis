@@ -1,29 +1,30 @@
 package org.molgenis.data.security.auth;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
+class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   private RoleMembershipValidatorImpl roleMembershipValidatorImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     roleMembershipValidatorImpl = new RoleMembershipValidatorImpl(dataService);
   }
 
   @Test
-  public void testValidateRoleMembershipWithoutGroup() {
+  void testValidateRoleMembershipWithoutGroup() {
     RoleMembership roleMembership = mock(RoleMembership.class);
     Role roleWithoutGroup = mock(Role.class);
     when(roleMembership.getRole()).thenReturn(roleWithoutGroup);
@@ -33,7 +34,7 @@ public class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testValidateRoleMembershipGroupNoExistingRoles() {
+  void testValidateRoleMembershipGroupNoExistingRoles() {
     RoleMembership roleMembership = mock(RoleMembership.class);
     User user = mock(User.class);
     when(roleMembership.getUser()).thenReturn(user);
@@ -52,7 +53,7 @@ public class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testValidateRoleMembershipGroupSameExistingRole() {
+  void testValidateRoleMembershipGroupSameExistingRole() {
     RoleMembership roleMembership =
         when(mock(RoleMembership.class).getId()).thenReturn("roleMembershipId").getMock();
     User user = mock(User.class);
@@ -72,8 +73,8 @@ public class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("unchecked")
-  @Test(expectedExceptions = RoleMembershipValidationException.class)
-  public void testValidateRoleMembershipGroupOtherExistingRole() {
+  @Test
+  void testValidateRoleMembershipGroupOtherExistingRole() {
     RoleMembership roleMembership =
         when(mock(RoleMembership.class).getId()).thenReturn("roleMembershipId").getMock();
     User user = mock(User.class);
@@ -95,6 +96,8 @@ public class RoleMembershipValidatorImplTest extends AbstractMockitoTest {
         .thenReturn(query);
     when(query.eq(RoleMembershipMetadata.USER, user).findAll())
         .thenReturn(Stream.of(otherRoleMembership));
-    roleMembershipValidatorImpl.validate(roleMembership);
+    assertThrows(
+        RoleMembershipValidationException.class,
+        () -> roleMembershipValidatorImpl.validate(roleMembership));
   }
 }

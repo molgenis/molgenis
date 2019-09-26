@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf.format;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -9,11 +11,11 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
 import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -32,11 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {VcfToEntityTest.Config.class})
-public class VcfToEntityTest extends AbstractMolgenisSpringTest {
+class VcfToEntityTest extends AbstractMolgenisSpringTest {
   @Autowired private VcfAttributes vcfAttrs;
 
   @Autowired private EntityTypeFactory entityTypeFactory;
@@ -52,8 +52,8 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
     }
   }
 
-  @BeforeMethod
-  public void beforeTest() throws IOException {
+  @BeforeEach
+  void beforeTest() throws IOException {
     String headersSmall =
         "##fileformat=VCFv4.1\n"
             + "##fileDate=2012/11/05\n"
@@ -72,7 +72,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testGetEntityType() {
+  void testGetEntityType() {
     EntityType expectedEntityType = entityTypeFactory.create("EntityNameSmall");
     expectedEntityType.addAttribute(vcfAttrs.getChromAttribute());
     expectedEntityType.addAttribute(vcfAttrs.getAltAttribute());
@@ -146,7 +146,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testToEntity() throws IOException {
+  void testToEntity() throws IOException {
     VcfRecord record =
         new VcfRecord(
             vcfMetaSmall,
@@ -169,7 +169,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testToEntityAlternativeAlleles() throws IOException {
+  void testToEntityAlternativeAlleles() throws IOException {
     VcfRecord record =
         new VcfRecord(
             vcfMetaSmall,
@@ -194,7 +194,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
 
   // https://github.com/molgenis/molgenis/issues/5329
   @Test
-  public void testToEntityMissingValues() throws IOException {
+  void testToEntityMissingValues() throws IOException {
     String vcfHeaders =
         "##fileformat=VCFv4.1\n"
             + "##INFO=<ID=GoNL_AF,Number=.,Type=Float,Description=\"The allele frequency for variants seen in the population used for the GoNL project\">\n"
@@ -206,10 +206,10 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest {
         new VcfRecord(
             vcfMeta, new String[] {"1", "54728", ".", "G", "T,C", ".", ".", "GoNL_AF=0.01,."});
     Entity entity = vcfToEntity.toEntity(record);
-    assertEquals(entity.getString("GoNL_AF"), "0.01,.");
+    assertEquals("0.01,.", entity.getString("GoNL_AF"));
   }
 
   @Configuration
   @Import({VcfTestConfig.class})
-  public static class Config {}
+  static class Config {}
 }

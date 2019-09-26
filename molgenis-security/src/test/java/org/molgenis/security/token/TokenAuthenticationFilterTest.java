@@ -1,35 +1,36 @@
 package org.molgenis.security.token;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 import java.io.IOException;
 import java.util.Arrays;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TokenAuthenticationFilterTest {
+class TokenAuthenticationFilterTest {
   private TokenAuthenticationFilter filter;
   private AuthenticationProvider authenticationProvider;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     authenticationProvider = mock(AuthenticationProvider.class);
     filter = new TokenAuthenticationFilter(authenticationProvider);
   }
 
   @Test
-  public void doFilter() throws IOException, ServletException {
+  void doFilter() throws IOException, ServletException {
     SecurityContext previous = SecurityContextHolder.getContext();
     try {
       SecurityContext testContext = SecurityContextHolder.createEmptyContext();
@@ -51,7 +52,7 @@ public class TokenAuthenticationFilterTest {
       filter.doFilter(request, response, chain);
       verify(chain).doFilter(request, response);
 
-      assertEquals(SecurityContextHolder.getContext().getAuthentication(), auth);
+      assertEquals(auth, getContext().getAuthentication());
     } finally {
       SecurityContextHolder.setContext(previous);
     }

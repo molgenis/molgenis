@@ -3,17 +3,21 @@ package org.molgenis.semanticmapper.service.impl;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static javax.measure.unit.Unit.valueOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.semanticmapper.service.impl.UnitResolverImpl.UNIT_ONTOLOGY_IRI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -24,62 +28,60 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = UnitResolverImplTest.Config.class)
-public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
+class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrMetaFactory;
 
   @Autowired private UnitResolverImpl unitResolverImpl;
 
   @Test
-  public void testConvertNumberToOntologyTermStyle() {
-    assertEquals(unitResolverImpl.convertNumberToOntologyTermStyle("kg/m^2"), "kg\\/m\\^\\[2\\]");
-    assertEquals(unitResolverImpl.convertNumberToOntologyTermStyle("kg/m^²"), "kg\\/m\\^\\[2\\]");
-    assertEquals(unitResolverImpl.convertNumberToOntologyTermStyle("kg/m²"), "kg\\/m\\^\\[2\\]");
+  void testConvertNumberToOntologyTermStyle() {
+    assertEquals("kg\\/m\\^\\[2\\]", unitResolverImpl.convertNumberToOntologyTermStyle("kg/m^2"));
+    assertEquals("kg\\/m\\^\\[2\\]", unitResolverImpl.convertNumberToOntologyTermStyle("kg/m^²"));
+    assertEquals("kg\\/m\\^\\[2\\]", unitResolverImpl.convertNumberToOntologyTermStyle("kg/m²"));
   }
 
   @Test
-  public void testTokenize() {
+  void testTokenize() {
     Set<String> tokenize = unitResolverImpl.tokenize("area density (kg/m^²)");
-    Assert.assertTrue(newHashSet("area", "density", "kg/m^²").containsAll(tokenize));
+    assertTrue(newHashSet("area", "density", "kg/m^²").containsAll(tokenize));
 
     Set<String> tokenize1 = unitResolverImpl.tokenize("area density (kg/m^2)");
-    Assert.assertTrue(newHashSet("area", "density", "kg/m^²").containsAll(tokenize1));
+    assertTrue(newHashSet("area", "density", "kg/m^²").containsAll(tokenize1));
 
     Set<String> tokenize2 = unitResolverImpl.tokenize("area density (kg/m2)");
-    Assert.assertTrue(newHashSet("area", "density", "kg/m²").containsAll(tokenize2));
+    assertTrue(newHashSet("area", "density", "kg/m²").containsAll(tokenize2));
 
     Set<String> tokenize3 = unitResolverImpl.tokenize("area 2 density2 (kg/m2)");
-    Assert.assertTrue(newHashSet("area", "density²", "kg/m²").containsAll(tokenize3));
+    assertTrue(newHashSet("area", "density²", "kg/m²").containsAll(tokenize3));
 
     Set<String> tokenize4 = unitResolverImpl.tokenize("area 2 density 2 (kg/m2)");
-    assertEquals(tokenize4.size(), 3);
-    Assert.assertFalse(tokenize4.containsAll(newHashSet("area", "density", "²", "kg/m²")));
+    assertEquals(3, tokenize4.size());
+    assertFalse(tokenize4.containsAll(newHashSet("area", "density", "²", "kg/m²")));
   }
 
   @Test
-  public void testIsUnitEmpty() {
+  void testIsUnitEmpty() {
     Unit<?> unit = Unit.valueOf("");
     Unit<?> unit1 = Unit.valueOf("¹");
     Unit<?> unitKg = Unit.valueOf("kg");
-    Assert.assertTrue(unitResolverImpl.isUnitEmpty(null));
-    Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit));
-    Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit1));
-    Assert.assertFalse(unitResolverImpl.isUnitEmpty(unitKg));
+    assertTrue(unitResolverImpl.isUnitEmpty(null));
+    assertTrue(unitResolverImpl.isUnitEmpty(unit));
+    assertTrue(unitResolverImpl.isUnitEmpty(unit1));
+    assertFalse(unitResolverImpl.isUnitEmpty(unitKg));
   }
 
   @Test
-  public void testReplaceIllegalChars() {
+  void testReplaceIllegalChars() {
     assertEquals(
-        unitResolverImpl.replaceIllegalChars("area density (kg/m^2)"), "area density  kg/m^2 ");
+        "area density  kg/m^2 ", unitResolverImpl.replaceIllegalChars("area density (kg/m^2)"));
     assertEquals(
-        unitResolverImpl.replaceIllegalChars("area density (kg/m²)"), "area density  kg/m2 ");
+        "area density  kg/m2 ", unitResolverImpl.replaceIllegalChars("area density (kg/m²)"));
   }
 
   @Test
-  public void resolveUnitLabelNoUnit() {
+  void resolveUnitLabelNoUnit() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight").setDescription(null);
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
@@ -87,7 +89,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionNoUnit() {
+  void resolveUnitLabelNoUnitDescriptionNoUnit() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight").setDescription("weight");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
@@ -95,23 +97,23 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void resolveUnitLabelWithUnit_directUnitMatch() {
+  void resolveUnitLabelWithUnit_directUnitMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight (kg)").setDescription(null);
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("kg"));
+    assertEquals(valueOf("kg"), unit);
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch() {
+  void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("label").setDescription("height (cm)");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("cm"));
+    assertEquals(valueOf("cm"), unit);
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2() {
+  void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2() {
     Attribute attr =
         attrMetaFactory
             .create()
@@ -119,11 +121,11 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setLabel("label")
             .setDescription("area density (kg/m2)");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("kg/m²"));
+    assertEquals(valueOf("kg/m²"), unit);
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2() {
+  void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2() {
     Attribute attr =
         attrMetaFactory
             .create()
@@ -131,11 +133,11 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setLabel("label")
             .setDescription("area density (kg/m^2)");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("kg/m²"));
+    assertEquals(valueOf("kg/m²"), unit);
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2() {
+  void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2() {
     Attribute attr =
         attrMetaFactory
             .create()
@@ -143,19 +145,19 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setLabel("label")
             .setDescription("area density (kg/m²)");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("kg/m²"));
+    assertEquals(valueOf("kg/m²"), unit);
   }
 
   @Test
-  public void resolveUnitLabelWithUnit_unitOntologyMatch() {
+  void resolveUnitLabelWithUnit_unitOntologyMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight (kilogram)").setDescription(null);
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("kg"));
+    assertEquals(valueOf("kg"), unit);
   }
 
   @Test
-  public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch() {
+  void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch() {
     Attribute attr =
         attrMetaFactory
             .create()
@@ -163,18 +165,18 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setLabel("label")
             .setDescription("height (centimeter)");
     Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
-    assertEquals(unit, Unit.valueOf("cm"));
+    assertEquals(valueOf("cm"), unit);
   }
 
   @Configuration
   static class Config {
     @Bean
-    public UnitResolverImpl unitResolverImpl() {
+    UnitResolverImpl unitResolverImpl() {
       return new UnitResolverImpl(ontologyService());
     }
 
     @Bean
-    public OntologyService ontologyService() {
+    OntologyService ontologyService() {
       String ontologyId = "id";
       String kgTerm = "kilogram";
       String cmTerm = "centimeter";

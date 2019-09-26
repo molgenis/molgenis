@@ -8,7 +8,7 @@ We have several backend services which we run to debug and test the MOLGENIS bac
 * Optional: [OpenCPU 2.1](https://www.opencpu.org) and [R 3.5.x](https://www.r-project.org/) (enables R scripting feature)	
 * Optional: [Python 3.6](https://www.python.org) (enables Python scripting feature)
 
-> **IMPORTANT:** to switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
+> **IMPORTANT**: To switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
 
 ## Deploy
 You first need to configure the specifics for your OS.
@@ -19,12 +19,12 @@ Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-mac
 **For Windows**
 Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows
 
-> **IMPORTANT**: Go to Windows Docker Desktop App and check ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
+> **IMPORTANT**: Go to Windows Docker Desktop App and check if this option is checked: ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
 
 ### Run
-You can create it all up by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and click on **Create 'dev-env: Compose...'**.
+You can create a new run-configuration by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and click on **Create 'dev-env: Compose...'**.
 
-> **Please be advised**: when you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
+> **IMPORTANT**: When you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
 
 You need to add the following environments variables to the *Run configuration*:
 

@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.style.Style;
 import org.molgenis.core.ui.style.StyleService;
@@ -17,11 +19,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
-public class ThemeManagerControllerTest {
+class ThemeManagerControllerTest {
   @Mock private StyleService styleService;
 
   private MockMvc mockMvc;
@@ -30,8 +30,8 @@ public class ThemeManagerControllerTest {
   private String bootstrap4FileName = "bs4-file-name.min.css";
   private MockMultipartFile bs3File, bs4File;
 
-  @BeforeMethod
-  public void before() {
+  @BeforeEach
+  void before() {
     initMocks(this);
     ThemeManagerController themeManagerController = new ThemeManagerController(styleService);
 
@@ -47,7 +47,7 @@ public class ThemeManagerControllerTest {
   }
 
   @Test
-  public void addBootstrap3ThemeOnly() throws Exception {
+  void addBootstrap3ThemeOnly() throws Exception {
     Style newStyle = Style.createLocal("new-style");
     when(styleService.addStyle(eq(bootstrap3FileName), eq(bootstrap3FileName), any(), any(), any()))
         .thenReturn(newStyle);
@@ -61,7 +61,7 @@ public class ThemeManagerControllerTest {
   }
 
   @Test
-  public void addBootstrap3and4Theme() throws Exception {
+  void addBootstrap3and4Theme() throws Exception {
     Style newStyle = Style.createLocal("new-style");
     when(styleService.addStyle(
             eq(bootstrap3FileName), eq(bootstrap3FileName), any(), eq(bootstrap4FileName), any()))

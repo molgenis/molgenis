@@ -34,9 +34,7 @@ When developing, you can run the integration tests as usual.
 
 Please boot the backend services with the docker-compose stack in the source-tree.
 * Navigate to molgenis-platform-integration-tests/integ-test-env
-* **For Windows:** change in the ```.env``` file the backend to ```BACKEND=./backend-for-windows.conf```
-* Right click the ```docker-compose.yaml```
-* Click on *Create 'integ-test-env: Compose...'*
+* Right click the ```docker-compose.yaml```, click on *Create 'integ-test-env: Compose...'*
 * Check the option ```--build, force build images```
 * Add the following variables to the environment:
 
@@ -64,11 +62,18 @@ test runs.
 > **This won't work!**
 
 You should disable this feature:
-1. Go to preferences / Build, Execution, Deployment / Maven / Running Tests
-2. Uncheck the box labelled `systemPropertyVariables`
+- Navigate to the *Running Tests* properties
+  - **For Windows**
+
+    Go to *Settings / Build, Execution, Deployment / Build tools / Maven / Running Tests*
+
+  - **For Mac**
+
+    Go to *Preferences / Settings / Build, Execution, Deployment / Build tools / Maven / Running Tests*
+
+- Uncheck the box labelled `systemPropertyVariables`
 
 ## When building pull requests
-
 A travis config file is added that shows travis how to build molgenis and execute the
 integration tests.
 These will be run on travis-ci.org when you make a pull request to the github molgenis/molgenis

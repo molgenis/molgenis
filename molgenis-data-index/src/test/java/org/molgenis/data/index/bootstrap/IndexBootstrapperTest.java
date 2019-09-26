@@ -2,6 +2,7 @@ package org.molgenis.data.index.bootstrap;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -10,15 +11,16 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -43,11 +45,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {IndexBootstrapperTest.Config.class})
-public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
+class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private Config config;
   @Autowired private MetaDataService metaDataService;
   @Autowired private IndexService indexService;
@@ -57,12 +58,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
 
   private IndexBootstrapper indexBootstrapper;
 
-  public IndexBootstrapperTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     config.resetMocks();
 
     indexBootstrapper =
@@ -75,7 +72,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testStartupNoIndex() {
+  void testStartupNoIndex() {
     @SuppressWarnings("unchecked")
     Repository<Entity> repo1 = mock(Repository.class);
     EntityType entityType1 = mock(EntityType.class);
@@ -102,7 +99,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testStartupFailedIndexJobs() {
+  void testStartupFailedIndexJobs() {
     when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
     IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
     when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
@@ -140,12 +137,12 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
 
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).deleteAll(eq(IndexActionMetadata.INDEX_ACTION), captor.capture());
-    assertEquals(captor.getValue().collect(toList()), singletonList("actionId"));
+    assertEquals(singletonList("actionId"), captor.getValue().collect(toList()));
     verify(dataService).deleteById(IndexActionGroupMetadata.INDEX_ACTION_GROUP, "id");
   }
 
   @Test
-  public void testStartupFailedIndexJobsUnknownEntityType() {
+  void testStartupFailedIndexJobsUnknownEntityType() {
     when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
     IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
     when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
@@ -179,7 +176,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testStartupAllIsFine() {
+  void testStartupAllIsFine() {
     when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
 
     when(dataService.findAll(
@@ -194,7 +191,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Mock IndexService indexService;
 
     @Mock IndexActionRegisterService indexActionRegisterService;
@@ -203,22 +200,22 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
 
     @Mock AttributeMetadata attributeMetadata;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public IndexService indexService() {
+    IndexService indexService() {
       return indexService;
     }
 
     @Bean
-    public IndexActionRegisterService indexActionRegisterService() {
+    IndexActionRegisterService indexActionRegisterService() {
       return indexActionRegisterService;
     }
 
     @Bean
-    public MetaDataService metaDataService() {
+    MetaDataService metaDataService() {
       return metaDataService;
     }
 

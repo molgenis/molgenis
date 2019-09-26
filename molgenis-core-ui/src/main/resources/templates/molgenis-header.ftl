@@ -60,9 +60,6 @@
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
-        <#-- Add spacing to body to show content below fixed-top navigation bar -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/menu/fixed-top-menu.css"/>" type="text/css">
-
         <#-- Make footer sticky -->
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
 
@@ -72,9 +69,10 @@
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
-        <#-- Include molgenis-menu css -->
-        <link rel="stylesheet" href="/@molgenis-ui/menu/dist/context.css" type="text/css">
+        <#-- Include context css -->
+        <link rel="stylesheet" href="/@molgenis-ui/legacy-lib/dist/context.css" type="text/css">
 
+        <script type="text/javascript" src="/@molgenis-ui/legacy-lib/dist/require.js"></script>
     </#if>
 
     <#-- Load css specified via settigns -->
@@ -99,27 +97,49 @@
             <@topmenu menu plugin_id pluginid_with_query_string/>
         </#if>
     <#else>
-        <#assign menu=gson.toJson(menu)>
+        <#-- Render the Vue context components -->
+        <div id="molgenis-menu"></div>
+        <div id="cookiewall"></div>
+        <script>
+          <#assign menu=gson.toJson(menu)>
 
-        <#-- VUE -->
-        <script type="text/javascript">
-            window.molgenisMenu = {
-                menu: ${menu}
-                <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
-                <#if app_settings.logoTopHref??>, topLogoMaxHeight: ${app_settings.logoTopMaxHeight}</#if>
-                <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
-                <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
-                , authenticated: ${authenticated?c}
-                , loginHref: '/login'
-                , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
-            }
+          requirejs.config({
+            baseUrl: '/@molgenis-ui/legacy-lib/dist'
+          });
 
-            window.cookieWall = ${cookieWall?c}
+          requirejs(["context.umd.min", "vue.min"], function(context, Vue) {
+            new Vue({
+              render: function(createElement) {
+                const propsData = {
+                  props: {
+                    molgenisMenu: {
+                      menu: ${menu},
+                      <#if app_settings.logoTopHref??>topLogo: '${app_settings.logoTopHref}', </#if>
+                      <#if app_settings.logoTopHref??>topLogoMaxHeight: ${app_settings.logoTopMaxHeight}, </#if>
+                      <#if app_settings.logoNavBarHref?has_content>navBarLogo: '${app_settings.logoNavBarHref}', </#if>
+                      <#if plugin_id??>selectedPlugin: '${plugin_id}', </#if>
+                      authenticated: ${authenticated?c},
+                      loginHref: '/login',
+                      helpLink: {
+                        label: 'Help',
+                        href: 'https://molgenis.gitbooks.io/molgenis/content/'
+                      }
+                    }
+                  }
+                };
+                return createElement(context.default.HeaderComponent, propsData);
+              }
+            }).$mount('#molgenis-menu');
+
+            <#if cookieWall>
+            new Vue ({
+              render: function(createElement) {
+                return createElement(context.default.CookieWall);
+              }
+            }).$mount('#cookiewall');
+            </#if>
+          });
         </script>
-
-        <#-- Include the Vue version of the molgenis menu  -->
-        <div id="molgenis-site-menu"></div>
-        <script type=text/javascript src="/@molgenis-ui/menu/dist/context.umd.js"></script>
     </#if>
 
 <#-- Start application content -->

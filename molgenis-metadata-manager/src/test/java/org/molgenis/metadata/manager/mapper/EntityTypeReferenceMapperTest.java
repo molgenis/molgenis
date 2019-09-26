@@ -1,48 +1,49 @@
 package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier.create;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityTypeReferenceMapperTest {
+class EntityTypeReferenceMapperTest {
   @Mock private EntityTypeMetadata entityTypeMetadata;
 
   @Mock private DataService dataService;
 
   private EntityTypeReferenceMapper entityTypeReferenceMapper;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     MockitoAnnotations.initMocks(this);
     entityTypeReferenceMapper = new EntityTypeReferenceMapper(entityTypeMetadata, dataService);
   }
 
   @Test
-  public void testToEntityTypeReference() throws Exception {
+  void testToEntityTypeReference() {
     String id = "id";
     EntityType entityType = entityTypeReferenceMapper.toEntityTypeReference(id);
-    assertEquals(entityType.getIdValue(), id);
+    assertEquals(id, entityType.getIdValue());
   }
 
   @Test
-  public void testToEntityTypeReferenceNull() throws Exception {
+  void testToEntityTypeReferenceNull() {
     assertNull(entityTypeReferenceMapper.toEntityTypeReference(null));
   }
 
   @Test
-  public void testToEditorEntityTypeIdentifiers() {
+  void testToEditorEntityTypeIdentifiers() {
     String id = "id";
     String label = "label";
     EntityType entityType = mock(EntityType.class);
@@ -50,11 +51,11 @@ public class EntityTypeReferenceMapperTest {
     when(entityType.getLabel()).thenReturn(label);
     List<EditorEntityTypeIdentifier> editorEntityTypeIdentifiers =
         entityTypeReferenceMapper.toEditorEntityTypeIdentifiers(of(entityType));
-    assertEquals(editorEntityTypeIdentifiers, of(EditorEntityTypeIdentifier.create(id, label)));
+    assertEquals(of(create(id, label)), editorEntityTypeIdentifiers);
   }
 
   @Test
-  public void testToEditorEntityTypeIdentifier() {
+  void testToEditorEntityTypeIdentifier() {
     String id = "id";
     String label = "label";
     EntityType entityType = mock(EntityType.class);
@@ -62,6 +63,6 @@ public class EntityTypeReferenceMapperTest {
     when(entityType.getLabel()).thenReturn(label);
     EditorEntityTypeIdentifier editorEntityTypeIdentifier =
         entityTypeReferenceMapper.toEditorEntityTypeIdentifier(entityType);
-    assertEquals(editorEntityTypeIdentifier, EditorEntityTypeIdentifier.create(id, label));
+    assertEquals(create(id, label), editorEntityTypeIdentifier);
   }
 }

@@ -1,24 +1,26 @@
 package org.molgenis.data.security.exception;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.molgenis.util.exception.ExceptionMessageTest;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-security");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ObjectIdentity objectIdentity = Mockito.mock(ObjectIdentity.class);
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
@@ -30,19 +32,17 @@ public class UpdatePermissionDeniedExceptionTest extends ExceptionMessageTest {
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     ObjectIdentity objectIdentity = Mockito.mock(ObjectIdentity.class);
     Mockito.when(objectIdentity.getIdentifier()).thenReturn("identifier");
     Mockito.when(objectIdentity.getType()).thenReturn("type");
     InsufficientPermissionsException ex =
         new InsufficientPermissionsException(
             objectIdentity, Collections.singletonList("superuser"));
-    assertEquals(ex.getMessage(), "type:type, identifier:identifier, roles:[superuser]");
+    assertEquals("type:type, identifier:identifier, roles:[superuser]", ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en",

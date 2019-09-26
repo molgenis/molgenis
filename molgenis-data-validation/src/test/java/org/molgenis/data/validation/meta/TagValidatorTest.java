@@ -1,33 +1,35 @@
 package org.molgenis.data.validation.meta;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TagValidatorTest {
+class TagValidatorTest {
   private TagValidator tagValidator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     tagValidator = new TagValidator();
   }
 
   @Test
-  public void validateValid() throws Exception {
+  void validateValid() {
     Tag tag = mock(Tag.class);
     when(tag.getRelationIri()).thenReturn(Relation.isRealizationOf.getIRI());
     tagValidator.validate(tag);
   }
 
-  @Test(expectedExceptions = MolgenisValidationException.class)
-  public void validateInvalid() throws Exception {
+  @SuppressWarnings("deprecation")
+  @Test
+  void validateInvalid() {
     Tag tag = mock(Tag.class);
     when(tag.getRelationIri()).thenReturn("blaat");
-    tagValidator.validate(tag);
+    assertThrows(MolgenisValidationException.class, () -> tagValidator.validate(tag));
   }
 }

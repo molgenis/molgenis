@@ -1,6 +1,8 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -8,30 +10,29 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
 
 import java.util.Iterator;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class DynamicEntityTest {
-  @DataProvider(name = "setNoExceptionProvider")
-  public static Iterator<Object[]> setNoExceptionProvider() {
+class DynamicEntityTest {
+  static Iterator<Object[]> setNoExceptionProvider() {
     return newArrayList(
             new Object[] {ONE_TO_MANY, mock(Iterable.class)},
             new Object[] {XREF, mock(Entity.class)})
         .iterator();
   }
 
-  @Test(dataProvider = "setNoExceptionProvider")
-  public void setNoException(AttributeType attrType, Object value) {
-    set(attrType, value); // test if no exception occurs
+  @ParameterizedTest
+  @MethodSource("setNoExceptionProvider")
+  void setNoException(AttributeType attrType, Object value) {
+    assertDoesNotThrow(() -> set(attrType, value));
   }
 
-  @DataProvider(name = "setExceptionProvider")
-  public static Iterator<Object[]> setExceptionProvider() {
+  static Iterator<Object[]> setExceptionProvider() {
     return newArrayList(
             new Object[] {ONE_TO_MANY, mock(Entity.class)},
             new Object[] {XREF, mock(Iterable.class)},
@@ -39,9 +40,10 @@ public class DynamicEntityTest {
         .iterator();
   }
 
-  @Test(dataProvider = "setExceptionProvider", expectedExceptions = MolgenisDataException.class)
-  public void setException(AttributeType attrType, Object value) throws Exception {
-    set(attrType, value);
+  @ParameterizedTest
+  @MethodSource("setExceptionProvider")
+  void setException(AttributeType attrType, Object value) {
+    assertThrows(MolgenisDataException.class, () -> set(attrType, value));
   }
 
   private static void set(AttributeType attrType, Object value) {

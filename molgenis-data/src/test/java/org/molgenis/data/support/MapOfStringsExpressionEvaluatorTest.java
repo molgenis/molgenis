@@ -1,5 +1,8 @@
 package org.molgenis.data.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
@@ -7,11 +10,11 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.gson.JsonSyntaxException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -22,21 +25,16 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = MapOfStringsExpressionEvaluatorTest.Config.class)
-public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
+class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
   private Entity entity;
   private EntityType emd;
   private EntityType refEmd;
 
   @Autowired private EntityTypeFactory entityTypeFactory;
   @Autowired private AttributeFactory attributeFactory;
-
-  public MapOfStringsExpressionEvaluatorTest() {
-    super(Strictness.WARN);
-  }
 
   private EntityType createDynamicLocationMetaData() {
     return entityTypeFactory
@@ -56,8 +54,8 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
         .addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
   }
 
-  @BeforeMethod
-  public void createEntity() {
+  @BeforeEach
+  void createEntity() {
     emd = createDynamicSourceMetaData();
     refEmd = createDynamicLocationMetaData();
 
@@ -69,19 +67,19 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression() {
+  void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     try {
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected NPE");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "Attribute has no expression.");
+      assertEquals("Attribute has no expression.", expected.getMessage());
     }
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity() {
+  void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
     when(amd.getDataType()).thenReturn(XREF);
     when(amd.getExpression()).thenReturn("{'a':b}");
@@ -89,12 +87,12 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected IllegalArgumentException.");
     } catch (NullPointerException expected) {
-      assertEquals(expected.getMessage(), "refEntity not specified.");
+      assertEquals("refEntity not specified.", expected.getMessage());
     }
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap() {
+  void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
     when(amd.getDataType()).thenReturn(XREF);
     when(amd.hasRefEntity()).thenReturn(true);
@@ -109,7 +107,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings() {
+  void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(XREF);
     when(amd.hasRefEntity()).thenReturn(true);
@@ -120,13 +118,13 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Nested expressions not supported, expression must be Map<String,String>.");
+          "Nested expressions not supported, expression must be Map<String,String>.",
+          expected.getMessage());
     }
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist() {
+  void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.hasRefEntity()).thenReturn(true);
@@ -136,12 +134,12 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
       new MapOfStringsExpressionEvaluator(amd, emd);
       fail("Expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
-      assertEquals(expected.getMessage(), "Unknown target attribute: hallo.");
+      assertEquals("Unknown target attribute: hallo.", expected.getMessage());
     }
   }
 
   @Test
-  public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist() {
+  void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.hasRefEntity()).thenReturn(true);
@@ -152,13 +150,13 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
       fail("Expected illegal argument exception");
     } catch (IllegalArgumentException expected) {
       assertEquals(
-          expected.getMessage(),
-          "Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.");
+          "Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.",
+          expected.getMessage());
     }
   }
 
   @Test
-  public void testEvaluate() {
+  void testEvaluate() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(XREF);
     when(amd.hasRefEntity()).thenReturn(true);

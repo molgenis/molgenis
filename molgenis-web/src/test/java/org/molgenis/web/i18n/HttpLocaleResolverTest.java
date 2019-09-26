@@ -1,60 +1,60 @@
 package org.molgenis.web.i18n;
 
 import static java.util.Locale.GERMAN;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {HttpLocaleResolverTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class HttpLocaleResolverTest extends AbstractMockitoTestNGSpringContextTests {
+@SecurityTestExecutionListeners
+class HttpLocaleResolverTest extends AbstractMockitoSpringContextTests {
   @Mock private UserLocaleResolver userLocaleResolver;
   @Mock private FallbackLocaleSupplier fallbackLocaleSupplier;
   @Mock private UserService userService;
   private HttpLocaleResolver httpLocaleResolver;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     httpLocaleResolver =
         new HttpLocaleResolver(userLocaleResolver, fallbackLocaleSupplier, userService);
   }
 
   @WithMockUser
   @Test
-  public void testResolveLocaleAuthenticated() {
+  void testResolveLocaleAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     String username = "user";
     when(userLocaleResolver.resolveLocale(username)).thenReturn(Locale.GERMAN);
-    assertEquals(httpLocaleResolver.resolveLocale(httpServletRequest), Locale.GERMAN);
+    assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
   }
 
   @Test
-  public void testResolveLocaleNotAuthenticated() {
+  void testResolveLocaleNotAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(fallbackLocaleSupplier.get()).thenReturn(Locale.GERMAN);
-    assertEquals(httpLocaleResolver.resolveLocale(httpServletRequest), Locale.GERMAN);
+    assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
   }
 
   @WithMockUser
   @Test
-  public void testSetLocaleAuthenticated() {
+  void testSetLocaleAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
     Locale locale = GERMAN;
@@ -70,7 +70,7 @@ public class HttpLocaleResolverTest extends AbstractMockitoTestNGSpringContextTe
 
   @WithMockUser
   @Test
-  public void testSetLocaleAuthenticatedUnchangedLanguage() {
+  void testSetLocaleAuthenticatedUnchangedLanguage() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
     Locale locale = GERMAN;
@@ -84,26 +84,33 @@ public class HttpLocaleResolverTest extends AbstractMockitoTestNGSpringContextTe
   }
 
   @WithMockUser
-  @Test(expectedExceptions = UnknownUserException.class)
-  public void testSetLocaleAuthenticatedUnknownUser() {
+  @Test
+  void testSetLocaleAuthenticatedUnknownUser() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-    httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.GERMAN);
+    assertThrows(
+        UnknownUserException.class,
+        () -> httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.GERMAN));
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void testSetLocaleNotAuthenticated() {
+  @Test
+  void testSetLocaleNotAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-    httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.GERMAN);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.GERMAN));
   }
 
   @WithMockUser
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void testSetLocaleUnusedLanguage() {
+  @Test
+  void testSetLocaleUnusedLanguage() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-    httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.CHINESE);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () ->
+            httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, Locale.CHINESE));
   }
 
   static class Config {}

@@ -1,87 +1,70 @@
 package org.molgenis.jobs.schedule;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.quality.Strictness;
-import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.validation.JsonValidator;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
-  private ScheduledJobRepositoryDecorator scheduledJobRepositoryDecorator;
+@SecurityTestExecutionListeners
+class ScheduledJobRepositoryDecoratorTest extends AbstractMockitoSpringContextTests {
+  private static final String SCHEMA =
+      "{\"properties\": {\n" + "\"text\": {\n\"type\": \"string\"}}";
+  private static final String PARAMETERS = "{\"text\": \"test\"}";
 
   @Mock private JobScheduler jobScheduler;
   @Mock private Repository<ScheduledJob> delegateRepository;
   @Mock private ScheduledJob scheduledJob;
   @Mock private JsonValidator jsonValidator;
+  private ScheduledJobRepositoryDecorator scheduledJobRepositoryDecorator;
 
-  private static String schema = "{\"properties\": {\n" + "\"text\": {\n\"type\": \"string\"}}";
-  private static String parameters = "{\"text\": \"test\"}";
-
-  @Captor private ArgumentCaptor<Stream<ScheduledJob>> jobStreamCaptor;
-
-  public ScheduledJobRepositoryDecoratorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeClass
-  public void beforeClass() {
-    initMocks(this);
-  }
-
-  @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUpBeforeMethod() {
-    reset(jobScheduler, delegateRepository, scheduledJob, jsonValidator);
-
-    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
-    when(scheduledJobType.getSchema()).thenReturn(schema);
-    when(scheduledJob.getParameters()).thenReturn(parameters);
-    when(scheduledJob.getType()).thenReturn(scheduledJobType);
-
+  @BeforeEach
+  void setUpBeforeMethod() {
     scheduledJobRepositoryDecorator =
         new ScheduledJobRepositoryDecorator(delegateRepository, jobScheduler, jsonValidator);
   }
 
   @Test
-  public void testQuery() throws Exception {
+  void testQuery() {
     assertEquals(
-        scheduledJobRepositoryDecorator.query().getRepository(), scheduledJobRepositoryDecorator);
+        scheduledJobRepositoryDecorator, scheduledJobRepositoryDecorator.query().getRepository());
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+    when(scheduledJobType.getSchema()).thenReturn(SCHEMA);
+    when(scheduledJob.getParameters()).thenReturn(PARAMETERS);
+    when(scheduledJob.getType()).thenReturn(scheduledJobType);
+
     scheduledJobRepositoryDecorator.update(scheduledJob);
-    verify(jsonValidator).validate(parameters, schema);
+    verify(jsonValidator).validate(PARAMETERS, SCHEMA);
     verify(delegateRepository).update(scheduledJob);
     verify(jobScheduler).schedule(scheduledJob);
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     when(scheduledJob.getId()).thenReturn("id");
     scheduledJobRepositoryDecorator.delete(scheduledJob);
     verify(delegateRepository).delete(scheduledJob);
@@ -89,12 +72,12 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
   }
 
   @Test
-  public void testDeleteFails() {
+  void testDeleteFails() {
     doThrow(new MolgenisDataException("Failed")).when(delegateRepository).delete(scheduledJob);
     when(scheduledJob.getId()).thenReturn("id");
     try {
       scheduledJobRepositoryDecorator.delete(scheduledJob);
-      Assert.fail("delete method should rethrow exception from delegate repository");
+      fail("delete method should rethrow exception from delegate repository");
     } catch (MolgenisDataException expected) {
     }
     verifyNoMoreInteractions(jobScheduler);
@@ -102,22 +85,37 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
 
   @Test
   @WithMockUser("admin")
-  public void testSetUsernameAdd() {
+  void testSetUsernameAdd() {
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+    when(scheduledJobType.getSchema()).thenReturn(SCHEMA);
+    when(scheduledJob.getParameters()).thenReturn(PARAMETERS);
+    when(scheduledJob.getType()).thenReturn(scheduledJobType);
+
     scheduledJobRepositoryDecorator.add(scheduledJob);
     verify(scheduledJob).setUser("admin");
   }
 
   @Test
   @WithMockUser("other_user")
-  public void testSetUsernameUpdate() {
-    when(scheduledJob.getUser()).thenReturn("admin");
+  void testSetUsernameUpdate() {
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+    when(scheduledJobType.getSchema()).thenReturn(SCHEMA);
+    when(scheduledJob.getParameters()).thenReturn(PARAMETERS);
+    when(scheduledJob.getType()).thenReturn(scheduledJobType);
+
     scheduledJobRepositoryDecorator.update(scheduledJob);
     verify(scheduledJob).setUser("other_user");
   }
 
   @SuppressWarnings("unchecked")
-  @Test(enabled = false) // FIXME
-  public void testDeleteStreamFails() {
+  @Disabled
+  @Test
+  void testDeleteStreamFails() {
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+    when(scheduledJobType.getSchema()).thenReturn(SCHEMA);
+    when(scheduledJob.getParameters()).thenReturn(PARAMETERS);
+    when(scheduledJob.getType()).thenReturn(scheduledJobType);
+
     doAnswer(
             (InvocationOnMock invocation) -> {
               Stream<ScheduledJob> jobStream = invocation.getArgument(0);
@@ -129,7 +127,7 @@ public class ScheduledJobRepositoryDecoratorTest extends AbstractMolgenisSpringT
     when(scheduledJob.getId()).thenReturn("id");
     try {
       scheduledJobRepositoryDecorator.delete(Stream.of(scheduledJob));
-      Assert.fail("delete method should rethrow exception from delegate repository");
+      fail("delete method should rethrow exception from delegate repository");
     } catch (MolgenisDataException expected) {
     }
 

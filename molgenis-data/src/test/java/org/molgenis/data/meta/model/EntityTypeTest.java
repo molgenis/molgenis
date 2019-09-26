@@ -1,8 +1,15 @@
 package org.molgenis.data.meta.model;
 
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -15,21 +22,16 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -38,19 +40,20 @@ import org.testng.annotations.Test;
       EntityTypeFactory.class,
       MetadataTestConfig.class
     })
-public class EntityTypeTest extends AbstractSystemEntityTest {
+class EntityTypeTest extends AbstractSystemEntityTest {
 
   @Autowired EntityTypeMetadata metadata;
   @Autowired EntityTypeFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, EntityType.class, factory, getOverriddenReturnTypes(), getExcludedAttrs(), true);
   }
 
   @Test
-  public void addSequenceNumberNull() {
+  void addSequenceNumberNull() {
     Attribute attr1 = mock(Attribute.class);
     Attribute attr2 = mock(Attribute.class);
     Attribute attr3 = mock(Attribute.class);
@@ -66,7 +69,7 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void addSequenceNumberNullAndOtherNull() {
+  void addSequenceNumberNullAndOtherNull() {
     Attribute attr1 = mock(Attribute.class);
     Attribute attr2 = mock(Attribute.class);
     Attribute attr3 = mock(Attribute.class);
@@ -82,19 +85,19 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void setLabel() {
+  void setLabel() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     doReturn(strAttr).when(entityTypeMeta).getAttribute(LABEL);
     EntityType entityType = new EntityType(entityTypeMeta);
     String label = "label";
     entityType.setLabel(label);
-    assertEquals(entityType.getLabel(), label);
-    assertEquals(entityType.getString(LABEL), label);
+    assertEquals(label, entityType.getLabel());
+    assertEquals(label, entityType.getString(LABEL));
   }
 
   @Test
-  public void setLabelNull() {
+  void setLabelNull() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     EntityType entityType = new EntityType(entityTypeMeta);
     assertNull(entityType.getLabel());
@@ -102,7 +105,7 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void newInstanceShallowCopy() {
+  void newInstanceShallowCopy() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute xrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
@@ -151,13 +154,13 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
     EntityType entityTypeCopy = EntityType.newInstance(entityType);
     assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
-    assertEquals(entityTypeCopy.getId(), "myPackage_myEntity");
+    assertEquals("myPackage_myEntity", entityTypeCopy.getId());
     assertSame(entityTypeCopy.getPackage(), package_);
-    assertEquals(entityTypeCopy.getLabel(), "label");
-    assertEquals(entityTypeCopy.getDescription(), "description");
+    assertEquals("label", entityTypeCopy.getLabel());
+    assertEquals("description", entityTypeCopy.getDescription());
 
     List<Attribute> ownAttrsCopy = newArrayList(entityTypeCopy.getOwnAllAttributes());
-    assertEquals(ownAttrsCopy.size(), 4);
+    assertEquals(4, ownAttrsCopy.size());
     assertSame(ownAttrsCopy.get(0), attrId);
     assertSame(ownAttrsCopy.get(1), attrLabel);
     assertSame(ownAttrsCopy.get(2), attrCompound);
@@ -167,7 +170,7 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
     List<Attribute> ownLookAttrsCopy = newArrayList(entityTypeCopy.getOwnLookupAttributes());
 
-    assertEquals(ownLookAttrsCopy.size(), 2);
+    assertEquals(2, ownLookAttrsCopy.size());
     assertSame(ownLookAttrsCopy.get(0), attrId);
     assertSame(ownLookAttrsCopy.get(1), attrLabel);
 
@@ -175,18 +178,15 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
     assertSame(entityTypeCopy.getExtends(), extendsEntityType);
 
     List<Tag> tagsCopy = newArrayList(entityTypeCopy.getTags());
-    assertEquals(tagsCopy.size(), 2);
+    assertEquals(2, tagsCopy.size());
     assertSame(tagsCopy.get(0), tag0);
     assertSame(tagsCopy.get(1), tag1);
-    assertEquals(entityTypeCopy.getBackend(), "backend");
-    assertEquals(entityTypeCopy.getIndexingDepth(), 3);
+    assertEquals("backend", entityTypeCopy.getBackend());
+    assertEquals(3, entityTypeCopy.getIndexingDepth());
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed")
-  public void addAttributeWithDuplicateName() {
+  @Test
+  void addAttributeWithDuplicateName() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     Attribute strAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
@@ -197,11 +197,16 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
     Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
     Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attrName").getMock();
     entityType.addAttribute(attr0);
-    entityType.addAttribute(attr1);
+
+    Exception exception =
+        assertThrows(MolgenisDataException.class, () -> entityType.addAttribute(attr1));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Entity \\[myEntity\\] already contains attribute with name \\[attrName\\], duplicate attribute names are not allowed");
   }
 
   @Test
-  public void addLabelAttributeSetsNillableFalse() {
+  void addLabelAttributeSetsNillableFalse() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     EntityType entityType = new EntityType(entityTypeMeta);
     Attribute attr = mock(Attribute.class);
@@ -212,7 +217,7 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testRemoveAttribute() {
+  void testRemoveAttribute() {
     EntityType entityTypeMeta = mockEntityTypeMeta();
     EntityType entityType = new EntityType(entityTypeMeta);
     Attribute mrefAttr = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
@@ -236,8 +241,8 @@ public class EntityTypeTest extends AbstractSystemEntityTest {
 
     entityType.removeAttribute(compoundAttr);
 
-    assertEquals(Iterables.size(entityType.getAllAttributes()), 1);
-    assertEquals(entityType.getAllAttributes().iterator().next(), normalAttr);
+    assertEquals(1, size(entityType.getAllAttributes()));
+    assertEquals(normalAttr, entityType.getAllAttributes().iterator().next());
   }
 
   private EntityType mockEntityTypeMeta() {

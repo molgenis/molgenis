@@ -2,6 +2,8 @@ package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -10,8 +12,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.export.mapper.PackageMapper.PACKAGE_ATTRS;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -30,10 +32,8 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EmxExportServiceImplTest extends AbstractMockitoTest {
+class EmxExportServiceImplTest extends AbstractMockitoTest {
 
   @Mock DataService dataService;
 
@@ -43,13 +43,13 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
 
   private EmxExportServiceImpl service;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     service = new EmxExportServiceImpl(dataService, contextMessageSource, timeZoneProvider);
   }
 
   @Test
-  public void testResolveMetadata() {
+  void testResolveMetadata() {
     String entityType1Id = "e1";
     String entityType2Id = "e2";
     String entityType3Id = "e3";
@@ -88,12 +88,12 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
         ImmutableMap.of(
             entityType1Id, entityType1, entityType2Id, entityType2, entityType3Id, entityType3);
 
-    assertEquals(packages, expectedPackages);
-    assertEquals(entityTypes, expectedEntityTypes);
+    assertEquals(expectedPackages, packages);
+    assertEquals(expectedEntityTypes, entityTypes);
   }
 
   @Test
-  public void writeEntityTypesTest() {
+  void writeEntityTypesTest() {
     EntityType entityType1 = mock(EntityType.class);
     EntityType entityType2 = mock(EntityType.class);
     EntityType entityType3 = mock(EntityType.class);
@@ -117,11 +117,11 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     Stream<List> argument = argumentCaptor.getValue();
     List<Object> actual = argument.collect(Collectors.toList()).get(0);
     // Check that the abstract entityType comes first in the stream to the writer
-    assertEquals(actual.get(0), "3");
+    assertEquals("3", actual.get(0));
   }
 
   @Test
-  public void testWritePackageSheet() {
+  void testWritePackageSheet() {
     String entityType1Id = "e1";
     EntityType entityType1 = mock(EntityType.class);
     String entityType2Id = "e2";

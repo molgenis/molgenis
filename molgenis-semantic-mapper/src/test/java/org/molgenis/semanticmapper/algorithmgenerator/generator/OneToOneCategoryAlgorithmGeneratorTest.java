@@ -2,6 +2,8 @@ package org.molgenis.semanticmapper.algorithmgenerator.generator;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -9,7 +11,10 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 
 import com.google.common.collect.Lists;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -20,11 +25,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -41,12 +44,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
 
   private DataService dataService;
 
-  public OneToOneCategoryAlgorithmGeneratorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void init() {
+  @BeforeEach
+  void init() {
     dataService = Mockito.mock(DataService.class);
 
     categoryAlgorithmGenerator = new OneToOneCategoryAlgorithmGenerator(dataService);
@@ -118,24 +117,24 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
   }
 
   @Test
-  public void testIsSuitable() {
-    Assert.assertTrue(
+  void testIsSuitable() {
+    assertTrue(
         categoryAlgorithmGenerator.isSuitable(targetAttribute, singletonList(sourceAttribute)));
   }
 
   @Test
-  public void testGenerate() {
+  void testGenerate() {
     String generatedAlgorithm =
         categoryAlgorithmGenerator.generate(
             targetAttribute, singletonList(sourceAttribute), targetEntityType, sourceEntityType);
     String expectedAlgorithm =
         "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
-    Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, generatedAlgorithm);
   }
 
   @Test
-  public void testGenerateRules() {
+  void testGenerateRules() {
     EntityType targetRefEntityType = createCategoricalRefEntityType("HOP_HYPERTENSION");
     Entity targetEntity1 =
         new DynamicEntity(
@@ -170,7 +169,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpri
     String expectedAlgorithm =
         "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
 
-    Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, generatedAlgorithm);
   }
 
   private EntityType createCategoricalRefEntityType(String entityTypeId) {

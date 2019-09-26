@@ -1,71 +1,72 @@
 package org.molgenis.data;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class FetchTest {
+class FetchTest {
   @Test
-  public void equalsTrue() {
+  void equalsTrue() {
     String field = "field";
     assertEquals(new Fetch().field(field), new Fetch().field(field));
   }
 
   @Test
-  public void equalsFalse() {
-    assertFalse(new Fetch().field("field0").equals(new Fetch().field("field1")));
+  void equalsFalse() {
+    assertNotEquals(new Fetch().field("field0"), new Fetch().field("field1"));
   }
 
   @Test
-  public void equalsSubFetchTrue() {
+  void equalsSubFetchTrue() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertTrue(new Fetch().field(field, subFetch).equals(new Fetch().field(field, subFetch)));
+    assertEquals(new Fetch().field(field, subFetch), new Fetch().field(field, subFetch));
   }
 
   @Test
-  public void equalsSubFetchFalse() {
+  void equalsSubFetchFalse() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertFalse(new Fetch().field(field, subFetch).equals(new Fetch().field(field)));
+    assertNotEquals(new Fetch().field(field, subFetch), new Fetch().field(field));
   }
 
   @Test
-  public void getFetch() {
+  void getFetch() {
     String field = "field";
     Fetch subFetch = new Fetch();
-    assertEquals(subFetch, new Fetch().field(field, subFetch).getFetch(field));
+    assertEquals(new Fetch().field(field, subFetch).getFetch(field), subFetch);
   }
 
   @Test
-  public void getFields() {
+  void getFields() {
     String field0 = "field0";
     String field1 = "field1";
     String field2 = "field2";
     Fetch fetch = new Fetch().field(field0).field(field1).field(field2);
 
-    assertEquals(Sets.newHashSet(field0, field1, field2), fetch.getFields());
+    assertEquals(fetch.getFields(), newHashSet(field0, field1, field2));
   }
 
   @Test
-  public void hasFieldTrue() {
+  void hasFieldTrue() {
     String field = "field";
     assertTrue(new Fetch().field(field).hasField(field));
   }
 
   @Test
-  public void hasFieldFalse() {
+  void hasFieldFalse() {
     String field = "field";
     assertFalse(new Fetch().hasField(field));
   }
 
   @Test
-  public void iterator() {
+  void iterator() {
     String field0 = "field0";
     String field1 = "field1";
     String field2 = "field2";

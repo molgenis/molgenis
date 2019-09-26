@@ -1,168 +1,169 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.molgenis.util.HugeMap.THRESHOLD;
 
-import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class HugeMapTest {
+class HugeMapTest {
   private HugeMap<String, String> hugeMap;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     hugeMap = new HugeMap<>();
   }
 
-  @AfterMethod
-  public void afterMethod() throws IOException {
+  @AfterEach
+  void afterMethod() throws IOException {
     hugeMap.close();
   }
 
   @Test
-  public void clear() {
+  void clear() {
     hugeMap.put("key", "value");
     hugeMap.clear();
     assertTrue(hugeMap.isEmpty());
   }
 
   @Test
-  public void clearLarge() {
+  void clearLarge() {
     fillToThreshold();
     hugeMap.clear();
     assertTrue(hugeMap.isEmpty());
   }
 
   @Test
-  public void containsKey() {
+  void containsKey() {
     hugeMap.put("key", "value");
     assertTrue(hugeMap.containsKey("key"));
     assertFalse(hugeMap.containsKey("value"));
   }
 
   @Test
-  public void containsKeyLarge() {
+  void containsKeyLarge() {
     fillToThreshold();
     assertTrue(hugeMap.containsKey("3"));
     assertFalse(hugeMap.containsKey("value"));
   }
 
   @Test
-  public void containsValue() {
+  void containsValue() {
     hugeMap.put("key", "value");
     assertTrue(hugeMap.containsValue("value"));
     assertFalse(hugeMap.containsValue("key"));
   }
 
   @Test
-  public void containsValueLarge() {
+  void containsValueLarge() {
     fillToThreshold();
     assertTrue(hugeMap.containsValue("3"));
     assertFalse(hugeMap.containsValue("key"));
   }
 
   @Test
-  public void entrySet() {
+  void entrySet() {
     hugeMap.put("key", "value");
-    assertEquals(hugeMap.entrySet().size(), 1);
+    assertEquals(1, hugeMap.entrySet().size());
   }
 
   @Test
-  public void entrySetLarge() {
+  void entrySetLarge() {
     fillToThreshold();
-    assertEquals(hugeMap.entrySet().size(), HugeMap.THRESHOLD);
+    assertEquals(THRESHOLD, hugeMap.entrySet().size());
   }
 
   @Test
-  public void get() {
+  void get() {
     hugeMap.put("key", "value");
-    assertEquals(hugeMap.get("key"), "value");
+    assertEquals("value", hugeMap.get("key"));
     assertNull(hugeMap.get("value"));
   }
 
   @Test
-  public void getLarge() {
+  void getLarge() {
     fillToThreshold();
-    assertEquals(hugeMap.get("2"), "2");
+    assertEquals("2", hugeMap.get("2"));
     assertNull(hugeMap.get("value"));
   }
 
   @Test
-  public void isEmpty() {
+  void isEmpty() {
     assertTrue(hugeMap.isEmpty());
     hugeMap.put("key", "value");
     assertFalse(hugeMap.isEmpty());
   }
 
   @Test
-  public void isEmptyLarge() {
+  void isEmptyLarge() {
     assertTrue(hugeMap.isEmpty());
     fillToThreshold();
     assertFalse(hugeMap.isEmpty());
   }
 
   @Test
-  public void keySet() {
+  void keySet() {
     hugeMap.put("key", "value");
-    assertEquals(hugeMap.keySet(), Sets.newHashSet("key"));
+    assertEquals(newHashSet("key"), hugeMap.keySet());
   }
 
   @Test
-  public void keySetLarge() {
+  void keySetLarge() {
     fillToThreshold();
-    assertEquals(hugeMap.keySet().size(), HugeMap.THRESHOLD);
+    assertEquals(THRESHOLD, hugeMap.keySet().size());
   }
 
   @Test
-  public void putAll() {
+  void putAll() {
     hugeMap.putAll(Collections.singletonMap("key", "value"));
-    assertEquals(hugeMap.size(), 1);
+    assertEquals(1, hugeMap.size());
   }
 
   @Test
-  public void putAllLarge() {
+  void putAllLarge() {
     Map<String, String> map = new HashMap<>();
     for (int i = 0; i < HugeMap.THRESHOLD; i++) {
       map.put(Integer.toString(i), Integer.toString(i));
     }
 
     hugeMap.putAll(map);
-    assertEquals(hugeMap.size(), HugeMap.THRESHOLD);
+    assertEquals(THRESHOLD, hugeMap.size());
   }
 
   @Test
-  public void remove() {
+  void remove() {
     fillToThreshold();
-    assertEquals(hugeMap.remove("5"), "5");
-    assertEquals(hugeMap.size(), HugeMap.THRESHOLD - 1);
+    assertEquals("5", hugeMap.remove("5"));
+    assertEquals(THRESHOLD - 1, hugeMap.size());
   }
 
   @Test
-  public void removeLarge() {
+  void removeLarge() {
     hugeMap.put("test", "value");
-    assertEquals(hugeMap.remove("test"), "value");
+    assertEquals("value", hugeMap.remove("test"));
     assertTrue(hugeMap.isEmpty());
   }
 
   @Test
-  public void values() {
+  void values() {
     hugeMap.put("key", "value");
-    assertEquals(hugeMap.values().size(), 1);
+    assertEquals(1, hugeMap.values().size());
   }
 
   @Test
-  public void valuesLarge() {
+  void valuesLarge() {
     fillToThreshold();
-    assertEquals(hugeMap.values().size(), HugeMap.THRESHOLD);
+    assertEquals(THRESHOLD, hugeMap.values().size());
   }
 
   private void fillToThreshold() {

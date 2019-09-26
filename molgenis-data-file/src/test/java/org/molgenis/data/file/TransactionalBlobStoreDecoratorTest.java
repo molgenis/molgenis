@@ -1,67 +1,68 @@
 package org.molgenis.data.file;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
-import static org.testng.Assert.assertEquals;
 
 import java.nio.channels.ReadableByteChannel;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
+class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
   private static final String TRANSACTION_ID = "1";
 
   @Mock private BlobStore blobStore;
   private TransactionalBlobStoreDecorator transactionalBlobStoreDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     transactionalBlobStoreDecorator = new TransactionalBlobStoreDecorator(blobStore);
     TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, TRANSACTION_ID);
   }
 
-  @AfterMethod
-  public void tearDownAfterMethod() {
+  @AfterEach
+  void tearDownAfterMethod() {
     TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-    super.tearDownAfterMethod();
-  }
-
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testTransactionalBlobStoreDecorator() {
-    new TransactionalBlobStoreDecorator(null);
   }
 
   @Test
-  public void testStore() {
+  void testTransactionalBlobStoreDecorator() {
+    assertThrows(NullPointerException.class, () -> new TransactionalBlobStoreDecorator(null));
+  }
+
+  @Test
+  void testStore() {
     BlobMetadata blobMetadata = mock(BlobMetadata.class);
     ReadableByteChannel readableByteChannel = mock(ReadableByteChannel.class);
     when(blobStore.store(readableByteChannel)).thenReturn(blobMetadata);
-    assertEquals(transactionalBlobStoreDecorator.store(readableByteChannel), blobMetadata);
+    assertEquals(blobMetadata, transactionalBlobStoreDecorator.store(readableByteChannel));
   }
 
   @Test
-  public void testDelete() {
+  void testDelete() {
     String blobId = "MyBlobId";
     transactionalBlobStoreDecorator.delete(blobId);
     verify(blobStore).delete(blobId);
   }
 
   @Test
-  public void testNewChannel() {
+  void testNewChannel() {
     String blobId = "MyBlobId";
     ReadableByteChannel readableByteChannel = mock(ReadableByteChannel.class);
     when(blobStore.newChannel(blobId)).thenReturn(readableByteChannel);
-    assertEquals(transactionalBlobStoreDecorator.newChannel(blobId), readableByteChannel);
+    assertEquals(readableByteChannel, transactionalBlobStoreDecorator.newChannel(blobId));
   }
 
   @Test
-  public void testRollbackTransaction() {
+  void testRollbackTransaction() {
     String blobId = "MyBlobId";
     BlobMetadata blobMetadata = mock(BlobMetadata.class);
     when(blobMetadata.getId()).thenReturn(blobId);
@@ -74,8 +75,8 @@ public class TransactionalBlobStoreDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDoCleanupAfterCompletion() {
-    transactionalBlobStoreDecorator.doCleanupAfterCompletion(TRANSACTION_ID);
-    // no exceptions
+  void testDoCleanupAfterCompletion() {
+    assertDoesNotThrow(
+        () -> transactionalBlobStoreDecorator.doCleanupAfterCompletion(TRANSACTION_ID));
   }
 }

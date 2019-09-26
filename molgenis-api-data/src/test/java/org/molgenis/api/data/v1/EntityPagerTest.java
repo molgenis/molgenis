@@ -1,39 +1,40 @@
 package org.molgenis.api.data.v1;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static java.lang.Integer.valueOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class EntityPagerTest {
+class EntityPagerTest {
 
   @Test
-  public void getNextStart() {
+  void getNextStart() {
     EntityPager pager = new EntityPager(10, 15, null, null);
-    assertEquals(pager.getNextStart(), Integer.valueOf(25));
+    assertEquals(valueOf(25), pager.getNextStart());
 
     pager = new EntityPager(0, 10, 25L, null);
-    assertEquals(pager.getNextStart(), Integer.valueOf(10));
+    assertEquals(valueOf(10), pager.getNextStart());
 
     pager = new EntityPager(10, 10, 25L, null);
-    assertEquals(pager.getNextStart(), Integer.valueOf(20));
+    assertEquals(valueOf(20), pager.getNextStart());
 
     pager = new EntityPager(0, 25, 25L, null);
     assertNull(pager.getNextStart());
   }
 
   @Test
-  public void getPrevStart() {
+  void getPrevStart() {
     EntityPager pager = new EntityPager(10, 15, null, null);
-    assertEquals(pager.getPrevStart(), Integer.valueOf(0));
+    assertEquals(valueOf(0), pager.getPrevStart());
 
     pager = new EntityPager(0, 15, 30L, null);
     assertNull(pager.getPrevStart());
 
     pager = new EntityPager(15, 15, 30L, null);
-    assertEquals(pager.getPrevStart(), Integer.valueOf(0));
+    assertEquals(valueOf(0), pager.getPrevStart());
 
     pager = new EntityPager(30, 15, 30L, null);
-    assertEquals(pager.getPrevStart(), Integer.valueOf(15));
+    assertEquals(valueOf(15), pager.getPrevStart());
   }
 }

@@ -1,5 +1,9 @@
 package org.molgenis.data.meta.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,15 +23,12 @@ import static org.molgenis.data.meta.model.AttributeMetadata.PARENT;
 import static org.molgenis.data.meta.model.AttributeMetadata.TYPE;
 import static org.molgenis.data.meta.model.AttributeMetadata.getIdAttributeValidationExpression;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Sort;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.config.MetadataTestConfig;
@@ -35,7 +36,6 @@ import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
       AttributeFactory.class,
       MetadataTestConfig.class
     })
-public class AttributeTest extends AbstractSystemEntityTest {
+class AttributeTest extends AbstractSystemEntityTest {
 
   @Autowired AttributeMetadata metadata;
   @Autowired AttributeFactory factory;
@@ -68,8 +68,9 @@ public class AttributeTest extends AbstractSystemEntityTest {
     return map;
   }
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, Attribute.class, factory, getOverriddenReturnTypes(), getExcludedAttrs(), true);
   }
@@ -77,25 +78,8 @@ public class AttributeTest extends AbstractSystemEntityTest {
   private Attribute attribute;
 
   @Test
-  public void setParentNullToAttribute() {
-    EntityType entityType = mock(EntityType.class);
-    Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAutoAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isVisibleAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAggregatableAttr =
-        when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isReadOnlyAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isUniqueAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute parentAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
-    doReturn(typeAttr).when(entityType).getAttribute(TYPE);
-    doReturn(isNullableAttr).when(entityType).getAttribute(IS_NULLABLE);
-    doReturn(isAutoAttr).when(entityType).getAttribute(IS_AUTO);
-    doReturn(isVisibleAttr).when(entityType).getAttribute(IS_VISIBLE);
-    doReturn(isAggregatableAttr).when(entityType).getAttribute(IS_AGGREGATABLE);
-    doReturn(isReadOnlyAttr).when(entityType).getAttribute(IS_READ_ONLY);
-    doReturn(isUniqueAttr).when(entityType).getAttribute(IS_UNIQUE);
-    doReturn(parentAttr).when(entityType).getAttribute(PARENT);
+  void setParentNullToAttribute() {
+    EntityType entityType = createMockEntityType();
 
     attribute = new Attribute(entityType);
 
@@ -106,19 +90,23 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testIsReferenceTypeString() {
+  void testIsReferenceTypeString() {
+    EntityType entityType = createAttributeMetadataMock();
+    Attribute attribute = new Attribute(entityType);
     attribute.setDataType(STRING);
     assertFalse(attribute.hasRefEntity());
   }
 
   @Test
-  public void testIsReferenceTypeXref() {
+  void testIsReferenceTypeXref() {
+    EntityType entityType = createAttributeMetadataMock();
+    attribute = new Attribute(entityType);
+
     attribute.setDataType(XREF);
     assertTrue(attribute.hasRefEntity());
   }
 
-  @Test
-  public void setParentNullToNull() {
+  private EntityType createAttributeMetadataMock() {
     EntityType entityType = mock(EntityType.class);
     Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
@@ -135,6 +123,12 @@ public class AttributeTest extends AbstractSystemEntityTest {
     doReturn(isAggregatableAttr).when(entityType).getAttribute(IS_AGGREGATABLE);
     doReturn(isReadOnlyAttr).when(entityType).getAttribute(IS_READ_ONLY);
     doReturn(isUniqueAttr).when(entityType).getAttribute(IS_UNIQUE);
+    return entityType;
+  }
+
+  @Test
+  void setParentNullToNull() {
+    EntityType entityType = createAttributeMetadataMock();
     attribute = new Attribute(entityType);
 
     attribute.setParent(null);
@@ -142,7 +136,7 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void setParentAttributeToNull() {
+  void setParentAttributeToNull() {
     EntityType entityType = mock(EntityType.class);
     Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
@@ -176,7 +170,7 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void setParentAttributeToAttribute() {
+  void setParentAttributeToAttribute() {
     EntityType entityType = mock(EntityType.class);
     Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
@@ -205,7 +199,7 @@ public class AttributeTest extends AbstractSystemEntityTest {
 
     Attribute parentAttr = mock(Attribute.class);
     attribute.setParent(parentAttr);
-    assertEquals(attribute.getParent(), parentAttr);
+    assertEquals(parentAttr, attribute.getParent());
 
     verify(currentParentAttr).removeChild(attribute);
     verifyNoMoreInteractions(currentParentAttr);
@@ -214,7 +208,7 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void setIdAttributeTrue() {
+  void setIdAttributeTrue() {
     EntityType entityType = mock(EntityType.class);
     Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
@@ -242,7 +236,7 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void setIdAttributeFalse() {
+  void setIdAttributeFalse() {
     EntityType entityType = mock(EntityType.class);
     Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
     Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
@@ -270,28 +264,12 @@ public class AttributeTest extends AbstractSystemEntityTest {
   }
 
   @Test
-  public void testIdValidationExpression() {
-    EntityType entityType = mock(EntityType.class);
-    Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAutoAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isVisibleAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAggregatableAttr =
-        when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isReadOnlyAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isUniqueAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    doReturn(typeAttr).when(entityType).getAttribute(TYPE);
-    doReturn(isNullableAttr).when(entityType).getAttribute(IS_NULLABLE);
-    doReturn(isAutoAttr).when(entityType).getAttribute(IS_AUTO);
-    doReturn(isVisibleAttr).when(entityType).getAttribute(IS_VISIBLE);
-    doReturn(isAggregatableAttr).when(entityType).getAttribute(IS_AGGREGATABLE);
-    doReturn(isReadOnlyAttr).when(entityType).getAttribute(IS_READ_ONLY);
-    doReturn(isUniqueAttr).when(entityType).getAttribute(IS_UNIQUE);
+  void testIdValidationExpression() {
+    EntityType entityType = createAttributeMetadataMock();
 
     attribute = new Attribute(entityType);
     String expression = getIdAttributeValidationExpression();
     assertEquals(
-        expression,
         "$('isIdAttribute').eq(false).or($('isIdAttribute').isNull()).or($('isIdAttribute').eq(true)"
             + ".and("
             + "$('type').eq('email')"
@@ -301,28 +279,15 @@ public class AttributeTest extends AbstractSystemEntityTest {
             + ".or($('type').eq('string'))"
             + ".or($('type').isNull())"
             + ")"
-            + ".and($('isNullable').eq(false))).value()");
+            + ".and($('isNullable').eq(false))).value()",
+        expression);
   }
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6566
+
   @Test
-  public void testNewInstance() {
-    EntityType entityType = mock(EntityType.class);
-    Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
-    Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAutoAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isVisibleAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isAggregatableAttr =
-        when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isReadOnlyAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    Attribute isUniqueAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
-    doReturn(typeAttr).when(entityType).getAttribute(TYPE);
-    doReturn(isNullableAttr).when(entityType).getAttribute(IS_NULLABLE);
-    doReturn(isAutoAttr).when(entityType).getAttribute(IS_AUTO);
-    doReturn(isVisibleAttr).when(entityType).getAttribute(IS_VISIBLE);
-    doReturn(isAggregatableAttr).when(entityType).getAttribute(IS_AGGREGATABLE);
-    doReturn(isReadOnlyAttr).when(entityType).getAttribute(IS_READ_ONLY);
-    doReturn(isUniqueAttr).when(entityType).getAttribute(IS_UNIQUE);
+  void testNewInstance() {
+    EntityType entityType = createAttributeMetadataMock();
 
     attribute = new Attribute(entityType);
     AttributeFactory attributeFactory = mock(AttributeFactory.class);
@@ -337,5 +302,27 @@ public class AttributeTest extends AbstractSystemEntityTest {
     verify(attributeCopy).setVisible(true);
     verify(attributeCopy).setNullableExpression("nullableExpression");
     verify(attributeCopy).setValidationExpression("expression");
+  }
+
+  private EntityType createMockEntityType() {
+    EntityType entityType = mock(EntityType.class);
+    Attribute typeAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    Attribute isNullableAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute isAutoAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute isVisibleAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute isAggregatableAttr =
+        when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute isReadOnlyAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute isUniqueAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    Attribute parentAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+    doReturn(typeAttr).when(entityType).getAttribute(TYPE);
+    doReturn(isNullableAttr).when(entityType).getAttribute(IS_NULLABLE);
+    doReturn(isAutoAttr).when(entityType).getAttribute(IS_AUTO);
+    doReturn(isVisibleAttr).when(entityType).getAttribute(IS_VISIBLE);
+    doReturn(isAggregatableAttr).when(entityType).getAttribute(IS_AGGREGATABLE);
+    doReturn(isReadOnlyAttr).when(entityType).getAttribute(IS_READ_ONLY);
+    doReturn(isUniqueAttr).when(entityType).getAttribute(IS_UNIQUE);
+    doReturn(parentAttr).when(entityType).getAttribute(PARENT);
+    return entityType;
   }
 }

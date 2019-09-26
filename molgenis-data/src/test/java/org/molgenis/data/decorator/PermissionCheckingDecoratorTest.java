@@ -6,6 +6,10 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -14,13 +18,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
@@ -34,40 +38,38 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
+class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<Entity> delegateRepository;
   @Mock private PermissionChecker<Entity> permissionChecker;
 
   private PermissionCheckingDecorator<Entity> permissionCheckingDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     permissionCheckingDecorator =
         new PermissionCheckingDecorator<>(delegateRepository, permissionChecker);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testPermissionCheckingDecorator() {
-    new PermissionCheckingDecorator<>(null, null);
+  @Test
+  void testPermissionCheckingDecorator() {
+    assertThrows(NullPointerException.class, () -> new PermissionCheckingDecorator<>(null, null));
   }
 
   @Test
-  public void testIterator() {
+  void testIterator() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(delegateRepository.iterator())
         .thenReturn(asList(permittedEntity, notPermittedEntity).iterator());
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
     assertEquals(
-        newArrayList(permissionCheckingDecorator.iterator()), singletonList(permittedEntity));
+        singletonList(permittedEntity), newArrayList(permissionCheckingDecorator.iterator()));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testForEachBatched() {
+  void testForEachBatched() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
@@ -82,44 +84,44 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
         .forEachBatched(eq(fetch), any(), eq(1000));
     List<Entity> actualEntities = new ArrayList<>();
     permissionCheckingDecorator.forEachBatched(fetch, actualEntities::addAll, 1000);
-    assertEquals(actualEntities, singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), actualEntities);
   }
 
   @Test
-  public void testCount() {
+  void testCount() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(delegateRepository.findAll(new QueryImpl<>().offset(0).pageSize(Integer.MAX_VALUE)))
         .thenReturn(Stream.of(permittedEntity, notPermittedEntity));
     when(permissionChecker.isCountAllowed(permittedEntity)).thenReturn(true);
-    assertEquals(permissionCheckingDecorator.count(), 1L);
+    assertEquals(1L, permissionCheckingDecorator.count());
   }
 
   @Test
-  public void testCountQuery() {
+  void testCountQuery() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     Query<Entity> query = new QueryImpl<>();
     when(delegateRepository.findAll(new QueryImpl<>().offset(0).pageSize(Integer.MAX_VALUE)))
         .thenReturn(Stream.of(permittedEntity, notPermittedEntity));
     when(permissionChecker.isCountAllowed(permittedEntity)).thenReturn(true);
-    assertEquals(permissionCheckingDecorator.count(query), 1L);
+    assertEquals(1L, permissionCheckingDecorator.count(query));
   }
 
   @Test
-  public void testFindAllQuery() {
+  void testFindAllQuery() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(delegateRepository.findAll(new QueryImpl<>().offset(0).pageSize(Integer.MAX_VALUE)))
         .thenReturn(Stream.of(permittedEntity, notPermittedEntity));
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
     assertEquals(
-        permissionCheckingDecorator.findAll(new QueryImpl<>()).collect(toList()),
-        singletonList(permittedEntity));
+        singletonList(permittedEntity),
+        permissionCheckingDecorator.findAll(new QueryImpl<>()).collect(toList()));
   }
 
   @Test
-  public void testFindAllQuerySkipLimit() {
+  void testFindAllQuerySkipLimit() {
     Entity permittedEntity0 = mock(Entity.class);
     Entity notPermittedEntity0 = mock(Entity.class);
     Entity permittedEntity1 = mock(Entity.class);
@@ -137,54 +139,54 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
     doReturn(false).when(permissionChecker).isReadAllowed(notPermittedEntity0);
     doReturn(true).when(permissionChecker).isReadAllowed(permittedEntity1);
     assertEquals(
+        singletonList(permittedEntity1),
         permissionCheckingDecorator
             .findAll(new QueryImpl<>().offset(1).pageSize(1))
-            .collect(toList()),
-        singletonList(permittedEntity1));
+            .collect(toList()));
   }
 
   @Test
-  public void testFindOneQuery() {
+  void testFindOneQuery() {
     Entity notPermittedEntity = mock(Entity.class);
     Entity permittedEntity = mock(Entity.class);
     when(delegateRepository.findAll(new QueryImpl<>().offset(0).pageSize(Integer.MAX_VALUE)))
         .thenReturn(Stream.of(notPermittedEntity, permittedEntity));
     doReturn(false).when(permissionChecker).isReadAllowed(notPermittedEntity);
     doReturn(true).when(permissionChecker).isReadAllowed(permittedEntity);
-    assertEquals(permissionCheckingDecorator.findOne(new QueryImpl<>()), permittedEntity);
+    assertEquals(permittedEntity, permissionCheckingDecorator.findOne(new QueryImpl<>()));
   }
 
   @Test
-  public void testFindOneByIdPermitted() {
+  void testFindOneByIdPermitted() {
     Entity permittedEntity = mock(Entity.class);
     when(delegateRepository.findOneById("permittedId")).thenReturn(permittedEntity);
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
-    assertEquals(permissionCheckingDecorator.findOneById("permittedId"), permittedEntity);
+    assertEquals(permittedEntity, permissionCheckingDecorator.findOneById("permittedId"));
   }
 
   @Test
-  public void testFindOneByIdNotPermitted() {
+  void testFindOneByIdNotPermitted() {
     assertNull(permissionCheckingDecorator.findOneById("notPermittedId"));
   }
 
   @Test
-  public void testFindOneByIdFetchPermitted() {
+  void testFindOneByIdFetchPermitted() {
     Entity permittedEntity = mock(Entity.class);
     Fetch fetch = mock(Fetch.class);
     when(delegateRepository.findOneById("permittedId", fetch)).thenReturn(permittedEntity);
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
-    assertEquals(permissionCheckingDecorator.findOneById("permittedId", fetch), permittedEntity);
+    assertEquals(permittedEntity, permissionCheckingDecorator.findOneById("permittedId", fetch));
   }
 
   @Test
-  public void testFindOneByIdFetchNotPermitted() {
+  void testFindOneByIdFetchNotPermitted() {
     Fetch fetch = mock(Fetch.class);
     assertNull(permissionCheckingDecorator.findOneById("notPermittedId", fetch));
   }
 
   @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
   @Test
-  public void testFindAllStream() {
+  void testFindAllStream() {
     Entity permittedEntity = mock(Entity.class);
     when(delegateRepository.findAll(any(Stream.class)))
         .thenAnswer(
@@ -194,15 +196,13 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
             });
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
     assertEquals(
-        permissionCheckingDecorator
-            .findAll(Stream.of("permittedId", "notPermittedId"))
-            .collect(toList()),
-        singletonList(permittedEntity));
+        singletonList(permittedEntity),
+        permissionCheckingDecorator.findAll(of("permittedId", "notPermittedId")).collect(toList()));
   }
 
   @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
   @Test
-  public void testFindAllStreamFetch() {
+  void testFindAllStreamFetch() {
     Entity permittedEntity = mock(Entity.class);
     Fetch fetch = mock(Fetch.class);
     when(delegateRepository.findAll(any(Stream.class), eq(fetch)))
@@ -213,14 +213,14 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
             });
     when(permissionChecker.isReadAllowed(permittedEntity)).thenReturn(true);
     assertEquals(
+        singletonList(permittedEntity),
         permissionCheckingDecorator
-            .findAll(Stream.of("permittedId", "notPermittedId"), fetch)
-            .collect(toList()),
-        singletonList(permittedEntity));
+            .findAll(of("permittedId", "notPermittedId"), fetch)
+            .collect(toList()));
   }
 
   @Test
-  public void testUpdateEntityPermitted() {
+  void testUpdateEntityPermitted() {
     Entity permittedEntity = mock(Entity.class);
     when(permissionChecker.isUpdateAllowed(permittedEntity)).thenReturn(true);
     permissionCheckingDecorator.update(permittedEntity);
@@ -228,14 +228,14 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdateEntityNotPermitted() {
+  void testUpdateEntityNotPermitted() {
     Entity entity = mock(Entity.class);
     permissionCheckingDecorator.update(entity);
     verifyZeroInteractions(delegateRepository);
   }
 
   @Test
-  public void testUpdateStream() {
+  void testUpdateStream() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(permissionChecker.isUpdateAllowed(permittedEntity)).thenReturn(true);
@@ -243,11 +243,11 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
-  public void testDeleteEntityPermitted() {
+  void testDeleteEntityPermitted() {
     Entity entity = mock(Entity.class);
     when(permissionChecker.isDeleteAllowed(entity)).thenReturn(true);
     permissionCheckingDecorator.delete(entity);
@@ -255,14 +255,14 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteEntityNotPermitted() {
+  void testDeleteEntityNotPermitted() {
     Entity entity = mock(Entity.class);
     permissionCheckingDecorator.delete(entity);
     verifyZeroInteractions(delegateRepository);
   }
 
   @Test
-  public void testDeleteStream() {
+  void testDeleteStream() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(permissionChecker.isDeleteAllowed(permittedEntity)).thenReturn(true);
@@ -270,11 +270,11 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
-  public void testDeleteByIdPermitted() {
+  void testDeleteByIdPermitted() {
     Entity permittedEntity = mock(Entity.class);
     when(delegateRepository.findOneById("permittedId")).thenReturn(permittedEntity);
     when(permissionChecker.isDeleteAllowed(permittedEntity)).thenReturn(true);
@@ -283,7 +283,7 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteByIdNotPermitted() {
+  void testDeleteByIdNotPermitted() {
     Entity permittedEntity = mock(Entity.class);
     when(delegateRepository.findOneById("permittedId")).thenReturn(permittedEntity);
     permissionCheckingDecorator.deleteById("permittedId");
@@ -291,14 +291,14 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteByIdUnknownEntity() {
+  void testDeleteByIdUnknownEntity() {
     permissionCheckingDecorator.deleteById("unknownEntityId");
     verify(delegateRepository).deleteById("unknownEntityId");
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     doAnswer(
@@ -314,12 +314,12 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
     permissionCheckingDecorator.deleteAll();
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), entityStreamCaptor.getValue().collect(toList()));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testDeleteAllStream() {
+  void testDeleteAllStream() {
     Entity permittedEntity =
         when(mock(Entity.class).getIdValue()).thenReturn("permittedId").getMock();
     Entity notPermittedEntity = mock(Entity.class);
@@ -331,11 +331,11 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
 
     ArgumentCaptor<Stream<Object>> entityIdStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).deleteAll(entityIdStreamCaptor.capture());
-    assertEquals(entityIdStreamCaptor.getValue().collect(toList()), singletonList("permittedId"));
+    assertEquals(singletonList("permittedId"), entityIdStreamCaptor.getValue().collect(toList()));
   }
 
   @Test
-  public void testAddEntityPermitted() {
+  void testAddEntityPermitted() {
     Entity entity = mock(Entity.class);
     when(permissionChecker.isAddAllowed(entity)).thenReturn(true);
     permissionCheckingDecorator.add(entity);
@@ -343,14 +343,14 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAddEntityNotPermitted() {
+  void testAddEntityNotPermitted() {
     Entity entity = mock(Entity.class);
     permissionCheckingDecorator.add(entity);
     verifyZeroInteractions(delegateRepository);
   }
 
   @Test
-  public void testAddStream() {
+  void testAddStream() {
     Entity permittedEntity = mock(Entity.class);
     Entity notPermittedEntity = mock(Entity.class);
     when(permissionChecker.isAddAllowed(permittedEntity)).thenReturn(true);
@@ -358,25 +358,27 @@ public class PermissionCheckingDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(entityStreamCaptor.capture());
-    assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedEntity));
+    assertEquals(singletonList(permittedEntity), entityStreamCaptor.getValue().collect(toList()));
   }
 
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void testAggregateNonSystemOrSuperuser() {
+  @Test
+  void testAggregateNonSystemOrSuperuser() {
     SecurityContext originalSecurityContext = SecurityContextHolder.getContext();
     try {
       SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
       securityContext.setAuthentication(
           new UsernamePasswordAuthenticationToken("principal", "credentials", emptySet()));
       AggregateQuery aggregateQuery = mock(AggregateQuery.class);
-      permissionCheckingDecorator.aggregate(aggregateQuery);
+      assertThrows(
+          UnsupportedOperationException.class,
+          () -> permissionCheckingDecorator.aggregate(aggregateQuery));
     } finally {
       SecurityContextHolder.setContext(originalSecurityContext);
     }
   }
 
   @Test
-  public void testAggregateSystemUser() {
+  void testAggregateSystemUser() {
     SecurityContext originalSecurityContext = SecurityContextHolder.getContext();
     try {
       SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

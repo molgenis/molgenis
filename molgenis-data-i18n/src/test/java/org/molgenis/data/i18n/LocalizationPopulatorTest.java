@@ -1,16 +1,18 @@
 package org.molgenis.data.i18n;
 
+import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -18,10 +20,8 @@ import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.AllPropertiesMessageSource;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class LocalizationPopulatorTest extends AbstractMockitoTest {
+class LocalizationPopulatorTest extends AbstractMockitoTest {
   private LocalizationPopulator localizationPopulator;
   private AllPropertiesMessageSource allPropertiesMessageSource;
   @Mock private LocalizationService localizationService;
@@ -35,15 +35,15 @@ public class LocalizationPopulatorTest extends AbstractMockitoTest {
   private Locale nl = new Locale("nl");
   private Locale en = new Locale("en");
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     localizationPopulator = new LocalizationPopulator(localizationService, l10nStringFactory);
     allPropertiesMessageSource = new AllPropertiesMessageSource();
     allPropertiesMessageSource.addMolgenisNamespaces("test");
   }
 
   @Test
-  public void testPopulate() {
+  void testPopulate() {
     // existing
     when(enPlusNl.getMessageID()).thenReturn("EN_PLUS_NL");
     doReturn("updated in database").when(enPlusNl).getString(en);
@@ -75,7 +75,7 @@ public class LocalizationPopulatorTest extends AbstractMockitoTest {
     verify(biobankUTF8).set("nl", "\uD83D\uDC00\uD83C\uDDF3\uD83C\uDDF1");
 
     verify(localizationService).store(updateCaptor.capture(), addCaptor.capture());
-    assertEquals(newArrayList(updateCaptor.getValue()), ImmutableList.of(enPlusNl, nlOnly));
-    assertEquals(newArrayList(addCaptor.getValue()), ImmutableList.of(enOnly, biobankUTF8));
+    assertEquals(of(enPlusNl, nlOnly), newArrayList(updateCaptor.getValue()));
+    assertEquals(of(enOnly, biobankUTF8), newArrayList(addCaptor.getValue()));
   }
 }

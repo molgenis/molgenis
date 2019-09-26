@@ -1,16 +1,22 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
@@ -19,31 +25,24 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class MappingGeneratorTest extends AbstractMockitoTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class MappingGeneratorTest extends AbstractMockitoTest {
   @Mock private DocumentIdGenerator documentIdGenerator;
 
   private MappingGenerator mappingGenerator;
 
-  public MappingGeneratorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     mappingGenerator = new MappingGenerator(documentIdGenerator);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testMappingGenerator() {
-    new MappingGenerator(null);
+  @Test
+  void testMappingGenerator() {
+    assertThrows(NullPointerException.class, () -> new MappingGenerator(null));
   }
 
-  @DataProvider(name = "createMappingProvider")
-  public static Iterator<Object[]> createMappingProvider() {
+  static Iterator<Object[]> createMappingProvider() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {AttributeType.BOOL, MappingType.BOOLEAN});
     dataItems.add(new Object[] {AttributeType.DATE, MappingType.DATE});
@@ -57,8 +56,9 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createMappingProvider")
-  public void testCreateMapping(AttributeType attributeType, MappingType mappingType) {
+  @ParameterizedTest
+  @MethodSource("createMappingProvider")
+  void testCreateMapping(AttributeType attributeType, MappingType mappingType) {
     initDocumentIdGeneratorMock();
     String attrIdentifier = "attr";
     EntityType entityType = createEntityType(attrIdentifier, attributeType);
@@ -67,11 +67,10 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
     FieldMapping fieldMapping =
         FieldMapping.builder().setName(attrIdentifier).setType(mappingType).build();
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
-  @DataProvider(name = "createMappingProviderAnalyzeNGrams")
-  public static Iterator<Object[]> createMappingProviderAnalyzeNGrams() {
+  static Iterator<Object[]> createMappingProviderAnalyzeNGrams() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {AttributeType.EMAIL});
     dataItems.add(new Object[] {AttributeType.ENUM});
@@ -80,8 +79,7 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @DataProvider(name = "createMappingProviderNested")
-  public static Iterator<Object[]> createMappingProviderNested() {
+  static Iterator<Object[]> createMappingProviderNested() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {AttributeType.CATEGORICAL});
     dataItems.add(new Object[] {AttributeType.CATEGORICAL_MREF});
@@ -92,8 +90,9 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createMappingProviderNested")
-  public void testCreateMappingProviderNested(AttributeType attributeType) {
+  @ParameterizedTest
+  @MethodSource("createMappingProviderNested")
+  void testCreateMappingProviderNested(AttributeType attributeType) {
     initDocumentIdGeneratorMock();
     String refAttrIdentifier = "refAttr";
     EntityType refEntityType = createEntityType(refAttrIdentifier, AttributeType.LONG);
@@ -114,11 +113,10 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
                         .build()))
             .build();
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
-  @DataProvider(name = "createMappingProviderDepth")
-  public static Iterator<Object[]> createMappingProviderDepth() {
+  static Iterator<Object[]> createMappingProviderDepth() {
     String refRefAttrIdentifier = "refRefAttr";
     EntityType refRefEntityType = createEntityType(refRefAttrIdentifier, AttributeType.LONG);
     String refAttrIdentifier = "refAttr";
@@ -175,12 +173,13 @@ public class MappingGeneratorTest extends AbstractMockitoTest {
     return dataItems.iterator();
   }
 
-  @Test(dataProvider = "createMappingProviderDepth")
-  public void testCreateMappingProviderDepth(EntityType entityType, FieldMapping fieldMapping) {
+  @ParameterizedTest
+  @MethodSource("createMappingProviderDepth")
+  void testCreateMappingProviderDepth(EntityType entityType, FieldMapping fieldMapping) {
     initDocumentIdGeneratorMock();
     Mapping mapping = mappingGenerator.createMapping(entityType);
     Mapping expectedMapping = createMapping(fieldMapping);
-    assertEquals(mapping, expectedMapping);
+    assertEquals(expectedMapping, mapping);
   }
 
   private static EntityType createEntityType(String attrIdentifier, AttributeType type) {
