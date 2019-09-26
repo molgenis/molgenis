@@ -1,18 +1,17 @@
 package org.molgenis.semanticmapper.utils;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class UnitHelperTest {
-
+class UnitHelperTest {
   @Test
-  public void superscriptToNumber() {
-    assertEquals(UnitHelper.superscriptToNumber("⁵⁹⁸⁰³⁴test⁷¹⁶²²²"), "598034test716222");
+  void superscriptToNumber() {
+    assertEquals("598034test716222", UnitHelper.superscriptToNumber("⁵⁹⁸⁰³⁴test⁷¹⁶²²²"));
   }
 
   @Test
-  public void numberToSuperscript() {
-    assertEquals(UnitHelper.numberToSuperscript("598034test716222"), "⁵⁹⁸⁰³⁴test⁷¹⁶²²²");
+  void numberToSuperscript() {
+    assertEquals("⁵⁹⁸⁰³⁴test⁷¹⁶²²²", UnitHelper.numberToSuperscript("598034test716222"));
   }
 }

@@ -160,7 +160,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorNoValues() throws IOException {
+  void iteratorNoValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -169,7 +169,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorEmptyValues() throws IOException {
+  void iteratorEmptyValues() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -179,7 +179,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorTsv() throws IOException {
+  void iteratorTsv() throws IOException {
     try (CsvRepository tsvRepository =
         new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = tsvRepository.iterator();
@@ -191,7 +191,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorEmptyLines() throws IOException {
+  void iteratorEmptyLines() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -203,7 +203,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorEmptyLinesSingleCol() throws IOException {
+  void iteratorEmptyLinesSingleCol() throws IOException {
     try (CsvRepository csvRepository =
         new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory, null)) {
       Iterator<Entity> it = csvRepository.iterator();
@@ -219,7 +219,7 @@ class CsvRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void iteratorCaseSensitivity() throws IOException {
+  void iteratorCaseSensitivity() throws IOException {
     File csvFile = ResourceUtils.getFile("case-sensitivity.csv");
     try (CsvRepository csvRepository =
         new CsvRepository(csvFile, entityTypeFactory, attrMetaFactory, null)) {
