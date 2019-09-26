@@ -13,7 +13,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.processor.TrimProcessor;
@@ -39,12 +38,11 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
   private EntityTypeFactory entityTypeFactory;
   private AttributeFactory attributeFactory;
 
-  public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException {
+  public ExcelRepositoryCollection(File file) throws IOException {
     this(file, new TrimProcessor());
   }
 
-  public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors)
-      throws IOException, MolgenisInvalidFormatException {
+  public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws IOException {
     this(new FileInputStream(file), cellProcessors);
   }
 
