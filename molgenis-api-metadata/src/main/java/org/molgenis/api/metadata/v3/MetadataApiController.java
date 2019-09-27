@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(MetadataApiController.API_META_PATH)
 class MetadataApiController extends ApiController {
-  private static final String API_META_ID = "meta";
+  private static final String API_META_ID = "metadata";
   static final String API_META_PATH = ApiNamespace.API_PATH + '/' + API_META_ID;
 
   private final MetadataServiceImpl metadataService;
