@@ -242,6 +242,11 @@ pipeline {
                         }
                     }
                 }
+                stage('Manually close and release on sonatype [ x.x ]') {
+                    steps {
+                        input(message='Log on to https://oss.sonatype.org/ and manually close and release to maven central.')
+                    }
+                }
             }
         }
         stage('Steps [ feature ]') {
