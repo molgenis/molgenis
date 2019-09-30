@@ -7,14 +7,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.molgenis.util.ResourceUtils.getFile;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import io.restassured.RestAssured;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -41,6 +36,103 @@ class MetadataControllerIT extends AbstractApiTest {
     deleteData();
 
     AbstractApiTest.tearDownAfterClass();
+  }
+
+  @Test
+  @Order(1)
+  void testRetrieveMetadata() {
+
+    // GET /api/metadata
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(2)
+  void testRetrieveMetadataEntityType() {
+    // GET /api/metadata/v3meta_MyDataset
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(3)
+  void testRetrieveMetadataEntityTypeUnknown() {
+    // GET /api/metadata/v3meta_MyUnknownDataset
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(4)
+  void testRetrieveMetadataEntityTypeAttributes() {
+    // GET /api/metadata/v3meta_MyDataset/attributes
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(5)
+  void testRetrieveMetadataEntityTypeAttribute() {
+    // GET /api/metadata/v3meta_MyDataset/attribute/myString
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(6)
+  void testRetrieveMetadataEntityTypeAttributeUnknown() {
+    // GET /api/metadata/v3meta_MyDataset/attribute/myUnknownAttribute
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(7)
+  void testUpdateMetadataEntityType() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(8)
+  void testPartialUpdateMetadataEntityType() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(9)
+  void testCreateMetadataEntityTypeAttribute() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(10)
+  void testUpdateMetadataEntityTypeAttribute() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(11)
+  void testPartialUpdateMetadataEntityTypeAttribute() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(12)
+  void testDeleteMetadataEntityTypeAttributes() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(13)
+  void testDeleteMetadataEntityTypeAttribute() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(14)
+  void testDeleteMetadataEntityTypes() {
+    throw new UnsupportedOperationException(); // FIXME implement
+  }
+
+  @Test
+  @Order(15)
+  void testDeleteMetadataEntityType() {
+    throw new UnsupportedOperationException(); // FIXME implement
   }
 
   private static void importData() {
