@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -42,6 +44,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
   private final String environment;
   private final MessageSource messageSource;
   private final Gson gson;
+  private final PlatformTransactionManager transactionManager;
 
   public static final String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
 
@@ -52,7 +55,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       AuthenticationSettings authenticationSettings,
       @Value("${environment}") String environment,
       MessageSource messageSource,
-      Gson gson) {
+      Gson gson,
+      PlatformTransactionManager transactionManager) {
     this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
     this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
     this.appSettings = requireNonNull(appSettings);
@@ -60,6 +64,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
     this.environment = requireNonNull(environment);
     this.messageSource = requireNonNull(messageSource);
     this.gson = requireNonNull(gson);
+    this.transactionManager = requireNonNull(transactionManager);
   }
 
   @Override
@@ -69,17 +74,56 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       Object handler,
       ModelAndView modelAndView) {
     if (modelAndView != null) {
-      modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-      modelAndView.addObject(KEY_THEME_FINGERPRINT_REGISTRY, themeFingerprintRegistry);
-      modelAndView.addObject(KEY_APP_SETTINGS, appSettings);
-      modelAndView.addObject(KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
-      modelAndView.addObject(KEY_AUTHENTICATION_SIGN_UP, authenticationSettings.getSignUp());
-      modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
-      modelAndView.addObject(
-          KEY_I18N,
-          new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
-      modelAndView.addObject(KEY_GSON, gson);
+      String viewName = modelAndView.getViewName();
+      if (viewName == null || !viewName.startsWith("forward:")) {
+        // use programmatic transaction instead of transaction annotation since we only want to
+        // start a read-only transaction when a modelAndView exists
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setReadOnly(true);
+        transactionTemplate.execute(
+            status -> {
+              modelAndView.addObject(
+                  KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
+              modelAndView.addObject(KEY_THEME_FINGERPRINT_REGISTRY, themeFingerprintRegistry);
+              modelAndView.addObject(KEY_APP_SETTINGS, createAppSettings());
+              modelAndView.addObject(
+                  KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
+              modelAndView.addObject(
+                  KEY_AUTHENTICATION_SIGN_UP, authenticationSettings.getSignUp());
+              modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
+              modelAndView.addObject(
+                  KEY_I18N,
+                  new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
+              modelAndView.addObject(KEY_GSON, gson);
+              return null;
+            });
+      }
     }
+  }
+
+  private Map<String, Object> createAppSettings() {
+    Map<String, Object> modelValue = new HashMap<>();
+    modelValue.put("bootstrapTheme", appSettings.getBootstrapTheme());
+    modelValue.put("cssHref", appSettings.getCssHref());
+    modelValue.put("customJavascript", appSettings.getCustomJavascript());
+    modelValue.put("footer", appSettings.getFooter());
+    modelValue.put(
+        "googleAnalyticsIpAnonymization", appSettings.getGoogleAnalyticsIpAnonymization());
+    modelValue.put("googleAnalyticsTrackingId", appSettings.getGoogleAnalyticsTrackingId());
+    modelValue.put(
+        "googleAnalyticsTrackingIdMolgenis", appSettings.getGoogleAnalyticsTrackingIdMolgenis());
+    modelValue.put(
+        "googleAnalyticsAccountPrivacyFriendly",
+        appSettings.getGoogleAnalyticsAccountPrivacyFriendly());
+    modelValue.put(
+        "googleAnalyticsAccountPrivacyFriendlyMolgenis",
+        appSettings.getGoogleAnalyticsAccountPrivacyFriendlyMolgenis());
+    modelValue.put("logoNavBarHref", appSettings.getLogoNavBarHref());
+    modelValue.put("logoTopHref", appSettings.getLogoTopHref());
+    modelValue.put("logoTopMaxHeight", appSettings.getLogoTopMaxHeight());
+    modelValue.put("title", appSettings.getTitle());
+    modelValue.put("trackingCodeFooter", appSettings.getTrackingCodeFooter());
+    return modelValue;
   }
 
   /**

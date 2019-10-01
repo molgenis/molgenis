@@ -5,6 +5,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -18,11 +19,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
@@ -91,6 +92,24 @@ public class L2Cache implements TransactionListener {
   }
 
   /**
+   * Retrieves a partial entity from the cache or the underlying repository.
+   *
+   * @param repository the underlying repository
+   * @param id the ID of the entity to retrieve
+   * @param fetch containing attributes to retrieve, can be null
+   * @return the retrieved Entity, or null if the entity is not present.
+   * @throws com.google.common.util.concurrent.UncheckedExecutionException if the repository throws
+   *     an error when loading the entity
+   */
+  public Entity get(Repository<Entity> repository, Object id, Fetch fetch) {
+    LoadingCache<Object, Optional<Map<String, Object>>> cache = getEntityCache(repository);
+    EntityType entityType = repository.getEntityType();
+    return cache
+        .getUnchecked(id)
+        .map(e -> entityHydration.hydrate(e, entityType, fetch))
+        .orElse(null);
+  }
+  /**
    * Retrieves a list of entities from the cache. If the cache doesn't yet exist, will create the
    * cache.
    *
@@ -102,18 +121,45 @@ public class L2Cache implements TransactionListener {
    */
   public List<Entity> getBatch(Repository<Entity> repository, Iterable<Object> ids) {
     try {
+      EntityType entityType = repository.getEntityType();
       return getEntityCache(repository).getAll(ids).values().stream()
           .filter(Optional::isPresent)
-          .map(Optional::get)
-          .map(e -> entityHydration.hydrate(e, repository.getEntityType()))
-          .collect(Collectors.toList());
+          .map(e -> entityHydration.hydrate(e.get(), entityType))
+          .collect(toList());
     } catch (ExecutionException exception) {
-      // rethrow unchecked
-      if (exception.getCause() instanceof RuntimeException) {
-        throw (RuntimeException) exception.getCause();
-      }
-      throw new MolgenisDataException(exception);
+      throw translateExecutionException(exception);
     }
+  }
+
+  /**
+   * Retrieves a list of partial entities from the cache. If the cache doesn't yet exist, will
+   * create the cache.
+   *
+   * @param repository the underlying repository, used to create the cache loader or to retrieve the
+   *     existing cache
+   * @param ids {@link Iterable} of the ids of the entities to retrieve
+   * @param fetch containing attributes to retrieve, can be null
+   * @return List containing the retrieved entities, missing values are excluded
+   * @throws RuntimeException if the cache failed to load the entities
+   */
+  public List<Entity> getBatch(Repository<Entity> repository, Iterable<Object> ids, Fetch fetch) {
+    try {
+      EntityType entityType = repository.getEntityType();
+      return getEntityCache(repository).getAll(ids).values().stream()
+          .filter(Optional::isPresent)
+          .map(e -> entityHydration.hydrate(e.get(), entityType, fetch))
+          .collect(toList());
+    } catch (ExecutionException exception) {
+      throw translateExecutionException(exception);
+    }
+  }
+
+  private RuntimeException translateExecutionException(ExecutionException exception) {
+    // rethrow unchecked
+    if (exception.getCause() instanceof RuntimeException) {
+      return (RuntimeException) exception.getCause();
+    }
+    return new MolgenisDataException(exception);
   }
 
   /** Logs cumulative cache statistics for all known caches. */

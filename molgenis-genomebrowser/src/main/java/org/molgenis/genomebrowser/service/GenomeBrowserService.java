@@ -26,6 +26,7 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,11 +47,12 @@ public class GenomeBrowserService {
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
+  @Transactional(readOnly = true)
   @GetMapping(value = "/tracks", produces = APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<String> getGenomeBrowserTracksAsString(@RequestParam String entityTypeId) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    return getTracksString(getGenomeBrowserTracks(entityType));
+    return getTracksStringInternal(getGenomeBrowserTracks(entityType));
   }
 
   public Map<String, GenomeBrowserTrack> getGenomeBrowserTracks(EntityType entityType) {
@@ -61,7 +63,12 @@ public class GenomeBrowserService {
   }
 
   /** Get readable genome entities */
+  @Transactional(readOnly = true)
   public List<String> getTracksString(Map<String, GenomeBrowserTrack> entityTracks) {
+    return getTracksStringInternal(entityTracks);
+  }
+
+  private List<String> getTracksStringInternal(Map<String, GenomeBrowserTrack> entityTracks) {
     List<String> results = new ArrayList<>();
     if (hasPermission()) {
       Map<String, GenomeBrowserTrack> allTracks = new HashMap<>(entityTracks);
