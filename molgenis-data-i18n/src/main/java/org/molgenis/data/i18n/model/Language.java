@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** Language entity */
+@SuppressWarnings("unused")
 public class Language extends StaticEntity {
   public Language(Entity entity) {
     super(entity);

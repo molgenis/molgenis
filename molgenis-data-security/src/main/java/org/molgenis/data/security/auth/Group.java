@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class Group extends StaticEntity {
   public Group(Entity entity) {
     super(entity);

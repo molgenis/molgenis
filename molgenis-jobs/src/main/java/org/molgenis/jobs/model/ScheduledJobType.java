@@ -13,6 +13,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** Describes a schedulable Job type. */
+@SuppressWarnings("unused")
 public class ScheduledJobType extends StaticEntity {
   public ScheduledJobType(Entity entity) {
     super(entity);

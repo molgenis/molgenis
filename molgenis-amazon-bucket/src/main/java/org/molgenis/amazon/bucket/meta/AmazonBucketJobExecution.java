@@ -7,6 +7,7 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
 
+@SuppressWarnings("unused")
 public class AmazonBucketJobExecution extends JobExecution {
   public AmazonBucketJobExecution(Entity entity) {
     super(entity);

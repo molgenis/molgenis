@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 
+@SuppressWarnings("unused")
 public class GenomeBrowserSettings extends StaticEntity {
 
   public GenomeBrowserSettings(Entity entity) {
