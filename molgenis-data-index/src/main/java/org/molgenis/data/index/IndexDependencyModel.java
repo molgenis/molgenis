@@ -3,7 +3,6 @@ package org.molgenis.data.index;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptySet;
-import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
@@ -17,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.GenericDependencyResolver;
 
@@ -36,7 +36,11 @@ class IndexDependencyModel {
           .field(IS_ABSTRACT)
           .field(INDEXING_DEPTH)
           .field(EXTENDS, new Fetch().field(ID))
-          .field(ATTRIBUTES, new Fetch().field(REF_ENTITY_TYPE, new Fetch().field(ID)));
+          .field(
+              ATTRIBUTES,
+              new Fetch()
+                  .field(AttributeMetadata.ID)
+                  .field(AttributeMetadata.REF_ENTITY_TYPE, new Fetch().field(ID)));
 
   /**
    * Creates an IndexDependencyModel for a list of EntityTypes.

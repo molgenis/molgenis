@@ -26,6 +26,7 @@ import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,6 +86,7 @@ public class JobsController extends PluginController {
     return "view-job";
   }
 
+  @Transactional(readOnly = true)
   @GetMapping(value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<Entity> findLastJobs() {

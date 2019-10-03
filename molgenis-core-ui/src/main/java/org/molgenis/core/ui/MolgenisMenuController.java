@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,6 +74,7 @@ public class MolgenisMenuController {
    * Forwards to the first plugin of the first menu that the user can read since no menu path is
    * provided.
    */
+  @Transactional(readOnly = true)
   @SuppressWarnings("squid:S3752") // multiple methods required
   @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST})
   public String forwardDefaultMenuDefaultPlugin(Model model) {
