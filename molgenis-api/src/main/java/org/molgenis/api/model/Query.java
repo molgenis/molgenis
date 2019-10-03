@@ -59,6 +59,7 @@ public abstract class Query {
     return (List<Query>) getValue();
   }
 
+  @SuppressWarnings("unused")
   public static Query create(String newItem, Operator newOperator, Object newValue) {
     return builder().setItem(newItem).setOperator(newOperator).setValue(newValue).build();
   }
