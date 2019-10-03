@@ -17,6 +17,7 @@ public abstract class EntityResponse {
   @CheckForNull
   public abstract Map<String, Object> getData();
 
+  @SuppressWarnings("unused")
   public static EntityResponse create(LinksResponse newLinks, Map<String, Object> newData) {
     return builder().setLinks(newLinks).setData(newData).build();
   }

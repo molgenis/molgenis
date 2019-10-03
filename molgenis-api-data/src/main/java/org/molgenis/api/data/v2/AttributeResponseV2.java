@@ -249,6 +249,7 @@ class AttributeResponseV2 {
     return lookupAttribute;
   }
 
+  @SuppressWarnings("unused")
   public Boolean isAggregatable() {
     return isAggregatable;
   }

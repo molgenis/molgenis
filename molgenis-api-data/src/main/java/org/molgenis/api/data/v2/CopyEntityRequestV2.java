@@ -12,6 +12,7 @@ public abstract class CopyEntityRequestV2 {
   @NotNull
   public abstract String getNewEntityName();
 
+  @SuppressWarnings("unused")
   public static CopyEntityRequestV2 create(String newEntityName) {
     return new AutoValue_CopyEntityRequestV2(newEntityName);
   }

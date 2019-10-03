@@ -41,15 +41,6 @@ public class AttributeResponse {
   private String visibleExpression;
   private String validationExpression;
 
-  public AttributeResponse(
-      String entityParentName,
-      EntityType entityType,
-      Attribute attr,
-      UserPermissionEvaluator permissionService,
-      DataService dataService) {
-    this(entityParentName, entityType, attr, null, null, permissionService, dataService);
-  }
-
   /**
    * @param attributesSet set of lowercase attribute names to include in response
    * @param attributeExpandsSet set of lowercase attribute names to expand in response
@@ -274,6 +265,7 @@ public class AttributeResponse {
     return lookupAttribute;
   }
 
+  @SuppressWarnings("unused")
   public Boolean isAggregatable() {
     return isAggregatable;
   }

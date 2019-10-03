@@ -23,6 +23,7 @@ public abstract class EntitiesResponse {
   @CheckForNull
   public abstract PageResponse getPage();
 
+  @SuppressWarnings("unused")
   public static EntitiesResponse create(LinksResponse newLinks) {
     return create(newLinks, null, null);
   }

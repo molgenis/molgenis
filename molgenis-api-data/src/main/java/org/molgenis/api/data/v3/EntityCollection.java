@@ -37,6 +37,7 @@ abstract class EntityCollection {
     abstract EntityCollection build();
   }
 
+  @SuppressWarnings("unused")
   static EntityCollection create(
       String newEntityTypeId,
       List<Entity> newEntities,
@@ -63,6 +64,7 @@ abstract class EntityCollection {
 
     abstract int getPageSize();
 
+    @SuppressWarnings("unused")
     static Page create(int newOffset, int newTotal, int newPageSize) {
       return builder().setOffset(newOffset).setTotal(newTotal).setPageSize(newPageSize).build();
     }
