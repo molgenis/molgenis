@@ -7,6 +7,7 @@ import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -185,7 +186,11 @@ public class MetadataV3Mapper {
     builder.setType(attr.getDataType());
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
     if (EntityTypeUtils.isReferenceType(attr)) {
-      builder.setRefEntityType(toEntityTypeResponse(attr.getRefEntity()));
+      try {
+        builder.setRefEntityType(LinksResponse.create(null, new URI("http://fix.me/"), null));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
     }
     builder.setCascadeDelete(attr.getCascadeDelete());
     builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy()) : null);

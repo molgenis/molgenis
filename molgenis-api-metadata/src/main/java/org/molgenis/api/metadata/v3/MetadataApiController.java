@@ -35,7 +35,7 @@ class MetadataApiController extends ApiController {
     this.entityTypeMapper = requireNonNull(entityTypeMapper);
   }
 
-  @GetMapping("/")
+  @GetMapping
   public EntityTypesResponse getEntityTypes(@Valid ReadEntityTypesRequest entitiesRequest) {
     int size = entitiesRequest.getSize();
     int page = entitiesRequest.getPage();
