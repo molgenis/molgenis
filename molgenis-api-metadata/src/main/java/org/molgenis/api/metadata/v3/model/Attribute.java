@@ -3,6 +3,7 @@ package org.molgenis.api.metadata.v3.model;
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.util.AutoGson;
@@ -25,7 +26,7 @@ public abstract class Attribute {
 
   @Nullable
   @CheckForNull
-  public abstract EntityTypeResponse getRefEntityType();
+  public abstract LinksResponse getRefEntityType();
 
   @Nullable
   @CheckForNull
@@ -114,7 +115,7 @@ public abstract class Attribute {
 
     public abstract Builder setLookupAttributeIndex(Integer index);
 
-    public abstract Builder setRefEntityType(EntityTypeResponse entityTypeResponse);
+    public abstract Builder setRefEntityType(LinksResponse linksResponse);
 
     public abstract Builder setCascadeDelete(Boolean isCascadeDelete);
 
