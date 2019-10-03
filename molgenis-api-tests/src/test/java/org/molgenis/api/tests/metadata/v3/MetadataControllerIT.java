@@ -5,11 +5,15 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.molgenis.test.IsEqualJson.isEqualJson;
 import static org.molgenis.util.ResourceUtils.getFile;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
+import com.google.common.collect.ImmutableMap;
+import io.restassured.RestAssured;
+import java.io.IOException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -17,6 +21,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.tests.AbstractApiTest;
+import org.molgenis.test.TestResourceUtils;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
@@ -40,10 +45,16 @@ class MetadataControllerIT extends AbstractApiTest {
 
   @Test
   @Order(1)
-  void testRetrieveMetadata() {
+  void testRetrieveMetadata() throws IOException {
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(), "retrieveMetadata.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    // GET /api/metadata
-    throw new UnsupportedOperationException(); // FIXME implement
+    given()
+        .get("/api/metadata")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   @Test
