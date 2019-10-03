@@ -50,7 +50,6 @@ import com.google.common.collect.Streams;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.apache.commons.collections.CollectionUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
@@ -717,9 +716,7 @@ public class Attribute extends StaticEntity implements Labeled {
   }
 
   private static String toEnumOptionsString(List<String> enumOptions) {
-    return !CollectionUtils.isEmpty(enumOptions)
-        ? enumOptions.stream().collect(joining(","))
-        : null;
+    return !enumOptions.isEmpty() ? enumOptions.stream().collect(joining(",")) : null;
   }
 
   private AttributeType getCachedDataType() {
