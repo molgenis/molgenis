@@ -2,19 +2,19 @@ openapi: 3.0.1
 info:
   title: Metadata API
   description: RESTful API to create/read/update/delete metadata.
-  version: 1.0.0-SNAPSHOT
+  version: 3.0.0-SNAPSHOT
   license:
     name: "GNU LGPLv3"
     url: "https://www.gnu.org/licenses/lgpl-3.0.en.html"
 tags:
-- name: "Batch"
-  description: Combines multiple API calls in one HTTP request. (seperate API)
-- name: "Package"
-  description: Create, read, update and delete packages. (seperate API)
-- name: "Tag"
-  description: Create, read, update and delete tags. (seperate API)
-- name: "Metadata"
-  description: Create, read, update and delete metadata.
+  - name: "Batch"
+    description: Combines multiple API calls in one HTTP request. (seperate API)
+  - name: "Package"
+    description: Create, read, update and delete packages. (seperate API)
+  - name: "Tag"
+    description: Create, read, update and delete tags. (seperate API)
+  - name: "Metadata"
+    description: Create, read, update and delete metadata.
 servers:
   - url: http://localhost:8080/api/metadata
 paths:
@@ -38,11 +38,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Creates a new entitytype.
       requestBody:
         content:
@@ -60,7 +60,24 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        '500':          
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - "Metadata"
+      summary: Deletes metadata in the system based on a query.
+      parameters:
+        - $ref: '#/components/parameters/query'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkAttributeCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /meta/{entityTypeId}:
     get:
@@ -78,11 +95,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: replaces entitytype metadata.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -100,11 +117,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: updates entitytype metadata.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -124,11 +141,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Delete an entitytype.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -141,7 +158,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /meta/{entityTypeId}/attributes:
     get:
@@ -164,7 +181,25 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - "Metadata"
+      summary: Deletes attributes in the system based on a query
+      parameters:
+        - $ref: '#/components/parameters/entityTypeId'
+        - $ref: '#/components/parameters/query'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkAttributeCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /meta/{entityTypeId}/attributes/{attributeId}:
     get:
@@ -183,11 +218,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Create an attribute.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -206,11 +241,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Replace an attribute.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -229,11 +264,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Update an attribute.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -252,11 +287,11 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-          - "Metadata"
+        - "Metadata"
       summary: Delete an attribute.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
@@ -270,7 +305,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':          
+        '500':
           $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
@@ -353,7 +388,6 @@ components:
       required: false
       schema:
         type: boolean
-        
   schemas:
     Links:
       type: object
@@ -408,9 +442,9 @@ components:
     EntityTypeData:
       type: object
       properties:
-        id: 
+        id:
           type: string
-        package: 
+        package:
           type: string
         idAttribute:
           type: string
@@ -422,15 +456,15 @@ components:
             type: string
         extends:
           $ref: "#/components/schemas/EntityType"
-        label: 
+        label:
           $ref: "#/components/schemas/I18nValue"
-        description: 
+        description:
           $ref: "#/components/schemas/I18nValue"
-        abstract: 
+        abstract:
           type: boolean
-        indexingDepth: 
+        indexingDepth:
           type: integer
-        attributes: 
+        attributes:
           type: array
           items:
             $ref: "#/components/schemas/Attribute"
@@ -445,43 +479,43 @@ components:
           type: string
         data:
           $ref: "#/components/schemas/AttributeData"
-    AttributeData:        
+    AttributeData:
       properties:
-        id: 
+        id:
           type: object
-        name: 
+        name:
           type: string
         sequenceNr:
           type: string
-        type: 
+        type:
           type: string
         mappedBy:
           $ref: "#/components/schemas/Attribute"
         lookupAttribute:
           type: boolean
-        refEntityTypeId: 
+        refEntityTypeId:
           type: string
           nullable: true
-        label: 
+        label:
           $ref: "#/components/schemas/I18nValue"
-        description: 
+        description:
           $ref: "#/components/schemas/I18nValue"
-        nullable: 
+        nullable:
           type: boolean
-        auto: 
+        auto:
           type: boolean
-        visible: 
+        visible:
           type: boolean
-        unique: 
+        unique:
           type: boolean
-        readOnly: 
+        readOnly:
           type: boolean
         aggregatable:
           type: boolean
         options:
           type: array
           items:
-             $ref: "#/components/schemas/Option"
+            $ref: "#/components/schemas/Option"
         defaultValue:
           type: string
           nullable: true
@@ -507,9 +541,9 @@ components:
           type: string
         package:
           type: string
-        label: 
+        label:
           $ref: "#/components/schemas/I18nValue"
-        description: 
+        description:
           $ref: "#/components/schemas/I18nValue"
         isAbstract:
           type: string
@@ -560,16 +594,16 @@ components:
           type: boolean
         visible:
           type: boolean
-        label: 
+        label:
           $ref: "#/components/schemas/I18nValue"
-        description: 
+        description:
           $ref: "#/components/schemas/I18nValue"
         aggregatable:
           type: boolean
         enumOptions:
           type: array
           items:
-             type: string
+            type: string
         rangeMin:
           type: number
         rangeMax:
@@ -641,7 +675,7 @@ components:
         title:
           type: string
           description:
-            A short, summary of the problem type. Written in english and readable for engineers 
+            A short, summary of the problem type. Written in english and readable for engineers
             (usually not suited for non technical stakeholders and not localized).
           example: Service Unavailable
         status:
@@ -667,10 +701,10 @@ components:
             An absolute URI that identifies the specific occurrence of the problem.
             It may or may not yield further information if dereferenced.
         errorCode:
-            type: string
-            description:
-                The MOLGENIS error code for the thrown exception.
-      
+          type: string
+          description:
+            The MOLGENIS error code for the thrown exception.
+
   responses:
     OkEntityTypeResponse:
       description: OK
