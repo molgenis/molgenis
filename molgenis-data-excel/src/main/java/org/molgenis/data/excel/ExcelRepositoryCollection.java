@@ -13,7 +13,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.processor.TrimProcessor;
@@ -34,25 +33,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ExcelRepositoryCollection extends FileRepositoryCollection {
   private static final String REPOSITORY_COLLECTION_NAME = "EXCEL";
 
-  private final String fileName;
   private final Workbook workbook;
 
   private EntityTypeFactory entityTypeFactory;
   private AttributeFactory attributeFactory;
 
-  public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException {
+  public ExcelRepositoryCollection(File file) throws IOException {
     this(file, new TrimProcessor());
   }
 
-  public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors)
-      throws IOException, MolgenisInvalidFormatException {
-    this(file.getName(), new FileInputStream(file), cellProcessors);
+  public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws IOException {
+    this(new FileInputStream(file), cellProcessors);
   }
 
-  public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
+  public ExcelRepositoryCollection(InputStream in, CellProcessor... cellProcessors)
       throws IOException {
     super(ExcelFileExtensions.getExcel(), cellProcessors);
-    this.fileName = name;
     workbook = WorkbookFactory.create(in);
   }
 
@@ -80,7 +76,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
       return null;
     }
 
-    return new ExcelRepository(name, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+    return new ExcelRepository(poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
   public int getNumberOfSheets() {
@@ -97,8 +93,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
       return null;
     }
 
-    return new ExcelRepository(
-        fileName, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+    return new ExcelRepository(poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
   public ExcelSheetWriter createWritable(

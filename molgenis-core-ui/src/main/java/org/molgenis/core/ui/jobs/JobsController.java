@@ -2,7 +2,6 @@ package org.molgenis.core.ui.jobs;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.jobs.JobsController.URI;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
@@ -27,6 +26,7 @@ import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(JobsController.URI)
 public class JobsController extends PluginController {
   public static final String ID = "jobs";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
@@ -86,6 +86,7 @@ public class JobsController extends PluginController {
     return "view-job";
   }
 
+  @Transactional(readOnly = true)
   @GetMapping(value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<Entity> findLastJobs() {

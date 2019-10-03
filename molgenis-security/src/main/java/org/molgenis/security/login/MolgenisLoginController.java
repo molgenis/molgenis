@@ -1,7 +1,5 @@
 package org.molgenis.security.login;
 
-import static org.molgenis.security.login.MolgenisLoginController.URI;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MolgenisLoginController.URI)
 public class MolgenisLoginController {
   public static final String PARAM_SESSION_EXPIRED = "expired";
 

@@ -20,6 +20,7 @@ class QueryValidationRepositoryDecoratorTest {
   private EntityType entityType;
   private Repository<Entity> delegateRepository;
   private QueryValidator queryValidator;
+  private FetchValidator fetchValidator;
 
   @SuppressWarnings("unchecked")
   @BeforeEach
@@ -28,14 +29,17 @@ class QueryValidationRepositoryDecoratorTest {
     entityType = mock(EntityType.class);
     when(delegateRepository.getEntityType()).thenReturn(entityType);
     queryValidator = mock(QueryValidator.class);
+    fetchValidator = mock(FetchValidator.class);
     queryValidationRepositoryDecorator =
-        new QueryValidationRepositoryDecorator<>(delegateRepository, queryValidator);
+        new QueryValidationRepositoryDecorator<>(
+            delegateRepository, queryValidator, fetchValidator);
   }
 
   @Test
   void testQueryValidationRepositoryDecorator() {
     assertThrows(
-        NullPointerException.class, () -> new QueryValidationRepositoryDecorator<>(null, null));
+        NullPointerException.class,
+        () -> new QueryValidationRepositoryDecorator<>(null, null, null));
   }
 
   @Test

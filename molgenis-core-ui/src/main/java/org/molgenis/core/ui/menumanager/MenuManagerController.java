@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.menumanager;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.menumanager.MenuManagerController.URI;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.google.common.collect.Lists;
@@ -31,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /** Plugin to view and modify the app UI menu */
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MenuManagerController.URI)
 public class MenuManagerController extends PluginController {
   public static final String ID = "menumanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

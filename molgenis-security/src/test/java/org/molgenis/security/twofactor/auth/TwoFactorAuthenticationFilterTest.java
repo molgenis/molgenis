@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
 import java.io.IOException;
@@ -96,8 +95,6 @@ class TwoFactorAuthenticationFilterTest extends AbstractMockitoSpringContextTest
   @Test
   void testDoFilterInternalNotAuthenticated() throws IOException, ServletException {
     request.setRequestURI("/login");
-    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
-
     filter.doFilterInternal(request, response, chain);
     verify(chain).doFilter(request, response);
   }
@@ -112,7 +109,6 @@ class TwoFactorAuthenticationFilterTest extends AbstractMockitoSpringContextTest
       testContext.setAuthentication(new RecoveryAuthenticationToken("recovery"));
 
       request.setRequestURI("/menu/main/dataexplorer");
-      when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 
       filter.doFilterInternal(request, response, chain);
       verify(chain).doFilter(request, response);

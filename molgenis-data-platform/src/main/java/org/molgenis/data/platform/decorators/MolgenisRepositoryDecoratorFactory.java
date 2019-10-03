@@ -30,6 +30,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.DefaultValueReferenceValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.FetchValidator;
 import org.molgenis.data.validation.QueryValidationRepositoryDecorator;
 import org.molgenis.data.validation.QueryValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -56,6 +57,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
   private final L3Cache l3Cache;
   private final PlatformTransactionManager transactionManager;
   private final QueryValidator queryValidator;
+  private final FetchValidator fetchValidator;
   private final DefaultValueReferenceValidator defaultValueReferenceValidator;
   private final UserPermissionEvaluator permissionService;
   private final RowLevelSecurityRepositoryDecoratorFactory
@@ -78,6 +80,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       L3Cache l3Cache,
       PlatformTransactionManager transactionManager,
       QueryValidator queryValidator,
+      FetchValidator fetchValidator,
       DefaultValueReferenceValidator defaultValueReferenceValidator,
       UserPermissionEvaluator permissionService,
       RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory) {
@@ -98,6 +101,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     this.l3Cache = requireNonNull(l3Cache);
     this.transactionManager = requireNonNull(transactionManager);
     this.queryValidator = requireNonNull(queryValidator);
+    this.fetchValidator = requireNonNull(fetchValidator);
     this.defaultValueReferenceValidator = requireNonNull(defaultValueReferenceValidator);
     this.permissionService = requireNonNull(permissionService);
     this.rowLevelSecurityRepositoryDecoratorFactory =
@@ -165,7 +169,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
     // 1. query validation decorator
     decoratedRepository =
-        new QueryValidationRepositoryDecorator<>(decoratedRepository, queryValidator);
+        new QueryValidationRepositoryDecorator<>(
+            decoratedRepository, queryValidator, fetchValidator);
 
     // 0. Dynamic decorators
     decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);

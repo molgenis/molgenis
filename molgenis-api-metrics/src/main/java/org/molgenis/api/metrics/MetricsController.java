@@ -1,7 +1,6 @@
 package org.molgenis.api.metrics;
 
 import static io.prometheus.client.exporter.common.TextFormat.CONTENT_TYPE_004;
-import static org.molgenis.api.metrics.MetricsController.BASE_URI;
 
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.swagger.annotations.Api;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api("Metrics")
 @RestController
-@RequestMapping(BASE_URI)
+@RequestMapping(MetricsController.BASE_URI)
 public class MetricsController {
   static final String BASE_URI = ApiNamespace.API_PATH + "/metrics";
   private final PrometheusMeterRegistry meterRegistry;

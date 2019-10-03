@@ -10,7 +10,6 @@ import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.createEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -98,7 +97,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MappingServiceController.URI)
 public class MappingServiceController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 

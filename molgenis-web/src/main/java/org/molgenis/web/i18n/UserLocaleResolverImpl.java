@@ -7,6 +7,7 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserLocaleResolverImpl implements UserLocaleResolver {
@@ -18,6 +19,7 @@ public class UserLocaleResolverImpl implements UserLocaleResolver {
     this.fallbackLocaleSupplier = requireNonNull(fallbackLocaleSupplier);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Locale resolveLocale(String username) {
     User user = userService.getUser(username);

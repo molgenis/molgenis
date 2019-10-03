@@ -1,21 +1,17 @@
 package org.molgenis.data.cache.l2;
 
-import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Objects.requireNonNull;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.SORTED;
-import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +24,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Adds, removes and retrieves entities from the {@link L2Cache} when a {@link Repository} is {@link
@@ -63,44 +60,55 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    */
   @Override
   public Entity findOneById(Object id) {
-    if (cacheable
-        && !transactionInformation.isEntireRepositoryDirty(getEntityType())
-        && !transactionInformation.isEntityDirty(EntityKey.create(getEntityType(), id))) {
+    if (doRetrieveFromCache(id)) {
       return l2Cache.get(delegate(), id);
     }
     return delegate().findOneById(id);
   }
 
-  /**
-   * Retrieves multiple entities by id.
-   *
-   * <p>If the repository is cacheable and the current transaction hasn't completely dirtied it,
-   * will split the stream into batches and load the batches through {@link #findAllBatch(List)}.
-   *
-   * <p>Otherwise, will delegate this call to the decorated repository.
-   *
-   * @param ids {@link Stream} of ids to retrieve
-   * @return {@link Stream} of retrieved {@link Entity}s, missing ones excluded
-   */
+  @SuppressWarnings("UnstableApiUsage")
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
-    if (cacheable && !transactionInformation.isEntireRepositoryDirty(getEntityType())) {
-      Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
-      Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
-      return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false)
-          .flatMap(List::stream);
+    if (doRetrieveFromCache()) {
+      Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), ID_BATCH_SIZE);
+      Iterable<List<Object>> iterable = () -> batches;
+      return Streams.stream(iterable).flatMap(batch -> findAllCache(batch).stream());
+    } else {
+      return delegate().findAll(ids);
     }
-    return delegate().findAll(ids);
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   @Override
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
-    return findAll(ids);
+    if (doRetrieveFromCache()) {
+      Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), ID_BATCH_SIZE);
+      Iterable<List<Object>> iterable = () -> batches;
+      return Streams.stream(iterable).flatMap(batch -> findAllCache(batch, fetch).stream());
+    } else {
+      return delegate().findAll(ids, fetch);
+    }
   }
 
   @Override
   public Entity findOneById(Object id, Fetch fetch) {
-    return findOneById(id);
+    if (doRetrieveFromCache(id)) {
+      return l2Cache.get(delegate(), id, fetch);
+    }
+    return delegate().findOneById(id, fetch);
+  }
+
+  private boolean doRetrieveFromCache() {
+    return cacheable
+        && (TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+            || !transactionInformation.isEntireRepositoryDirty(getEntityType()));
+  }
+
+  private boolean doRetrieveFromCache(Object id) {
+    return cacheable
+        && (TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+            || (!transactionInformation.isEntireRepositoryDirty(getEntityType())
+                && !transactionInformation.isEntityDirty(EntityKey.create(getEntityType(), id))));
   }
 
   /**
@@ -113,18 +121,43 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    * @param ids list of entity IDs to retrieve
    * @return List of {@link Entity}s, missing ones excluded.
    */
-  private List<Entity> findAllBatch(List<Object> ids) {
-    String entityTypeId = getEntityType().getId();
-    Multimap<Boolean, Object> partitionedIds =
-        Multimaps.index(
-            ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityTypeId, id)));
-    Collection<Object> cleanIds = partitionedIds.get(false);
-    Collection<Object> dirtyIds = partitionedIds.get(true);
+  private List<Entity> findAllCache(List<Object> ids) {
+    if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+      return l2Cache.getBatch(delegate(), ids);
+    } else {
+      String entityTypeId = getEntityType().getId();
+      Multimap<Boolean, Object> partitionedIds =
+          Multimaps.index(
+              ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityTypeId, id)));
+      Collection<Object> cleanIds = partitionedIds.get(false);
+      Collection<Object> dirtyIds = partitionedIds.get(true);
 
-    Map<Object, Entity> result =
-        newHashMap(uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
-    result.putAll(delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
+      Map<Object, Entity> result =
+          newHashMap(uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
+      result.putAll(
+          delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
 
-    return ids.stream().filter(result::containsKey).map(result::get).collect(toList());
+      return ids.stream().filter(result::containsKey).map(result::get).collect(toList());
+    }
+  }
+
+  private List<Entity> findAllCache(List<Object> ids, Fetch fetch) {
+    if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+      return l2Cache.getBatch(delegate(), ids, fetch);
+    } else {
+      String entityTypeId = getEntityType().getId();
+      Multimap<Boolean, Object> partitionedIds =
+          Multimaps.index(
+              ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityTypeId, id)));
+      Collection<Object> cleanIds = partitionedIds.get(false);
+      Collection<Object> dirtyIds = partitionedIds.get(true);
+
+      List<Entity> batch = l2Cache.getBatch(delegate(), cleanIds, fetch);
+      Map<Object, Entity> result = newHashMap(uniqueIndex(batch, Entity::getIdValue));
+      result.putAll(
+          delegate().findAll(dirtyIds.stream(), fetch).collect(toMap(Entity::getIdValue, e -> e)));
+
+      return ids.stream().filter(result::containsKey).map(result::get).collect(toList());
+    }
   }
 }
