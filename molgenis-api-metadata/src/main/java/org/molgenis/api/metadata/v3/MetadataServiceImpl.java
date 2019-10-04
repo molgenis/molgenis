@@ -26,10 +26,7 @@ public class MetadataServiceImpl {
   private final SortMapper sortMapper;
 
   MetadataServiceImpl(
-      MetaDataService metadataService,
-      QueryMapper queryMapperV3,
-      SortMapper sortMapper,
-      MetadataV3Mapper entityTypeMapper) {
+      MetaDataService metadataService, QueryMapper queryMapperV3, SortMapper sortMapper) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
