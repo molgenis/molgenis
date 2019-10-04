@@ -5,12 +5,12 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
-import java.util.Optional;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
@@ -126,13 +126,17 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return Attributes.builder().setAttributes(attributes).setTotal(count).build();
   }
 
-  public Attribute findAttribute(String entityTypeId, String attributeName) {
-    Optional<EntityType> entityType = metadataService.getEntityType(entityTypeId);
-    if (entityType.isPresent()) {
-      // FIXME: get by id or name
-      return entityType.get().getAttribute(attributeName);
+  @Override
+  public Attribute findAttribute(String attributeId) {
+    // TODO use MetaDataService instead of DataService
+    Attribute attribute =
+        dataService.findOneById(
+            AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
+    if (attribute == null) {
+      // TODO we can't throw an UnknownAttributeException here because it requires EntityType
+      throw new UnknownEntityException(AttributeMetadata.ATTRIBUTE_META_DATA, attributeId);
     }
-    return null;
+    return attribute;
   }
 
   public void createEntityType(EntityType entityType) {

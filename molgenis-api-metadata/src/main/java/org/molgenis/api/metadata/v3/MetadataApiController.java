@@ -5,16 +5,19 @@ import static java.util.Objects.requireNonNull;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
+import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
 import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
+import org.molgenis.api.metadata.v3.model.ReadAttributeRequest;
 import org.molgenis.api.metadata.v3.model.ReadAttributesRequest;
 import org.molgenis.api.metadata.v3.model.ReadEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.ReadEntityTypesRequest;
 import org.molgenis.api.model.Sort;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +65,15 @@ class MetadataApiController extends ApiController {
         metadataApiService.findEntityType(readEntityTypeRequest.getEntityTypeId());
 
     return metadataV3Mapper.toEntityTypeResponse(entityType);
+  }
+
+  @Transactional(readOnly = true)
+  @GetMapping("/{entityTypeId}/attributes/{attributeId}")
+  public AttributeResponse getEntityTypeAttribute(
+      @Valid ReadAttributeRequest readAttributeRequest) {
+    // TODO pass entity type identifier to findAttribute and check if exists in service
+    Attribute attribute = metadataApiService.findAttribute(readAttributeRequest.getAttributeId());
+    return metadataV3Mapper.mapAttribute(attribute);
   }
 
   @Transactional
