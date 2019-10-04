@@ -24,9 +24,8 @@ class QueryMapper {
     this.rsqlValueParser = requireNonNull(rsqlValueParser);
   }
 
-  public org.molgenis.data.Query<? extends Entity> map(
-      Query query, Repository<? extends Entity> repository) {
-    QueryImpl<? extends Entity> entityQuery = new QueryImpl<>(repository);
+  public <E extends Entity> org.molgenis.data.Query<E> map(Query query, Repository<E> repository) {
+    QueryImpl<E> entityQuery = new QueryImpl<>(repository);
     map(query, entityQuery, repository.getEntityType());
     return entityQuery;
   }
