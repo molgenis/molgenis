@@ -2,7 +2,10 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
+import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
@@ -410,14 +413,14 @@ public class MetadataV3Mapper {
   private I18nValue getI18nAttrLabel(Attribute attr) {
     String defaultValue = attr.getLabel();
     Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, attr.getLabel(code)));
+    getLanguageCodes().forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(LABEL, code))));
     return I18nValue.create(defaultValue, translations);
   }
 
   private I18nValue getI18nAttrDesc(Attribute attr) {
     String defaultValue = attr.getDescription();
     Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, attr.getDescription(code)));
+    getLanguageCodes().forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(DESCRIPTION, code))));
     return I18nValue.create(defaultValue, translations);
   }
 
