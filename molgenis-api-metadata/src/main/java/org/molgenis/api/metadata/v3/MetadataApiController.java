@@ -60,11 +60,11 @@ class MetadataApiController extends ApiController {
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}")
   public EntityTypeResponse getEntityType(@Valid ReadEntityTypeRequest readEntityTypeRequest) {
-
     EntityType entityType =
         metadataApiService.findEntityType(readEntityTypeRequest.getEntityTypeId());
 
-    return metadataV3Mapper.toEntityTypeResponse(entityType);
+    return metadataV3Mapper.toEntityTypeResponse(
+        entityType, readEntityTypeRequest.isFlattenAttrs());
   }
 
   @Transactional(readOnly = true)

@@ -69,7 +69,7 @@ public class MetadataV3Mapper {
       EntityTypes entityTypes, int size, int number, int total) {
     List<EntityTypeResponse> results = new ArrayList<>();
     for (EntityType entityType : entityTypes.getEntityTypes()) {
-      results.add(mapInternal(entityType));
+      results.add(mapInternal(entityType, false));
     }
 
     return EntityTypesResponse.create(
@@ -79,7 +79,11 @@ public class MetadataV3Mapper {
   }
 
   public EntityTypeResponse toEntityTypeResponse(EntityType entityType) {
-    return mapInternal(entityType);
+    return toEntityTypeResponse(entityType, false);
+  }
+
+  public EntityTypeResponse toEntityTypeResponse(EntityType entityType, boolean flattenAttrs) {
+    return mapInternal(entityType, flattenAttrs);
   }
 
   public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
@@ -113,7 +117,7 @@ public class MetadataV3Mapper {
     return entityType;
   }
 
-  private EntityTypeResponse mapInternal(EntityType entityType) {
+  private EntityTypeResponse mapInternal(EntityType entityType, boolean flattenAttrs) {
     if (entityType == null) {
       throw new IllegalStateException(); // FIXME
     }
@@ -124,12 +128,12 @@ public class MetadataV3Mapper {
     builder.setPackage_(pack != null ? createEntityResponseUri(pack) : null);
     builder.setLabel(getI18nEntityTypeLabel(entityType));
     builder.setDescription(getI18nEntityTypeDesc(entityType));
-    builder.setAttributes(mapInternal(entityType.getOwnAtomicAttributes()));
+    builder.setAttributes(flattenAttrs ? mapInternal(entityType.getAllAttributes()) : mapInternal(entityType.getOwnAllAttributes()));
     builder.setLabelAttribute(getLabelAttribute(entityType));
     builder.setIdAttribute(getIdAttribute(entityType));
     builder.setAbstract_(entityType.isAbstract());
     EntityType parent = entityType.getExtends();
-    builder.setExtends(parent != null ? mapInternal(parent) : null);
+    builder.setExtends(parent != null ? mapInternal(parent, false) : null);
     builder.setBackend(entityType.getBackend());
     builder.setIndexingDepth(entityType.getIndexingDepth());
 
@@ -413,14 +417,18 @@ public class MetadataV3Mapper {
   private I18nValue getI18nAttrLabel(Attribute attr) {
     String defaultValue = attr.getLabel();
     Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(LABEL, code))));
+    getLanguageCodes()
+        .forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(LABEL, code))));
     return I18nValue.create(defaultValue, translations);
   }
 
   private I18nValue getI18nAttrDesc(Attribute attr) {
     String defaultValue = attr.getDescription();
     Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(DESCRIPTION, code))));
+    getLanguageCodes()
+        .forEach(
+            code ->
+                translations.put(code, attr.getString(getI18nAttributeName(DESCRIPTION, code))));
     return I18nValue.create(defaultValue, translations);
   }
 
