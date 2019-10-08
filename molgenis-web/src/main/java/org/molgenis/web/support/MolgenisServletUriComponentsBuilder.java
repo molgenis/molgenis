@@ -3,7 +3,7 @@ package org.molgenis.web.support;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class DecodingServletUriComponentsBuilder
+public class MolgenisServletUriComponentsBuilder
     extends org.springframework.web.servlet.support.ServletUriComponentsBuilder {
   /**
    * Creates a ServletUriComponentsBuilder from the current request with decoded query params. This

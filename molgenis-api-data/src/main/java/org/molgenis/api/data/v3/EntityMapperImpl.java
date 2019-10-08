@@ -21,7 +21,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.web.support.DecodingServletUriComponentsBuilder;
+import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -229,8 +229,8 @@ public class EntityMapperImpl implements EntityMapper {
   }
 
   private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder = DecodingServletUriComponentsBuilder
-        .fromCurrentRequestDecodedQuery();
+    UriComponentsBuilder builder =
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
     if (pageNumber != null) {
       builder.replaceQueryParam("page", pageNumber);
     }
@@ -239,7 +239,7 @@ public class EntityMapperImpl implements EntityMapper {
 
   private URI createEntityResponseUri(Entity entity, @Nullable @CheckForNull String attributeName) {
     UriComponentsBuilder uriComponentsBuilder =
-        DecodingServletUriComponentsBuilder.fromCurrentRequestUri()
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestUri()
             .replacePath(null)
             .path(EntityController.API_ENTITY_PATH)
             .pathSegment(entity.getEntityType().getId(), entity.getIdValue().toString());

@@ -25,7 +25,7 @@ class ServletUriComponentsBuilderTest {
 
     assertEquals(
         "http://localhost/api/data/EntityType",
-        DecodingServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
   }
 
   @Test
@@ -45,6 +45,6 @@ class ServletUriComponentsBuilderTest {
 
     assertEquals(
         "http://localhost/api/data/EntityType?query=a==b,c=in=('d e','f g','h i')&j==k&page=1&attr=#CHROM,POS,REF,ALT",
-        DecodingServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
   }
 }
