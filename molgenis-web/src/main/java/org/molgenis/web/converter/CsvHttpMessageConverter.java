@@ -34,7 +34,7 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 
   @Override
   protected EntityCollection readInternal(
-      Class<? extends EntityCollection> clazz, HttpInputMessage inputMessage) throws IOException {
+      Class<? extends EntityCollection> clazz, HttpInputMessage inputMessage) {
     throw new UnsupportedOperationException();
   }
 }

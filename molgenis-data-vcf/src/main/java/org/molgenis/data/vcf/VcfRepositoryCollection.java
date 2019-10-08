@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -53,7 +52,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection {
   }
 
   @Override
-  public void init() throws IOException {
+  public void init() {
     // no operation
   }
 
