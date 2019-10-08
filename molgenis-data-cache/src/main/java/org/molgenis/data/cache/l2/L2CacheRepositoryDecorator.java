@@ -9,9 +9,11 @@ import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -123,7 +125,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    */
   private List<Entity> findAllCache(List<Object> ids) {
     if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-      return l2Cache.getBatch(delegate(), ids);
+      List<Entity> unorderedEntities = l2Cache.getBatch(delegate(), ids);
+      return createOrderedEntities(ids, unorderedEntities);
     } else {
       String entityTypeId = getEntityType().getId();
       Multimap<Boolean, Object> partitionedIds =
@@ -143,7 +146,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   private List<Entity> findAllCache(List<Object> ids, Fetch fetch) {
     if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-      return l2Cache.getBatch(delegate(), ids, fetch);
+      List<Entity> unorderedEntities = l2Cache.getBatch(delegate(), ids, fetch);
+      return createOrderedEntities(ids, unorderedEntities);
     } else {
       String entityTypeId = getEntityType().getId();
       Multimap<Boolean, Object> partitionedIds =
@@ -159,5 +163,13 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
       return ids.stream().filter(result::containsKey).map(result::get).collect(toList());
     }
+  }
+
+  private List<Entity> createOrderedEntities(List<Object> ids, List<Entity> unorderedEntities) {
+    Map<Object, Entity> entityIndex = Maps.newHashMapWithExpectedSize(ids.size());
+    unorderedEntities.forEach(entity -> entityIndex.put(entity.getIdValue(), entity));
+    List<Entity> orderedEntities = new ArrayList<>(ids.size());
+    ids.forEach(id -> orderedEntities.add(entityIndex.get(id)));
+    return orderedEntities;
   }
 }
