@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -15,10 +17,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.validation.JsonValidator;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DecoratorParametersRepositoryDecoratorTest extends AbstractMockitoTest {
+class DecoratorParametersRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private JsonValidator jsonValidator;
 
   @Mock private Repository delegateRepo;
@@ -30,21 +30,21 @@ public class DecoratorParametersRepositoryDecoratorTest extends AbstractMockitoT
   private static final String SCHEMA = "{some: 'schema'}";
   private static final String JSON = "{para: 'meters'}";
 
-  @BeforeMethod
+  @BeforeEach
   @SuppressWarnings("unchecked")
-  public void beforeMethod() {
+  void beforeMethod() {
     decorator = new DecoratorParametersRepositoryDecorator(delegateRepo, jsonValidator);
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     decorator.update(mockParameters());
     verify(jsonValidator).validate(JSON, SCHEMA);
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testUpdateStream() {
+  void testUpdateStream() {
     decorator.update(Stream.of(mockParameters(), mockParameters()));
 
     verify(delegateRepo).update(streamCaptor.capture());
@@ -57,14 +57,14 @@ public class DecoratorParametersRepositoryDecoratorTest extends AbstractMockitoT
   }
 
   @Test
-  public void testAdd() {
+  void testAdd() {
     decorator.add(mockParameters());
     verify(jsonValidator).validate(JSON, SCHEMA);
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testAddStream() {
+  void testAddStream() {
     decorator.add(Stream.of(mockParameters(), mockParameters()));
 
     verify(delegateRepo).add(streamCaptor.capture());
@@ -77,7 +77,7 @@ public class DecoratorParametersRepositoryDecoratorTest extends AbstractMockitoT
   }
 
   @Test
-  public void testNoValidationWhenNullParameters() {
+  void testNoValidationWhenNullParameters() {
     DecoratorParameters parameters = mock(DecoratorParameters.class, RETURNS_DEEP_STUBS);
 
     decorator.add(parameters);

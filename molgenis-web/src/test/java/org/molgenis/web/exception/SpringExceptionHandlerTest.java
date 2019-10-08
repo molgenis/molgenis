@@ -13,22 +13,22 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.method.HandlerMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SpringExceptionHandlerTest extends AbstractMockitoTest {
+class SpringExceptionHandlerTest extends AbstractMockitoTest {
   private SpringExceptionHandler springExceptionHandler;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     springExceptionHandler = mock(SpringExceptionHandler.class, CALLS_REAL_METHODS);
   }
 
   @Test
-  public void testHandleSpringMethodNotAllowedException() {
+  void testHandleSpringMethodNotAllowedException() {
     Exception e = mock(Exception.class);
     HttpServletRequest request = new MockHttpServletRequest();
     springExceptionHandler.handleSpringMethodNotAllowedException(e, request);
@@ -36,7 +36,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleSpringNotFoundException() {
+  void testHandleSpringNotFoundException() {
     Exception e = mock(Exception.class);
     HttpServletRequest request = new MockHttpServletRequest();
     springExceptionHandler.handleSpringNotFoundException(e, request);
@@ -44,7 +44,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleSpringPayloadTooLargeException() {
+  void testHandleSpringPayloadTooLargeException() {
     Exception e = mock(Exception.class);
     HttpServletRequest request = new MockHttpServletRequest();
     Exception cause = mock(Exception.class);
@@ -54,7 +54,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleSpringUnsupportedMediaTypeException() {
+  void testHandleSpringUnsupportedMediaTypeException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     springExceptionHandler.handleSpringUnsupportedMediaTypeException(e, method);
@@ -62,7 +62,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleSpringNotAcceptableException() {
+  void testHandleSpringNotAcceptableException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     springExceptionHandler.handleSpringNotAcceptableException(e, method);
@@ -70,7 +70,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testHandleSpringBadRequestException() {
+  void testHandleSpringBadRequestException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     springExceptionHandler.handleSpringBadRequestException(e, method);
@@ -78,7 +78,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testAsyncRequestTimeoutException() {
+  void testAsyncRequestTimeoutException() {
     Exception e = mock(Exception.class);
     HandlerMethod method = mock(HandlerMethod.class);
     springExceptionHandler.handleSpringServiceUnavailableException(e, method);

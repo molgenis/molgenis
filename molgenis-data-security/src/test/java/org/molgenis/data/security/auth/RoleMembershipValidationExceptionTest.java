@@ -2,27 +2,26 @@ package org.molgenis.data.security.auth;
 
 import static org.mockito.Mockito.mock;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 public class RoleMembershipValidationExceptionTest extends ExceptionMessageTest {
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-security");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
         new RoleMembershipValidationException(mock(RoleMembership.class)), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  public static Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "User cannot have multiple roles within the same group."};
     Object[] nlParams = {"nl", "Gebruiker kan niet meerdere rollen binnen dezelfde groep hebben."};
     return new Object[][] {enParams, nlParams};

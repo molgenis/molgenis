@@ -1,10 +1,10 @@
 package org.molgenis.jobs.model;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -19,8 +19,9 @@ public class ScheduledJobTest extends AbstractSystemEntityTest {
   @Autowired ScheduledJobMetadata metadata;
   @Autowired ScheduledJobFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, ScheduledJob.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }

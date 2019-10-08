@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -15,14 +16,16 @@ import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -41,11 +44,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L3CacheRepositoryDecoratorTest.Config.class)
-public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
+class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   private L3CacheRepositoryDecorator l3CacheRepositoryDecorator;
   private EntityType entityType;
 
@@ -75,12 +77,8 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Mock private Fetch fetch;
 
-  public L3CacheRepositoryDecoratorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     entityType = entityTypeFactory.create(repositoryName);
     entityType.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
     entityType.addAttribute(attributeFactory.create().setName(COUNTRY));
@@ -112,29 +110,29 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindOneRepositoryClean() {
+  void testFindOneRepositoryClean() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
     Query<Entity> queryWithPageSizeOne = new QueryImpl<>(query).pageSize(1);
     when(l3Cache.get(delegateRepository, queryWithPageSizeOne)).thenReturn(singletonList(3));
     when(delegateRepository.findOneById(3, fetch)).thenReturn(entity3);
 
-    assertEquals(l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne), entity3);
+    assertEquals(entity3, l3CacheRepositoryDecorator.findOne(queryWithPageSizeOne));
     verify(delegateRepository, times(1)).findOneById(3, fetch);
     verify(delegateRepository, atLeast(0)).getEntityType();
     verifyNoMoreInteractions(delegateRepository);
   }
 
   @Test
-  public void testFindOneRepositoryDirty() {
+  void testFindOneRepositoryDirty() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
     when(delegateRepository.findOne(query)).thenReturn(entity3);
 
-    assertEquals(l3CacheRepositoryDecorator.findOne(query), entity3);
+    assertEquals(entity3, l3CacheRepositoryDecorator.findOne(query));
     verifyNoMoreInteractions(l3Cache);
   }
 
   @Test
-  public void testFindAllRepositoryClean() {
+  void testFindAllRepositoryClean() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
 
     List<Object> ids = asList(1, 2);
@@ -146,12 +144,12 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     Stream<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query);
 
-    assertEquals(actualEntities.collect(toList()), expectedEntities);
-    assertEquals(entityIdCaptor.getValue().collect(toList()), ids);
+    assertEquals(expectedEntities, actualEntities.collect(toList()));
+    assertEquals(ids, entityIdCaptor.getValue().collect(toList()));
   }
 
   @Test
-  public void testFindAllVeryLargePageSize() {
+  void testFindAllVeryLargePageSize() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
     Query<Entity> largeQuery = new QueryImpl<>(query).setPageSize(10000);
 
@@ -161,12 +159,12 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 
   @Test
-  public void testFindAllZeroPageSize() {
+  void testFindAllZeroPageSize() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(true);
     Query<Entity> largeQuery = new QueryImpl<>(query).setPageSize(0);
 
@@ -176,12 +174,12 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(largeQuery).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 
   @Test
-  public void testFindAllRepositoryDirty() {
+  void testFindAllRepositoryDirty() {
     when(transactionInformation.isRepositoryCompletelyClean(entityType)).thenReturn(false);
     Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL");
     query.pageSize(10);
@@ -194,14 +192,14 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
     List<Entity> actualEntities = l3CacheRepositoryDecorator.findAll(query).collect(toList());
 
-    assertEquals(actualEntities, expectedEntities);
+    assertEquals(expectedEntities, actualEntities);
     verifyNoMoreInteractions(l3Cache);
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return mock(EntityManager.class);
     }
   }

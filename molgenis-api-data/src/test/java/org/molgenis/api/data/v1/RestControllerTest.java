@@ -5,6 +5,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Locale.ENGLISH;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -25,10 +27,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import cz.jirutka.rsql.parser.RSQLParser;
 import java.util.HashSet;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.molgenis.api.data.RestService;
 import org.molgenis.api.data.ServletUriComponentsBuilderFactory;
 import org.molgenis.api.data.v1.RestControllerTest.RestControllerConfig;
@@ -66,6 +74,7 @@ import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
@@ -83,7 +92,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -92,14 +100,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.NestedServletException;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {RestControllerConfig.class, GsonConfig.class})
-public class RestControllerTest extends AbstractTestNGSpringContextTests {
+class RestControllerTest extends AbstractMockitoSpringContextTests {
   private static final String ENTITY_NAME = "Person";
   private static final String ENTITY_UNTYPED_ID = "p1";
   private static final String HREF_ENTITY = BASE_URI + '/' + ENTITY_NAME;
@@ -144,8 +149,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
 
   @Mock private LocaleResolver localeResolver;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeAll
+  static void beforeClass() {
     DataConverter.setConversionService(new DefaultFormattingConversionService());
 
     ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
@@ -157,13 +162,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     MessageSourceHolder.setMessageSource(messageSource);
   }
 
-  @AfterClass
-  public void afterClass() {
+  @AfterAll
+  static void afterClass() {
     MessageSourceHolder.setMessageSource(null);
   }
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     MockitoAnnotations.initMocks(this);
     reset(permissionService, dataService, metaDataService, tokenService);
 
@@ -273,7 +278,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void loginPasswordReset() throws Exception {
+  void loginPasswordReset() throws Exception {
     String username = "henk";
     String password = "123henk";
 
@@ -300,7 +305,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testLogoutTokenInHeader() throws Exception {
+  void testLogoutTokenInHeader() throws Exception {
     mockMvc
         .perform(
             post(BASE_URI + "/logout").header(TokenExtractor.TOKEN_HEADER, "abcde").content(""))
@@ -310,7 +315,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testLogoutTokenInParam() throws Exception {
+  void testLogoutTokenInParam() throws Exception {
     mockMvc
         .perform(
             post(BASE_URI + "/logout").param(TokenExtractor.TOKEN_PARAMETER, "abcde").content(""))
@@ -319,13 +324,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void testLogoutNoToken() throws Exception {
+  void testLogoutNoToken() throws Exception {
     mockMvc.perform(post(BASE_URI + "/logout").content("")).andExpect(status().isBadRequest());
     verifyZeroInteractions(tokenService);
   }
 
   @Test
-  public void create() throws Exception {
+  void create() throws Exception {
     mockMvc
         .perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
         .andExpect(status().isCreated())
@@ -335,7 +340,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void createFromFormPost() throws Exception {
+  void createFromFormPost() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY)
@@ -349,13 +354,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void deleteDelete() throws Exception {
+  void deleteDelete() throws Exception {
     mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
     verify(dataService).deleteById(ENTITY_NAME, ENTITY_UNTYPED_ID);
   }
 
   @Test
-  public void deletePost() throws Exception {
+  void deletePost() throws Exception {
     mockMvc
         .perform(post(HREF_ENTITY_ID).param("_method", "DELETE"))
         .andExpect(status().isNoContent());
@@ -363,25 +368,25 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void deleteAllDelete() throws Exception {
+  void deleteAllDelete() throws Exception {
     mockMvc.perform(delete(HREF_ENTITY)).andExpect(status().isNoContent());
     verify(dataService).deleteAll(ENTITY_NAME);
   }
 
   @Test
-  public void deleteAllPost() throws Exception {
+  void deleteAllPost() throws Exception {
     mockMvc.perform(post(HREF_ENTITY).param("_method", "DELETE")).andExpect(status().isNoContent());
     verify(dataService).deleteAll(ENTITY_NAME);
   }
 
   @Test
-  public void deleteMetaDelete() throws Exception {
+  void deleteMetaDelete() throws Exception {
     mockMvc.perform(delete(HREF_ENTITY_META)).andExpect(status().isNoContent());
     verify(metaDataService).deleteEntityType(ENTITY_NAME);
   }
 
   @Test
-  public void deleteMetaPost() throws Exception {
+  void deleteMetaPost() throws Exception {
     mockMvc
         .perform(post(HREF_ENTITY_META).param("_method", "DELETE"))
         .andExpect(status().isNoContent());
@@ -389,7 +394,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityType() throws Exception {
+  void retrieveEntityType() throws Exception {
     mockMvc
         .perform(get(HREF_ENTITY_META))
         .andExpect(status().isOk())
@@ -398,7 +403,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityTypeWritable() throws Exception {
+  void retrieveEntityTypeWritable() throws Exception {
     when(permissionService.hasPermission(
             new EntityTypeIdentity(ENTITY_NAME), EntityTypePermission.UPDATE_DATA))
         .thenReturn(true);
@@ -421,7 +426,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityTypeNotWritable() throws Exception {
+  void retrieveEntityTypeNotWritable() throws Exception {
     when(permissionService.hasPermission(
             new EntityTypeIdentity(ENTITY_NAME), EntityTypePermission.ADD_DATA))
         .thenReturn(true);
@@ -435,7 +440,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityTypePost() throws Exception {
+  void retrieveEntityTypePost() throws Exception {
     String json = "{\"attributes\":[\"name\"]}";
     mockMvc
         .perform(
@@ -456,7 +461,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityTypeSelectAttributes() throws Exception {
+  void retrieveEntityTypeSelectAttributes() throws Exception {
     mockMvc
         .perform(get(HREF_ENTITY_META).param("attributes", "name"))
         .andExpect(status().isOk())
@@ -472,7 +477,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityTypeExpandAttributes() throws Exception {
+  void retrieveEntityTypeExpandAttributes() throws Exception {
     mockMvc
         .perform(get(HREF_ENTITY_META).param("expand", "attributes"))
         .andExpect(status().isOk())
@@ -484,7 +489,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieve() throws Exception {
+  void retrieve() throws Exception {
     restController.retrieveEntity(ENTITY_NAME, ENTITY_UNTYPED_ID, new String[] {}, new String[] {});
 
     mockMvc
@@ -500,7 +505,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveSelectAttributes() throws Exception {
+  void retrieveSelectAttributes() throws Exception {
     mockMvc
         .perform(get(HREF_ENTITY_ID).param("attributes", "notname"))
         .andExpect(status().isOk())
@@ -509,7 +514,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityCollection() throws Exception {
+  void retrieveEntityCollection() throws Exception {
     mockMvc
         .perform(
             get(HREF_ENTITY)
@@ -524,7 +529,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityCollectionPost() throws Exception {
+  void retrieveEntityCollectionPost() throws Exception {
 
     mockMvc
         .perform(
@@ -538,7 +543,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveEntityAttribute() throws Exception {
+  void retrieveEntityAttribute() throws Exception {
     mockMvc
         .perform(get(HREF_ENTITY_ID + "/name"))
         .andExpect(status().isOk())
@@ -546,10 +551,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
         .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityTypeException.class,
-      expectedExceptionsMessageRegExp = "id:unknown") // handled globally
-  public void retrieveAttributeUnknownEntity() throws Throwable {
+  @Test
+  void retrieveAttributeUnknownEntity() throws Throwable {
     String entityTypeId = "unknown";
     when(dataService.getEntityType(entityTypeId))
         .thenThrow(new UnknownEntityTypeException(entityTypeId));
@@ -557,12 +560,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     try {
       mockMvc.perform(get(HREF_UNKNOWN_ENTITY_META + "/attribute"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityTypeException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("id:unknown");
     }
   }
 
   @Test
-  public void retrieveEntityAttributePost() throws Exception {
+  void retrieveEntityAttributePost() throws Exception {
     String json = "{\"attributes\":[\"name\"]}";
     mockMvc
         .perform(
@@ -575,10 +584,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
         .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
   }
 
-  @Test(
-      expectedExceptions = UnknownAttributeException.class,
-      expectedExceptionsMessageRegExp = "type:Person attribute:name") // handled globally
-  public void retrieveEntityAttributeUnknownAttribute() throws Throwable {
+  @Test
+  void retrieveEntityAttributeUnknownAttribute() throws Throwable {
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
 
@@ -594,14 +601,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     try {
       mockMvc.perform(get(HREF_ENTITY_ID + "/name"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownAttributeException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Person attribute:name");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownAttributeException.class,
-      expectedExceptionsMessageRegExp = "type:Person attribute:name") // handled globally
-  public void retrieveEntityAttributeUnknownEntity() throws Throwable {
+  @Test
+  void retrieveEntityAttributeUnknownEntity() throws Throwable {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn(ENTITY_NAME);
     when(entityType.getLabel("en")).thenReturn("My entity type");
@@ -613,12 +624,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     try {
       mockMvc.perform(get(HREF_ENTITY_ID + "/name"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownAttributeException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Person attribute:name");
     }
   }
 
   @Test
-  public void retrieveEntityAttributeXref() throws Exception {
+  void retrieveEntityAttributeXref() throws Exception {
     reset(dataService);
 
     @SuppressWarnings("unchecked")
@@ -704,7 +721,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void update() throws Exception {
+  void update() throws Exception {
     mockMvc
         .perform(
             MockMvcRequestBuilders.put(HREF_ENTITY_ID)
@@ -715,8 +732,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  public void updateInternalRepoNotUpdateable() throws Exception {
+  void updateInternalRepoNotUpdateable() throws Exception {
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
     when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
@@ -731,10 +749,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
         .andExpect(status().isBadRequest());
   }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Person does not have an id attribute") // handled globally
-  public void updateInternalRepoIdAttributeIsNull() throws Throwable {
+  @Test
+  void updateInternalRepoIdAttributeIsNull() throws Throwable {
     @SuppressWarnings("unchecked")
     Repository<Entity> repo = mock(Repository.class);
     when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
@@ -748,14 +764,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
               .content("{name:Klaas}")
               .contentType(APPLICATION_JSON));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("Person does not have an id attribute");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Person id:p1 attribute:id") // handled globally
-  public void updateInternalRepoExistingIsNull() throws Throwable {
+  @Test
+  void updateInternalRepoExistingIsNull() throws Throwable {
     when(dataService.findOneById(
             ArgumentMatchers.eq(ENTITY_NAME),
             ArgumentMatchers.eq(ENTITY_UNTYPED_ID),
@@ -768,12 +788,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
               .content("{name:Klaas}")
               .contentType(APPLICATION_JSON));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Person id:p1 attribute:id");
     }
   }
 
   @Test
-  public void updateAttribute() throws Exception {
+  void updateAttribute() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY_ID + "/name")
@@ -788,7 +814,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void updateAttributeNull() throws Exception {
+  void updateAttributeNull() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY_ID + "/name")
@@ -803,7 +829,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void updateAttributeWithEmptyValue() throws Exception {
+  void updateAttributeWithEmptyValue() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY_ID + "/name").param("_method", "PUT").contentType(APPLICATION_JSON))
@@ -811,10 +837,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityTypeException.class,
-      expectedExceptionsMessageRegExp = "id:unknownentity") // handled globally
-  public void updateAttribute_unknownEntity() throws Throwable {
+  @Test
+  void updateAttribute_unknownEntity() throws Throwable {
     String entityTypeId = "unknownentity";
     when(dataService.getEntityType(entityTypeId))
         .thenThrow(new UnknownEntityTypeException(entityTypeId));
@@ -825,14 +849,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
               .content("Klaas")
               .contentType(APPLICATION_JSON));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityTypeException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("id:unknownentity");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownEntityException.class,
-      expectedExceptionsMessageRegExp = "type:Person id:666 attribute:id") // handled globally
-  public void updateAttribute_unknownEntityId() throws Throwable {
+  @Test
+  void updateAttribute_unknownEntityId() throws Throwable {
     try {
       mockMvc.perform(
           post(HREF_ENTITY + "/666" + "/name")
@@ -840,15 +868,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
               .content("Klaas")
               .contentType(APPLICATION_JSON));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownEntityException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Person id:666 attribute:id");
     }
   }
 
-  @Test(
-      expectedExceptions = UnknownAttributeException.class,
-      expectedExceptionsMessageRegExp =
-          "type:Person attribute:unknownattribute") // handled globally
-  public void updateAttribute_unknownAttribute() throws Throwable {
+  @Test
+  void updateAttribute_unknownAttribute() throws Throwable {
     try {
       mockMvc.perform(
           post(HREF_ENTITY_ID + "/unknownattribute")
@@ -856,12 +887,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
               .content("Klaas")
               .contentType(APPLICATION_JSON));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      Exception exception =
+          assertThrows(
+              UnknownAttributeException.class,
+              () -> {
+                throw e.getCause();
+              });
+      assertThat(exception.getMessage()).containsPattern("type:Person attribute:unknownattribute");
     }
   }
 
   @Test
-  public void updateFromFormPost() throws Exception {
+  void updateFromFormPost() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY_ID)
@@ -874,7 +911,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void updatePost() throws Exception {
+  void updatePost() throws Exception {
     mockMvc
         .perform(
             post(HREF_ENTITY_ID)
@@ -886,27 +923,32 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class) // handled globally
-  public void handleUnknownEntityException() throws Throwable {
+  @Test
+  void handleUnknownEntityException() throws Throwable {
     String entityTypeId = "bogus";
     when(dataService.getEntityType(entityTypeId))
         .thenThrow(new UnknownEntityTypeException(entityTypeId));
     try {
       mockMvc.perform(get(BASE_URI + "/" + entityTypeId + "/1"));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      assertThrows(
+          UnknownEntityTypeException.class,
+          () -> {
+            throw e.getCause();
+          });
     }
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  public void molgenisDataAccessException() throws Exception {
+  void molgenisDataAccessException() throws Exception {
     when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
         .thenThrow(new MolgenisDataAccessException());
     mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isUnauthorized());
   }
 
-  @Test(expectedExceptions = PermissionDeniedException.class) // handled globally
-  public void molgenisPermissionDeniedException() throws Throwable {
+  @Test
+  void molgenisPermissionDeniedException() throws Throwable {
     when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID))
         .thenThrow(
             new EntityTypePermissionDeniedException(
@@ -914,12 +956,16 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     try {
       mockMvc.perform(get(HREF_ENTITY_ID));
     } catch (NestedServletException e) {
-      throw e.getCause();
+      assertThrows(
+          PermissionDeniedException.class,
+          () -> {
+            throw e.getCause();
+          });
     }
   }
 
   @Test
-  public void retrieveEntityCollectionCsv() throws Exception {
+  void retrieveEntityCollectionCsv() throws Exception {
     mockMvc
         .perform(
             get(BASE_URI + "/csv/Person")
@@ -932,7 +978,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
-  public void retrieveSortedEntityCollectionCsv() throws Exception {
+  void retrieveSortedEntityCollectionCsv() throws Exception {
     mockMvc
         .perform(
             get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
@@ -944,69 +990,69 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Configuration
-  public static class RestControllerConfig extends WebMvcConfigurerAdapter {
+  static class RestControllerConfig extends WebMvcConfigurerAdapter {
     @Bean
-    public AuthenticationSettings authenticationSettings() {
+    AuthenticationSettings authenticationSettings() {
       return mock(AuthenticationSettings.class);
     }
 
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return mock(DataService.class);
     }
 
     @Bean
-    public MetaDataService metaDataService() {
+    MetaDataService metaDataService() {
       return mock(MetaDataService.class);
     }
 
     @Bean
-    public TokenService tokenService() {
+    TokenService tokenService() {
       return mock(TokenService.class);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() {
+    AuthenticationManager authenticationManager() {
       return mock(AuthenticationManager.class);
     }
 
     @Bean
-    public UserPermissionEvaluator permissionService() {
+    UserPermissionEvaluator permissionService() {
       return mock(UserPermissionEvaluator.class);
     }
 
     @Bean
-    public UserAccountService userAccountService() {
+    UserAccountService userAccountService() {
       return mock(UserAccountService.class);
     }
 
     @Bean
-    public IdGenerator idGenerator() {
+    IdGenerator idGenerator() {
       return mock(IdGenerator.class);
     }
 
     @Bean
-    public FileStore fileStore() {
+    FileStore fileStore() {
       return mock(FileStore.class);
     }
 
     @Bean
-    public FileMetaFactory fileMetaFactory() {
+    FileMetaFactory fileMetaFactory() {
       return mock(FileMetaFactory.class);
     }
 
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return mock(EntityManager.class);
     }
 
     @Bean
-    public ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory() {
+    ServletUriComponentsBuilderFactory servletUriComponentsBuilderFactory() {
       return mock(ServletUriComponentsBuilderFactory.class);
     }
 
     @Bean
-    public RestController restController() {
+    RestController restController() {
       return new RestController(
           authenticationSettings(),
           dataService(),

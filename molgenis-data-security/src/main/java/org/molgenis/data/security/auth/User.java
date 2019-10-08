@@ -91,19 +91,19 @@ public class User extends StaticEntity {
     set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
   }
 
-  public Boolean isActive() {
-    return getBoolean(ACTIVE);
+  public boolean isActive() {
+    return Boolean.TRUE.equals(getBoolean(ACTIVE));
   }
 
-  public void setActive(Boolean active) {
+  public void setActive(boolean active) {
     set(ACTIVE, active);
   }
 
-  public Boolean isSuperuser() {
-    return getBoolean(SUPERUSER);
+  public boolean isSuperuser() {
+    return Boolean.TRUE.equals(getBoolean(SUPERUSER));
   }
 
-  public void setSuperuser(Boolean superuser) {
+  public void setSuperuser(boolean superuser) {
     set(SUPERUSER, superuser);
   }
 

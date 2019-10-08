@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.amazon.bucket.config.AmazonBucketTestConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
@@ -13,7 +14,6 @@ import org.molgenis.jobs.model.JobPackage;
 import org.molgenis.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -47,8 +47,9 @@ public class AmazonBucketJobExecutionTest extends AbstractSystemEntityTest {
     return attrs;
   }
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata,
         AmazonBucketJobExecution.class,

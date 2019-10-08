@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Locale;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.security.auth.User;
@@ -30,6 +32,7 @@ import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,18 +41,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {MetadataManagerControllerTest.Config.class, GsonConfig.class})
-public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTests {
+class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @Autowired private MenuReaderService menuReaderService;
@@ -64,8 +64,8 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 
   private MockMvc mockMvc;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     MockitoAnnotations.initMocks(this);
     FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
     freeMarkerViewResolver.setSuffix(".ftl");
@@ -75,7 +75,6 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 
     when(appSettings.getLanguageCode()).thenReturn("nl");
     User user = mock(User.class);
-    when(user.isSuperuser()).thenReturn(false);
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     MetadataManagerController metadataEditorController =
@@ -90,7 +89,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testInit() throws Exception {
+  void testInit() throws Exception {
     when(localeResolver.resolveLocale(any())).thenReturn(Locale.GERMAN);
     mockMvc
         .perform(get("/plugin/metadata-manager"))
@@ -102,7 +101,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testGetEditorPackages() throws Exception {
+  void testGetEditorPackages() throws Exception {
     when(metadataManagerService.getEditorPackages()).thenReturn(getEditorPackageResponse());
     mockMvc
         .perform(get("/plugin/metadata-manager/editorPackages"))
@@ -112,7 +111,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testGetEditorEntityType() throws Exception {
+  void testGetEditorEntityType() throws Exception {
     when(metadataManagerService.getEditorEntityType("id_1"))
         .thenReturn(getEditorEntityTypeResponse());
     mockMvc
@@ -123,7 +122,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testCreateEditorEntityType() throws Exception {
+  void testCreateEditorEntityType() throws Exception {
     EditorEntityTypeResponse editorEntityTypeResponse = getEditorEntityTypeResponse();
     when(metadataManagerService.createEditorEntityType()).thenReturn(editorEntityTypeResponse);
     mockMvc
@@ -134,7 +133,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testUpsertEntityType() throws Exception {
+  void testUpsertEntityType() throws Exception {
     mockMvc
         .perform(
             post("/plugin/metadata-manager/entityType")
@@ -145,7 +144,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Test
-  public void testCreateEditorAttribute() throws Exception {
+  void testCreateEditorAttribute() throws Exception {
     when(metadataManagerService.createEditorAttribute()).thenReturn(getEditorAttributeResponse());
     mockMvc
         .perform(get("/plugin/metadata-manager/create/attribute"))
@@ -237,24 +236,24 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   @Configuration
-  public static class Config {
+  static class Config {
     @Bean
-    public MenuReaderService menuReaderService() {
+    MenuReaderService menuReaderService() {
       return mock(MenuReaderService.class);
     }
 
     @Bean
-    public AppSettings appSettings() {
+    AppSettings appSettings() {
       return mock(AppSettings.class);
     }
 
     @Bean
-    public MetadataManagerService metadataManagerService() {
+    MetadataManagerService metadataManagerService() {
       return mock(MetadataManagerService.class);
     }
 
     @Bean
-    public UserAccountService userAccountService() {
+    UserAccountService userAccountService() {
       return mock(UserAccountService.class);
     }
   }

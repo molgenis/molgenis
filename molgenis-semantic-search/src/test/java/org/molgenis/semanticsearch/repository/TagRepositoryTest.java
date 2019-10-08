@@ -1,5 +1,6 @@
 package org.molgenis.semanticsearch.repository;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -11,9 +12,11 @@ import static org.molgenis.data.meta.model.TagMetadata.CODE_SYSTEM;
 import static org.molgenis.data.meta.model.TagMetadata.OBJECT_IRI;
 import static org.molgenis.data.meta.model.TagMetadata.RELATION_IRI;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.testng.Assert.assertTrue;
 
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -29,9 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = TagRepositoryTest.Config.class)
 public class TagRepositoryTest extends AbstractMolgenisSpringTest {
@@ -45,11 +47,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest {
 
   private final UUID uuid = UUID.randomUUID();
 
-  public TagRepositoryTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
+  @BeforeEach
   public void beforeMethod() {
     tagRepository = new TagRepository(dataService, idGenerator, tagFactory);
     when(idGenerator.generateId()).thenReturn(uuid.toString());

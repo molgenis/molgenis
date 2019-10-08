@@ -1,5 +1,6 @@
 package org.molgenis.data.importer.emx;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.EntityManager;
@@ -20,10 +23,8 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ImportWriterTest extends AbstractMockitoTest {
+class ImportWriterTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
 
   @SuppressWarnings("deprecation")
@@ -36,8 +37,8 @@ public class ImportWriterTest extends AbstractMockitoTest {
 
   private ImportWriter importWriter;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     importWriter =
         new ImportWriter(
             metaDataService,
@@ -47,14 +48,14 @@ public class ImportWriterTest extends AbstractMockitoTest {
             dataPersister);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testImportWriter() {
-    importWriter = new ImportWriter(null, null, null, null, null);
+  @Test
+  void testImportWriter() {
+    assertThrows(NullPointerException.class, () -> new ImportWriter(null, null, null, null, null));
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/7611
   @Test
-  public void testDoImportIgnoreMetadata() {
+  void testDoImportIgnoreMetadata() {
     EmxImportJob emxImportJob = mock(EmxImportJob.class);
     when(emxImportJob.getMetadataAction()).thenReturn(MetadataAction.IGNORE);
     when(emxImportJob.getDataAction()).thenReturn(DataAction.ADD_UPDATE_EXISTING);

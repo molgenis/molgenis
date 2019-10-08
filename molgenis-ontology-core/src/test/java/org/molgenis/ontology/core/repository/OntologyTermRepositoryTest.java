@@ -4,6 +4,7 @@ import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
@@ -15,11 +16,14 @@ import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.ontology.core.model.OntologyTerm.create;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -39,11 +43,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = OntologyTermRepositoryTest.Config.class)
-public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
+class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired DataService dataService;
 
   @Autowired OntologyTermRepository ontologyTermRepository;
@@ -56,12 +59,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   private org.molgenis.ontology.core.meta.OntologyTerm ontologyTermEntity;
 
-  public OntologyTermRepositoryTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeTest
-  public void beforeTest() {
+  @BeforeEach
+  void beforeTest() {
     Entity ontologyEntity = mock(Entity.class);
     when(ontologyEntity.getString(OntologyMetadata.ID)).thenReturn("34");
 
@@ -73,7 +72,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindExcatOntologyTerms() {
+  void testFindExcatOntologyTerms() {
     Entity synonymEntity1 = mock(Entity.class);
     when(synonymEntity1.get(OntologyTermSynonymMetadata.ID)).thenReturn("synonym-1");
     when(synonymEntity1.get(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR))
@@ -118,14 +117,12 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
         ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
     assertEquals(
-        exactOntologyTerms,
-        singletonList(
-            OntologyTerm.create(
-                "http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))));
+        singletonList(create("http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))),
+        exactOntologyTerms);
   }
 
   @Test
-  public void testFindOntologyTerms() {
+  void testFindOntologyTerms() {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Query<Entity>> queryCaptor = forClass(Query.class);
     when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
@@ -136,17 +133,17 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
             asList("1", "2"), of("term1", "term2", "term3"), 100);
 
     assertEquals(
-        terms,
         singletonList(
-            OntologyTerm.create(
-                "http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))));
+            create(
+                "http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))),
+        terms);
     assertEquals(
-        queryCaptor.getValue().toString(),
-        "rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100");
+        "rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100",
+        queryCaptor.getValue().toString());
   }
 
   @Test
-  public void testGetChildOntologyTermsByNodePath() {
+  void testGetChildOntologyTermsByNodePath() {
     Entity ontologyEntity = new DynamicEntity(ontologyMetadata);
     ontologyEntity.set(OntologyMetadata.ONTOLOGY_IRI, "http://www.molgenis.org");
     ontologyEntity.set(OntologyMetadata.ONTOLOGY_NAME, "molgenis");
@@ -188,42 +185,42 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
     List<OntologyTerm> childOntologyTermsByNodePath =
         ontologyTermRepository.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
 
-    assertEquals(childOntologyTermsByNodePath.size(), 2);
+    assertEquals(2, childOntologyTermsByNodePath.size());
     assertEquals(
-        childOntologyTermsByNodePath.get(0),
-        OntologyTerm.create("iri 2", "name 2", null, singletonList("name 2")));
+        create("iri 2", "name 2", null, singletonList("name 2")),
+        childOntologyTermsByNodePath.get(0));
     assertEquals(
-        childOntologyTermsByNodePath.get(1),
-        OntologyTerm.create("iri 3", "name 3", null, singletonList("name 3")));
+        create("iri 3", "name 3", null, singletonList("name 3")),
+        childOntologyTermsByNodePath.get(1));
   }
 
   @Test
-  public void testCalculateNodePathDistance() {
+  void testCalculateNodePathDistance() {
     // Case 1
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].1[2]"), 1);
+        1, ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].1[2]"));
 
     // Case 2
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1].1[2]", "0[0].0[1]"), 1);
+        1, ontologyTermRepository.calculateNodePathDistance("0[0].0[1].1[2]", "0[0].0[1]"));
 
     // Case 3
     assertEquals(
+        4,
         ontologyTermRepository.calculateNodePathDistance(
-            "0[0].0[1].1[2].2[3]", "0[0].0[1].0[2].2[3]"),
-        4);
+            "0[0].0[1].1[2].2[3]", "0[0].0[1].0[2].2[3]"));
 
     // Case 4
     assertEquals(
-        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].0[2].1[3].2[4]"),
-        3);
+        3,
+        ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1].0[2].1[3].2[4]"));
 
     // Case 5
-    assertEquals(ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1]"), 0);
+    assertEquals(0, ontologyTermRepository.calculateNodePathDistance("0[0].0[1]", "0[0].0[1]"));
   }
 
   @Test
-  public void testGetOntologyTerm() {
+  void testGetOntologyTerm() {
     @SuppressWarnings("unchecked")
     Query<org.molgenis.ontology.core.meta.OntologyTerm> query = mock(Query.class, RETURNS_SELF);
     when(dataService.query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class))
@@ -235,23 +232,22 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
     OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
     assertEquals(
-        ontologyTerm,
-        OntologyTerm.create(
-            "http://www.test.nl/iri", "Ontology term", singletonList("Ontology term")));
+        create("http://www.test.nl/iri", "Ontology term", singletonList("Ontology term")),
+        ontologyTerm);
   }
 
   @Configuration
   @Import(OntologyTestConfig.class)
-  public static class Config {
+  static class Config {
     @Autowired private DataService dataService;
 
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return mock(DataService.class);
     }
 
     @Bean
-    public OntologyTermRepository ontologyTermRepository() {
+    OntologyTermRepository ontologyTermRepository() {
       return new OntologyTermRepository(dataService);
     }
   }

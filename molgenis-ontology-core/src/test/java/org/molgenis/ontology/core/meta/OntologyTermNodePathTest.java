@@ -1,12 +1,12 @@
 package org.molgenis.ontology.core.meta;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -21,8 +21,9 @@ public class OntologyTermNodePathTest extends AbstractSystemEntityTest {
   @Autowired OntologyTermNodePathMetadata metadata;
   @Autowired OntologyTermNodePathFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata,
         OntologyTermNodePath.class,

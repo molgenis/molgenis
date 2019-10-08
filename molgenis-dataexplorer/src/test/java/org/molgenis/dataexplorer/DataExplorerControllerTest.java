@@ -1,25 +1,27 @@
 package org.molgenis.dataexplorer;
 
+import static java.time.LocalDateTime.parse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.NAVIGATOR;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -28,17 +30,22 @@ import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
@@ -48,7 +55,7 @@ import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,13 +66,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {GsonConfig.class})
-public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringContextTests {
+class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
   @InjectMocks private DataExplorerController controller = new DataExplorerController();
 
   @Mock private Repository<Entity> repository;
@@ -98,12 +103,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  public DataExplorerControllerTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void beforeTest() {
+  @BeforeEach
+  void beforeTest() {
     when(permissionService.hasPermission(
             new EntityTypeIdentity("yes"), EntityTypePermission.UPDATE_METADATA))
         .thenReturn(true);
@@ -137,7 +138,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void initSetNavigatorMenuPathNoNavigator() {
+  void initSetNavigatorMenuPathNoNavigator() {
     String selectedEntityname = "selectedEntityname";
     String selectedEntityId = "selectedEntityId";
     String navigatorPath = "path/to-navigator";
@@ -152,9 +153,13 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void initSortEntitiesByLabel() {
+  void initSortEntitiesByLabel() {
     MetaDataService metaDataService = mock(MetaDataService.class);
-    when(dataService.getMeta()).thenReturn(metaDataService);
+    Query<EntityType> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(query.eq(IS_ABSTRACT, false)).thenReturn(query);
+    when(query.fetch(any())).thenReturn(query);
+    when(dataService.query(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class))
+        .thenReturn(query);
 
     EntityType entity1 = mock(EntityType.class);
     when(entity1.getId()).thenReturn("1");
@@ -165,7 +170,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     when(entity2.getLabel()).thenReturn("aaa");
 
     Stream<EntityType> entityStream = Stream.of(entity1, entity2);
-    when(metaDataService.getEntityTypes()).thenReturn(entityStream);
+    when(query.findAll()).thenReturn(entityStream);
 
     controller.init(null, null, model);
 
@@ -179,7 +184,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void initTrackingIdPresent() {
+  void initTrackingIdPresent() {
     String selectedEntityname = "selectedEntityname";
     String selectedEntityId = "selectedEntityId";
 
@@ -197,7 +202,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void initTrackingIdNotPresent() {
+  void initTrackingIdNotPresent() {
     String selectedEntityname = "selectedEntityname";
     String selectedEntityId = "selectedEntityId";
 
@@ -212,14 +217,14 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testViewEntityDetails() throws Exception {
+  void testViewEntityDetails() throws Exception {
     when(configuration.getTemplate("view-entityreport-specific-template.ftl"))
         .thenReturn(mock(Template.class));
 
     String actual = controller.viewEntityDetails(entityTypeId, entityId, model);
     String expected = "view-entityreport";
 
-    Assert.assertEquals(actual, expected);
+    assertEquals(expected, actual);
     verify(model).addAttribute("entity", entity);
     verify(model).addAttribute("entityType", entityType);
     verify(model).addAttribute("viewName", "view-entityreport-specific-template");
@@ -229,7 +234,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testViewEntityDetailsById() throws Exception {
+  void testViewEntityDetailsById() throws Exception {
     when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
     String entityTypeLabel = "MyEntityTypeLabel";
     when(entityType.getLabel()).thenReturn(entityTypeLabel);
@@ -239,7 +244,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     String actual = controller.viewEntityDetailsById(entityTypeId, entityId, model);
     String expected = "view-standalone-report";
 
-    Assert.assertEquals(actual, expected);
+    assertEquals(expected, actual);
     verify(model).addAttribute("entity", entity);
     verify(model).addAttribute("entityType", entityType);
     verify(model).addAttribute("entityTypeId", entityTypeId);
@@ -247,35 +252,32 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
   }
 
-  @Test(expectedExceptions = UnknownEntityTypeException.class)
-  public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception {
+  @Test
+  void testViewEntityDetailsByIdEntityTypeNotExists() {
     when(dataService.getEntityType(entityTypeId)).thenReturn(null);
-    controller.viewEntityDetailsById(entityTypeId, entityId, model);
-    verifyNoMoreInteractions(model);
+    assertThrows(
+        UnknownEntityTypeException.class,
+        () -> controller.viewEntityDetailsById(entityTypeId, entityId, model));
   }
 
   @Test
-  public void testGetDownloadFilenameCsv() {
+  void testGetDownloadFilenameCsv() {
     assertEquals(
+        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv",
         controller.getDownloadFilename(
-            "it_emx_datatypes_TypeTest",
-            LocalDateTime.parse("2017-07-04T14:14:33"),
-            DOWNLOAD_TYPE_CSV),
-        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.csv");
+            "it_emx_datatypes_TypeTest", parse("2017-07-04T14:14:33"), DOWNLOAD_TYPE_CSV));
   }
 
   @Test
-  public void testGetDownloadFilenameXlsx() {
+  void testGetDownloadFilenameXlsx() {
     assertEquals(
+        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx",
         controller.getDownloadFilename(
-            "it_emx_datatypes_TypeTest",
-            LocalDateTime.parse("2017-07-04T14:14:33"),
-            DOWNLOAD_TYPE_XLSX),
-        "it_emx_datatypes_TypeTest_2017-07-04_14_14_33.xlsx");
+            "it_emx_datatypes_TypeTest", parse("2017-07-04T14:14:33"), DOWNLOAD_TYPE_XLSX));
   }
 
   @Test
-  public void testPackageLink() {
+  void testPackageLink() {
     when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
 
     when(menuReaderService.findMenuItemPath(NAVIGATOR))
@@ -284,11 +286,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/", "glyphicon-home"));
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/parentId", "parent"));
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/packId", "pack"));
-    assertEquals(controller.getNavigatorLinks(entityTypeId), expected);
+    assertEquals(expected, controller.getNavigatorLinks(entityTypeId));
   }
 
   @Test
-  public void testShowCopyNoReadDataPermission() {
+  void testShowCopyNoReadDataPermission() {
     when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
     when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
         .thenReturn(false);
@@ -299,7 +301,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testShowCopyNoParentPackage() {
+  void testShowCopyNoParentPackage() {
     when(entityType.getPackage()).thenReturn(null);
 
     when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
@@ -311,7 +313,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testShowCopyNoAddEntityTypePermission() {
+  void testShowCopyNoAddEntityTypePermission() {
     when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
     when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
         .thenReturn(true);
@@ -322,7 +324,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testShowCopyRepositoryNotWritable() {
+  void testShowCopyRepositoryNotWritable() {
     when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(false);
     when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
         .thenReturn(true);
@@ -333,7 +335,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   }
 
   @Test
-  public void testShowCopyAllowed() {
+  void testShowCopyAllowed() {
     when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
 
     when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);

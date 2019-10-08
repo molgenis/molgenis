@@ -4,14 +4,16 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.io.File;
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
@@ -25,10 +27,8 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OptionsWizardPageTest extends AbstractMockitoTest {
+class OptionsWizardPageTest extends AbstractMockitoTest {
   @Mock private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
   @Mock private ImportServiceFactory importServiceFactory;
   @Mock private DataService dataService;
@@ -36,8 +36,8 @@ public class OptionsWizardPageTest extends AbstractMockitoTest {
 
   private OptionsWizardPage optionsWizardPage;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     optionsWizardPage =
         new OptionsWizardPage(
             fileRepositoryCollectionFactory,
@@ -48,7 +48,7 @@ public class OptionsWizardPageTest extends AbstractMockitoTest {
 
   // test for https://github.com/molgenis/molgenis/issues/7448
   @Test
-  public void testHandleRequestEntitiesInPackages() {
+  void testHandleRequestEntitiesInPackages() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     BindingResult bindingResult = mock(BindingResult.class);
     ImportWizard wizard = mock(ImportWizard.class);
@@ -68,15 +68,15 @@ public class OptionsWizardPageTest extends AbstractMockitoTest {
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(entitiesValidationReport.valid()).thenReturn(true);
     assertEquals(
-        optionsWizardPage.handleRequest(httpServletRequest, bindingResult, wizard),
-        "File is validated and can be imported.");
+        "File is validated and can be imported.",
+        optionsWizardPage.handleRequest(httpServletRequest, bindingResult, wizard));
     verify(wizard).setEntitiesInDefaultPackage(emptyList());
     verify(wizard).setPackages(emptyMap());
   }
 
   // test for https://github.com/molgenis/molgenis/issues/7448
   @Test
-  public void testHandleRequestNoWritablePackageException() {
+  void testHandleRequestNoWritablePackageException() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     when(httpServletRequest.getParameter("data-option")).thenReturn("add");
     BindingResult bindingResult = mock(BindingResult.class);

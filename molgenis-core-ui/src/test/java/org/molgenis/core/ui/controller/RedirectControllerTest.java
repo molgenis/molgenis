@@ -1,25 +1,26 @@
 package org.molgenis.core.ui.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.controller.RedirectController.ID;
 import static org.molgenis.core.ui.controller.RedirectController.nodeMatches;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import java.nio.file.AccessDeniedException;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.menu.MenuReaderService;
 import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.springframework.web.servlet.view.RedirectView;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RedirectControllerTest extends AbstractMockitoTest {
+class RedirectControllerTest extends AbstractMockitoTest {
 
   private RedirectController redirectController;
 
@@ -34,42 +35,43 @@ public class RedirectControllerTest extends AbstractMockitoTest {
 
   @Mock private MenuReaderService menuReaderService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     redirectController = new RedirectController(menuReaderService);
   }
 
   @Test
-  public void testNodeMatchesUrlEncoded() {
+  void testNodeMatchesUrlEncoded() {
     assertTrue(nodeMatches(item, "https://nu.nl/?a=b&c=d"));
   }
 
   @Test
-  public void testNodeMatchesEscapeEqualsCharacter() {
+  void testNodeMatchesEscapeEqualsCharacter() {
     assertTrue(nodeMatches(userManual, "https://drive.google.com/file/d/abcde/view?usp=sharing"));
   }
 
   @Test
-  public void testNodeMatchesWrongID() {
+  void testNodeMatchesWrongID() {
     assertFalse(nodeMatches(MenuItem.create("wrong-id", "Wrong ID"), "https://nu.nl/"));
   }
 
   @Test
-  public void testNodeMatchesNotAMenuItem() {
+  void testNodeMatchesNotAMenuItem() {
     assertFalse(nodeMatches(menu, "https://nu.nl/"));
   }
 
-  @Test(expectedExceptions = AccessDeniedException.class)
-  public void testRedirectToUnknownSite() throws AccessDeniedException {
+  @Test
+  void testRedirectToUnknownSite() throws AccessDeniedException {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
-    redirectController.redirect("https://rogue.com/");
+    assertThrows(
+        AccessDeniedException.class, () -> redirectController.redirect("https://rogue.com/"));
   }
 
   @Test
-  public void testCorrectRedirect() throws AccessDeniedException {
+  void testCorrectRedirect() throws AccessDeniedException {
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
     String url = "https://nu.nl/?a=b&c=d";
     RedirectView response = (RedirectView) redirectController.redirect(url);
-    assertEquals(response.getUrl(), url);
+    assertEquals(url, response.getUrl());
   }
 }

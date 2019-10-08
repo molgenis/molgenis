@@ -1,7 +1,5 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import static org.molgenis.core.ui.admin.usermanager.UserManagerController.URI;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -19,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Api("User manager")
 @Controller
-@RequestMapping(URI)
+@RequestMapping(UserManagerController.URI)
 public class UserManagerController extends PluginController {
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
   private final UserManagerService pluginUserManagerService;

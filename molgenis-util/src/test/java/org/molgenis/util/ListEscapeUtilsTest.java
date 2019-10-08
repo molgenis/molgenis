@@ -1,76 +1,83 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.util.ListEscapeUtils.toList;
 
-import java.util.Arrays;
 import java.util.Collections;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ListEscapeUtilsTest {
-
-  @Test
-  public void toListString() {
-    assertEquals(ListEscapeUtils.toList("a"), Collections.singletonList("a"));
-    assertEquals(ListEscapeUtils.toList("a,b,c"), Arrays.asList("a", "b", "c"));
-
-    assertEquals(ListEscapeUtils.toList("\\,"), Collections.singletonList(","));
-    assertEquals(ListEscapeUtils.toList("a\\,b"), Collections.singletonList("a,b"));
-
-    assertEquals(ListEscapeUtils.toList("\\\\"), Collections.singletonList("\\"));
-    assertEquals(ListEscapeUtils.toList("a\\\\b"), Collections.singletonList("a\\b"));
-
-    assertEquals(ListEscapeUtils.toList("a,b,"), Arrays.asList("a", "b", ""));
-    assertEquals(ListEscapeUtils.toList("a,,c"), Arrays.asList("a", "", "c"));
-    assertEquals(ListEscapeUtils.toList(",b,c"), Arrays.asList("", "b", "c"));
-
-    assertEquals(ListEscapeUtils.toList(""), Collections.emptyList());
-    assertEquals(ListEscapeUtils.toList(null), null);
-  }
+class ListEscapeUtilsTest {
 
   @Test
-  public void toListStringcharchar() {
-    assertEquals(ListEscapeUtils.toString(Arrays.asList("a", "b", "c"), ',', '/'), "a,b,c");
-    assertEquals(ListEscapeUtils.toString(Collections.singletonList("a,b,c"), ',', '/'), "a/,b/,c");
-    assertEquals(ListEscapeUtils.toString(Collections.singletonList("/"), ',', '/'), "//");
-  }
+  void toListString() {
+    assertEquals(singletonList("a"), toList("a"));
+    assertEquals(asList("a", "b", "c"), toList("a,b,c"));
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void toListStringcharchar_exception() {
-    ListEscapeUtils.toList("", 'a', 'a');
+    assertEquals(singletonList(","), toList("\\,"));
+    assertEquals(singletonList("a,b"), toList("a\\,b"));
+
+    assertEquals(singletonList("\\"), toList("\\\\"));
+    assertEquals(singletonList("a\\b"), toList("a\\\\b"));
+
+    assertEquals(asList("a", "b", ""), toList("a,b,"));
+    assertEquals(asList("a", "", "c"), toList("a,,c"));
+    assertEquals(asList("", "b", "c"), toList(",b,c"));
+
+    assertEquals(emptyList(), toList(""));
+    assertNull(ListEscapeUtils.toList(null));
   }
 
   @Test
-  public void toStringList() {
-    assertEquals("a", ListEscapeUtils.toString(Collections.singletonList("a")));
-    assertEquals("a,b,c", ListEscapeUtils.toString(Arrays.asList("a", "b", "c")));
-
-    assertEquals("\\,", ListEscapeUtils.toString(Collections.singletonList(",")));
-    assertEquals("a\\,b", ListEscapeUtils.toString(Collections.singletonList("a,b")));
-
-    assertEquals("\\\\", ListEscapeUtils.toString(Collections.singletonList("\\")));
-    assertEquals("a\\\\b", ListEscapeUtils.toString(Collections.singletonList("a\\b")));
-
-    assertEquals("a,b,", ListEscapeUtils.toString(Arrays.asList("a", "b", "")));
-    assertEquals("a,,c", ListEscapeUtils.toString(Arrays.asList("a", "", "c")));
-    assertEquals(",b,c", ListEscapeUtils.toString(Arrays.asList("", "b", "c")));
-
-    assertEquals("a,b,", ListEscapeUtils.toString(Arrays.asList("a", "b", null)));
-    assertEquals("a,,c", ListEscapeUtils.toString(Arrays.asList("a", null, "c")));
-    assertEquals(",b,c", ListEscapeUtils.toString(Arrays.asList(null, "b", "c")));
-
-    assertEquals("", ListEscapeUtils.toString(Collections.emptyList()));
-    assertEquals(null, ListEscapeUtils.toString(null));
+  void toListStringcharchar() {
+    assertEquals("a,b,c", ListEscapeUtils.toString(asList("a", "b", "c"), ',', '/'));
+    assertEquals("a/,b/,c", ListEscapeUtils.toString(singletonList("a,b,c"), ',', '/'));
+    assertEquals("//", ListEscapeUtils.toString(singletonList("/"), ',', '/'));
   }
 
   @Test
-  public void toStringListcharchar() {
-    assertEquals("a,b,c", ListEscapeUtils.toString(Arrays.asList("a", "b", "c"), ',', '/'));
-    assertEquals("a/,b/,c", ListEscapeUtils.toString(Collections.singletonList("a,b,c"), ',', '/'));
-    assertEquals("//", ListEscapeUtils.toString(Collections.singletonList("/"), ',', '/'));
+  void toListStringcharchar_exception() {
+    assertThrows(IllegalArgumentException.class, () -> ListEscapeUtils.toList("", 'a', 'a'));
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void toStringListcharchar_exception() {
-    ListEscapeUtils.toString(Collections.emptyList(), 'a', 'a');
+  @Test
+  void toStringList() {
+    assertEquals("a", ListEscapeUtils.toString(singletonList("a")));
+    assertEquals("a,b,c", ListEscapeUtils.toString(asList("a", "b", "c")));
+
+    assertEquals("\\,", ListEscapeUtils.toString(singletonList(",")));
+    assertEquals("a\\,b", ListEscapeUtils.toString(singletonList("a,b")));
+
+    assertEquals("\\\\", ListEscapeUtils.toString(singletonList("\\")));
+    assertEquals("a\\\\b", ListEscapeUtils.toString(singletonList("a\\b")));
+
+    assertEquals("a,b,", ListEscapeUtils.toString(asList("a", "b", "")));
+    assertEquals("a,,c", ListEscapeUtils.toString(asList("a", "", "c")));
+    assertEquals(",b,c", ListEscapeUtils.toString(asList("", "b", "c")));
+
+    assertEquals("a,b,", ListEscapeUtils.toString(asList("a", "b", null)));
+    assertEquals("a,,c", ListEscapeUtils.toString(asList("a", null, "c")));
+    assertEquals(",b,c", ListEscapeUtils.toString(asList(null, "b", "c")));
+
+    assertEquals("", ListEscapeUtils.toString(emptyList()), "");
+    assertNull(ListEscapeUtils.toString(null));
+  }
+
+  @Test
+  void toStringListcharchar() {
+    assertEquals("a,b,c", ListEscapeUtils.toString(asList("a", "b", "c"), ',', '/'));
+    assertEquals("a/,b/,c", ListEscapeUtils.toString(singletonList("a,b,c"), ',', '/'));
+    assertEquals("//", ListEscapeUtils.toString(singletonList("/"), ',', '/'));
+  }
+
+  @Test
+  void toStringListcharchar_exception() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> ListEscapeUtils.toString(Collections.emptyList(), 'a', 'a'));
   }
 }

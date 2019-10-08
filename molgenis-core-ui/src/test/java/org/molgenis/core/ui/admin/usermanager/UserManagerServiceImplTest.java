@@ -1,22 +1,27 @@
 package org.molgenis.core.ui.admin.usermanager;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
-import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsServiceImpl;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,13 +37,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {Config.class})
-public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests {
+class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
 
   private SecurityContext previousContext;
 
@@ -47,12 +48,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
   @EnableGlobalMethodSecurity(prePostEnabled = true)
   static class Config extends WebSecurityConfigurerAdapter {
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return mock(DataService.class);
     }
 
     @Bean
-    public UserManagerService userManagerService() {
+    UserManagerService userManagerService() {
       return new UserManagerServiceImpl(dataService());
     }
 
@@ -86,52 +87,49 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
   @Autowired private DataService dataService;
 
-  @BeforeClass
-  public void setUpBeforeClass() {
+  @BeforeEach
+  void setUpBeforeEach() {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     SecurityContextHolder.setContext(testContext);
   }
 
-  @AfterClass
-  public void tearDownAfterClass() {
+  @AfterEach
+  void tearDownAfterEach() {
     SecurityContextHolder.setContext(previousContext);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void userManagerServiceImpl() {
-    new UserManagerServiceImpl(null);
+  @Test
+  void userManagerServiceImpl() {
+    assertThrows(NullPointerException.class, () -> new UserManagerServiceImpl(null));
   }
 
   @Test
-  public void getAllMolgenisUsersSu() {
+  void getAllMolgenisUsersSu() {
     String molgenisUserId0 = "id0";
     String molgenisUserName0 = "user0";
     User user0 = when(mock(User.class).getId()).thenReturn(molgenisUserId0).getMock();
-    when(user0.getIdValue()).thenReturn(molgenisUserId0);
     when(user0.getUsername()).thenReturn(molgenisUserName0);
     String molgenisUserId1 = "id1";
     String molgenisUserName1 = "user1";
     User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
-    when(user1.getIdValue()).thenReturn(molgenisUserId1);
     when(user1.getUsername()).thenReturn(molgenisUserName1);
     when(dataService.findOneById(USER, molgenisUserId0, User.class)).thenReturn(user0);
     when(dataService.findOneById(USER, molgenisUserId1, User.class)).thenReturn(user1);
     when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user0, user1));
     this.setSecurityContextSuperUser();
     assertEquals(
-        userManagerService.getAllUsers(),
-        Arrays.asList(new UserViewData(user0), new UserViewData(user1)));
-  }
-
-  @Test(expectedExceptions = AccessDeniedException.class)
-  public void getAllMolgenisUsersNonSu() {
-    this.setSecurityContextNonSuperUserWrite();
-    this.userManagerService.getAllUsers();
+        asList(new UserViewData(user0), new UserViewData(user1)), userManagerService.getAllUsers());
   }
 
   @Test
-  public void testSetActivationUser() {
+  void getAllMolgenisUsersNonSu() {
+    this.setSecurityContextNonSuperUserWrite();
+    assertThrows(AccessDeniedException.class, () -> this.userManagerService.getAllUsers());
+  }
+
+  @Test
+  void testSetActivationUser() {
     this.setSecurityContextSuperUser();
 
     String userId = "MyUserId";
@@ -142,11 +140,13 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
     verify(dataService).update(USER, user);
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testSetActivationUserUnknown() {
+  @Test
+  void testSetActivationUserUnknown() {
     this.setSecurityContextSuperUser();
 
-    userManagerService.setActivationUser("unknownUserId", true);
+    assertThrows(
+        UnknownEntityException.class,
+        () -> userManagerService.setActivationUser("unknownUserId", true));
   }
 
   private void setSecurityContextSuperUser() {

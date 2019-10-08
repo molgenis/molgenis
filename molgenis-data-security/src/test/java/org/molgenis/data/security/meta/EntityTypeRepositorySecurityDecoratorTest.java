@@ -1,9 +1,14 @@
 package org.molgenis.data.security.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Integer.MAX_VALUE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -11,10 +16,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.EntityTypePermission.UPDATE_METADATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -38,21 +43,17 @@ import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {EntityTypeRepositorySecurityDecoratorTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class EntityTypeRepositorySecurityDecoratorTest
-    extends AbstractMockitoTestNGSpringContextTests {
+@SecurityTestExecutionListeners
+class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 
   @Mock private Repository<EntityType> delegateRepository;
@@ -63,8 +64,8 @@ public class EntityTypeRepositorySecurityDecoratorTest
   @Mock private EntityTypeRepositorySecurityDecorator repo;
   @Mock private DataService dataService;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     repo =
         new EntityTypeRepositorySecurityDecorator(
             delegateRepository,
@@ -77,7 +78,7 @@ public class EntityTypeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void count() {
+  void count() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -93,12 +94,12 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType1Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.count(), 1L);
+    assertEquals(1L, repo.count());
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void add() {
+  void add() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = mock(EntityType.class);
     Package pack = mock(Package.class);
@@ -122,8 +123,8 @@ public class EntityTypeRepositorySecurityDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = PackagePermissionDeniedException.class)
-  public void addNoPermissionOnPack() {
+  @Test
+  void addNoPermissionOnPack() {
     EntityType entityType = mock(EntityType.class);
     Package pack = mock(Package.class);
 
@@ -133,26 +134,26 @@ public class EntityTypeRepositorySecurityDecoratorTest
             new PackageIdentity("test"), PackagePermission.ADD_ENTITY_TYPE))
         .thenReturn(false);
 
-    repo.add(entityType);
+    assertThrows(PackagePermissionDeniedException.class, () -> repo.add(entityType));
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = NullPackageNotSuException.class)
-  public void addNullPackage() {
+  @Test
+  void addNullPackage() {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getPackage()).thenReturn(null);
 
-    repo.add(entityType);
+    assertThrows(NullPackageNotSuException.class, () -> repo.add(entityType));
   }
 
   @Test
-  public void query() {
-    assertEquals(repo.query().getRepository(), repo);
+  void query() {
+    assertEquals(repo, repo.query().getRepository());
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void countQuery() {
+  void countQuery() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -170,14 +171,14 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType1Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.count(q), 1L);
-    assertEquals(queryCaptor.getValue().getOffset(), 0);
-    assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
+    assertEquals(1L, repo.count(q));
+    assertEquals(0, queryCaptor.getValue().getOffset());
+    assertEquals(MAX_VALUE, queryCaptor.getValue().getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllQueryUser() {
+  void findAllQueryUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -202,15 +203,15 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), repo.findAll(q).collect(toList()));
     Query<EntityType> decoratedQ = queryCaptor.getValue();
-    assertEquals(decoratedQ.getOffset(), 0);
-    assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
+    assertEquals(0, decoratedQ.getOffset());
+    assertEquals(MAX_VALUE, decoratedQ.getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllQueryUserOffsetLimit() {
+  void findAllQueryUserOffsetLimit() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -237,15 +238,15 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(q).collect(toList()), singletonList(entityType2));
+    assertEquals(singletonList(entityType2), repo.findAll(q).collect(toList()));
     Query<EntityType> decoratedQ = queryCaptor.getValue();
-    assertEquals(decoratedQ.getOffset(), 0);
-    assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
+    assertEquals(0, decoratedQ.getOffset());
+    assertEquals(MAX_VALUE, decoratedQ.getPageSize());
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void iteratorUser() {
+  void iteratorUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -266,13 +267,13 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), newArrayList(repo.iterator()));
   }
 
   @SuppressWarnings("unchecked")
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneQueryUserPermissionAllowed() {
+  void findOneQueryUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -282,13 +283,13 @@ public class EntityTypeRepositorySecurityDecoratorTest
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOne(q), entityType0);
+    assertEquals(entityType0, repo.findOne(q));
   }
 
   @SuppressWarnings("unchecked")
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneQueryUserPermissionDenied() {
+  void findOneQueryUserPermissionDenied() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -303,19 +304,19 @@ public class EntityTypeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdUserPermissionAllowed() {
+  void findOneByIdUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 = mock(EntityType.class);
     when(delegateRepository.findOneById("entity0")).thenReturn(entityType0);
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOneById("entity0"), entityType0);
+    assertEquals(entityType0, repo.findOneById("entity0"));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdUserPermissionDenied() {
+  void findOneByIdUserPermissionDenied() {
     String entityType0Name = "entity0";
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
@@ -325,7 +326,7 @@ public class EntityTypeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdFetchUserPermissionAllowed() {
+  void findOneByIdFetchUserPermissionAllowed() {
     String entityType0Name = "entity0";
     EntityType entityType0 = mock(EntityType.class);
     Fetch fetch = mock(Fetch.class);
@@ -333,12 +334,12 @@ public class EntityTypeRepositorySecurityDecoratorTest
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA))
         .thenReturn(true);
-    assertEquals(repo.findOneById(entityType0Name, fetch), entityType0);
+    assertEquals(entityType0, repo.findOneById(entityType0Name, fetch));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findOneByIdFetchUserPermissionDenied() {
+  void findOneByIdFetchUserPermissionDenied() {
     String entityType0Name = "entity0";
     Fetch fetch = mock(Fetch.class);
     when(userPermissionEvaluator.hasPermission(
@@ -349,7 +350,7 @@ public class EntityTypeRepositorySecurityDecoratorTest
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void findAllIdsFetchUser() {
+  void findAllIdsFetchUser() {
     String entityType0Name = "entity0";
     EntityType entityType0 =
         when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
@@ -372,18 +373,18 @@ public class EntityTypeRepositorySecurityDecoratorTest
     doReturn(true)
         .when(userPermissionEvaluator)
         .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.READ_METADATA);
-    assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType2));
+    assertEquals(asList(entityType0, entityType2), repo.findAll(ids, fetch).collect(toList()));
   }
 
   @WithMockUser(username = USERNAME, authorities = "ROLE_SU")
   @Test
-  public void aggregateSu() {
+  void aggregateSu() {
     aggregateSuOrSystem();
   }
 
   @WithMockUser(username = USERNAME, authorities = "ROLE_SYSTEM")
   @Test
-  public void aggregateSystem() {
+  void aggregateSystem() {
     aggregateSuOrSystem();
   }
 
@@ -391,19 +392,19 @@ public class EntityTypeRepositorySecurityDecoratorTest
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
     when(delegateRepository.aggregate(aggregateQuery)).thenReturn(aggregateResult);
-    assertEquals(repo.aggregate(aggregateQuery), aggregateResult);
-  }
-
-  @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = UnsupportedOperationException.class)
-  public void aggregateUser() {
-    AggregateQuery aggregateQuery = mock(AggregateQuery.class);
-    repo.aggregate(aggregateQuery);
+    assertEquals(aggregateResult, repo.aggregate(aggregateQuery));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void delete() {
+  void aggregateUser() {
+    AggregateQuery aggregateQuery = mock(AggregateQuery.class);
+    assertThrows(UnsupportedOperationException.class, () -> repo.aggregate(aggregateQuery));
+  }
+
+  @WithMockUser(username = USERNAME)
+  @Test
+  void delete() {
     String entityTypeId = "entityTypeId";
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityTypeId), EntityTypePermission.DELETE_METADATA))
@@ -418,10 +419,8 @@ public class EntityTypeRepositorySecurityDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:DELETE_METADATA entityTypeId:entityTypeId")
-  public void deleteNotAllowed() {
+  @Test
+  void deleteNotAllowed() {
     String entityTypeId = "entityTypeId";
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityTypeId), EntityTypePermission.DELETE_METADATA))
@@ -430,12 +429,15 @@ public class EntityTypeRepositorySecurityDecoratorTest
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityTypeId");
 
-    repo.delete(entityType);
+    Exception exception =
+        assertThrows(EntityTypePermissionDeniedException.class, () -> repo.delete(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:DELETE_METADATA entityTypeId:entityTypeId");
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = SystemMetadataModificationException.class)
-  public void deleteSystemEntityType() {
+  @Test
+  void deleteSystemEntityType() {
     String entityTypeId = "entityTypeId";
     when(systemEntityTypeRegistry.hasSystemEntityType("entityTypeId")).thenReturn(true);
     when(userPermissionEvaluator.hasPermission(
@@ -445,12 +447,12 @@ public class EntityTypeRepositorySecurityDecoratorTest
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityTypeId").getMock();
 
-    repo.delete(entityType);
+    assertThrows(SystemMetadataModificationException.class, () -> repo.delete(entityType));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void update() {
+  void update() {
     String entityTypeId = "entityTypeId";
 
     EntityType entityType = mock(EntityType.class);
@@ -479,8 +481,8 @@ public class EntityTypeRepositorySecurityDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = PackagePermissionDeniedException.class)
-  public void updateNoPermissionOnPack() {
+  @Test
+  void updateNoPermissionOnPack() {
     String entityTypeId = "entityTypeId";
 
     EntityType entityType = mock(EntityType.class);
@@ -499,12 +501,12 @@ public class EntityTypeRepositorySecurityDecoratorTest
         .when(userPermissionEvaluator)
         .hasPermission(new PackageIdentity("test"), PackagePermission.ADD_ENTITY_TYPE);
 
-    repo.update(entityType);
+    assertThrows(PackagePermissionDeniedException.class, () -> repo.update(entityType));
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = NullPackageNotSuException.class)
-  public void updateToNullPackage() {
+  @Test
+  void updateToNullPackage() {
     String entityTypeId = "entityTypeId";
 
     EntityType entityType = mock(EntityType.class);
@@ -518,12 +520,12 @@ public class EntityTypeRepositorySecurityDecoratorTest
             EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class))
         .thenReturn(oldEntityType);
 
-    repo.update(entityType);
+    assertThrows(NullPackageNotSuException.class, () -> repo.update(entityType));
   }
 
   @WithMockUser(username = USERNAME)
   @Test
-  public void updateFromNullToNullPackage() {
+  void updateFromNullToNullPackage() {
     String entityTypeId = "entityTypeId";
 
     EntityType entityType = mock(EntityType.class);
@@ -546,10 +548,8 @@ public class EntityTypeRepositorySecurityDecoratorTest
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(
-      expectedExceptions = EntityTypePermissionDeniedException.class,
-      expectedExceptionsMessageRegExp = "permission:UPDATE_METADATA entityTypeId:entityTypeId")
-  public void updateNotAllowed() {
+  @Test
+  void updateNotAllowed() {
     String entityTypeId = "entityTypeId";
     when(userPermissionEvaluator.hasPermission(
             new EntityTypeIdentity(entityTypeId), UPDATE_METADATA))
@@ -566,12 +566,15 @@ public class EntityTypeRepositorySecurityDecoratorTest
             EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class))
         .thenReturn(entityType);
 
-    repo.update(entityType);
+    Exception exception =
+        assertThrows(EntityTypePermissionDeniedException.class, () -> repo.update(entityType));
+    assertThat(exception.getMessage())
+        .containsPattern("permission:UPDATE_METADATA entityTypeId:entityTypeId");
   }
 
   @WithMockUser(username = USERNAME)
-  @Test(expectedExceptions = SystemMetadataModificationException.class)
-  public void updateSystemEntityType() {
+  @Test
+  void updateSystemEntityType() {
     String entityTypeId = "entityTypeId";
     when(systemEntityTypeRegistry.hasSystemEntityType(entityTypeId)).thenReturn(true);
     when(userPermissionEvaluator.hasPermission(
@@ -589,7 +592,7 @@ public class EntityTypeRepositorySecurityDecoratorTest
             EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(), EntityType.class))
         .thenReturn(entityType);
 
-    repo.update(entityType);
+    assertThrows(SystemMetadataModificationException.class, () -> repo.update(entityType));
   }
 
   static class Config {}

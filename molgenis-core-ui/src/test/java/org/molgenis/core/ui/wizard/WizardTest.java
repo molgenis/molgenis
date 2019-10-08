@@ -1,33 +1,33 @@
 package org.molgenis.core.ui.wizard;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Test;
 import org.springframework.validation.BindingResult;
-import org.testng.annotations.Test;
 
-public class WizardTest {
+class WizardTest {
 
   @Test
-  public void addPage() {
+  void addPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
-    assertEquals(wizard.getPages().size(), 1);
+    assertEquals(1, wizard.getPages().size());
   }
 
   @Test
-  public void getCurrentPage() {
+  void getCurrentPage() {
     Wizard wizard = new Wizard();
     WizardPage page = new TestWizardPage();
     wizard.addPage(page);
-    assertEquals(wizard.getCurrentPage(), page);
+    assertEquals(page, wizard.getCurrentPage());
   }
 
   @Test
-  public void getNextButton() {
+  void getNextButton() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -35,41 +35,41 @@ public class WizardTest {
     WizardButton nextButton = wizard.getNextButton();
     assertNotNull(nextButton);
     assertTrue(nextButton.isEnabled());
-    assertEquals(nextButton.getTitle(), "Next");
-    assertEquals(nextButton.getTargetUri(), "/next");
+    assertEquals("Next", nextButton.getTitle());
+    assertEquals("/next", nextButton.getTargetUri());
 
     wizard.next();
     nextButton = wizard.getNextButton();
     assertTrue(nextButton.isEnabled());
-    assertEquals(nextButton.getTitle(), "Finish");
-    assertEquals(nextButton.getTargetUri(), "/restart");
+    assertEquals("Finish", nextButton.getTitle());
+    assertEquals("/restart", nextButton.getTargetUri());
   }
 
   @Test
-  public void getPages() {
+  void getPages() {
     Wizard wizard = new Wizard();
     assertNotNull(wizard.getPages());
-    assertEquals(wizard.getPages().size(), 0);
+    assertEquals(0, wizard.getPages().size());
 
     wizard.addPage(new TestWizardPage());
-    assertEquals(wizard.getPages().size(), 1);
+    assertEquals(1, wizard.getPages().size());
 
     wizard.addPage(new TestWizardPage());
-    assertEquals(wizard.getPages().size(), 2);
+    assertEquals(2, wizard.getPages().size());
   }
 
   @Test
-  public void getPreviousButton() {
+  void getPreviousButton() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     WizardButton prevButton = wizard.getPreviousButton();
     assertNotNull(prevButton);
     assertFalse(prevButton.isEnabled());
-    assertEquals(prevButton.getTitle(), "Previous");
+    assertEquals("Previous", prevButton.getTitle());
   }
 
   @Test
-  public void isFirstPage() {
+  void isFirstPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -79,7 +79,7 @@ public class WizardTest {
   }
 
   @Test
-  public void isLastPage() {
+  void isLastPage() {
     Wizard wizard = new Wizard();
     wizard.addPage(new TestWizardPage());
     wizard.addPage(new TestWizardPage());
@@ -89,29 +89,29 @@ public class WizardTest {
   }
 
   @Test
-  public void next() {
+  void next() {
     Wizard wizard = new Wizard();
     WizardPage p1 = new TestWizardPage();
     wizard.addPage(p1);
     WizardPage p2 = new TestWizardPage();
     wizard.addPage(p2);
 
-    assertEquals(wizard.getCurrentPage(), p1);
+    assertEquals(p1, wizard.getCurrentPage());
     wizard.next();
-    assertEquals(wizard.getCurrentPage(), p2);
+    assertEquals(p2, wizard.getCurrentPage());
   }
 
   @Test
-  public void previous() {
+  void previous() {
     Wizard wizard = new Wizard();
     WizardPage p1 = new TestWizardPage();
     wizard.addPage(p1);
     WizardPage p2 = new TestWizardPage();
     wizard.addPage(p2);
     wizard.next();
-    assertEquals(wizard.getCurrentPage(), p2);
+    assertEquals(p2, wizard.getCurrentPage());
     wizard.previous();
-    assertEquals(wizard.getCurrentPage(), p1);
+    assertEquals(p1, wizard.getCurrentPage());
   }
 
   private static class TestWizardPage extends AbstractWizardPage {

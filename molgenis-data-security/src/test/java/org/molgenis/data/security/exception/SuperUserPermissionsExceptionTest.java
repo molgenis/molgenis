@@ -1,36 +1,36 @@
 package org.molgenis.data.security.exception;
 
-import static org.testng.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class SuperUserPermissionsExceptionTest extends ExceptionMessageTest {
+class SuperUserPermissionsExceptionTest extends ExceptionMessageTest {
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data-security");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     ExceptionMessageTest.assertExceptionMessageEquals(
         new SuperUserPermissionsException("admin"), lang, message);
   }
 
   @Test
-  public void testGetMessage() {
+  void testGetMessage() {
     CodedRuntimeException ex = new SuperUserPermissionsException("admin");
-    assertEquals(ex.getMessage(), "name:admin");
+    assertEquals("name:admin", ex.getMessage());
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
         "en",

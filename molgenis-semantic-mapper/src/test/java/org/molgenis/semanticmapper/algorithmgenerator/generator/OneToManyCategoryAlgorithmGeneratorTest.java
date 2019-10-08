@@ -1,6 +1,10 @@
 package org.molgenis.semanticmapper.algorithmgenerator.generator;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -9,7 +13,10 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -20,11 +27,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -43,12 +48,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 
   private EntityType sourceEntityType;
 
-  public OneToManyCategoryAlgorithmGeneratorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeMethod
-  public void init() {
+  @BeforeEach
+  void init() {
     DataService dataService = Mockito.mock(DataService.class);
     categoryAlgorithmGenerator = new OneToManyCategoryAlgorithmGenerator(dataService);
 
@@ -191,14 +192,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
   }
 
   @Test
-  public void testIsSuitable() {
-    Assert.assertTrue(
+  void testIsSuitable() {
+    assertTrue(
         categoryAlgorithmGenerator.isSuitable(
             targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1)));
   }
 
   @Test
-  public void testGenerate() {
+  void testGenerate() {
     String expected =
         "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
     String generateMultipleAttributes =
@@ -207,58 +208,58 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
             Arrays.asList(sourceAttribute, sourceAttribute1),
             targetEntityType,
             sourceEntityType);
-    Assert.assertEquals(generateMultipleAttributes, expected);
+    assertEquals(expected, generateMultipleAttributes);
   }
 
   @Test
-  public void testGenerateWeightedMap() {
+  void testGenerateWeightedMap() {
     String expected =
         "$('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value()";
     String actual = categoryAlgorithmGenerator.generateWeightedMap(sourceAttribute);
 
-    Assert.assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testGenerateWeightedMapForTarget() {
-    Assert.assertEquals(
-        categoryAlgorithmGenerator.groupCategoryValues(targetAttribute),
-        ".group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();");
+  void testGenerateWeightedMapForTarget() {
+    assertEquals(
+        ".group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();",
+        categoryAlgorithmGenerator.groupCategoryValues(targetAttribute));
   }
 
   @Test
-  public void testGenerateWeightedMapForSource() {
-    Assert.assertEquals(
-        categoryAlgorithmGenerator.groupCategoryValues(sourceAttribute),
-        ".group([0,1,2,3,4,5,6,7]).map({\"-0\":\"1\",\"0-1\":\"4\",\"1-2\":\"4\",\"2-3\":\"5\",\"4-5\":\"6\",\"6-7\":\"7\",\"7+\":\"7\"}, null, null).value();");
+  void testGenerateWeightedMapForSource() {
+    assertEquals(
+        ".group([0,1,2,3,4,5,6,7]).map({\"-0\":\"1\",\"0-1\":\"4\",\"1-2\":\"4\",\"2-3\":\"5\",\"4-5\":\"6\",\"6-7\":\"7\",\"7+\":\"7\"}, null, null).value();",
+        categoryAlgorithmGenerator.groupCategoryValues(sourceAttribute));
   }
 
   @Test
-  public void testSuitableForGeneratingWeightedMap() {
-    Assert.assertTrue(
+  void testSuitableForGeneratingWeightedMap() {
+    assertTrue(
         categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(
             targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1)));
 
-    Assert.assertFalse(
+    assertFalse(
         categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(
             targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1, sourceAttribute2)));
   }
 
   @Test
-  public void testHomogenousGenerator() {
+  void testHomogenousGenerator() {
     String expectedAlgorithm =
         "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
-    Assert.assertEquals(
+    assertEquals(
+        expectedAlgorithm,
         categoryAlgorithmGenerator.generate(
             targetAttribute,
-            Arrays.asList(sourceAttribute, sourceAttribute1),
+            asList(sourceAttribute, sourceAttribute1),
             targetEntityType,
-            sourceEntityType),
-        expectedAlgorithm);
+            sourceEntityType));
   }
 
   @Test
-  public void testHeterogenousGenerator() {
+  void testHeterogenousGenerator() {
     String expectedAlgorithm =
         "$('MESHED_POTATO_1').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"3\",\"4\":\"2\",\"5\":\"2\",\"6\":\"1\",\"7\":\"1\",\"8\":\"1\",\"9\":\"1\"}, null, null).value();$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\"}, null, null).value();$('Stroke').map({\"1\":\"2\",\"2\":\"4\",\"9\":\"9\"}, null, null).value();";
     String actual =
@@ -267,17 +268,17 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
             Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2),
             targetEntityType,
             sourceEntityType);
-    Assert.assertEquals(actual, expectedAlgorithm);
+    assertEquals(expectedAlgorithm, actual);
   }
 
   @Test
-  public void testCreateAlgorithmNullCheck() {
+  void testCreateAlgorithmNullCheck() {
     String actual =
         "var SUM_WEIGHT;\nif($('MESHED_POTATO_1').isNull().value() && $('MESHED_POTATO').isNull().value() && $('Stroke').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}";
     String createAlgorithmNullCheck =
         categoryAlgorithmGenerator.createAlgorithmNullCheckIfStatement(
             Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2));
-    Assert.assertEquals(createAlgorithmNullCheck, actual);
+    assertEquals(actual, createAlgorithmNullCheck);
   }
 
   @Test
@@ -287,6 +288,6 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
     String createAlgorithmElseBlock =
         categoryAlgorithmGenerator.createAlgorithmElseBlock(
             targetAttribute, Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2));
-    Assert.assertEquals(createAlgorithmElseBlock, actual);
+    assertEquals(actual, createAlgorithmElseBlock);
   }
 }

@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.file;
 
-import static org.molgenis.core.ui.file.FileDownloadController.URI;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 
 import java.io.File;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(FileDownloadController.URI)
 public class FileDownloadController {
   public static final String URI = "/files";
 

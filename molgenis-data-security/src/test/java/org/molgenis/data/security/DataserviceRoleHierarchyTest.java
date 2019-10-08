@@ -1,15 +1,16 @@
 package org.molgenis.data.security;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -18,10 +19,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
+class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
   private DataserviceRoleHierarchy molgenisRoleHierarchy;
 
   @Mock private DataService dataService;
@@ -37,8 +36,8 @@ public class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
 
   @Captor private ArgumentCaptor<Query<Role>> queryCaptor;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     molgenisRoleHierarchy = new DataserviceRoleHierarchy(dataService);
 
     when(dataService.findAll(eq(ROLE), queryCaptor.capture(), eq(Role.class)))
@@ -54,7 +53,7 @@ public class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testGetReachableGrantedAuthoritiesSu() {
+  void testGetReachableGrantedAuthoritiesSu() {
     when(su.getName()).thenReturn("SU");
     when(su.getIncludes())
         .thenReturn(ImmutableList.of(aclTakeOwnership, aclModifyAuditing, aclGeneralChanges));
@@ -63,18 +62,17 @@ public class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
     when(aclGeneralChanges.getName()).thenReturn("ACL_GENERAL_CHANGES");
 
     assertEquals(
-        (Set)
-            molgenisRoleHierarchy.getReachableGrantedAuthorities(
-                singletonList(new SimpleGrantedAuthority("ROLE_SU"))),
-        ImmutableSet.of(
+        of(
             new SimpleGrantedAuthority("ROLE_ACL_TAKE_OWNERSHIP"),
             new SimpleGrantedAuthority("ROLE_ACL_MODIFY_AUDITING"),
             new SimpleGrantedAuthority("ROLE_ACL_GENERAL_CHANGES"),
-            new SimpleGrantedAuthority("ROLE_SU")));
+            new SimpleGrantedAuthority("ROLE_SU")),
+        molgenisRoleHierarchy.getReachableGrantedAuthorities(
+            singletonList(new SimpleGrantedAuthority("ROLE_SU"))));
   }
 
   @Test
-  public void testGetReachableGrantedAuthoritiesDeep() {
+  void testGetReachableGrantedAuthoritiesDeep() {
     when(bbmriViewer.getName()).thenReturn("BBMRI_VIEWER");
     when(bbmriViewer.getIncludes()).thenReturn(ImmutableList.of(viewer));
 
@@ -84,12 +82,11 @@ public class DataserviceRoleHierarchyTest extends AbstractMockitoTest {
     when(dataExplorer.getName()).thenReturn("DATA_EXPLORER");
 
     assertEquals(
-        (Set)
-            molgenisRoleHierarchy.getReachableGrantedAuthorities(
-                singletonList(new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"))),
-        ImmutableSet.of(
+        of(
             new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"),
             new SimpleGrantedAuthority("ROLE_VIEWER"),
-            new SimpleGrantedAuthority("ROLE_DATA_EXPLORER")));
+            new SimpleGrantedAuthority("ROLE_DATA_EXPLORER")),
+        molgenisRoleHierarchy.getReachableGrantedAuthorities(
+            singletonList(new SimpleGrantedAuthority("ROLE_BBMRI_VIEWER"))));
   }
 }

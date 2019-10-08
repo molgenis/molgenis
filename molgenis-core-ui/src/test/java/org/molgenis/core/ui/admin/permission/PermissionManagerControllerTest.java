@@ -1,13 +1,16 @@
 package org.molgenis.core.ui.admin.permission;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -22,7 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,9 +36,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -71,18 +78,16 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
-public class PermissionManagerControllerTest extends AbstractTestNGSpringContextTests {
+class PermissionManagerControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private Config config;
 
   private MockMvc mockMvc;
@@ -124,44 +129,44 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Configuration
-  public static class Config extends WebMvcConfigurerAdapter {
+  static class Config extends WebMvcConfigurerAdapter {
     @Mock DataService dataService;
     @Mock MutableAclService mutableAclService;
     @Mock MutableAclClassService mutableAclClassService;
     @Mock SystemEntityTypeRegistry systemEntityTypeRegistry;
     @Mock PermissionRegistry permissionRegistry;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public DataService dataService() {
+    DataService dataService() {
       return dataService;
     }
 
     @Bean
-    public MutableAclService mutableAclService() {
+    MutableAclService mutableAclService() {
       return mutableAclService;
     }
 
     @Bean
-    public MutableAclClassService mutableAclClassService() {
+    MutableAclClassService mutableAclClassService() {
       return mutableAclClassService;
     }
 
     @Bean
-    public SystemEntityTypeRegistry systemEntityTypeRegistry() {
+    SystemEntityTypeRegistry systemEntityTypeRegistry() {
       return systemEntityTypeRegistry;
     }
 
     @Bean
-    public PermissionRegistry permissionRegistry() {
+    PermissionRegistry permissionRegistry() {
       return permissionRegistry;
     }
 
     @Bean
-    public PermissionManagerController permissionManagerController() {
+    PermissionManagerController permissionManagerController() {
       return new PermissionManagerController(
           dataService(),
           mutableAclService(),
@@ -194,8 +199,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
   @Autowired private PermissionRegistry permissionRegistry;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     config.resetMocks();
     MockitoAnnotations.initMocks(this);
     mockMvc =
@@ -258,13 +263,15 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
     when(permissionRead.getMask()).thenReturn(READ_MASK);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void PermissionManagerController() {
-    new PermissionManagerController(null, null, null, null, null);
+  @Test
+  void PermissionManagerController() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new PermissionManagerController(null, null, null, null, null));
   }
 
   @Test
-  public void init() throws Exception {
+  void init() throws Exception {
     this.mockMvc
         .perform(get(PluginController.PLUGIN_URI_PREFIX + "/permissionmanager"))
         .andExpect(status().isOk())
@@ -274,28 +281,27 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testGetUsers() {
-    assertEquals(permissionManagerController.getUsers(), Arrays.asList(user1, user2));
+  void testGetUsers() {
+    assertEquals(asList(user1, user2), permissionManagerController.getUsers());
   }
 
   @Test
-  public void testGetRoles() {
-    assertEquals(permissionManagerController.getRoles(), Arrays.asList(role1, role2));
+  void testGetRoles() {
+    assertEquals(asList(role1, role2), permissionManagerController.getRoles());
   }
 
   @Test
-  public void testGetPlugins() {
-    assertEquals(permissionManagerController.getPlugins(), Arrays.asList(plugin1, plugin2));
+  void testGetPlugins() {
+    assertEquals(asList(plugin1, plugin2), permissionManagerController.getPlugins());
   }
 
   @Test
-  public void testGetPackages() {
-    assertEquals(
-        permissionManagerController.getPackages(), Arrays.asList(package1, package2, package3));
+  void testGetPackages() {
+    assertEquals(asList(package1, package2, package3), permissionManagerController.getPackages());
   }
 
   @Test
-  public void testGetUserPluginPermissions() {
+  void testGetUserPluginPermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
 
@@ -318,11 +324,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
     Permissions expected =
         Permissions.create(
             ImmutableSet.of("1", "2"), ImmutableMultimap.of(plugin1.getId(), "read"));
-    assertEquals(permissionManagerController.getUserPluginPermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserPluginPermissions("Ipsum"));
   }
 
   @Test
-  public void testGetRolePluginPermissions() {
+  void testGetRolePluginPermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
 
@@ -346,11 +352,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
         Permissions.create(
             ImmutableSet.of("1", "2"), ImmutableMultimap.of(entityType1.getId(), "read"));
     Permissions actual = permissionManagerController.getRolePluginPermissions("ONE");
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 
   @Test
-  public void testGetUserEntityClassPermissions() {
+  void testGetUserEntityClassPermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
     MutableAcl acl3 = mock(MutableAcl.class);
@@ -382,11 +388,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(entityType1.getId(), "writemeta", entityType2.getId(), "count"));
 
-    assertEquals(permissionManagerController.getUserEntityClassPermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserEntityClassPermissions("Ipsum"));
   }
 
   @Test
-  public void testGetRoleEntityTypePermissions() {
+  void testGetRoleEntityTypePermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
     MutableAcl acl3 = mock(MutableAcl.class);
@@ -418,11 +424,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(entityType1.getId(), "write", entityType2.getId(), "read"));
 
-    assertEquals(permissionManagerController.getRoleEntityClassPermissions("ONE"), expected);
+    assertEquals(expected, permissionManagerController.getRoleEntityClassPermissions("ONE"));
   }
 
   @Test
-  public void testGetUserPackagePermissions() {
+  void testGetUserPackagePermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
     MutableAcl acl3 = mock(MutableAcl.class);
@@ -454,11 +460,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(package1.getId(), "writemeta", package2.getId(), "count"));
 
-    assertEquals(permissionManagerController.getUserPackagePermissions("Ipsum"), expected);
+    assertEquals(expected, permissionManagerController.getUserPackagePermissions("Ipsum"));
   }
 
   @Test
-  public void testGetRolePackagePermissions() {
+  void testGetRolePackagePermissions() {
     MutableAcl acl1 = mock(MutableAcl.class);
     MutableAcl acl2 = mock(MutableAcl.class);
     MutableAcl acl3 = mock(MutableAcl.class);
@@ -490,11 +496,11 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
             ImmutableSet.of("1", "2", "3"),
             ImmutableMultimap.of(package1.getId(), "write", package2.getId(), "read"));
 
-    assertEquals(permissionManagerController.getRolePackagePermissions("ONE"), expected);
+    assertEquals(expected, permissionManagerController.getRolePackagePermissions("ONE"));
   }
 
   @Test
-  public void testUpdateRolePluginPermissions() {
+  void testUpdateRolePluginPermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("read");
@@ -521,7 +527,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateUserPluginPermissions() {
+  void testUpdateUserPluginPermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("read");
@@ -551,7 +557,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateRoleEntityTypePermissions() {
+  void testUpdateRoleEntityTypePermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("write");
@@ -591,7 +597,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateUserEntityClassPermissions() {
+  void testUpdateUserEntityClassPermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("write");
@@ -635,7 +641,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateRolePackagePermissions() {
+  void testUpdateRolePackagePermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("write");
@@ -675,7 +681,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateUserPackagePermissions() {
+  void testUpdateUserPackagePermissions() {
     WebRequest webRequest = mock(WebRequest.class);
 
     when(webRequest.getParameter("radio-1")).thenReturn("write");
@@ -715,7 +721,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateEntityClassRlsEnableRls() {
+  void testUpdateEntityClassRlsEnableRls() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute idAttribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
@@ -732,7 +738,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
   }
 
   @Test
-  public void testUpdateEntityClassRlsDisableRls() {
+  void testUpdateEntityClassRlsDisableRls() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
     Attribute idAttribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
@@ -748,17 +754,19 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
     verify(mutableAclClassService).deleteAclClass("entity-entityTypeId");
   }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Updating system entity type not allowed")
-  public void testUpdateEntityClassRlsSystemEntityType() {
+  @Test
+  void testUpdateEntityClassRlsSystemEntityType() {
     when(systemEntityTypeRegistry.hasSystemEntityType("entityTypeId")).thenReturn(true);
     EntityTypeRlsRequest entityTypeRlsRequest = new EntityTypeRlsRequest("entityTypeId", true);
-    permissionManagerController.updateEntityClassRls(entityTypeRlsRequest);
+    Exception exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> permissionManagerController.updateEntityClassRls(entityTypeRlsRequest));
+    assertThat(exception.getMessage()).containsPattern("Updating system entity type not allowed");
   }
 
   @Test
-  public void testGetPermissionSets() {
+  void testGetPermissionSets() {
     when(permissionRegistry.getPermissionSets())
         .thenReturn(
             ImmutableMap.of(
@@ -782,6 +790,6 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
                     PermissionResponse.create("TestPermission", "UPDATE", "Description of UPDATE"),
                     PermissionResponse.create(
                         "TestPermission", "DELETE", "Description of DELETE"))));
-    assertEquals(actual, expected);
+    assertEquals(expected, actual);
   }
 }

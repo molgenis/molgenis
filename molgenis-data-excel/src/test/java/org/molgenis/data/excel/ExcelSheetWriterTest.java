@@ -7,6 +7,9 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.processor.CellProcessor;
@@ -14,31 +17,27 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest {
+class ExcelSheetWriterTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrMetaFactory;
 
   private ExcelWriter excelWriter;
-  private ByteArrayOutputStream bos;
   private ExcelSheetWriter excelSheetWriter;
 
-  @BeforeMethod
-  public void setUp() throws IOException {
-    bos = new ByteArrayOutputStream();
+  @BeforeEach
+  void setUp() {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
     excelWriter = new ExcelWriter(bos, attrMetaFactory);
     excelSheetWriter = excelWriter.createWritable("sheet", Arrays.asList("col1", "col2"));
   }
 
-  @AfterMethod
-  public void tearDown() throws IOException {
+  @AfterEach
+  void tearDown() throws IOException {
     excelWriter.close();
   }
 
   @Test
-  public void addCellProcessor() throws IOException {
+  void addCellProcessor() {
     CellProcessor processor =
         when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
@@ -60,7 +59,7 @@ public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void write() throws IOException {
+  void write() throws IOException {
     Entity entity1 =
         new DynamicEntity(mock(EntityType.class)) {
           @Override

@@ -1,15 +1,18 @@
 package org.molgenis.data.cache.l1;
 
-import static org.mockito.MockitoAnnotations.initMocks;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -29,12 +32,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = L1CacheTest.Config.class)
-public class L1CacheTest extends AbstractMolgenisSpringTest {
+class L1CacheTest extends AbstractMolgenisSpringTest {
   private L1Cache l1Cache;
   private EntityType entityType;
   private Entity entity1;
@@ -55,8 +55,8 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
 
   @Mock private TransactionManager transactionManager;
 
-  @BeforeClass
-  public void beforeClass() {
+  @BeforeEach
+  void beforeMethod() {
     entityType = entityTypeFactory.create(repository);
     entityType.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
     entityType.addAttribute(attributeFactory.create().setName("ATTRIBUTE_1"));
@@ -71,15 +71,12 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     entity2 = new DynamicEntity(entityType);
     entity2.set("ID", entityID2);
     entity2.set("ATTRIBUTE_1", "test_value_2");
-  }
 
-  @BeforeMethod
-  public void beforeMethod() {
     l1Cache = new L1Cache(transactionManager, entityHydration);
   }
 
   @Test
-  public void testWhenNotInTransaction() {
+  void testWhenNotInTransaction() {
     // Without a transactionStarted() call the cache does not exist, return null
     l1Cache.put(repository, entity1);
     Optional<CacheHit<Entity>> optionalCacheHit = l1Cache.get(repository, entityID1, entityType);
@@ -87,13 +84,13 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testPutAndGetWhenInTransaction() {
+  void testPutAndGetWhenInTransaction() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
     // Entity has not been added to cache, return no CacheHit
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
 
     // Entity has been added to cache, return entity
     l1Cache.put(repository, entity1);
@@ -103,12 +100,12 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     // Cleanup after transaction and expect the cache to be cleared, return no CacheHit
     l1Cache.doCleanupAfterCompletion(transactionID);
     actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
   @Test
-  public void testEvictStream() {
+  void testEvictStream() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
@@ -123,14 +120,14 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.evict(Stream.of(EntityKey.create(entity1), EntityKey.create(entity2)));
 
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
     result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
   @Test
-  public void testEvictStreamOfOneEntity() {
+  void testEvictStreamOfOneEntity() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
@@ -147,12 +144,12 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     actualEntity = l1Cache.get(repository, entityID1, entityType).get();
     assertTrue(EntityUtils.equals(actualEntity.getValue(), entity1));
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
   @Test
-  public void testEvictAll() {
+  void testEvictAll() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
@@ -167,27 +164,27 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.evictAll(entityType);
 
     Optional<CacheHit<Entity>> result = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
     result = l1Cache.get(repository, entityID2, entityType);
-    assertEquals(result, Optional.empty());
+    assertEquals(empty(), result);
   }
 
   @Test
-  public void testPutDeletionWhenInTransaction() {
+  void testPutDeletionWhenInTransaction() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
     // Entity has been deleted once, return empty
     l1Cache.putDeletion(create(entity1));
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.of(CacheHit.empty()));
+    assertEquals(of(CacheHit.empty()), actualEntity);
 
     // Cleanup transaction
     l1Cache.doCleanupAfterCompletion(transactionID);
   }
 
   @Test
-  public void testEvictAllWhenInTransaction() {
+  void testEvictAllWhenInTransaction() {
     // Start transaction
     l1Cache.transactionStarted(transactionID);
 
@@ -195,7 +192,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
     l1Cache.put(repository, entity1);
     l1Cache.evictAll(entityType);
     Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType);
-    assertEquals(actualEntity, Optional.empty());
+    assertEquals(empty(), actualEntity);
 
     // Cleanup transaction
     l1Cache.doCleanupAfterCompletion(transactionID);
@@ -203,15 +200,15 @@ public class L1CacheTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({EntityHydration.class})
-  public static class Config {
+  static class Config {
     @Mock private EntityManager entityManager;
 
-    public Config() {
-      initMocks(this);
+    Config() {
+      org.mockito.MockitoAnnotations.initMocks(this);
     }
 
     @Bean
-    public EntityManager entityManager() {
+    EntityManager entityManager() {
       return entityManager;
     }
   }

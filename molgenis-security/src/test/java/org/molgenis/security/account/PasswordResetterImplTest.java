@@ -1,9 +1,12 @@
 package org.molgenis.security.account;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.InvalidEmailAddressException;
@@ -21,30 +24,29 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class PasswordResetterImplTest extends AbstractMockitoTest {
+class PasswordResetterImplTest extends AbstractMockitoTest {
   @Mock private PasswordResetTokenRepository passwordResetTokenRepository;
   @Mock private UserService userService;
   @Mock private MailSender mailSender;
   @Mock private AppSettings appSettings;
   private PasswordResetterImpl passwordResetServiceImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     passwordResetServiceImpl =
         new PasswordResetterImpl(
             passwordResetTokenRepository, userService, mailSender, appSettings);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testPasswordResetServiceImpl() {
-    new PasswordResetterImpl(null, null, null, null);
+  @Test
+  void testPasswordResetServiceImpl() {
+    assertThrows(
+        NullPointerException.class, () -> new PasswordResetterImpl(null, null, null, null));
   }
 
   @Test
-  public void testResetPassword() {
+  void testResetPassword() {
     String emailAddress = "my@email.com";
 
     User user = mock(User.class);
@@ -80,14 +82,16 @@ public class PasswordResetterImplTest extends AbstractMockitoTest {
     verify(mailSender).send(simpleMessage);
   }
 
-  @Test(expectedExceptions = InvalidEmailAddressException.class)
-  public void testResetPasswordUnknownEmailAddress() {
+  @Test
+  void testResetPasswordUnknownEmailAddress() {
     String emailAddress = "unkown@email.com";
-    passwordResetServiceImpl.resetPassword(emailAddress);
+    assertThrows(
+        InvalidEmailAddressException.class,
+        () -> passwordResetServiceImpl.resetPassword(emailAddress));
   }
 
   @Test
-  public void testValidatePasswordResetToken() {
+  void testValidatePasswordResetToken() {
     String username = "MyUsername";
     String token = "MyToken";
 
@@ -97,15 +101,17 @@ public class PasswordResetterImplTest extends AbstractMockitoTest {
     verify(passwordResetTokenRepository).validateToken(user, token);
   }
 
-  @Test(expectedExceptions = UnknownUserException.class)
-  public void testValidatePasswordResetTokenUnknownUser() {
+  @Test
+  void testValidatePasswordResetTokenUnknownUser() {
     String username = "MyUsername";
     String token = "MyToken";
-    passwordResetServiceImpl.validatePasswordResetToken(username, token);
+    assertThrows(
+        UnknownUserException.class,
+        () -> passwordResetServiceImpl.validatePasswordResetToken(username, token));
   }
 
   @Test
-  public void testChangePassword() {
+  void testChangePassword() {
     String username = "MyUsername";
     String token = "MyToken";
     String password = "MyPassword";
@@ -120,17 +126,19 @@ public class PasswordResetterImplTest extends AbstractMockitoTest {
     verify(passwordResetTokenRepository).deleteToken(user, token);
   }
 
-  @Test(expectedExceptions = UnknownUserException.class)
-  public void testChangePasswordUnknownUser() {
+  @Test
+  void testChangePasswordUnknownUser() {
     String username = "MyUsername";
     String token = "MyToken";
     String password = "MyPassword";
 
-    passwordResetServiceImpl.changePassword(username, token, password);
+    assertThrows(
+        UnknownUserException.class,
+        () -> passwordResetServiceImpl.changePassword(username, token, password));
   }
 
   @Test
-  public void testChangePasswordAuthenticatedUser() {
+  void testChangePasswordAuthenticatedUser() {
     String username = "MyUsername";
     String password = "MyPassword";
 
@@ -147,10 +155,12 @@ public class PasswordResetterImplTest extends AbstractMockitoTest {
     verify(userService).update(user);
   }
 
-  @Test(expectedExceptions = AuthenticationCredentialsNotFoundException.class)
-  public void testChangePasswordAuthenticatedUserNoAuthenticedUser() {
+  @Test
+  void testChangePasswordAuthenticatedUserNoAuthenticedUser() {
     SecurityContext securityContext = mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
-    passwordResetServiceImpl.changePasswordAuthenticatedUser("MyPassword");
+    assertThrows(
+        AuthenticationCredentialsNotFoundException.class,
+        () -> passwordResetServiceImpl.changePasswordAuthenticatedUser("MyPassword"));
   }
 }

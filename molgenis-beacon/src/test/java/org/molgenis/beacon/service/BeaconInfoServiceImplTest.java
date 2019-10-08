@@ -1,14 +1,17 @@
 package org.molgenis.beacon.service;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.beacon.config.BeaconMetadata.BEACON;
-import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
@@ -16,22 +19,20 @@ import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.impl.BeaconInfoServiceImpl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class BeaconInfoServiceImplTest {
+class BeaconInfoServiceImplTest {
   private BeaconInfoService beaconInfoService;
 
   @Mock private DataService dataService;
 
-  @BeforeMethod
-  public void beforeMethod() {
+  @BeforeEach
+  void beforeMethod() {
     initMocks(this);
     beaconInfoService = new BeaconInfoServiceImpl(dataService);
   }
 
   @Test
-  public void getAvailableBeaconsTest() {
+  void getAvailableBeaconsTest() {
     List<BeaconDatasetResponse> beaconDatasets =
         newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
     BeaconResponse beaconResponse =
@@ -43,11 +44,11 @@ public class BeaconInfoServiceImplTest {
     when(dataService.findAll(BEACON, Beacon.class)).thenReturn(Stream.of(beacon));
 
     List<BeaconResponse> expectedBeaconList = newArrayList(beaconResponse);
-    assertEquals(beaconInfoService.getAvailableBeacons(), expectedBeaconList);
+    assertEquals(expectedBeaconList, beaconInfoService.getAvailableBeacons());
   }
 
   @Test
-  public void infoTest() {
+  void infoTest() {
     List<BeaconDatasetResponse> beaconDatasets =
         newArrayList(BeaconDatasetResponse.create("dataset", "DATA", ""));
     BeaconResponse beaconResponse =
@@ -58,11 +59,11 @@ public class BeaconInfoServiceImplTest {
 
     when(dataService.findOneById(BEACON, "beacon", Beacon.class)).thenReturn(beacon);
 
-    assertEquals(beaconInfoService.info("beacon"), beaconResponse);
+    assertEquals(beaconResponse, beaconInfoService.info("beacon"));
   }
 
-  @Test(expectedExceptions = UnknownEntityException.class)
-  public void testInfoUnknownBeacon() {
-    beaconInfoService.info("unknownBeacon");
+  @Test
+  void testInfoUnknownBeacon() {
+    assertThrows(UnknownEntityException.class, () -> beaconInfoService.info("unknownBeacon"));
   }
 }

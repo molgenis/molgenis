@@ -1,13 +1,13 @@
 package org.molgenis.web.menu;
 
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class MenuUtilsTest {
+class MenuUtilsTest {
 
   @Test
-  public void getMenuJson() {
+  void getMenuJson() {
     assertNotNull(MenuUtils.readDefaultMenuValueFromClasspath());
   }
 }

@@ -1,6 +1,7 @@
 package org.molgenis.api.data.v3;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -22,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -31,20 +34,18 @@ import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class EntityManagerV3ImplTest extends AbstractMockitoTest {
+class EntityManagerV3ImplTest extends AbstractMockitoTest {
   @Mock private EntityManager entityManager;
   private EntityManagerV3 entityManagerV3;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     entityManagerV3 = new EntityManagerV3Impl(entityManager);
   }
 
   @Test
-  public void testCreate() {
+  void testCreate() {
     EntityType entityType = mock(EntityType.class);
     entityManagerV3.create(entityType);
 
@@ -52,7 +53,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateString() {
+  void testPopulateString() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -72,8 +73,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("string", "stringValue");
   }
 
-  @Test(expectedExceptions = IllegalAttributeTypeException.class)
-  public void testPopulateCompound() {
+  @Test
+  void testPopulateCompound() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -88,13 +89,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("string", "stringValue");
 
-    entityManagerV3.populate(entityType, entity, valueMap);
-
-    verify(entity).set("string", "stringValue");
+    assertThrows(
+        IllegalAttributeTypeException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateLong() {
+  void testPopulateLong() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -114,8 +115,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("long", 15L);
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateLongInvalid() {
+  @Test
+  void testPopulateLongInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -130,11 +131,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("long", "test");
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateInt() {
+  void testPopulateInt() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -155,7 +158,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateIntNull() {
+  void testPopulateIntNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -175,8 +178,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("int", null);
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateIntInvalid() {
+  @Test
+  void testPopulateIntInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -191,11 +194,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("int", "15.0");
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateDecimalDouble() {
+  void testPopulateDecimalDouble() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -216,7 +221,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateDecimalNumber() {
+  void testPopulateDecimalNumber() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -237,7 +242,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateDecimalNull() {
+  void testPopulateDecimalNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -257,8 +262,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("decimal", null);
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateDecimalInvalid() {
+  @Test
+  void testPopulateDecimalInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -273,13 +278,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("decimal", "15.0");
 
-    entityManagerV3.populate(entityType, entity, valueMap);
-
-    verify(entity).set("decimal", 15.0);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateDate() {
+  void testPopulateDate() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -300,7 +305,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateDateNull() {
+  void testPopulateDateNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -320,8 +325,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("date", null);
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateDateInvalid() {
+  @Test
+  void testPopulateDateInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -336,11 +341,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("date", 1);
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateDateTime() {
+  void testPopulateDateTime() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -361,7 +368,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateDateTimeNull() {
+  void testPopulateDateTimeNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -381,8 +388,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("datetime", null);
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateDateTimeInvalid() {
+  @Test
+  void testPopulateDateTimeInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -397,11 +404,13 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("datetime", 1);
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
   @Test
-  public void testPopulateXref() {
+  void testPopulateXref() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -431,7 +440,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateXrefNull() {
+  void testPopulateXrefNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -452,7 +461,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateMref() {
+  void testPopulateMref() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -485,7 +494,7 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testPopulateMrefEmpty() {
+  void testPopulateMrefEmpty() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -510,8 +519,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     verify(entity).set("mref", Collections.emptyList());
   }
 
-  @Test(expectedExceptions = NullMrefValueException.class)
-  public void testPopulateMrefNull() {
+  @Test
+  void testPopulateMrefNull() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -526,11 +535,12 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("mref", null);
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        NullMrefValueException.class, () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 
-  @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testPopulateMrefInvalid() {
+  @Test
+  void testPopulateMrefInvalid() {
     EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     Attribute attribute = mock(Attribute.class);
@@ -545,6 +555,8 @@ public class EntityManagerV3ImplTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("mref", "invalid");
 
-    entityManagerV3.populate(entityType, entity, valueMap);
+    assertThrows(
+        InvalidAttributeValueException.class,
+        () -> entityManagerV3.populate(entityType, entity, valueMap));
   }
 }

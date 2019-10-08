@@ -1,45 +1,47 @@
 package org.molgenis.js.nashorn;
 
-import static org.testng.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import javax.script.ScriptException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /** Created by Dennis on 2/17/2017. */
-public class NashornScriptEngineTest {
+class NashornScriptEngineTest {
   private static NashornScriptEngine nashornScriptEngine;
 
-  @BeforeClass
-  public static void setUpBeforeClass() {
+  @BeforeAll
+  static void setUpBeforeClass() {
     nashornScriptEngine = new NashornScriptEngine();
   }
 
   @Test
-  public void testInvokeFunction() throws Exception {
+  void testInvokeFunction() throws Exception {
     long epoch = 1487342481434L;
-    assertEquals(nashornScriptEngine.eval("new Date(" + epoch + ")"), epoch);
+    assertEquals(epoch, nashornScriptEngine.eval("new Date(" + epoch + ")"));
   }
 
   @Test
-  public void testInvokeDateDMY() throws Exception {
+  void testInvokeDateDMY() throws Exception {
     LocalDate localDate = LocalDate.now();
     String script =
         String.format(
             "new Date(%d,%d,%d)",
             localDate.getYear(), localDate.getMonth().getValue() - 1, localDate.getDayOfMonth());
     long epochMilli = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    assertEquals(nashornScriptEngine.eval(script), epochMilli);
+    assertEquals(epochMilli, nashornScriptEngine.eval(script));
   }
 
-  @Test(
-      expectedExceptions = ScriptException.class,
-      expectedExceptionsMessageRegExp =
-          "ReferenceError: \"piet\" is not defined in <eval> at line number 1")
-  public void doesntDirtyContext() throws ScriptException {
+  @Test
+  void doesntDirtyContext() throws ScriptException {
     nashornScriptEngine.eval("piet = 3");
-    nashornScriptEngine.eval("piet");
+    Exception exception =
+        assertThrows(ScriptException.class, () -> nashornScriptEngine.eval("piet"));
+    assertThat(exception.getMessage())
+        .containsPattern("ReferenceError: \"piet\" is not defined in <eval> at line number 1");
   }
 }

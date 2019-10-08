@@ -1,7 +1,5 @@
 package org.molgenis.datarowedit.controller;
 
-import static org.molgenis.datarowedit.controller.DataRowEditController.URI;
-
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.security.user.UserAccountService;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(DataRowEditController.URI)
 public class DataRowEditController extends VuePluginController {
   public static final String ID = "data-row-edit";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

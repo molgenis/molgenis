@@ -1,42 +1,49 @@
 package org.molgenis.web.exception;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.web.exception.ExceptionResponseType.PROBLEM;
-import static org.testng.Assert.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.util.UnexpectedEnumException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ExceptionResponseGeneratorRegistryImplTest {
+class ExceptionResponseGeneratorRegistryImplTest {
   private ExceptionResponseGeneratorRegistryImpl exceptionResponseGeneratorRegistryImpl;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     exceptionResponseGeneratorRegistryImpl = new ExceptionResponseGeneratorRegistryImpl();
   }
 
   @Test
-  public void testRegisterExceptionResponseGenerator() {
+  void testRegisterExceptionResponseGenerator() {
     ExceptionResponseGenerator responseGenerator = mock(ExceptionResponseGenerator.class);
     when(responseGenerator.getType()).thenReturn(PROBLEM);
     exceptionResponseGeneratorRegistryImpl.registerExceptionResponseGenerator(responseGenerator);
     assertEquals(
-        exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM),
-        responseGenerator);
+        responseGenerator,
+        exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM));
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void testRegisterExceptionResponseGeneratorAlreadyExists() {
+  @Test
+  void testRegisterExceptionResponseGeneratorAlreadyExists() {
     ExceptionResponseGenerator responseGenerator = mock(ExceptionResponseGenerator.class);
     when(responseGenerator.getType()).thenReturn(PROBLEM);
     exceptionResponseGeneratorRegistryImpl.registerExceptionResponseGenerator(responseGenerator);
-    exceptionResponseGeneratorRegistryImpl.registerExceptionResponseGenerator(responseGenerator);
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            exceptionResponseGeneratorRegistryImpl.registerExceptionResponseGenerator(
+                responseGenerator));
   }
 
-  @Test(expectedExceptions = UnexpectedEnumException.class)
-  public void testGetExceptionResponseGenerator() {
-    exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM);
+  @Test
+  void testGetExceptionResponseGenerator() {
+    assertThrows(
+        UnexpectedEnumException.class,
+        () -> exceptionResponseGeneratorRegistryImpl.getExceptionResponseGenerator(PROBLEM));
   }
 }

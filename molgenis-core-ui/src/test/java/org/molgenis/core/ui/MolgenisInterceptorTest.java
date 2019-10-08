@@ -1,11 +1,18 @@
 package org.molgenis.core.ui;
 
+import static com.google.common.collect.ImmutableList.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.core.ui.MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE;
+import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
+import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -14,47 +21,37 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.PluginAttributes;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.ModelAndView;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class MolgenisInterceptorTest {
-  private ResourceFingerprintRegistry resourceFingerprintRegistry;
-  private ThemeFingerprintRegistry themeFingerprintRegistry;
-  private AppSettings appSettings;
-  private AuthenticationSettings authenticationSettings;
-  private MessageSource messageSource;
-  private OidcClient oidcClient;
+class MolgenisInterceptorTest extends AbstractMockitoTest {
+  @Mock private ResourceFingerprintRegistry resourceFingerprintRegistry;
+  @Mock private ThemeFingerprintRegistry themeFingerprintRegistry;
+  @Mock private AppSettings appSettings;
+  @Mock private AuthenticationSettings authenticationSettings;
+  @Mock private MessageSource messageSource;
+  @Mock private TransactionManager transactionManager;
+
+  private String environment;
   private Gson gson;
+  private MolgenisInterceptor molgenisInterceptor;
 
-  @BeforeMethod
-  public void setUp() {
-    resourceFingerprintRegistry = mock(ResourceFingerprintRegistry.class);
-    themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
-    appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
-    authenticationSettings = mock(AuthenticationSettings.class);
-    messageSource = mock(MessageSource.class);
-    oidcClient = mock(OidcClient.class);
+  @BeforeEach
+  void setUpBeforeEach() {
+    environment = "development";
     gson = new Gson();
-  }
-
-  @Test(expectedExceptions = NullPointerException.class)
-  public void MolgenisInterceptor() {
-    new MolgenisInterceptor(null, null, null, null, null, null, null);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void postHandle() throws Exception {
-    String environment = "development";
-    MolgenisInterceptor molgenisInterceptor =
+    molgenisInterceptor =
         new MolgenisInterceptor(
             resourceFingerprintRegistry,
             themeFingerprintRegistry,
@@ -62,7 +59,20 @@ public class MolgenisInterceptorTest {
             authenticationSettings,
             environment,
             messageSource,
-            gson);
+            gson,
+            transactionManager);
+  }
+
+  @Test
+  void MolgenisInterceptor() {
+    assertThrows(
+        NullPointerException.class,
+        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void postHandle() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     Object handler = mock(Object.class);
@@ -70,37 +80,25 @@ public class MolgenisInterceptorTest {
     molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 
     Map<String, Object> model = modelAndView.getModel();
-    assertEquals(
-        model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
+    assertEquals(resourceFingerprintRegistry, model.get(KEY_RESOURCE_FINGERPRINT_REGISTRY));
 
     Map<String, String> environmentAttributes =
         gson.fromJson(String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
 
-    assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
-    assertEquals(
-        environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
+    assertNotNull(model.get(KEY_APP_SETTINGS));
+    assertEquals(environment, environmentAttributes.get(ATTRIBUTE_ENVIRONMENT_TYPE));
     assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
     assertSame(model.get(KEY_GSON), gson);
   }
 
   @Test
-  @SuppressWarnings("unchecked")
-  public void postHandleWithOidcClient() throws Exception {
-    String environment = "development";
-    MolgenisInterceptor molgenisInterceptor =
-        new MolgenisInterceptor(
-            resourceFingerprintRegistry,
-            themeFingerprintRegistry,
-            appSettings,
-            authenticationSettings,
-            environment,
-            messageSource,
-            gson);
+  void postHandleWithOidcClient() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     Object handler = mock(Object.class);
     ModelAndView modelAndView = new ModelAndView();
 
+    OidcClient oidcClient = mock(OidcClient.class);
     when(authenticationSettings.getOidcClients()).thenReturn(ImmutableList.of(oidcClient));
     when(oidcClient.getRegistrationId()).thenReturn("registrationId");
     when(oidcClient.getClientName()).thenReturn("clientName");
@@ -109,14 +107,14 @@ public class MolgenisInterceptorTest {
 
     Map<String, Object> model = modelAndView.getModel();
     assertEquals(
-        model.get(PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS),
-        ImmutableList.of(
+        of(
             ImmutableMap.of(
                 "name",
                 "clientName",
                 "registrationId",
                 "registrationId",
                 "requestUri",
-                "/oauth2/authorization/registrationId")));
+                "/oauth2/authorization/registrationId")),
+        model.get(KEY_AUTHENTICATION_OIDC_CLIENTS));
   }
 }

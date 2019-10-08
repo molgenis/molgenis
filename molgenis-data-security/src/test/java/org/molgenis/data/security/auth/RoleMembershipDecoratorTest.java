@@ -6,26 +6,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class RoleMembershipDecoratorTest extends AbstractMockitoTest {
+class RoleMembershipDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<RoleMembership> delegateRepository;
   @Mock private RoleMembershipValidator roleMembershipValidator;
   private RoleMembershipDecorator roleMembershipDecorator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     roleMembershipDecorator =
         new RoleMembershipDecorator(delegateRepository, roleMembershipValidator);
   }
 
   @Test
-  public void testAdd() {
+  void testAdd() {
     RoleMembership roleMembership = mock(RoleMembership.class);
     roleMembershipDecorator.add(roleMembership);
     verify(roleMembershipValidator).validate(roleMembership);
@@ -33,7 +33,7 @@ public class RoleMembershipDecoratorTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testAddStream() {
+  void testAddStream() {
     RoleMembership roleMembership = mock(RoleMembership.class);
 
     when(delegateRepository.add(any(Stream.class)))
@@ -47,7 +47,7 @@ public class RoleMembershipDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testUpdate() {
+  void testUpdate() {
     RoleMembership roleMembership = mock(RoleMembership.class);
     roleMembershipDecorator.update(roleMembership);
     verify(roleMembershipValidator).validate(roleMembership);
@@ -55,7 +55,7 @@ public class RoleMembershipDecoratorTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testUpdateStream() {
+  void testUpdateStream() {
     RoleMembership roleMembership = mock(RoleMembership.class);
 
     roleMembershipDecorator.update(Stream.of(roleMembership));

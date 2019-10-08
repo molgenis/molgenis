@@ -58,6 +58,7 @@ public class StaticContentServiceImpl implements StaticContentService {
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public boolean isCurrentUserCanEdit(String pluginId) {
     if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), READ_DATA)) {
@@ -72,6 +73,7 @@ public class StaticContentServiceImpl implements StaticContentService {
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public String getContent(String key) {
     StaticContent staticContent =

@@ -2,7 +2,6 @@ package org.molgenis.metadata.manager.controller;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -31,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MetadataManagerController.URI)
 public class MetadataManagerController extends VuePluginController {
   private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 

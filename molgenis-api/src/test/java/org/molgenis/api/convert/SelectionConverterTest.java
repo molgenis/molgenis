@@ -1,33 +1,34 @@
 package org.molgenis.api.convert;
 
-import static org.testng.Assert.assertEquals;
+import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.molgenis.api.model.Selection.FULL_SELECTION;
 
-import java.util.Collections;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.api.model.Selection;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class SelectionConverterTest {
+class SelectionConverterTest {
   private SelectionConverter selectionConverter;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     selectionConverter = new SelectionConverter();
   }
 
   @Test
-  public void testConvert() {
-    assertEquals(
-        selectionConverter.convert("item"), new Selection(Collections.singletonMap("item", null)));
+  void testConvert() {
+    assertEquals(new Selection(singletonMap("item", null)), selectionConverter.convert("item"));
   }
 
   @Test
-  public void testConvertEmptySelection() {
-    assertEquals(selectionConverter.convert(""), Selection.FULL_SELECTION);
+  void testConvertEmptySelection() {
+    assertEquals(FULL_SELECTION, selectionConverter.convert(""));
   }
 
-  @Test(expectedExceptions = SelectionParseException.class)
-  public void testConvertParseException() {
-    selectionConverter.convert("item,");
+  @Test
+  void testConvertParseException() {
+    assertThrows(SelectionParseException.class, () -> selectionConverter.convert("item,"));
   }
 }

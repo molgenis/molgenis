@@ -1,10 +1,12 @@
 package org.molgenis.data.meta;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class PackageRepositoryDecoratorTest {
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testPackageRepositoryDecorator() throws Exception {
-    new PackageRepositoryDecorator(null, null);
+import org.junit.jupiter.api.Test;
+
+class PackageRepositoryDecoratorTest {
+  @Test
+  void testPackageRepositoryDecorator() {
+    assertThrows(NullPointerException.class, () -> new PackageRepositoryDecorator(null, null));
   }
 }

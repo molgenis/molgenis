@@ -2,12 +2,12 @@ package org.molgenis.security.oidc.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -33,8 +33,9 @@ public class OidcClientTest extends AbstractSystemEntityTest {
     return map;
   }
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, OidcClient.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }

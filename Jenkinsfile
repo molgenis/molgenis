@@ -8,7 +8,7 @@ pipeline {
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
         YUM_REPOSITORY_SNAPSHOTS = "https://${env.LOCAL_REGISTRY}/repository/yum-snapshots/"
         YUM_REPOSITORY_RELEASES = "https://${env.LOCAL_REGISTRY}/repository/yum-releases/"
-        CHART_VERSION = '1.4.0'
+        CHART_VERSION = '1.5.2'
         TIMESTAMP = sh(returnStdout: true, script: "date -u +'%F_%H-%M-%S'").trim()
     }
     stages {
@@ -121,7 +121,6 @@ pipeline {
                     steps {
                         milestone(ordinal: 100, label: 'deploy to master.dev.molgenis.org')
                         container('rancher') {
-                            sh "rancher context switch dev-molgenis"
                             sh "rancher apps upgrade --set image.tag=${TAG} master ${CHART_VERSION}"
                         }
                     }
@@ -201,7 +200,7 @@ pipeline {
                             unstash 'rancher-config'
                         }
                         container('rancher') {
-                            sh "rancher context switch test-molgenis"
+//                            sh "rancher context switch test-molgenis"
                             sh "rancher apps upgrade --set image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
@@ -241,6 +240,11 @@ pipeline {
                                 sh "cd target/checkout/molgenis-app && mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_RELEASES} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
                             }
                         }
+                    }
+                }
+                stage('Manually close and release on sonatype [ x.x ]') {
+                    steps {
+                        input(message='Log on to https://oss.sonatype.org/ and manually close and release to maven central.')
                     }
                 }
             }

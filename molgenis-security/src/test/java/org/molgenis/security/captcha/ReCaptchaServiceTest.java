@@ -1,10 +1,10 @@
 package org.molgenis.security.captcha;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,13 +13,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class ReCaptchaServiceTest extends AbstractMockitoTest {
+class ReCaptchaServiceTest extends AbstractMockitoTest {
 
   private ReCaptchaService reCaptchaService;
 
@@ -29,20 +29,20 @@ public class ReCaptchaServiceTest extends AbstractMockitoTest {
 
   @Mock private ReCaptchaHttpPostFactory reCaptchaHttpPostFactory;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     reCaptchaService = new ReCaptchaService(httpClient, appSettings, reCaptchaHttpPostFactory);
   }
 
   @Test
-  public void testValidate() throws IOException {
+  void testValidate() throws IOException {
     mockVerificationSetup(0.5, 0.6);
     String token = "test-token";
     assertTrue(reCaptchaService.validate(token));
   }
 
   @Test
-  public void testValidateUnderThreshold() throws IOException {
+  void testValidateUnderThreshold() throws IOException {
     mockVerificationSetup(0.5, 0.4);
     String token = "test-token";
     assertFalse(reCaptchaService.validate(token));

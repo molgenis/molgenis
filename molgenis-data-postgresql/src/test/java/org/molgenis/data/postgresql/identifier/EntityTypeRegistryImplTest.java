@@ -1,6 +1,8 @@
 package org.molgenis.data.postgresql.identifier;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
@@ -10,18 +12,16 @@ import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_
 import static org.springframework.transaction.support.TransactionSynchronizationManager.bindResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.getResource;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   @Mock private Attribute stringAttr;
@@ -34,7 +34,7 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   private EntityTypeRegistryImpl entityTypeRegistryImpl;
   private EntityTypeDescription entityTypeDescription;
 
-  @BeforeMethod
+  @BeforeEach
   public void setUpBeforeMethod() {
     entityTypeRegistryImpl = new EntityTypeRegistryImpl(transactionManager);
 
@@ -62,7 +62,7 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.registerEntityType(entityType);
   }
 
-  @AfterMethod
+  @AfterEach
   public void afterMethod() {
     if (getResource(TRANSACTION_ID_RESOURCE_NAME) != null) {
       unbindResource(TRANSACTION_ID_RESOURCE_NAME);
@@ -72,12 +72,12 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   @Test
   public void testGetEntityTypeDescription() {
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription(
             "org_molgenis_test_many#2409e1c6_stringAttribute"));
@@ -90,12 +90,12 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
   public void testGetEntityTypeDescriptionWithinNewTransactionFallbackToCommitted() {
     bindResource(TRANSACTION_ID_RESOURCE_NAME, "1");
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription(
             "org_molgenis_test_many#2409e1c6_stringAttribute"));
@@ -129,15 +129,15 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.addAttribute(entityType, attr);
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref2"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref2"));
   }
 
   @Test
@@ -159,12 +159,12 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
                 AttributeDescription.create("xint")));
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_xint"));
   }
@@ -188,9 +188,9 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
                 AttributeDescription.create("xint")));
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
     assertNull(
@@ -205,12 +205,12 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.updateAttribute(entityType, mrefAttr, attr);
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_newName"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_newName"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
   }
@@ -230,16 +230,16 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.updateAttribute(entityType, stringAttr, attr);
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many#2409e1c6_stringAttribute"),
-        entityTypeDescription);
+            "org_molgenis_test_many#2409e1c6_stringAttribute"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
   }
 
   @Test
@@ -247,9 +247,9 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.deleteAttribute(entityType, mrefAttr);
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
   }
@@ -266,12 +266,12 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
                 AttributeDescription.create("xref_attribute_with_a_long_name")));
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
-        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
-        entityTypeDescription);
+        entityTypeDescription,
+        entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"));
   }
 
   @Test
@@ -330,9 +330,9 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
 
     // other checks still see old metadata
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertEquals(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
         entityTypeDescription,
@@ -342,9 +342,9 @@ public class EntityTypeRegistryImplTest extends AbstractMockitoTest {
     entityTypeRegistryImpl.afterCommitTransaction("2");
 
     assertEquals(
+        entityTypeDescription,
         entityTypeRegistryImpl.getEntityTypeDescription(
-            "org_molgenis_test_many_packages_deep#2409e1c6"),
-        entityTypeDescription);
+            "org_molgenis_test_many_packages_deep#2409e1c6"));
     assertNull(
         entityTypeRegistryImpl.getEntityTypeDescription("org_molgenis_test_many#2409e1c6_mref"),
         "After committing the junction table description should be removed for all threads");

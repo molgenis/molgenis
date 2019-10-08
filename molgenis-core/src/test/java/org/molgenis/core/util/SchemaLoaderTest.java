@@ -1,15 +1,15 @@
 package org.molgenis.core.util;
 
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class SchemaLoaderTest {
+class SchemaLoaderTest {
   @Test
-  public void getSchemaFromInputStream() throws IOException {
+  void getSchemaFromInputStream() throws IOException {
     String schemaStr =
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></xs:schema>";
     try (InputStream bis = new ByteArrayInputStream(schemaStr.getBytes("UTF-8"))) {
@@ -19,7 +19,7 @@ public class SchemaLoaderTest {
   }
 
   @Test
-  public void getSchema() {
+  void getSchema() {
     SchemaLoader schemaLoader = new SchemaLoader("example.xsd");
     assertNotNull(schemaLoader.getSchema());
   }

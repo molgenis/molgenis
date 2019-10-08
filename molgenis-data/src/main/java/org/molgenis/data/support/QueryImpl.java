@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
@@ -20,6 +23,10 @@ import org.molgenis.data.Sort;
 
 public class QueryImpl<E extends Entity> implements Query<E> {
   private final List<List<QueryRule>> rules = new ArrayList<>();
+
+  private DataService dataService;
+  private String entityTypeId;
+  private Class<E> entityClass;
 
   private int offset;
   private int pageSize;
@@ -53,6 +60,18 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     this.repository = repository;
   }
 
+  public QueryImpl(DataService dataService, String entityTypeId) {
+    this(dataService, entityTypeId, null);
+  }
+
+  public QueryImpl(
+      DataService dataService, String entityTypeId, @Nullable @CheckForNull Class<E> entityClass) {
+    this();
+    this.dataService = requireNonNull(dataService);
+    this.entityTypeId = requireNonNull(entityTypeId);
+    this.entityClass = entityClass;
+  }
+
   public QueryImpl(Query<E> q) {
     this();
     for (QueryRule rule : q.getRules()) {
@@ -78,24 +97,47 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     this.rules.get(this.rules.size() - 1).add(rule);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Long count() {
-    if (repository == null) throw new RuntimeException("Query failed: repository not set");
-    return repository.count(this);
+    if (dataService != null) {
+      return dataService.count(entityTypeId, (Query<Entity>) this);
+    } else {
+      if (repository == null) throw new RuntimeException("Query failed: repository not set");
+      return repository.count(this);
+    }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Stream<E> findAll() {
-    if (repository == null) throw new RuntimeException("Query failed: repository not set");
-    return repository.findAll(this);
+    if (dataService != null) {
+      if (entityClass != null) {
+        return dataService.findAll(entityTypeId, this, entityClass);
+      } else {
+        return (Stream<E>) dataService.findAll(entityTypeId, (Query<Entity>) this);
+      }
+    } else {
+      if (repository == null) throw new RuntimeException("Query failed: repository not set");
+      return repository.findAll(this);
+    }
   }
 
+  @SuppressWarnings("unchecked")
   @Nullable
   @CheckForNull
   @Override
   public E findOne() {
-    if (repository == null) throw new RuntimeException("Query failed: repository not set");
-    return repository.findOne(this);
+    if (dataService != null) {
+      if (entityClass != null) {
+        return dataService.findOne(entityTypeId, this, entityClass);
+      } else {
+        return (E) dataService.findOne(entityTypeId, (Query<Entity>) this);
+      }
+    } else {
+      if (repository == null) throw new RuntimeException("Query failed: repository not set");
+      return repository.findOne(this);
+    }
   }
 
   @Override

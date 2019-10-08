@@ -1,7 +1,14 @@
 package org.molgenis.data.index;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.EnumSet.allOf;
+import static java.util.EnumSet.of;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
@@ -20,16 +27,15 @@ import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
-import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
@@ -45,10 +51,8 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class IndexedRepositoryDecoratorTest {
+class IndexedRepositoryDecoratorTest {
   private IndexedRepositoryDecorator indexedRepositoryDecorator;
   private SearchService searchService;
   private Repository<Entity> delegateRepository;
@@ -58,8 +62,8 @@ public class IndexedRepositoryDecoratorTest {
   private Query<Entity> unsupportedQuery;
 
   @SuppressWarnings("unchecked")
-  @BeforeMethod
-  public void setUp() throws IOException {
+  @BeforeEach
+  void setUp() throws IOException {
     searchService = mock(SearchService.class);
     delegateRepository = mock(Repository.class);
     String entityTypeId = "entity";
@@ -98,13 +102,14 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @SuppressWarnings("resource")
-  @Test(expectedExceptions = NullPointerException.class)
-  public void indexedRepositoryDecorator() {
-    new IndexedRepositoryDecorator(null, null, null);
+  @Test
+  void indexedRepositoryDecorator() {
+    assertThrows(
+        NullPointerException.class, () -> new IndexedRepositoryDecorator(null, null, null));
   }
 
   @Test
-  public void addEntity() {
+  void addEntity() {
     String id = "id0";
     Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
     indexedRepositoryDecorator.add(entity);
@@ -114,7 +119,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void addStream() {
+  void addStream() {
     Stream<Entity> entities = Stream.empty();
     indexedRepositoryDecorator.add(entities);
     verify(delegateRepository, times(1)).add(entities);
@@ -122,7 +127,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void aggregate() {
+  void aggregate() {
     when(indexedRepositoryDecorator.getName()).thenReturn("entity");
     Attribute xAttr = when(mock(Attribute.class).getName()).thenReturn("xAttr").getMock();
     Attribute yAttr = when(mock(Attribute.class).getName()).thenReturn("yAttr").getMock();
@@ -139,78 +144,83 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void aggregateUnknownIndexExceptionRecoverable() {
+  void aggregateUnknownIndexExceptionRecoverable() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
     when(searchService.aggregate(repositoryEntityType, aggregateQuery))
         .thenThrow(new UnknownIndexException("msg"))
         .thenReturn(aggregateResult);
 
-    assertEquals(indexedRepositoryDecorator.aggregate(aggregateQuery), aggregateResult);
+    assertEquals(aggregateResult, indexedRepositoryDecorator.aggregate(aggregateQuery));
     verify(delegateRepository, never()).count(unsupportedQuery);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
-  public void aggregateUnknownIndexExceptionUnrecoverable() {
+  @Test
+  void aggregateUnknownIndexExceptionUnrecoverable() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     when(searchService.aggregate(repositoryEntityType, aggregateQuery))
         .thenThrow(new UnknownIndexException("msg"));
-    indexedRepositoryDecorator.aggregate(aggregateQuery);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> indexedRepositoryDecorator.aggregate(aggregateQuery));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist");
   }
 
   @Test
-  public void close() throws IOException {
+  void close() throws IOException {
     indexedRepositoryDecorator.close();
     verify(delegateRepository).close();
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void count() {
+  void count() {
     indexedRepositoryDecorator.count();
     verify(delegateRepository).count();
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void countQuery() {
+  void countQuery() {
     indexedRepositoryDecorator.count(query);
     verify(delegateRepository).count(query);
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void countQueryUnsupported() {
+  void countQueryUnsupported() {
     indexedRepositoryDecorator.count(unsupportedQuery);
     verify(searchService).count(repositoryEntityType, unsupportedQuery);
     verify(delegateRepository, never()).count(unsupportedQuery);
   }
 
   @Test
-  public void countUnknownIndexExceptionRecoverable() {
+  void countUnknownIndexExceptionRecoverable() {
     when(searchService.count(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"))
         .thenReturn(5L);
 
-    assertEquals(indexedRepositoryDecorator.count(unsupportedQuery), 5L);
+    assertEquals(5L, indexedRepositoryDecorator.count(unsupportedQuery));
     verify(delegateRepository, never()).count(unsupportedQuery);
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
-  public void countUnknownIndexExceptionUnrecoverable() {
+  @Test
+  void countUnknownIndexExceptionUnrecoverable() {
     when(searchService.count(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"));
-    indexedRepositoryDecorator.count(unsupportedQuery);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class, () -> indexedRepositoryDecorator.count(unsupportedQuery));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist");
   }
 
   @Test
-  public void deleteEntity() {
+  void deleteEntity() {
     String id = "id0";
     Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
     indexedRepositoryDecorator.delete(entity);
@@ -219,7 +229,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteStream() {
+  void deleteStream() {
     Stream<Entity> entities = Stream.empty();
     indexedRepositoryDecorator.delete(entities);
     verify(delegateRepository, times(1)).delete(entities);
@@ -227,14 +237,14 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void deleteAll() {
+  void deleteAll() {
     indexedRepositoryDecorator.deleteAll();
     verify(delegateRepository).deleteAll();
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void deleteByIdObject() {
+  void deleteByIdObject() {
     Object id = "0";
     indexedRepositoryDecorator.deleteById(id);
     verify(delegateRepository).deleteById(id);
@@ -242,14 +252,14 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOneQuery() {
+  void findOneQuery() {
     indexedRepositoryDecorator.findOne(query);
     verify(delegateRepository).findOne(query);
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void findOneQueryUnsupported() {
+  void findOneQueryUnsupported() {
     Entity entity0 = mock(Entity.class);
     when(searchService.searchOne(repositoryEntityType, unsupportedQuery)).thenReturn(entity0);
 
@@ -259,7 +269,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOneUnknownIndexExceptionRecoverable() {
+  void findOneUnknownIndexExceptionRecoverable() {
     Entity entity0 = mock(Entity.class);
     when(searchService.searchOne(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"))
@@ -269,18 +279,21 @@ public class IndexedRepositoryDecoratorTest {
     verify(delegateRepository).findOneById(any(Object.class), isNull());
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
-  public void findOneUnknownIndexExceptionUnrecoverable() {
+  @Test
+  void findOneUnknownIndexExceptionUnrecoverable() {
     when(searchService.searchOne(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"));
-    indexedRepositoryDecorator.findOne(unsupportedQuery);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> indexedRepositoryDecorator.findOne(unsupportedQuery));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist");
   }
 
   @Test
-  public void findOneById() {
+  void findOneById() {
     Object id = mock(Object.class);
     indexedRepositoryDecorator.findOneById(id);
     verify(delegateRepository).findOneById(id);
@@ -288,29 +301,29 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void findOneByIdFetch() {
+  void findOneByIdFetch() {
     Object id = mock(Object.class);
     Fetch fetch = new Fetch();
 
     Entity entity = mock(Entity.class);
     when(delegateRepository.findOneById(id, fetch)).thenReturn(entity);
-    assertEquals(indexedRepositoryDecorator.findOneById(id, fetch), entity);
+    assertEquals(entity, indexedRepositoryDecorator.findOneById(id, fetch));
     verify(delegateRepository, times(1)).findOneById(id, fetch);
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void getEntityType() {
-    assertEquals(indexedRepositoryDecorator.getEntityType(), repositoryEntityType);
+  void getEntityType() {
+    assertEquals(repositoryEntityType, indexedRepositoryDecorator.getEntityType());
   }
 
   @Test
-  public void getName() {
-    assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getId());
+  void getName() {
+    assertEquals(repositoryEntityType.getId(), indexedRepositoryDecorator.getName());
   }
 
   @Test
-  public void updateEntity() {
+  void updateEntity() {
     String id = "id0";
     Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
     indexedRepositoryDecorator.update(entity);
@@ -319,7 +332,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void updateStream() {
+  void updateStream() {
     Stream<Entity> entities = Stream.empty();
     indexedRepositoryDecorator.update(entities);
     verify(delegateRepository, times(1)).update(entities);
@@ -327,7 +340,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void findAllStream() {
+  void findAllStream() {
     Object id0 = "id0";
     Object id1 = "id1";
     Entity entity0 = mock(Entity.class);
@@ -335,12 +348,12 @@ public class IndexedRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void findAllStreamFetch() {
+  void findAllStreamFetch() {
     Fetch fetch = new Fetch();
     Object id0 = "id0";
     Object id1 = "id1";
@@ -349,12 +362,12 @@ public class IndexedRepositoryDecoratorTest {
     Stream<Object> entityIds = Stream.of(id0, id1);
     when(delegateRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
     Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds, fetch);
-    assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+    assertEquals(asList(entity0, entity1), expectedEntities.collect(toList()));
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void findAllQuery() {
+  void findAllQuery() {
     indexedRepositoryDecorator.findAll(query);
     verify(delegateRepository, times(1)).findAll(query);
     verifyZeroInteractions(searchService);
@@ -362,7 +375,7 @@ public class IndexedRepositoryDecoratorTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void findAllQueryUnsupported() {
+  void findAllQueryUnsupported() {
     indexedRepositoryDecorator.findAll(unsupportedQuery);
     verify(searchService).search(repositoryEntityType, unsupportedQuery);
     verify(delegateRepository).findAll(any(Stream.class), isNull());
@@ -370,7 +383,7 @@ public class IndexedRepositoryDecoratorTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void findAllUnknownIndexExceptionRecoverable() {
+  void findAllUnknownIndexExceptionRecoverable() {
     Stream<Object> entityStream = mock(Stream.class);
     when(searchService.search(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"))
@@ -380,18 +393,21 @@ public class IndexedRepositoryDecoratorTest {
     verify(delegateRepository).findAll(any(Stream.class), isNull());
   }
 
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp =
-          "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist")
-  public void findAllUnknownIndexExceptionUnrecoverable() {
+  @Test
+  void findAllUnknownIndexExceptionUnrecoverable() {
     when(searchService.search(repositoryEntityType, unsupportedQuery))
         .thenThrow(new UnknownIndexException("msg"));
-    indexedRepositoryDecorator.findAll(unsupportedQuery);
+    Exception exception =
+        assertThrows(
+            MolgenisDataException.class,
+            () -> indexedRepositoryDecorator.findAll(unsupportedQuery));
+    assertThat(exception.getMessage())
+        .containsPattern(
+            "Error executing query, index for entity type 'My entity type' with id 'entity' does not exist");
   }
 
   @Test
-  public void forEachBatched() {
+  void forEachBatched() {
     Fetch fetch = new Fetch();
     @SuppressWarnings("unchecked")
     Consumer<List<Entity>> consumer = mock(Consumer.class);
@@ -400,32 +416,32 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void iterator() {
+  void iterator() {
     indexedRepositoryDecorator.iterator();
     verify(delegateRepository, times(1)).iterator();
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void getCapabilities() {
+  void getCapabilities() {
     assertEquals(
-        indexedRepositoryDecorator.getCapabilities(),
-        EnumSet.of(AGGREGATEABLE, QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
+        of(AGGREGATEABLE, QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT),
+        indexedRepositoryDecorator.getCapabilities());
   }
 
   @Test
-  public void getQueryOperators() {
-    assertEquals(indexedRepositoryDecorator.getQueryOperators(), EnumSet.allOf(Operator.class));
+  void getQueryOperators() {
+    assertEquals(allOf(Operator.class), indexedRepositoryDecorator.getQueryOperators());
   }
 
   @Test
-  public void query() {
-    assertEquals(indexedRepositoryDecorator.query().getRepository(), indexedRepositoryDecorator);
+  void query() {
+    assertEquals(indexedRepositoryDecorator, indexedRepositoryDecorator.query().getRepository());
     verifyZeroInteractions(searchService);
   }
 
   @Test
-  public void unsupportedQueryWithComputedAttributes() {
+  void unsupportedQueryWithComputedAttributes() {
     @SuppressWarnings("unchecked")
     Query<Entity> q = mock(Query.class);
     QueryRule qRule1 = mock(QueryRule.class);
@@ -453,7 +469,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void unsupportedQueryWithSortOnComputedAttributes() {
+  void unsupportedQueryWithSortOnComputedAttributes() {
     @SuppressWarnings("unchecked")
     Query<Entity> q = mock(Query.class);
     Sort sort = mock(Sort.class);
@@ -481,7 +497,7 @@ public class IndexedRepositoryDecoratorTest {
   }
 
   @Test
-  public void unsupportedQueryWithNestedQueryRuleField() {
+  void unsupportedQueryWithNestedQueryRuleField() {
     String refAttrName = "refAttr";
     String attrName = "attr";
     String queryRuleField = refAttrName + '.' + attrName;

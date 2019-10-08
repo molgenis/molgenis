@@ -1,11 +1,11 @@
 package org.molgenis.core.ui.data.system.core;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractEntityFactoryTest;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {

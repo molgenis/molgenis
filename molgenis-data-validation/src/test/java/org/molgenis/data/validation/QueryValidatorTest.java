@@ -1,7 +1,9 @@
 package org.molgenis.data.validation;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
@@ -40,8 +42,13 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.file.model.FileMeta;
@@ -49,26 +56,24 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class QueryValidatorTest {
+class QueryValidatorTest {
+  private FetchValidator fetchValidator;
   private QueryValidator queryValidator;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
+    fetchValidator = mock(FetchValidator.class);
     EntityManager entityManager = mock(EntityManager.class);
-    this.queryValidator = new QueryValidator(entityManager);
+    this.queryValidator = new QueryValidator(fetchValidator, entityManager);
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
-  public void testQueryValidator() {
-    new QueryValidator(null);
+  @Test
+  void testQueryValidator() {
+    assertThrows(NullPointerException.class, () -> new QueryValidator(null, null));
   }
 
-  @DataProvider(name = "validateValidProvider")
-  public static Iterator<Object[]> validateValidProvider() {
+  static Iterator<Object[]> validateValidProvider() {
     List<Object[]> queries = new ArrayList<>(256);
 
     EnumSet.of(EQUALS)
@@ -249,14 +254,14 @@ public class QueryValidatorTest {
     return entityType;
   }
 
-  @Test(dataProvider = "validateValidProvider")
-  public void testValidateValid(EntityType entityType, Query<Entity> query) {
+  @ParameterizedTest
+  @MethodSource("validateValidProvider")
+  void testValidateValid(EntityType entityType, Query<Entity> query) {
     queryValidator.validate(query, entityType);
     // test passes if not exception occurred
   }
 
-  @DataProvider(name = "validateInvalidProvider")
-  public static Iterator<Object[]> validateInvalidProvider() {
+  static Iterator<Object[]> validateInvalidProvider() {
     List<Object[]> queries = new ArrayList<>(6);
     EnumSet.of(BOOL, DECIMAL, INT, LONG, DATE, DATE_TIME, ENUM)
         .forEach(
@@ -288,10 +293,22 @@ public class QueryValidatorTest {
     return queries.iterator();
   }
 
-  @Test(
-      dataProvider = "validateInvalidProvider",
-      expectedExceptions = MolgenisValidationException.class)
-  public void testValidateInvalid(Query<Entity> query, EntityType entityType) {
+  @SuppressWarnings("deprecation")
+  @ParameterizedTest
+  @MethodSource("validateInvalidProvider")
+  void testValidateInvalid(Query<Entity> query, EntityType entityType) {
+    assertThrows(
+        MolgenisValidationException.class, () -> queryValidator.validate(query, entityType));
+  }
+
+  @Test
+  void testValidateFetch() {
+    @SuppressWarnings("unchecked")
+    Query<Entity> query = mock(Query.class);
+    Fetch fetch = mock(Fetch.class);
+    when(query.getFetch()).thenReturn(fetch);
+    EntityType entityType = mock(EntityType.class);
     queryValidator.validate(query, entityType);
+    verify(fetchValidator).validateFetch(fetch, entityType);
   }
 }

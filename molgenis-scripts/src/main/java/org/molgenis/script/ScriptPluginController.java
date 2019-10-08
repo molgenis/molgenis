@@ -1,7 +1,5 @@
 package org.molgenis.script;
 
-import static org.molgenis.script.ScriptPluginController.URI;
-
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(ScriptPluginController.URI)
 public class ScriptPluginController extends VuePluginController {
   public static final String ID = "scripts";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

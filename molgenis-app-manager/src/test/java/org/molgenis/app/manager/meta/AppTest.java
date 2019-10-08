@@ -1,113 +1,113 @@
 package org.molgenis.app.manager.meta;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {AppFactory.class, AppMetadata.class, AbstractMolgenisSpringTest.Config.class})
-public class AppTest extends AbstractMolgenisSpringTest {
+class AppTest extends AbstractMolgenisSpringTest {
   @Autowired private AppFactory appFactory;
   private App app;
 
-  @BeforeMethod
-  public void setup() {
+  @BeforeEach
+  void setup() {
     app = appFactory.create("id");
   }
 
   @Test
-  public void testConstructorParams() {
+  void testConstructorParams() {
     app = appFactory.create();
     assertNotNull(app.getId());
   }
 
   @Test
-  public void testId() {
-    assertEquals(app.getId(), "id");
+  void testId() {
+    assertEquals("id", app.getId());
     app.setId("id1");
-    assertEquals(app.getId(), "id1");
+    assertEquals("id1", app.getId());
   }
 
   @Test
-  public void testLabel() {
+  void testLabel() {
     assertNull(app.getLabel());
     app.setLabel("label");
-    assertEquals(app.getLabel(), "label");
+    assertEquals("label", app.getLabel());
   }
 
   @Test
-  public void testDescription() {
+  void testDescription() {
     assertNull(app.getDescription());
     app.setDescription("description");
-    assertEquals(app.getDescription(), "description");
+    assertEquals("description", app.getDescription());
   }
 
   @Test
-  public void testActive() {
+  void testActive() {
     assertFalse(app.isActive());
     app.setActive(true);
     assertTrue(app.isActive());
   }
 
   @Test
-  public void testVersion() {
+  void testVersion() {
     assertNull(app.getAppVersion());
     app.setAppVersion("1.0.0");
-    assertEquals(app.getAppVersion(), "1.0.0");
+    assertEquals("1.0.0", app.getAppVersion());
   }
 
   @Test
-  public void testDependency() {
+  void testDependency() {
     assertNull(app.getApiDependency());
     app.setApiDependency("7.9.1");
-    assertEquals(app.getApiDependency(), "7.9.1");
+    assertEquals("7.9.1", app.getApiDependency());
   }
 
   @Test
-  public void testContent() {
+  void testContent() {
     assertNull(app.getTemplateContent());
     app.setTemplateContent("<html></html>");
-    assertEquals(app.getTemplateContent(), "<html></html>");
+    assertEquals("<html></html>", app.getTemplateContent());
   }
 
   @Test
-  public void testResource() {
+  void testResource() {
     assertNull(app.getResourceFolder());
     app.setResourceFolder("/blah");
-    assertEquals(app.getResourceFolder(), "/blah");
+    assertEquals("/blah", app.getResourceFolder());
   }
 
   @Test
-  public void testUri() {
+  void testUri() {
     assertNull(app.getName());
     app.setName("app1");
-    assertEquals(app.getName(), "app1");
+    assertEquals("app1", app.getName());
   }
 
   @Test
-  public void testConfig() {
+  void testConfig() {
     assertNull(app.getAppConfig());
     app.setAppConfig("{key: value}");
-    assertEquals(app.getAppConfig(), "{key: value}");
+    assertEquals("{key: value}", app.getAppConfig());
   }
 
   @Test
-  public void testFolder() {
+  void testFolder() {
     assertNull(app.getResourceFolder());
     app.setResourceFolder("/blah");
-    assertEquals(app.getResourceFolder(), "/blah");
+    assertEquals("/blah", app.getResourceFolder());
   }
 
   @Test
-  public void menuAndFooter() {
+  void menuAndFooter() {
     assertFalse(app.includeMenuAndFooter());
     app.setIncludeMenuAndFooter(true);
     assertTrue(app.includeMenuAndFooter());

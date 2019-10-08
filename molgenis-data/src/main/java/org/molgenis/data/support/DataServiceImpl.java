@@ -48,26 +48,31 @@ public class DataServiceImpl implements DataService {
     return metaDataService.getEntityTypes().map(EntityType::getId);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public long count(String entityTypeId) {
     return getRepository(entityTypeId).count();
   }
 
+  @Transactional(readOnly = true)
   @Override
   public long count(String entityTypeId, Query<Entity> q) {
     return getRepository(entityTypeId).count(q);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Stream<Entity> findAll(String entityTypeId) {
     return findAll(entityTypeId, query(entityTypeId));
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Stream<Entity> findAll(String entityTypeId, Query<Entity> q) {
     return getRepository(entityTypeId).findAll(q);
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -75,6 +80,7 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId).findOneById(id);
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -160,19 +166,21 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public Query<Entity> query(String entityTypeId) {
-    return new QueryImpl<>(getRepository(entityTypeId));
+    return new QueryImpl<>(this, entityTypeId);
   }
 
   @Override
   public <E extends Entity> Query<E> query(String entityTypeId, Class<E> entityClass) {
-    return new QueryImpl<>(getRepository(entityTypeId, entityClass));
+    return new QueryImpl<>(this, entityTypeId, entityClass);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public <E extends Entity> Stream<E> findAll(String entityTypeId, Query<E> q, Class<E> clazz) {
     return getRepository(entityTypeId, clazz).findAll(q);
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -180,6 +188,7 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId, clazz).findOneById(id);
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -187,11 +196,13 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId, clazz).findOne(q);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public <E extends Entity> Stream<E> findAll(String entityTypeId, Class<E> clazz) {
     return findAll(entityTypeId, query(entityTypeId, clazz), clazz);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public AggregateResult aggregate(String entityTypeId, AggregateQuery aggregateQuery) {
     return getRepository(entityTypeId).aggregate(aggregateQuery);
@@ -212,6 +223,7 @@ public class DataServiceImpl implements DataService {
     return getRepository(repositoryName).getCapabilities();
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -219,6 +231,7 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId).findOneById(id, fetch);
   }
 
+  @Transactional(readOnly = true)
   @Nullable
   @CheckForNull
   @Override
@@ -227,22 +240,26 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId, clazz).findOneById(id, fetch);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Stream<Entity> findAll(String entityTypeId, Stream<Object> ids) {
     return getRepository(entityTypeId).findAll(ids);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public <E extends Entity> Stream<E> findAll(
       String entityTypeId, Stream<Object> ids, Class<E> clazz) {
     return getRepository(entityTypeId, clazz).findAll(ids);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Stream<Entity> findAll(String entityTypeId, Stream<Object> ids, Fetch fetch) {
     return getRepository(entityTypeId).findAll(ids, fetch);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public <E extends Entity> Stream<E> findAll(
       String entityTypeId, Stream<Object> ids, Fetch fetch, Class<E> clazz) {

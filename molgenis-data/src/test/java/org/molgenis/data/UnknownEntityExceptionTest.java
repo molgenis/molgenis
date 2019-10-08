@@ -2,47 +2,46 @@ package org.molgenis.data;
 
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.exception.ExceptionMessageTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class UnknownEntityExceptionTest extends ExceptionMessageTest {
+class UnknownEntityExceptionTest extends ExceptionMessageTest {
   @Mock private EntityType entityType;
   @Mock private Attribute attribute;
 
-  @BeforeMethod
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     messageSource.addMolgenisNamespaces("data");
   }
 
-  @Test(dataProvider = "languageMessageProvider")
+  @ParameterizedTest
+  @MethodSource("languageMessageProvider")
   @Override
-  public void testGetLocalizedMessage(String lang, String message) {
+  protected void testGetLocalizedMessage(String lang, String message) {
     when(entityType.getIdAttribute()).thenReturn(attribute);
     when(attribute.getLabel("en")).thenReturn("Identifier");
     when(entityType.getLabel("en")).thenReturn("Books");
     assertExceptionMessageEquals(new UnknownEntityException(entityType, 5), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProvider")
-  @Override
-  public Object[][] languageMessageProvider() {
+  static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {"en", "Unknown entity with 'Identifier' '5' of type 'Books'."}
     };
   }
 
-  @Test(dataProvider = "languageMessageProviderIdOnly")
-  public void testGetLocalizedMessageIdOnly(String lang, String message) {
+  @ParameterizedTest
+  @MethodSource("languageMessageProviderIdOnly")
+  void testGetLocalizedMessageIdOnly(String lang, String message) {
     assertExceptionMessageEquals(new UnknownEntityException("org_example_Books", 5), lang, message);
   }
 
-  @DataProvider(name = "languageMessageProviderIdOnly")
-  public Object[][] languageMessageProviderIdOnly() {
+  static Object[][] languageMessageProviderIdOnly() {
     return new Object[][] {new Object[] {"en", "Unknown entity '5' of type 'org_example_Books'."}};
   }
 }

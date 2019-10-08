@@ -1,21 +1,22 @@
 package org.molgenis.validation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static java.lang.Long.valueOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-public class ConstraintViolationTest {
+class ConstraintViolationTest {
   @Test
-  public void renumberRowIndexRowNumber() {
+  void renumberRowIndexRowNumber() {
     ConstraintViolation constraintViolation = new ConstraintViolation("test", 1L);
     constraintViolation.renumberRowIndex(Arrays.asList(3, 2, 1));
-    assertEquals(constraintViolation.getRowNr(), Long.valueOf(3L));
+    assertEquals(valueOf(3L), constraintViolation.getRowNr());
   }
 
   @Test
-  public void renumberRowIndexNoRowNumber() {
+  void renumberRowIndexNoRowNumber() {
     ConstraintViolation constraintViolation = new ConstraintViolation("test", null);
     constraintViolation.renumberRowIndex(Arrays.asList(3, 2, 1));
     assertNull(constraintViolation.getRowNr());

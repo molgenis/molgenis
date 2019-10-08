@@ -1,18 +1,19 @@
 package org.molgenis.semanticmapper.mapping.model;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.createCopy;
 
 import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.test.AbstractMockitoTest;
-import org.testng.annotations.Test;
 
-public class AttributeMappingTest extends AbstractMockitoTest {
+class AttributeMappingTest extends AbstractMockitoTest {
   @Test
-  public void testCreateCopy() {
+  void testCreateCopy() {
     String identifier = "MyIdentifier";
     String targetAttributeName = "MyTargetAttributeName";
     Attribute targetAttribute = mock(Attribute.class);
@@ -28,6 +29,6 @@ public class AttributeMappingTest extends AbstractMockitoTest {
             algorithm,
             sourceAttributes,
             algorithmState);
-    assertEquals(AttributeMapping.createCopy(attributeMapping), attributeMapping);
+    assertEquals(attributeMapping, createCopy(attributeMapping));
   }
 }

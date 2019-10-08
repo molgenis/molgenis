@@ -1,47 +1,49 @@
 package org.molgenis.app.manager.decorator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-public class AppRepositoryDecoratorTest {
+class AppRepositoryDecoratorTest {
   private AppRepositoryDecorator appRepositoryDecorator;
   @Mock private AppManagerService appManagerService;
   @Mock private Repository<App> repository;
 
-  @BeforeMethod
-  public void setUpBeforeMethod() {
+  @BeforeEach
+  void setUpBeforeMethod() {
     initMocks(this);
     appRepositoryDecorator = new AppRepositoryDecorator(repository, appManagerService);
   }
 
   @Test
-  public void testDelete() {
-    App app = mock(App.class);
+  void testDelete() {
+    String appId = "app";
+    App app = when(mock(App.class).getId()).thenReturn(appId).getMock();
     appRepositoryDecorator.delete(app);
+    verify(repository).deleteById(appId);
   }
 
   @Test
-  public void testDeleteById() {
+  void testDeleteById() {
     appRepositoryDecorator.deleteById("app");
     verify(appManagerService).deleteApp("app");
     verify(repository).deleteById("app");
   }
 
   @Test
-  public void testDeleteAll() {
+  void testDeleteAll() {
     App app1 = mock(App.class);
     when(app1.getId()).thenReturn("app1");
     App app2 = mock(App.class);
@@ -59,12 +61,12 @@ public class AppRepositoryDecoratorTest {
   }
 
   @Test
-  public void testDelegate() {
-    assertEquals(appRepositoryDecorator.delegate(), repository);
+  void testDelegate() {
+    assertEquals(repository, appRepositoryDecorator.delegate());
   }
 
   @Test
-  public void testUpdateActivated() {
+  void testUpdateActivated() {
     App current = mock(App.class);
     when(current.getId()).thenReturn("app");
     when(current.isActive()).thenReturn(false);
@@ -80,7 +82,7 @@ public class AppRepositoryDecoratorTest {
   }
 
   @Test
-  public void testUpdateDeactivated() {
+  void testUpdateDeactivated() {
     App current = mock(App.class);
     when(current.getId()).thenReturn("app");
     when(current.isActive()).thenReturn(true);
@@ -96,7 +98,7 @@ public class AppRepositoryDecoratorTest {
   }
 
   @Test
-  public void testUpdateNoActivationChange() {
+  void testUpdateNoActivationChange() {
     App current = mock(App.class);
     when(current.getId()).thenReturn("app");
     when(current.isActive()).thenReturn(true);
@@ -112,7 +114,7 @@ public class AppRepositoryDecoratorTest {
   }
 
   @Test
-  public void testUpdate1() {
+  void testUpdate1() {
     App app1 = mock(App.class);
     App app2 = mock(App.class);
     Stream<App> apps = Stream.of(app1, app2);

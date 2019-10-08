@@ -1,11 +1,11 @@
 package org.molgenis.data.i18n.model;
 
+import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.i18n.config.I18nTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
@@ -19,8 +19,9 @@ public class LanguageTest extends AbstractSystemEntityTest {
   @Autowired LanguageMetadata metadata;
   @Autowired LanguageFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
-  public void testSystemEntity() {
+  protected void testSystemEntity() {
     internalTestAttributes(
         metadata, Language.class, factory, getOverriddenReturnTypes(), getExcludedAttrs(), true);
   }
