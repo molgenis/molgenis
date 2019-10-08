@@ -150,7 +150,10 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
       TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
       List<Object> ids = asList("0", "1", "2");
-      List<Entity> entities = asList(mock(Entity.class), mock(Entity.class), mock(Entity.class));
+      Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn("0").getMock();
+      Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
+      Entity entity2 = when(mock(Entity.class).getIdValue()).thenReturn("2").getMock();
+      List<Entity> entities = asList(entity0, entity1, entity2);
       when(l2Cache.getBatch(delegateRepository, ids)).thenReturn(entities);
       assertEquals(entities, l2CacheRepositoryDecorator.findAll(ids.stream()).collect(toList()));
     } finally {
@@ -177,7 +180,10 @@ class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
       Fetch fetch = mock(Fetch.class);
       List<Object> ids = asList("0", "1", "2");
-      List<Entity> entities = asList(mock(Entity.class), mock(Entity.class), mock(Entity.class));
+      Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn("0").getMock();
+      Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn("1").getMock();
+      Entity entity2 = when(mock(Entity.class).getIdValue()).thenReturn("2").getMock();
+      List<Entity> entities = asList(entity0, entity1, entity2);
       when(l2Cache.getBatch(delegateRepository, ids, fetch)).thenReturn(entities);
       assertEquals(
           entities, l2CacheRepositoryDecorator.findAll(ids.stream(), fetch).collect(toList()));

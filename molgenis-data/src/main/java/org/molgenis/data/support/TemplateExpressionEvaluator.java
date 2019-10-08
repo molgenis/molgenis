@@ -12,6 +12,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.HandlebarsException;
 import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.cache.ConcurrentMapTemplateCache;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
@@ -28,7 +29,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
-  private static final Handlebars HANDLEBARS = new Handlebars();
+  private static final Handlebars HANDLEBARS =
+      new Handlebars().with(new ConcurrentMapTemplateCache());
 
   private final Attribute attribute;
   private final EntityType entityType;
