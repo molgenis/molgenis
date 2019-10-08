@@ -128,7 +128,10 @@ public class MetadataV3Mapper {
     builder.setPackage_(pack != null ? createEntityResponseUri(pack) : null);
     builder.setLabel(getI18nEntityTypeLabel(entityType));
     builder.setDescription(getI18nEntityTypeDesc(entityType));
-    builder.setAttributes(flattenAttrs ? mapInternal(entityType.getAllAttributes()) : mapInternal(entityType.getOwnAllAttributes()));
+    builder.setAttributes(
+        flattenAttrs
+            ? mapInternal(entityType.getAllAttributes())
+            : mapInternal(entityType.getOwnAllAttributes()));
     builder.setLabelAttribute(getLabelAttribute(entityType));
     builder.setIdAttribute(getIdAttribute(entityType));
     builder.setAbstract_(entityType.isAbstract());

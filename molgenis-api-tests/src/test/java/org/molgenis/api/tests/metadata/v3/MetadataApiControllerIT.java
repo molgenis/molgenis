@@ -211,10 +211,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   @Test
   @Order(12)
   void testDeleteMetadataEntityType() {
-    given()
-        .delete("/api/metadata/v3meta_MyDataset")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
   }
 
   @Test
