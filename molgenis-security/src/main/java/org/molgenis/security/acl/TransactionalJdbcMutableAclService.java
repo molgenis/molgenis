@@ -1,5 +1,7 @@
 package org.molgenis.security.acl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -18,9 +20,12 @@ import org.springframework.util.Assert;
 
 /** {@link Transactional} {@link JdbcMutableAclService}. */
 public class TransactionalJdbcMutableAclService extends JdbcMutableAclService {
+  private final AclCache aclCache;
+
   public TransactionalJdbcMutableAclService(
       DataSource dataSource, LookupStrategy lookupStrategy, AclCache aclCache) {
     super(dataSource, lookupStrategy, aclCache);
+    this.aclCache = requireNonNull(aclCache);
   }
 
   /**
@@ -56,10 +61,30 @@ public class TransactionalJdbcMutableAclService extends JdbcMutableAclService {
     super.deleteAcl(objectIdentity, deleteChildren);
   }
 
+  /**
+   * Same as {@link JdbcMutableAclService#updateAcl(MutableAcl)} except that it clears all cache as
+   * a workaround for https://github.com/spring-projects/spring-security/issues/3330.
+   */
   @Transactional
   @Override
   public MutableAcl updateAcl(MutableAcl acl) {
-    return super.updateAcl(acl);
+    Assert.notNull(acl.getId(), "Object Identity doesn't provide an identifier");
+
+    // Delete this ACL's ACEs in the acl_entry table
+    deleteEntries(retrieveObjectIdentityPrimaryKey(acl.getObjectIdentity()));
+
+    // Create this ACL's ACEs in the acl_entry table
+    createEntries(acl);
+
+    // Change the mutable columns in acl_object_identity
+    updateObjectIdentity(acl);
+
+    // Clear all cache
+    aclCache.clearCache();
+
+    // Retrieve the ACL via superclass (ensures cache registration, proper retrieval
+    // etc)
+    return (MutableAcl) super.readAclById(acl.getObjectIdentity());
   }
 
   @Transactional(readOnly = true)
