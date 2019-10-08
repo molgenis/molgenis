@@ -2,12 +2,15 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
-import java.util.Optional;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
@@ -19,30 +22,32 @@ import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MetadataServiceImpl {
-
+public class MetadataApiServiceImpl implements MetadataApiService {
   private final MetaDataService metadataService;
   private final QueryMapper queryMapper;
   private final SortMapper sortMapper;
+  private final MetadataV3Mapper metadataV3Mapper;
+  // TODO replace usage of DataService with new methods in MetaDataService
+  private final DataService dataService;
 
-  MetadataServiceImpl(
+  MetadataApiServiceImpl(
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
       SortMapper sortMapper,
-      MetadataV3Mapper entityTypeMapper) {
+      MetadataV3Mapper metadataV3Mapper,
+      DataService dataService) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
+    this.metadataV3Mapper = requireNonNull(metadataV3Mapper);
+    this.dataService = requireNonNull(dataService);
   }
 
   public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
     Repository<org.molgenis.data.meta.model.EntityType> repository =
         metadataService
-            .getRepository(
-                EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-                org.molgenis.data.meta.model.EntityType.class)
-            .orElseThrow(
-                () -> new UnknownRepositoryException(EntityTypeMetadata.ENTITY_TYPE_META_DATA));
+            .getRepository(ENTITY_TYPE_META_DATA, org.molgenis.data.meta.model.EntityType.class)
+            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
         query != null
@@ -70,9 +75,8 @@ public class MetadataServiceImpl {
   public EntityType findEntityType(String identifier) {
     Repository<EntityType> repository =
         metadataService
-            .getRepository(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class)
-            .orElseThrow(
-                () -> new UnknownRepositoryException(EntityTypeMetadata.ENTITY_TYPE_META_DATA));
+            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
+            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
     EntityType entityType = repository.findOneById(identifier);
     if (entityType == null) {
@@ -122,16 +126,35 @@ public class MetadataServiceImpl {
     return Attributes.builder().setAttributes(attributes).setTotal(count).build();
   }
 
-  public Attribute findAttribute(String entityTypeId, String attributeName) {
-    Optional<EntityType> entityType = metadataService.getEntityType(entityTypeId);
-    if (entityType.isPresent()) {
-      // FIXME: get by id or name
-      return entityType.get().getAttribute(attributeName);
+  @Override
+  public Attribute findAttribute(String attributeId) {
+    // TODO use MetaDataService instead of DataService
+    Attribute attribute =
+        dataService.findOneById(
+            AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
+    if (attribute == null) {
+      // TODO we can't throw an UnknownAttributeException here because it requires EntityType
+      throw new UnknownEntityException(AttributeMetadata.ATTRIBUTE_META_DATA, attributeId);
     }
-    return null;
+    return attribute;
   }
 
   public void createEntityType(EntityType entityType) {
     metadataService.addEntityType(entityType);
+  }
+
+  @Override
+  public void deleteEntityType(String entityTypeId) {
+    metadataService.deleteEntityType(entityTypeId);
+  }
+
+  @Override
+  public void deleteEntityTypes(Query q) {
+    Repository<EntityType> entityTypeRepository =
+        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
+    org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
+    dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
+    List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
+    metadataService.deleteEntityType(entityTypes);
   }
 }

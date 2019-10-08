@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
 @TestMethodOrder(OrderAnnotation.class)
-class MetadataControllerIT extends AbstractApiTest {
-  private static final Logger LOG = getLogger(MetadataControllerIT.class);
+class MetadataApiControllerIT extends AbstractApiTest {
+  private static final Logger LOG = getLogger(MetadataApiControllerIT.class);
 
   @BeforeAll
   protected static void setUpBeforeClass() {
@@ -210,20 +210,23 @@ class MetadataControllerIT extends AbstractApiTest {
 
   @Test
   @Order(12)
-  void testDeleteMetadataEntityTypes() {
-    throw new UnsupportedOperationException(); // FIXME implement
+  void testDeleteMetadataEntityType() {
+    given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
   }
 
   @Test
   @Order(13)
-  void testDeleteMetadataEntityType() {
-    given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
+  void testDeleteMetadataEntityTypes() {
+    given()
+        .delete("/api/metadata?q=id=in=(MyNumbers,MyStrings)")
+        .then()
+        .statusCode(NO_CONTENT.value());
   }
 
   private static void importData() {
     String importJobStatusUrl =
         given()
-            .multiPart(getFile(MetadataControllerIT.class, "metadata_api_v3_emx.xlsx"))
+            .multiPart(getFile(MetadataApiControllerIT.class, "metadata_api_v3_emx.xlsx"))
             .param("file")
             .param("action", "ADD")
             .post("plugin/importwizard/importFile")

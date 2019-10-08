@@ -27,8 +27,12 @@ public abstract class EntityType {
 
   public abstract List<AttributeResponse> getAttributes();
 
+  @Nullable
+  @CheckForNull
   public abstract String getLabelAttribute();
 
+  @Nullable
+  @CheckForNull
   public abstract String getIdAttribute();
 
   public abstract boolean isAbstract_();
