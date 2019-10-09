@@ -3,7 +3,6 @@ package org.molgenis.core.ui;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.MolgenisMenuController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
@@ -26,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * attributes to the Model so the freemarker view can use them when rendering the header and footer.
  */
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MolgenisMenuController.URI)
 public class MolgenisMenuController {
   private static final Logger LOG = LoggerFactory.getLogger(MolgenisMenuController.class);
 
@@ -74,6 +74,7 @@ public class MolgenisMenuController {
    * Forwards to the first plugin of the first menu that the user can read since no menu path is
    * provided.
    */
+  @Transactional(readOnly = true)
   @SuppressWarnings("squid:S3752") // multiple methods required
   @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST})
   public String forwardDefaultMenuDefaultPlugin(Model model) {

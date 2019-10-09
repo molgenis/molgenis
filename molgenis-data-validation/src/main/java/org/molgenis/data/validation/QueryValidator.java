@@ -18,6 +18,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -41,9 +42,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class QueryValidator {
+  private final FetchValidator fetchValidator;
   private final EntityManager entityManager;
 
-  public QueryValidator(EntityManager entityManager) {
+  public QueryValidator(FetchValidator fetchValidator, EntityManager entityManager) {
+    this.fetchValidator = requireNonNull(fetchValidator);
     this.entityManager = requireNonNull(entityManager);
   }
 
@@ -57,6 +60,11 @@ public class QueryValidator {
    */
   public void validate(Query<? extends Entity> query, EntityType entityType) {
     query.getRules().forEach(queryRule -> validateQueryRule(queryRule, entityType));
+    Fetch fetch = query.getFetch();
+    if (fetch != null) {
+      Fetch validatedFetch = fetchValidator.validateFetch(fetch, entityType);
+      query.setFetch(validatedFetch);
+    }
   }
 
   private void validateQueryRule(QueryRule queryRule, EntityType entityType) {

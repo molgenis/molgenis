@@ -11,7 +11,6 @@ import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZ
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -677,7 +676,7 @@ public class ClientFacade implements Closeable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     try {
       client.close();
     } catch (ElasticsearchException e) {

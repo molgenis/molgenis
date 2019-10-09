@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.thememanager;
 
 import static java.util.Collections.singletonList;
-import static org.molgenis.core.ui.thememanager.ThemeManagerController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(ThemeManagerController.URI)
 public class ThemeManagerController extends PluginController {
   public static final String ID = "thememanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

@@ -46,11 +46,13 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityTestHarness;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
+import org.molgenis.data.support.PartialEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -64,6 +66,7 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
   private Entity hydratedEntity;
   private Map<String, Object> dehydratedEntity;
   private EntityHydration entityHydration;
+  private EntityManager entityManager;
 
   @Captor private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
 
@@ -104,7 +107,7 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
     dehydratedEntity.put(ATTR_ENUM, "option1");
 
     // mock entity manager
-    EntityManager entityManager =
+    entityManager =
         when(mock(EntityManager.class).create(entityType, EntityManager.CreationMode.NO_POPULATE))
             .thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityType)))
             .getMock();
@@ -123,6 +126,18 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
     assertTrue(
         entityTypeArgumentCaptor.getAllValues().stream()
             .allMatch(emd -> emd.getId().equals("TypeTestRefDynamic")));
+  }
+
+  @Test
+  void testHydrateFetch() {
+    Fetch fetch = new Fetch().field(ATTR_ID);
+    when(entityManager.createFetch(entityType, fetch))
+        .thenReturn(
+            new EntityWithComputedAttributes(
+                new PartialEntity(new DynamicEntity(entityType), fetch, entityManager)));
+
+    Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityType, fetch);
+    assertEquals("0", hydratedEntity.getIdValue());
   }
 
   @Test

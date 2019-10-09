@@ -1,10 +1,12 @@
 package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.URI; // NOSONAR
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
@@ -21,15 +23,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
@@ -51,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -108,6 +115,7 @@ public class DataExplorerController extends PluginController {
    *
    * @return the view name
    */
+  @Transactional(readOnly = true)
   @GetMapping
   public String init(
       @RequestParam(value = "entity", required = false) String selectedEntityName,
@@ -118,10 +126,7 @@ public class DataExplorerController extends PluginController {
     final boolean currentUserIsSu = SecurityUtils.currentUserIsSu();
 
     Map<String, EntityType> entitiesMeta =
-        dataService
-            .getMeta()
-            .getEntityTypes()
-            .filter(entityType -> !entityType.isAbstract())
+        getEntityTypeStream()
             .filter(entityType -> currentUserIsSu || !EntityTypeUtils.isSystemEntity(entityType))
             .sorted(Comparator.comparing(EntityType::getLabel))
             .collect(toLinkedMap(EntityType::getId, Function.identity()));
@@ -445,5 +450,23 @@ public class DataExplorerController extends PluginController {
     } catch (IOException e) {
       return false;
     }
+  }
+
+  private Stream<EntityType> getEntityTypeStream() {
+    Fetch packageFetch =
+        new Fetch()
+            .field(PackageMetadata.ID)
+            .field(PackageMetadata.PARENT, new Fetch().field(PackageMetadata.ID));
+    Fetch fetch =
+        new Fetch()
+            .field(EntityTypeMetadata.ID)
+            .field(EntityTypeMetadata.LABEL)
+            .field(EntityTypeMetadata.PACKAGE, packageFetch);
+
+    return dataService
+        .query(ENTITY_TYPE_META_DATA, EntityType.class)
+        .eq(IS_ABSTRACT, false)
+        .fetch(fetch)
+        .findAll();
   }
 }

@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.negotiator;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.ENABLED_EXPRESSION;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -49,7 +48,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(NegotiatorController.URI)
 public class NegotiatorController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
   public static final String ID = "directory";

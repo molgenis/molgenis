@@ -121,6 +121,6 @@ public class SavedScriptRunner {
   }
 
   private String generateRandomString() {
-    return UUID.randomUUID().toString().replaceAll("-", "");
+    return UUID.randomUUID().toString().replace("-", "");
   }
 }

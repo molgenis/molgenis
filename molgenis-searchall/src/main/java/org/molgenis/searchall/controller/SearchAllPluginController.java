@@ -1,7 +1,6 @@
 package org.molgenis.searchall.controller;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.searchall.controller.SearchAllPluginController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import org.molgenis.core.ui.controller.VuePluginController;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(SearchAllPluginController.URI)
 public class SearchAllPluginController extends VuePluginController {
   public static final String ID = "searchAll";
   public static final String URI = PLUGIN_URI_PREFIX + ID;

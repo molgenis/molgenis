@@ -13,7 +13,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.jobs.model.ScheduledJob;
-import org.molgenis.jobs.model.ScheduledJobMetadata;
 import org.molgenis.validation.ConstraintViolation;
 import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
@@ -106,7 +105,7 @@ public class JobScheduler {
       }
 
       // If not active, do not schedule it
-      if (!scheduledJob.getBoolean(ScheduledJobMetadata.ACTIVE)) {
+      if (!scheduledJob.isActive()) {
         return;
       }
 

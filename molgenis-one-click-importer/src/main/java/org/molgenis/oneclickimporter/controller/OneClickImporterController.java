@@ -2,7 +2,6 @@ package org.molgenis.oneclickimporter.controller;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -37,7 +36,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(OneClickImporterController.URI)
 public class OneClickImporterController extends VuePluginController {
   public static final String ONE_CLICK_IMPORTER = "one-click-importer";
   public static final String URI = PLUGIN_URI_PREFIX + ONE_CLICK_IMPORTER;

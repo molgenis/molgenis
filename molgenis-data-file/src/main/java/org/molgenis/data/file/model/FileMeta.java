@@ -22,6 +22,7 @@ public class FileMeta extends StaticEntity {
   }
 
   public FileMeta(String id, EntityType entityType) {
+    super(entityType);
     setId(id);
   }
 

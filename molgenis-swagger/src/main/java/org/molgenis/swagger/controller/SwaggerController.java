@@ -2,7 +2,6 @@ package org.molgenis.swagger.controller;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.swagger.controller.SwaggerController.URI;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +24,7 @@ import org.springframework.web.util.UriComponents;
  * @see <a href="http://swagger.io/">http://swagger.io/</a>
  */
 @Controller
-@RequestMapping(URI)
+@RequestMapping(SwaggerController.URI)
 public class SwaggerController extends PluginController {
   private static final String ID = "swagger";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

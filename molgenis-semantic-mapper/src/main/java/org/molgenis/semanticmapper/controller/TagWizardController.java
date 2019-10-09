@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.semanticmapper.controller.TagWizardController.URI;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -51,7 +50,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(TagWizardController.URI)
 public class TagWizardController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(TagWizardController.class);
 

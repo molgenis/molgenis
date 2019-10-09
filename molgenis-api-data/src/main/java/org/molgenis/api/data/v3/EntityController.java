@@ -21,6 +21,7 @@ import org.molgenis.api.model.Sort;
 import org.molgenis.data.Entity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -48,6 +49,7 @@ public class EntityController extends ApiController {
     this.entityMapper = requireNonNull(entityMapper);
   }
 
+  @Transactional
   @PostMapping("/{entityTypeId}")
   public ResponseEntity createEntity(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -62,6 +64,7 @@ public class EntityController extends ApiController {
     return ResponseEntity.created(location).build();
   }
 
+  @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/{entityId}")
   public EntityResponse getEntity(@Valid ReadEntityRequest entityRequest) {
     Selection filter = entityRequest.getFilter();
@@ -74,6 +77,7 @@ public class EntityController extends ApiController {
     return entityMapper.map(entity, filter, expand);
   }
 
+  @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/{entityId}/{fieldId}")
   public EntitiesResponse getReferencedEntities(@Valid ReadSubresourceRequest entitiesRequest) {
     String entityTypeId = entitiesRequest.getEntityTypeId();
@@ -112,6 +116,7 @@ public class EntityController extends ApiController {
     return entityMapper.map(entityCollection, filter, expand, size, page, entities.getTotal());
   }
 
+  @Transactional
   @PutMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateEntity(
@@ -121,6 +126,7 @@ public class EntityController extends ApiController {
     dataServiceV3.update(entityTypeId, entityId, entityMap);
   }
 
+  @Transactional
   @PatchMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updatePartialEntity(
@@ -130,6 +136,7 @@ public class EntityController extends ApiController {
     dataServiceV3.updatePartial(entityTypeId, entityId, entityMap);
   }
 
+  @Transactional
   @DeleteMapping("/{entityTypeId}/{entityId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteEntity(@Valid DeleteEntityRequest deleteRequest) {
@@ -143,6 +150,7 @@ public class EntityController extends ApiController {
     dataServiceV3.deleteAll(deleteRequest.getEntityTypeId(), query);
   }
 
+  @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}")
   public EntitiesResponse getEntities(@Valid ReadEntitiesRequest entitiesRequest) {
     String entityTypeId = entitiesRequest.getEntityTypeId();

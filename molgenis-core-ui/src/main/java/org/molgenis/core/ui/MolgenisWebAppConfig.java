@@ -63,6 +63,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
@@ -95,6 +96,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private MessageSource messageSource;
 
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
+
+  @Autowired private PlatformTransactionManager transactionManager;
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
@@ -224,7 +227,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         authenticationSettings,
         environment,
         messageSource,
-        gson);
+        gson,
+        transactionManager);
   }
 
   @Bean

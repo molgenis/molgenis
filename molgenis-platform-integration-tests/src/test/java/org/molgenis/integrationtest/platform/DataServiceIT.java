@@ -234,7 +234,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Order(11)
   public void testQuery() {
     assertNotNull(dataService.query(entityType.getId()));
-    assertThrows(UnknownEntityTypeException.class, () -> dataService.query("bogus"));
+    assertThrows(UnknownEntityTypeException.class, () -> dataService.query("bogus").count());
   }
 
   @WithMockUser(username = USERNAME_READ)
