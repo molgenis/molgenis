@@ -1,1 +1,13 @@
-{"fix": "me"}
+{
+  "links": {
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes",
+    "next": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?page=1"
+  },
+  "items": [],
+  "page": {
+    "size": -1,
+    "totalElements": -1,
+    "totalPages": -1,
+    "number": -1
+  }
+}

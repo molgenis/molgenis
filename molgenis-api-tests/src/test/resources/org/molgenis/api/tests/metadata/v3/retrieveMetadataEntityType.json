@@ -1,1 +1,7 @@
-{"fix": "me"}
+{
+  "links": {
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset"
+  },
+  "data": {
+  }
+}

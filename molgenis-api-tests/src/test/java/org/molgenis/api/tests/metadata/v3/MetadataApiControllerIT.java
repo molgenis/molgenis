@@ -53,7 +53,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
             getClass(), "retrieveMetadata.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata")
+        .get("/api/metadata?q=package==v3meta")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));

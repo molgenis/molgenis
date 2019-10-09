@@ -1,1 +1,18 @@
-{"fix": "me"}
+{
+  "links": {
+    "self": "${baseUri}/api/metadata?q=package==v3meta",
+    "next": "${baseUri}/api/metadata?q=package==v3meta&page=1"
+  },
+  "items": [{
+    },{
+    },{
+    },{
+    },{
+  }],
+  "page": {
+    "size": 100,
+    "totalElements": 5,
+    "totalPages": 1,
+    "number": 0
+  }
+}
