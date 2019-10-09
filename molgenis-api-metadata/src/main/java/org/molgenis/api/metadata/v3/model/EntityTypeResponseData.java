@@ -8,14 +8,10 @@ import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_EntityType.class)
-public abstract class EntityType {
+@AutoGson(autoValueClass = AutoValue_EntityTypeResponseData.class)
+public abstract class EntityTypeResponseData {
 
   public abstract String getId();
-
-  @Nullable
-  @CheckForNull
-  public abstract URI getPackage_();
 
   @Nullable
   @CheckForNull
@@ -26,6 +22,10 @@ public abstract class EntityType {
   public abstract I18nValue getDescription();
 
   public abstract List<AttributeResponse> getAttributes();
+
+  @Nullable
+  @CheckForNull
+  public abstract URI getPackage_();
 
   @Nullable
   @CheckForNull
@@ -49,8 +49,8 @@ public abstract class EntityType {
   @CheckForNull
   public abstract Integer getIndexingDepth();
 
-  public static EntityType.Builder builder() {
-    return new AutoValue_EntityType.Builder();
+  public static EntityTypeResponseData.Builder builder() {
+    return new AutoValue_EntityTypeResponseData.Builder();
   }
 
   @SuppressWarnings(
@@ -80,6 +80,6 @@ public abstract class EntityType {
 
     public abstract Builder setIndexingDepth(Integer indexingDepth);
 
-    public abstract EntityType build();
+    public abstract EntityTypeResponseData build();
   }
 }

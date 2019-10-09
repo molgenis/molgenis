@@ -9,18 +9,16 @@ import org.molgenis.util.AutoGson;
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EntityTypeResponse.class)
 public abstract class EntityTypeResponse {
-  public abstract String getEntityTypeId();
-
   public abstract LinksResponse getLinks();
 
   // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
   @CheckForNull
-  public abstract EntityType getData();
+  public abstract EntityTypeResponseData getData();
 
   public static EntityTypeResponse create(
-      String entityTypeId, LinksResponse newLinks, EntityType entityType) {
-    return builder().setEntityTypeId(entityTypeId).setLinks(newLinks).setData(entityType).build();
+      LinksResponse newLinks, EntityTypeResponseData entityType) {
+    return builder().setLinks(newLinks).setData(entityType).build();
   }
 
   public static Builder builder() {
@@ -31,12 +29,9 @@ public abstract class EntityTypeResponse {
       "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   public abstract static class Builder {
-
-    public abstract Builder setEntityTypeId(String id);
-
     public abstract Builder setLinks(LinksResponse newLinks);
 
-    public abstract Builder setData(EntityType entityType);
+    public abstract Builder setData(EntityTypeResponseData entityType);
 
     public abstract EntityTypeResponse build();
   }

@@ -9,8 +9,8 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_Attribute.class)
-public abstract class Attribute {
+@AutoGson(autoValueClass = AutoValue_AttributeResponseData.class)
+public abstract class AttributeResponseData {
 
   public abstract String getId();
 
@@ -97,7 +97,7 @@ public abstract class Attribute {
   public abstract String getDefaultValue();
 
   public static Builder builder() {
-    return new AutoValue_Attribute.Builder();
+    return new AutoValue_AttributeResponseData.Builder();
   }
 
   @SuppressWarnings(
@@ -157,6 +157,6 @@ public abstract class Attribute {
 
     public abstract Builder setDefaultValue(String defaultValue);
 
-    public abstract Attribute build();
+    public abstract AttributeResponseData build();
   }
 }

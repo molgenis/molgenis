@@ -18,12 +18,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.molgenis.api.convert.SortConverter;
-import org.molgenis.api.metadata.v3.model.Attribute.Builder;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
+import org.molgenis.api.metadata.v3.model.AttributeResponseData;
+import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
+import org.molgenis.api.metadata.v3.model.EntityTypeResponseData;
 import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.model.response.LinksResponse;
@@ -121,8 +123,7 @@ public class MetadataV3Mapper {
     if (entityType == null) {
       throw new IllegalStateException(); // FIXME
     }
-    org.molgenis.api.metadata.v3.model.EntityType.Builder builder =
-        org.molgenis.api.metadata.v3.model.EntityType.builder();
+    EntityTypeResponseData.Builder builder = EntityTypeResponseData.builder();
     builder.setId(entityType.getId());
     Package pack = entityType.getPackage();
     builder.setPackage_(pack != null ? createEntityResponseUri(pack) : null);
@@ -140,7 +141,7 @@ public class MetadataV3Mapper {
     builder.setBackend(entityType.getBackend());
     builder.setIndexingDepth(entityType.getIndexingDepth());
 
-    return EntityTypeResponse.create(entityType.getId(), createLinksResponse(), builder.build());
+    return EntityTypeResponse.create(createLinksResponse(), builder.build());
   }
 
   private String getIdAttribute(EntityType entityType) {
@@ -183,13 +184,13 @@ public class MetadataV3Mapper {
   }
 
   AttributeResponse mapAttribute(Attribute attr) {
-    org.molgenis.api.metadata.v3.model.Attribute attribute = mapInternal(attr);
+    AttributeResponseData attribute = mapInternal(attr);
     return AttributeResponse.create(
         LinksResponse.create(null, createAttributeResponseUri(attr), null), attribute);
   }
 
-  private org.molgenis.api.metadata.v3.model.Attribute mapInternal(Attribute attr) {
-    Builder builder = org.molgenis.api.metadata.v3.model.Attribute.builder();
+  private AttributeResponseData mapInternal(Attribute attr) {
+    Builder builder = AttributeResponseData.builder();
     builder.setId(attr.getIdentifier());
     builder.setName(attr.getName());
     builder.setSequenceNr(attr.getSequenceNumber());

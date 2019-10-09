@@ -15,9 +15,10 @@ public abstract class AttributeResponse {
   // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
   @CheckForNull
-  public abstract Attribute getData();
+  public abstract AttributeResponseData getData();
 
-  public static AttributeResponse create(LinksResponse linksResponse, Attribute newData) {
+  public static AttributeResponse create(
+      LinksResponse linksResponse, AttributeResponseData newData) {
     return builder().setLink(linksResponse).setData(newData).build();
   }
 
@@ -32,7 +33,7 @@ public abstract class AttributeResponse {
 
     public abstract Builder setLink(LinksResponse linksResponse);
 
-    public abstract Builder setData(Attribute newData);
+    public abstract Builder setData(AttributeResponseData newData);
 
     public abstract AttributeResponse build();
   }
