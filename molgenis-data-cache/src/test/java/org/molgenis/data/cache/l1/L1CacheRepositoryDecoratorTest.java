@@ -75,8 +75,6 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Mock private Repository<Entity> authorRepository;
 
-  @Mock private Repository<Entity> bookRepository;
-
   @Captor private ArgumentCaptor<Stream<Entity>> entitiesCaptor;
 
   @Captor private ArgumentCaptor<Stream<Object>> entityIdsCaptor;
