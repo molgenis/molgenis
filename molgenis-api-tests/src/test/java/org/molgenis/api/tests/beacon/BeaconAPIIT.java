@@ -27,12 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.beacon.controller.BeaconController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class BeaconAPIIT extends AbstractApiTests {
-  private static final Logger LOG = LoggerFactory.getLogger(BeaconAPIIT.class);
-
   // User credentials
   private static final String BEACON_TEST_USER_PASSWORD = "beacon_test_user_password";
 

@@ -17,12 +17,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
-  private static final Logger LOG = LoggerFactory.getLogger(TwoFactorAuthenticationAPIIT.class);
-
   // Request parameters
   private static final String PATH = "api/v1/";
 
@@ -51,7 +47,7 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
 
   @Test
   void test2faEnforced() {
-    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENFORCED);
+    toggle2fa(TwoFactorAuthenticationSetting.ENFORCED);
 
     try {
       Gson gson = new Gson();
@@ -73,13 +69,13 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
     } finally {
       // disable 2fa in finally clause instead of after each method due to
       // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
-      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+      toggle2fa(TwoFactorAuthenticationSetting.DISABLED);
     }
   }
 
   @Test
   void test2faEnabled() {
-    toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.ENABLED);
+    toggle2fa(TwoFactorAuthenticationSetting.ENABLED);
 
     try {
       Gson gson = new Gson();
@@ -100,7 +96,7 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
     } finally {
       // disable 2fa in finally clause instead of after each method due to
       // https://github.com/cbeust/testng/issues/952 which results in cross-test-class issues
-      toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
+      toggle2fa(TwoFactorAuthenticationSetting.DISABLED);
     }
   }
 
@@ -118,10 +114,9 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
   /**
    * Enable or disable 2 factor authentication
    *
-   * @param adminToken admin token for login in RESTAPI
    * @param state state of 2 factor authentication (can be Enforced, Enabled, Disabled)
    */
-  private void toggle2fa(String adminToken, TwoFactorAuthenticationSetting state) {
+  private void toggle2fa(TwoFactorAuthenticationSetting state) {
     given()
         .contentType(APPLICATION_JSON)
         .body(state.getLabel())
