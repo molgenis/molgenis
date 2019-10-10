@@ -21,9 +21,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SystemEntityPopulator {
+
   private final DataService dataService;
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
+  @SuppressWarnings("unused")
   public SystemEntityPopulator(
       DataService dataService, EntityTypeDependencyResolver entityTypeDependencyResolver) {
     this.dataService = requireNonNull(dataService);

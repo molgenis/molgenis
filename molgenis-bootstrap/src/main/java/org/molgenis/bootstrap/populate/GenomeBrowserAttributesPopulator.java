@@ -12,6 +12,7 @@ public class GenomeBrowserAttributesPopulator {
   private final DataService dataService;
   private final GenomeBrowserAttributesFactory gbaFactory;
 
+  @SuppressWarnings("unused")
   public GenomeBrowserAttributesPopulator(
       DataService dataService, GenomeBrowserAttributesFactory gbaFactory) {
     this.gbaFactory = requireNonNull(gbaFactory);
