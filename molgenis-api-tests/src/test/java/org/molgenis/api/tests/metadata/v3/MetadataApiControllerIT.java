@@ -69,7 +69,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata/v3meta_MyDataset")
+        .get("/api/metadata/v3meta_MyNumbers")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -196,7 +196,10 @@ class MetadataApiControllerIT extends AbstractApiTest {
   @Test
   @Order(10)
   void testDeleteMetadataEntityTypeAttributes() {
-    throw new UnsupportedOperationException(); // FIXME implement
+    given()
+        .delete("/api/metadata/v3meta_MyDataset/attributes?q=id=in=(myDate,myDateTime)")
+        .then()
+        .statusCode(NO_CONTENT.value());
   }
 
   @Test

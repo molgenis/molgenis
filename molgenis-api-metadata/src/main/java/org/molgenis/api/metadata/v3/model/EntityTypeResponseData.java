@@ -1,10 +1,10 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
-import java.net.URI;
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -15,35 +15,32 @@ public abstract class EntityTypeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract I18nValue getLabel();
+  public abstract String getLabel();
 
   @Nullable
   @CheckForNull
-  public abstract I18nValue getDescription();
-
-  public abstract List<AttributeResponse> getAttributes();
+  public abstract I18nValue getLabelI18n();
 
   @Nullable
   @CheckForNull
-  public abstract URI getPackage_();
+  public abstract String getDescription();
 
   @Nullable
   @CheckForNull
-  public abstract String getLabelAttribute();
+  public abstract I18nValue getDescriptionI18n();
+
+  public abstract AttributesResponse getAttributes();
 
   @Nullable
   @CheckForNull
-  public abstract String getIdAttribute();
+  public abstract PackageResponse getPackage_();
 
-  public abstract boolean isAbstract_();
-
-  @Nullable
-  @CheckForNull
-  public abstract EntityTypeResponse getExtends();
+  @SerializedName("blaat")
+  public abstract boolean isAbstract();
 
   @Nullable
   @CheckForNull
-  public abstract String getBackend();
+  public abstract EntityTypeResponse getExtends_();
 
   @Nullable
   @CheckForNull
@@ -60,23 +57,21 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setId(String id);
 
-    public abstract Builder setPackage_(URI pack);
+    public abstract Builder setPackage_(PackageResponse packageResponse);
 
-    public abstract Builder setLabel(I18nValue label);
+    public abstract Builder setLabel(String label);
 
-    public abstract Builder setDescription(I18nValue description);
+    public abstract Builder setLabelI18n(I18nValue label);
 
-    public abstract Builder setAttributes(List<AttributeResponse> attributes);
+    public abstract Builder setDescription(String description);
 
-    public abstract Builder setLabelAttribute(String attributeId);
+    public abstract Builder setDescriptionI18n(I18nValue description);
 
-    public abstract Builder setIdAttribute(String attributeId);
+    public abstract Builder setAttributes(AttributesResponse attributes);
 
-    public abstract Builder setAbstract_(boolean isAbstract);
+    public abstract Builder setAbstract(boolean isAbstract);
 
-    public abstract Builder setExtends(EntityTypeResponse entityType);
-
-    public abstract Builder setBackend(String backend);
+    public abstract Builder setExtends_(EntityTypeResponse entityType);
 
     public abstract Builder setIndexingDepth(Integer indexingDepth);
 
