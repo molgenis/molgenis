@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Controller
 @RequestMapping(LogManagerController.URI)
 public class LogManagerController extends PluginController {
-  private static final Logger LOG = LoggerFactory.getLogger(LogManagerController.class);
-
   public static final String ID = "logmanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
