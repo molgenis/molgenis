@@ -1,21 +1,19 @@
 package org.molgenis.data.excel.xlsx;
 
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toBoolean;
 import static org.molgenis.data.DataConverter.toDouble;
 import static org.molgenis.data.DataConverter.toInt;
-import static org.molgenis.data.DataConverter.toLocalDate;
 import static org.molgenis.data.DataConverter.toLong;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,20 +32,10 @@ public class XlsxWriter implements AutoCloseable {
 
   private final Path target;
   private final Workbook workbook;
-  private final TimeZone timeZone;
 
-  private SimpleDateFormat simpleDateFormat;
-  private SimpleDateFormat simpleDateTimeFormat;
-
-  XlsxWriter(Path target, Workbook workbook, TimeZone timeZone) {
+  XlsxWriter(Path target, Workbook workbook) {
     this.target = requireNonNull(target);
     this.workbook = requireNonNull(workbook);
-    this.timeZone = requireNonNull(timeZone);
-
-    this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    simpleDateFormat.setTimeZone(timeZone);
-    this.simpleDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
-    simpleDateTimeFormat.setTimeZone(timeZone);
   }
 
   public boolean hasSheet(String name) {
@@ -119,10 +107,9 @@ public class XlsxWriter implements AutoCloseable {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
-      Instant instant = toLocalDate(value).atStartOfDay(timeZone.toZoneId()).toInstant();
-      cell.setCellValue(simpleDateFormat.format(Date.from(instant)));
+      cell.setCellValue(ISO_LOCAL_DATE.format((LocalDate) value));
     } else if (value instanceof Instant) {
-      cell.setCellValue(simpleDateTimeFormat.format(Date.from((Instant) value)));
+      cell.setCellValue(ISO_INSTANT.format((Instant) value));
     } else if (value instanceof Double) {
       cell.setCellValue(toDouble(value));
     } else if (value instanceof Integer) {
