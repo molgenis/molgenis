@@ -17,6 +17,7 @@ public abstract class DeletePermissionRequest {
 
   public abstract String getRole();
 
+  @SuppressWarnings("unused")
   public static DeletePermissionRequest create(String user, String role) {
     if (isNullOrEmpty(user) && isNullOrEmpty(role)) {
       throw new MissingUserOrRoleException();

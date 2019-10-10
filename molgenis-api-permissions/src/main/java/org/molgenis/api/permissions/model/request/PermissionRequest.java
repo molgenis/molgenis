@@ -24,6 +24,7 @@ public abstract class PermissionRequest {
 
   public abstract String getPermission();
 
+  @SuppressWarnings("unused")
   public static PermissionRequest create(String role, String user, String permission) {
     if (isNullOrEmpty(user) && isNullOrEmpty(role)) {
       throw new MissingUserOrRoleException();

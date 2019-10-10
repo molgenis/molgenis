@@ -13,6 +13,7 @@ public abstract class ObjectPermissionsRequest {
 
   public abstract List<PermissionRequest> getPermissions();
 
+  @SuppressWarnings("unused")
   public static ObjectPermissionsRequest create(
       String identifier, List<PermissionRequest> permissionRequests) {
     return new AutoValue_ObjectPermissionsRequest(identifier, permissionRequests);

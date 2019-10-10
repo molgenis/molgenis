@@ -14,6 +14,7 @@ public abstract class SetTypePermissionsRequest {
   @NotEmpty
   public abstract List<ObjectPermissionsRequest> getObjects();
 
+  @SuppressWarnings("unused")
   public static SetTypePermissionsRequest create(List<ObjectPermissionsRequest> objects) {
     return new AutoValue_SetTypePermissionsRequest(objects);
   }
