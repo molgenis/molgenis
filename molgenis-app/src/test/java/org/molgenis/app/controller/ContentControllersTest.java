@@ -28,19 +28,27 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @WebAppConfiguration
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
 class ContentControllersTest extends AbstractMockitoSpringContextTests {
-  @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @Autowired private HomeController homeController;
+  @Autowired
+  private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @Autowired private NewsController newsController;
+  @Autowired
+  private HomeController homeController;
 
-  @Autowired private BackgroundController backgroundController;
+  @Autowired
+  private NewsController newsController;
 
-  @Autowired private ContactController contactController;
+  @Autowired
+  private BackgroundController backgroundController;
 
-  @Autowired private ReferencesController referencesController;
+  @Autowired
+  private ContactController contactController;
 
-  @Autowired private StaticContentService staticContentService;
+  @Autowired
+  private ReferencesController referencesController;
+
+  @Autowired
+  private StaticContentService staticContentService;
 
   private MockMvc mockMvcHome;
   private MockMvc mockMvcNews;
@@ -78,57 +86,57 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void initHome() throws Exception {
-    this.initMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
+    this.initMethodTest(mockMvcHome, HomeController.URI);
   }
 
   @Test
   void initNews() throws Exception {
-    this.initMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
+    this.initMethodTest(mockMvcNews, NewsController.URI);
   }
 
   @Test
   void initBackground() throws Exception {
-    this.initMethodTest(mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
+    this.initMethodTest(mockMvcBackground, BackgroundController.URI);
   }
 
   @Test
   void initContact() throws Exception {
-    this.initMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
+    this.initMethodTest(mockMvcContact, ContactController.URI);
   }
 
   @Test
   void initReferences() throws Exception {
-    this.initMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
+    this.initMethodTest(mockMvcReferences, ReferencesController.URI);
   }
 
   @Test
   void initEditGetHome() throws Exception {
-    this.initEditGetMethodTest(mockMvcHome, HomeController.URI, HomeController.ID);
+    this.initEditGetMethodTest(mockMvcHome, HomeController.URI);
   }
 
   @Test
   void initEditGetNews() throws Exception {
-    this.initEditGetMethodTest(mockMvcNews, NewsController.URI, NewsController.ID);
+    this.initEditGetMethodTest(mockMvcNews, NewsController.URI);
   }
 
   @Test
   void initEditGetBackground() throws Exception {
     this.initEditGetMethodTest(
-        mockMvcBackground, BackgroundController.URI, BackgroundController.ID);
+        mockMvcBackground, BackgroundController.URI);
   }
 
   @Test
   void initEditGetContact() throws Exception {
-    this.initEditGetMethodTest(mockMvcContact, ContactController.URI, ContactController.ID);
+    this.initEditGetMethodTest(mockMvcContact, ContactController.URI);
   }
 
   @Test
   void initEditGetReferences() throws Exception {
     this.initEditGetMethodTest(
-        mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
+        mockMvcReferences, ReferencesController.URI);
   }
 
-  private void initMethodTest(MockMvc mockMvc, String uri, String uniqueReference)
+  private void initMethodTest(MockMvc mockMvc, String uri)
       throws Exception {
     when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
     mockMvc
@@ -139,7 +147,7 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
         .andExpect(model().attributeExists("isCurrentUserCanEdit"));
   }
 
-  private void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference)
+  private void initEditGetMethodTest(MockMvc mockMvc, String uri)
       throws Exception {
     when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
     when(this.staticContentService.isCurrentUserCanEdit("staticcontent")).thenReturn(true);
@@ -160,6 +168,7 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
   @Configuration
   static class Config {
+
     @Bean
     HomeController homeController() {
       return new HomeController();

@@ -35,6 +35,7 @@ public class WebAppConfig extends MolgenisWebAppConfig {
 
   /** Configures Freemarker */
   @Override
+  @SuppressWarnings("unused")
   public FreeMarkerConfigurer freeMarkerConfigurer() {
     FreeMarkerConfigurer result = super.freeMarkerConfigurer();
     // Look up unknown templates in the FreemarkerTemplate repository
