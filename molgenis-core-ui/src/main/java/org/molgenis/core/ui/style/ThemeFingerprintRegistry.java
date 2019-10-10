@@ -44,11 +44,11 @@ public class ThemeFingerprintRegistry {
   }
 
   private String extractThemeNameFromThemeUri(String themeUri) {
-    return themeUri.substring(themeUri.lastIndexOf("/") + 1);
+    return themeUri.substring(themeUri.lastIndexOf('/') + 1);
   }
 
   private BootstrapVersion extractBootstrapVersionFromPath(String themeUri) {
-    String path = themeUri.substring(0, themeUri.lastIndexOf("/"));
+    String path = themeUri.substring(0, themeUri.lastIndexOf('/'));
     return path.contains("bootstrap-4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
   }
 }

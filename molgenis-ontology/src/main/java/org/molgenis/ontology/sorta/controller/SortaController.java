@@ -557,7 +557,6 @@ public class SortaController extends PluginController {
     SortaJobExecution sortaJobExecution = sortaJobExecutionFactory.create();
     sortaJobExecution.setIdentifier(resultEntityName);
     sortaJobExecution.setName(jobName);
-    User currentUser = userAccountService.getCurrentUser();
     sortaJobExecution.setSourceEntityName(inputData.getName());
     sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + resultEntityName);
     sortaJobExecution.setResultEntityName(resultEntityName);

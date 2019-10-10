@@ -19,8 +19,6 @@ import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
 import org.molgenis.util.exception.ErrorCoded;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CopyServiceImpl implements CopyService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CopyServiceImpl.class);
   private final ResourceCollector resourceCollector;
   private final MetaDataService metadataService;
   private final PackageCopier packageCopier;
@@ -77,7 +74,6 @@ public class CopyServiceImpl implements CopyService {
     Progress progress = state.progress();
     int max = calculateMaxProgress(resourceCollection);
     progress.setProgressMax(max);
-    LOG.info("max progress set to: " + max);
     progress.progress(0, contextMessageSource.getMessage("progress-copy-started"));
 
     copyPackages(resourceCollection.getPackages(), state);
