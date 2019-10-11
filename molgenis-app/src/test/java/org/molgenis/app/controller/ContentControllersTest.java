@@ -29,26 +29,19 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ContextConfiguration(classes = {Config.class, GsonConfig.class})
 class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
-  @Autowired
-  private GsonHttpMessageConverter gsonHttpMessageConverter;
+  @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-  @Autowired
-  private HomeController homeController;
+  @Autowired private HomeController homeController;
 
-  @Autowired
-  private NewsController newsController;
+  @Autowired private NewsController newsController;
 
-  @Autowired
-  private BackgroundController backgroundController;
+  @Autowired private BackgroundController backgroundController;
 
-  @Autowired
-  private ContactController contactController;
+  @Autowired private ContactController contactController;
 
-  @Autowired
-  private ReferencesController referencesController;
+  @Autowired private ReferencesController referencesController;
 
-  @Autowired
-  private StaticContentService staticContentService;
+  @Autowired private StaticContentService staticContentService;
 
   private MockMvc mockMvcHome;
   private MockMvc mockMvcNews;
@@ -121,8 +114,7 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void initEditGetBackground() throws Exception {
-    this.initEditGetMethodTest(
-        mockMvcBackground, BackgroundController.URI);
+    this.initEditGetMethodTest(mockMvcBackground, BackgroundController.URI);
   }
 
   @Test
@@ -132,12 +124,10 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void initEditGetReferences() throws Exception {
-    this.initEditGetMethodTest(
-        mockMvcReferences, ReferencesController.URI);
+    this.initEditGetMethodTest(mockMvcReferences, ReferencesController.URI);
   }
 
-  private void initMethodTest(MockMvc mockMvc, String uri)
-      throws Exception {
+  private void initMethodTest(MockMvc mockMvc, String uri) throws Exception {
     when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
     mockMvc
         .perform(MockMvcRequestBuilders.get(uri))
@@ -147,8 +137,7 @@ class ContentControllersTest extends AbstractMockitoSpringContextTests {
         .andExpect(model().attributeExists("isCurrentUserCanEdit"));
   }
 
-  private void initEditGetMethodTest(MockMvc mockMvc, String uri)
-      throws Exception {
+  private void initEditGetMethodTest(MockMvc mockMvc, String uri) throws Exception {
     when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
     when(this.staticContentService.isCurrentUserCanEdit("staticcontent")).thenReturn(true);
 

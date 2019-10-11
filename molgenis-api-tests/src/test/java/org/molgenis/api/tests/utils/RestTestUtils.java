@@ -26,9 +26,7 @@ import net.minidev.json.parser.ParseException;
 import org.molgenis.core.ui.admin.permission.PermissionManagerController;
 import org.slf4j.Logger;
 
-/**
- * Methods shared by Rest Api tests
- */
+/** Methods shared by Rest Api tests */
 public class RestTestUtils {
 
   private static final Logger LOG = getLogger(RestTestUtils.class);
@@ -279,9 +277,7 @@ public class RestTestUtils {
     return monitorImportJob(adminToken, importJobStatusUrl);
   }
 
-  /**
-   * Given the job uri and token, wait until the job is done and report back the status.
-   */
+  /** Given the job uri and token, wait until the job is done and report back the status. */
   private static String monitorImportJob(String adminToken, String importJobURL) {
     LOG.info("############ " + importJobURL);
     await()
@@ -479,18 +475,14 @@ public class RestTestUtils {
     }
   }
 
-  /**
-   * Removes all permissions for a given user identifier
-   */
+  /** Removes all permissions for a given user identifier */
   public static void removeRightsForUser(String adminToken, String username) {
     if (adminToken != null && username != null) {
       // TODO: no api to revoke permissions currently
     }
   }
 
-  /**
-   * Removes the token for the test user by logging out
-   */
+  /** Removes the token for the test user by logging out */
   public static void cleanupUserToken(String testUserToken) {
     if (testUserToken != null) {
       given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");

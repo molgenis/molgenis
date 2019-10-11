@@ -14,9 +14,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-/**
- * @deprecated use {@link BlobStore}
- */
+/** @deprecated use {@link BlobStore} */
 @Deprecated
 public class FileStore {
 
@@ -75,7 +73,7 @@ public class FileStore {
    * Returns a {@link File} for the given filename in the store.
    *
    * @throws FileNotFoundException if no file with the given filename exists
-   * @throws IOException           if the given filename does not refer to a file
+   * @throws IOException if the given filename does not refer to a file
    */
   public File getFile(String fileName) throws IOException {
     validatePathname(fileName);
@@ -104,9 +102,7 @@ public class FileStore {
     return new File(storageDir + separator + fileName);
   }
 
-  /**
-   * @throws UncheckedIOException if the file with given name could not be deleted
-   */
+  /** @throws UncheckedIOException if the file with given name could not be deleted */
   public void delete(String fileName) {
     validatePathname(fileName);
 
@@ -122,9 +118,7 @@ public class FileStore {
     return storageDir;
   }
 
-  /**
-   * http://cwe.mitre.org/data/definitions/22.html
-   */
+  /** http://cwe.mitre.org/data/definitions/22.html */
   private void validatePathname(String pathname) {
     File file = new File(storageDir, pathname);
 

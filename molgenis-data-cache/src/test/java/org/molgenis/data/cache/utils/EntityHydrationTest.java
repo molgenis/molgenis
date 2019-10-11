@@ -61,8 +61,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = {TestHarnessConfig.class})
 class EntityHydrationTest extends AbstractMolgenisSpringTest {
 
-  @Autowired
-  private EntityTestHarness entityTestHarness;
+  @Autowired private EntityTestHarness entityTestHarness;
 
   private EntityType entityType;
   private Entity hydratedEntity;
@@ -70,8 +69,7 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
   private EntityHydration entityHydration;
   private EntityManager entityManager;
 
-  @Captor
-  private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
+  @Captor private ArgumentCaptor<EntityType> entityTypeArgumentCaptor;
 
   @BeforeEach
   void setUpBeforeMethod() {

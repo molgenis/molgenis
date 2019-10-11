@@ -37,9 +37,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
 
   private final List<OrderV1> orders;
 
-  /**
-   * Creates a new {@link SortV1} instance.
-   */
+  /** Creates a new {@link SortV1} instance. */
   public SortV1(DirectionV1 direction, List<String> properties) {
 
     if (properties == null || properties.isEmpty()) {
@@ -147,9 +145,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
       this.property = property;
     }
 
-    /**
-     * @deprecated use {@link SortV1#SortV1(DirectionV1, List)} instead.
-     */
+    /** @deprecated use {@link SortV1#SortV1(DirectionV1, List)} instead. */
     @Deprecated
     public static List<OrderV1> create(DirectionV1 direction, Iterable<String> properties) {
 
@@ -160,23 +156,17 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
       return orders;
     }
 
-    /**
-     * Returns the order the property shall be sorted for.
-     */
+    /** Returns the order the property shall be sorted for. */
     public DirectionV1 getDirection() {
       return direction;
     }
 
-    /**
-     * Returns the property to order for.
-     */
+    /** Returns the property to order for. */
     public String getProperty() {
       return property;
     }
 
-    /**
-     * Returns whether sorting for this property shall be ascending.
-     */
+    /** Returns whether sorting for this property shall be ascending. */
     public boolean isAscending() {
       return this.direction.equals(DirectionV1.ASC);
     }
