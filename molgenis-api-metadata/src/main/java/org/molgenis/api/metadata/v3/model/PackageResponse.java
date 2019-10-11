@@ -1,8 +1,6 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.util.AutoGson;
 
@@ -11,8 +9,7 @@ import org.molgenis.util.AutoGson;
 public abstract class PackageResponse {
   public abstract LinksResponse getLinks();
 
-  public static PackageResponse create(
-      LinksResponse newLinks) {
+  public static PackageResponse create(LinksResponse newLinks) {
     return builder().setLinks(newLinks).build();
   }
 

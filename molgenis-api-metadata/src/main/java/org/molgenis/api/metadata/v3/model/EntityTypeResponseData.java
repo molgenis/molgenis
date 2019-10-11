@@ -4,7 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.gson.annotations.SerializedName;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.util.AutoGson;
 
 @AutoValue

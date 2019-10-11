@@ -6,7 +6,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.data.Sort;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.util.AutoGson;
 
 @AutoValue

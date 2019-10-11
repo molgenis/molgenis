@@ -41,7 +41,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.web.support.ServletUriComponentsBuilder;
+import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -436,12 +436,12 @@ public class MetadataV3Mapper {
   }
 
   private URI createEntitiesResponseUri() {
-    UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
+    UriComponentsBuilder builder = MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
     return builder.build().toUri();
   }
 
   private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
+    UriComponentsBuilder builder = MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
     if (pageNumber != null) {
       builder.replaceQueryParam(PAGE, pageNumber);
     }
