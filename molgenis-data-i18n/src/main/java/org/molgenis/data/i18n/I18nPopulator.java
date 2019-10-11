@@ -25,6 +25,7 @@ public class I18nPopulator {
   private final LocalizationPopulator localizationPopulator;
   private final List<PropertiesMessageSource> localizationMessageSources;
 
+  @SuppressWarnings("unused")
   public I18nPopulator(
       DataService dataService,
       LanguageFactory languageFactory,
