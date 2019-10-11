@@ -99,7 +99,7 @@ public class EmxImportService implements ImportService {
   }
 
   @Override
-  public EntitiesValidationReport validateImport(File file, RepositoryCollection source) {
+  public EntitiesValidationReport validateImport(RepositoryCollection source) {
     return parser.validate(source);
   }
 

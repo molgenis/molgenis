@@ -335,8 +335,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     RepositoryCollection source = mock(RepositoryCollection.class);
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertTrue(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
@@ -374,8 +373,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     when(dataService.hasRepository(entityTypeId0)).thenReturn(true);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertFalse(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
@@ -423,8 +421,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     RepositoryCollection source = mock(RepositoryCollection.class);
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertTrue(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();
@@ -477,8 +474,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     doReturn(true).when(dataService).hasRepository(entityTypeId0);
     doReturn(true).when(dataService).hasRepository(sampleEntityName0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertFalse(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();

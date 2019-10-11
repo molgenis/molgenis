@@ -23,7 +23,7 @@ public interface ImportService extends Ordered {
       DataAction dataAction,
       @Nullable @CheckForNull String packageId);
 
-  EntitiesValidationReport validateImport(File file, RepositoryCollection source);
+  EntitiesValidationReport validateImport(RepositoryCollection source);
 
   boolean canImport(File file, RepositoryCollection source);
 
