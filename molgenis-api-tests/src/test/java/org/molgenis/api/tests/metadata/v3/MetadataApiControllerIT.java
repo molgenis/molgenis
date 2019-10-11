@@ -1,12 +1,6 @@
 package org.molgenis.api.tests.metadata.v3;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
-import static org.molgenis.util.ResourceUtils.getFile;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -22,6 +16,8 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.test.TestResourceUtils;
 import org.slf4j.Logger;
@@ -35,18 +31,37 @@ class MetadataApiControllerIT extends AbstractApiTest {
   protected static void setUpBeforeClass() {
     AbstractApiTest.setUpBeforeClass();
 
-    importData();
+    createPackage();
   }
 
   @AfterAll
   protected static void tearDownAfterClass() {
-    deleteData();
+    deletePackage();
 
     AbstractApiTest.tearDownAfterClass();
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {"Identifiable", "Describable", "MyNumbers", "MyStrings", "MyDataset"})
   @Order(1)
+  void testCreateMetadataEntityTypeIdentifiable(String datasetName) throws IOException {
+    String bodyJson =
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "createMetadataEntityType" + datasetName + ".json",
+            ImmutableMap.of("baseUri", RestAssured.baseURI));
+
+    given()
+        .contentType(APPLICATION_JSON_VALUE)
+        .body(bodyJson)
+        .post("/api/metadata")
+        .then()
+        .statusCode(CREATED.value())
+        .header(LOCATION, RestAssured.baseURI + "/api/metadata/v3meta_" + datasetName);
+  }
+
+  @Test
+  @Order(2)
   void testRetrieveMetadata() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -60,7 +75,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(2)
+  @Order(3)
   void testRetrieveMetadataEntityType() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -76,7 +91,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(3)
+  @Order(4)
   void testRetrieveMetadataEntityTypeAttributes() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -92,7 +107,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(4)
+  @Order(5)
   void testRetrieveMetadataEntityTypeAttribute() throws IOException {
     String expectedJson =
         TestResourceUtils.getRenderedString(
@@ -108,7 +123,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(5)
+  @Order(6)
   void testUpdateMetadataEntityType() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -125,7 +140,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(6)
+  @Order(7)
   void testPartialUpdateMetadataEntityType() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -142,7 +157,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(7)
+  @Order(8)
   void testCreateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -160,7 +175,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(8)
+  @Order(9)
   void testUpdateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -177,7 +192,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(9)
+  @Order(10)
   void testPartialUpdateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -194,7 +209,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(10)
+  @Order(11)
   void testDeleteMetadataEntityTypeAttributes() {
     given()
         .delete("/api/metadata/v3meta_MyDataset/attributes?q=id=in=(myDate,myDateTime)")
@@ -203,7 +218,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(11)
+  @Order(12)
   void testDeleteMetadataEntityTypeAttribute() {
     given()
         .delete("/api/metadata/v3meta_MyDataset/attributes/myString")
@@ -212,13 +227,13 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @Test
-  @Order(12)
+  @Order(13)
   void testDeleteMetadataEntityType() {
     given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
   }
 
   @Test
-  @Order(13)
+  @Order(14)
   void testDeleteMetadataEntityTypes() {
     given()
         .delete("/api/metadata?q=id=in=(MyNumbers,MyStrings)")
@@ -226,43 +241,17 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
-  private static void importData() {
-    String importJobStatusUrl =
-        given()
-            .multiPart(getFile(MetadataApiControllerIT.class, "metadata_api_v3_emx.xlsx"))
-            .param("file")
-            .param("action", "ADD")
-            .post("plugin/importwizard/importFile")
-            .then()
-            .statusCode(CREATED.value())
-            .extract()
-            .header("Location");
-
-    monitorImportJob(importJobStatusUrl);
-  }
-
-  /** Given the job uri and token, wait until the job is done and report back the status. */
-  private static String monitorImportJob(String importJobURL) {
-    LOG.info("############ " + importJobURL);
-    await()
-        .pollDelay(500, MILLISECONDS)
-        .atMost(45, MINUTES)
-        .until(() -> pollForStatus(importJobURL), not(equalTo("RUNNING")));
-    LOG.info("Import completed");
-    return pollForStatus(importJobURL);
-  }
-
-  private static String pollForStatus(String importJobURL) {
-    return given()
-        .get(importJobURL)
+  private static void createPackage() {
+    given()
+        .contentType(APPLICATION_JSON_VALUE)
+        .body("{\"id\":\"v3meta\",\"label\":\"v3meta\"}")
+        .post("/api/data/sys_md_Package")
         .then()
-        .statusCode(HttpStatus.OK.value())
-        .extract()
-        .path("status")
-        .toString();
+        .statusCode(CREATED.value())
+        .header(LOCATION, RestAssured.baseURI + "/api/data/sys_md_Package/v3meta");
   }
 
-  private static void deleteData() {
+  private static void deletePackage() {
     given().delete("/api/data/sys_md_Package/v3meta").then().statusCode(NO_CONTENT.value());
   }
 }

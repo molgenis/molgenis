@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
@@ -30,6 +31,7 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -88,11 +90,7 @@ public class MetadataV3Mapper {
   }
 
   public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
-    if (entityTypeRequest == null) {
-      throw new IllegalStateException(); // FIXME
-    }
-    if ((entityTypeRequest.isAbstract() == null || !entityTypeRequest.isAbstract())
-        && entityTypeRequest.getIdAttribute() == null) {
+    if ((!entityTypeRequest.isAbstract()) && entityTypeRequest.getIdAttribute() == null) {
       throw new IllegalArgumentException(
           "ID attribute for EntityType ["
               + entityTypeRequest.getLabel()
@@ -100,17 +98,43 @@ public class MetadataV3Mapper {
     }
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
-    Optional<Package> pack = metaDataService.getPackage(entityTypeRequest.getPackage());
+    String packageId = entityTypeRequest.getPackage();
+    Optional<Package> pack = packageId != null ? metaDataService.getPackage(packageId) : null;
     entityType.setPackage(
         pack.orElseThrow(() -> new UnknownPackageException(entityTypeRequest.getPackage())));
+    String extendsEntityTypeId = entityTypeRequest.getExtends();
+    if (extendsEntityTypeId != null) {
+      EntityType extendsEntityType =
+          metaDataService
+              .getEntityType(extendsEntityTypeId)
+              .orElseThrow(() -> new UnknownEntityTypeException(extendsEntityTypeId));
+      entityType.setExtends(extendsEntityType);
+    }
+
     processI18nLabel(entityTypeRequest, entityType);
     processI18nDescription(entityTypeRequest, entityType);
     Map<String, Attribute> ownAttributes =
         toAttributes(entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
+    String idAttribute = entityTypeRequest.getIdAttribute();
+    if (idAttribute != null) {
+      ownAttributes.get(idAttribute).setIdAttribute(true);
+    }
+    String labelAttribute = entityTypeRequest.getLabelAttribute();
+    if (labelAttribute != null) {
+      ownAttributes.get(labelAttribute).setLabelAttribute(true);
+    }
+    AtomicInteger count = new AtomicInteger();
+    entityTypeRequest
+        .getLookupAttributes()
+        .forEach(
+            lookupAttribute ->
+                ownAttributes
+                    .get(lookupAttribute)
+                    .setLookupAttributeIndex(count.getAndIncrement()));
     entityType.setOwnAllAttributes(ownAttributes.values());
     entityType.setAbstract(entityTypeRequest.isAbstract());
     Optional<EntityType> extendsEntityType =
-        metaDataService.getEntityType(entityTypeRequest.getEntityTypeParent());
+        metaDataService.getEntityType(entityTypeRequest.getExtends());
     if (extendsEntityType.isPresent()) {
       entityType.setExtends(extendsEntityType.get());
     }
@@ -327,13 +351,18 @@ public class MetadataV3Mapper {
     return responseType;
   }
 
-  private Attribute toAttribute(CreateAttributeRequest attributeRequest, EntityType entityType) {
+  private Attribute toAttribute(
+      CreateAttributeRequest attributeRequest, EntityType entityType, int index) {
     Attribute attribute = attributeFactory.create();
 
     attribute.setIdentifier(attributeRequest.getId());
     attribute.setName(attributeRequest.getName());
     attribute.setEntity(entityType);
-    attribute.setSequenceNumber(attributeRequest.getSequenceNumber());
+    Integer sequenceNumber = attributeRequest.getSequenceNumber();
+    if (sequenceNumber == null) {
+      sequenceNumber = index;
+    }
+    attribute.setSequenceNumber(index);
     attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
     Optional<EntityType> refEntityType =
         metaDataService.getEntityType(attributeRequest.getRefEntityType());
@@ -368,22 +397,23 @@ public class MetadataV3Mapper {
       CreateEntityTypeRequest entityTypeRequest,
       EntityType entityType) {
     Map<String, Attribute> attributeMap = new HashMap<>();
+    AtomicInteger index = new AtomicInteger(0);
     for (CreateAttributeRequest attributeRequest : attributes) {
-      Attribute attr = toAttribute(attributeRequest, entityType);
+      Attribute attr = toAttribute(attributeRequest, entityType, index.getAndIncrement());
       if (attributeRequest.getId().equals(entityTypeRequest.getIdAttribute())) {
         attr.setIdAttribute(true);
       }
       if (attributeRequest.getId().equals(entityType.getLabelAttribute())) {
         attr.setLabelAttribute(true);
       }
-      if (entityTypeRequest.getLookupAttributes().contains(attributeRequest.getId())) {
-        attr.setLookupAttributeIndex(
-            entityTypeRequest.getLookupAttributes().indexOf(attributeRequest.getId()));
+      List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
+      if (lookupAttributes != null && lookupAttributes.contains(attributeRequest.getId())) {
+        attr.setLookupAttributeIndex(lookupAttributes.indexOf(attributeRequest.getId()));
       }
       attributeMap.put(attributeRequest.getId(), attr);
     }
 
-    resolveMappedBy(attributes, attributeMap, entityTypeRequest.getEntityTypeParent());
+    resolveMappedBy(attributes, attributeMap, entityTypeRequest.getExtends());
 
     return attributeMap;
   }
@@ -436,12 +466,14 @@ public class MetadataV3Mapper {
   }
 
   private URI createEntitiesResponseUri() {
-    UriComponentsBuilder builder = MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
+    UriComponentsBuilder builder =
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
     return builder.build().toUri();
   }
 
   private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder = MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
+    UriComponentsBuilder builder =
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
     if (pageNumber != null) {
       builder.replaceQueryParam(PAGE, pageNumber);
     }
@@ -494,8 +526,12 @@ public class MetadataV3Mapper {
       entityType.setLabel(i18nValue.getDefaultValue());
       getLanguageCodes()
           .forEach(
-              languageCode ->
-                  entityType.setLabel(languageCode, i18nValue.getTranslations().get(languageCode)));
+              languageCode -> {
+                Map<String, String> translations = i18nValue.getTranslations();
+                if (translations != null) {
+                  entityType.setLabel(languageCode, translations.get(languageCode));
+                }
+              });
     }
   }
 
@@ -506,9 +542,12 @@ public class MetadataV3Mapper {
       entityType.setDescription(i18nValue.getDefaultValue());
       getLanguageCodes()
           .forEach(
-              languageCode ->
-                  entityType.setDescription(
-                      languageCode, i18nValue.getTranslations().get(languageCode)));
+              languageCode -> {
+                Map<String, String> translations = i18nValue.getTranslations();
+                if (translations != null) {
+                  entityType.setDescription(languageCode, translations.get(languageCode));
+                }
+              });
     }
   }
 

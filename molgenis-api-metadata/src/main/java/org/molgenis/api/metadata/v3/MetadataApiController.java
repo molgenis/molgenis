@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
 
+import java.net.URI;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
@@ -20,6 +21,7 @@ import org.molgenis.api.model.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(MetadataApiController.API_META_PATH)
@@ -78,9 +81,17 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PostMapping
-  public void createEntityType(@RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+  public ResponseEntity createEntityType(
+      @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = metadataV3Mapper.toEntityType(createEntityTypeRequest);
     metadataApiService.createEntityType(entityType);
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequestUri()
+            .replacePath(API_META_PATH)
+            .pathSegment(entityType.getId())
+            .build()
+            .toUri();
+    return ResponseEntity.created(location).build();
   }
 
   @Transactional(readOnly = true)
