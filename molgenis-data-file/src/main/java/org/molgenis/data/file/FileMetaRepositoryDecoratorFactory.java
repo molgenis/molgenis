@@ -9,6 +9,7 @@ import org.molgenis.data.file.model.FileMetaMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("unused")
 public class FileMetaRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<FileMeta, FileMetaMetadata> {
   private final FileStore fileStore;

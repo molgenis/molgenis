@@ -12,13 +12,6 @@ public class MissingValueProcessor extends AbstractCellProcessor {
     this.emptyIsMissing = emptyIsMissing;
   }
 
-  public MissingValueProcessor(
-      boolean processHeader, boolean processData, String missingValue, boolean emptyIsMissing) {
-    super(processHeader, processData);
-    this.missingValue = missingValue;
-    this.emptyIsMissing = emptyIsMissing;
-  }
-
   @Override
   public String process(String value) {
     if (value == null) {
