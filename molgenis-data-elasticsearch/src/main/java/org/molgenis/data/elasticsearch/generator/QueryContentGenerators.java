@@ -19,6 +19,7 @@ class QueryContentGenerators {
   private final SortGenerator sortGenerator;
   private final AggregationGenerator aggregationGenerator;
 
+  @SuppressWarnings("unused")
   public QueryContentGenerators(
       QueryGenerator queryGenerator,
       SortGenerator sortGenerator,

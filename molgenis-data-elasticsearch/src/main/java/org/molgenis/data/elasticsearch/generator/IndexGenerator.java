@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 class IndexGenerator {
   private final DocumentIdGenerator documentIdGenerator;
 
+  @SuppressWarnings("unused")
   IndexGenerator(DocumentIdGenerator documentIdGenerator) {
     this.documentIdGenerator = requireNonNull(documentIdGenerator);
   }

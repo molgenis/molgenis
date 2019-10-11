@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -39,25 +38,9 @@ class AggregationGenerator {
    */
   private static final long PRECISION_THRESHOLD = 40000L;
 
+  @SuppressWarnings("unused")
   AggregationGenerator(DocumentIdGenerator documentIdGenerator) {
     this.documentIdGenerator = requireNonNull(documentIdGenerator);
-  }
-
-  public void generate(
-      SearchRequestBuilder searchRequestBuilder,
-      Attribute aggAttr1,
-      Attribute aggAttr2,
-      Attribute aggAttrDistinct) {
-    List<AggregationBuilder> aggregationBuilders =
-        createAggregations(aggAttr1, aggAttr2, aggAttrDistinct);
-
-    // collect aggregates
-    searchRequestBuilder.setSize(0);
-
-    // add all aggregations to builder
-    for (AggregationBuilder aggregationBuilder : aggregationBuilders) {
-      searchRequestBuilder.addAggregation(aggregationBuilder);
-    }
   }
 
   List<AggregationBuilder> createAggregations(
