@@ -4,9 +4,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -22,8 +19,6 @@ import org.molgenis.data.support.AbstractWritable;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class CsvWriter extends AbstractWritable {
-  public static final char DEFAULT_SEPARATOR = ',';
-
   private final au.com.bytecode.opencsv.CSVWriter csvWriter;
   /** process cells before writing */
   private List<CellProcessor> cellProcessors;
@@ -32,11 +27,6 @@ public class CsvWriter extends AbstractWritable {
 
   public CsvWriter(Writer writer) {
     this(writer, ',');
-  }
-
-  public CsvWriter(Writer writer, List<String> attributeNames) throws IOException {
-    this(writer);
-    writeAttributeNames(attributeNames);
   }
 
   public CsvWriter(Writer writer, char separator) {
@@ -54,24 +44,12 @@ public class CsvWriter extends AbstractWritable {
     }
   }
 
-  public CsvWriter(OutputStream os) {
-    this(new OutputStreamWriter(os, UTF_8));
-  }
-
   public CsvWriter(OutputStream os, char separator) {
     this(new OutputStreamWriter(os, UTF_8), separator);
   }
 
   public CsvWriter(OutputStream os, char separator, boolean noQuotes) {
     this(new OutputStreamWriter(os, UTF_8), separator, noQuotes);
-  }
-
-  public CsvWriter(File file) throws FileNotFoundException {
-    this(new OutputStreamWriter(new FileOutputStream(file), UTF_8), DEFAULT_SEPARATOR);
-  }
-
-  public CsvWriter(File file, char separator) throws FileNotFoundException {
-    this(new OutputStreamWriter(new FileOutputStream(file), UTF_8), separator);
   }
 
   public void addCellProcessor(CellProcessor cellProcessor) {
