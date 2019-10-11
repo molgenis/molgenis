@@ -1,0 +1,22 @@
+{
+  "id": "v3meta_MyNumbers",
+  "package_": "v3meta",
+  "label": {
+    "defaultValue": "MyNumbers"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyNumbers_id",
+      "name": "id",
+      "type": "int"
+    },
+    {
+      "id": "v3meta_MyNumbers_label",
+      "name": "label",
+      "type": "string",
+      "visible": true
+    }
+  ],
+  "idAttribute": "v3meta_MyNumbers_id",
+  "labelAttribute": "v3meta_MyNumbers_label"
+}

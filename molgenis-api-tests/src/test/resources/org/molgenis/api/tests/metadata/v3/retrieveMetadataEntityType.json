@@ -1,1 +1,60 @@
-{"fix": "me"}
+{
+  "links": {
+    "self": "${baseUri}/api/metadata/v3meta_MyNumbers"
+  },
+  "data": {
+    "id": "v3meta_MyNumbers",
+    "label": "My Numbers",
+    "attributes": {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes"
+      },
+      "items": [
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/aaaac3nutyqzlhfw2djjzsaaam"
+          },
+          "data": {
+            "id": "aaaac3nutyqzlhfw2djjzsaaam",
+            "name": "id",
+            "sequenceNr": 0,
+            "type": "INT",
+            "label": "id",
+            "nullable": false,
+            "auto": false,
+            "visible": true,
+            "unique": true,
+            "readOnly": true,
+            "aggregatable": false
+          }
+        },
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/aaaac3nutyqzlhfw2djjzsaaaq"
+          },
+          "data": {
+            "id": "aaaac3nutyqzlhfw2djjzsaaaq",
+            "name": "label",
+            "sequenceNr": 1,
+            "type": "STRING",
+            "lookupAttributeIndex": 0,
+            "label": "label",
+            "nullable": false,
+            "auto": false,
+            "visible": true,
+            "unique": false,
+            "readOnly": false,
+            "aggregatable": false
+          }
+        }
+      ]
+    },
+    "package_": {
+      "links": {
+        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+      }
+    },
+    "abstract_": false,
+    "indexingDepth": 1
+  }
+}

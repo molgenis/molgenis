@@ -3,7 +3,6 @@ package org.molgenis.web.support;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.web.support.ServletUriComponentsBuilder.fromCurrentRequestDecodedQuery;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -26,7 +25,7 @@ class ServletUriComponentsBuilderTest {
 
     assertEquals(
         "http://localhost/api/data/EntityType",
-        fromCurrentRequestDecodedQuery().build().toUriString());
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
   }
 
   @Test
@@ -46,6 +45,6 @@ class ServletUriComponentsBuilderTest {
 
     assertEquals(
         "http://localhost/api/data/EntityType?query=a==b,c=in=('d e','f g','h i')&j==k&page=1&attr=#CHROM,POS,REF,ALT",
-        fromCurrentRequestDecodedQuery().build().toUriString());
+        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery().build().toUriString());
   }
 }

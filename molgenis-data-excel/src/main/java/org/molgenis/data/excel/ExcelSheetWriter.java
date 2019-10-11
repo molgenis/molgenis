@@ -1,6 +1,5 @@
 package org.molgenis.data.excel;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
@@ -134,7 +133,7 @@ public class ExcelSheetWriter extends AbstractWritable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     // Nothing
   }
 

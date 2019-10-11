@@ -1,14 +1,16 @@
 package org.molgenis.api.metadata.v3.model;
 
+import static java.util.Collections.emptyList;
+
 import java.util.List;
 
 public class CreateEntityTypeRequest {
   String id;
   I18nValue label;
   I18nValue description;
-  Boolean isAbstract;
-  String aPackage;
-  String entityTypeParent;
+  Boolean abstract_;
+  String package_;
+  String extends_;
   List<CreateAttributeRequest> attributes;
   String idAttribute;
   String labelAttribute;
@@ -18,9 +20,9 @@ public class CreateEntityTypeRequest {
       String id,
       I18nValue label,
       I18nValue description,
-      Boolean isAbstract,
-      String aPackage,
-      String entityTypeParent,
+      Boolean abstract_,
+      String package_,
+      String extends_,
       List<CreateAttributeRequest> attributes,
       String idAttribute,
       String labelAttribute,
@@ -28,9 +30,9 @@ public class CreateEntityTypeRequest {
     this.id = id;
     this.label = label;
     this.description = description;
-    this.isAbstract = isAbstract;
-    this.aPackage = aPackage;
-    this.entityTypeParent = entityTypeParent;
+    this.abstract_ = abstract_;
+    this.package_ = package_;
+    this.extends_ = extends_;
     this.attributes = attributes;
     this.idAttribute = idAttribute;
     this.labelAttribute = labelAttribute;
@@ -49,16 +51,16 @@ public class CreateEntityTypeRequest {
     return description;
   }
 
-  public Boolean isAbstract() {
-    return isAbstract;
+  public boolean isAbstract() {
+    return abstract_ != null ? abstract_ : false;
   }
 
   public String getPackage() {
-    return aPackage;
+    return package_;
   }
 
-  public String getEntityTypeParent() {
-    return entityTypeParent;
+  public String getExtends() {
+    return extends_;
   }
 
   public List<CreateAttributeRequest> getAttributes() {
@@ -74,6 +76,6 @@ public class CreateEntityTypeRequest {
   }
 
   public List<String> getLookupAttributes() {
-    return lookupAttributes;
+    return lookupAttributes != null ? lookupAttributes : emptyList();
   }
 }

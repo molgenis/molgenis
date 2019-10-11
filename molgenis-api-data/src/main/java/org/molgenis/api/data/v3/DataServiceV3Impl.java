@@ -157,6 +157,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     return result;
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Entities findAll(
       String entityTypeId,

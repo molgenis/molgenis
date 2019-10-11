@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.NAVIGATOR;
@@ -37,11 +39,13 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
@@ -151,7 +155,11 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
   @Test
   void initSortEntitiesByLabel() {
     MetaDataService metaDataService = mock(MetaDataService.class);
-    when(dataService.getMeta()).thenReturn(metaDataService);
+    Query<EntityType> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(query.eq(IS_ABSTRACT, false)).thenReturn(query);
+    when(query.fetch(any())).thenReturn(query);
+    when(dataService.query(EntityTypeMetadata.ENTITY_TYPE_META_DATA, EntityType.class))
+        .thenReturn(query);
 
     EntityType entity1 = mock(EntityType.class);
     when(entity1.getId()).thenReturn("1");
@@ -162,7 +170,7 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
     when(entity2.getLabel()).thenReturn("aaa");
 
     Stream<EntityType> entityStream = Stream.of(entity1, entity2);
-    when(metaDataService.getEntityTypes()).thenReturn(entityStream);
+    when(query.findAll()).thenReturn(entityStream);
 
     controller.init(null, null, model);
 

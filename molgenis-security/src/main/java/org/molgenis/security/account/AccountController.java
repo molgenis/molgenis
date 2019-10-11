@@ -1,7 +1,6 @@
 package org.molgenis.security.account;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountConstants.MIN_PASSWORD_LENGTH;
 
 import java.util.Collections;
@@ -41,7 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(AccountController.URI)
 public class AccountController {
   private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
 

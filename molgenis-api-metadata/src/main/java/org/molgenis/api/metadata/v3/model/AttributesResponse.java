@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.metadata.v3.model.EntityTypeResponseData.Builder;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.util.AutoGson;
@@ -12,6 +13,14 @@ import org.molgenis.util.AutoGson;
 @AutoGson(autoValueClass = AutoValue_AttributesResponse.class)
 public abstract class AttributesResponse {
   public abstract LinksResponse getLinks();
+
+  @Nullable
+  @CheckForNull
+  public abstract String getLabelAttribute();
+
+  @Nullable
+  @CheckForNull
+  public abstract String getIdAttribute();
 
   // can be null when selecting zero attributes (e.g. for referenced entities)
   @Nullable
@@ -42,6 +51,10 @@ public abstract class AttributesResponse {
   public abstract static class Builder {
 
     public abstract Builder setLinks(LinksResponse newLinks);
+
+    public abstract Builder setLabelAttribute(String attributeId);
+
+    public abstract Builder setIdAttribute(String attributeId);
 
     public abstract Builder setItems(List<AttributeResponse> newItems);
 

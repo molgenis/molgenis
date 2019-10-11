@@ -77,10 +77,7 @@ public class EntityHelper {
   public String getLabel(String typeId, String identifier) {
     String entityTypeId = getEntityTypeIdFromType(typeId);
     Entity[] result = new Entity[1];
-    runAsSystem(
-        () -> {
-          result[0] = getEntityByIdentifier(identifier, entityTypeId);
-        });
+    runAsSystem(() -> result[0] = getEntityByIdentifier(identifier, entityTypeId));
     if (result[0] == null) {
       throw new UnknownEntityException(entityTypeId, identifier);
     }
@@ -102,9 +99,7 @@ public class EntityHelper {
     String entityTypeId = getEntityTypeIdFromType(typeId);
     String[] result = new String[1];
     runAsSystem(
-        () -> {
-          result[0] = dataService.getRepository(entityTypeId).getEntityType().getLabel();
-        });
+        () -> result[0] = dataService.getRepository(entityTypeId).getEntityType().getLabel());
     return result[0];
   }
 

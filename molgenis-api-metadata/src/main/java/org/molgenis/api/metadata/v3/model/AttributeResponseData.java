@@ -1,16 +1,16 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
+import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.data.Sort;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_Attribute.class)
-public abstract class Attribute {
+@AutoGson(autoValueClass = AutoValue_AttributeResponseData.class)
+public abstract class AttributeResponseData {
 
   public abstract String getId();
 
@@ -18,7 +18,7 @@ public abstract class Attribute {
 
   public abstract Integer getSequenceNr();
 
-  public abstract AttributeType getType();
+  public abstract String getType();
 
   @Nullable
   @CheckForNull
@@ -42,11 +42,19 @@ public abstract class Attribute {
 
   @Nullable
   @CheckForNull
-  public abstract I18nValue getLabel();
+  public abstract String getLabel();
 
   @Nullable
   @CheckForNull
-  public abstract I18nValue getDescription();
+  public abstract I18nValue getLabelI18n();
+
+  @Nullable
+  @CheckForNull
+  public abstract String getDescription();
+
+  @Nullable
+  @CheckForNull
+  public abstract I18nValue getDescriptionI18n();
 
   public abstract boolean isNullable();
 
@@ -66,7 +74,7 @@ public abstract class Attribute {
 
   @Nullable
   @CheckForNull
-  public abstract String getEnumOptions();
+  public abstract List<String> getEnumOptions();
 
   @Nullable
   @CheckForNull
@@ -97,7 +105,7 @@ public abstract class Attribute {
   public abstract String getDefaultValue();
 
   public static Builder builder() {
-    return new AutoValue_Attribute.Builder();
+    return new AutoValue_AttributeResponseData.Builder();
   }
 
   @SuppressWarnings(
@@ -111,7 +119,7 @@ public abstract class Attribute {
 
     public abstract Builder setSequenceNr(Integer sequenceNr);
 
-    public abstract Builder setType(AttributeType type);
+    public abstract Builder setType(String type);
 
     public abstract Builder setLookupAttributeIndex(Integer index);
 
@@ -123,9 +131,13 @@ public abstract class Attribute {
 
     public abstract Builder setOrderBy(Sort sort);
 
-    public abstract Builder setLabel(I18nValue label);
+    public abstract Builder setLabel(String label);
 
-    public abstract Builder setDescription(I18nValue description);
+    public abstract Builder setDescription(String description);
+
+    public abstract Builder setLabelI18n(I18nValue label);
+
+    public abstract Builder setDescriptionI18n(I18nValue description);
 
     public abstract Builder setNullable(boolean isNullable);
 
@@ -141,7 +153,7 @@ public abstract class Attribute {
 
     public abstract Builder setExpression(String expression);
 
-    public abstract Builder setEnumOptions(String enumOptions);
+    public abstract Builder setEnumOptions(List<String> enumOptions);
 
     public abstract Builder setRangeMin(Long min);
 
@@ -157,6 +169,6 @@ public abstract class Attribute {
 
     public abstract Builder setDefaultValue(String defaultValue);
 
-    public abstract Attribute build();
+    public abstract AttributeResponseData build();
   }
 }

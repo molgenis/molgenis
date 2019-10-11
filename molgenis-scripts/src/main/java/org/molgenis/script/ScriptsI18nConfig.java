@@ -1,4 +1,4 @@
-package org.molgenis.script.controller;
+package org.molgenis.script;
 
 import org.molgenis.util.i18n.PropertiesMessageSource;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ public class ScriptsI18nConfig {
   public static final String NAMESPACE = "scripts";
 
   @Bean
-  public PropertiesMessageSource ScriptsI18nMessageSource() {
+  public PropertiesMessageSource scriptsI18nMessageSource() {
     return new PropertiesMessageSource(NAMESPACE);
   }
 }

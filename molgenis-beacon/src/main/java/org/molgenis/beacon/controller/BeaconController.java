@@ -1,7 +1,6 @@
 package org.molgenis.beacon.controller;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.beacon.controller.BeaconController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.annotations.Api;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Api("Beacon")
 @Controller
-@RequestMapping(URI)
+@RequestMapping(BeaconController.URI)
 public class BeaconController {
   public static final String URI = "/beacon";
 
