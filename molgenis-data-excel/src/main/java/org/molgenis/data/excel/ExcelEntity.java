@@ -16,7 +16,6 @@ import org.molgenis.data.support.DynamicEntity;
  * <p>All attributes are of type String, values are processed using the given CellProcessors
  */
 public class ExcelEntity extends DynamicEntity {
-  private static final long serialVersionUID = 8928375571009145452L;
   private final transient Row row;
   private final Map<String, Integer> colNamesMap;
   private final List<CellProcessor> cellProcessors;
