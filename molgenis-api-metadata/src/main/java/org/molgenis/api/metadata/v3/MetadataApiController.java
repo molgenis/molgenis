@@ -39,12 +39,17 @@ class MetadataApiController extends ApiController {
   static final String API_META_PATH = ApiNamespace.API_PATH + '/' + API_META_ID;
 
   private final MetadataApiService metadataApiService;
-  private final MetadataV3Mapper metadataV3Mapper;
+  private final EntityTypeV3Mapper entityTypeV3Mapper;
+  private final AttributeV3Mapper attributeV3Mapper;
 
-  MetadataApiController(MetadataApiService metadataApiService, MetadataV3Mapper metadataV3Mapper) {
+  MetadataApiController(
+      MetadataApiService metadataApiService,
+      EntityTypeV3Mapper entityTypeV3Mapper,
+      AttributeV3Mapper attributeV3Mapper) {
     super(API_META_ID, 3);
     this.metadataApiService = requireNonNull(metadataApiService);
-    this.metadataV3Mapper = requireNonNull(metadataV3Mapper);
+    this.entityTypeV3Mapper = requireNonNull(entityTypeV3Mapper);
+    this.attributeV3Mapper = requireNonNull(attributeV3Mapper);
   }
 
   @Transactional(readOnly = true)
@@ -57,7 +62,8 @@ class MetadataApiController extends ApiController {
     EntityTypes entityTypes =
         metadataApiService.findEntityTypes(entitiesRequest.getQ().orElse(null), sort, size, page);
 
-    return metadataV3Mapper.toEntityTypesResponse(entityTypes, size, page, entityTypes.getTotal());
+    return entityTypeV3Mapper.toEntityTypesResponse(
+        entityTypes, size, page, entityTypes.getTotal());
   }
 
   @Transactional(readOnly = true)
@@ -66,7 +72,7 @@ class MetadataApiController extends ApiController {
     EntityType entityType =
         metadataApiService.findEntityType(readEntityTypeRequest.getEntityTypeId());
 
-    return metadataV3Mapper.toEntityTypeResponse(
+    return entityTypeV3Mapper.toEntityTypeResponse(
         entityType, readEntityTypeRequest.isFlattenAttrs(), readEntityTypeRequest.isI18n());
   }
 
@@ -76,14 +82,14 @@ class MetadataApiController extends ApiController {
       @Valid ReadAttributeRequest readAttributeRequest) {
     // TODO pass entity type identifier to findAttribute and check if exists in service
     Attribute attribute = metadataApiService.findAttribute(readAttributeRequest.getAttributeId());
-    return metadataV3Mapper.mapAttribute(attribute, false);
+    return attributeV3Mapper.mapAttribute(attribute, false);
   }
 
   @Transactional
   @PostMapping
   public ResponseEntity createEntityType(
       @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
-    EntityType entityType = metadataV3Mapper.toEntityType(createEntityTypeRequest);
+    EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     metadataApiService.createEntityType(entityType);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
@@ -109,7 +115,7 @@ class MetadataApiController extends ApiController {
             size,
             page);
 
-    return metadataV3Mapper.mapAttributes(attributes, size, page, attributes.getTotal());
+    return attributeV3Mapper.mapAttributes(attributes, size, page, attributes.getTotal());
   }
 
   @Transactional

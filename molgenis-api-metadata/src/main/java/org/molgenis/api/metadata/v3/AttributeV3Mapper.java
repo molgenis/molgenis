@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
@@ -24,23 +23,15 @@ import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
-import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
-import org.molgenis.api.metadata.v3.model.EntityTypeResponseData;
-import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
-import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
-import org.molgenis.data.UnknownEntityTypeException;
-import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
@@ -49,7 +40,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class MetadataV3Mapper {
+public class AttributeV3Mapper {
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
   private final EntityTypeFactory entityTypeFactory;
@@ -58,7 +49,7 @@ public class MetadataV3Mapper {
   private final SortMapper sortMapper;
   private final SortConverter sortConverter;
 
-  public MetadataV3Mapper(
+  public AttributeV3Mapper(
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
@@ -71,148 +62,6 @@ public class MetadataV3Mapper {
     this.sortConverter = requireNonNull(sortConverter);
   }
 
-  public EntityTypesResponse toEntityTypesResponse(
-      EntityTypes entityTypes, int size, int number, int total) {
-    List<EntityTypeResponse> results = new ArrayList<>();
-    for (EntityType entityType : entityTypes.getEntityTypes()) {
-      results.add(mapInternal(entityType, false, true, false, false));
-    }
-
-    return EntityTypesResponse.create(
-        createLinksResponse(number, size, total),
-        results,
-        PageResponse.create(size, entityTypes.getTotal(), entityTypes.getTotal() / size, number));
-  }
-
-  public EntityTypeResponse toEntityTypeResponse(
-      EntityType entityType, boolean flattenAttrs, boolean i18n) {
-    return mapInternal(entityType, flattenAttrs, true, true, i18n);
-  }
-
-  public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
-    if ((!entityTypeRequest.isAbstract()) && entityTypeRequest.getIdAttribute() == null) {
-      throw new IllegalArgumentException(
-          "ID attribute for EntityType ["
-              + entityTypeRequest.getLabel()
-              + "] cannot be null"); // FIXME
-    }
-    EntityType entityType = entityTypeFactory.create();
-    entityType.setId(entityTypeRequest.getId());
-    String packageId = entityTypeRequest.getPackage();
-    Optional<Package> pack = packageId != null ? metaDataService.getPackage(packageId) : null;
-    entityType.setPackage(
-        pack.orElseThrow(() -> new UnknownPackageException(entityTypeRequest.getPackage())));
-    String extendsEntityTypeId = entityTypeRequest.getExtends();
-    if (extendsEntityTypeId != null) {
-      EntityType extendsEntityType =
-          metaDataService
-              .getEntityType(extendsEntityTypeId)
-              .orElseThrow(() -> new UnknownEntityTypeException(extendsEntityTypeId));
-      entityType.setExtends(extendsEntityType);
-    }
-
-    processI18nLabel(entityTypeRequest, entityType);
-    processI18nDescription(entityTypeRequest, entityType);
-    Map<String, Attribute> ownAttributes =
-        toAttributes(entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
-    String idAttribute = entityTypeRequest.getIdAttribute();
-    if (idAttribute != null) {
-      ownAttributes.get(idAttribute).setIdAttribute(true);
-    }
-    String labelAttribute = entityTypeRequest.getLabelAttribute();
-    if (labelAttribute != null) {
-      ownAttributes.get(labelAttribute).setLabelAttribute(true);
-    }
-    AtomicInteger count = new AtomicInteger();
-    entityTypeRequest
-        .getLookupAttributes()
-        .forEach(
-            lookupAttribute ->
-                ownAttributes
-                    .get(lookupAttribute)
-                    .setLookupAttributeIndex(count.getAndIncrement()));
-    entityType.setOwnAllAttributes(ownAttributes.values());
-    entityType.setAbstract(entityTypeRequest.isAbstract());
-    Optional<EntityType> extendsEntityType =
-        metaDataService.getEntityType(entityTypeRequest.getExtends());
-    if (extendsEntityType.isPresent()) {
-      entityType.setExtends(extendsEntityType.get());
-    }
-    entityType.setBackend(metaDataService.getDefaultBackend().getName());
-    return entityType;
-  }
-
-  private EntityTypeResponse mapInternal(
-      EntityType entityType,
-      boolean flattenAttrs,
-      boolean includeData,
-      boolean expandAttrs,
-      boolean i18n) {
-    EntityTypeResponse.Builder entityTypeResponseBuilder = EntityTypeResponse.builder();
-    entityTypeResponseBuilder.setLinks(
-        LinksResponse.create(null, createEntityTypeResponseUri(entityType), null));
-
-    if (includeData) {
-      EntityTypeResponseData.Builder builder = EntityTypeResponseData.builder();
-      builder.setId(entityType.getId());
-      Package pack = entityType.getPackage();
-      if (pack != null) {
-        builder.setPackage_(
-            PackageResponse.builder()
-                .setLinks(LinksResponse.create(null, createPackageResponseUri(pack), null))
-                .build());
-      }
-      builder.setLabel(entityType.getLabel(LocaleContextHolder.getLocale().getLanguage()));
-      builder.setDescription(
-          entityType.getDescription(LocaleContextHolder.getLocale().getLanguage()));
-      if (i18n) {
-        builder.setLabelI18n(getI18nEntityTypeLabel(entityType));
-        builder.setDescriptionI18n(getI18nEntityTypeDesc(entityType));
-      }
-
-      AttributesResponse.Builder attributesResponseBuilder =
-          AttributesResponse.builder()
-              .setLinks(LinksResponse.create(null, createAttributesResponseUri(entityType), null));
-      if (expandAttrs) {
-        attributesResponseBuilder.setItems(
-            flattenAttrs
-                ? mapInternal(entityType.getAllAttributes(), i18n)
-                : mapInternal(entityType.getOwnAllAttributes(), i18n));
-      }
-      builder.setAttributes(attributesResponseBuilder.build());
-      builder.setAbstract(entityType.isAbstract());
-      EntityType parent = entityType.getExtends();
-      builder.setExtends_(parent != null ? mapInternal(parent, false, false, false, i18n) : null);
-      builder.setIndexingDepth(entityType.getIndexingDepth());
-      entityTypeResponseBuilder.setData(builder.build());
-    }
-
-    return entityTypeResponseBuilder.build();
-  }
-
-  private String getIdAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isIdAttribute()) {
-        return attribute.getIdValue().toString();
-      }
-    }
-    return null;
-  }
-
-  private String getLabelAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isLabelAttribute()) {
-        return attribute.getIdValue().toString();
-      }
-    }
-    return null;
-  }
-
-  private LinksResponse createLinksResponse() {
-    URI self = createEntitiesResponseUri();
-    return LinksResponse.create(null, self, null);
-  }
-
   AttributesResponse mapAttributes(Attributes attributes, int size, int number, int total) {
     return AttributesResponse.create(
         createLinksResponse(number, size, total),
@@ -222,7 +71,7 @@ public class MetadataV3Mapper {
         PageResponse.create(size, attributes.getTotal(), attributes.getTotal() / size, number));
   }
 
-  private List<AttributeResponse> mapInternal(
+  List<AttributeResponse> mapInternal(
       Iterable<org.molgenis.data.meta.model.Attribute> allAttributes, boolean i18n) {
     List<AttributeResponse> result = new ArrayList<>();
     for (Attribute attr : allAttributes) {
@@ -362,7 +211,7 @@ public class MetadataV3Mapper {
     if (sequenceNumber == null) {
       sequenceNumber = index;
     }
-    attribute.setSequenceNumber(index);
+    attribute.setSequenceNumber(sequenceNumber);
     attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
     Optional<EntityType> refEntityType =
         metaDataService.getEntityType(attributeRequest.getRefEntityType());
@@ -392,7 +241,7 @@ public class MetadataV3Mapper {
     return attribute;
   }
 
-  private Map<String, Attribute> toAttributes(
+  Map<String, Attribute> toAttributes(
       List<CreateAttributeRequest> attributes,
       CreateEntityTypeRequest entityTypeRequest,
       EntityType entityType) {
@@ -480,35 +329,6 @@ public class MetadataV3Mapper {
     return builder.build().toUri();
   }
 
-  private URI createEntityTypeResponseUri(EntityType entityType) {
-    UriComponentsBuilder uriComponentsBuilder =
-        fromCurrentRequestUri()
-            .replacePath(null)
-            .path(MetadataApiController.API_META_PATH)
-            .pathSegment(entityType.getId());
-    return uriComponentsBuilder.build().toUri();
-  }
-
-  private URI createPackageResponseUri(Package aPackage) {
-    UriComponentsBuilder uriComponentsBuilder =
-        fromCurrentRequestUri()
-            .replacePath(null)
-            .path(API_ENTITY_PATH)
-            .pathSegment(PackageMetadata.PACKAGE)
-            .pathSegment(aPackage.getId());
-    return uriComponentsBuilder.build().toUri();
-  }
-
-  private URI createAttributesResponseUri(EntityType entityType) {
-    UriComponentsBuilder uriComponentsBuilder =
-        fromCurrentRequestUri()
-            .replacePath(null)
-            .path(MetadataApiController.API_META_PATH)
-            .pathSegment(entityType.getId())
-            .pathSegment(ATTRIBUTES);
-    return uriComponentsBuilder.build().toUri();
-  }
-
   private URI createAttributeResponseUri(Attribute attr) {
     UriComponentsBuilder uriComponentsBuilder =
         fromCurrentRequestUri()
@@ -518,37 +338,6 @@ public class MetadataV3Mapper {
             .pathSegment(ATTRIBUTES)
             .pathSegment(attr.getIdentifier());
     return uriComponentsBuilder.build().toUri();
-  }
-
-  private void processI18nLabel(CreateEntityTypeRequest entityTypeRequest, EntityType entityType) {
-    I18nValue i18nValue = entityTypeRequest.getLabel();
-    if (i18nValue != null) {
-      entityType.setLabel(i18nValue.getDefaultValue());
-      getLanguageCodes()
-          .forEach(
-              languageCode -> {
-                Map<String, String> translations = i18nValue.getTranslations();
-                if (translations != null) {
-                  entityType.setLabel(languageCode, translations.get(languageCode));
-                }
-              });
-    }
-  }
-
-  private void processI18nDescription(
-      CreateEntityTypeRequest entityTypeRequest, EntityType entityType) {
-    I18nValue i18nValue = entityTypeRequest.getDescription();
-    if (i18nValue != null) {
-      entityType.setDescription(i18nValue.getDefaultValue());
-      getLanguageCodes()
-          .forEach(
-              languageCode -> {
-                Map<String, String> translations = i18nValue.getTranslations();
-                if (translations != null) {
-                  entityType.setDescription(languageCode, translations.get(languageCode));
-                }
-              });
-    }
   }
 
   private void processI18nLabel(CreateAttributeRequest attr, Attribute attribute) {
@@ -590,20 +379,6 @@ public class MetadataV3Mapper {
         .forEach(
             code ->
                 translations.put(code, attr.getString(getI18nAttributeName(DESCRIPTION, code))));
-    return I18nValue.create(defaultValue, translations);
-  }
-
-  private I18nValue getI18nEntityTypeLabel(EntityType entityType) {
-    String defaultValue = entityType.getLabel();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, entityType.getLabel(code)));
-    return I18nValue.create(defaultValue, translations);
-  }
-
-  private I18nValue getI18nEntityTypeDesc(EntityType entityType) {
-    String defaultValue = entityType.getDescription();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, entityType.getDescription(code)));
     return I18nValue.create(defaultValue, translations);
   }
 }

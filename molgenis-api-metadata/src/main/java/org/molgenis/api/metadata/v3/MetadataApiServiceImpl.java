@@ -26,7 +26,6 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   private final MetaDataService metadataService;
   private final QueryMapper queryMapper;
   private final SortMapper sortMapper;
-  private final MetadataV3Mapper metadataV3Mapper;
   // TODO replace usage of DataService with new methods in MetaDataService
   private final DataService dataService;
 
@@ -34,12 +33,10 @@ public class MetadataApiServiceImpl implements MetadataApiService {
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
       SortMapper sortMapper,
-      MetadataV3Mapper metadataV3Mapper,
       DataService dataService) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
-    this.metadataV3Mapper = requireNonNull(metadataV3Mapper);
     this.dataService = requireNonNull(dataService);
   }
 
