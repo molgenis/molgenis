@@ -12,17 +12,17 @@
       "items": [
         {
           "link": {
-            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/aaaac3nutyqzlhfw2djjzsaaam"
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/v3meta_MyNumbers_id"
           },
           "data": {
-            "id": "aaaac3nutyqzlhfw2djjzsaaam",
+            "id": "v3meta_MyNumbers_id",
             "name": "id",
             "sequenceNr": 0,
-            "type": "INT",
+            "type": "int",
             "label": "id",
             "nullable": false,
             "auto": false,
-            "visible": true,
+            "visible": false,
             "unique": true,
             "readOnly": true,
             "aggregatable": false
@@ -30,13 +30,13 @@
         },
         {
           "link": {
-            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/aaaac3nutyqzlhfw2djjzsaaaq"
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/v3meta_MyNumbers_label"
           },
           "data": {
-            "id": "aaaac3nutyqzlhfw2djjzsaaaq",
+            "id": "v3meta_MyNumbers_label",
             "name": "label",
             "sequenceNr": 1,
-            "type": "STRING",
+            "type": "string",
             "lookupAttributeIndex": 0,
             "label": "label",
             "nullable": false,

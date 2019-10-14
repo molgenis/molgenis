@@ -34,8 +34,7 @@ public abstract class EntityTypeResponseData {
   @CheckForNull
   public abstract PackageResponse getPackage_();
 
-  @SerializedName("blaat")
-  public abstract boolean isAbstract();
+  public abstract boolean isAbstract_();
 
   @Nullable
   @CheckForNull
@@ -68,7 +67,7 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setAttributes(AttributesResponse attributes);
 
-    public abstract Builder setAbstract(boolean isAbstract);
+    public abstract Builder setAbstract_(boolean isAbstract);
 
     public abstract Builder setExtends_(EntityTypeResponse entityType);
 

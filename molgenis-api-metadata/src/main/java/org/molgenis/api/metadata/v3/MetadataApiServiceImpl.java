@@ -13,6 +13,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
+import org.molgenis.data.meta.EntityTypeWithoutMappedByAttributes;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -137,7 +138,8 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   public void createEntityType(EntityType entityType) {
-    metadataService.addEntityType(entityType);
+    addEntityTypeFirstPass(entityType);
+    updateEntityTypeSecondPass(entityType);
   }
 
   @Override
@@ -153,5 +155,23 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
     List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
     metadataService.deleteEntityType(entityTypes);
+  }
+
+  // TODO remove code duplication with molgenis-data-import DataPersisterImpl
+  private void addEntityTypeFirstPass(EntityType entityType) {
+    EntityType persistableEntityType;
+    if (entityType.hasMappedByAttributes()) {
+      persistableEntityType = new EntityTypeWithoutMappedByAttributes(entityType);
+    } else {
+      persistableEntityType = entityType;
+    }
+    metadataService.addEntityType(persistableEntityType);
+  }
+
+  // TODO remove code duplication with molgenis-data-import DataPersisterImpl
+  private void updateEntityTypeSecondPass(EntityType entityType) {
+    if (entityType.hasMappedByAttributes()) {
+      metadataService.updateEntityType(entityType);
+    }
   }
 }

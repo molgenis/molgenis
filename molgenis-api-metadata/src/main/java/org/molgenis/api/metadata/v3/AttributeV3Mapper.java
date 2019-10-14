@@ -26,12 +26,14 @@ import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
@@ -43,23 +45,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class AttributeV3Mapper {
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
+
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
   private final SortMapper sortMapper;
   private final SortConverter sortConverter;
+  private final EntityManager entityManager;
+  private final EntityTypeMetadata entityTypeMetadata;
 
   public AttributeV3Mapper(
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
       SortMapper sortMapper,
-      SortConverter sortConverter) {
+      SortConverter sortConverter,
+      EntityManager entityManager,
+      EntityTypeMetadata entityTypeMetadata) {
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attributeFactory = requireNonNull(attributeFactory);
     this.metaDataService = requireNonNull(metaDataService);
     this.sortMapper = requireNonNull(sortMapper);
     this.sortConverter = requireNonNull(sortConverter);
+    this.entityManager = requireNonNull(entityManager);
+    this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
   }
 
   AttributesResponse mapAttributes(Attributes attributes, int size, int number, int total) {
@@ -213,10 +222,12 @@ public class AttributeV3Mapper {
     }
     attribute.setSequenceNumber(sequenceNumber);
     attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
-    Optional<EntityType> refEntityType =
-        metaDataService.getEntityType(attributeRequest.getRefEntityType());
-    if (refEntityType.isPresent()) {
-      attribute.setRefEntity(refEntityType.get());
+
+    EntityType refEntityType;
+    String refEntityTypeId = attributeRequest.getRefEntityType();
+    if (refEntityTypeId != null) {
+      refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
+      attribute.setRefEntity(refEntityType);
     }
     // FIXME: absent attr results in false.
     // attribute.setCascadeDelete(attributeRequest.isCascadeDelete());

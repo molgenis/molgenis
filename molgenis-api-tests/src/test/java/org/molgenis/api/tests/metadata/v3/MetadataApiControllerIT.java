@@ -112,11 +112,11 @@ class MetadataApiControllerIT extends AbstractApiTest {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
-            "retrieveMetadataEntityTypeAttributes.json",
+            "retrieveMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata/v3meta_MyDataset/attributes/myString")
+        .get("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));

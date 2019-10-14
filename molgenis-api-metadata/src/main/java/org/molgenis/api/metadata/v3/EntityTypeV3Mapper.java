@@ -70,12 +70,6 @@ public class EntityTypeV3Mapper {
   }
 
   public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
-    if ((!entityTypeRequest.isAbstract()) && entityTypeRequest.getIdAttribute() == null) {
-      throw new IllegalArgumentException(
-          "ID attribute for EntityType ["
-              + entityTypeRequest.getLabel()
-              + "] cannot be null"); // FIXME
-    }
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
@@ -161,7 +155,7 @@ public class EntityTypeV3Mapper {
                 : attributeV3Mapper.mapInternal(entityType.getOwnAllAttributes(), i18n));
       }
       builder.setAttributes(attributesResponseBuilder.build());
-      builder.setAbstract(entityType.isAbstract());
+      builder.setAbstract_(entityType.isAbstract());
       EntityType parent = entityType.getExtends();
       builder.setExtends_(parent != null ? mapInternal(parent, false, false, false, i18n) : null);
       builder.setIndexingDepth(entityType.getIndexingDepth());

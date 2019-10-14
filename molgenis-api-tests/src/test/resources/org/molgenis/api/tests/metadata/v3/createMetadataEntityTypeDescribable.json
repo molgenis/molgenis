@@ -8,7 +8,7 @@
   "attributes": [
     {
       "id": "v3meta_Describable_description",
-      "name": "id",
+      "name": "description",
       "type": "string"
     }
   ],

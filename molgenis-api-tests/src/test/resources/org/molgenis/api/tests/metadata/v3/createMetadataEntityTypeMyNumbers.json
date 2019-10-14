@@ -2,7 +2,7 @@
   "id": "v3meta_MyNumbers",
   "package_": "v3meta",
   "label": {
-    "defaultValue": "MyNumbers"
+    "defaultValue": "My Numbers"
   },
   "attributes": [
     {
@@ -18,5 +18,6 @@
     }
   ],
   "idAttribute": "v3meta_MyNumbers_id",
-  "labelAttribute": "v3meta_MyNumbers_label"
+  "labelAttribute": "v3meta_MyNumbers_label",
+  "lookupAttributes": ["v3meta_MyNumbers_label"]
 }
