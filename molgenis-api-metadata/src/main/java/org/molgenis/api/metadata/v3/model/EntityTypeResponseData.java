@@ -28,6 +28,18 @@ public abstract class EntityTypeResponseData {
   @CheckForNull
   public abstract I18nValue getDescriptionI18n();
 
+  @Nullable
+  @CheckForNull
+  public abstract AttributeResponse getLabelAttribute();
+
+  @Nullable
+  @CheckForNull
+  public abstract AttributeResponse getIdAttribute();
+
+  @Nullable
+  @CheckForNull
+  public abstract AttributesResponse getLookupAttributes();
+
   public abstract AttributesResponse getAttributes();
 
   @Nullable
@@ -72,6 +84,12 @@ public abstract class EntityTypeResponseData {
     public abstract Builder setExtends_(EntityTypeResponse entityType);
 
     public abstract Builder setIndexingDepth(Integer indexingDepth);
+
+    public abstract Builder setLabelAttribute(AttributeResponse labelAttribute);
+
+    public abstract Builder setIdAttribute(AttributeResponse idAttribute);
+
+    public abstract Builder setLookupAttributes(AttributesResponse lookupAttributes);
 
     public abstract EntityTypeResponseData build();
   }
