@@ -24,6 +24,7 @@ import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.I18nValue;
+import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.meta.AttributeType;
@@ -119,8 +120,7 @@ public class AttributeV3Mapper {
     if (attr.getDataType() == AttributeType.ENUM) {
       builder.setEnumOptions(attr.getEnumOptions());
     }
-    builder.setRangeMin(attr.getRangeMin());
-    builder.setRangeMax(attr.getRangeMax());
+    builder.setRange(Range.create(attr.getRangeMin(), attr.getRangeMax()));
     Attribute parent = attr.getParent();
     builder.setParentAttributeId(parent != null ? parent.getIdentifier() : null);
     builder.setNullableExpression(attr.getNullableExpression());

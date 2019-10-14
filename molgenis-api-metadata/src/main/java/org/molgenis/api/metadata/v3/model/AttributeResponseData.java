@@ -78,11 +78,7 @@ public abstract class AttributeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract Long getRangeMin();
-
-  @Nullable
-  @CheckForNull
-  public abstract Long getRangeMax();
+  public abstract Range getRange();
 
   @Nullable
   @CheckForNull
@@ -155,9 +151,7 @@ public abstract class AttributeResponseData {
 
     public abstract Builder setEnumOptions(List<String> enumOptions);
 
-    public abstract Builder setRangeMin(Long min);
-
-    public abstract Builder setRangeMax(Long max);
+    public abstract Builder setRange(Range range);
 
     public abstract Builder setParentAttributeId(String parent);
 
