@@ -27,7 +27,6 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   @Mock private QueryMapper queryMapper;
   @Mock private SortMapper sortMapper;
   @Mock private DataService dataService;
-  @Mock private EntityTypeV3Mapper entityTypeV3Mapper;
   private MetadataApiServiceImpl metadataApiServiceImpl;
 
   @BeforeEach
