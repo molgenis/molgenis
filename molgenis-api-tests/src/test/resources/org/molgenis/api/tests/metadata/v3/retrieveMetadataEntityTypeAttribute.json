@@ -1,7 +1,18 @@
 {
-  "links": {
+  "link": {
     "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString"
   },
   "data": {
+    "id": "v3meta_MyDataset_myString",
+    "name": "myString",
+    "sequenceNr": 10,
+    "type": "string",
+    "label": "myString",
+    "nullable": false,
+    "auto": false,
+    "visible": false,
+    "unique": false,
+    "readOnly": false,
+    "aggregatable": false
   }
 }
