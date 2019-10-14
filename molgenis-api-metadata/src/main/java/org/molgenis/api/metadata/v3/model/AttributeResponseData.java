@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.data.Sort;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -38,7 +37,7 @@ public abstract class AttributeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract Sort getOrderBy();
+  public abstract List<AttributeSort> getOrderBy();
 
   @Nullable
   @CheckForNull
@@ -125,7 +124,7 @@ public abstract class AttributeResponseData {
 
     public abstract Builder setMappedBy(AttributeResponse attribute);
 
-    public abstract Builder setOrderBy(Sort sort);
+    public abstract Builder setOrderBy(List<AttributeSort> sort);
 
     public abstract Builder setLabel(String label);
 

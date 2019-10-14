@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
@@ -20,6 +21,8 @@ import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
+import org.molgenis.api.metadata.v3.model.AttributeSort;
+import org.molgenis.api.metadata.v3.model.AttributeSort.Order.Direction;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
@@ -27,6 +30,8 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Order;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -34,7 +39,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
@@ -92,7 +96,7 @@ public class AttributeV3Mapper {
     builder.setId(attr.getIdentifier());
     builder.setName(attr.getName());
     builder.setSequenceNr(attr.getSequenceNumber());
-    builder.setType(mapAttributeType(attr.getDataType()));
+    builder.setType(getValueString(attr.getDataType()));
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
     if (EntityTypeUtils.isReferenceType(attr)) {
       try {
@@ -103,7 +107,7 @@ public class AttributeV3Mapper {
     }
     builder.setCascadeDelete(attr.getCascadeDelete());
     builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy(), i18n) : null);
-    builder.setOrderBy(attr.getOrderBy());
+    builder.setOrderBy(map(attr));
     builder.setLabel(attr.getLabel(LocaleContextHolder.getLocale().getLanguage()));
     builder.setDescription(attr.getDescription(LocaleContextHolder.getLocale().getLanguage()));
     if (i18n) {
@@ -131,73 +135,16 @@ public class AttributeV3Mapper {
     return builder.build();
   }
 
-  private String mapAttributeType(AttributeType attributeType) {
-    String responseType;
-    switch (attributeType) {
-      case BOOL:
-        responseType = "bool";
-        break;
-      case CATEGORICAL:
-        responseType = "categorical";
-        break;
-      case CATEGORICAL_MREF:
-        responseType = "categorical_mref";
-        break;
-      case COMPOUND:
-        responseType = "compound";
-        break;
-      case DATE:
-        responseType = "date";
-        break;
-      case DATE_TIME:
-        responseType = "date_time";
-        break;
-      case DECIMAL:
-        responseType = "decimal";
-        break;
-      case EMAIL:
-        responseType = "email";
-        break;
-      case ENUM:
-        responseType = "enum";
-        break;
-      case FILE:
-        responseType = "file";
-        break;
-      case HTML:
-        responseType = "html";
-        break;
-      case HYPERLINK:
-        responseType = "hyperlink";
-        break;
-      case INT:
-        responseType = "int";
-        break;
-      case LONG:
-        responseType = "long";
-        break;
-      case MREF:
-        responseType = "mref";
-        break;
-      case ONE_TO_MANY:
-        responseType = "one_to_many";
-        break;
-      case SCRIPT:
-        responseType = "script";
-        break;
-      case STRING:
-        responseType = "string";
-        break;
-      case TEXT:
-        responseType = "text";
-        break;
-      case XREF:
-        responseType = "xref";
-        break;
-      default:
-        throw new UnexpectedEnumException(attributeType);
+  private List<AttributeSort> map(Attribute attr) {
+    List<AttributeSort> orders = new ArrayList<>();
+
+    Sort sort = attr.getOrderBy();
+    for (Order order : sort) {
+      orders.add(
+          AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
     }
-    return responseType;
+
+    return orders;
   }
 
   private Attribute toAttribute(
