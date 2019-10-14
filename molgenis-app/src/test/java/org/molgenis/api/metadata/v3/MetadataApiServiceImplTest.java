@@ -27,20 +27,19 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   @Mock private QueryMapper queryMapper;
   @Mock private SortMapper sortMapper;
   @Mock private DataService dataService;
-  @Mock private MetadataV3Mapper metadataV3Mapper;
+  @Mock private EntityTypeV3Mapper entityTypeV3Mapper;
   private MetadataApiServiceImpl metadataApiServiceImpl;
 
   @BeforeEach
   void setUpBeforeEach() {
     metadataApiServiceImpl =
-        new MetadataApiServiceImpl(
-            metadataService, queryMapper, sortMapper, metadataV3Mapper, dataService);
+        new MetadataApiServiceImpl(metadataService, queryMapper, sortMapper, dataService);
   }
 
   @Test
   void testMetadataApiServiceImpl() {
     assertThrows(
-        NullPointerException.class, () -> new MetadataApiServiceImpl(null, null, null, null, null));
+        NullPointerException.class, () -> new MetadataApiServiceImpl(null, null, null, null));
   }
 
   @Test

@@ -444,23 +444,27 @@ components:
       properties:
         id:
           type: string
-        package:
+        package_:
           type: string
         idAttribute:
-          type: string
+          $ref: "#/components/schemas/Attribute"
         labelAttribute:
-          type: string
+          $ref: "#/components/schemas/Attribute"
         lookupAttributes:
           type: array
           items:
-            type: string
-        extends:
+            $ref: "#/components/schemas/Attribute"
+        extends_:
           $ref: "#/components/schemas/EntityType"
-        label:
-          $ref: "#/components/schemas/I18nValue"
         description:
+          type: string
+        description_i18n:
           $ref: "#/components/schemas/I18nValue"
-        abstract:
+        label:
+          type: string
+        label_i18n:
+          $ref: "#/components/schemas/I18nValue"
+        abstract_:
           type: boolean
         indexingDepth:
           type: integer
@@ -489,6 +493,7 @@ components:
           type: string
         type:
           type: string
+          enum: [bool, categorical, categorical_mref, compound, date, date_time, decimal, email, enum, file, html, hyperlink, int, long, mref, one_to_many, script, string, text, xref]
         mappedBy:
           $ref: "#/components/schemas/Attribute"
         lookupAttribute:
@@ -496,9 +501,13 @@ components:
         refEntityTypeId:
           type: string
           nullable: true
-        label:
-          $ref: "#/components/schemas/I18nValue"
         description:
+          type: string
+        description_i18n:
+          $ref: "#/components/schemas/I18nValue"
+        label:
+          type: string
+        label_i18n:
           $ref: "#/components/schemas/I18nValue"
         nullable:
           type: boolean
@@ -539,15 +548,13 @@ components:
       properties:
         id:
           type: string
-        package:
-          type: string
+        package_:
+          $ref: "#/components/schemas/Links"
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
-        isAbstract:
-          type: string
-        aPackage:
+        abstract_:
           type: string
         entityTypeParent:
           type: string
@@ -573,6 +580,7 @@ components:
           type: string
         type:
           type: string
+          enum: [bool, categorical, categorical_mref, compound, date, date_time, decimal, email, enum, file, html, hyperlink, int, long, mref, one_to_many, script, string, text, xref]
         parent:
           description: the id of the parent attribute
           type: string
@@ -584,8 +592,9 @@ components:
           description: the id of the 'mapped by' attribute
           type: string
         orderBy:
-          description: the id of the 'order by' attribute
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeSort"
         expression:
           type: string
         nullable:
@@ -604,10 +613,8 @@ components:
           type: array
           items:
             type: string
-        rangeMin:
-          type: number
-        rangeMax:
-          type: number
+        range:
+          $ref: "#/components/schemas/Range"
         readonly:
           type: boolean
         unique:
@@ -644,6 +651,21 @@ components:
             $ref: "#/components/schemas/Attribute"
         page:
           $ref: "#/components/schemas/Page"
+    AttributeSort:
+      type: array
+      properties:
+        id:
+          type: string
+        order:
+          type: string
+          enum: [ASC,DESC]
+    Range:
+      type: object
+      properties:
+        min:
+          type: integer
+        max:
+          type: integer
     I18nValue:
       type: object
       properties:

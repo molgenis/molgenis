@@ -15,17 +15,20 @@ import org.molgenis.test.AbstractMockitoTest;
 
 class MetadataApiControllerTest extends AbstractMockitoTest {
   @Mock private MetadataApiService metadataApiService;
-  @Mock private MetadataV3Mapper metadataV3Mapper;
+  @Mock private EntityTypeV3Mapper entityTypeV3Mapper;
+  @Mock private AttributeV3Mapper attributeV3Mapper;
   private MetadataApiController metadataApiController;
 
   @BeforeEach
   void setUpBeforeEach() {
-    metadataApiController = new MetadataApiController(metadataApiService, metadataV3Mapper);
+    metadataApiController =
+        new MetadataApiController(metadataApiService, entityTypeV3Mapper, attributeV3Mapper);
   }
 
   @Test
   void testMetadataApiController() {
-    assertThrows(NullPointerException.class, () -> new MetadataApiController(null, null));
+    assertThrows(
+        NullPointerException.class, () -> new MetadataApiController(null, null, attributeV3Mapper));
   }
 
   @Test
