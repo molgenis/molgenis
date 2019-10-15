@@ -14,11 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.springframework.stereotype.Component;
 
 public class VcfUtils {
 
