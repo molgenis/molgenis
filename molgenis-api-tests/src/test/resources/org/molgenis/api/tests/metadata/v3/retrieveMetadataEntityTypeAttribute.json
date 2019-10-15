@@ -7,6 +7,8 @@
     "name": "myString",
     "sequenceNr": 10,
     "type": "string",
+    "idAttribute": false,
+    "labelAttribute": false,
     "label": "myString",
     "nullable": false,
     "auto": false,
