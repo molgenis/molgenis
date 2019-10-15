@@ -102,7 +102,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
     given()
         .get("/api/metadata/v3meta_MyDataset/attributes?size=3&page=2")
         .then()
-          .statusCode(HttpStatus.OK.value())
+        .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
   }
 
