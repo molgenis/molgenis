@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
@@ -26,15 +26,19 @@ import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
 import org.molgenis.api.metadata.v3.model.AttributeSort;
 import org.molgenis.api.metadata.v3.model.AttributeSort.Order.Direction;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
+import org.molgenis.api.metadata.v3.model.Category;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
+import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -83,7 +87,7 @@ public class AttributeV3Mapper {
         createLinksResponse(number, size, total),
         attributes.getAttributes().stream()
             .map(attribute -> this.mapAttribute(attribute, false))
-            .collect(Collectors.toList()),
+            .collect(toList()),
         PageResponse.create(size, attributes.getTotal(), attributes.getTotal() / size, number));
   }
 
@@ -136,6 +140,10 @@ public class AttributeV3Mapper {
     if (attr.getDataType() == AttributeType.ENUM) {
       builder.setEnumOptions(attr.getEnumOptions());
     }
+    if (attr.getDataType() == AttributeType.CATEGORICAL
+        || attr.getDataType() == AttributeType.CATEGORICAL_MREF) {
+      builder.setCategoricalOptions(getCategories(attr.getRefEntity()));
+    }
     org.molgenis.data.Range range = attr.getRange();
     if (range != null) {
       builder.setRange(Range.create(range.getMin(), range.getMax()));
@@ -148,6 +156,26 @@ public class AttributeV3Mapper {
     builder.setDefaultValue(attr.getDefaultValue());
 
     return builder.build();
+  }
+
+  private List<Category> getCategories(EntityType entityType) {
+    Repository<Entity> repository =
+        metaDataService
+            .getRepository(entityType)
+            .orElseThrow(() -> new UnknownRepositoryException(entityType.getId()));
+    Attribute idAttribute = entityType.getIdAttribute();
+    Attribute labelAttribute = entityType.getLabelAttribute();
+    return repository
+        .query()
+        .findAll()
+        .map(
+            entity -> {
+              return Category.builder()
+                  .setId(entity.get(idAttribute))
+                  .setLabel(entity.get(labelAttribute).toString())
+                  .build();
+            })
+        .collect(toList());
   }
 
   private List<AttributeSort> map(Attribute attr) {
