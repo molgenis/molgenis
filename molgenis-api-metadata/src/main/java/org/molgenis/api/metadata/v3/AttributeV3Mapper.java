@@ -1,5 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
@@ -8,6 +9,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -145,12 +147,17 @@ public class AttributeV3Mapper {
   }
 
   private List<AttributeSort> map(Attribute attr) {
-    List<AttributeSort> orders = new ArrayList<>();
+    List<AttributeSort> orders;
 
     Sort sort = attr.getOrderBy();
-    for (Order order : sort) {
-      orders.add(
-          AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+    if (sort == null) {
+      orders = emptyList();
+    } else {
+      orders = new ArrayList<>(Iterables.size(sort));
+      for (Order order : sort) {
+        orders.add(
+            AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+      }
     }
 
     return orders;

@@ -100,9 +100,9 @@ class MetadataApiControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata/v3meta_MyDataset/attributes")
+        .get("/api/metadata/v3meta_MyDataset/attributes?number=2&size=3")
         .then()
-        .statusCode(HttpStatus.OK.value())
+          .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
   }
 
