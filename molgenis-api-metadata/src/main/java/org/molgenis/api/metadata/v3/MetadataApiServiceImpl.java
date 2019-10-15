@@ -93,9 +93,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
                 () -> new UnknownRepositoryException(AttributeMetadata.ATTRIBUTE_META_DATA));
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> molgenisQuery =
-        query != null
-            ? (org.molgenis.data.Query<Attribute>) queryMapper.map(query, repository)
-            : new QueryImpl<>(repository);
+        query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     boolean nest = !molgenisQuery.getRules().isEmpty();
     if (nest) {
