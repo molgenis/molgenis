@@ -13,14 +13,6 @@ import org.molgenis.semanticsearch.explain.bean.EntityTypeSearchResults;
 import org.molgenis.semanticsearch.semantic.Hits;
 
 public interface SemanticSearchService {
-  /**
-   * Find {@link Attribute attributes} in a {@link EntityType entity type} that match the given
-   * target attribute in the target entity type.
-   */
-  default AttributeSearchResults findAttributes(
-      EntityType sourceEntityType, EntityType targetEntityType, Attribute targetAttribute) {
-    return findAttributes(sourceEntityType, targetEntityType, targetAttribute, emptySet());
-  }
 
   /**
    * Find {@link Attribute attributes} in a source {@link EntityType entity type} that match
