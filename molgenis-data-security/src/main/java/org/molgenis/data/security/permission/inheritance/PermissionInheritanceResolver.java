@@ -86,12 +86,6 @@ public class PermissionInheritanceResolver {
     return ownPermission;
   }
 
-  public boolean isNotEmpty(InheritedPermissionsResult result) {
-    return !(result.getRequestedAclParentRolesPermissions() == null
-            || result.getRequestedAclParentRolesPermissions().isEmpty())
-        || (result.getParentAclPermission() != null && isNotEmpty(result.getParentAclPermission()));
-  }
-
   private boolean isNotEmpty(InheritedUserPermissionsResult result) {
     return result.getOwnPermission() != null
         || !(result.getInheritedUserPermissionsResult() == null

@@ -487,7 +487,6 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
   @Test
   void testSetPermission() {
     Sid role = new GrantedAuthoritySid("ROLE_role");
-    Entity entity = mock(Entity.class);
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
     when(acl.getObjectIdentity()).thenReturn(objectIdentity);
@@ -519,7 +518,6 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
 
   @Test
   void testSetPermissions() {
-    Entity entity = mock(Entity.class);
     Sid sid = new GrantedAuthoritySid("ROLE_role");
     MutableAcl acl = mock(MutableAcl.class);
     ObjectIdentity objectIdentity = new ObjectIdentityImpl("entity-typeId", "identifier");
