@@ -43,7 +43,6 @@ public class VcfRepository extends AbstractRepository {
 
   public static final String NAME = "NAME";
   public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
-  public static final String PREFIX = "##";
 
   public static final int BATCH_SIZE = 1000;
   private final String entityTypeId;

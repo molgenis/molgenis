@@ -316,8 +316,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
-    File file = mock(File.class);
-
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
 
@@ -352,8 +350,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithoutSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
@@ -391,8 +387,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithSamples() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
@@ -442,8 +436,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
