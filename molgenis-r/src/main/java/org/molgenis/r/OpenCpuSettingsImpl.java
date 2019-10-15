@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCpuSettings {
-  private static final long serialVersionUID = 1L;
-
   private static final String ID = "OpenCpuSettings";
 
   public OpenCpuSettingsImpl() {
