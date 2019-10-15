@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataExplorerSettings extends DefaultSettingsEntity {
-  private static final long serialVersionUID = 1L;
-
   private static final String ID = DataExplorerController.ID;
 
   public DataExplorerSettings() {
