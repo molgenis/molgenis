@@ -48,10 +48,12 @@ public class UserViewData {
     return fullName;
   }
 
+  @SuppressWarnings("unused")
   public Boolean isActive() {
     return this.active;
   }
 
+  @SuppressWarnings("unused")
   public Boolean isSuperuser() {
     return this.superuser;
   }

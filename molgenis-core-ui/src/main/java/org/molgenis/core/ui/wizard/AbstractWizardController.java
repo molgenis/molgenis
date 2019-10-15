@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public abstract class AbstractWizardController extends PluginController {
+
   private static final String VIEW_NAME = "view-wizard";
   private final String wizardName;
 
@@ -50,13 +51,8 @@ public abstract class AbstractWizardController extends PluginController {
   }
 
   @GetMapping(value = "/**")
-  public String init(HttpServletRequest request) {
-    onInit(request);
+  public String init() {
     return VIEW_NAME;
-  }
-
-  protected void onInit(HttpServletRequest request) {
-    // in case you want to do something in the beginning
   }
 
   @PostMapping("/next")

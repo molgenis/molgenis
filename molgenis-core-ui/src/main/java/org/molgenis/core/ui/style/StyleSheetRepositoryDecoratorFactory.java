@@ -8,6 +8,7 @@ import org.molgenis.data.Repository;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("unused")
 public class StyleSheetRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<StyleSheet, StyleSheetMetadata> {
   private final AppDbSettings appDbSettings;
