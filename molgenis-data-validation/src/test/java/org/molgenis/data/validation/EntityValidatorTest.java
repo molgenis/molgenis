@@ -250,7 +250,6 @@ class EntityValidatorTest extends AbstractMockitoTest {
 
   @Test
   void testValidateNotNullConstraintCompound() {
-    String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
 
     EntityType entityType =
