@@ -16,7 +16,6 @@ import org.molgenis.api.data.v3.model.EntitiesResponse.Builder;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
@@ -64,16 +63,11 @@ public class EntityMapperImpl implements EntityMapper {
 
   private void setPageResponse(EntityCollection entityCollection, Builder builder) {
     Page page = entityCollection.getPage();
-    PageResponse pageResponse = null;
     if (page != null) {
-      pageResponse =
+      builder.setPage(
           getPageResponse(
-              entityCollection.getEntities().size(),
-              page.getOffset(),
-              page.getTotal(),
-              page.getPageSize());
+              entityCollection.getSize(), page.getOffset(), page.getTotal(), page.getPageSize()));
     }
-    builder.setPage(pageResponse);
   }
 
   private EntityResponse mapRecursive(
