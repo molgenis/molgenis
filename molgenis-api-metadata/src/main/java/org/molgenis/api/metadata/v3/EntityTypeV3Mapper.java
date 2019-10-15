@@ -168,14 +168,14 @@ public class EntityTypeV3Mapper {
     return entityTypeResponseBuilder.build();
   }
 
-  private AttributesResponse getLookupAttributes(EntityType entityType) {
+  private List<AttributeResponse> getLookupAttributes(EntityType entityType) {
     List<AttributeResponse> lookupAttributes = new ArrayList<>();
     for (Attribute attribute : entityType.getOwnAllAttributes()) {
       if (attribute.isIdAttribute()) {
         lookupAttributes.add(attributeV3Mapper.mapAttribute(attribute, false));
       }
     }
-    return AttributesResponse.create(null, lookupAttributes, null); // TODO: links and page
+    return lookupAttributes;
   }
 
   private AttributeResponse getIdAttribute(EntityType entityType) {

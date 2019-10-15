@@ -59,7 +59,11 @@
     {
       "id": "v3meta_MyDataset_myInt",
       "name": "myInt",
-      "type": "int"
+      "type": "int",
+      "range": {
+        "min": 2,
+        "max": 4
+      }
     },
     {
       "id": "v3meta_MyDataset_myLong",

@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
@@ -118,7 +119,9 @@ public class AttributeV3Mapper {
     }
     builder.setCascadeDelete(attr.getCascadeDelete());
     builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy(), i18n) : null);
-    builder.setOrderBy(map(attr));
+    if (attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()) {
+      builder.setOrderBy(map(attr));
+    }
     builder.setLabel(attr.getLabel(LocaleContextHolder.getLocale().getLanguage()));
     builder.setDescription(attr.getDescription(LocaleContextHolder.getLocale().getLanguage()));
     if (i18n) {
@@ -198,8 +201,10 @@ public class AttributeV3Mapper {
     processI18nDescription(attributeRequest, attribute);
     attribute.setAggregatable(attributeRequest.isAggregatable());
     attribute.setEnumOptions(attributeRequest.getEnumOptions());
-    attribute.setRangeMin(attributeRequest.getRangeMin());
-    attribute.setRangeMax(attributeRequest.getRangeMax());
+    Range range = attributeRequest.getRange();
+    if (range != null) {
+      attribute.setRange(map(range));
+    }
     attribute.setReadOnly(attributeRequest.isReadonly());
     attribute.setUnique(attributeRequest.isUnique());
     attribute.setNullableExpression(attributeRequest.getNullableExpression());
@@ -207,6 +212,10 @@ public class AttributeV3Mapper {
     attribute.setValidationExpression(attributeRequest.getValidationExpression());
     attribute.setDefaultValue(attributeRequest.getDefaultValue());
     return attribute;
+  }
+
+  private org.molgenis.data.Range map(Range range) {
+    return new org.molgenis.data.Range(range.getMin(), range.getMax());
   }
 
   Map<String, Attribute> toAttributes(

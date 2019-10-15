@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
+import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
@@ -37,7 +38,7 @@ public abstract class EntityTypeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract AttributesResponse getLookupAttributes();
+  public abstract List<AttributeResponse> getLookupAttributes();
 
   public abstract AttributesResponse getAttributes();
 
@@ -88,7 +89,7 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setIdAttribute(AttributeResponse idAttribute);
 
-    public abstract Builder setLookupAttributes(AttributesResponse lookupAttributes);
+    public abstract Builder setLookupAttributes(List<AttributeResponse> lookupAttributes);
 
     public abstract EntityTypeResponseData build();
   }

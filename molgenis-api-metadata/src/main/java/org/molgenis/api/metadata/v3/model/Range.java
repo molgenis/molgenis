@@ -11,6 +11,7 @@ public abstract class Range {
   @Nullable
   @CheckForNull
   public abstract Long getMin();
+
   @Nullable
   @CheckForNull
   public abstract Long getMax();
