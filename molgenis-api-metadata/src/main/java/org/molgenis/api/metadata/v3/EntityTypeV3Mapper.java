@@ -61,7 +61,11 @@ public class EntityTypeV3Mapper {
     return EntityTypesResponse.create(
         createLinksResponse(number, size, total),
         results,
-        PageResponse.create(size, entityTypes.getTotal(), total > 0 ? (int) Math.ceil(total / (double) size) : 0, number));
+        PageResponse.create(
+            size,
+            entityTypes.getTotal(),
+            total > 0 ? (int) Math.ceil(total / (double) size) : 0,
+            number));
   }
 
   public EntityTypeResponse toEntityTypeResponse(
