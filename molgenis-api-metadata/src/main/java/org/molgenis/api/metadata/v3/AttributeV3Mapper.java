@@ -135,7 +135,10 @@ public class AttributeV3Mapper {
     if (attr.getDataType() == AttributeType.ENUM) {
       builder.setEnumOptions(attr.getEnumOptions());
     }
-    builder.setRange(Range.create(attr.getRangeMin(), attr.getRangeMax()));
+    org.molgenis.data.Range range = attr.getRange();
+    if (range != null) {
+      builder.setRange(Range.create(range.getMin(), range.getMax()));
+    }
     Attribute parent = attr.getParent();
     builder.setParentAttributeId(parent != null ? parent.getIdentifier() : null);
     builder.setNullableExpression(attr.getNullableExpression());
