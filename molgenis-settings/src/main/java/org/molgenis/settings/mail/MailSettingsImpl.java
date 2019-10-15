@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MailSettingsImpl extends DefaultSettingsEntity implements MailSettings {
-  private static final long serialVersionUID = 1L;
   private static final String ID = "MailSettings";
 
   public static final String DEFAULT_REPLY_EMAIL_ADDRESS = "molgenis+admin@gmail.com";
