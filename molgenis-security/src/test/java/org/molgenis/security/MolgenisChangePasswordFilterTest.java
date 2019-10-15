@@ -11,21 +11,18 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class MolgenisChangePasswordFilterTest {
+class MolgenisChangePasswordFilterTest extends AbstractMockitoSpringContextTests {
   @Mock private UserService userService;
   private MolgenisChangePasswordFilter filter;
 

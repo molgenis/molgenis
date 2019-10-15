@@ -1,7 +1,5 @@
 package org.molgenis.core.ui.admin.log;
 
-import static org.molgenis.core.ui.admin.log.LogManagerController.URI;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.util.ContextInitializer;
@@ -26,10 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(LogManagerController.URI)
 public class LogManagerController extends PluginController {
-  private static final Logger LOG = LoggerFactory.getLogger(LogManagerController.class);
-
   public static final String ID = "logmanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 

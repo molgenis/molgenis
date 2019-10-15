@@ -42,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.v3.EntityCollection.Page;
 import org.molgenis.api.data.v3.model.EntitiesResponse;
@@ -58,13 +59,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class EntityMapperImplTest extends AbstractMockitoTest {
   private EntityMapperImpl entityMapper;
-
-  @SuppressWarnings("deprecation")
-  EntityMapperImplTest() {
-    super(Strictness.LENIENT); // due to generic mocking code
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

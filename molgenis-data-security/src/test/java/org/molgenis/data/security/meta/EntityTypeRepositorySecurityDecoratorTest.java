@@ -47,13 +47,12 @@ import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {EntityTypeRepositorySecurityDecoratorTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
 

@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,7 @@ class DynamicEntityTest {
   @ParameterizedTest
   @MethodSource("setNoExceptionProvider")
   void setNoException(AttributeType attrType, Object value) {
-    set(attrType, value); // test if no exception occurs
+    assertDoesNotThrow(() -> set(attrType, value));
   }
 
   static Iterator<Object[]> setExceptionProvider() {

@@ -7,21 +7,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @TestPropertySource(properties = {"molgenis.version = 10.3.8"})
 @ContextConfiguration(classes = {GsonHttpMessageConverter.class})
-class RootApiControllerTest {
+class RootApiControllerTest extends AbstractMockitoSpringContextTests {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 

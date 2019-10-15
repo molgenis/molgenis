@@ -13,12 +13,13 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import com.google.gson.JsonSyntaxException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.AttributeValueConversionException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-class StringExpressionEvaluatorTest {
+class StringExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
   private static Entity entity;
   private static EntityType entityType;
 
@@ -54,8 +55,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorConstructorChecksIfAttributeHasExpression() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-    when(amd.getDataType()).thenReturn(STRING);
+    Attribute amd = mock(Attribute.class);
     try {
       new StringExpressionEvaluator(amd, entityType);
       fail("Expected NPE");
@@ -66,8 +66,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorConstructorChecksIfExpressionIsMap() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-    when(amd.getDataType()).thenReturn(STRING);
+    Attribute amd = mock(Attribute.class);
     when(amd.getExpression()).thenReturn("{}");
     try {
       new StringExpressionEvaluator(amd, entityType);
@@ -79,7 +78,6 @@ class StringExpressionEvaluatorTest {
   @Test
   void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-    when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("bogus");
     try {
       new StringExpressionEvaluator(amd, entityType);
@@ -93,7 +91,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorLookupAttributeAndConvertFromIntToString() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
+    Attribute amd = mock(Attribute.class);
     when(amd.getDataType()).thenReturn(STRING);
     when(amd.getExpression()).thenReturn("Int");
     assertEquals("1", new StringExpressionEvaluator(amd, entityType).evaluate(entity));
@@ -101,7 +99,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorLookupAttributeAndConvertFromIntToLong() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
+    Attribute amd = mock(Attribute.class);
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("Int");
     assertEquals(1L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
@@ -109,7 +107,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorLookupAttributeAndConvertFromLongToInt() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
+    Attribute amd = mock(Attribute.class);
     when(amd.getDataType()).thenReturn(INT);
     when(amd.getExpression()).thenReturn("Long");
     assertEquals(10, new StringExpressionEvaluator(amd, entityType).evaluate(entity));
@@ -117,7 +115,7 @@ class StringExpressionEvaluatorTest {
 
   @Test
   void testStringEvaluatorLookupAttributeAndConvertFromStringToLong() {
-    Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
+    Attribute amd = mock(Attribute.class);
     when(amd.getDataType()).thenReturn(LONG);
     when(amd.getExpression()).thenReturn("String");
     assertEquals(12L, new StringExpressionEvaluator(amd, entityType).evaluate(entity));

@@ -35,6 +35,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.RestService;
 import org.molgenis.api.data.ServletUriComponentsBuilderFactory;
@@ -100,6 +101,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.NestedServletException;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {RestControllerConfig.class, GsonConfig.class})
 class RestControllerTest extends AbstractMockitoSpringContextTests {
@@ -146,10 +148,6 @@ class RestControllerTest extends AbstractMockitoSpringContextTests {
   private MockMvc mockMvc;
 
   @Mock private LocaleResolver localeResolver;
-
-  RestControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeAll
   static void beforeClass() {

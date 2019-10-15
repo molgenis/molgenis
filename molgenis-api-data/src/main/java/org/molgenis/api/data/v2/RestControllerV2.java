@@ -8,7 +8,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.api.data.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
-import static org.molgenis.api.data.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -99,7 +98,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping(BASE_URI)
+@RequestMapping(RestControllerV2.BASE_URI)
 @Timed(value = "rest.v2", description = "Timing information for the REST API v2.", histogram = true)
 public class RestControllerV2 {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
@@ -154,6 +153,7 @@ public class RestControllerV2 {
   /** @deprecated replaced with a call to '/api' with method 'OPTIONS' */
   @Autowired
   @Deprecated
+  @Transactional(readOnly = true)
   @GetMapping("/version")
   public Map<String, String> getVersion(
       @Value("${molgenis.version:@null}") String molgenisVersion,
@@ -175,6 +175,7 @@ public class RestControllerV2 {
    * Retrieve an entity instance by id, optionally specify which attributes to include in the
    * response.
    */
+  @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/{id}")
   public Map<String, Object> retrieveEntity(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -186,6 +187,7 @@ public class RestControllerV2 {
   }
 
   /** Tunnel retrieveEntity through a POST request */
+  @Transactional(readOnly = true)
   @PostMapping(value = "/{entityTypeId}/{id}", params = "_method=GET")
   public Map<String, Object> retrieveEntityPost(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -251,6 +253,7 @@ public class RestControllerV2 {
   /**
    * Retrieve an entity collection, optionally specify which attributes to include in the response.
    */
+  @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}")
   public EntityCollectionResponseV2 retrieveEntityCollection(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -261,6 +264,7 @@ public class RestControllerV2 {
     return createEntityCollectionResponse(entityTypeId, request, httpRequest, includeCategories);
   }
 
+  @Transactional(readOnly = true)
   @PostMapping(value = "/{entityTypeId}", params = "_method=GET")
   public EntityCollectionResponseV2 retrieveEntityCollectionPost(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -272,6 +276,7 @@ public class RestControllerV2 {
   }
 
   /** Retrieve attribute meta data */
+  @Transactional(readOnly = true)
   @GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
   public AttributeResponseV2 retrieveEntityAttributeMeta(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -279,6 +284,7 @@ public class RestControllerV2 {
     return createAttributeResponse(entityTypeId, attributeName);
   }
 
+  @Transactional(readOnly = true)
   @PostMapping(
       value = "/{entityTypeId}/meta/{attributeName}",
       params = "_method=GET",
@@ -303,8 +309,7 @@ public class RestControllerV2 {
   public EntityCollectionBatchCreateResponseBodyV2 createEntities(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -364,8 +369,7 @@ public class RestControllerV2 {
   public String copyEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid CopyEntityRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     // No repo
     if (!dataService.hasRepository(entityTypeId))
       throw new UnknownEntityTypeException(entityTypeId);
@@ -425,12 +429,12 @@ public class RestControllerV2 {
    * @param response HttpServletResponse
    */
   @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
+  @Transactional
   @PutMapping("/{entityTypeId}")
   public synchronized void updateEntities(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -453,20 +457,39 @@ public class RestControllerV2 {
   }
 
   /**
+   * Get all l10n resource strings in the language of the current user
+   *
+   * @deprecated use /api/v2/sys_L10nString endpoints
+   */
+  @Deprecated
+  @Transactional(readOnly = true)
+  @GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
+  public Map<String, String> getL10nStrings() {
+    Map<String, String> translations = new HashMap<>();
+
+    ResourceBundle bundle = LanguageService.getBundle();
+    for (String key : localizationService.getAllMessageIds()) {
+      translations.put(key, bundle.getString(key));
+    }
+
+    return translations;
+  }
+
+  /**
    * @param entityTypeId The name of the entity to update
    * @param attributeName The name of the attribute to update
    * @param request EntityCollectionBatchRequestV2
    * @param response HttpServletResponse
    */
   @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
+  @Transactional
   @PutMapping("/{entityTypeId}/{attributeName}")
   @ResponseStatus(OK)
   public synchronized void updateAttribute(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
-      HttpServletResponse response)
-      throws Exception {
+      HttpServletResponse response) {
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -514,31 +537,13 @@ public class RestControllerV2 {
   }
 
   /**
-   * Get all l10n resource strings in the language of the current user
-   *
-   * @deprecated use /api/v2/sys_L10nString endpoints
-   */
-  @Deprecated
-  @GetMapping(value = "/i18n", produces = APPLICATION_JSON_VALUE)
-  @Transactional(readOnly = true)
-  public Map<String, String> getL10nStrings() {
-    Map<String, String> translations = new HashMap<>();
-
-    ResourceBundle bundle = LanguageService.getBundle();
-    for (String key : localizationService.getAllMessageIds()) {
-      translations.put(key, bundle.getString(key));
-    }
-
-    return translations;
-  }
-
-  /**
    * Get the localization resource strings for a specific language and namespace. Will *not* provide
    * fallback values if the specified language is not available.
    *
    * @deprecated use /api/v2/sys_L10nString endpoints
    */
   @Deprecated
+  @Transactional(readOnly = true)
   @GetMapping(
       value = "/i18n/{namespace}/{language}",
       produces = APPLICATION_JSON_VALUE + ";charset=UTF-8")
@@ -553,6 +558,7 @@ public class RestControllerV2 {
    * @deprecated use /api/v2/sys_L10nString endpoints
    */
   @Deprecated
+  @Transactional(readOnly = true)
   @GetMapping(
       value = "/i18n/{namespace}_{language}.properties",
       produces = TEXT_PLAIN_VALUE + ";charset=UTF-8 ")
@@ -574,6 +580,7 @@ public class RestControllerV2 {
    * @deprecated use /api/v2/sys_L10nString endpoints
    */
   @Deprecated
+  @Transactional
   @PostMapping("/i18n/{namespace}")
   @ResponseStatus(CREATED)
   public void registerMissingResourceStrings(
@@ -588,6 +595,7 @@ public class RestControllerV2 {
 
   /** @deprecated use /api/v2/sys_L10nString endpoints */
   @Deprecated
+  @Transactional
   @DeleteMapping("/i18n/{namespace}")
   @ResponseStatus(NO_CONTENT)
   public void deleteNamespace(@PathVariable String namespace) {

@@ -29,8 +29,10 @@ class AppRepositoryDecoratorTest {
 
   @Test
   void testDelete() {
-    App app = mock(App.class);
+    String appId = "app";
+    App app = when(mock(App.class).getId()).thenReturn(appId).getMock();
     appRepositoryDecorator.delete(app);
+    verify(repository).deleteById(appId);
   }
 
   @Test

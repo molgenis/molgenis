@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.generator.model.Document;
@@ -43,14 +44,11 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DocumentContentBuilderTest extends AbstractMockitoTest {
   @Mock private DocumentIdGenerator documentIdGenerator;
 
   private DocumentContentBuilder documentContentBuilder;
-
-  DocumentContentBuilderTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

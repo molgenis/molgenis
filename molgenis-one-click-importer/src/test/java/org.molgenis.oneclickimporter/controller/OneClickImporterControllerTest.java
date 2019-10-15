@@ -22,6 +22,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.model.EntityType;
@@ -45,6 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
 class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
@@ -67,10 +69,6 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
   @Mock private OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory;
 
   @Mock private JobExecutor jobExecutor;
-
-  OneClickImporterControllerTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void before() {

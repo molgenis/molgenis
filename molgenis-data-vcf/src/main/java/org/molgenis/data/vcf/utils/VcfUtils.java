@@ -23,10 +23,11 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VcfUtils {
+
+  private VcfUtils() {}
+
   /**
    * Creates a internal molgenis id from a vcf entity
    *

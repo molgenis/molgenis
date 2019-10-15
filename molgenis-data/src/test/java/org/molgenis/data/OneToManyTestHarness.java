@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static freemarker.template.utility.Collections12.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
@@ -210,6 +211,10 @@ public class OneToManyTestHarness {
     person1.set(PersonMetaData1.ATTR_PARENT, person3);
     person2.set(PersonMetaData1.ATTR_PARENT, person1);
     person3.set(PersonMetaData1.ATTR_PARENT, person2);
+
+    person1.set(PersonMetaData1.ATTR_CHILDREN, singletonList(person2));
+    person2.set(PersonMetaData1.ATTR_CHILDREN, singletonList(person3));
+    person3.set(PersonMetaData1.ATTR_CHILDREN, singletonList(person1));
 
     return newArrayList(person1, person2, person3);
   }

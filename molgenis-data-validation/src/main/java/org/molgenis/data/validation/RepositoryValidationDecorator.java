@@ -19,7 +19,6 @@ import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -588,20 +587,12 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
     public void close() {
       if (refEntitiesIds != null) {
         for (HugeSet<Object> refEntityIds : refEntitiesIds.values()) {
-          try {
-            refEntityIds.close();
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
+          refEntityIds.close();
         }
       }
       if (uniqueAttrsValues != null) {
         for (HugeMap<Object, Object> uniqueAttrValues : uniqueAttrsValues.values()) {
-          try {
-            uniqueAttrValues.close();
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
+          uniqueAttrValues.close();
         }
       }
     }

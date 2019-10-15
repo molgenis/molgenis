@@ -26,12 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityTestHarness;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.TestHarnessConfig;
@@ -39,6 +41,7 @@ import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
+import org.molgenis.data.support.PartialEntity;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.data.util.EntityUtils;
@@ -48,6 +51,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L2CacheTest.Config.class)
 class L2CacheTest extends AbstractMolgenisSpringTest {
   private L2Cache l2Cache;
@@ -66,10 +70,6 @@ class L2CacheTest extends AbstractMolgenisSpringTest {
   private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
   private List<Entity> testEntities;
   private EntityType emd;
-
-  L2CacheTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {
@@ -178,6 +178,27 @@ class L2CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
+  void testGetFetchStringIdCachesLoadedData() {
+    Fetch fetch = new Fetch().field(EntityTestHarness.ATTR_ID);
+    when(entityManager.createFetch(emd, fetch))
+        .thenAnswer(
+            invocation ->
+                new EntityWithComputedAttributes(
+                    new PartialEntity(new DynamicEntity(emd), fetch, entityManager)));
+
+    Entity entity2 = testEntities.get(2);
+    when(repository.findOneById("2")).thenReturn(entity2);
+
+    Entity result = l2Cache.get(repository, "2", fetch);
+    assertEquals("2", result.getIdValue());
+
+    result = l2Cache.get(repository, "2", fetch);
+    assertEquals("2", result.getIdValue());
+
+    verify(repository, times(1)).findOneById("2");
+  }
+
+  @Test
   void testGetStringIdLoaderThrowsException() {
     when(repository.findOneById("2"))
         .thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
@@ -195,13 +216,31 @@ class L2CacheTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void testFindAll() {
+  void testGetBatch() {
     when(repository.findAll(idStreamCaptor.capture())).thenReturn(testEntities.stream());
     List<Entity> result = l2Cache.getBatch(repository, newArrayList("0", "1", "2", "3"));
     Map<Object, Entity> retrievedEntities =
         result.stream().collect(toMap(Entity::getIdValue, e -> e));
     assertEquals(4, retrievedEntities.size());
     assertTrue(EntityUtils.equals(retrievedEntities.get("1"), testEntities.get(1)));
+    assertEquals(newArrayList("0", "1", "2", "3"), idStreamCaptor.getValue().collect(toList()));
+  }
+
+  @Test
+  void testGetBatchFetch() {
+    Fetch fetch = new Fetch().field(EntityTestHarness.ATTR_ID);
+    when(entityManager.createFetch(emd, fetch))
+        .thenAnswer(
+            invocation ->
+                new EntityWithComputedAttributes(
+                    new PartialEntity(new DynamicEntity(emd), fetch, entityManager)));
+
+    when(repository.findAll(idStreamCaptor.capture())).thenReturn(testEntities.stream());
+    List<Entity> result = l2Cache.getBatch(repository, newArrayList("0", "1", "2", "3"), fetch);
+    Map<Object, Entity> retrievedEntities =
+        result.stream().collect(toMap(Entity::getIdValue, e -> e));
+    assertEquals(4, retrievedEntities.size());
+    assertEquals(testEntities.get(1).getIdValue(), retrievedEntities.get("1").getIdValue());
     assertEquals(newArrayList("0", "1", "2", "3"), idStreamCaptor.getValue().collect(toList()));
   }
 

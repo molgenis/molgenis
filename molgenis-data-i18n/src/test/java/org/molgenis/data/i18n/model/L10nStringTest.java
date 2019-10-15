@@ -13,6 +13,7 @@ public class L10nStringTest extends AbstractSystemEntityTest {
   @Autowired L10nStringMetadata metadata;
   @Autowired L10nStringFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

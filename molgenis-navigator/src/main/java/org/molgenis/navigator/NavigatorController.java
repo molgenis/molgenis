@@ -2,7 +2,6 @@ package org.molgenis.navigator;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.navigator.NavigatorController.URI;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(NavigatorController.URI)
 public class NavigatorController extends VuePluginController {
   public static final String ID = "navigator";
   public static final String URI = PLUGIN_URI_PREFIX + ID;

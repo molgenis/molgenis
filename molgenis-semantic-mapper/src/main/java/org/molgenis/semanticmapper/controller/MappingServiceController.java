@@ -10,7 +10,6 @@ import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.createEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -51,7 +50,6 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -61,7 +59,6 @@ import org.molgenis.jobs.JobExecutionUriUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.semanticmapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.semanticmapper.data.request.MappingServiceRequest;
 import org.molgenis.semanticmapper.job.MappingJobExecution;
@@ -98,7 +95,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(MappingServiceController.URI)
 public class MappingServiceController extends PluginController {
   private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
@@ -117,7 +114,6 @@ public class MappingServiceController extends PluginController {
   private final SemanticSearchService semanticSearchService;
   private final MenuReaderService menuReaderService;
   private final MappingJobExecutionFactory mappingJobExecutionFactory;
-  private final UserAccountService userAccountService;
   private final JobExecutor jobExecutor;
   private final JobsController jobsController;
 
@@ -129,7 +125,6 @@ public class MappingServiceController extends PluginController {
       SemanticSearchService semanticSearchService,
       MenuReaderService menuReaderService,
       MappingJobExecutionFactory mappingJobExecutionFactory,
-      UserAccountService userAccountService,
       JobExecutor jobExecutor,
       JobsController jobsController) {
     super(URI);
@@ -140,7 +135,6 @@ public class MappingServiceController extends PluginController {
     this.semanticSearchService = semanticSearchService;
     this.menuReaderService = menuReaderService;
     this.mappingJobExecutionFactory = mappingJobExecutionFactory;
-    this.userAccountService = userAccountService;
     this.jobExecutor = jobExecutor;
     this.jobsController = jobsController;
   }
@@ -652,7 +646,6 @@ public class MappingServiceController extends PluginController {
       @RequestParam(required = false, name = "package") String packageId,
       @RequestParam(required = false) String label) {
     MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
-    User currentUser = userAccountService.getCurrentUser();
     mappingJobExecution.setMappingProjectId(mappingProjectId);
     mappingJobExecution.setTargetEntityTypeId(targetEntityTypeId);
     mappingJobExecution.setAddSourceAttribute(addSourceAttribute);

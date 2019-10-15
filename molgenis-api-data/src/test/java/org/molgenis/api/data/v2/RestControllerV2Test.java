@@ -75,6 +75,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.api.data.RestService;
 import org.molgenis.api.data.ServletUriComponentsBuilderFactory;
@@ -135,6 +136,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.NestedServletException;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = {RestControllerV2Config.class, GsonConfig.class})
 class RestControllerV2Test extends AbstractMolgenisSpringTest {
@@ -201,10 +203,6 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
   private String attrCompoundAttrCompoundName;
   private String attrCompoundAttrCompoundAttr0Name;
   private EntityType entityType;
-
-  RestControllerV2Test() {
-    super(Strictness.WARN);
-  }
 
   @BeforeAll
   static void beforeClass() {

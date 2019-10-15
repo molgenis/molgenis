@@ -12,6 +12,7 @@ class GroupTest extends AbstractSystemEntityTest {
   @Autowired GroupMetadata metadata;
   @Autowired GroupFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

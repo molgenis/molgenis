@@ -19,6 +19,7 @@ class BeaconDatasetTest extends AbstractSystemEntityTest {
   @Autowired BeaconDatasetMetadata metadata;
   @Autowired BeaconDatasetFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   public void testSystemEntity() {
     internalTestAttributes(

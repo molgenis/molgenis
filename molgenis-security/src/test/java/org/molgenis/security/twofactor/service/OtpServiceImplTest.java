@@ -6,18 +6,15 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class OtpServiceImplTest {
+class OtpServiceImplTest extends AbstractMockitoSpringContextTests {
 
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";

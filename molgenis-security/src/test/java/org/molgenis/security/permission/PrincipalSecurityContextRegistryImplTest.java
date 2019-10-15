@@ -13,20 +13,17 @@ import java.util.HashSet;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class PrincipalSecurityContextRegistryImplTest {
+class PrincipalSecurityContextRegistryImplTest extends AbstractMockitoSpringContextTests {
   @Mock private SecurityContextRegistry securityContextRegistry;
 
   private PrincipalSecurityContextRegistryImpl principalSecurityContextRegistryImpl;

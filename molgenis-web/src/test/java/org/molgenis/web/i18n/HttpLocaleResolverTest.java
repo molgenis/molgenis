@@ -18,13 +18,12 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {HttpLocaleResolverTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class HttpLocaleResolverTest extends AbstractMockitoSpringContextTests {
   @Mock private UserLocaleResolver userLocaleResolver;
   @Mock private FallbackLocaleSupplier fallbackLocaleSupplier;

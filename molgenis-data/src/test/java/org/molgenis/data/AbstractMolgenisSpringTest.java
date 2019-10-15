@@ -6,7 +6,6 @@ import static org.mockito.Mockito.reset;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -27,14 +26,6 @@ import org.springframework.test.context.ContextConfiguration;
 public abstract class AbstractMolgenisSpringTest extends AbstractMockitoSpringContextTests {
   @Autowired private ApplicationContext applicationContext;
   @Autowired private Config config;
-
-  public AbstractMolgenisSpringTest() {
-    super();
-  }
-
-  public AbstractMolgenisSpringTest(Strictness strictness) {
-    super(strictness);
-  }
 
   private boolean isBootstrapped = false;
 

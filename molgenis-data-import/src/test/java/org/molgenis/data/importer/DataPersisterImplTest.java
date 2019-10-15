@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -41,6 +42,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.test.AbstractMockitoTest;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DataPersisterImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metaDataService;
   private DataService dataService;
@@ -52,10 +54,6 @@ class DataPersisterImplTest extends AbstractMockitoTest {
   @Mock private EntityType entityType0;
   @Mock private EntityType entityType1;
   @Mock private EntityType entityType2;
-
-  DataPersisterImplTest() {
-    super(Strictness.WARN);
-  }
 
   @SuppressWarnings("unchecked")
   @BeforeEach

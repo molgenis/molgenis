@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -47,6 +48,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
 class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
@@ -80,10 +82,6 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   @Captor private ArgumentCaptor<Stream<Object>> entityIdsCaptor;
 
   @Captor private ArgumentCaptor<Stream<EntityKey>> entityKeysCaptor;
-
-  L1CacheRepositoryDecoratorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

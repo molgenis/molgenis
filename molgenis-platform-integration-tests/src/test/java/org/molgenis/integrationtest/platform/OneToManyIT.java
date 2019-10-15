@@ -5,6 +5,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +45,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -151,7 +151,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
             .getIdValue());
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @ParameterizedTest
   @MethodSource("allTestCaseDataProvider")
@@ -325,7 +324,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
         stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @ParameterizedTest
   @MethodSource("allTestCaseDataProvider")
@@ -337,8 +335,11 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     Entity person2 = dataService.findOneById(personName, PERSON_2);
     Entity person3 = dataService.findOneById(personName, PERSON_3);
     person1.set(ATTR_PARENT, person2); // switch parents
+    person2.set(ATTR_CHILDREN, singletonList(person1));
     person2.set(ATTR_PARENT, person3);
+    person3.set(ATTR_CHILDREN, singletonList(person2));
     person3.set(ATTR_PARENT, person1);
+    person1.set(ATTR_CHILDREN, singletonList(person3));
     dataService.update(personName, Stream.of(person1, person2, person3));
 
     assertEquals(
@@ -418,7 +419,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     assertEquals(0, size(updatedAuthor3.getEntities(ATTR_BOOKS)));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderAscending() {
@@ -431,6 +431,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     person1.set(ATTR_PARENT, person3);
     person2.set(ATTR_PARENT, person3);
     person3.set(ATTR_PARENT, person3);
+    person3.set(ATTR_CHILDREN, newArrayList(person1, person2, person3));
     dataService.update(personName, Stream.of(person2, person1, person3));
 
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
@@ -439,14 +440,8 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
         stream(updatedPerson3.getEntities(ATTR_CHILDREN))
             .map(Entity::getIdValue)
             .collect(toList()));
-
-    Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
-    Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
-    assertEquals(0, size(updatedPerson1.getEntities(ATTR_CHILDREN)));
-    assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
   }
 
-  @Disabled // see https://github.com/molgenis/molgenis/issues/8665
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateParentOrderDescending() {
@@ -459,6 +454,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     person1.set(ATTR_PARENT, person1);
     person2.set(ATTR_PARENT, person1);
     person3.set(ATTR_PARENT, person1);
+    person1.set(ATTR_CHILDREN, newArrayList(person3, person2, person1));
     dataService.update(personName, Stream.of(person2, person1, person3));
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
@@ -467,11 +463,6 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
         stream(updatedPerson1.getEntities(ATTR_CHILDREN))
             .map(Entity::getIdValue)
             .collect(toList()));
-
-    Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
-    Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
-    assertEquals(0, size(updatedPerson2.getEntities(ATTR_CHILDREN)));
-    assertEquals(0, size(updatedPerson3.getEntities(ATTR_CHILDREN)));
   }
 
   private static void deleteBooksThenAuthors(DataService dataService, int testCase) {

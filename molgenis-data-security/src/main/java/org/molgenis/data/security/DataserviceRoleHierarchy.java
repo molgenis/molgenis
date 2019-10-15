@@ -5,6 +5,7 @@ import static com.google.common.collect.Sets.difference;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.security.auth.RoleMetadata.ID;
 import static org.molgenis.data.security.auth.RoleMetadata.INCLUDES;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
@@ -108,8 +109,9 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
     Query<Role> query = QueryImpl.query();
     Fetch fetch = new Fetch();
     Fetch childFetch = new Fetch();
+    childFetch.field(ID);
     childFetch.field(NAME);
-    fetch.field(NAME).field(INCLUDES, childFetch);
+    fetch.field(ID).field(NAME).field(INCLUDES, childFetch);
     query.fetch(fetch);
     query.pageSize(PAGE_SIZE);
     query.offset(offSet);

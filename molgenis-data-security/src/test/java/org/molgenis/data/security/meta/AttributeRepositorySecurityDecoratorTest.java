@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
@@ -46,13 +47,13 @@ import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {AttributeRepositorySecurityDecoratorTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "user";
   private static final String ROLE_SU = "SU";
@@ -72,10 +73,6 @@ class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoSpringCont
   @Mock private RepositoryCollection backend2;
   private String attributeId = "SDFSADFSDAF";
   @Captor private ArgumentCaptor<Consumer<List<Attribute>>> consumerCaptor;
-
-  AttributeRepositorySecurityDecoratorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

@@ -25,6 +25,7 @@ class FreemarkerTemplateTest extends AbstractSystemEntityTest {
   @Autowired FreemarkerTemplateMetadata metadata;
   @Autowired FreemarkerTemplateFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

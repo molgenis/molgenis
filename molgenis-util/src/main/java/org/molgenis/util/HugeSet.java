@@ -121,7 +121,7 @@ public class HugeSet<E> implements Set<E>, Closeable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (mapDB != null) {
       mapDB.close();
     }

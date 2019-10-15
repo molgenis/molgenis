@@ -18,6 +18,7 @@ public class DynamicDecoratorTest extends AbstractSystemEntityTest {
   @Autowired DynamicDecoratorMetadata metadata;
   @Autowired DynamicDecoratorFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

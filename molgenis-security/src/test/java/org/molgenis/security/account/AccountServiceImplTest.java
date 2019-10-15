@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -37,6 +38,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration
 class AccountServiceImplTest extends AbstractMockitoSpringContextTests {
   @Autowired private AccountService accountService;
@@ -52,10 +54,6 @@ class AccountServiceImplTest extends AbstractMockitoSpringContextTests {
   @Autowired private AuthenticationSettings authenticationSettings;
 
   @Autowired private IdGenerator idGenerator;
-
-  AccountServiceImplTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUp() {

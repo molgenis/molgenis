@@ -289,7 +289,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Override
-  public void configure(WebSecurity web) throws Exception {
+  public void configure(WebSecurity web) {
     web.ignoring()
         .antMatchers(PATTERN_CSS)
         .antMatchers(PATTERN_IMG)
@@ -391,8 +391,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   @Override
   @Bean
-  public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean()
-      throws Exception {
+  public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean() {
     return userDetailsService();
   }
 

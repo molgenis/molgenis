@@ -54,7 +54,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   public Collection<? extends GrantedAuthority> getAuthorities(User user) {
     Set<GrantedAuthority> authorities = new LinkedHashSet<>();
 
-    if (user.isSuperuser() != null && user.isSuperuser()) {
+    if (user.isSuperuser()) {
       authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
     }
     if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME)) {

@@ -42,13 +42,12 @@ import org.molgenis.navigator.model.Resource;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {NavigatorServiceImplTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class NavigatorServiceImplTest extends AbstractMockitoSpringContextTests {
   @Mock private DataService dataService;
   @Mock private JobExecutor jobExecutor;

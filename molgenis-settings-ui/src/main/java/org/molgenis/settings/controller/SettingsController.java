@@ -1,7 +1,5 @@
 package org.molgenis.settings.controller;
 
-import static org.molgenis.settings.controller.SettingsController.URI;
-
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(SettingsController.URI)
 public class SettingsController extends VuePluginController {
 
   public static final String ID = "settings";

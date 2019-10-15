@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -25,6 +26,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   @Autowired private EntityTypeFactory entityTypeFactory;
 
@@ -41,10 +43,6 @@ class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest 
   private EntityType sourceEntityType;
 
   private DataService dataService;
-
-  OneToOneCategoryAlgorithmGeneratorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void init() {

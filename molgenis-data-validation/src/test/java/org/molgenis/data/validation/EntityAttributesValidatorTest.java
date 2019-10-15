@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
@@ -34,6 +35,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.validation.ConstraintViolation;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class EntityAttributesValidatorTest extends AbstractMockitoTest {
   @Mock private ExpressionValidator expressionValidator;
 
@@ -41,10 +43,6 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
   private EntityType intRangeMinMeta;
   private EntityType intRangeMaxMeta;
-
-  EntityAttributesValidatorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

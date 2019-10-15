@@ -45,8 +45,8 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter {
       HttpServletResponse httpServletResponse,
       FilterChain filterChain)
       throws ServletException, IOException {
-    if (isUserShouldTwoFactorAuthenticate()
-        && currentUserIsAuthenticated()
+    if (currentUserIsAuthenticated()
+        && isUserShouldTwoFactorAuthenticate()
         && isNotProtected(httpServletRequest.getRequestURI())
         && isInsufficientlyAuthenticated()) {
       redirectToTwoFactorAuthenticationController(httpServletRequest, httpServletResponse);

@@ -9,15 +9,13 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.test.AbstractMockitoTest;
 
-@ExtendWith(MockitoExtension.class)
-class IndexDependencyModelTest {
+class IndexDependencyModelTest extends AbstractMockitoTest {
   @Mock private EntityType entity0;
   @Mock private EntityType entity1;
   @Mock private EntityType entity2;
