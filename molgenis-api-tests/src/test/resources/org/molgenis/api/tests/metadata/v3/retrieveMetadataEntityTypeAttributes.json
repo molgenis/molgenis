@@ -1,13 +1,84 @@
 {
   "links": {
-    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes",
-    "next": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?page=1"
+    "previous": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=1",
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=2",
+    "next": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=3"
   },
-  "items": [],
+  "items": [
+    {
+      "link": {
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myDecimal"
+      },
+      "data": {
+        "id": "v3meta_MyDataset_myDecimal",
+        "name": "myDecimal",
+        "sequenceNr": 7,
+        "type": "decimal",
+        "idAttribute": false,
+        "labelAttribute": false,
+        "label": "myDecimal",
+        "nullable": false,
+        "auto": false,
+        "visible": false,
+        "unique": false,
+        "readOnly": false,
+        "aggregatable": false,
+      }
+    },
+    {
+      "link": {
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myEnum"
+      },
+      "data": {
+        "id": "v3meta_MyDataset_myEnum",
+        "name": "myEnum",
+        "sequenceNr": 5,
+        "type": "enum",
+        "idAttribute": false,
+        "labelAttribute": false,
+        "label": "myEnum",
+        "nullable": false,
+        "auto": false,
+        "visible": false,
+        "unique": false,
+        "readOnly": false,
+        "aggregatable": false,
+        "enumOptions": [
+          "option0",
+          "option1",
+          "option2"
+        ]
+      }
+    },
+    {
+      "link": {
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myInt"
+      },
+      "data": {
+        "id": "v3meta_MyDataset_myInt",
+        "name": "myInt",
+        "sequenceNr": 8,
+        "type": "int",
+        "idAttribute": false,
+        "labelAttribute": false,
+        "label": "myInt",
+        "nullable": false,
+        "auto": false,
+        "visible": false,
+        "unique": false,
+        "readOnly": false,
+        "aggregatable": false,
+        "range": {
+          "min": 2,
+          "max": 4
+        }
+      }
+    }
+  ],
   "page": {
-    "size": -1,
-    "totalElements": -1,
-    "totalPages": -1,
-    "number": -1
+    "size": 3,
+    "totalElements": 15,
+    "totalPages": 5,
+    "number": 2
   }
 }

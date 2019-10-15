@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.gson.annotations.SerializedName;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
@@ -30,24 +29,11 @@ public abstract class EntityTypeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract AttributeResponse getLabelAttribute();
-
-  @Nullable
-  @CheckForNull
-  public abstract AttributeResponse getIdAttribute();
-
-  @Nullable
-  @CheckForNull
-  public abstract AttributesResponse getLookupAttributes();
+  public abstract PackageResponse getPackage_();
 
   public abstract AttributesResponse getAttributes();
 
-  @Nullable
-  @CheckForNull
-  public abstract PackageResponse getPackage_();
-
-  @SerializedName("blaat")
-  public abstract boolean isAbstract();
+  public abstract boolean isAbstract_();
 
   @Nullable
   @CheckForNull
@@ -68,8 +54,6 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setId(String id);
 
-    public abstract Builder setPackage_(PackageResponse packageResponse);
-
     public abstract Builder setLabel(String label);
 
     public abstract Builder setLabelI18n(I18nValue label);
@@ -78,19 +62,15 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setDescriptionI18n(I18nValue description);
 
+    public abstract Builder setPackage_(PackageResponse packageResponse);
+
     public abstract Builder setAttributes(AttributesResponse attributes);
 
-    public abstract Builder setAbstract(boolean isAbstract);
+    public abstract Builder setAbstract_(boolean isAbstract);
 
     public abstract Builder setExtends_(EntityTypeResponse entityType);
 
     public abstract Builder setIndexingDepth(Integer indexingDepth);
-
-    public abstract Builder setLabelAttribute(AttributeResponse labelAttribute);
-
-    public abstract Builder setIdAttribute(AttributeResponse idAttribute);
-
-    public abstract Builder setLookupAttributes(AttributesResponse lookupAttributes);
 
     public abstract EntityTypeResponseData build();
   }

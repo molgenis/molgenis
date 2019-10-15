@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
@@ -22,6 +20,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
+import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -62,7 +61,11 @@ public class EntityTypeV3Mapper {
     return EntityTypesResponse.create(
         createLinksResponse(number, size, total),
         results,
-        getPageResponse(size, entityTypes.getTotal(), entityTypes.getTotal() / size, number));
+        PageResponse.create(
+            size,
+            entityTypes.getTotal(),
+            total > 0 ? (int) Math.ceil(total / (double) size) : 0,
+            number));
   }
 
   public EntityTypeResponse toEntityTypeResponse(
@@ -71,12 +74,6 @@ public class EntityTypeV3Mapper {
   }
 
   public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
-    if ((!entityTypeRequest.isAbstract()) && entityTypeRequest.getIdAttribute() == null) {
-      throw new IllegalArgumentException(
-          "ID attribute for EntityType ["
-              + entityTypeRequest.getLabel()
-              + "] cannot be null"); // FIXME
-    }
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
@@ -151,9 +148,6 @@ public class EntityTypeV3Mapper {
         builder.setLabelI18n(getI18nEntityTypeLabel(entityType));
         builder.setDescriptionI18n(getI18nEntityTypeDesc(entityType));
       }
-      builder.setIdAttribute(getIdAttribute(entityType));
-      builder.setLabelAttribute(getLabelAttribute(entityType));
-      builder.setLookupAttributes(getLookupAttributes(entityType));
       AttributesResponse.Builder attributesResponseBuilder =
           AttributesResponse.builder()
               .setLinks(LinksResponse.create(null, createAttributesResponseUri(entityType), null));
@@ -164,7 +158,7 @@ public class EntityTypeV3Mapper {
                 : attributeV3Mapper.mapInternal(entityType.getOwnAllAttributes(), i18n));
       }
       builder.setAttributes(attributesResponseBuilder.build());
-      builder.setAbstract(entityType.isAbstract());
+      builder.setAbstract_(entityType.isAbstract());
       EntityType parent = entityType.getExtends();
       builder.setExtends_(parent != null ? mapInternal(parent, false, false, false, i18n) : null);
       builder.setIndexingDepth(entityType.getIndexingDepth());
@@ -172,34 +166,6 @@ public class EntityTypeV3Mapper {
     }
 
     return entityTypeResponseBuilder.build();
-  }
-
-  private AttributesResponse getLookupAttributes(EntityType entityType) {
-    List<AttributeResponse> lookupAttributes = new ArrayList<>();
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isIdAttribute()) {
-        lookupAttributes.add(attributeV3Mapper.mapAttribute(attribute, false));
-      }
-    }
-    return AttributesResponse.create(null, lookupAttributes, null); // TODO: links and page
-  }
-
-  private AttributeResponse getIdAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isIdAttribute()) {
-        return attributeV3Mapper.mapAttribute(attribute, false);
-      }
-    }
-    return null;
-  }
-
-  private AttributeResponse getLabelAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isLabelAttribute()) {
-        return attributeV3Mapper.mapAttribute(attribute, false);
-      }
-    }
-    return null;
   }
 
   private LinksResponse createLinksResponse(int number, int size, int total) {

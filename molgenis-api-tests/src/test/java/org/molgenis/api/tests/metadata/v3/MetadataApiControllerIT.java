@@ -12,6 +12,7 @@ import io.restassured.RestAssured;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -100,7 +101,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata/v3meta_MyDataset/attributes")
+        .get("/api/metadata/v3meta_MyDataset/attributes?size=3&page=2")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
@@ -112,16 +113,18 @@ class MetadataApiControllerIT extends AbstractApiTest {
     String expectedJson =
         TestResourceUtils.getRenderedString(
             getClass(),
-            "retrieveMetadataEntityTypeAttributes.json",
+            "retrieveMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
-        .get("/api/metadata/v3meta_MyDataset/attributes/myString")
+        .get("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body(isEqualJson(expectedJson));
   }
 
+  // TODO enable and update after endpoint is async
+  @Disabled
   @Test
   @Order(6)
   void testUpdateMetadataEntityType() throws IOException {
@@ -139,6 +142,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(7)
   void testPartialUpdateMetadataEntityType() throws IOException {
@@ -156,6 +161,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(8)
   void testCreateMetadataEntityTypeAttribute() throws IOException {
@@ -174,6 +181,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .header(LOCATION, RestAssured.baseURI + "/api/metadata/v3meta_MyDataset/fixme");
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(9)
   void testUpdateMetadataEntityTypeAttribute() throws IOException {
@@ -191,6 +200,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(10)
   void testPartialUpdateMetadataEntityTypeAttribute() throws IOException {
@@ -208,6 +219,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(11)
   void testDeleteMetadataEntityTypeAttributes() {
@@ -217,6 +230,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO enable after endpoint is async
+  @Disabled
   @Test
   @Order(12)
   void testDeleteMetadataEntityTypeAttribute() {
@@ -226,12 +241,14 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
+  // TODO fix after endpoint is async
   @Test
   @Order(13)
   void testDeleteMetadataEntityType() {
     given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
   }
 
+  // TODO fix after endpoint is async
   @Test
   @Order(14)
   void testDeleteMetadataEntityTypes() {

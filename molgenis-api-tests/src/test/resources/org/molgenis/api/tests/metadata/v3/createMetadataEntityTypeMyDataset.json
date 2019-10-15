@@ -3,7 +3,10 @@
   "package_": "v3meta",
   "extends_": "v3meta_Describable",
   "label": {
-    "defaultValue": "MyDataset"
+    "defaultValue": "My Dataset"
+  },
+  "description": {
+    "defaultValue": "My Dataset with data"
   },
   "attributes": [
     {
@@ -14,12 +17,14 @@
     {
       "id": "v3meta_MyDataset_myCategorical",
       "name": "myCategorical",
-      "type": "categorical"
+      "type": "categorical",
+      "refEntityType": "v3meta_MyStrings"
     },
     {
       "id": "v3meta_MyDataset_myCategoricalMref",
       "name": "myCategoricalMref",
-      "type": "categorical_mref"
+      "type": "categorical_mref",
+      "refEntityType": "v3meta_MyNumbers"
     },
     {
       "id": "v3meta_MyDataset_myDate",
@@ -34,7 +39,12 @@
     {
       "id": "v3meta_MyDataset_myEnum",
       "name": "myEnum",
-      "type": "enum"
+      "type": "enum",
+      "enumOptions": [
+        "option0",
+        "option1",
+        "option2"
+      ]
     },
     {
       "id": "v3meta_MyDataset_myNumbers",
@@ -49,17 +59,16 @@
     {
       "id": "v3meta_MyDataset_myInt",
       "name": "myInt",
-      "type": "int"
+      "type": "int",
+      "range": {
+        "min": 2,
+        "max": 4
+      }
     },
     {
       "id": "v3meta_MyDataset_myLong",
       "name": "myLong",
       "type": "long"
-    },
-    {
-      "id": "v3meta_MyDataset_myOneToMany",
-      "name": "myOneToMany",
-      "type": "one_to_many"
     },
     {
       "id": "v3meta_MyDataset_myString",
@@ -74,17 +83,20 @@
     {
       "id": "v3meta_MyDataset_myXref",
       "name": "myXref",
-      "type": "xref"
+      "type": "xref",
+      "refEntityType": "v3meta_MyNumbers"
     },
     {
       "id": "v3meta_MyDataset_myMref",
       "name": "myMref",
-      "type": "mref"
+      "type": "mref",
+      "refEntityType": "v3meta_MyStrings"
     },
     {
       "id": "v3meta_MyDataset_myComputed",
       "name": "myComputed",
-      "type": "string"
+      "type": "string",
+      "expression": "{\"template\":\"static\"}"
     }
   ]
 }

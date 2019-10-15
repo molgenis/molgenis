@@ -20,8 +20,7 @@ public class CreateAttributeRequest {
   I18nValue description;
   boolean aggregatable;
   List<String> enumOptions;
-  Long rangeMin;
-  Long rangeMax;
+  Range range;
   boolean readonly;
   boolean unique;
   String nullableExpression;
@@ -47,8 +46,7 @@ public class CreateAttributeRequest {
       I18nValue description,
       boolean aggregatable,
       List<String> enumOptions,
-      Long rangeMin,
-      Long rangeMax,
+      Range range,
       boolean readonly,
       boolean unique,
       String nullableExpression,
@@ -72,8 +70,7 @@ public class CreateAttributeRequest {
     this.description = description;
     this.aggregatable = aggregatable;
     this.enumOptions = enumOptions;
-    this.rangeMin = rangeMin;
-    this.rangeMax = rangeMax;
+    this.range = range;
     this.readonly = readonly;
     this.unique = unique;
     this.nullableExpression = nullableExpression;
@@ -147,12 +144,8 @@ public class CreateAttributeRequest {
     return enumOptions;
   }
 
-  public Long getRangeMin() {
-    return rangeMin;
-  }
-
-  public Long getRangeMax() {
-    return rangeMax;
+  public Range getRange() {
+    return range;
   }
 
   public Boolean isReadonly() {

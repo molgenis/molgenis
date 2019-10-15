@@ -16,9 +16,9 @@ tags:
   - name: "Metadata"
     description: Create, read, update and delete metadata.
 servers:
-  - url: http://localhost:8080/api/metadata
+  - url: http://localhost:8080/api
 paths:
-  /meta:
+  /metadata:
     get:
       tags:
         - "Metadata"
@@ -79,7 +79,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /meta/{entityTypeId}:
+  /metadata/{entityTypeId}:
     get:
       tags:
         - "Metadata"
@@ -160,7 +160,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /meta/{entityTypeId}/attributes:
+  /metadata/{entityTypeId}/attributes:
     get:
       tags:
         - "Metadata"
@@ -201,7 +201,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /meta/{entityTypeId}/attributes/{attributeId}:
+  /metadata/{entityTypeId}/attributes/{attributeId}:
     get:
       tags:
         - "Metadata"
@@ -404,9 +404,9 @@ components:
       required:
         - self
       example:
-        previous: https://my.molgenis.org/api/meta?number=0
-        self: https://my.molgenis.org/api/meta?number=1
-        next: https://my.molgenis.org/api/meta?number=2
+        previous: https://my.molgenis.org/api/metadata?number=0
+        self: https://my.molgenis.org/api/metadata?number=1
+        next: https://my.molgenis.org/api/metadata?number=2
     Page:
       type: object
       properties:

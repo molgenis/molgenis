@@ -1,6 +1,8 @@
 package org.molgenis.api.metadata.v3;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
@@ -8,6 +10,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
 import org.molgenis.data.meta.AttributeType;
@@ -38,6 +42,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -48,23 +53,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class AttributeV3Mapper {
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
+
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
   private final SortMapper sortMapper;
   private final SortConverter sortConverter;
+  private final EntityManager entityManager;
+  private final EntityTypeMetadata entityTypeMetadata;
 
   public AttributeV3Mapper(
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
       SortMapper sortMapper,
-      SortConverter sortConverter) {
+      SortConverter sortConverter,
+      EntityManager entityManager,
+      EntityTypeMetadata entityTypeMetadata) {
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attributeFactory = requireNonNull(attributeFactory);
     this.metaDataService = requireNonNull(metaDataService);
     this.sortMapper = requireNonNull(sortMapper);
     this.sortConverter = requireNonNull(sortConverter);
+    this.entityManager = requireNonNull(entityManager);
+    this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
   }
 
   AttributesResponse mapAttributes(Attributes attributes, int size, int number, int total) {
@@ -97,6 +109,8 @@ public class AttributeV3Mapper {
     builder.setName(attr.getName());
     builder.setSequenceNr(attr.getSequenceNumber());
     builder.setType(getValueString(attr.getDataType()));
+    builder.setIdAttribute(attr.isIdAttribute());
+    builder.setLabelAttribute(attr.isLabelAttribute());
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
     if (EntityTypeUtils.isReferenceType(attr)) {
       try {
@@ -107,7 +121,9 @@ public class AttributeV3Mapper {
     }
     builder.setCascadeDelete(attr.getCascadeDelete());
     builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy(), i18n) : null);
-    builder.setOrderBy(map(attr));
+    if (attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()) {
+      builder.setOrderBy(map(attr));
+    }
     builder.setLabel(attr.getLabel(LocaleContextHolder.getLocale().getLanguage()));
     builder.setDescription(attr.getDescription(LocaleContextHolder.getLocale().getLanguage()));
     if (i18n) {
@@ -124,7 +140,10 @@ public class AttributeV3Mapper {
     if (attr.getDataType() == AttributeType.ENUM) {
       builder.setEnumOptions(attr.getEnumOptions());
     }
-    builder.setRange(Range.create(attr.getRangeMin(), attr.getRangeMax()));
+    org.molgenis.data.Range range = attr.getRange();
+    if (range != null) {
+      builder.setRange(Range.create(range.getMin(), range.getMax()));
+    }
     Attribute parent = attr.getParent();
     builder.setParentAttributeId(parent != null ? parent.getIdentifier() : null);
     builder.setNullableExpression(attr.getNullableExpression());
@@ -136,12 +155,17 @@ public class AttributeV3Mapper {
   }
 
   private List<AttributeSort> map(Attribute attr) {
-    List<AttributeSort> orders = new ArrayList<>();
+    List<AttributeSort> orders;
 
     Sort sort = attr.getOrderBy();
-    for (Order order : sort) {
-      orders.add(
-          AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+    if (sort == null) {
+      orders = emptyList();
+    } else {
+      orders = new ArrayList<>(Iterables.size(sort));
+      for (Order order : sort) {
+        orders.add(
+            AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+      }
     }
 
     return orders;
@@ -160,10 +184,12 @@ public class AttributeV3Mapper {
     }
     attribute.setSequenceNumber(sequenceNumber);
     attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
-    Optional<EntityType> refEntityType =
-        metaDataService.getEntityType(attributeRequest.getRefEntityType());
-    if (refEntityType.isPresent()) {
-      attribute.setRefEntity(refEntityType.get());
+
+    EntityType refEntityType;
+    String refEntityTypeId = attributeRequest.getRefEntityType();
+    if (refEntityTypeId != null) {
+      refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
+      attribute.setRefEntity(refEntityType);
     }
     // FIXME: absent attr results in false.
     // attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
@@ -177,8 +203,10 @@ public class AttributeV3Mapper {
     processI18nDescription(attributeRequest, attribute);
     attribute.setAggregatable(attributeRequest.isAggregatable());
     attribute.setEnumOptions(attributeRequest.getEnumOptions());
-    attribute.setRangeMin(attributeRequest.getRangeMin());
-    attribute.setRangeMax(attributeRequest.getRangeMax());
+    Range range = attributeRequest.getRange();
+    if (range != null) {
+      attribute.setRange(map(range));
+    }
     attribute.setReadOnly(attributeRequest.isReadonly());
     attribute.setUnique(attributeRequest.isUnique());
     attribute.setNullableExpression(attributeRequest.getNullableExpression());
@@ -186,6 +214,10 @@ public class AttributeV3Mapper {
     attribute.setValidationExpression(attributeRequest.getValidationExpression());
     attribute.setDefaultValue(attributeRequest.getDefaultValue());
     return attribute;
+  }
+
+  private org.molgenis.data.Range map(Range range) {
+    return new org.molgenis.data.Range(range.getMin(), range.getMax());
   }
 
   Map<String, Attribute> toAttributes(
