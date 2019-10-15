@@ -29,7 +29,6 @@ import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.data.decorator.meta.DecoratorParametersFactory;
 import org.molgenis.data.decorator.meta.DecoratorParametersMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
-import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -206,15 +205,6 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
             testPermissionService.createPermission(
                 Permission.create(entry.getKey(), sid, entry.getValue()));
           });
-    }
-  }
-
-  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
-    try {
-      indexJobScheduler.waitForAllIndicesStable();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
     }
   }
 }
