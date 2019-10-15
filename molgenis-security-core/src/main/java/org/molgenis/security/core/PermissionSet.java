@@ -23,11 +23,6 @@ public class PermissionSet extends AbstractPermission {
   public static final PermissionSet WRITE = new PermissionSet("Write", WRITE_MASK, 'W');
   public static final PermissionSet WRITEMETA = new PermissionSet("Manage", WRITEMETA_MASK, 'A');
 
-  protected PermissionSet(String name, int mask) {
-    super(mask);
-    this.name = name;
-  }
-
   public PermissionSet(String name, int mask, char code) {
     super(mask, code);
     this.name = name;
