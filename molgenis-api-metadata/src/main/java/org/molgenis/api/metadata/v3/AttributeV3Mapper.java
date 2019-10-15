@@ -109,6 +109,8 @@ public class AttributeV3Mapper {
     builder.setName(attr.getName());
     builder.setSequenceNr(attr.getSequenceNumber());
     builder.setType(getValueString(attr.getDataType()));
+    builder.setIdAttribute(attr.isIdAttribute());
+    builder.setLabelAttribute(attr.isLabelAttribute());
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
     if (EntityTypeUtils.isReferenceType(attr)) {
       try {

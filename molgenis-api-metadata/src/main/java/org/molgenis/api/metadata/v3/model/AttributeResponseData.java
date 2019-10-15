@@ -19,6 +19,10 @@ public abstract class AttributeResponseData {
 
   public abstract String getType();
 
+  public abstract boolean isIdAttribute();
+
+  public abstract boolean isLabelAttribute();
+
   @Nullable
   @CheckForNull
   public abstract Integer getLookupAttributeIndex();
@@ -115,6 +119,10 @@ public abstract class AttributeResponseData {
     public abstract Builder setSequenceNr(Integer sequenceNr);
 
     public abstract Builder setType(String type);
+
+    public abstract Builder setIdAttribute(boolean isIdAttribute);
+
+    public abstract Builder setLabelAttribute(boolean isLabelAttribute);
 
     public abstract Builder setLookupAttributeIndex(Integer index);
 

@@ -5,6 +5,11 @@
   "data": {
     "id": "v3meta_MyNumbers",
     "label": "My Numbers",
+    "package_": {
+      "links": {
+        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+      }
+    },
     "attributes": {
       "links": {
         "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes"
@@ -19,6 +24,8 @@
             "name": "id",
             "sequenceNr": 0,
             "type": "int",
+            "idAttribute": true,
+            "labelAttribute": false,
             "label": "id",
             "nullable": false,
             "auto": false,
@@ -37,6 +44,8 @@
             "name": "label",
             "sequenceNr": 1,
             "type": "string",
+            "idAttribute": false,
+            "labelAttribute": true,
             "lookupAttributeIndex": 0,
             "label": "label",
             "nullable": false,
@@ -48,11 +57,6 @@
           }
         }
       ]
-    },
-    "package_": {
-      "links": {
-        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
-      }
     },
     "abstract_": false,
     "indexingDepth": 1

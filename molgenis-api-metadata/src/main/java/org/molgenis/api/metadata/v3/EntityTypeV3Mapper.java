@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
@@ -145,9 +144,6 @@ public class EntityTypeV3Mapper {
         builder.setLabelI18n(getI18nEntityTypeLabel(entityType));
         builder.setDescriptionI18n(getI18nEntityTypeDesc(entityType));
       }
-      builder.setIdAttribute(getIdAttribute(entityType));
-      builder.setLabelAttribute(getLabelAttribute(entityType));
-      builder.setLookupAttributes(getLookupAttributes(entityType));
       AttributesResponse.Builder attributesResponseBuilder =
           AttributesResponse.builder()
               .setLinks(LinksResponse.create(null, createAttributesResponseUri(entityType), null));
@@ -166,34 +162,6 @@ public class EntityTypeV3Mapper {
     }
 
     return entityTypeResponseBuilder.build();
-  }
-
-  private List<AttributeResponse> getLookupAttributes(EntityType entityType) {
-    List<AttributeResponse> lookupAttributes = new ArrayList<>();
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isIdAttribute()) {
-        lookupAttributes.add(attributeV3Mapper.mapAttribute(attribute, false));
-      }
-    }
-    return lookupAttributes;
-  }
-
-  private AttributeResponse getIdAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isIdAttribute()) {
-        return attributeV3Mapper.mapAttribute(attribute, false);
-      }
-    }
-    return null;
-  }
-
-  private AttributeResponse getLabelAttribute(EntityType entityType) {
-    for (Attribute attribute : entityType.getOwnAllAttributes()) {
-      if (attribute.isLabelAttribute()) {
-        return attributeV3Mapper.mapAttribute(attribute, false);
-      }
-    }
-    return null;
   }
 
   private LinksResponse createLinksResponse(int number, int size, int total) {
