@@ -1,11 +1,9 @@
 package org.molgenis.ontology.core.utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -15,14 +13,12 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
@@ -70,11 +66,6 @@ public class OntologyLoader {
 
   private Map<String, OWLClass> hashToRetrieveClass = new HashMap<>();
 
-  public OntologyLoader(OWLOntologyManager manager, OWLDataFactory factory) {
-    this.manager = manager;
-    this.factory = factory;
-  }
-
   public OntologyLoader(String ontologyName, File ontologyFile)
       throws OWLOntologyCreationException {
     this.ontologyFile = ontologyFile;
@@ -96,20 +87,6 @@ public class OntologyLoader {
         fileDocumentSource, owlOntologyLoaderConfiguration);
   }
 
-  public void preProcessing() {
-    for (OWLClass cls : ontology.getClassesInSignature()) {
-      hashToRetrieveClass.put(getLabel(cls).trim().toLowerCase(), cls);
-    }
-  }
-
-  public Set<OWLAnnotationAssertionAxiom> getAllAnnotationAxiom(OWLClass cls) {
-    Set<OWLAnnotationAssertionAxiom> axioms = new HashSet<>();
-    for (OWLAnnotation annotation : cls.getAnnotations(ontology)) {
-      axioms.add(factory.getOWLAnnotationAssertionAxiom(cls.getIRI(), annotation));
-    }
-    return axioms;
-  }
-
   public Set<OWLClass> getRootClasses() {
     Set<OWLClass> listOfTopClasses = new HashSet<>();
     for (OWLClass cls : ontology.getClassesInSignature()) {
@@ -123,23 +100,6 @@ public class OntologyLoader {
     return factory.getOWLThing();
   }
 
-  public List<Set<OWLClass>> getAssociatedClasses(OWLClass cls) {
-    List<Set<OWLClass>> alternativeDefinitions = new ArrayList<>();
-    for (OWLSubClassOfAxiom axiom : ontology.getSubClassAxiomsForSubClass(cls)) {
-      Set<OWLClass> associatedTerms = new HashSet<>();
-      OWLClassExpression expression = axiom.getSuperClass();
-      if (expression.isAnonymous()) {
-        for (OWLObjectProperty property : expression.getObjectPropertiesInSignature()) {
-          if (owlObjectProperties.contains(property.getIRI().toString())) {
-            associatedTerms.addAll(expression.getClassesInSignature());
-          }
-        }
-      }
-      alternativeDefinitions.add(associatedTerms);
-    }
-    return alternativeDefinitions;
-  }
-
   public Set<OWLClass> getChildClass(OWLClass cls) {
     Set<OWLClass> listOfClasses = new HashSet<>();
     for (OWLSubClassOfAxiom axiom : ontology.getSubClassAxiomsForSuperClass(cls)) {
@@ -150,19 +110,6 @@ public class OntologyLoader {
       }
     }
     return listOfClasses;
-  }
-
-  // TODO: what if the ontology terms have multiple IDs?
-  public String getId(OWLClass entity) {
-    for (OWLAnnotationProperty owlObjectProperty : ontology.getAnnotationPropertiesInSignature()) {
-      if (ifExistsAnnotation(owlObjectProperty.toString(), "id")) {
-        Set<String> annotation = getAnnotation(entity, owlObjectProperty.getIRI().toString());
-        if (!annotation.isEmpty()) {
-          return annotation.iterator().next();
-        }
-      }
-    }
-    return StringUtils.EMPTY;
   }
 
   private boolean ifExistsAnnotation(String propertyUrl, String keyword) {
@@ -185,16 +132,6 @@ public class OntologyLoader {
     }
     listOfSynonyms.add(getLabel(cls));
     return listOfSynonyms;
-  }
-
-  public String getDefinition(OWLClass cls) {
-    for (String definitionProperty : ontologyTermDefinitions) {
-      Set<String> annotation = getAnnotation(cls, definitionProperty);
-      if (!annotation.isEmpty()) {
-        return annotation.iterator().next();
-      }
-    }
-    return StringUtils.EMPTY;
   }
 
   public String getLabel(OWLEntity entity) {
@@ -221,25 +158,6 @@ public class OntologyLoader {
       throw new RuntimeException("Failed to get label for OWLClass " + entity);
     }
     return annotations;
-  }
-
-  public Map<String, Set<String>> getAllDatabaseIds(OWLClass entity) {
-    Map<String, Set<String>> dbAnnotations = new HashMap<>();
-
-    for (OWLAnnotation annotation : entity.getAnnotations(ontology)) {
-      if (annotation.getValue() instanceof OWLLiteral) {
-        OWLLiteral val = (OWLLiteral) annotation.getValue();
-        String value = val.getLiteral();
-        if (value.matches(DB_ID_PATTERN)) {
-          String databaseName = value.replaceAll(DB_ID_PATTERN, "$1");
-          if (!dbAnnotations.containsKey(databaseName)) {
-            dbAnnotations.put(databaseName, new HashSet<>());
-          }
-          dbAnnotations.get(databaseName).add(value.replaceAll(DB_ID_PATTERN, "$2"));
-        }
-      }
-    }
-    return dbAnnotations;
   }
 
   // TODO : FIXME replace the getAllDatabaseIds later on
@@ -301,18 +219,6 @@ public class OntologyLoader {
     return hashToRetrieveClass;
   }
 
-  public Set<OWLSubClassOfAxiom> getSubClassAxiomsForSuperClass(OWLClass cls) {
-    return ontology.getSubClassAxiomsForSuperClass(cls);
-  }
-
-  public Set<OWLSubClassOfAxiom> getSubClassAxiomsForSubClass(OWLClass cls) {
-    return ontology.getSubClassAxiomsForSubClass(cls);
-  }
-
-  public void addSynonymsProperties(Set<String> synonymsProperties) {
-    this.synonymsProperties.addAll(synonymsProperties);
-  }
-
   public OWLClass createClass(String iri, Set<OWLClass> rootClasses) {
     OWLClass owlClass = factory.getOWLClass(IRI.create(iri));
     for (OWLClass rootClass : rootClasses) {
@@ -324,10 +230,6 @@ public class OntologyLoader {
   public void addClass(OWLClass cls, OWLClass parentClass) {
     if (parentClass == null) parentClass = factory.getOWLThing();
     manager.applyChange(new AddAxiom(ontology, factory.getOWLSubClassOfAxiom(cls, parentClass)));
-  }
-
-  public long count() {
-    return ontology.getClassesInSignature().size();
   }
 
   public Set<OWLClass> getAllclasses() {
