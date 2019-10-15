@@ -81,6 +81,10 @@ public abstract class AttributeResponseData {
 
   @Nullable
   @CheckForNull
+  public abstract List<Category> getCategoricalOptions();
+
+  @Nullable
+  @CheckForNull
   public abstract Range getRange();
 
   @Nullable
@@ -157,6 +161,8 @@ public abstract class AttributeResponseData {
     public abstract Builder setExpression(String expression);
 
     public abstract Builder setEnumOptions(List<String> enumOptions);
+
+    public abstract Builder setCategoricalOptions(List<Category> categories);
 
     public abstract Builder setRange(Range range);
 
