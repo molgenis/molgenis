@@ -36,7 +36,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -91,12 +90,6 @@ public class EntityTestHarness {
     return staticTestEntityStaticMetaData;
   }
 
-  public EntityType createDynamicRefEntityType(String id, Package package_) {
-    EntityType refEntityType =
-        entityTypeFactory.create(id).setLabel(id).setBackend("PostgreSQL").setPackage(package_);
-    return createDynamicRefEntityType(refEntityType);
-  }
-
   public EntityType createDynamicRefEntityType() {
     return createDynamicRefEntityType("TypeTestRefDynamic");
   }
@@ -113,13 +106,6 @@ public class EntityTestHarness {
     return refEntityType;
   }
 
-  public EntityType createDynamicTestEntityType(
-      String id, Package package_, EntityType refEntityType) {
-    EntityType entityType =
-        entityTypeFactory.create(id).setLabel(id).setBackend("PostgreSQL").setPackage(package_);
-    return createDynamicTestEntityType(entityType, refEntityType);
-  }
-
   public EntityType createDynamicTestEntityType(EntityType refEntityType) {
     return createDynamicTestEntityType(refEntityType, "TypeTestDynamic");
   }
@@ -127,15 +113,6 @@ public class EntityTestHarness {
   public EntityType createDynamicTestEntityType(EntityType refEntityType, String id) {
     EntityType entityType = entityTypeFactory.create(id).setLabel(id).setBackend("PostgreSQL");
     return createDynamicTestEntityType(entityType, refEntityType);
-  }
-
-  public EntityType createDynamicSelfReferencingTestEntityType() {
-    EntityType entityType =
-        entityTypeFactory
-            .create("TypeTestDynamicSelfReference")
-            .setLabel("TypeTestDynamicSelfReference")
-            .setBackend("PostgreSQL");
-    return createDynamicTestEntityType(entityType, entityType);
   }
 
   private EntityType createDynamicTestEntityType(EntityType entityType, EntityType refEntityType) {
@@ -194,11 +171,6 @@ public class EntityTestHarness {
       EntityType entityType, int numberOfEntities, List<Entity> refEntities) {
     return IntStream.range(0, numberOfEntities)
         .mapToObj(i -> createEntity(entityType, i, refEntities.get(i % refEntities.size())));
-  }
-
-  public Stream<Entity> createSelfRefEntitiesWithEmptyReferences(
-      EntityType entityType, int numberOfEntities) {
-    return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityType, i, null));
   }
 
   private Entity createRefEntity(EntityType refEntityType, int id) {

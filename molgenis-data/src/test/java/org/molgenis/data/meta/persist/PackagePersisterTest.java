@@ -40,10 +40,6 @@ class PackagePersisterTest extends AbstractMockitoTest {
 
   @Test
   void testUpsertPackages() throws Exception {
-    String newPackageName = "newPackage";
-    String unchangedPackageName = "unchangedPackage";
-    String updatedPackageName = "updatedPackage";
-
     Package newPackage = mock(Package.class);
     when(newPackage.getId()).thenReturn("newPackageId");
 
