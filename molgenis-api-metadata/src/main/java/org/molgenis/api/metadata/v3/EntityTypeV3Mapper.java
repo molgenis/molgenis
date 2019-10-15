@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
@@ -21,6 +20,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
+import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -61,7 +61,7 @@ public class EntityTypeV3Mapper {
     return EntityTypesResponse.create(
         createLinksResponse(number, size, total),
         results,
-        getPageResponse(size, entityTypes.getTotal(), entityTypes.getTotal() / size, number));
+        PageResponse.create(size, entityTypes.getTotal(), total > 0 ? (int) Math.ceil(total / (double) size) : 0, number));
   }
 
   public EntityTypeResponse toEntityTypeResponse(
