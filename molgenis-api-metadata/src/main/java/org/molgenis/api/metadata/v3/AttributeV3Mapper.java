@@ -12,7 +12,6 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 import com.google.common.collect.Iterables;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,11 +112,8 @@ public class AttributeV3Mapper {
     builder.setLabelAttribute(attr.isLabelAttribute());
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());
     if (EntityTypeUtils.isReferenceType(attr)) {
-      try {
-        builder.setRefEntityType(LinksResponse.create(null, new URI("http://fix.me/"), null));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
+      builder.setRefEntityType(
+          LinksResponse.create(null, createEntityTypeResponseUri(attr.getRefEntity()), null));
     }
     builder.setCascadeDelete(attr.getCascadeDelete());
     builder.setMappedBy(attr.getMappedBy() != null ? mapAttribute(attr.getMappedBy(), i18n) : null);
@@ -316,6 +312,15 @@ public class AttributeV3Mapper {
             .pathSegment(attr.getEntity().getId())
             .pathSegment(ATTRIBUTES)
             .pathSegment(attr.getIdentifier());
+    return uriComponentsBuilder.build().toUri();
+  }
+
+  private URI createEntityTypeResponseUri(EntityType entityType) {
+    UriComponentsBuilder uriComponentsBuilder =
+        fromCurrentRequestUri()
+            .replacePath(null)
+            .path(MetadataApiController.API_META_PATH)
+            .pathSegment(entityType.getId());
     return uriComponentsBuilder.build().toUri();
   }
 
