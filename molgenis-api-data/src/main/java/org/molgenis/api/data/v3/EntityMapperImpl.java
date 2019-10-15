@@ -71,7 +71,7 @@ public class EntityMapperImpl implements EntityMapper {
               page.getTotal() > 0
                   ? (int) Math.ceil(page.getTotal() / (double) page.getPageSize())
                   : 0,
-              page.getOffset() / page.getPageSize());
+              page.getTotal() > 0 ? (page.getOffset() / page.getPageSize()) + 1 : 0);
       builder.setPage(pageResponse);
     }
   }
