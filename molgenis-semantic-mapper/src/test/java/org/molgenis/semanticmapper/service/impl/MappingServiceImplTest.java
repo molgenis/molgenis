@@ -66,7 +66,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.jobs.Progress;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
@@ -87,6 +86,7 @@ import org.springframework.test.context.ContextConfiguration;
       EntityBaseTestConfig.class
     })
 class MappingServiceImplTest extends AbstractMolgenisSpringTest {
+
   private static final String TARGET_HOP_ENTITY = "HopEntity";
   private static final String SOURCE_GENE_ENTITY = "Gene";
   private static final String SOURCE_EXON_ENTITY = "Exon";
@@ -370,9 +370,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // make project and apply mappings once
-    MappingProject project = createMappingProjectWithMappings();
-
+    // apply mappings once
     Entity mappedEntity = mock(Entity.class);
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenReturn(mappedEntity);
@@ -444,9 +442,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // make project and apply mappings once
-    MappingProject project = createMappingProjectWithMappings();
-
+    // apply mappings once
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenAnswer(invocation -> new DynamicEntity(targetMeta));
 
@@ -784,14 +780,12 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()")),
               eq(geneEntity),
-              eq(geneMetaData),
               eq(3)))
           .thenReturn(geneEntity.getString("id"));
 
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()")),
               eq(geneEntity),
-              eq(geneMetaData),
               eq(3)))
           .thenReturn(geneEntity.getDouble("length"));
 
@@ -801,23 +795,6 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       expectedEntity.set("source", geneMetaData.getId());
       expectedEntities.add(expectedEntity);
     }
-  }
-
-  private MappingProject createMappingProjectWithMappings() {
-    MappingProject mappingProject =
-        mappingService.addMappingProject("TestRun", hopMetaData.getId(), 3);
-    MappingTarget target = mappingProject.getMappingTarget(hopMetaData.getId());
-
-    when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
-
-    EntityMapping mapping = target.addSource(geneMetaData);
-
-    AttributeMapping idMapping = mapping.addAttributeMapping("identifier");
-    idMapping.setAlgorithm("$('id').value()");
-    AttributeMapping attrMapping = mapping.addAttributeMapping("height");
-    attrMapping.setAlgorithm("$('length').value()");
-
-    return mappingProject;
   }
 
   private MappingTarget getManualMappingTarget(
@@ -833,6 +810,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   @Configuration
   @Import(UserTestConfig.class)
   static class Config {
+
     @Bean
     EntityManager entityManager() {
       return mock(EntityManager.class);

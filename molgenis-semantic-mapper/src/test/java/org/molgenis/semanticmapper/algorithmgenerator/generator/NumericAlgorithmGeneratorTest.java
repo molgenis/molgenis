@@ -90,8 +90,7 @@ class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest {
   @Test
   void generateUnitConversionAlgorithm() {
     String generateUnitConversionAlgorithm =
-        numericAlgorithmGenerator.generateUnitConversionAlgorithm(
-            targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
+        numericAlgorithmGenerator.generateUnitConversionAlgorithm(targetAttribute, sourceAttribute);
     assertEquals(
         "$('sourceHeight').unit('cm').toUnit('m').value();", generateUnitConversionAlgorithm);
   }

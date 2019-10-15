@@ -160,11 +160,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   }
 
   @Override
-  public Object apply(
-      AttributeMapping attributeMapping,
-      Entity sourceEntity,
-      EntityType sourceEntityType,
-      int depth) {
+  public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, int depth) {
     String algorithm = attributeMapping.getAlgorithm();
     if (isEmpty(algorithm)) {
       return null;

@@ -31,9 +31,7 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator {
     StringBuilder algorithm = new StringBuilder();
 
     if (sourceAttributes.size() == 1) {
-      algorithm.append(
-          generateUnitConversionAlgorithm(
-              targetAttribute, targetEntityType, sourceAttributes.get(0), sourceEntityType));
+      algorithm.append(generateUnitConversionAlgorithm(targetAttribute, sourceAttributes.get(0)));
     } else if (sourceAttributes.size() > 1) {
       algorithm.append("var counter = 0;\nvar SUM=newValue(0);\n");
       for (Attribute sourceAttribute : sourceAttributes) {
@@ -68,18 +66,12 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator {
     return enumType == INT || enumType == LONG || enumType == DECIMAL;
   }
 
-  String generateUnitConversionAlgorithm(
-      Attribute targetAttribute,
-      EntityType targetEntityType,
-      Attribute sourceAttribute,
-      EntityType sourceEntityType) {
+  String generateUnitConversionAlgorithm(Attribute targetAttribute, Attribute sourceAttribute) {
     String algorithm = null;
 
-    Unit<? extends Quantity> targetUnit =
-        unitResolver.resolveUnit(targetAttribute, targetEntityType);
+    Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute);
 
-    Unit<? extends Quantity> sourceUnit =
-        unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
+    Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute);
 
     if (sourceUnit != null) {
       if (targetUnit != null && !sourceUnit.equals(targetUnit)) {
