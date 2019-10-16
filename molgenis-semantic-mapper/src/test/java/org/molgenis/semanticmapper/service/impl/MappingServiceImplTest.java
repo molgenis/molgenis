@@ -66,6 +66,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.jobs.Progress;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
@@ -370,7 +371,8 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // apply mappings once
+    // create project and apply mappings once
+    createMappingProjectWithMappings();
     Entity mappedEntity = mock(Entity.class);
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenReturn(mappedEntity);
@@ -442,7 +444,8 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // apply mappings once
+    // create mapping project and apply mappings once
+    createMappingProjectWithMappings();
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenAnswer(invocation -> new DynamicEntity(targetMeta));
 
@@ -800,6 +803,23 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   private MappingTarget getManualMappingTarget(
       String identifier, Collection<EntityMapping> entityMappings) {
     return new MappingTarget(identifier, hopMetaData, entityMappings);
+  }
+
+  private MappingProject createMappingProjectWithMappings() {
+    MappingProject mappingProject =
+        mappingService.addMappingProject("TestRun", hopMetaData.getId(), 3);
+    MappingTarget target = mappingProject.getMappingTarget(hopMetaData.getId());
+
+    when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
+
+    EntityMapping mapping = target.addSource(geneMetaData);
+
+    AttributeMapping idMapping = mapping.addAttributeMapping("identifier");
+    idMapping.setAlgorithm("$('id').value()");
+    AttributeMapping attrMapping = mapping.addAttributeMapping("height");
+    attrMapping.setAlgorithm("$('length').value()");
+
+    return mappingProject;
   }
 
   private MappingProject getManualMappingProject(

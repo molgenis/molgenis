@@ -813,6 +813,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(emxEntity.getString("en")).thenReturn("english");
     when(emxEntity.getString("de")).thenReturn("deutch");
 
+    emxMetadataParser.toL10nString(emxEntity);
     verify(l10nString).setMessageID("identifier");
     verify(l10nString).setNamespace(DEFAULT_NAMESPACE);
     verify(l10nString).setDescription("desc");
@@ -832,6 +833,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(emxEntity.getString("namespace")).thenReturn("dataexplorer");
     when(emxEntity.getString("nl")).thenReturn("nederlands");
 
+    emxMetadataParser.toL10nString(emxEntity);
     verify(l10nString).setMessageID("identifier");
     verify(l10nString).setNamespace("dataexplorer");
     verify(l10nString).setDescription("desc");

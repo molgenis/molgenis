@@ -31,6 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = UnitResolverImplTest.Config.class)
 class UnitResolverImplTest extends AbstractMolgenisSpringTest {
+
   @Autowired private AttributeFactory attrMetaFactory;
 
   @Autowired private UnitResolverImpl unitResolverImpl;
@@ -84,7 +85,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   void resolveUnitLabelNoUnit() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight").setDescription(null);
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertNull(unit);
   }
 
@@ -92,7 +93,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   void resolveUnitLabelNoUnitDescriptionNoUnit() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight").setDescription("weight");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertNull(unit);
   }
 
@@ -100,7 +101,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   void resolveUnitLabelWithUnit_directUnitMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight (kg)").setDescription(null);
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("kg"), unit);
   }
 
@@ -108,7 +109,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("label").setDescription("height (cm)");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("cm"), unit);
   }
 
@@ -120,7 +121,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setName("attr")
             .setLabel("label")
             .setDescription("area density (kg/m2)");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("kg/m²"), unit);
   }
 
@@ -132,7 +133,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setName("attr")
             .setLabel("label")
             .setDescription("area density (kg/m^2)");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("kg/m²"), unit);
   }
 
@@ -144,7 +145,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setName("attr")
             .setLabel("label")
             .setDescription("area density (kg/m²)");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("kg/m²"), unit);
   }
 
@@ -152,7 +153,7 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
   void resolveUnitLabelWithUnit_unitOntologyMatch() {
     Attribute attr =
         attrMetaFactory.create().setName("attr").setLabel("weight (kilogram)").setDescription(null);
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("kg"), unit);
   }
 
@@ -164,12 +165,13 @@ class UnitResolverImplTest extends AbstractMolgenisSpringTest {
             .setName("attr")
             .setLabel("label")
             .setDescription("height (centimeter)");
-    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+    Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr);
     assertEquals(valueOf("cm"), unit);
   }
 
   @Configuration
   static class Config {
+
     @Bean
     UnitResolverImpl unitResolverImpl() {
       return new UnitResolverImpl(ontologyService());
