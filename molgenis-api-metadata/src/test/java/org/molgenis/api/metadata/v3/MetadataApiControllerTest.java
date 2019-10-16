@@ -22,13 +22,14 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   @BeforeEach
   void setUpBeforeEach() {
     metadataApiController =
-        new MetadataApiController(metadataApiService, entityTypeV3Mapper, attributeV3Mapper);
+        new MetadataApiController(metadataApiService, null, entityTypeV3Mapper, attributeV3Mapper);
   }
 
   @Test
   void testMetadataApiController() {
     assertThrows(
-        NullPointerException.class, () -> new MetadataApiController(null, null, attributeV3Mapper));
+        NullPointerException.class,
+        () -> new MetadataApiController(null, null, null, attributeV3Mapper));
   }
 
   @Test

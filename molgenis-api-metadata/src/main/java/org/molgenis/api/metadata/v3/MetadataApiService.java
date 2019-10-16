@@ -30,4 +30,11 @@ public interface MetadataApiService {
   void deleteEntityType(String entityTypeId);
 
   void deleteEntityTypes(Query q);
+
+  /**
+   * Updates entity type.
+   *
+   * @param entityType updated entity type
+   */
+  Void updateEntityType(EntityType entityType);
 }
