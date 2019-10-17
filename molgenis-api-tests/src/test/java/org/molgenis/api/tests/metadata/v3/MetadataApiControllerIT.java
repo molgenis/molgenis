@@ -139,7 +139,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .put("/api/metadata/v3meta_MyNumbers")
         .then()
         .statusCode(ACCEPTED.value());
-
+    // TODO check location
     // TODO poll job until success and verify that update was performed successfully
   }
 

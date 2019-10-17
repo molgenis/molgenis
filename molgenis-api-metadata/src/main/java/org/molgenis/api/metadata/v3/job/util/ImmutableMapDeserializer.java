@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
+ * TODO use dependency or move to molgenis-utils
+ *
  * copied from
  * https://github.com/acebaggins/gson-serializers/blob/master/src/main/java/com/tyler/gson/immutable/
  */
