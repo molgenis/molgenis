@@ -8,13 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {UserValidatorTest.Config.class})
-@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+@SecurityTestExecutionListeners
 class UserValidatorTest extends AbstractMockitoSpringContextTests {
   private UserValidator userValidator;
 

@@ -3,7 +3,6 @@ package org.molgenis.core.ui.freemarker;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
 
 import freemarker.cache.TemplateLoader;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
@@ -23,12 +22,12 @@ public class RepositoryTemplateLoader implements TemplateLoader {
   }
 
   @Override
-  public void closeTemplateSource(Object arg0) throws IOException {
+  public void closeTemplateSource(Object arg0) {
     // noop
   }
 
   @Override
-  public Object findTemplateSource(String name) throws IOException {
+  public Object findTemplateSource(String name) {
     FreemarkerTemplate template =
         dataService.findOne(
             FREEMARKER_TEMPLATE,
@@ -50,7 +49,7 @@ public class RepositoryTemplateLoader implements TemplateLoader {
   }
 
   @Override
-  public Reader getReader(Object source, String encoding) throws IOException {
+  public Reader getReader(Object source, String encoding) {
     TemplateSource r = ((TemplateSource) source);
     return new StringReader(r.getValue());
   }

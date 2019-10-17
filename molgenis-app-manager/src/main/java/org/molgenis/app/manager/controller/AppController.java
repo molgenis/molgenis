@@ -2,7 +2,6 @@ package org.molgenis.app.manager.controller;
 
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.app.manager.controller.AppController.URI;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
@@ -36,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
-@RequestMapping(URI)
+@RequestMapping(AppController.URI)
 public class AppController extends PluginController {
   public static final String ID = "app";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;

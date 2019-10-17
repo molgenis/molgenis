@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 
 import java.io.IOException;
@@ -13,13 +12,12 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
@@ -27,11 +25,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class TwoFactorAuthenticationFilterTest {
+class TwoFactorAuthenticationFilterTest extends AbstractMockitoSpringContextTests {
 
   @Mock private AuthenticationSettings authenticationSettings;
   @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -99,8 +95,6 @@ class TwoFactorAuthenticationFilterTest {
   @Test
   void testDoFilterInternalNotAuthenticated() throws IOException, ServletException {
     request.setRequestURI("/login");
-    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
-
     filter.doFilterInternal(request, response, chain);
     verify(chain).doFilter(request, response);
   }
@@ -115,7 +109,6 @@ class TwoFactorAuthenticationFilterTest {
       testContext.setAuthentication(new RecoveryAuthenticationToken("recovery"));
 
       request.setRequestURI("/menu/main/dataexplorer");
-      when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 
       filter.doFilterInternal(request, response, chain);
       verify(chain).doFilter(request, response);

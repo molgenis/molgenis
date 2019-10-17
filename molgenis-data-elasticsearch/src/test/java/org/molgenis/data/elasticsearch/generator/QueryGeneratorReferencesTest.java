@@ -42,6 +42,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataConverter;
@@ -57,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /** Copy of standard QueryGeneratorTest but now with queries done on the referenced entity */
 // FIXME add nillable tests
+@MockitoSettings(strictness = Strictness.LENIENT)
 class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   private static final String FIELD_NGRAM_ANALYZED = "ngram";
 
@@ -83,10 +85,6 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrFactory;
 
   private QueryGenerator queryGenerator;
-
-  QueryGeneratorReferencesTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUp() {

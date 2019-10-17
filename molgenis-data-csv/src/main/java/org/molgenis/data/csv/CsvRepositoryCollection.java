@@ -2,7 +2,6 @@ package org.molgenis.data.csv;
 
 import com.google.common.collect.Lists;
 import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.support.FileRepositoryCollection;
@@ -35,7 +33,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection {
   private List<String> entityTypeIds;
   private List<String> entityTypeIdsLowerCase;
 
-  public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException {
+  public CsvRepositoryCollection(File file) {
     this(file, (CellProcessor[]) null);
   }
 
@@ -47,7 +45,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection {
   }
 
   @Override
-  public void init() throws IOException {
+  public void init() {
     // no operation
   }
 

@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -49,11 +50,9 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.semanticmapper.job.MappingJobExecution;
 import org.molgenis.semanticmapper.job.MappingJobExecutionFactory;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
@@ -85,11 +84,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
 class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
-  private static final String USERNAME = "MyUsername";
-
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -117,8 +115,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   @Mock private MetaDataService metaDataService;
   @Mock private Package system;
   @Mock private Package base;
-  @Mock private UserAccountService userAccountService;
-  @Mock private User user;
   @Mock private JobExecutor jobExecutor;
   @Mock private MappingJobExecution mappingJobExecution;
   @Mock private EntityType mappingJobExecutionMetadata;
@@ -137,10 +133,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   private MockMvc mockMvc;
   private SecurityContext previousContext;
 
-  MappingServiceControllerTest() {
-    super(Strictness.WARN);
-  }
-
   @AfterEach
   void tearDownAfterClass() {
     SecurityContextHolder.setContext(previousContext);
@@ -154,8 +146,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     authentication.setAuthenticated(true);
     testContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(testContext);
-
-    user = when(mock(User.class).getUsername()).thenReturn(USERNAME).getMock();
 
     hop = entityTypeFactory.create("HOP");
     ageAttr = attrMetaFactory.create().setName("age").setDataType(INT);
@@ -184,7 +174,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
             semanticSearchService,
             menuReaderService,
             mappingJobExecutionFactory,
-            userAccountService,
             jobExecutor,
             jobsController);
 
@@ -334,8 +323,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
             .andReturn()
             .getResponse();
     assertEquals(
-        response.getContentAsString(),
         "true",
+        response.getContentAsString(),
         "When checking for a new entity type, the result should be the String \"true\"");
     assertEquals(APPLICATION_JSON_UTF8_VALUE, response.getContentType());
     verify(dataService).hasEntityType("blah");
@@ -355,8 +344,8 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
             .getResponse();
     assertEquals(APPLICATION_JSON_UTF8_VALUE, response.getContentType());
     assertEquals(
-        response.getContentAsString(),
         "false",
+        response.getContentAsString(),
         "When checking for an existing entity type, the result should be the String \"false\"");
   }
 
@@ -455,8 +444,6 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
     when(mappingJobExecution.getIdValue()).thenReturn("abcde");
     when(mappingJobExecutionMetadata.getId()).thenReturn("MappingJobExecution");
-
-    when(userAccountService.getCurrentUser()).thenReturn(user);
 
     mockMvc
         .perform(

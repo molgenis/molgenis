@@ -109,7 +109,7 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (mapDB != null) {
       mapDB.close();
     }

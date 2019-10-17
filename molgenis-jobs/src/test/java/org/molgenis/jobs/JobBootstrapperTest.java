@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -42,6 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {JobBootstrapperTest.Config.class, JobBootstrapper.class})
 class JobBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private JobBootstrapper jobBootstrapper;
@@ -71,10 +73,6 @@ class JobBootstrapperTest extends AbstractMolgenisSpringTest {
   @Autowired private JobScheduler jobScheduler;
 
   @Autowired private Config config;
-
-  JobBootstrapperTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

@@ -3,7 +3,6 @@ package org.molgenis.data.mem;
 import static com.google.common.collect.Iterables.partition;
 
 import com.google.common.collect.Sets;
-import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,7 +60,7 @@ public class InMemoryRepository implements Repository<Entity> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     // do nothing
   }
 

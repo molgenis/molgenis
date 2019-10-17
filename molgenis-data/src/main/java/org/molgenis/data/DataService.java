@@ -218,28 +218,32 @@ public interface DataService extends Iterable<Repository<Entity>> {
   <E extends Entity> E findOne(String entityTypeId, Query<E> q, Class<E> clazz);
 
   /**
-   * Adds an entity to it's repository
+   * Adds an entity to it's repository Note: the caller is responsible for updating the other side
+   * of bidirectional relationships (e.g. one-to-many attributes).
    *
    * @throws MolgenisDataException if the repository of the entity isn't a Writable
    */
   void add(String entityTypeId, Entity entity);
 
   /**
-   * Adds entities to it's repository
+   * Adds entities to it's repository Note: the caller is responsible for updating the other side of
+   * bidirectional relationships (e.g. one-to-many attributes).
    *
    * @param entities entities
    */
   <E extends Entity> void add(String entityTypeId, Stream<E> entities);
 
   /**
-   * Updates an entity
+   * Updates an entity Note: the caller is responsible for updating the other side of bidirectional
+   * relationships (e.g. one-to-many attributes).
    *
    * @throws MolgenisDataException if the repository of the entity isn't an Updateable
    */
   void update(String entityTypeId, Entity entity);
 
   /**
-   * Updates entities
+   * Updates entities Note: the caller is responsible for updating the other side of bidirectional
+   * relationships (e.g. one-to-many attributes).
    *
    * @param entities entities
    */

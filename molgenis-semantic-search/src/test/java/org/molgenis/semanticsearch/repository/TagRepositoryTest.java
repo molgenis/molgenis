@@ -16,6 +16,7 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
 @ContextConfiguration(classes = TagRepositoryTest.Config.class)
 public class TagRepositoryTest extends AbstractMolgenisSpringTest {
@@ -44,10 +46,6 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest {
   @Autowired private IdGenerator idGenerator;
 
   private final UUID uuid = UUID.randomUUID();
-
-  public TagRepositoryTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   public void beforeMethod() {

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -56,6 +57,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {SortaServiceImplTest.Config.class})
 class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   private static final String ONTOLOGY_IRI = "http://www.molgenis.org/";
@@ -71,10 +73,6 @@ class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   @Autowired private OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
   @Autowired private OntologyTermDynamicAnnotationFactory ontologyTermDynamicAnnotationFactory;
-
-  SortaServiceImplTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

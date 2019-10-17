@@ -19,6 +19,7 @@ public class ScheduledJobTest extends AbstractSystemEntityTest {
   @Autowired ScheduledJobMetadata metadata;
   @Autowired ScheduledJobFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

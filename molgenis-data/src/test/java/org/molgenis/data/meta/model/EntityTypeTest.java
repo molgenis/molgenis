@@ -45,6 +45,7 @@ class EntityTypeTest extends AbstractSystemEntityTest {
   @Autowired EntityTypeMetadata metadata;
   @Autowired EntityTypeFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

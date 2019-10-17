@@ -17,9 +17,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -28,19 +26,18 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class UserAccountControllerTest {
+class UserAccountControllerTest extends AbstractMockitoSpringContextTests {
   @Mock private UserAccountService userAccountService;
   @Mock private RecoveryService recoveryService;
   @Mock private TwoFactorAuthenticationService twoFactorAuthenticationService;

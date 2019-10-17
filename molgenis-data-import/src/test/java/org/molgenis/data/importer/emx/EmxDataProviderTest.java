@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -27,6 +28,7 @@ import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class EmxDataProviderTest extends AbstractMockitoTest {
   @Mock private EmxImportJob emxImportJob;
 
@@ -37,10 +39,6 @@ class EmxDataProviderTest extends AbstractMockitoTest {
   @BeforeEach
   void setUpBeforeMethod() {
     emxDataProvider = new EmxDataProvider(emxImportJob, entityManager);
-  }
-
-  EmxDataProviderTest() {
-    super(Strictness.WARN);
   }
 
   @Test

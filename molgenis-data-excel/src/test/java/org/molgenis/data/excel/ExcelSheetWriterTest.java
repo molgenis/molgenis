@@ -22,12 +22,11 @@ class ExcelSheetWriterTest extends AbstractMolgenisSpringTest {
   @Autowired private AttributeFactory attrMetaFactory;
 
   private ExcelWriter excelWriter;
-  private ByteArrayOutputStream bos;
   private ExcelSheetWriter excelSheetWriter;
 
   @BeforeEach
   void setUp() {
-    bos = new ByteArrayOutputStream();
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
     excelWriter = new ExcelWriter(bos, attrMetaFactory);
     excelSheetWriter = excelWriter.createWritable("sheet", Arrays.asList("col1", "col2"));
   }

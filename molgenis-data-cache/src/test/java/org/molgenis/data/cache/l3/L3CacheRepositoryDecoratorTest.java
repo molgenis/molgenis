@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -44,6 +45,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L3CacheRepositoryDecoratorTest.Config.class)
 class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   private L3CacheRepositoryDecorator l3CacheRepositoryDecorator;
@@ -74,10 +76,6 @@ class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   private Query<Entity> query;
 
   @Mock private Fetch fetch;
-
-  L3CacheRepositoryDecoratorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void beforeMethod() {

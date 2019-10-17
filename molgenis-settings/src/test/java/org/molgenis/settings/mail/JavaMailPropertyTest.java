@@ -19,6 +19,7 @@ class JavaMailPropertyTest extends AbstractSystemEntityTest {
   @Autowired JavaMailPropertyType metadata;
   @Autowired JavaMailPropertyFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

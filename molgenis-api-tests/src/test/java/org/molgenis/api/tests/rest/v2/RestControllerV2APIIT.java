@@ -109,17 +109,6 @@ class RestControllerV2APIIT extends AbstractApiTests {
     testUserToken = RestTestUtils.login(testUserName, REST_TEST_USER_PASSWORD);
   }
 
-  @Disabled
-  @Test // TODO
-  void testGetVersion() {
-    //	@Autowired
-    //	@GetMapping("/version")
-    //	@ResponseBody
-    //	Map<String, String> getVersion(@Value("${molgenis.version:@null}") String
-    // molgenisVersion,
-    //			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
-  }
-
   @Test
   void testRetrieveEntity() {
     ValidatableResponse response =

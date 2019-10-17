@@ -23,13 +23,12 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 
 @ContextConfiguration(classes = {UserPermissionEvaluatorImplTest.Config.class})
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@SecurityTestExecutionListeners
 class UserPermissionEvaluatorImplTest extends AbstractMockitoSpringContextTests {
   @Mock private PermissionEvaluator permissionEvaluator;
   @Mock private PermissionRegistry permissionRegistry;

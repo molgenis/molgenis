@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -54,6 +55,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
 public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   @Captor private ArgumentCaptor<Stream<Entity>> streamCaptor;
@@ -74,10 +76,6 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   private IndexActionGroup indexActionGroup;
   private EntityType testEntityType;
   private Entity toIndexEntity;
-
-  public IndexJobServiceTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   public void beforeMethod() {

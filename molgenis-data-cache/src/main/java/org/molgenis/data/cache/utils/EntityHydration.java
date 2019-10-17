@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,39 +32,70 @@ public class EntityHydration {
   }
 
   /**
-   * Rehydrate an entity. Entity can be an {@link EntityWithComputedAttributes} if there are
-   * attributes present with an expression
+   * Rehydrate an entity.
    *
    * @param entityType metadata of the entity to rehydrate
    * @param dehydratedEntity map with key value pairs representing this entity
    * @return hydrated entity
    */
-  @SuppressWarnings("unchecked")
   public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType) {
-    LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getId());
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getId());
+    }
 
     Entity hydratedEntity = entityManager.create(entityType, NO_POPULATE);
-
     for (Attribute attribute : entityType.getAtomicAttributes()) {
-      // Only hydrate the attribute if it is NOT computed.
-      // Computed attributes will be calculated based on the metadata
-      if (attribute.getExpression() == null) {
-        String name = attribute.getName();
-        Object value = dehydratedEntity.get(name);
-        if (value != null) {
-          if (isMultipleReferenceType(attribute)) {
-            // We can do this cast because during dehydration, mrefs and categorical mrefs are
-            // stored as a List of Object
-            value = entityManager.getReferences(attribute.getRefEntity(), (List<Object>) value);
-          } else if (isSingleReferenceType(attribute)) {
-            value = entityManager.getReference(attribute.getRefEntity(), value);
-          }
-        }
-        hydratedEntity.set(name, value);
-      }
+      hydrateValue(dehydratedEntity, attribute, hydratedEntity);
     }
 
     return hydratedEntity;
+  }
+
+  /**
+   * Rehydrate a partial entity.
+   *
+   * @param entityType metadata of the entity to rehydrate
+   * @param dehydratedEntity map with key value pairs representing this entity
+   * @param fetch containing attributes to retrieve, can be null
+   * @return hydrated entity
+   */
+  public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType, Fetch fetch) {
+    if (fetch == null) {
+      return hydrate(dehydratedEntity, entityType);
+    }
+
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityType.getId());
+    }
+
+    Entity hydratedEntity = entityManager.createFetch(entityType, fetch);
+    for (String attributeName : fetch.getFields()) {
+      Attribute attribute = entityType.getAttribute(attributeName);
+      hydrateValue(dehydratedEntity, attribute, hydratedEntity);
+    }
+
+    return hydratedEntity;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void hydrateValue(
+      Map<String, Object> dehydratedEntity, Attribute attribute, Entity hydratedEntity) {
+    // Only hydrate the attribute if it is NOT computed.
+    // Computed attributes will be calculated based on the metadata
+    if (attribute.getExpression() == null) {
+      String name = attribute.getName();
+      Object value = dehydratedEntity.get(name);
+      if (value != null) {
+        if (isMultipleReferenceType(attribute)) {
+          // We can do this cast because during dehydration, mrefs and categorical mrefs are
+          // stored as a List of Object
+          value = entityManager.getReferences(attribute.getRefEntity(), (List<Object>) value);
+        } else if (isSingleReferenceType(attribute)) {
+          value = entityManager.getReference(attribute.getRefEntity(), value);
+        }
+      }
+      hydratedEntity.set(name, value);
+    }
   }
 
   /**

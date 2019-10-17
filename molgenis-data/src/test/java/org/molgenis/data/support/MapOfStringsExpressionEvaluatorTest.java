@@ -14,6 +14,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import com.google.gson.JsonSyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -25,6 +26,7 @@ import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = MapOfStringsExpressionEvaluatorTest.Config.class)
 class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
   private Entity entity;
@@ -33,10 +35,6 @@ class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest {
 
   @Autowired private EntityTypeFactory entityTypeFactory;
   @Autowired private AttributeFactory attributeFactory;
-
-  MapOfStringsExpressionEvaluatorTest() {
-    super(Strictness.WARN);
-  }
 
   private EntityType createDynamicLocationMetaData() {
     return entityTypeFactory

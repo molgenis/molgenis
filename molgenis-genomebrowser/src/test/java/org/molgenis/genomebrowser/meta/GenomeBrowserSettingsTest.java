@@ -19,6 +19,7 @@ public class GenomeBrowserSettingsTest extends AbstractSystemEntityTest {
   @Autowired GenomeBrowserSettingsMetadata metadata;
   @Autowired GenomeBrowserSettingsFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

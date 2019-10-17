@@ -14,9 +14,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGeneratorImpl;
@@ -27,13 +25,12 @@ import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.RecoveryCodeMetadata;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretMetadata;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SecurityTestExecutionListeners
-class RecoveryServiceImplTest {
+class RecoveryServiceImplTest extends AbstractMockitoSpringContextTests {
   private static final String USERNAME = "molgenisUser";
   private static final String ROLE_SU = "SU";
 

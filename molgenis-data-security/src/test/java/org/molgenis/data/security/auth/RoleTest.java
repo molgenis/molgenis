@@ -12,6 +12,7 @@ public class RoleTest extends AbstractSystemEntityTest {
   @Autowired RoleMetadata metadata;
   @Autowired RoleFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

@@ -773,6 +773,9 @@ class PostgreSqlQueryGenerator {
     switch (attributeType) {
       case BOOL:
         Boolean booleanDefaultValue = (Boolean) defaultTypedValue;
+        if (booleanDefaultValue == null) {
+          throw new NullPointerException();
+        }
         sqlDefaultValue = booleanDefaultValue ? "TRUE" : "FALSE";
         break;
       case CATEGORICAL:
@@ -965,10 +968,16 @@ class PostgreSqlQueryGenerator {
             // It does however return those rows when queried with "... NOT abstract IS TRUE"
             if (attr.getDataType() == BOOL) {
               Boolean bool = (Boolean) postgreSqlVal;
+              if (bool == null) {
+                throw new NullPointerException();
+              }
               //noinspection ConstantConditions (getPostgreSqlQueryValue() != null if r.getValue()
               // != null)
-              if (bool) predicate.append(" IS TRUE");
-              else predicate.append(" IS FALSE");
+              if (Boolean.TRUE.equals(bool)) {
+                predicate.append(" IS TRUE");
+              } else {
+                predicate.append(" IS FALSE");
+              }
             } else {
               predicate.append(" =");
               predicate.append(" ? ");

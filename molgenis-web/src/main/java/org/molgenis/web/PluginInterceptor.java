@@ -10,6 +10,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.menu.MenuReaderService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -39,6 +40,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter {
     return true;
   }
 
+  @Transactional(readOnly = true)
   @Override
   public void postHandle(
       HttpServletRequest request,
@@ -46,34 +48,39 @@ public class PluginInterceptor extends HandlerInterceptorAdapter {
       Object handler,
       ModelAndView modelAndView) {
     if (modelAndView != null) {
-      PluginController molgenisPlugin = validateHandler(handler);
-      String pluginId = molgenisPlugin.getId();
+      String viewName = modelAndView.getViewName();
+      if (viewName == null || !viewName.startsWith("forward:")) {
+        PluginController molgenisPlugin = validateHandler(handler);
+        String pluginId = molgenisPlugin.getId();
 
-      // allow controllers that handle multiple plugins to set their plugin id
-      if (!modelAndView.getModel().containsKey(PluginAttributes.KEY_PLUGIN_ID)) {
-        modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID, pluginId);
+        // allow controllers that handle multiple plugins to set their plugin id
+        if (!modelAndView.getModel().containsKey(PluginAttributes.KEY_PLUGIN_ID)) {
+          modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID, pluginId);
+        }
+
+        Entity pluginSettings = molgenisPlugin.getPluginSettings();
+        boolean pluginSettingsCanWrite;
+        if (pluginSettings != null) {
+          String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
+          pluginSettingsCanWrite =
+              permissionService.hasPermission(
+                  new EntityTypeIdentity(pluginSettingsEntityName),
+                  EntityTypePermission.UPDATE_DATA);
+          modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
+        } else {
+          pluginSettingsCanWrite = false;
+        }
+
+        modelAndView.addObject(
+            PluginAttributes.KEY_PLUGIN_SHOW_SETTINGS_COG, pluginSettingsCanWrite);
+        modelAndView.addObject(PluginAttributes.KEY_MENU, menuReaderService.getMenu().orElse(null));
+
+        modelAndView.addObject(
+            PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
+        modelAndView.addObject(
+            PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING,
+            getPluginIdWithQueryString(request, pluginId));
       }
-
-      Entity pluginSettings = molgenisPlugin.getPluginSettings();
-      boolean pluginSettingsCanWrite;
-      if (pluginSettings != null) {
-        String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
-        pluginSettingsCanWrite =
-            permissionService.hasPermission(
-                new EntityTypeIdentity(pluginSettingsEntityName), EntityTypePermission.UPDATE_DATA);
-        modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
-      } else {
-        pluginSettingsCanWrite = false;
-      }
-
-      modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SHOW_SETTINGS_COG, pluginSettingsCanWrite);
-      modelAndView.addObject(PluginAttributes.KEY_MENU, menuReaderService.getMenu().orElse(null));
-
-      modelAndView.addObject(
-          PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
-      modelAndView.addObject(
-          PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING,
-          getPluginIdWithQueryString(request, pluginId));
     }
   }
 

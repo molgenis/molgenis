@@ -57,7 +57,7 @@ public class ScheduledScriptConfig {
           if (scriptResult.getOutput() != null) {
             progress.status(format("Script output:%n%s", scriptResult.getOutput()));
           } else {
-            progress.status(format("Script has no output."));
+            progress.status("Script has no output.");
           }
           return scriptResult;
         };

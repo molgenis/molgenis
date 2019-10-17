@@ -156,7 +156,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       case "2BP01":
         return translateDependentObjectsStillExist(sourceThrowable, pSqlException);
       case "42703":
-        return translateUndefinedColumnException(sourceThrowable, pSqlException);
+        return translateUndefinedColumnException(pSqlException);
       case PostgreSqlQueryGenerator.ERR_CODE_READONLY_VIOLATION:
         return translateReadonlyViolation(sourceThrowable, pSqlException);
       default:
@@ -413,7 +413,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
 
   /** Package private for testability */
   static MolgenisValidationException translateUndefinedColumnException(
-      @SuppressWarnings("unused") Throwable sourceThrowable, PSQLException pSqlException) {
+      PSQLException pSqlException) {
     ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
     String message = serverErrorMessage.getMessage(); // FIXME exposes internal message
     ConstraintViolation constraintViolation = new ConstraintViolation(message);

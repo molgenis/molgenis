@@ -14,6 +14,7 @@ import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZ
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -25,6 +26,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ElasticsearchServiceTest extends AbstractMockitoTest {
   private ElasticsearchService elasticsearchService;
 
@@ -35,10 +37,6 @@ class ElasticsearchServiceTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
 
   @Mock private EntityType entityType;
-
-  ElasticsearchServiceTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeEach
   void setUpBeforeMethod() {

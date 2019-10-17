@@ -1,9 +1,7 @@
 package org.molgenis.oneclickimporter.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 
@@ -14,9 +12,6 @@ public interface ExcelService {
    *
    * @param file
    * @return
-   * @throws IOException
-   * @throws InvalidFormatException
    */
-  List<Sheet> buildExcelSheetsFromFile(final File file)
-      throws IOException, InvalidFormatException, EmptySheetException;
+  List<Sheet> buildExcelSheetsFromFile(final File file) throws EmptySheetException;
 }

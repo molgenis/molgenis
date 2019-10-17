@@ -19,6 +19,7 @@ public class NegotiatorEntityConfigTest extends AbstractSystemEntityTest {
   @Autowired NegotiatorEntityConfigMetadata metadata;
   @Autowired NegotiatorEntityConfigFactory factory;
 
+  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(
