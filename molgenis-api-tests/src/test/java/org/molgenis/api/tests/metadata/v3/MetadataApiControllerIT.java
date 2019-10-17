@@ -1,5 +1,6 @@
 package org.molgenis.api.tests.metadata.v3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.molgenis.api.tests.AbstractApiTest;
+import org.molgenis.api.tests.utils.JobUtils;
 import org.molgenis.test.TestResourceUtils;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -133,14 +135,19 @@ class MetadataApiControllerIT extends AbstractApiTest {
             "updateMetadataEntityTypeMyNumbers.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .put("/api/metadata/v3meta_MyNumbers")
-        .then()
-        .statusCode(ACCEPTED.value());
-    // TODO check location
-    // TODO poll job until success and verify that update was performed successfully
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .put("/api/metadata/v3meta_MyNumbers")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
+
+    // TODO validate updated entity type
   }
 
   // TODO enable after endpoint is async
@@ -151,15 +158,20 @@ class MetadataApiControllerIT extends AbstractApiTest {
     String bodyJson =
         TestResourceUtils.getRenderedString(
             getClass(),
-            "partialUpdateMetadataEntityType.json",
+            "partialUpdateMetadataEntityTypeMyStrings.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .patch("/api/metadata/v3meta_MyDataset")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .put("/api/metadata/v3meta_MyStrings")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
   // TODO enable after endpoint is async

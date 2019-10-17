@@ -3,6 +3,7 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 
 import java.net.URI;
+import java.util.Map;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
@@ -27,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -133,6 +135,29 @@ class MetadataApiController extends ApiController {
       @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     entityType.setId(entityTypeId);
+
+    JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
+
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequestUri()
+            .replacePath(EntityController.API_ENTITY_PATH)
+            .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
+            .build()
+            .toUri();
+    return ResponseEntity.accepted().location(location).build();
+  }
+
+  @Transactional
+  @PatchMapping("/{entityTypeId}")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public ResponseEntity updatePartialEntityType(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @RequestBody Map<String, Object> entityTypeValues) {
+    EntityType entityType = metadataApiService.findEntityType(entityTypeId);
+
+    // TODO modify entity type based on entity type values
+    // note: we can't use CreateEntityTypeRequest because we can't distinguish between null and not
+    // defined values then)
 
     JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
 
