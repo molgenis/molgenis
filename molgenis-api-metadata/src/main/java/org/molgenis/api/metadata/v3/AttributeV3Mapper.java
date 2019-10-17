@@ -356,10 +356,12 @@ public class AttributeV3Mapper {
     I18nValue i18nValue = attr.getLabel();
     if (i18nValue != null) {
       attribute.setLabel(i18nValue.getDefaultValue());
-      getLanguageCodes()
-          .forEach(
-              languageCode ->
-                  attribute.setLabel(languageCode, i18nValue.getTranslations().get(languageCode)));
+      Map<String, String> translations = i18nValue.getTranslations();
+      if (translations != null) {
+        getLanguageCodes()
+            .forEach(
+                languageCode -> attribute.setLabel(languageCode, translations.get(languageCode)));
+      }
     }
   }
 
@@ -368,11 +370,14 @@ public class AttributeV3Mapper {
     I18nValue i18nValue = attributeRequest.getDescription();
     if (i18nValue != null) {
       attribute.setDescription(i18nValue.getDefaultValue());
-      getLanguageCodes()
-          .forEach(
-              languageCode ->
-                  attribute.setDescription(
-                      languageCode, i18nValue.getTranslations().get(languageCode)));
+      Map<String, String> translations = i18nValue.getTranslations();
+      if (translations != null) {
+        getLanguageCodes()
+            .forEach(
+                languageCode -> {
+                  attribute.setDescription(languageCode, translations.get(languageCode));
+                });
+      }
     }
   }
 

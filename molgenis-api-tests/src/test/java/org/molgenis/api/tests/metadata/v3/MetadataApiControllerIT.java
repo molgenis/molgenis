@@ -3,6 +3,7 @@ package org.molgenis.api.tests.metadata.v3;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -123,23 +124,23 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  // TODO enable and update after endpoint is async
-  @Disabled
   @Test
   @Order(6)
   void testUpdateMetadataEntityType() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
             getClass(),
-            "updateMetadataEntityType.json",
+            "updateMetadataEntityTypeMyNumbers.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(bodyJson)
-        .put("/api/metadata/v3meta_MyDataset")
+        .put("/api/metadata/v3meta_MyNumbers")
         .then()
-        .statusCode(NO_CONTENT.value());
+        .statusCode(ACCEPTED.value());
+
+    // TODO poll job until success and verify that update was performed successfully
   }
 
   // TODO enable after endpoint is async

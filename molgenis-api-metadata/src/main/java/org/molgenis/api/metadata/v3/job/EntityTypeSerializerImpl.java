@@ -53,8 +53,8 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new AutoValueTypeAdapterFactory())
-            .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
-            .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
+              .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
+              .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
             .create();
   }
 
@@ -84,6 +84,11 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setLabelI18n(
             ImmutableMap.copyOf(
                 getLanguageCodes()
+                    .filter(
+                        languageCode ->
+                            entityType.getString(
+                                    getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode))
+                                != null)
                     .collect(
                         toMap(
                             Function.identity(),
@@ -95,6 +100,12 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setDescriptionI18n(
             ImmutableMap.copyOf(
                 getLanguageCodes()
+                    .filter(
+                        languageCode ->
+                            entityType.getString(
+                                    getI18nAttributeName(
+                                        EntityTypeMetadata.DESCRIPTION, languageCode))
+                                != null)
                     .collect(
                         toMap(
                             Function.identity(),
@@ -117,7 +128,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
   }
 
   private static SerializableAttribute toSerializableAttribute(Attribute attribute) {
-    EntityType refEntityType = attribute.getRefEntity();
+    EntityType refEntityType = attribute.hasRefEntity() ? attribute.getRefEntity() : null;
     String refEntityTypeId = refEntityType != null ? refEntityType.getId() : null;
     Attribute mappedBy = attribute.getMappedBy();
     String mappedById = mappedBy != null ? mappedBy.getIdentifier() : null;
@@ -125,6 +136,8 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     String orderBy = sort != null ? sort.toSortString() : null;
     Attribute parent = attribute.getParent();
     String parentId = parent != null ? parent.getIdentifier() : null;
+    Boolean cascadeDelete = attribute.getCascadeDelete();
+    boolean isCascadeDelete = cascadeDelete != null ? cascadeDelete : false;
 
     return SerializableAttribute.builder()
         .setId(attribute.getIdentifier())
@@ -135,13 +148,18 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setLabelAttribute(attribute.isLabelAttribute())
         .setLookupAttributeIndex(attribute.getLookupAttributeIndex())
         .setRefEntityTypeId(refEntityTypeId)
-        .setCascadeDelete(attribute.getCascadeDelete())
+        .setCascadeDelete(isCascadeDelete)
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
         .setLabelI18n(
             ImmutableMap.copyOf(
                 getLanguageCodes()
+                    .filter(
+                        languageCode ->
+                            attribute.getString(
+                                    getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode))
+                                != null)
                     .collect(
                         toMap(
                             Function.identity(),
@@ -153,6 +171,12 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setDescriptionI18n(
             ImmutableMap.copyOf(
                 getLanguageCodes()
+                    .filter(
+                        languageCode ->
+                            attribute.getString(
+                                    getI18nAttributeName(
+                                        EntityTypeMetadata.DESCRIPTION, languageCode))
+                                != null)
                     .collect(
                         toMap(
                             Function.identity(),
@@ -275,7 +299,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     attribute.setIdentifier(serializableAttribute.getId());
     attribute.setName(serializableAttribute.getName());
     attribute.setSequenceNumber(serializableAttribute.getSequenceNr());
-    attribute.setDataType(AttributeType.valueOf(serializableAttribute.getType()));
+    attribute.setDataType(AttributeType.toEnum(serializableAttribute.getType()));
     attribute.setIdAttribute(serializableAttribute.isIdAttribute());
     attribute.setLabelAttribute(serializableAttribute.isLabelAttribute());
     attribute.setLookupAttributeIndex(serializableAttribute.getLookupAttributeIndex());

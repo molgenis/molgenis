@@ -142,7 +142,7 @@ class MetadataApiController extends ApiController {
             .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
             .build()
             .toUri();
-    return ResponseEntity.created(location).build();
+    return ResponseEntity.accepted().location(location).build();
   }
 
   @Transactional
