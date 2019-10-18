@@ -682,6 +682,11 @@ components:
           type: string
         description:
           type: string
+    Location:
+      type: object
+      properties:
+        location:
+          type: string
     Problem:
       type: object
       properties:
