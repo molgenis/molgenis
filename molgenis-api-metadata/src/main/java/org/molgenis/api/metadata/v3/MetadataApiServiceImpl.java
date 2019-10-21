@@ -141,6 +141,11 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
+  public Void updateEntityType(EntityType entityType) {
+    return null; // FIXME
+  }
+
+  @Override
   public void deleteEntityType(String entityTypeId) {
     metadataService.deleteEntityType(entityTypeId);
   }

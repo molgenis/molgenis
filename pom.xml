@@ -71,6 +71,12 @@
     <skipTests>${maven.test.skip}</skipTests>
     <skipITs>${skipTests}</skipITs>
     <skipUTs>${skipTests}</skipUTs>
+    <jacoco.skip>${skipTests}</jacoco.skip>
+    <enforcer.skip>${skipTests}</enforcer.skip>
+    <checkstyle.skip>${skipTests}</checkstyle.skip>
+    <fmt.skip>${skipTests}</fmt.skip>
+    <reproducible.skip>${skipTests}</reproducible.skip>
+    <swagger.skip>${skipTests}</swagger.skip>
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.3</elasticsearch.version>
