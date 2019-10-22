@@ -74,10 +74,10 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
-@Transactional
+// @Transactional FIXME: enabling this failes the testLanguageService() in (amongst others) maven,
+// but not intellij (https://github.com/molgenis/molgenis/issues/8730)
 class PlatformIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
