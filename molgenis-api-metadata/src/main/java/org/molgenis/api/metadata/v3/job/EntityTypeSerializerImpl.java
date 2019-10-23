@@ -53,8 +53,8 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new AutoValueTypeAdapterFactory())
-              .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
-              .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
+            .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
+            .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
             .create();
   }
 

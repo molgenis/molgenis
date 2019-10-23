@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * TODO use dependency or move to molgenis-utils
  *
- * copied from
+ * <p>copied from
  * https://github.com/acebaggins/gson-serializers/blob/master/src/main/java/com/tyler/gson/immutable/
  */
 abstract class BaseMapDeserializer<E> implements JsonDeserializer<E> {
