@@ -8,7 +8,6 @@ import java.util.List;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -18,12 +17,12 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MetadataApiServiceImpl implements MetadataApiService {
+
   private final MetaDataService metadataService;
   private final QueryMapper queryMapper;
   private final SortMapper sortMapper;
@@ -146,18 +145,15 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public void deleteEntityType(String entityTypeId) {
+  public Void deleteEntityType(String entityTypeId) {
     metadataService.deleteEntityType(entityTypeId);
+    return null;
   }
 
   @Override
-  public void deleteEntityTypes(Query q) {
-    Repository<EntityType> entityTypeRepository =
-        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
-    org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
-    dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
-    List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
-    metadataService.deleteEntityType(entityTypes);
+  public Void deleteEntityTypes(List<String> entityTypeIds) {
+    metadataService.deleteEntityTypes(entityTypeIds);
+    return null;
   }
 
   // TODO remove code duplication with molgenis-data-import DataPersisterImpl

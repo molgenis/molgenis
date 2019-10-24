@@ -11,7 +11,6 @@ import org.molgenis.api.data.v3.EntityController;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
-import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
 import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
@@ -41,6 +40,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping(MetadataApiController.API_META_PATH)
 class MetadataApiController extends ApiController {
+
   private static final String API_META_ID = "metadata";
   static final String API_META_PATH = ApiNamespace.API_PATH + '/' + API_META_ID;
 
@@ -137,14 +137,7 @@ class MetadataApiController extends ApiController {
     entityType.setId(entityTypeId);
 
     JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
-
-    URI location =
-        ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .replacePath(EntityController.API_ENTITY_PATH)
-            .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
-            .build()
-            .toUri();
-    return ResponseEntity.accepted().location(location).build();
+    return toLocationResponse(jobExecution);
   }
 
   @Transactional
@@ -160,7 +153,28 @@ class MetadataApiController extends ApiController {
     // defined values then)
 
     JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
+    return toLocationResponse(jobExecution);
+  }
 
+  @Transactional
+  @DeleteMapping("/{entityTypeId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ResponseEntity deleteEntityType(@PathVariable String entityTypeId) {
+    JobExecution jobExecution = metadataApiJobService.scheduleDelete(entityTypeId);
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
+  @DeleteMapping
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ResponseEntity deleteEntityTypes(
+      @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
+    JobExecution jobExecution =
+        metadataApiJobService.scheduleDelete(deleteEntityTypesRequest.getQ());
+    return toLocationResponse(jobExecution);
+  }
+
+  private ResponseEntity toLocationResponse(JobExecution jobExecution) {
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
             .replacePath(EntityController.API_ENTITY_PATH)
@@ -168,19 +182,5 @@ class MetadataApiController extends ApiController {
             .build()
             .toUri();
     return ResponseEntity.accepted().location(location).build();
-  }
-
-  @Transactional
-  @DeleteMapping("/{entityTypeId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
-    metadataApiService.deleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
-  }
-
-  @Transactional
-  @DeleteMapping
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteEntityTypes(@Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
-    metadataApiService.deleteEntityTypes(deleteEntityTypesRequest.getQ());
   }
 }

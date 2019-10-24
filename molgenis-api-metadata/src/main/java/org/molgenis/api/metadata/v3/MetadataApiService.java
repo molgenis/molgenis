@@ -1,5 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
+import java.util.List;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.UnknownEntityException;
@@ -27,9 +28,13 @@ public interface MetadataApiService {
    * @param entityTypeId entity type identifier
    * @throws UnknownEntityTypeException if no entity type exists for the given identifier
    */
-  void deleteEntityType(String entityTypeId);
+  Void deleteEntityType(String entityTypeId);
 
-  void deleteEntityTypes(Query q);
+  /**
+   * @param entityTypeIds entity type identifiers
+   * @throws UnknownEntityTypeException if no entity type exists for a given identifier
+   */
+  Void deleteEntityTypes(List<String> entityTypeIds);
 
   /**
    * Updates entity type.

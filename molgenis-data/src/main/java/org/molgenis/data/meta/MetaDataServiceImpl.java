@@ -59,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 /** Meta data service for retrieving and editing meta data. */
 @Component
 public class MetaDataServiceImpl implements MetaDataService {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
   private final DataService dataService;
@@ -173,6 +174,16 @@ public class MetaDataServiceImpl implements MetaDataService {
     dataService.deleteById(ENTITY_TYPE_META_DATA, entityTypeId);
 
     LOG.info("Removed entity [{}]", entityTypeId);
+  }
+
+  @Transactional
+  @Override
+  public void deleteEntityTypes(Collection<String> entityTypeIds) {
+    dataService.deleteAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream().map(id -> (Object) id));
+
+    if (LOG.isInfoEnabled()) {
+      LOG.info("Removed entities [{}]", String.join(",", entityTypeIds));
+    }
   }
 
   @Transactional
@@ -530,10 +541,14 @@ public class MetaDataServiceImpl implements MetaDataService {
           .forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
       for (Attribute oldAttribute : oldAtomicAttributes) {
-        if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+        if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) {
+          return false;
+        }
         // FIXME This implies that an attribute can never be different when doing an update import?
         if (!EntityUtils.equals(
-            oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) return false;
+            oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) {
+          return false;
+        }
       }
     }
     return true;
