@@ -8,6 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class Ontology extends StaticEntity {
   public Ontology(Entity entity) {
     super(entity);

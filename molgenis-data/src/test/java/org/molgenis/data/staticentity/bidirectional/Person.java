@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class Person extends StaticEntity {
   public Person(Entity entity) {
     super(entity);

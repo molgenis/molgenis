@@ -5,6 +5,7 @@ import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class TestRefEntityStatic extends StaticEntity {
   public TestRefEntityStatic(Entity entity) {
     super(entity);

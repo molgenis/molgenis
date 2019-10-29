@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class OntologyTermNodePath extends StaticEntity {
   public OntologyTermNodePath(Entity entity) {
     super(entity);

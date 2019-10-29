@@ -8,6 +8,7 @@ import org.molgenis.data.support.StaticEntity;
 // TODO validate IRI
 // TODO extends typed entity that stores entity and handles get/sets, also apply to other meta data
 // entities
+@SuppressWarnings("unused")
 public class Tag extends StaticEntity {
   public Tag(Entity entity) {
     super(entity);

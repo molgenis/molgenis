@@ -18,18 +18,16 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** A representation of a client registration with an OpenID Connect 1.0 Provider. */
+@SuppressWarnings("unused")
 public class OidcClient extends StaticEntity {
-  @SuppressWarnings("unused")
   public OidcClient(Entity entity) {
     super(entity);
   }
 
-  @SuppressWarnings("unused")
   public OidcClient(EntityType entityType) {
     super(entityType);
   }
 
-  @SuppressWarnings("unused")
   public OidcClient(String id, EntityType entityType) {
     super(entityType);
     setRegistrationId(id);
@@ -43,7 +41,6 @@ public class OidcClient extends StaticEntity {
     return getString(REGISTRATION_ID);
   }
 
-  @SuppressWarnings("unused")
   public void setClientId(String clientId) {
     set(CLIENT_ID, clientId);
   }
@@ -52,7 +49,6 @@ public class OidcClient extends StaticEntity {
     return getString(CLIENT_ID);
   }
 
-  @SuppressWarnings("unused")
   public void setClientSecret(String clientSecret) {
     set(CLIENT_SECRET, clientSecret);
   }
@@ -61,7 +57,6 @@ public class OidcClient extends StaticEntity {
     return getString(CLIENT_SECRET);
   }
 
-  @SuppressWarnings("unused")
   public void setClientName(String clientName) {
     set(CLIENT_NAME, clientName);
   }
@@ -70,7 +65,6 @@ public class OidcClient extends StaticEntity {
     return getString(CLIENT_NAME);
   }
 
-  @SuppressWarnings("unused")
   public void setClientAuthenticationMethod(String clientAuthenticationMethod) {
     set(CLIENT_AUTHENTICATION_METHOD, clientAuthenticationMethod);
   }
@@ -79,7 +73,6 @@ public class OidcClient extends StaticEntity {
     return getString(CLIENT_AUTHENTICATION_METHOD);
   }
 
-  @SuppressWarnings("unused")
   public void setAuthorizationGrantType(String authorizationGrantType) {
     set(AUTHORIZATION_GRANT_TYPE, authorizationGrantType);
   }
@@ -88,7 +81,6 @@ public class OidcClient extends StaticEntity {
     return getString(AUTHORIZATION_GRANT_TYPE);
   }
 
-  @SuppressWarnings("unused")
   public void setAuthorizationUri(String authorizationUri) {
     set(AUTHORIZATION_URI, authorizationUri);
   }
@@ -97,7 +89,6 @@ public class OidcClient extends StaticEntity {
     return getString(AUTHORIZATION_URI);
   }
 
-  @SuppressWarnings("unused")
   public void setTokenUri(String tokenUri) {
     set(TOKEN_URI, tokenUri);
   }
@@ -106,7 +97,6 @@ public class OidcClient extends StaticEntity {
     return getString(TOKEN_URI);
   }
 
-  @SuppressWarnings("unused")
   public void setJwkSetUri(String jwkSetUri) {
     set(JWK_SET_URI, jwkSetUri);
   }
@@ -115,7 +105,6 @@ public class OidcClient extends StaticEntity {
     return getString(JWK_SET_URI);
   }
 
-  @SuppressWarnings("unused")
   public void setScopes(String[] scopes) {
     set(SCOPES, scopes != null ? String.join(",", scopes) : null);
   }
@@ -125,7 +114,6 @@ public class OidcClient extends StaticEntity {
     return scopeStr != null ? scopeStr.split(",") : new String[0];
   }
 
-  @SuppressWarnings("unused")
   public void setUserInfoUri(String userInfoUri) {
     set(USER_INFO_URI, userInfoUri);
   }
@@ -134,7 +122,6 @@ public class OidcClient extends StaticEntity {
     return getString(USER_INFO_URI);
   }
 
-  @SuppressWarnings("unused")
   public void setUsernameAttributeName(String usernameAttributeName) {
     set(USERNAME_ATTRIBUTE_NAME, usernameAttributeName);
   }

@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 
+@SuppressWarnings("unused")
 public class BeaconDataset extends StaticEntity {
   public BeaconDataset(Entity entity) {
     super(entity);
