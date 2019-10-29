@@ -39,6 +39,7 @@ import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
@@ -99,6 +100,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Commit
 public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
+
   private static final String USERNAME = "metaDataService-user";
 
   private static final String ENTITY_TYPE_ID = "metaDataServiceEntityType";
@@ -108,6 +110,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   public static final String ENTITY_TYPE_3 = "entityType3";
   public static final String ENTITY_TYPE_2 = "entityType2";
   public static final String ENTITY_TYPE_1 = "entityType1";
+  public static final String OTM_ENTITYTYPE = "OTM_ENTITYTYPE";
   private static List<Entity> refEntities;
 
   @Autowired private MetaDataService metaDataService;
@@ -318,9 +321,81 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
     assertTrue(dataService.hasRepository(ENTITY_TYPE_3));
   }
 
+  @SuppressWarnings("deprecation")
   @WithMockUser(username = USERNAME)
   @Test
   @Order(8)
+  public void testCreateOTM() {
+    EntityType entityType =
+        entityTypeFactory
+            .create(OTM_ENTITYTYPE)
+            .setLabel("label")
+            .setBackend("PostgreSQL")
+            .setPackage(packPermission);
+    entityType.addAttribute(
+        attributeFactory
+            .create()
+            .setIdentifier("OTM_ID")
+            .setName("id")
+            .setDataType(STRING)
+            .setIdAttribute(true)
+            .setNillable(false));
+    Attribute attr =
+        attributeFactory
+            .create()
+            .setIdentifier("MAPPED_BY_ID")
+            .setName("attr")
+            .setDataType(XREF)
+            .setRefEntity(entityType);
+    entityType.addAttribute(attr);
+    entityType.addAttribute(
+        attributeFactory
+            .create()
+            .setIdentifier("OTM_ATTR_ID")
+            .setName("otm")
+            .setDataType(ONE_TO_MANY)
+            .setRefEntity(entityType)
+            .setMappedBy(attr));
+    metaDataService.createRepository(entityType);
+    assertTrue(dataService.hasRepository(OTM_ENTITYTYPE));
+  }
+
+  @SuppressWarnings("deprecation")
+  @WithMockUser(username = USERNAME)
+  @Test
+  @Order(9)
+  public void testUpdateOTM() {
+    EntityType entityType = metaDataService.getEntityType(OTM_ENTITYTYPE).get();
+    Attribute attr2 =
+        attributeFactory
+            .create()
+            .setIdentifier("MAPPED_BY_ID2")
+            .setName("attr2")
+            .setDataType(XREF)
+            .setRefEntity(entityType);
+    entityType.addAttribute(attr2);
+    entityType.addAttribute(
+        attributeFactory
+            .create()
+            .setIdentifier("OTM_ATTR_ID2")
+            .setName("otm2")
+            .setDataType(ONE_TO_MANY)
+            .setRefEntity(entityType)
+            .setMappedBy(attr2));
+    metaDataService.updateEntityType(entityType);
+    assertTrue(dataService.hasRepository(OTM_ENTITYTYPE));
+
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(OTM_ENTITYTYPE)
+            .orElseThrow(() -> new UnknownEntityTypeException(OTM_ENTITYTYPE));
+    ;
+    assertTrue(EntityUtils.equals(attr2, updatedEntityType.getAttribute("attr2")));
+  }
+
+  @WithMockUser(username = USERNAME)
+  @Test
+  @Order(10)
   public void testAddAttribute() {
     EntityType entityType =
         metaDataService
@@ -341,7 +416,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @Test
-  @Order(9)
+  @Order(11)
   public void testUpdateAttribute() {
     EntityType entityType =
         metaDataService
@@ -362,7 +437,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
 
   @WithMockUser(username = USERNAME)
   @Test
-  @Order(10)
+  @Order(12)
   public void testDeleteAttribute() {
     EntityType entityType =
         metaDataService
@@ -441,7 +516,8 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
                     REF_ENTITY_TYPE_ID,
                     ENTITY_TYPE_1,
                     ENTITY_TYPE_2,
-                    ENTITY_TYPE_3),
+                    ENTITY_TYPE_3,
+                    OTM_ENTITYTYPE),
                 EntityType.class)
             .collect(toList());
     dataService.getMeta().deleteEntityType(entityTypes);

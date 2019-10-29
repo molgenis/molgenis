@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -225,6 +226,14 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Transactional
   @Override
   public void addEntityType(EntityType entityType) {
+    if (dataService.hasEntityType(entityType.getId())) {
+      throw new EntityAlreadyExistsException(entityType);
+    }
+    upsertEntityTypeSkipMappedByAttributes(entityType, null);
+    addMappedByAttributes(entityType, null);
+  }
+
+  private void internalAddEntityType(EntityType entityType) {
     // create entity
     dataService.add(ENTITY_TYPE_META_DATA, entityType);
 
@@ -304,16 +313,20 @@ public class MetaDataServiceImpl implements MetaDataService {
     resolvedEntityTypes.forEach(
         entityType -> {
           EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
-          if (existingEntityType == null) {
-            if (entityType.hasMappedByAttributes()) {
-              updateEntityType(entityType, new EntityTypeWithoutMappedByAttributes(entityType));
-            }
-          } else {
-            if (hasNewMappedByAttrs(entityType, existingEntityType)) {
-              updateEntityType(entityType, existingEntityType);
-            }
-          }
+          addMappedByAttributes(entityType, existingEntityType);
         });
+  }
+
+  private void addMappedByAttributes(EntityType entityType, EntityType existingEntityType) {
+    if (existingEntityType == null) {
+      if (entityType.hasMappedByAttributes()) {
+        updateEntityType(entityType, new EntityTypeWithoutMappedByAttributes(entityType));
+      }
+    } else {
+      if (hasNewMappedByAttrs(entityType, existingEntityType)) {
+        updateEntityType(entityType, existingEntityType);
+      }
+    }
   }
 
   private void upsertEntityTypesSkipMappedByAttributes(
@@ -322,20 +335,26 @@ public class MetaDataServiceImpl implements MetaDataService {
     resolvedEntityType.forEach(
         entityType -> {
           EntityType existingEntityType = existingEntityTypeMap.get(entityType.getId());
-          if (existingEntityType == null) {
-            if (entityType.hasMappedByAttributes()) {
-              entityType = new EntityTypeWithoutMappedByAttributes(entityType);
-            }
-
-            addEntityType(entityType);
-          } else {
-            if (hasNewMappedByAttrs(entityType, existingEntityType)) {
-              entityType = new EntityTypeWithoutMappedByAttributes(entityType, existingEntityType);
-            }
-
-            updateEntityType(entityType, existingEntityType);
-          }
+          upsertEntityTypeSkipMappedByAttributes(entityType, existingEntityType);
         });
+  }
+
+  private EntityType upsertEntityTypeSkipMappedByAttributes(
+      EntityType entityType, EntityType existingEntityType) {
+    if (existingEntityType == null) {
+      if (entityType.hasMappedByAttributes()) {
+        entityType = new EntityTypeWithoutMappedByAttributes(entityType);
+      }
+
+      internalAddEntityType(entityType);
+    } else {
+      if (hasNewMappedByAttrs(entityType, existingEntityType)) {
+        entityType = new EntityTypeWithoutMappedByAttributes(entityType, existingEntityType);
+      }
+
+      updateEntityType(entityType, existingEntityType);
+    }
+    return entityType;
   }
 
   private void updateEntityType(EntityType entityType, EntityType existingEntityType) {

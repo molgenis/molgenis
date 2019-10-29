@@ -286,6 +286,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     String backendName = "backend";
 
     EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("repoId");
     when(entityType.getBackend()).thenReturn(backendName);
     Attribute attr0 = mock(Attribute.class);
     Attribute attr1 = mock(Attribute.class);
@@ -303,6 +304,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
     assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
+    verify(dataService).hasEntityType("repoId");
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
     verifyNoMoreInteractions(dataService);
@@ -322,6 +324,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     Class<Package> entityClass = Package.class;
 
     EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("repoId");
     when(entityType.getBackend()).thenReturn(backendName);
     Attribute attr0 = mock(Attribute.class);
     Attribute attr1 = mock(Attribute.class);
@@ -339,6 +342,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
     assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
+    verify(dataService).hasEntityType("repoId");
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
     verifyNoMoreInteractions(dataService);
@@ -578,6 +582,7 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
     assertEquals(newArrayList(attr0, attr1), attrsCaptor.getValue().collect(toList()));
 
+    verify(dataService).hasEntityType(entityType.getId());
     verify(dataService).add(ENTITY_TYPE_META_DATA, entityType);
 
     verifyNoMoreInteractions(dataService);
