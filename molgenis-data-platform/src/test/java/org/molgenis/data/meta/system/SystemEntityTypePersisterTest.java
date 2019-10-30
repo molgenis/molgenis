@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.system;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doAnswer;
@@ -75,7 +76,7 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
     when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
         .thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
     systemEntityTypePersister.removeNonExistingSystemEntityTypes();
-    verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
+    verify(metaDataService).deleteEntityTypes(asList("refRemoved", "removed"));
   }
 
   @Test

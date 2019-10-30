@@ -4,7 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -179,26 +178,14 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Transactional
   @Override
   public void deleteEntityTypes(Collection<String> entityTypeIds) {
+    if (entityTypeIds.isEmpty()) {
+      return;
+    }
+
     dataService.deleteAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream().map(id -> (Object) id));
 
     if (LOG.isInfoEnabled()) {
       LOG.info("Removed entities [{}]", String.join(",", entityTypeIds));
-    }
-  }
-
-  @Transactional
-  @Override
-  public void deleteEntityType(Collection<EntityType> entityTypes) {
-    if (entityTypes.isEmpty()) {
-      return;
-    }
-
-    dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
-
-    if (LOG.isInfoEnabled()) {
-      LOG.info(
-          "Removed entities [{}]",
-          entityTypes.stream().map(EntityType::getId).collect(joining(",")));
     }
   }
 
