@@ -432,7 +432,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
 
   private static void depopulate(ApplicationContext applicationContext) {
     DataService dataService = applicationContext.getBean(DataService.class);
-    List<EntityType> entityTypes =
+    List<String> entityTypeIds =
         dataService
             .findAll(
                 ENTITY_TYPE_META_DATA,
@@ -443,8 +443,9 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
                     ENTITY_TYPE_2,
                     ENTITY_TYPE_3),
                 EntityType.class)
+            .map(EntityType::getId)
             .collect(toList());
-    dataService.getMeta().deleteEntityType(entityTypes);
+    dataService.getMeta().deleteEntityTypes(entityTypeIds);
     dataService.delete(PackageMetadata.PACKAGE, Stream.of(packNoPermission, packPermission));
   }
 
