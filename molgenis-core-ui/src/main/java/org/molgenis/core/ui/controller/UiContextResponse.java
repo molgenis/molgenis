@@ -1,9 +1,9 @@
 package org.molgenis.core.ui.controller;
 
 import com.google.auto.value.AutoValue;
-import com.google.gson.JsonObject;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.web.menu.model.Menu;
 
 @AutoValue
 @SuppressWarnings("squid:S1610")
@@ -19,7 +19,7 @@ public abstract class UiContextResponse {
   @CheckForNull
   public abstract String getNavBarLogo();
 
-  public abstract JsonObject getMenu();
+  public abstract Menu getMenu();
 
   public abstract String getloginHref();
 
@@ -58,7 +58,7 @@ public abstract class UiContextResponse {
 
     public abstract Builder setHelpLink(String helpLink);
 
-    public abstract Builder setMenu(JsonObject menu);
+    public abstract Builder setMenu(Menu menu);
 
     public abstract Builder setAuthenticated(Boolean authenticated);
 
