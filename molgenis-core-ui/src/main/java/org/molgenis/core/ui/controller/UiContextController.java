@@ -2,8 +2,6 @@ package org.molgenis.core.ui.controller;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -11,6 +9,8 @@ import io.swagger.annotations.ApiResponses;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,16 +31,19 @@ public class UiContextController {
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
+  private final MenuReaderService menuReaderService;
   private final String molgenisVersion;
   private final String molgenisBuildDate;
 
   public UiContextController(
       AppSettings appSettings,
       CookieWallService cookieWallService,
+      MenuReaderService menuReaderService,
       @Value("${molgenis.version}") String molgenisVersion,
       @Value("${molgenis.build.date}") String molgenisBuildDate) {
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
+    this.menuReaderService = requireNonNull(menuReaderService);
     this.molgenisVersion = requireNonNull(molgenisVersion);
     this.molgenisBuildDate = requireNonNull(molgenisBuildDate);
   }
@@ -55,12 +58,7 @@ public class UiContextController {
   @GetMapping("/**")
   @ResponseBody
   public UiContextResponse getContext() {
-
-    JsonObject menu =
-        appSettings.getMenu() != null
-            ? new JsonParser().parse(appSettings.getMenu()).getAsJsonObject()
-            : new JsonObject();
-
+    Menu menu = menuReaderService.getMenu().orElseThrow();
     boolean authenticated = SecurityUtils.currentUserIsAuthenticated();
     boolean showCookieWall = cookieWallService.showCookieWall();
 
