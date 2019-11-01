@@ -238,18 +238,14 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
    */
   void deleteEntityTypes(Collection<String> entityTypeIds);
 
-  /**
-   * Deletes a collection of entity type.
-   *
-   * @param entityTypes entity type collection
-   */
-  void deleteEntityType(Collection<EntityType> entityTypes);
-
   /** Adds an Attribute to an EntityType */
   void addAttribute(Attribute attribute);
 
   /** Deletes an Attribute from an Entity */
   void deleteAttributeById(Object id);
+
+  /** Deletes multiple attributes */
+  void deleteAttributesById(Collection<String> attributeIds);
 
   /**
    * Check the integration of an entity type with existing entities Check only if the existing
