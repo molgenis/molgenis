@@ -6,8 +6,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.DataPersisterImpl;
@@ -34,6 +32,7 @@ import org.molgenis.jobs.JobExecutionConfig;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
+import org.molgenis.security.acl.AclConfig;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
@@ -57,12 +56,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
-import org.springframework.security.acls.jdbc.AclConfig;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -196,14 +192,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
   @Bean
   public MailSender mailSender() {
     return mock(MailSender.class);
-  }
-
-  @Bean
-  public ConversionService conversionService() {
-    DefaultConversionService defaultConversionService = new DefaultConversionService();
-    defaultConversionService.addConverter(new StringToDateConverter());
-    defaultConversionService.addConverter(new StringToDateTimeConverter());
-    return defaultConversionService;
   }
 
   @Bean
