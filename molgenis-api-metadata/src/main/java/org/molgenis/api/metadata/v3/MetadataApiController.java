@@ -11,6 +11,9 @@ import org.molgenis.api.data.v3.EntityController;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
+import org.molgenis.api.metadata.v3.model.DeleteAttributeRequest;
+import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
+import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
 import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
@@ -128,6 +131,26 @@ class MetadataApiController extends ApiController {
   }
 
   @Transactional
+  @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ResponseEntity deleteAttribute(@Valid DeleteAttributeRequest deleteAttributeRequest) {
+    JobExecution jobExecution =
+        metadataApiJobService.scheduleDeleteAttribute(
+            deleteAttributeRequest.getEntityTypeId(), deleteAttributeRequest.getAttributeId());
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
+  @DeleteMapping("/{entityTypeId}/attributes")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ResponseEntity deleteAttributes(@Valid DeleteAttributesRequest deleteAttributesRequest) {
+    JobExecution jobExecution =
+        metadataApiJobService.scheduleDeleteAttribute(
+            deleteAttributesRequest.getEntityTypeId(), deleteAttributesRequest.getQ());
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
   @PutMapping("/{entityTypeId}")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public ResponseEntity updateEntityType(
@@ -159,8 +182,9 @@ class MetadataApiController extends ApiController {
   @Transactional
   @DeleteMapping("/{entityTypeId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public ResponseEntity deleteEntityType(@PathVariable String entityTypeId) {
-    JobExecution jobExecution = metadataApiJobService.scheduleDelete(entityTypeId);
+  public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
+    JobExecution jobExecution =
+        metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
     return toLocationResponse(jobExecution);
   }
 
@@ -170,7 +194,7 @@ class MetadataApiController extends ApiController {
   public ResponseEntity deleteEntityTypes(
       @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
     JobExecution jobExecution =
-        metadataApiJobService.scheduleDelete(deleteEntityTypesRequest.getQ());
+        metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypesRequest.getQ());
     return toLocationResponse(jobExecution);
   }
 

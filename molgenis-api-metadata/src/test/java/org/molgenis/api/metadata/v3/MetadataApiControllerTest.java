@@ -11,6 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
+import org.molgenis.api.metadata.v3.model.DeleteAttributeRequest;
+import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
+import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
 import org.molgenis.api.model.Query;
 import org.molgenis.data.meta.model.EntityType;
@@ -48,16 +51,48 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testDeleteAttribute() {
+    String entityTypeId = "MyEntityTypeId";
+    String attributeId = "attrId";
+    DeleteAttributeRequest deleteAttributeRequest = new DeleteAttributeRequest();
+    deleteAttributeRequest.setEntityTypeId(entityTypeId);
+    deleteAttributeRequest.setAttributeId(attributeId);
+    MetadataDeleteJobExecution jobExecution = mockJobExecution();
+    when(metadataApiJobService.scheduleDeleteAttribute(entityTypeId, attributeId))
+        .thenReturn(jobExecution);
+
+    metadataApiController.deleteAttribute(deleteAttributeRequest);
+
+    verify(metadataApiJobService).scheduleDeleteAttribute(entityTypeId, attributeId);
+  }
+
+  @Test
+  void testDeleteAttributes() {
+    String entityTypeId = "MyEntityTypeId";
+    Query query = Query.create("name", IN, asList("name1", "name2"));
+    DeleteAttributesRequest deleteAttributesRequest = new DeleteAttributesRequest();
+    deleteAttributesRequest.setEntityTypeId(entityTypeId);
+    deleteAttributesRequest.setQ(query);
+    MetadataDeleteJobExecution jobExecution = mockJobExecution();
+    when(metadataApiJobService.scheduleDeleteAttribute(entityTypeId, query))
+        .thenReturn(jobExecution);
+
+    metadataApiController.deleteAttributes(deleteAttributesRequest);
+
+    verify(metadataApiJobService).scheduleDeleteAttribute(entityTypeId, query);
+  }
+
+  @Test
   void testDeleteEntityType() {
     String entityTypeId = "MyEntityTypeId";
-    EntityType entityType = mock(EntityType.class);
-    MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
-    when(jobExecution.getEntityType()).thenReturn(entityType);
-    when(metadataApiJobService.scheduleDelete(entityTypeId)).thenReturn(jobExecution);
+    DeleteEntityTypeRequest deleteEntityTypeRequest = new DeleteEntityTypeRequest();
+    deleteEntityTypeRequest.setEntityTypeId(entityTypeId);
+    MetadataDeleteJobExecution jobExecution = mockJobExecution();
+    when(metadataApiJobService.scheduleDeleteEntityType(entityTypeId)).thenReturn(jobExecution);
 
-    metadataApiController.deleteEntityType(entityTypeId);
+    metadataApiController.deleteEntityType(deleteEntityTypeRequest);
 
-    verify(metadataApiJobService).scheduleDelete(entityTypeId);
+    verify(metadataApiJobService).scheduleDeleteEntityType(entityTypeId);
   }
 
   @Test
@@ -65,13 +100,18 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     Query query = Query.create("id", IN, asList("MyEntityTypeId0", "MyEntityTypeId1"));
     DeleteEntityTypesRequest deleteEntityTypesRequest = new DeleteEntityTypesRequest();
     deleteEntityTypesRequest.setQ(query);
-    EntityType entityType = mock(EntityType.class);
-    MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
-    when(jobExecution.getEntityType()).thenReturn(entityType);
-    when(metadataApiJobService.scheduleDelete(query)).thenReturn(jobExecution);
+    MetadataDeleteJobExecution jobExecution = mockJobExecution();
+    when(metadataApiJobService.scheduleDeleteEntityType(query)).thenReturn(jobExecution);
 
     metadataApiController.deleteEntityTypes(deleteEntityTypesRequest);
 
-    verify(metadataApiJobService).scheduleDelete(query);
+    verify(metadataApiJobService).scheduleDeleteEntityType(query);
+  }
+
+  private static MetadataDeleteJobExecution mockJobExecution() {
+    EntityType entityType = mock(EntityType.class);
+    MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(entityType);
+    return jobExecution;
   }
 }

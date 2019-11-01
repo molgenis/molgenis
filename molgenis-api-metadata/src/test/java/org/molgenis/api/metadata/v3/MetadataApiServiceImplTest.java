@@ -33,6 +33,20 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testDeleteAttribute() {
+    String attributeId = "attr1";
+    metadataApiServiceImpl.deleteAttribute(attributeId);
+    verify(metadataService).deleteAttributeById(attributeId);
+  }
+
+  @Test
+  void testDeleteAttributes() {
+    List<String> attributeIds = asList("attr1", "attr2");
+    metadataApiServiceImpl.deleteAttributes(attributeIds);
+    verify(metadataService).deleteAttributesById(attributeIds);
+  }
+
+  @Test
   void testDeleteEntityType() {
     String entityTypeId = "MyEntityTypeId";
     metadataApiServiceImpl.deleteEntityType(entityTypeId);

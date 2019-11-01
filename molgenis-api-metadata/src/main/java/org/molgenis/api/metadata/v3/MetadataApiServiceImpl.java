@@ -134,6 +134,18 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return attribute;
   }
 
+  @Override
+  public Void deleteAttribute(String attributeId) {
+    metadataService.deleteAttributeById(attributeId);
+    return null;
+  }
+
+  @Override
+  public Void deleteAttributes(List<String> attributeIds) {
+    metadataService.deleteAttributesById(attributeIds);
+    return null;
+  }
+
   public void createEntityType(EntityType entityType) {
     addEntityTypeFirstPass(entityType);
     updateEntityTypeSecondPass(entityType);

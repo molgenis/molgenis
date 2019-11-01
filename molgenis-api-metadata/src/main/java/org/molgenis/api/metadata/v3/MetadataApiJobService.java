@@ -29,7 +29,7 @@ public interface MetadataApiJobService {
    * @param entityTypeId entity type to delete
    * @return job execution
    */
-  MetadataDeleteJobExecution scheduleDelete(String entityTypeId);
+  MetadataDeleteJobExecution scheduleDeleteEntityType(String entityTypeId);
 
   /**
    * Schedule an entity type delete job.
@@ -37,5 +37,9 @@ public interface MetadataApiJobService {
    * @param q a query describing which entity types to delete
    * @return job execution
    */
-  MetadataDeleteJobExecution scheduleDelete(Query q);
+  MetadataDeleteJobExecution scheduleDeleteEntityType(Query q);
+
+  MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, String attributeId);
+
+  MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, Query query);
 }

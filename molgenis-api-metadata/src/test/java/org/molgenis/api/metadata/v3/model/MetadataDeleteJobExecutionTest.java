@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionFactory;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata;
+import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.DeleteType;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.jobs.model.JobExecution.Status;
@@ -39,7 +40,12 @@ public class MetadataDeleteJobExecutionTest extends AbstractSystemEntityTest {
     Pair<Class, Object> entityTypeIds = new Pair<>();
     entityTypeIds.setA(List.class);
     entityTypeIds.setB(asList("id1", "id2"));
-    map.put(MetadataDeleteJobExecutionMetadata.ENTITY_TYPE_IDS, entityTypeIds);
+    map.put(MetadataDeleteJobExecutionMetadata.IDS, entityTypeIds);
+
+    Pair<Class, Object> type = new Pair<>();
+    type.setA(DeleteType.class);
+    type.setB(DeleteType.ATTRIBUTE);
+    map.put(MetadataDeleteJobExecutionMetadata.DELETE_TYPE, type);
 
     Pair<Class, Object> status = new Pair<>();
     status.setA(Status.class);

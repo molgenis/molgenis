@@ -24,6 +24,10 @@ public interface MetadataApiService {
    */
   Attribute findAttribute(String attributeId);
 
+  Void deleteAttribute(String attributeId);
+
+  Void deleteAttributes(List<String> attributeIds);
+
   /**
    * @param entityTypeId entity type identifier
    * @throws UnknownEntityTypeException if no entity type exists for the given identifier

@@ -1,6 +1,9 @@
 package org.molgenis.api.metadata.v3.job;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
@@ -17,9 +20,15 @@ public class MetadataDeleteJobExecutionMetadata extends SystemEntityType {
   public static final String METADATA_DELETE_JOB_EXECUTION =
       PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
+  public enum DeleteType {
+    ENTITY_TYPE,
+    ATTRIBUTE
+  }
+
   static final String METADATA_DELETE_JOB_TYPE = "MetadataDeleteJob";
 
-  public static final String ENTITY_TYPE_IDS = "entityTypeIds";
+  public static final String IDS = "ids";
+  public static final String DELETE_TYPE = "deleteType";
 
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
@@ -39,10 +48,17 @@ public class MetadataDeleteJobExecutionMetadata extends SystemEntityType {
 
     setLabel("Metadata delete job execution");
 
-    addAttribute(ENTITY_TYPE_IDS)
+    addAttribute(DELETE_TYPE)
+        .setLabel("Delete type")
+        .setDescription("The type of resource to delete")
+        .setDataType(ENUM)
+        .setEnumOptions(stream(DeleteType.values()).map(DeleteType::toString).collect(toList()))
+        .setNillable(false);
+
+    addAttribute(IDS)
         .setDataType(TEXT)
-        .setLabel("EntityType IDs")
-        .setDescription("Comma-separated list of entity type IDs")
+        .setLabel("IDs")
+        .setDescription("Comma-separated list of IDs")
         .setNillable(false);
   }
 }
