@@ -2,7 +2,6 @@ package org.molgenis.api.tests.metadata.v3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
-import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -24,13 +23,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.api.tests.utils.JobUtils;
 import org.molgenis.test.TestResourceUtils;
-import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
 @TestMethodOrder(OrderAnnotation.class)
 class MetadataApiControllerIT extends AbstractApiTest {
-  private static final Logger LOG = getLogger(MetadataApiControllerIT.class);
-
   @BeforeAll
   protected static void setUpBeforeClass() {
     AbstractApiTest.setUpBeforeClass();
@@ -232,43 +228,61 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
-  // TODO enable after endpoint is async
-  @Disabled
   @Test
   @Order(11)
   void testDeleteMetadataEntityTypeAttributes() {
-    given()
-        .delete("/api/metadata/v3meta_MyDataset/attributes?q=id=in=(myDate,myDateTime)")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .delete(
+                "/api/metadata/v3meta_MyDataset/attributes?q=id=in=(v3meta_MyDataset_myDate,v3meta_MyDataset_myDateTime)")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
-  // TODO enable after endpoint is async
-  @Disabled
   @Test
   @Order(12)
   void testDeleteMetadataEntityTypeAttribute() {
-    given()
-        .delete("/api/metadata/v3meta_MyDataset/attributes/myString")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .delete("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
-  // TODO fix after endpoint is async
   @Test
   @Order(13)
   void testDeleteMetadataEntityType() {
-    given().delete("/api/metadata/v3meta_MyDataset").then().statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .delete("/api/metadata/v3meta_MyDataset")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
-  // TODO fix after endpoint is async
   @Test
   @Order(14)
   void testDeleteMetadataEntityTypes() {
-    given()
-        .delete("/api/metadata?q=id=in=(MyNumbers,MyStrings)")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .delete("/api/metadata?q=id=in=(v3meta_MyNumbers,v3meta_MyStrings)")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
   private static void createPackage() {
