@@ -255,7 +255,9 @@ public class AttributeV3Mapper {
       if (attributeRequest.getId().equals(entityTypeRequest.getIdAttribute())) {
         attr.setIdAttribute(true);
       }
-      if (attributeRequest.getId().equals(entityType.getLabelAttribute())) {
+      Attribute labelAttribute = entityType.getLabelAttribute();
+      if (labelAttribute != null
+          && attributeRequest.getId().equals(labelAttribute.getIdentifier())) {
         attr.setLabelAttribute(true);
       }
       List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
