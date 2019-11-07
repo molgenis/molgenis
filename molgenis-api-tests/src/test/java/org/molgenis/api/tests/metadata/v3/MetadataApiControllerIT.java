@@ -46,7 +46,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"Identifiable", "Describable", "MyNumbers", "MyStrings", "MyDataset"})
+  @ValueSource(strings = {"Identifiable", "Describable", "MyNumbers", "MyStrings", "MyDataset", "MyOneToMany"})
   @Order(1)
   void testCreateMetadataEntityTypeIdentifiable(String datasetName) throws IOException {
     String bodyJson =

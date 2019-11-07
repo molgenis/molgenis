@@ -1,0 +1,32 @@
+{
+  "id": "v3meta_MyOneToMany",
+  "package_": "v3meta",
+  "label": {
+    "defaultValue": "My Strings"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyOneToMany_id",
+      "name": "id",
+      "type": "string",
+      "visible": true
+    },
+    {
+      "id": "v3meta_MyOneToManyAttr",
+      "name": "OTM",
+      "type": "onetomany",
+      "mappedByAttribute": "v3meta_MyOneToManyMappedBy",
+      "visible": true,
+      "refEntityType": "v3meta_MyOneToMany"
+    },
+    {
+      "id": "v3meta_MyOneToManyMappedBy",
+      "name": "MappedBy",
+      "type": "xref",
+      "visible": true,
+      "refEntityType": "v3meta_MyOneToMany"
+    }
+  ],
+  "idAttribute": "v3meta_MyOneToMany_id",
+  "labelAttribute": "v3meta_MyOneToMany_id"
+}
