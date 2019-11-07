@@ -1080,7 +1080,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
     TestRefEntityStaticMetaData refEntityTypeStatic =
         applicationContext.getBean(TestRefEntityStaticMetaData.class);
 
-    dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
+    dataService.getMeta().deleteEntityTypes(asList(entityType.getId(), refEntityType.getId()));
     dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
     dataService.delete(refEntityTypeStatic.getId(), staticRefEntities.stream());
     dataService.delete(FILE_META, publicFile);
