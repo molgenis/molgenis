@@ -81,7 +81,7 @@ public class UiContextController {
     User user = userAccountService.getCurrentUser();
 
     return UiContextResponse.builder()
-        .setMenu(menuReaderService.getMenu().orElseThrow())
+        .setMenu(menuReaderService.getMenu().orElse(null))
         .setCssHref(appSettings.getCssHref())
         .setNavBarLogo(appSettings.getLogoNavBarHref())
         .setLogoTop(appSettings.getLogoTopHref())

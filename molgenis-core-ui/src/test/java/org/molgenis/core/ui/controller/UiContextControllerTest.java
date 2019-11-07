@@ -85,6 +85,25 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
+  void testGetContextEmptyMenu() throws Exception {
+    when(menuReaderService.getMenu()).thenReturn(Optional.empty());
+    when(appSettings.getLogoNavBarHref()).thenReturn("http:://thisissomelogo/");
+    when(appSettings.getLogoTopHref()).thenReturn("http:://thisisotherref/");
+    when(appSettings.getLogoTopMaxHeight()).thenReturn(22);
+    when(appSettings.getFooter()).thenReturn("<a class=\"foo\">message</a>");
+    when(appSettings.getCssHref()).thenReturn("cssHref");
+    when(cookieWallService.showCookieWall()).thenReturn(false);
+    when(userAccountService.getCurrentUser()).thenReturn(user);
+    when(user.getEmail()).thenReturn("henkie@example.org");
+    when(user.getUsername()).thenReturn("henkie");
+
+    mockMvc
+        .perform(get("/app-ui-context"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.menu").doesNotExist());
+  }
+
+  @Test
   void testGetContext() throws Exception {
 
     File resource = new ClassPathResource("exampleMenu.json").getFile();
