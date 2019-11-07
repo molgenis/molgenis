@@ -11,7 +11,23 @@
   <name>web</name>
   <description>Web framework without plugins.</description>
 
+  <repositories>
+    <repository>
+      <id>local-maven-repo</id>
+      <url>file:///${project.basedir}/../local-maven-repo</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <guava-gson-serializers.version>1.0.1</guava-gson-serializers.version>
+  </properties>
+
   <dependencies>
+    <dependency>
+      <groupId>com.baggonius.gson</groupId>
+      <artifactId>guava-gson-serializers</artifactId>
+      <version>${guava-gson-serializers.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api</artifactId>

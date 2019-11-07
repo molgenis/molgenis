@@ -192,16 +192,6 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Transactional
   @Override
   public void deleteAttributeById(Object id) {
-    deleteAttribute(id);
-  }
-
-  @Transactional
-  @Override
-  public void deleteAttributesById(Collection<String> attributeIds) {
-    attributeIds.forEach(this::deleteAttribute);
-  }
-
-  private void deleteAttribute(Object id) {
     Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, id, Attribute.class);
     if (attribute == null) {
       throw new UnknownEntityException(ATTRIBUTE_META_DATA, id);
@@ -538,14 +528,11 @@ public class MetaDataServiceImpl implements MetaDataService {
           .forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
       for (Attribute oldAttribute : oldAtomicAttributes) {
-        if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) {
-          return false;
-        }
+        if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+
         // FIXME This implies that an attribute can never be different when doing an update import?
         if (!EntityUtils.equals(
-            oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) {
-          return false;
-        }
+            oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) return false;
       }
     }
     return true;

@@ -10,18 +10,16 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class PasswordResetToken extends StaticEntity {
-  @SuppressWarnings("unused") // used via reflection
   public PasswordResetToken(Entity entity) {
     super(entity);
   }
 
-  @SuppressWarnings("unused") // used via reflection
   public PasswordResetToken(EntityType entityType) {
     super(entityType);
   }
 
-  @SuppressWarnings("unused") // used via reflection
   public PasswordResetToken(String id, EntityType entityType) {
     super(entityType);
     setId(id);

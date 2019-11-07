@@ -21,6 +21,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
+@SuppressWarnings("unused")
 public class ImportRun extends StaticEntity {
   private static final List<ValueLabel> status_options;
   private static final List<ValueLabel> notify_options;
