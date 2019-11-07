@@ -31,6 +31,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class User extends StaticEntity {
   public User(Entity entity) {
     super(entity);

@@ -19,6 +19,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class RoleMembership extends StaticEntity {
   public enum Status {
     FUTURE,

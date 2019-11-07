@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -683,30 +685,24 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     verifyNoMoreInteractions(dataService);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
-  void deleteEntityTypeCollection() {
-    EntityType entityType0 = mock(EntityType.class);
+  void deleteEntityTypes() {
     String entityTypeId0 = "entity0";
-    when(entityType0.getId()).thenReturn(entityTypeId0);
-
-    EntityType entityType1 = mock(EntityType.class);
     String entityTypeId1 = "entity1";
-    when(entityType1.getId()).thenReturn(entityTypeId1);
 
-    metaDataServiceImpl.deleteEntityType(newArrayList(entityType0, entityType1));
+    metaDataServiceImpl.deleteEntityTypes(asList(entityTypeId0, entityTypeId1));
 
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<EntityType>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
-    assertEquals(
-        newArrayList(entityType0, entityType1), entityIdCaptor.getValue().collect(toList()));
+    ArgumentCaptor<Stream<Object>> entityIdCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(dataService).deleteAll(eq(ENTITY_TYPE_META_DATA), entityIdCaptor.capture());
+    assertEquals(asList(entityTypeId0, entityTypeId1), entityIdCaptor.getValue().collect(toList()));
 
     verifyNoMoreInteractions(dataService);
   }
 
   @Test
-  void deleteEntityTypeCollectionEmpty() {
-    metaDataServiceImpl.deleteEntityType(emptyList());
+  void deleteEntityTypesEmpty() {
+    metaDataServiceImpl.deleteEntityTypes(emptyList());
     verifyNoMoreInteractions(dataService);
   }
 
@@ -1005,6 +1001,28 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     verify(dataService).update(ENTITY_TYPE_META_DATA, entityType);
     verify(dataService).delete(ATTRIBUTE_META_DATA, attribute);
     verify(entityType).removeAttribute(attribute);
+  }
+
+  @Test
+  void deleteAttributesById() {
+    String attrId0 = "attr0";
+    String attrId1 = "attr1";
+    Attribute attribute0 = mock(Attribute.class);
+    Attribute attribute1 = mock(Attribute.class);
+    EntityType entityType = mock(EntityType.class);
+    when(dataService.findOneById(ATTRIBUTE_META_DATA, attrId0, Attribute.class))
+        .thenReturn(attribute0);
+    when(dataService.findOneById(ATTRIBUTE_META_DATA, attrId1, Attribute.class))
+        .thenReturn(attribute1);
+    when(attribute0.getEntity()).thenReturn(entityType);
+    when(attribute1.getEntity()).thenReturn(entityType);
+
+    metaDataServiceImpl.deleteAttributesById(asList(attrId0, attrId1));
+
+    assertAll(
+        () -> verify(dataService, times(2)).update(ENTITY_TYPE_META_DATA, entityType),
+        () -> verify(dataService, times(2)).delete(eq(ATTRIBUTE_META_DATA), any(Attribute.class)),
+        () -> verify(entityType, times(2)).removeAttribute(any(Attribute.class)));
   }
 
   static Iterator<Object[]> isMetaEntityTypeProvider() {

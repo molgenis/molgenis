@@ -1,8 +1,12 @@
 package org.molgenis.data.meta.system;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -12,12 +16,17 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
@@ -49,6 +58,7 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
             mutableAclClassService);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void removeNonExistingSystemEntities() {
     when(dataService.getMeta()).thenReturn(metaDataService);
@@ -72,20 +82,36 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
     doReturn(true).when(systemEntityTypeRegistry).hasSystemEntityType("entity");
     doReturn(true).when(systemEntityTypeRegistry).hasSystemEntityType("refEntity");
 
-    when(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class))
-        .thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
+    Repository<EntityType> repository = mock(Repository.class);
+    when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
+    doAnswer(
+            invocation -> {
+              ((Consumer<List<Entity>>) invocation.getArgument(1))
+                  .accept(asList(refEntityType, entityType, refRemovedMeta, removedMeta));
+              return null;
+            })
+        .when(repository)
+        .forEachBatched(any(Fetch.class), any(), eq(1000));
+
     systemEntityTypePersister.removeNonExistingSystemEntityTypes();
-    verify(metaDataService).deleteEntityType(newArrayList(refRemovedMeta, removedMeta));
+    verify(metaDataService).deleteEntityTypes(asList("refRemoved", "removed"));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void persistSystemPackageChange() {
     RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
     when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
     when(dataService.getMeta()).thenReturn(metaDataService);
-    doAnswer(invocation -> Stream.empty())
-        .when(dataService)
-        .findAll(ENTITY_TYPE_META_DATA, EntityType.class);
+    Repository<EntityType> repository = mock(Repository.class);
+    when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
+    doAnswer(
+            invocation -> {
+              ((Consumer<List<Entity>>) invocation.getArgument(1)).accept(emptyList());
+              return null;
+            })
+        .when(repository)
+        .forEachBatched(any(Fetch.class), any(), eq(1000));
 
     when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
 
@@ -115,10 +141,16 @@ class SystemEntityTypePersisterTest extends AbstractMockitoTest {
     RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
     when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
     when(dataService.getMeta()).thenReturn(metaDataService);
-    doAnswer(invocation -> Stream.empty())
-        .when(dataService)
-        .findAll(ENTITY_TYPE_META_DATA, EntityType.class);
     when(systemEntityTypeRegistry.getSystemEntityTypes()).thenAnswer(invocation -> Stream.empty());
+    Repository<EntityType> repository = mock(Repository.class);
+    when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(repository);
+    doAnswer(
+            invocation -> {
+              ((Consumer<List<Entity>>) invocation.getArgument(1)).accept(emptyList());
+              return null;
+            })
+        .when(repository)
+        .forEachBatched(any(Fetch.class), any(), eq(1000));
 
     String packageId0 = "packageId0";
     String packageName0 = "packageName0";

@@ -11,18 +11,16 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class OidcUserMapping extends StaticEntity {
-  @SuppressWarnings("unused")
   public OidcUserMapping(Entity entity) {
     super(entity);
   }
 
-  @SuppressWarnings("unused")
   public OidcUserMapping(EntityType entityType) {
     super(entityType);
   }
 
-  @SuppressWarnings("unused")
   public OidcUserMapping(String id, EntityType entityType) {
     super(entityType);
     setId(id);
@@ -48,7 +46,6 @@ public class OidcUserMapping extends StaticEntity {
     set(OIDC_CLIENT, oidcClient);
   }
 
-  @SuppressWarnings("unused")
   public OidcClient getOidcClient() {
     return getEntity(OIDC_CLIENT, OidcClient.class);
   }
@@ -57,7 +54,6 @@ public class OidcUserMapping extends StaticEntity {
     set(OIDC_USERNAME, oidcUsername);
   }
 
-  @SuppressWarnings("unused")
   public String getOidcUsername() {
     return getString(OIDC_USERNAME);
   }

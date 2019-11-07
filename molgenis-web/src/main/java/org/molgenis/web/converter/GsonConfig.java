@@ -1,5 +1,12 @@
 package org.molgenis.web.converter;
 
+import com.baggonius.gson.immutable.ImmutableListDeserializer;
+import com.baggonius.gson.immutable.ImmutableMapDeserializer;
+import com.baggonius.gson.immutable.ImmutableSetDeserializer;
+import com.baggonius.gson.optional.OptionalTypeFactory;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import org.molgenis.data.Entity;
@@ -39,6 +46,7 @@ public class GsonConfig {
     return menuRuntimeTypeAdapterFactory;
   }
 
+  @SuppressWarnings("deprecation")
   @Bean
   public GsonFactoryBean gsonFactoryBean() {
     boolean prettyPrinting =
@@ -46,6 +54,13 @@ public class GsonConfig {
 
     GsonFactoryBean gsonFactoryBean = new GsonFactoryBean();
     gsonFactoryBean.registerTypeHierarchyAdapter(Entity.class, new EntitySerializer());
+    gsonFactoryBean.registerTypeHierarchyAdapter(
+        ImmutableList.class, new ImmutableListDeserializer());
+    gsonFactoryBean.registerTypeHierarchyAdapter(
+        ImmutableSet.class, new ImmutableSetDeserializer());
+    gsonFactoryBean.registerTypeHierarchyAdapter(
+        ImmutableMap.class, new ImmutableMapDeserializer());
+    gsonFactoryBean.registerTypeAdapterFactory(OptionalTypeFactory.forJDK());
     gsonFactoryBean.setRegisterJavaTimeConverters(true);
     gsonFactoryBean.setDisableHtmlEscaping(true);
     gsonFactoryBean.setPrettyPrinting(prettyPrinting);

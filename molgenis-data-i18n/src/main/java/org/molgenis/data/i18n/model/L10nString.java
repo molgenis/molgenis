@@ -13,6 +13,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** Localization string entity, enabling runtime localization. */
+@SuppressWarnings("unused")
 public class L10nString extends StaticEntity {
   public L10nString(Entity entity) {
     super(entity);

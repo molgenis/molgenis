@@ -4,7 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -59,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 /** Meta data service for retrieving and editing meta data. */
 @Component
 public class MetaDataServiceImpl implements MetaDataService {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
   private final DataService dataService;
@@ -177,23 +177,31 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Transactional
   @Override
-  public void deleteEntityType(Collection<EntityType> entityTypes) {
-    if (entityTypes.isEmpty()) {
+  public void deleteEntityTypes(Collection<String> entityTypeIds) {
+    if (entityTypeIds.isEmpty()) {
       return;
     }
 
-    dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
+    dataService.deleteAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream().map(id -> (Object) id));
 
     if (LOG.isInfoEnabled()) {
-      LOG.info(
-          "Removed entities [{}]",
-          entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+      LOG.info("Removed entities [{}]", String.join(",", entityTypeIds));
     }
   }
 
   @Transactional
   @Override
   public void deleteAttributeById(Object id) {
+    deleteAttribute(id);
+  }
+
+  @Transactional
+  @Override
+  public void deleteAttributesById(Collection<String> attributeIds) {
+    attributeIds.forEach(this::deleteAttribute);
+  }
+
+  private void deleteAttribute(Object id) {
     Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, id, Attribute.class);
     if (attribute == null) {
       throw new UnknownEntityException(ATTRIBUTE_META_DATA, id);
@@ -531,6 +539,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
       for (Attribute oldAttribute : oldAtomicAttributes) {
         if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+
         // FIXME This implies that an attribute can never be different when doing an update import?
         if (!EntityUtils.equals(
             oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) return false;

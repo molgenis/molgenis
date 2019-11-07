@@ -23,6 +23,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 public interface MetaDataService extends Iterable<RepositoryCollection> {
+
   /**
    * Returns the repository for the given entity type identifier.
    *
@@ -231,17 +232,20 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
   void deleteEntityType(String entityTypeId);
 
   /**
-   * Deletes a collection of entity type.
+   * Deletes a collection of entity types by ID.
    *
-   * @param entityTypes entity type collection
+   * @param entityTypeIds entity type id collection
    */
-  void deleteEntityType(Collection<EntityType> entityTypes);
+  void deleteEntityTypes(Collection<String> entityTypeIds);
 
   /** Adds an Attribute to an EntityType */
   void addAttribute(Attribute attribute);
 
   /** Deletes an Attribute from an Entity */
   void deleteAttributeById(Object id);
+
+  /** Deletes multiple attributes */
+  void deleteAttributesById(Collection<String> attributeIds);
 
   /**
    * Check the integration of an entity type with existing entities Check only if the existing
