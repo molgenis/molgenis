@@ -20,6 +20,8 @@ public abstract class UiContextResponse {
   @CheckForNull
   public abstract String getNavBarLogo();
 
+  @Nullable
+  @CheckForNull
   public abstract Menu getMenu();
 
   public abstract String getloginHref();
