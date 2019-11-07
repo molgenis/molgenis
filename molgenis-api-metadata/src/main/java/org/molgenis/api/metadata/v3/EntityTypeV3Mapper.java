@@ -38,6 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityTypeV3Mapper {
+
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
   private final EntityTypeFactory entityTypeFactory;
@@ -125,10 +126,11 @@ public class EntityTypeV3Mapper {
     return entityType;
   }
 
-  private void processSelfReferencingAttributes(EntityType entityType, Collection<Attribute> attributes) {
-    for(Attribute attribute : attributes){
-      if(isReferenceType(attribute)){
-        if(attribute.getRefEntity().getId().equals(entityType.getId())){
+  private void processSelfReferencingAttributes(
+      EntityType entityType, Collection<Attribute> attributes) {
+    for (Attribute attribute : attributes) {
+      if (isReferenceType(attribute)) {
+        if (attribute.getRefEntity().getId().equals(entityType.getId())) {
           attribute.setRefEntity(entityType);
         }
       }
