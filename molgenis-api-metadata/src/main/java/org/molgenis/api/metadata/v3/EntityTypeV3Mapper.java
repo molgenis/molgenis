@@ -3,11 +3,13 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityTypeV3Mapper {
+
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
   private final EntityTypeFactory entityTypeFactory;
@@ -75,7 +78,8 @@ public class EntityTypeV3Mapper {
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
-    Optional<Package> pack = packageId != null ? metaDataService.getPackage(packageId) : null;
+    Optional<Package> pack =
+        packageId != null ? metaDataService.getPackage(packageId) : Optional.empty();
     entityType.setPackage(
         pack.orElseThrow(() -> new UnknownPackageException(entityTypeRequest.getPackage())));
     String extendsEntityTypeId = entityTypeRequest.getExtends();
@@ -116,7 +120,21 @@ public class EntityTypeV3Mapper {
       entityType.setExtends(extendsEntityType.get());
     }
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
+
+    processSelfReferencingAttributes(entityType, ownAttributes.values());
+
     return entityType;
+  }
+
+  private void processSelfReferencingAttributes(
+      EntityType entityType, Collection<Attribute> attributes) {
+    for (Attribute attribute : attributes) {
+      if (isReferenceType(attribute)) {
+        if (attribute.getRefEntity().getId().equals(entityType.getId())) {
+          attribute.setRefEntity(entityType);
+        }
+      }
+    }
   }
 
   private EntityTypeResponse mapInternal(
