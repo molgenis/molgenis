@@ -102,6 +102,7 @@ in org.molgenis.data and subpackages from included modules
   "org.molgenis.metrics"
 })
 @Import({
+  PlatformITBaseConfig.class,
   SecurityCoreITConfig.class,
   PlatformBootstrapper.class,
   TestAppSettings.class,
