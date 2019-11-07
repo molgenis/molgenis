@@ -31,7 +31,7 @@ public class MetadataUpsertJobExecutionMetadata extends SystemEntityType {
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
-  static final String METADATA_CUD_JOB_TYPE = "MetadataUpsertJob";
+  static final String METADATA_UPSERT_JOB_TYPE = "MetadataUpsertJob";
 
   MetadataUpsertJobExecutionMetadata(
       JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {

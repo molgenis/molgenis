@@ -106,17 +106,18 @@ public class SystemEntityTypePersister {
   /** Package-private for testability */
   void removeNonExistingSystemEntityTypes() {
     // get all system entities
-    List<EntityType> removedSystemEntityMetas =
+    List<String> removedSystemEntityIds =
         dataService
             .findAll(ENTITY_TYPE_META_DATA, EntityType.class)
             .filter(EntityTypeUtils::isSystemEntity)
             .filter(this::isNotExists)
+            .map(EntityType::getId)
             .collect(toList());
 
-    dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
-    removedSystemEntityMetas.forEach(
-        entityType ->
-            mutableAclClassService.deleteAclClass(EntityIdentityUtils.toType(entityType)));
+    dataService.getMeta().deleteEntityTypes(removedSystemEntityIds);
+    removedSystemEntityIds.forEach(
+        entityTypeId ->
+            mutableAclClassService.deleteAclClass(EntityIdentityUtils.toType(entityTypeId)));
   }
 
   private void removeNonExistingSystemPackages() {

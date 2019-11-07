@@ -6,7 +6,7 @@ import java.util.Collection;
 /**
  * TODO use dependency or move to molgenis-utils
  *
- * copied from
+ * <p>copied from
  * https://github.com/acebaggins/gson-serializers/blob/master/src/main/java/com/tyler/gson/immutable/
  */
 public class ImmutableListDeserializer extends BaseCollectionDeserializer<ImmutableList<?>> {
