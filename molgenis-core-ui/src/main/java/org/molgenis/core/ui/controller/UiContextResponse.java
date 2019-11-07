@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.controller;
 
 import com.google.auto.value.AutoValue;
+import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.web.menu.model.Menu;
@@ -26,6 +27,14 @@ public abstract class UiContextResponse {
   public abstract String gethelpLink();
 
   public abstract Boolean getAuthenticated();
+
+  @Nullable
+  @CheckForNull
+  public abstract String getEmail();
+
+  public abstract String getUsername();
+
+  public abstract List<String> getRoles();
 
   public abstract Boolean getShowCookieWall();
 
@@ -61,6 +70,12 @@ public abstract class UiContextResponse {
     public abstract Builder setMenu(Menu menu);
 
     public abstract Builder setAuthenticated(Boolean authenticated);
+
+    public abstract Builder setEmail(String email);
+
+    public abstract Builder setUsername(String username);
+
+    public abstract Builder setRoles(List<String> roles);
 
     public abstract Builder setShowCookieWall(Boolean showCookieWall);
 
