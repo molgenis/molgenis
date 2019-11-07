@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class Plugin extends StaticEntity {
   public Plugin(Entity entity) {
     super(entity);

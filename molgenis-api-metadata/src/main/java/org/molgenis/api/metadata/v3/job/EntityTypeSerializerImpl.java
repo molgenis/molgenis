@@ -9,6 +9,8 @@ import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
+import com.baggonius.gson.immutable.ImmutableListDeserializer;
+import com.baggonius.gson.immutable.ImmutableMapDeserializer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -16,8 +18,6 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.molgenis.api.metadata.v3.job.util.ImmutableListDeserializer;
-import org.molgenis.api.metadata.v3.job.util.ImmutableMapDeserializer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Sort;

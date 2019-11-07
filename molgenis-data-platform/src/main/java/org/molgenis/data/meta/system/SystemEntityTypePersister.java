@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
@@ -106,13 +108,18 @@ public class SystemEntityTypePersister {
   /** Package-private for testability */
   void removeNonExistingSystemEntityTypes() {
     // get all system entities
-    List<String> removedSystemEntityIds =
-        dataService
-            .findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-            .filter(EntityTypeUtils::isSystemEntity)
-            .filter(this::isNotExists)
-            .map(EntityType::getId)
-            .collect(toList());
+    List<String> removedSystemEntityIds = new ArrayList<>();
+    dataService
+        .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
+        .forEachBatched(
+            new Fetch().field(ID).field(PACKAGE),
+            entityTypes ->
+                entityTypes.stream()
+                    .filter(EntityTypeUtils::isSystemEntity)
+                    .filter(this::isNotExists)
+                    .map(EntityType::getId)
+                    .forEach(removedSystemEntityIds::add),
+            1000);
 
     dataService.getMeta().deleteEntityTypes(removedSystemEntityIds);
     removedSystemEntityIds.forEach(

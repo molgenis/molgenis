@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** Entity representation of a dynamic decorator */
+@SuppressWarnings("unused")
 public class DynamicDecorator extends StaticEntity {
   public DynamicDecorator(Entity entity) {
     super(entity);

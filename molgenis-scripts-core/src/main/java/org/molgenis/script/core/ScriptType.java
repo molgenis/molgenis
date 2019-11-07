@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 /** Script type entity */
+@SuppressWarnings("unused")
 public class ScriptType extends StaticEntity {
   public ScriptType(Entity entity) {
     super(entity);
