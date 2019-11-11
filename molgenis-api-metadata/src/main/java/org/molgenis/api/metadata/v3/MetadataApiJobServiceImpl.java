@@ -88,7 +88,8 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
   @Override
   public MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, Query query) {
     validateEntityTypeExists(entityTypeId);
-    return scheduleDeleteAttribute(DeleteType.ATTRIBUTE, entityTypeId, getAttributeIds(entityTypeId, query));
+    return scheduleDeleteAttribute(
+        DeleteType.ATTRIBUTE, entityTypeId, getAttributeIds(entityTypeId, query));
   }
 
   private MetadataUpsertJobExecution scheduleUpsert(Action action, EntityType entityType) {
@@ -99,7 +100,8 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
     return jobExecution;
   }
 
-  private MetadataDeleteJobExecution scheduleDeleteAttribute(DeleteType deleteType, String entityTypeId, List<String> ids) {
+  private MetadataDeleteJobExecution scheduleDeleteAttribute(
+      DeleteType deleteType, String entityTypeId, List<String> ids) {
     MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
     jobExecution.setDeleteType(deleteType);
     jobExecution.setIds(ids);
@@ -108,7 +110,8 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
     return jobExecution;
   }
 
-  private MetadataDeleteJobExecution scheduleDeleteEntityType(DeleteType deleteType, List<String> ids) {
+  private MetadataDeleteJobExecution scheduleDeleteEntityType(
+      DeleteType deleteType, List<String> ids) {
     MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
     jobExecution.setDeleteType(deleteType);
     jobExecution.setIds(ids);
