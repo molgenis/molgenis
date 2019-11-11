@@ -35,11 +35,15 @@ public class MetadataUpsertConfig {
           case CREATE:
             throw new UnsupportedOperationException();
           case UPDATE:
-            return progress -> metadataApiService.updateEntityType(entityType);
+            return progress -> updateEntityType(entityType);
           default:
             throw new UnexpectedEnumException(action);
         }
       }
     };
+  }
+
+  private Void updateEntityType(EntityType entityType) {
+    return null; // FIXME
   }
 }

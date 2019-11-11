@@ -1,14 +1,21 @@
 package org.molgenis.api.metadata.v3;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
+import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
+import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
@@ -17,6 +24,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 
@@ -28,16 +36,19 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   private final SortMapper sortMapper;
   // TODO replace usage of DataService with new methods in MetaDataService
   private final DataService dataService;
+  private final MetadataApiJobService metadataApiJobService;
 
   MetadataApiServiceImpl(
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
       SortMapper sortMapper,
-      DataService dataService) {
+      DataService dataService,
+      MetadataApiJobService metadataApiJobService) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
     this.dataService = requireNonNull(dataService);
+    this.metadataApiJobService = requireNonNull(metadataApiJobService);
   }
 
   public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
@@ -135,15 +146,15 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Void deleteAttribute(String attributeId) {
-    metadataService.deleteAttributeById(attributeId);
-    return null;
+  public MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId) {
+    validateAttributePartOfEntity(entityTypeId, attributeId);
+    return null; // FIXME
   }
 
   @Override
-  public Void deleteAttributes(List<String> attributeIds) {
-    metadataService.deleteAttributesById(attributeIds);
-    return null;
+  public MetadataUpsertJobExecution deleteAttributes(String entityTypeId, Query query) {
+    validateEntityTypeExists(entityTypeId);
+    return null; // FIXME
   }
 
   public void createEntityType(EntityType entityType) {
@@ -152,20 +163,19 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Void updateEntityType(EntityType entityType) {
-    return null; // FIXME
+  public MetadataUpsertJobExecution updateEntityType(EntityType entityType) {
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   @Override
-  public Void deleteEntityType(String entityTypeId) {
-    metadataService.deleteEntityType(entityTypeId);
-    return null;
+  public MetadataDeleteJobExecution deleteEntityType(String entityTypeId) {
+    validateEntityTypeExists(entityTypeId);
+    return metadataApiJobService.scheduleDelete(singletonList(entityTypeId));
   }
 
   @Override
-  public Void deleteEntityTypes(List<String> entityTypeIds) {
-    metadataService.deleteEntityTypes(entityTypeIds);
-    return null;
+  public MetadataDeleteJobExecution deleteEntityTypes(Query query) {
+    return metadataApiJobService.scheduleDelete(getEntityTypeIds(query));
   }
 
   // TODO remove code duplication with molgenis-data-import DataPersisterImpl
@@ -183,6 +193,38 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   private void updateEntityTypeSecondPass(EntityType entityType) {
     if (entityType.hasMappedByAttributes()) {
       metadataService.updateEntityType(entityType);
+    }
+  }
+
+  private void validateEntityTypeExists(String entityTypeId) {
+    if (!metadataService.hasEntityType(entityTypeId)) {
+      throw new UnknownEntityTypeException(entityTypeId);
+    }
+  }
+
+  private List<String> getEntityTypeIds(Query q) {
+    Repository<EntityType> entityTypeRepository =
+        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
+    org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
+    dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
+    List<String> entityTypeIds =
+        dataServiceQuery.findAll().map(EntityType::getId).collect(toList());
+    if (entityTypeIds.isEmpty()) {
+      throw new ZeroResultsException(q);
+    }
+    return entityTypeIds;
+  }
+
+  private void validateAttributePartOfEntity(String entityTypeId, String attributeId) {
+    EntityType entityType =
+        metadataService
+            .getEntityType(entityTypeId)
+            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
+    Attribute attribute =
+        dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class);
+
+    if (attribute == null || !attribute.getEntity().getId().equals(entityTypeId)) {
+      throw new UnknownAttributeException(entityType, attributeId);
     }
   }
 }

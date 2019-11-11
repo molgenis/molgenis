@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3;
 
-import java.util.List;
+import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.UnknownEntityException;
@@ -24,26 +25,23 @@ public interface MetadataApiService {
    */
   Attribute findAttribute(String attributeId);
 
-  Void deleteAttribute(String attributeId);
+  MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId);
 
-  Void deleteAttributes(List<String> attributeIds);
+  MetadataUpsertJobExecution deleteAttributes(String entityTypeId, Query query);
 
   /**
    * @param entityTypeId entity type identifier
    * @throws UnknownEntityTypeException if no entity type exists for the given identifier
+   * @return MetadataDeleteJobExecution
    */
-  Void deleteEntityType(String entityTypeId);
+  MetadataDeleteJobExecution deleteEntityType(String entityTypeId);
 
-  /**
-   * @param entityTypeIds entity type identifiers
-   * @throws UnknownEntityTypeException if no entity type exists for a given identifier
-   */
-  Void deleteEntityTypes(List<String> entityTypeIds);
+  MetadataDeleteJobExecution deleteEntityTypes(Query query);
 
   /**
    * Updates entity type.
    *
    * @param entityType updated entity type
    */
-  Void updateEntityType(EntityType entityType);
+  MetadataUpsertJobExecution updateEntityType(EntityType entityType);
 }
