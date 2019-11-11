@@ -71,17 +71,11 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   public EntityType findEntityType(String identifier) {
-    Repository<EntityType> repository =
-        metadataService
-            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
-            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
-
-    EntityType entityType = repository.findOneById(identifier);
-    if (entityType == null) {
+    Optional<EntityType> entityType = metadataService.getEntityType(identifier);
+    if(!entityType.isPresent()){
       throw new UnknownEntityTypeException(identifier);
     }
-
-    return entityType;
+    return entityType.get();
   }
 
   public Attributes findAttributes(
@@ -124,7 +118,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   @Override
   public Attribute findAttribute(String attributeId, String entityTypeId) {
-    EntityType entityType = getEntityType(entityTypeId);
+    EntityType entityType = findEntityType(entityTypeId);
 
     // TODO use MetaDataService instead of DataService
     Attribute attribute =
@@ -136,24 +130,16 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return attribute;
   }
 
-  private EntityType getEntityType(String entityTypeId) {
-    Optional<EntityType> entityType = metadataService.getEntityType(entityTypeId);
-    if(!entityType.isPresent()){
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
-    return entityType.get();
-  }
-
   @Override
   public Void deleteAttribute(String attributeId, String entityTypeId) {
-    getEntityType(entityTypeId);
+    findEntityType(entityTypeId);
     metadataService.deleteAttributeById(attributeId);
     return null;
   }
 
   @Override
   public Void deleteAttributes(List<String> attributeIds, String entityTypeId) {
-    getEntityType(entityTypeId);
+    findEntityType(entityTypeId);
     metadataService.deleteAttributesById(attributeIds);
     return null;
   }
