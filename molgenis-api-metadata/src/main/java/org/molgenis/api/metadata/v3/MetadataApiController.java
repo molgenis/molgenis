@@ -88,8 +88,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/attributes/{attributeId}")
-  public AttributeResponse getEntityTypeAttribute(
-      @Valid ReadAttributeRequest readAttributeRequest) {
+  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
     // TODO pass entity type identifier to findAttribute and check if exists in service
     Attribute attribute = metadataApiService.findAttribute(readAttributeRequest.getAttributeId());
     return attributeV3Mapper.mapAttribute(attribute, false);
