@@ -187,7 +187,8 @@ public class AttributeV3Mapper {
       orders = new ArrayList<>(Iterables.size(sort));
       for (Order order : sort) {
         orders.add(
-            org.molgenis.api.model.Sort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+            org.molgenis.api.model.Sort.create(
+                order.getAttr(), Direction.valueOf(order.getDirection().name())));
       }
     }
 
