@@ -20,7 +20,6 @@ import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.EntityTypeSerializer;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionFactory;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.DeleteType;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionFactory;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionMetadata.Action;
@@ -72,7 +71,6 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     metadataApiJobService.scheduleCreate(entityType);
 
     assertAll(
-        () -> verify(jobExecution).setAction(Action.CREATE),
         () -> verify(jobExecution).setEntityTypeData("entity data"),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -109,7 +107,6 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     metadataApiJobService.scheduleDeleteAttribute(entityTypeId, attributeId);
 
     assertAll(
-        () -> verify(jobExecution).setDeleteType(DeleteType.ATTRIBUTE),
         () -> verify(jobExecution).setIds(singletonList(attributeId)),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -178,7 +175,6 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     metadataApiJobService.scheduleDeleteAttribute(entityTypeId, query);
 
     assertAll(
-        () -> verify(jobExecution).setDeleteType(DeleteType.ATTRIBUTE),
         () -> verify(jobExecution).setIds(asList("attr1", "attr2")),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -222,7 +218,6 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     metadataApiJobService.scheduleDeleteEntityType(entityTypeId);
 
     assertAll(
-        () -> verify(jobExecution).setDeleteType(DeleteType.ENTITY_TYPE),
         () -> verify(jobExecution).setIds(singletonList(entityTypeId)),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -256,7 +251,6 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     metadataApiJobService.scheduleDeleteEntityType(query);
 
     assertAll(
-        () -> verify(jobExecution).setDeleteType(DeleteType.ENTITY_TYPE),
         () -> verify(jobExecution).setIds(asList("MyEntityTypeId0", "MyEntityTypeId1")),
         () -> verify(jobExecutor).submit(jobExecution));
   }

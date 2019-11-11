@@ -11,7 +11,6 @@ import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.EntityTypeSerializer;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionFactory;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.DeleteType;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionFactory;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionMetadata.Action;
@@ -70,25 +69,27 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
   @Override
   public MetadataDeleteJobExecution scheduleDeleteEntityType(String entityTypeId) {
     validateEntityTypeExists(entityTypeId);
-    return scheduleDelete(DeleteType.ENTITY_TYPE, singletonList(entityTypeId));
+    return scheduleDelete(singletonList(entityTypeId));
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteEntityType(Query query) {
-    return scheduleDelete(DeleteType.ENTITY_TYPE, getEntityTypeIds(query));
+    return scheduleDelete(getEntityTypeIds(query));
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteAttribute(
       String entityTypeId, String attributeId) {
     validateAttributePartOfEntity(entityTypeId, attributeId);
-    return scheduleDelete(DeleteType.ATTRIBUTE, singletonList(attributeId));
+    // FIXME
+    return null;
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, Query query) {
     validateEntityTypeExists(entityTypeId);
-    return scheduleDelete(DeleteType.ATTRIBUTE, getAttributeIds(entityTypeId, query));
+    // FIXME
+    return null;
   }
 
   private MetadataUpsertJobExecution scheduleUpsert(Action action, EntityType entityType) {
@@ -99,9 +100,8 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
     return jobExecution;
   }
 
-  private MetadataDeleteJobExecution scheduleDelete(DeleteType deleteType, List<String> ids) {
+  private MetadataDeleteJobExecution scheduleDelete(List<String> ids) {
     MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
-    jobExecution.setDeleteType(deleteType);
     jobExecution.setIds(ids);
     jobExecutor.submit(jobExecution);
     return jobExecution;

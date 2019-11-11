@@ -5,7 +5,6 @@ import static org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadat
 import static org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.METADATA_DELETE_JOB_TYPE;
 
 import java.util.List;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.DeleteType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
@@ -26,15 +25,6 @@ public class MetadataDeleteJobExecution extends JobExecution {
   public MetadataDeleteJobExecution(String id, EntityType entityType) {
     super(entityType);
     setType(METADATA_DELETE_JOB_TYPE);
-  }
-
-  public void setDeleteType(DeleteType type) {
-    set(MetadataDeleteJobExecutionMetadata.DELETE_TYPE, type.toString());
-  }
-
-  public DeleteType getDeleteType() {
-    String type = getString(MetadataDeleteJobExecutionMetadata.DELETE_TYPE);
-    return DeleteType.valueOf(type);
   }
 
   public List<String> getIds() {
