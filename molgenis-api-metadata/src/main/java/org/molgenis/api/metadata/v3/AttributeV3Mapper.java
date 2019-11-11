@@ -215,8 +215,9 @@ public class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    // FIXME: absent attr results in false.
-    // attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    if(attributeRequest.isCascadeDelete() != null) {
+      attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
     attribute.setExpression(attributeRequest.getExpression());

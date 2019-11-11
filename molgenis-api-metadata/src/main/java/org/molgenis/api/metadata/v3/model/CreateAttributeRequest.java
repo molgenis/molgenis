@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3.model;
 
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("squid:S1610") // classes without fields should be converted to interfaces
 public class CreateAttributeRequest {
@@ -9,7 +10,7 @@ public class CreateAttributeRequest {
   String type;
   String parent;
   String refEntityType;
-  boolean cascadeDelete;
+  Boolean cascadeDelete;
   String mappedByAttribute;
   String orderBy;
   String expression;
@@ -35,7 +36,7 @@ public class CreateAttributeRequest {
       String type,
       String parent,
       String refEntityType,
-      boolean cascadeDelete,
+      Boolean cascadeDelete,
       String mappedByAttribute,
       String orderBy,
       String expression,
