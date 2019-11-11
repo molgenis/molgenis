@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3.job;
 
 import static java.util.Arrays.asList;
+import static org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.ENTITYTYPEID;
 import static org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.IDS;
 import static org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata.METADATA_DELETE_JOB_TYPE;
 
@@ -43,5 +44,13 @@ public class MetadataDeleteJobExecution extends JobExecution {
 
   public void setIds(List<String> ids) {
     set(IDS, String.join(",", ids));
+  }
+
+  public String getEntityTypeID() {
+    return getString(ENTITYTYPEID);
+  }
+
+  public void setEntityTypeId(String entityTypeId) {
+    set(ENTITYTYPEID, entityTypeId);
   }
 }

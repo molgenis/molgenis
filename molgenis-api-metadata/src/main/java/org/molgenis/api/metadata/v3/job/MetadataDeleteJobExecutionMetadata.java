@@ -29,6 +29,7 @@ public class MetadataDeleteJobExecutionMetadata extends SystemEntityType {
 
   public static final String IDS = "ids";
   public static final String DELETE_TYPE = "deleteType";
+  public static final String ENTITYTYPEID = "entityTypeId";
 
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
@@ -59,6 +60,12 @@ public class MetadataDeleteJobExecutionMetadata extends SystemEntityType {
         .setDataType(TEXT)
         .setLabel("IDs")
         .setDescription("Comma-separated list of IDs")
+        .setNillable(false);
+
+    addAttribute(ENTITYTYPEID)
+        .setDataType(TEXT)
+        .setLabel("EntityType Id")
+        .setDescription("The id of the entitytype of which this attributes are part of.")
         .setNillable(false);
   }
 }

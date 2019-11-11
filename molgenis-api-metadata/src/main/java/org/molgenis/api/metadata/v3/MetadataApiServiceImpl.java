@@ -115,7 +115,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Attribute findAttribute(String attributeId, String entityTypeId) {
+  public Attribute findAttribute(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
 
     // TODO use MetaDataService instead of DataService
@@ -129,14 +129,14 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Void deleteAttribute(String attributeId, String entityTypeId) {
+  public Void deleteAttribute(String entityTypeId, String attributeId) {
     findEntityType(entityTypeId);
     metadataService.deleteAttributeById(attributeId);
     return null;
   }
 
   @Override
-  public Void deleteAttributes(List<String> attributeIds, String entityTypeId) {
+  public Void deleteAttributes(String entityTypeId, List<String> attributeIds) {
     findEntityType(entityTypeId);
     metadataService.deleteAttributesById(attributeIds);
     return null;

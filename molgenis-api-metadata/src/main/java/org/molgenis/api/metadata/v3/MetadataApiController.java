@@ -88,11 +88,10 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/attributes/{attributeId}")
-  public AttributeResponse getEntityTypeAttribute(
-      @Valid ReadAttributeRequest readAttributeRequest) {
+  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
     Attribute attribute =
         metadataApiService.findAttribute(
-            readAttributeRequest.getAttributeId(), readAttributeRequest.getEntityTypeId());
+            readAttributeRequest.getEntityTypeId(), readAttributeRequest.getAttributeId());
     return attributeV3Mapper.mapAttribute(attribute, false);
   }
 

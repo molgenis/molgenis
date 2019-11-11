@@ -47,6 +47,11 @@ public class MetadataDeleteJobExecutionTest extends AbstractSystemEntityTest {
     type.setB(DeleteType.ATTRIBUTE);
     map.put(MetadataDeleteJobExecutionMetadata.DELETE_TYPE, type);
 
+    Pair<Class, Object> entityTypeId = new Pair<>();
+    entityTypeId.setA(String.class);
+    entityTypeId.setB("EntitytTypeId");
+    map.put(MetadataDeleteJobExecutionMetadata.ENTITYTYPEID, entityTypeId);
+
     Pair<Class, Object> status = new Pair<>();
     status.setA(Status.class);
     status.setB(Status.RUNNING);
