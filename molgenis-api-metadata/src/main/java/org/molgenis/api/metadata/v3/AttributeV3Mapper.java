@@ -215,7 +215,7 @@ public class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    if(attributeRequest.isCascadeDelete() != null) {
+    if (attributeRequest.isCascadeDelete() != null) {
       attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
     }
     String orderBy = attributeRequest.getOrderBy();
