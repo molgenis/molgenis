@@ -66,6 +66,6 @@ public class MetadataDeleteJobExecutionMetadata extends SystemEntityType {
         .setDataType(TEXT)
         .setLabel("EntityType Id")
         .setDescription("The id of the entitytype of which this attributes are part of.")
-        .setNillable(false);
+        .setNillable(true);
   }
 }

@@ -70,25 +70,25 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
   @Override
   public MetadataDeleteJobExecution scheduleDeleteEntityType(String entityTypeId) {
     validateEntityTypeExists(entityTypeId);
-    return scheduleDelete(DeleteType.ENTITY_TYPE, singletonList(entityTypeId));
+    return scheduleDeleteEntityType(DeleteType.ENTITY_TYPE, singletonList(entityTypeId));
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteEntityType(Query query) {
-    return scheduleDelete(DeleteType.ENTITY_TYPE, getEntityTypeIds(query));
+    return scheduleDeleteEntityType(DeleteType.ENTITY_TYPE, getEntityTypeIds(query));
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteAttribute(
       String entityTypeId, String attributeId) {
     validateAttributePartOfEntity(entityTypeId, attributeId);
-    return scheduleDelete(DeleteType.ATTRIBUTE, singletonList(attributeId));
+    return scheduleDeleteAttribute(DeleteType.ATTRIBUTE, entityTypeId, singletonList(attributeId));
   }
 
   @Override
   public MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, Query query) {
     validateEntityTypeExists(entityTypeId);
-    return scheduleDelete(DeleteType.ATTRIBUTE, getAttributeIds(entityTypeId, query));
+    return scheduleDeleteAttribute(DeleteType.ATTRIBUTE, entityTypeId, getAttributeIds(entityTypeId, query));
   }
 
   private MetadataUpsertJobExecution scheduleUpsert(Action action, EntityType entityType) {
@@ -99,7 +99,16 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
     return jobExecution;
   }
 
-  private MetadataDeleteJobExecution scheduleDelete(DeleteType deleteType, List<String> ids) {
+  private MetadataDeleteJobExecution scheduleDeleteAttribute(DeleteType deleteType, String entityTypeId, List<String> ids) {
+    MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
+    jobExecution.setDeleteType(deleteType);
+    jobExecution.setIds(ids);
+    jobExecution.setEntityTypeId(entityTypeId);
+    jobExecutor.submit(jobExecution);
+    return jobExecution;
+  }
+
+  private MetadataDeleteJobExecution scheduleDeleteEntityType(DeleteType deleteType, List<String> ids) {
     MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
     jobExecution.setDeleteType(deleteType);
     jobExecution.setIds(ids);
