@@ -1,6 +1,8 @@
 package org.molgenis.api.metadata.v3;
 
 import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.UnknownAttributeException;
@@ -12,11 +14,16 @@ public interface MetadataApiService {
 
   void createEntityType(EntityType entityType);
 
+  /**
+   * @param entityTypeId entity type identifier
+   * @throws UnknownEntityTypeException if not entity type exists for the given identifier
+   */
   EntityType findEntityType(String entityTypeId);
 
-  EntityTypes findEntityTypes(Query orElse, Sort sort, int size, int page);
+  EntityTypes findEntityTypes(@Nullable @CheckForNull Query query, Sort sort, int size, int page);
 
-  Attributes findAttributes(String entityTypeId, Query orElse, Sort sort, int size, int page);
+  Attributes findAttributes(
+      String entityTypeId, @Nullable @CheckForNull Query query, Sort sort, int size, int page);
 
   /**
    * @param attributeId attribute identifier

@@ -48,9 +48,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
             .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
-        query != null
-            ? queryMapper.map(query, repository)
-            : new QueryImpl<>(repository);
+        query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     // get entities
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> findQuery =
@@ -72,7 +70,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   public EntityType findEntityType(String identifier) {
     Optional<EntityType> entityType = metadataService.getEntityType(identifier);
-    if(!entityType.isPresent()){
+    if (!entityType.isPresent()) {
       throw new UnknownEntityTypeException(identifier);
     }
     return entityType.get();
