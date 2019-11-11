@@ -5,11 +5,12 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
+import java.util.Optional;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.EntityTypeWithoutMappedByAttributes;
@@ -48,7 +49,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
         query != null
-            ? (org.molgenis.data.Query<EntityType>) queryMapper.map(query, repository)
+            ? queryMapper.map(query, repository)
             : new QueryImpl<>(repository);
 
     // get entities
@@ -122,26 +123,37 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Attribute findAttribute(String attributeId) {
+  public Attribute findAttribute(String attributeId, String entityTypeId) {
+    EntityType entityType = getEntityType(entityTypeId);
+
     // TODO use MetaDataService instead of DataService
     Attribute attribute =
         dataService.findOneById(
             AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
     if (attribute == null) {
-      // TODO we can't throw an UnknownAttributeException here because it requires EntityType
-      throw new UnknownEntityException(AttributeMetadata.ATTRIBUTE_META_DATA, attributeId);
+      throw new UnknownAttributeException(entityType, attributeId);
     }
     return attribute;
   }
 
+  private EntityType getEntityType(String entityTypeId) {
+    Optional<EntityType> entityType = metadataService.getEntityType(entityTypeId);
+    if(!entityType.isPresent()){
+      throw new UnknownEntityTypeException(entityTypeId);
+    }
+    return entityType.get();
+  }
+
   @Override
-  public Void deleteAttribute(String attributeId) {
+  public Void deleteAttribute(String attributeId, String entityTypeId) {
+    getEntityType(entityTypeId);
     metadataService.deleteAttributeById(attributeId);
     return null;
   }
 
   @Override
-  public Void deleteAttributes(List<String> attributeIds) {
+  public Void deleteAttributes(List<String> attributeIds, String entityTypeId) {
+    getEntityType(entityTypeId);
     metadataService.deleteAttributesById(attributeIds);
     return null;
   }
