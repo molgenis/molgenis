@@ -147,14 +147,17 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   @Override
   public MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId) {
-    validateAttributePartOfEntity(entityTypeId, attributeId);
-    return null; // FIXME
+    EntityType entityType = findEntityType(entityTypeId);
+    Attribute attribute = validateAttributePartOfEntity(entityType, attributeId);
+    entityType.removeAttribute(attribute);
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   @Override
   public MetadataUpsertJobExecution deleteAttributes(String entityTypeId, Query query) {
-    validateEntityTypeExists(entityTypeId);
-    return null; // FIXME
+    EntityType entityType = findEntityType(entityTypeId);
+    findAttributes(entityTypeId, query).forEach(entityType::removeAttribute);
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   public void createEntityType(EntityType entityType) {
@@ -215,16 +218,26 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return entityTypeIds;
   }
 
-  private void validateAttributePartOfEntity(String entityTypeId, String attributeId) {
-    EntityType entityType =
-        metadataService
-            .getEntityType(entityTypeId)
-            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
+  private List<Attribute> findAttributes(String entityTypeId, Query q) {
+    Repository<Attribute> attributeRepository =
+        dataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class);
+    org.molgenis.data.Query<Attribute> dataServiceQuery =
+        queryMapper.map(q, attributeRepository).and().eq(AttributeMetadata.ENTITY, entityTypeId);
+    dataServiceQuery.setFetch(new Fetch().field(AttributeMetadata.ID));
+    List<Attribute> attributes = dataServiceQuery.findAll().collect(toList());
+    if (attributes.isEmpty()) {
+      throw new ZeroResultsException(q);
+    }
+    return attributes;
+  }
+
+  private Attribute validateAttributePartOfEntity(EntityType entityType, String attributeId) {
     Attribute attribute =
         dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class);
 
-    if (attribute == null || !attribute.getEntity().getId().equals(entityTypeId)) {
+    if (attribute == null || !attribute.getEntity().getId().equals(entityType.getId())) {
       throw new UnknownAttributeException(entityType, attributeId);
     }
+    return attribute;
   }
 }

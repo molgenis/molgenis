@@ -2,8 +2,8 @@ package org.molgenis.api.metadata.v3.job;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.api.metadata.v3.MetadataApiService;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionMetadata.Action;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MetadataUpsertConfig {
-  private final MetadataApiService metadataApiService;
+  private final MetaDataService metadataService;
   private final EntityTypeSerializer entityTypeSerializer;
 
   public MetadataUpsertConfig(
-      MetadataApiService metadataApiService, EntityTypeSerializer entityTypeSerializer) {
-    this.metadataApiService = requireNonNull(metadataApiService);
+      MetaDataService metadataService, EntityTypeSerializer entityTypeSerializer) {
+    this.metadataService = requireNonNull(metadataService);
     this.entityTypeSerializer = requireNonNull(entityTypeSerializer);
   }
 
@@ -44,6 +44,7 @@ public class MetadataUpsertConfig {
   }
 
   private Void updateEntityType(EntityType entityType) {
-    return null; // FIXME
+    metadataService.updateEntityType(entityType);
+    return null;
   }
 }
