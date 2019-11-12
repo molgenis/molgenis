@@ -7,7 +7,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
-import java.util.Optional;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
@@ -52,25 +51,22 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
-    Repository<org.molgenis.data.meta.model.EntityType> repository =
+    Repository<EntityType> repository =
         metadataService
-            .getRepository(ENTITY_TYPE_META_DATA, org.molgenis.data.meta.model.EntityType.class)
+            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
             .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
+    org.molgenis.data.Query<EntityType> molgenisQuery =
         query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     // get entities
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> findQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<EntityType> findQuery = new QueryImpl<>(molgenisQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapper.map(sort));
-    List<org.molgenis.data.meta.model.EntityType> entityTypes =
-        repository.findAll(findQuery).collect(toList());
+    List<EntityType> entityTypes = repository.findAll(findQuery).collect(toList());
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> countQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<EntityType> countQuery = new QueryImpl<>(molgenisQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
@@ -79,23 +75,20 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   public EntityType findEntityType(String identifier) {
-    Optional<EntityType> entityType = metadataService.getEntityType(identifier);
-    if (!entityType.isPresent()) {
-      throw new UnknownEntityTypeException(identifier);
-    }
-    return entityType.get();
+    return metadataService
+        .getEntityType(identifier)
+        .orElseThrow(() -> new UnknownEntityTypeException(identifier));
   }
 
   public Attributes findAttributes(
       String entityTypeId, Query query, Sort sort, int size, int number) {
-    Repository<org.molgenis.data.meta.model.Attribute> repository =
+    Repository<Attribute> repository =
         metadataService
-            .getRepository(
-                AttributeMetadata.ATTRIBUTE_META_DATA, org.molgenis.data.meta.model.Attribute.class)
+            .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)
             .orElseThrow(
                 () -> new UnknownRepositoryException(AttributeMetadata.ATTRIBUTE_META_DATA));
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> molgenisQuery =
+    org.molgenis.data.Query<Attribute> molgenisQuery =
         query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     boolean nest = !molgenisQuery.getRules().isEmpty();
@@ -112,11 +105,9 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapper.map(sort));
-    List<org.molgenis.data.meta.model.Attribute> attributes =
-        repository.findAll(findQuery).collect(toList());
+    List<Attribute> attributes = repository.findAll(findQuery).collect(toList());
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> countQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<Attribute> countQuery = new QueryImpl<>(molgenisQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
@@ -127,12 +118,15 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public Attribute findAttribute(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
+    return findAttribute(entityType, attributeId);
+  }
 
+  private Attribute findAttribute(EntityType entityType, String attributeId) {
     // TODO use MetaDataService instead of DataService
     Attribute attribute =
         dataService.findOneById(
             AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
-    if (attribute == null) {
+    if (attribute == null || !attribute.getEntity().getId().equals(entityType.getId())) {
       throw new UnknownAttributeException(entityType, attributeId);
     }
     return attribute;
@@ -140,9 +134,8 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   @Override
   public MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId) {
-    findEntityType(entityTypeId);
     EntityType entityType = findEntityType(entityTypeId);
-    Attribute attribute = validateAttributePartOfEntity(entityType, attributeId);
+    Attribute attribute = findAttribute(entityType, attributeId);
     entityType.removeAttribute(attribute);
     return metadataApiJobService.scheduleUpdate(entityType);
   }
@@ -223,15 +216,5 @@ public class MetadataApiServiceImpl implements MetadataApiService {
       throw new ZeroResultsException(q);
     }
     return attributes;
-  }
-
-  private Attribute validateAttributePartOfEntity(EntityType entityType, String attributeId) {
-    Attribute attribute =
-        dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class);
-
-    if (attribute == null || !attribute.getEntity().getId().equals(entityType.getId())) {
-      throw new UnknownAttributeException(entityType, attributeId);
-    }
-    return attribute;
   }
 }
