@@ -17,6 +17,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.data.InvalidAttributeValueException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -335,10 +337,10 @@ public class EntityTypeV3Mapper {
             processI18nDescription(description, entityType);
             break;
           case "attributes":
-            if(entry.getValue() != null){
+            if (entry.getValue() != null) {
               Iterable<Attribute> attrs = mapAttributes(entityType, entry);
               entityType.setOwnAllAttributes(attrs);
-            }else{
+            } else {
               throw new RuntimeException("entitytype must have entities");//TODO coded
             }
             break;
@@ -352,7 +354,38 @@ public class EntityTypeV3Mapper {
         }
       }
     }
-    //TODO: process label, id, lookup
+    for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
+      Iterable<Attribute> attributes = entityType.getAttributes();
+      switch (entry.getKey()) {
+        case "idAttribute":
+          String idAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
+          Attribute idAttribute = getAttribute(idAttributeId, attributes, entityType);
+          idAttribute.setIdAttribute(true);
+          //FIXME set all others to false
+          entityType.setOwnAllAttributes(attributes);
+          break;
+        case "labelAttribute":
+          String labelAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
+          Attribute labelAttribute = getAttribute(labelAttributeId, attributes, entityType);
+          labelAttribute.setLabelAttribute(true);
+          //FIXME set all others to false
+          entityType.setOwnAllAttributes(attributes);
+          break;
+        case "lookupAttributes":
+          //FIXME implement -> update all attrs with lookupindex or null
+          entityType.setOwnAllAttributes(attributes);
+          break;
+      }
+    }
+  }
+
+  private Attribute getAttribute(String labelAttributeId, Iterable<Attribute> attributes, EntityType entityType) {
+    for(Attribute attribute : attributes){
+      if(attribute.getIdentifier().equals(labelAttributeId)){
+        return attribute;
+      }
+    }
+    throw new UnknownAttributeException(entityType, labelAttributeId);
   }
 
   private Iterable<Attribute> mapAttributes(EntityType entityType, Entry<String, Object> entry) {
@@ -360,15 +393,16 @@ public class EntityTypeV3Mapper {
       throw new RuntimeException("not a valid attributes value, expecting a list");//TODO coded
     }
     List<Object> attrValues = (List<Object>) entry.getValue();
-    List<Map<String,Object>> requestAttributes = new ArrayList<>();
-    for(Object attrValue : attrValues){
-      Map<String,Object> valueMap = (Map<String,Object>)attrValue;
+    List<Map<String, Object>> requestAttributes = new ArrayList<>();
+    for (Object attrValue : attrValues) {
+      Map<String, Object> valueMap = (Map<String, Object>) attrValue;
       requestAttributes.add(valueMap);
     }
     return mapAttributes(requestAttributes, entityType);
   }
 
-  private Iterable<Attribute> mapAttributes(List<Map<String, Object>> values, EntityType entityType) {
+  private Iterable<Attribute> mapAttributes(List<Map<String, Object>> values,
+      EntityType entityType) {
     return attributeV3Mapper.toAttributes(values, entityType).values();
   }
 }
