@@ -25,7 +25,6 @@ import org.molgenis.api.model.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -87,10 +85,10 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/attributes/{attributeId}")
-  public AttributeResponse getEntityTypeAttribute(
-      @Valid ReadAttributeRequest readAttributeRequest) {
-    // TODO pass entity type identifier to findAttribute and check if exists in service
-    Attribute attribute = metadataApiService.findAttribute(readAttributeRequest.getAttributeId());
+  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
+    Attribute attribute =
+        metadataApiService.findAttribute(
+            readAttributeRequest.getEntityTypeId(), readAttributeRequest.getAttributeId());
     return attributeV3Mapper.mapAttribute(attribute, false);
   }
 
@@ -129,7 +127,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity deleteAttribute(@Valid DeleteAttributeRequest deleteAttributeRequest) {
     JobExecution jobExecution =
         metadataApiService.deleteAttribute(
@@ -139,7 +136,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity deleteAttributes(@Valid DeleteAttributesRequest deleteAttributesRequest) {
     JobExecution jobExecution =
         metadataApiService.deleteAttributes(
@@ -149,7 +145,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PutMapping("/{entityTypeId}")
-  @ResponseStatus(HttpStatus.ACCEPTED)
   public ResponseEntity updateEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
@@ -162,7 +157,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PatchMapping("/{entityTypeId}")
-  @ResponseStatus(HttpStatus.ACCEPTED)
   public ResponseEntity updatePartialEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody Map<String, Object> entityTypeValues) {
@@ -178,7 +172,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
     JobExecution jobExecution =
         metadataApiService.deleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
@@ -187,7 +180,6 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity deleteEntityTypes(
       @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
     JobExecution jobExecution =

@@ -2,14 +2,18 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 
 class MetadataApiServiceImplTest extends AbstractMockitoTest {
@@ -37,15 +41,21 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
   @Test
   void testDeleteAttribute() {
+    String entityTypeId = "entityTypeId";
+    EntityType entityType = mock(EntityType.class);
+    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
     String attributeId = "attr1";
-    metadataApiServiceImpl.deleteAttribute(attributeId);
+    metadataApiServiceImpl.deleteAttribute(entityTypeId, attributeId);
     verify(metadataService).deleteAttributeById(attributeId);
   }
 
   @Test
   void testDeleteAttributes() {
+    String entityTypeId = "entityTypeId";
+    EntityType entityType = mock(EntityType.class);
+    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
     List<String> attributeIds = asList("attr1", "attr2");
-    metadataApiServiceImpl.deleteAttributes(attributeIds);
+    metadataApiServiceImpl.deleteAttributes("entityTypeId", attributeIds);
     verify(metadataService).deleteAttributesById(attributeIds);
   }
 

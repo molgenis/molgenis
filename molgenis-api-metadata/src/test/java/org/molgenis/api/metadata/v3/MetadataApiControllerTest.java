@@ -1,25 +1,41 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.model.Query.Operator.IN;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
+import org.molgenis.api.metadata.v3.model.AttributeResponse;
+import org.molgenis.api.metadata.v3.model.AttributesResponse;
+import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteAttributeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
+import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
+import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
+import org.molgenis.api.metadata.v3.model.ReadAttributeRequest;
+import org.molgenis.api.metadata.v3.model.ReadAttributesRequest;
+import org.molgenis.api.metadata.v3.model.ReadEntityTypeRequest;
+import org.molgenis.api.metadata.v3.model.ReadEntityTypesRequest;
 import org.molgenis.api.model.Query;
+import org.molgenis.api.model.Sort;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -48,6 +64,107 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     assertThrows(
         NullPointerException.class,
         () -> new MetadataApiController(null, null, null, attributeV3Mapper));
+  }
+
+  @Test
+  void testGetEntityTypes() {
+    int page = 2;
+    int size = 1;
+    Sort sort = mock(Sort.class);
+    Query query = mock(Query.class);
+
+    ReadEntityTypesRequest readEntityTypesRequest = new ReadEntityTypesRequest();
+    readEntityTypesRequest.setPage(page);
+    readEntityTypesRequest.setSize(size);
+    readEntityTypesRequest.setSort(sort);
+    readEntityTypesRequest.setQ(query);
+
+    int total = 3;
+    EntityTypes entityTypes = when(mock(EntityTypes.class).getTotal()).thenReturn(total).getMock();
+    when(metadataApiService.findEntityTypes(query, sort, size, page)).thenReturn(entityTypes);
+
+    EntityTypesResponse entityTypesResponse = mock(EntityTypesResponse.class);
+    when(entityTypeV3Mapper.toEntityTypesResponse(entityTypes, size, page, total))
+        .thenReturn(entityTypesResponse);
+
+    assertEquals(entityTypesResponse, metadataApiController.getEntityTypes(readEntityTypesRequest));
+  }
+
+  @Test
+  void testGetEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    boolean flattenAttrs = true;
+    boolean i18n = false;
+
+    ReadEntityTypeRequest readEntityTypeRequest = new ReadEntityTypeRequest();
+    readEntityTypeRequest.setEntityTypeId(entityTypeId);
+    readEntityTypeRequest.setFlattenAttrs(flattenAttrs);
+    readEntityTypeRequest.setI18n(i18n);
+
+    EntityType entityType = mock(EntityType.class);
+    when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
+
+    EntityTypeResponse entityTypeResponse = mock(EntityTypeResponse.class);
+    when(entityTypeV3Mapper.toEntityTypeResponse(entityType, flattenAttrs, i18n))
+        .thenReturn(entityTypeResponse);
+    assertEquals(entityTypeResponse, metadataApiController.getEntityType(readEntityTypeRequest));
+  }
+
+  @Test
+  void testGetAttribute() {
+    String attributeId = "MyAttributeId";
+    String entityTypeId = "entityTypeId";
+
+    ReadAttributeRequest readAttributeRequest = new ReadAttributeRequest();
+    readAttributeRequest.setAttributeId(attributeId);
+    readAttributeRequest.setEntityTypeId(entityTypeId);
+
+    Attribute attribute = mock(Attribute.class);
+    when(metadataApiService.findAttribute(entityTypeId, attributeId)).thenReturn(attribute);
+
+    AttributeResponse attributeResponse = mock(AttributeResponse.class);
+    when(attributeV3Mapper.mapAttribute(attribute, false)).thenReturn(attributeResponse);
+    assertEquals(attributeResponse, metadataApiController.getAttribute(readAttributeRequest));
+  }
+
+  @Test
+  void testCreateEntityType() throws URISyntaxException {
+    CreateEntityTypeRequest createEntityTypeRequest = mock(CreateEntityTypeRequest.class);
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    when(entityTypeV3Mapper.toEntityType(createEntityTypeRequest)).thenReturn(entityType);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.created(new URI("http://localhost/api/metadata/" + entityTypeId)).build();
+    assertEquals(responseEntity, metadataApiController.createEntityType(createEntityTypeRequest));
+    verify(metadataApiService).createEntityType(entityType);
+  }
+
+  @Test
+  void testGetAttributes() {
+    String entityTypeId = "MyEntityTypeId";
+    Query query = mock(Query.class);
+    Sort sort = mock(Sort.class);
+    int size = 1;
+    int page = 2;
+
+    ReadAttributesRequest readAttributesRequest = new ReadAttributesRequest();
+    readAttributesRequest.setEntityTypeId(entityTypeId);
+    readAttributesRequest.setQ(query);
+    readAttributesRequest.setSort(sort);
+    readAttributesRequest.setSize(size);
+    readAttributesRequest.setPage(page);
+
+    int total = 3;
+    Attributes attributes = when(mock(Attributes.class).getTotal()).thenReturn(total).getMock();
+    when(metadataApiService.findAttributes(entityTypeId, query, sort, size, page))
+        .thenReturn(attributes);
+
+    AttributesResponse attributesResponse = mock(AttributesResponse.class);
+    when(attributeV3Mapper.mapAttributes(attributes, size, page, total))
+        .thenReturn(attributesResponse);
+
+    assertEquals(attributesResponse, metadataApiController.getAttributes(readAttributesRequest));
   }
 
   @Test
@@ -83,7 +200,30 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testUpdateEntityType() throws URISyntaxException {
+    String entityTypeId = "MyEntityTypeId";
+    CreateEntityTypeRequest createEntityTypeRequest = mock(CreateEntityTypeRequest.class);
+
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    when(entityTypeV3Mapper.toEntityType(createEntityTypeRequest)).thenReturn(entityType);
+
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataUpsertJobExecution.getEntityType()).thenReturn(entityType);
+
+    when(metadataApiJobService.scheduleUpdate(entityType)).thenReturn(metadataUpsertJobExecution);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.accepted()
+            .location(new URI("http://localhost/api/data/MyEntityTypeId"))
+            .build();
+    assertEquals(
+        responseEntity,
+        metadataApiController.updateEntityType(entityTypeId, createEntityTypeRequest));
+  }
+
+  @Test
   void testDeleteEntityType() {
+
     String entityTypeId = "MyEntityTypeId";
     DeleteEntityTypeRequest deleteEntityTypeRequest = new DeleteEntityTypeRequest();
     deleteEntityTypeRequest.setEntityTypeId(entityTypeId);

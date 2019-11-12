@@ -7,6 +7,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
+import java.util.Optional;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
@@ -16,7 +17,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.EntityTypeWithoutMappedByAttributes;
@@ -58,9 +58,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
             .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
-        query != null
-            ? (org.molgenis.data.Query<EntityType>) queryMapper.map(query, repository)
-            : new QueryImpl<>(repository);
+        query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     // get entities
     org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> findQuery =
@@ -81,17 +79,11 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   public EntityType findEntityType(String identifier) {
-    Repository<EntityType> repository =
-        metadataService
-            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
-            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
-
-    EntityType entityType = repository.findOneById(identifier);
-    if (entityType == null) {
+    Optional<EntityType> entityType = metadataService.getEntityType(identifier);
+    if (!entityType.isPresent()) {
       throw new UnknownEntityTypeException(identifier);
     }
-
-    return entityType;
+    return entityType.get();
   }
 
   public Attributes findAttributes(
@@ -133,20 +125,22 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Attribute findAttribute(String attributeId) {
+  public Attribute findAttribute(String entityTypeId, String attributeId) {
+    EntityType entityType = findEntityType(entityTypeId);
+
     // TODO use MetaDataService instead of DataService
     Attribute attribute =
         dataService.findOneById(
             AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
     if (attribute == null) {
-      // TODO we can't throw an UnknownAttributeException here because it requires EntityType
-      throw new UnknownEntityException(AttributeMetadata.ATTRIBUTE_META_DATA, attributeId);
+      throw new UnknownAttributeException(entityType, attributeId);
     }
     return attribute;
   }
 
   @Override
   public MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId) {
+    findEntityType(entityTypeId);
     EntityType entityType = findEntityType(entityTypeId);
     Attribute attribute = validateAttributePartOfEntity(entityType, attributeId);
     entityType.removeAttribute(attribute);
