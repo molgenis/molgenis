@@ -4,7 +4,6 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
@@ -13,12 +12,13 @@ import com.baggonius.gson.immutable.ImmutableListDeserializer;
 import com.baggonius.gson.immutable.ImmutableMapDeserializer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -81,38 +81,9 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setId(entityType.getId())
         .setPackageId(packageId)
         .setLabel(entityType.getLabel())
-        .setLabelI18n(
-            ImmutableMap.copyOf(
-                getLanguageCodes()
-                    .filter(
-                        languageCode ->
-                            entityType.getString(
-                                    getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode))
-                                != null)
-                    .collect(
-                        toMap(
-                            Function.identity(),
-                            languageCode ->
-                                entityType.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.LABEL, languageCode))))))
+        .setLabelI18n(getI18n(entityType, EntityTypeMetadata.LABEL))
         .setDescription(entityType.getDescription())
-        .setDescriptionI18n(
-            ImmutableMap.copyOf(
-                getLanguageCodes()
-                    .filter(
-                        languageCode ->
-                            entityType.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.DESCRIPTION, languageCode))
-                                != null)
-                    .collect(
-                        toMap(
-                            Function.identity(),
-                            languageCode ->
-                                entityType.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.DESCRIPTION, languageCode))))))
+        .setDescriptionI18n(getI18n(entityType, EntityTypeMetadata.DESCRIPTION))
         .setAttributes(
             ImmutableList.copyOf(
                 stream(entityType.getOwnAllAttributes())
@@ -152,38 +123,9 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
-        .setLabelI18n(
-            ImmutableMap.copyOf(
-                getLanguageCodes()
-                    .filter(
-                        languageCode ->
-                            attribute.getString(
-                                    getI18nAttributeName(EntityTypeMetadata.LABEL, languageCode))
-                                != null)
-                    .collect(
-                        toMap(
-                            Function.identity(),
-                            languageCode ->
-                                attribute.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.LABEL, languageCode))))))
+        .setLabelI18n(getI18n(attribute, AttributeMetadata.LABEL))
         .setDescription(attribute.getDescription())
-        .setDescriptionI18n(
-            ImmutableMap.copyOf(
-                getLanguageCodes()
-                    .filter(
-                        languageCode ->
-                            attribute.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.DESCRIPTION, languageCode))
-                                != null)
-                    .collect(
-                        toMap(
-                            Function.identity(),
-                            languageCode ->
-                                attribute.getString(
-                                    getI18nAttributeName(
-                                        EntityTypeMetadata.DESCRIPTION, languageCode))))))
+        .setDescriptionI18n(getI18n(attribute, AttributeMetadata.DESCRIPTION))
         .setNullable(attribute.isNillable())
         .setAuto(attribute.isAuto())
         .setVisible(attribute.isVisible())
@@ -206,34 +148,11 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
 
   private EntityType toEntityType(SerializableEntityType serializableEntityType) {
     String packageId = serializableEntityType.getPackageId();
-    Package aPackage =
-        packageId != null
-            ? dataService.findOneById(
-                PackageMetadata.PACKAGE,
-                packageId,
-                new Fetch().field(PackageMetadata.ID),
-                Package.class)
-            : null;
+    Package aPackage = packageId != null ? getPackage(packageId) : null;
     String extendsId = serializableEntityType.getExtendsId();
-    EntityType anExtends =
-        extendsId != null
-            ? dataService.findOneById(
-                EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-                extendsId,
-                new Fetch().field(EntityTypeMetadata.ID),
-                EntityType.class)
-            : null;
+    EntityType anExtends = extendsId != null ? getEntityType(extendsId) : null;
     ImmutableList<String> tagIds = serializableEntityType.getTagIds();
-    List<Tag> tags =
-        !tagIds.isEmpty()
-            ? dataService
-                .findAll(
-                    TagMetadata.TAG,
-                    (Stream<Object>) (Stream<?>) tagIds.stream(),
-                    new Fetch().field(TagMetadata.ID),
-                    Tag.class)
-                .collect(toList())
-            : emptyList();
+    List<Tag> tags = getTags(tagIds);
 
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(serializableEntityType.getId());
@@ -252,48 +171,49 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     return entityType;
   }
 
+  private Package getPackage(String packageId) {
+    return dataService.findOneById(
+        PackageMetadata.PACKAGE, packageId, new Fetch().field(PackageMetadata.ID), Package.class);
+  }
+
+  private static ImmutableMap<String, String> getI18n(Entity entity, String attributeName) {
+    Builder<String, String> builder = ImmutableMap.builder();
+    getLanguageCodes()
+        .forEach(
+            languageCode -> {
+              String value = entity.getString(getI18nAttributeName(attributeName, languageCode));
+              if (value != null) {
+                builder.put(languageCode, value);
+              }
+            });
+    return builder.build();
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Tag> getTags(ImmutableList<String> tagIds) {
+    return !tagIds.isEmpty()
+        ? dataService
+            .findAll(
+                TagMetadata.TAG,
+                (Stream<Object>) (Stream<?>) tagIds.stream(),
+                new Fetch().field(TagMetadata.ID),
+                Tag.class)
+            .collect(toList())
+        : emptyList();
+  }
+
   private Attribute toAttribute(SerializableAttribute serializableAttribute) {
     String refEntityTypeId = serializableAttribute.getRefEntityTypeId();
-    EntityType refEntityType =
-        refEntityTypeId != null
-            ? dataService.findOneById(
-                EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-                refEntityTypeId,
-                new Fetch().field(EntityTypeMetadata.ID),
-                EntityType.class)
-            : null;
+    EntityType refEntityType = refEntityTypeId != null ? getEntityType(refEntityTypeId) : null;
     String mappedById = serializableAttribute.getMappedById();
-    Attribute mappedByAttr =
-        mappedById != null
-            ? dataService.findOneById(
-                AttributeMetadata.ATTRIBUTE_META_DATA,
-                mappedById,
-                new Fetch().field(AttributeMetadata.ID),
-                Attribute.class)
-            : null;
+    Attribute mappedByAttr = mappedById != null ? getAttribute(mappedById) : null;
     String orderBy = serializableAttribute.getOrderBy();
     Sort sort = orderBy != null ? Sort.parse(orderBy) : null;
     String parentId = serializableAttribute.getParentId();
-    Attribute parent =
-        parentId != null
-            ? dataService.findOneById(
-                AttributeMetadata.ATTRIBUTE_META_DATA,
-                parentId,
-                new Fetch().field(AttributeMetadata.ID),
-                Attribute.class)
-            : null;
+    Attribute parent = parentId != null ? getAttribute(parentId) : null;
 
     ImmutableList<String> tagIds = serializableAttribute.getTagIds();
-    List<Tag> tags =
-        !tagIds.isEmpty()
-            ? dataService
-                .findAll(
-                    TagMetadata.TAG,
-                    (Stream<Object>) (Stream<?>) tagIds.stream(),
-                    new Fetch().field(TagMetadata.ID),
-                    Tag.class)
-                .collect(toList())
-            : emptyList();
+    List<Tag> tags = getTags(tagIds);
 
     Attribute attribute = attributeFactory.create();
     attribute.setIdentifier(serializableAttribute.getId());
@@ -328,5 +248,21 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     attribute.setValidationExpression(serializableAttribute.getValidationExpression());
     attribute.setDefaultValue(serializableAttribute.getDefaultValue());
     return attribute;
+  }
+
+  private Attribute getAttribute(String attributeId) {
+    return dataService.findOneById(
+        AttributeMetadata.ATTRIBUTE_META_DATA,
+        attributeId,
+        new Fetch().field(AttributeMetadata.ID),
+        Attribute.class);
+  }
+
+  private EntityType getEntityType(String entityTypeId) {
+    return dataService.findOneById(
+        EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+        entityTypeId,
+        new Fetch().field(EntityTypeMetadata.ID),
+        EntityType.class);
   }
 }
