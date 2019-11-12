@@ -3,16 +3,28 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.gson.Gson;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
@@ -23,6 +35,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
+import org.molgenis.data.InvalidAttributeValueException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -91,8 +104,8 @@ public class EntityTypeV3Mapper {
       entityType.setExtends(extendsEntityType);
     }
 
-    processI18nLabel(entityTypeRequest, entityType);
-    processI18nDescription(entityTypeRequest, entityType);
+    processI18nLabel(entityTypeRequest.getLabel(), entityType);
+    processI18nDescription(entityTypeRequest.getDescription(), entityType);
     Map<String, Attribute> ownAttributes =
         attributeV3Mapper.toAttributes(
             entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
@@ -241,8 +254,7 @@ public class EntityTypeV3Mapper {
     return uriComponentsBuilder.build().toUri();
   }
 
-  private void processI18nLabel(CreateEntityTypeRequest entityTypeRequest, EntityType entityType) {
-    I18nValue i18nValue = entityTypeRequest.getLabel();
+  private void processI18nLabel(I18nValue i18nValue, EntityType entityType) {
     if (i18nValue != null) {
       entityType.setLabel(i18nValue.getDefaultValue());
       getLanguageCodes()
@@ -257,8 +269,7 @@ public class EntityTypeV3Mapper {
   }
 
   private void processI18nDescription(
-      CreateEntityTypeRequest entityTypeRequest, EntityType entityType) {
-    I18nValue i18nValue = entityTypeRequest.getDescription();
+      I18nValue i18nValue, EntityType entityType) {
     if (i18nValue != null) {
       entityType.setDescription(i18nValue.getDefaultValue());
       getLanguageCodes()
@@ -284,5 +295,80 @@ public class EntityTypeV3Mapper {
     Map<String, String> translations = new HashMap<>();
     getLanguageCodes().forEach(code -> translations.put(code, entityType.getDescription(code)));
     return I18nValue.create(defaultValue, translations);
+  }
+
+  public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {
+    for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
+      if (entry.getKey() == "id") {
+        throw new RuntimeException("Cannot modify ID");//TODO: coded
+      }
+      if (entry.getValue() == null) {
+        entityType.set(entry.getKey(), null);
+      } else {
+        switch (entry.getKey()) {
+          case "package_":
+            String packageId = String.valueOf(entry.getValue());
+            Package pack = metaDataService.getPackage(packageId)
+                .orElseThrow(() -> new UnknownPackageException(packageId));
+            entityType.setPackage(pack);
+            break;
+          case "abstract_":
+            String stringValue = entry.getValue().toString();
+            if (!stringValue.equalsIgnoreCase("true") && !stringValue.equalsIgnoreCase("false")) {
+              throw new RuntimeException("Invalid boolean");//TODO: coded
+            }
+            Boolean isAbstract = Boolean.valueOf(stringValue);
+            entityType.setAbstract(isAbstract);
+            break;
+          case "extends_":
+            String extendsValue = String.valueOf(entry.getValue());
+            EntityType extends_ = metaDataService.getEntityType(extendsValue)
+                .orElseThrow(() -> new UnknownEntityTypeException(extendsValue));
+            entityType.setExtends(extends_);
+            break;
+          case "label":
+            I18nValue label = attributeV3Mapper.mapI18nValue(entry.getValue());
+            processI18nLabel(label, entityType);
+            break;
+          case "description":
+            I18nValue description = attributeV3Mapper.mapI18nValue(entry.getValue());
+            processI18nDescription(description, entityType);
+            break;
+          case "attributes":
+            if(entry.getValue() != null){
+              Iterable<Attribute> attrs = mapAttributes(entityType, entry);
+              entityType.setOwnAllAttributes(attrs);
+            }else{
+              throw new RuntimeException("entitytype must have entities");//TODO coded
+            }
+            break;
+          case "idAttribute":
+          case "labelAttribute":
+          case "lookupAttribute":
+            //ignore now and process at the end, we need to be sure the attributes have been processed.
+            break;
+          default:
+            throw new RuntimeException("not a entityType attr");//TODO coded
+        }
+      }
+    }
+    //TODO: process label, id, lookup
+  }
+
+  private Iterable<Attribute> mapAttributes(EntityType entityType, Entry<String, Object> entry) {
+    if (!(entry.getValue() instanceof Iterable<?>)) {
+      throw new RuntimeException("not a valid attributes value, expecting a list");//TODO coded
+    }
+    List<Object> attrValues = (List<Object>) entry.getValue();
+    List<Map<String,Object>> requestAttributes = new ArrayList<>();
+    for(Object attrValue : attrValues){
+      Map<String,Object> valueMap = (Map<String,Object>)attrValue;
+      requestAttributes.add(valueMap);
+    }
+    return mapAttributes(requestAttributes, entityType);
+  }
+
+  private Iterable<Attribute> mapAttributes(List<Map<String, Object>> values, EntityType entityType) {
+    return attributeV3Mapper.toAttributes(values, entityType);
   }
 }

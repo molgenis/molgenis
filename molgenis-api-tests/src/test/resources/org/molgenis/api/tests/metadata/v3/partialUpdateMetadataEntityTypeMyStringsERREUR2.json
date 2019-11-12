@@ -1,17 +1,10 @@
 {
   "label": {
     "defaultValue": "My Strings (updated)"
-  }, "attributes": [
+  }, "attributes":
     {
       "id": "v3meta_MyStrings_id",
       "name": "id",
       "type": "string"
-    },
-    {
-      "id": "v3meta_MyStrings_label2",
-      "name": "label",
-      "type": "string",
-      "visible": true
     }
-  ]
 }

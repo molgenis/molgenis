@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.api.convert.SortConverter;
@@ -37,6 +38,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -56,7 +58,6 @@ public class AttributeV3Mapper {
   public static final String ATTRIBUTES = "attributes";
   public static final String PAGE = "page";
 
-  private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
   private final SortMapper sortMapper;
@@ -65,14 +66,12 @@ public class AttributeV3Mapper {
   private final EntityTypeMetadata entityTypeMetadata;
 
   public AttributeV3Mapper(
-      EntityTypeFactory entityTypeFactory,
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
       SortMapper sortMapper,
       SortConverter sortConverter,
       EntityManager entityManager,
       EntityTypeMetadata entityTypeMetadata) {
-    this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attributeFactory = requireNonNull(attributeFactory);
     this.metaDataService = requireNonNull(metaDataService);
     this.sortMapper = requireNonNull(sortMapper);
@@ -224,7 +223,7 @@ public class AttributeV3Mapper {
     attribute.setNillable(attributeRequest.isNullable());
     attribute.setAuto(attributeRequest.isAuto());
     attribute.setVisible(attributeRequest.isVisible());
-    processI18nLabel(attributeRequest, attribute);
+    processI18nLabel(attributeRequest.getLabel(), attribute);
     processI18nDescription(attributeRequest, attribute);
     attribute.setAggregatable(attributeRequest.isAggregatable());
     attribute.setEnumOptions(attributeRequest.getEnumOptions());
@@ -239,6 +238,218 @@ public class AttributeV3Mapper {
     attribute.setValidationExpression(attributeRequest.getValidationExpression());
     attribute.setDefaultValue(attributeRequest.getDefaultValue());
     return attribute;
+  }
+
+  List<Attribute> toAttributes(List<Map<String,Object>> attributeValueMaps, EntityType entityType){
+    List<Attribute> attributes = new ArrayList<>();
+    int index = 0;
+    for(Map<String,Object> attributeValueMap : attributeValueMaps){
+      Attribute attr = toAttribute(attributeValueMap, entityType);
+      if(attr.getSequenceNumber() == null){
+        attr.setSequenceNumber(index);
+      }
+      attributes.add(attr);
+      index++;
+    }
+    //TODO: "parent" and "mapped by" from either this entity or metadataService
+    return attributes;
+  }
+
+  private Attribute toAttribute(
+      Map<String, Object> attributeRequest, EntityType entityType) {
+    Attribute attribute = attributeFactory.create();
+    attribute.setEntity(entityType);
+
+    for(Entry<String, Object> entry : attributeRequest.entrySet()){
+        switch (entry.getKey()) {
+          case "id":
+            attribute.setIdentifier(getStringValue(entry.getValue()));
+            break;
+          case "name":
+            attribute.setName(getStringValue(entry.getValue()));
+            break;
+          case "sequenceNumber":
+            String sequenceString = getStringValue(entry.getValue());
+            if (sequenceString != null) {
+              attribute.setSequenceNumber(Integer.valueOf(sequenceString));
+            }else{
+              //FIXME: coded exception
+              throw new RuntimeException("invalid value for "+ entry.getKey());
+            }
+            break;
+          case "type":
+            String typeString = getStringValue(entry.getValue());
+            if (typeString != null) {
+              attribute.setDataType(AttributeType.toEnum(typeString));
+            }else{
+              //FIXME: coded exception
+              throw new RuntimeException("invalid value for "+ entry.getKey());
+            }
+            break;
+          case "refEntityType":
+            EntityType refEntityType;
+            String refEntityTypeId = getStringValue(entry.getValue());
+            if (refEntityTypeId != null) {
+              refEntityType = (EntityType) entityManager
+                  .getReference(entityTypeMetadata, refEntityTypeId);
+              attribute.setRefEntity(refEntityType);
+            }
+            break;
+          case "cascadeDelete":
+            String cascadeValue = getStringValue(entry.getValue());
+            if(cascadeValue!=null) {
+              attribute.setCascadeDelete(Boolean.valueOf(cascadeValue));
+            }else{
+              attribute.setCascadeDelete(null);
+            }
+            break;
+          case "orderBy":
+            String orderBy = getStringValue(entry.getValue());
+            attribute
+                .setOrderBy(orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
+            break;
+          case "expression":
+            attribute.setExpression(getStringValue(entry.getValue()));
+            break;
+          case "nullable":
+            String nullableValue = getStringValue(entry.getValue());
+            if(nullableValue!=null) {
+              attribute.setCascadeDelete(Boolean.valueOf(nullableValue));
+            }else{
+              attribute.setCascadeDelete(null);
+            }
+            break;
+          case "auto":
+            String autoValue = getStringValue(entry.getValue());
+            if(autoValue!=null) {
+              attribute.setCascadeDelete(Boolean.valueOf(autoValue));
+            }else{
+              attribute.setCascadeDelete(null);
+            }
+            break;
+          case "visible":
+            String visibleValue = getStringValue(entry.getValue());
+            if(visibleValue!=null) {
+              attribute.setCascadeDelete(Boolean.valueOf(visibleValue));
+            }else{
+              attribute.setCascadeDelete(null);
+            }
+            break;
+          case "label":
+            I18nValue i18Label= mapI18nValue(entry.getValue());
+            processI18nLabel(i18Label,attribute);
+            break;
+          case "description":
+            I18nValue i18Description = mapI18nValue(entry.getValue());
+            processI18nLabel(i18Description,attribute);
+            break;
+          case "aggregatable":
+            attribute.setAggregatable(Boolean.valueOf(entry.getValue().toString()));
+            break;
+          case "enumOptions":
+            List<String> options = null;
+            if(options != null){
+              if(entry.getValue() instanceof List){
+              options = (List<String>) entry.getValue();
+              }else{
+                //FIXME: coded exception
+                throw new RuntimeException("invalid value for "+ entry.getKey());
+              }
+            }
+            attribute.setEnumOptions(options);
+            break;
+          case "range":
+            Range range = mapRange(entry.getValue());
+            if (range != null) {
+              attribute.setRange(map(range));
+            }
+            break;
+          case "readonly":
+            String readOnlyValue = getStringValue(entry.getValue());
+            if(readOnlyValue!=null) {
+              attribute.setReadOnly(Boolean.valueOf(readOnlyValue));
+            }else{
+              //FIXME: coded exception
+              throw new RuntimeException("invalid value for "+ entry.getKey());
+            }
+            break;
+          case "unique":
+            String uniqueValue = getStringValue(entry.getValue());
+            if(uniqueValue!=null) {
+              attribute.setUnique(Boolean.valueOf(uniqueValue));
+            }else{
+              //FIXME: coded exception
+              throw new RuntimeException("invalid value for "+ entry.getKey());
+            }
+            break;
+          case "defaultValue":
+            attribute.setDefaultValue(getStringValue(entry.getValue()));
+            break;
+          case "nullableExpression":
+            attribute.setNullableExpression(getStringValue(entry.getValue()));
+            break;
+          case "visibleExpression":
+            attribute.setVisibleExpression(getStringValue(entry.getValue()));
+            break;
+          case "validationExpression":
+            attribute.setValidationExpression(getStringValue(entry.getValue()));
+            break;
+          case "mappedBy":
+          case "parent":
+            //Skip now and process after all attributes in the request have been processed
+            break;
+          default:
+            //FIXME: coded exception
+            throw new RuntimeException("not a attr value: "+entry.getKey());
+        }
+      }
+    return attribute;
+  }
+
+
+  private String getStringValue(Object value) {
+    return value != null ? value.toString():null;
+  }
+
+  //FIXME: move to utility class
+  I18nValue mapI18nValue(Object value) {
+    I18nValue.Builder builder = I18nValue.builder();
+    if(value!=null && value instanceof Map){
+      Map valueMap = (Map)value;
+      Object defaultValue = valueMap.get("defaultValue");
+      if(defaultValue != null){
+        builder.setDefaultValue(defaultValue.toString());
+      }
+      Object translations = valueMap.get("translations");
+      if(translations!=null && translations instanceof Map) {
+        Map<?,?> translationsMap = (Map)translations;
+        Map<String, String> typedTranslations = new HashMap<>();
+        for(Entry entry : translationsMap.entrySet()){
+         if(entry.getKey() != null && entry.getValue() != null){
+           typedTranslations.put(entry.getKey().toString(),entry.getValue().toString());
+         }
+        }
+        builder.setTranslations(typedTranslations);
+      }
+      }
+    return builder.build();
+  }
+
+  private Range mapRange(Object value) {
+    Long minLong = null;
+    Long maxLong = null;
+    if(value!=null && value instanceof Map) {
+      Map valueMap = (Map) value;
+      Object min = valueMap.get("min");
+      if(min != null){
+        minLong = Double.valueOf(min.toString()).longValue();
+      }
+      Object max = valueMap.get("max");
+      if(max != null){
+        maxLong = Double.valueOf(max.toString()).longValue();
+      }
+    }
+    return Range.create(minLong, maxLong);
   }
 
   private org.molgenis.data.Range map(Range range) {
@@ -355,8 +566,7 @@ public class AttributeV3Mapper {
     return uriComponentsBuilder.build().toUri();
   }
 
-  private void processI18nLabel(CreateAttributeRequest attr, Attribute attribute) {
-    I18nValue i18nValue = attr.getLabel();
+  private void processI18nLabel(I18nValue i18nValue, Attribute attribute) {
     if (i18nValue != null) {
       attribute.setLabel(i18nValue.getDefaultValue());
       Map<String, String> translations = i18nValue.getTranslations();

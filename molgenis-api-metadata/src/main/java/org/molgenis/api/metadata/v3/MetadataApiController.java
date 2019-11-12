@@ -1,9 +1,23 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
 
+import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
@@ -24,6 +38,7 @@ import org.molgenis.api.metadata.v3.model.ReadEntityTypesRequest;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.model.JobExecution;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,39 +179,36 @@ class MetadataApiController extends ApiController {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody Map<String, Object> entityTypeValues) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
+    entityTypeV3Mapper.toEntityType(entityType, entityTypeValues);
+      JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
+      return toLocationResponse(jobExecution);
+    }
 
-    // TODO modify entity type based on entity type values
-    // note: we can't use CreateEntityTypeRequest because we can't distinguish between null and not
-    // defined values then)
-
-    JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
-    return toLocationResponse(jobExecution);
-  }
 
   @Transactional
-  @DeleteMapping("/{entityTypeId}")
-  public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
-    JobExecution jobExecution =
-        metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
-    return toLocationResponse(jobExecution);
-  }
+    @DeleteMapping("/{entityTypeId}")
+    public ResponseEntity deleteEntityType (@Valid DeleteEntityTypeRequest deleteEntityTypeRequest){
+      JobExecution jobExecution =
+          metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
+      return toLocationResponse(jobExecution);
+    }
 
-  @Transactional
-  @DeleteMapping
-  public ResponseEntity deleteEntityTypes(
-      @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
-    JobExecution jobExecution =
-        metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypesRequest.getQ());
-    return toLocationResponse(jobExecution);
-  }
+    @Transactional
+    @DeleteMapping
+    public ResponseEntity deleteEntityTypes (
+        @Valid DeleteEntityTypesRequest deleteEntityTypesRequest){
+      JobExecution jobExecution =
+          metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypesRequest.getQ());
+      return toLocationResponse(jobExecution);
+    }
 
-  private ResponseEntity toLocationResponse(JobExecution jobExecution) {
-    URI location =
-        ServletUriComponentsBuilder.fromCurrentRequestUri()
-            .replacePath(EntityController.API_ENTITY_PATH)
-            .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
-            .build()
-            .toUri();
-    return ResponseEntity.accepted().location(location).build();
+    private ResponseEntity toLocationResponse (JobExecution jobExecution){
+      URI location =
+          ServletUriComponentsBuilder.fromCurrentRequestUri()
+              .replacePath(EntityController.API_ENTITY_PATH)
+              .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
+              .build()
+              .toUri();
+      return ResponseEntity.accepted().location(location).build();
+    }
   }
-}
