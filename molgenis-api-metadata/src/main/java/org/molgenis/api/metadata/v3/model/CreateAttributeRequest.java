@@ -9,7 +9,7 @@ public class CreateAttributeRequest {
   String type;
   String parent;
   String refEntityType;
-  boolean cascadeDelete;
+  Boolean cascadeDelete;
   String mappedByAttribute;
   String orderBy;
   String expression;
@@ -35,7 +35,7 @@ public class CreateAttributeRequest {
       String type,
       String parent,
       String refEntityType,
-      boolean cascadeDelete,
+      Boolean cascadeDelete,
       String mappedByAttribute,
       String orderBy,
       String expression,

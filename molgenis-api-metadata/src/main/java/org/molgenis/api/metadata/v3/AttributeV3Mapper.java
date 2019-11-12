@@ -23,14 +23,13 @@ import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
-import org.molgenis.api.metadata.v3.model.AttributeSort;
-import org.molgenis.api.metadata.v3.model.AttributeSort.Order.Direction;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.Category;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
+import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
@@ -178,8 +177,8 @@ public class AttributeV3Mapper {
         .collect(toList());
   }
 
-  private List<AttributeSort> map(Attribute attr) {
-    List<AttributeSort> orders;
+  private List<org.molgenis.api.model.Sort> map(Attribute attr) {
+    List<org.molgenis.api.model.Sort> orders;
 
     Sort sort = attr.getOrderBy();
     if (sort == null) {
@@ -188,7 +187,8 @@ public class AttributeV3Mapper {
       orders = new ArrayList<>(Iterables.size(sort));
       for (Order order : sort) {
         orders.add(
-            AttributeSort.create(order.getAttr(), Direction.valueOf(order.getDirection().name())));
+            org.molgenis.api.model.Sort.create(
+                order.getAttr(), Direction.valueOf(order.getDirection().name())));
       }
     }
 
@@ -215,8 +215,9 @@ public class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    // FIXME: absent attr results in false.
-    // attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    if (attributeRequest.isCascadeDelete() != null) {
+      attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
     attribute.setExpression(attributeRequest.getExpression());

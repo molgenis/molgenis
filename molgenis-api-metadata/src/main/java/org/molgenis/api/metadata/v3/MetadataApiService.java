@@ -5,7 +5,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -27,13 +27,15 @@ public interface MetadataApiService {
 
   /**
    * @param attributeId attribute identifier
-   * @throws UnknownEntityException if no attribute exists for the given identifier
+   * @param entityTypeId
+   * @throws UnknownAttributeException if no attribute exists for the given identifier
+   * @throws UnknownEntityTypeException if no entityType exists for the given identifier
    */
-  Attribute findAttribute(String attributeId);
+  Attribute findAttribute(String entityTypeId, String attributeId);
 
-  Void deleteAttribute(String attributeId);
+  Void deleteAttribute(String entityTypeId, String attributeId);
 
-  Void deleteAttributes(List<String> attributeIds);
+  Void deleteAttributes(String entityTypeId, List<String> attributeIds);
 
   /**
    * @param entityTypeId entity type identifier

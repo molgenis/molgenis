@@ -27,6 +27,7 @@ public class MetadataDeleteConfig {
       public Job createJob(MetadataDeleteJobExecution metadataDeleteJobExecution) {
         List<String> ids = metadataDeleteJobExecution.getIds();
         DeleteType deleteType = metadataDeleteJobExecution.getDeleteType();
+        String entityTypeId = metadataDeleteJobExecution.getEntityTypeID();
 
         switch (deleteType) {
           case ENTITY_TYPE:
@@ -37,9 +38,9 @@ public class MetadataDeleteConfig {
             }
           case ATTRIBUTE:
             if (ids.size() == 1) {
-              return progress -> metadataApiService.deleteAttribute(ids.get(0));
+              return progress -> metadataApiService.deleteAttribute(entityTypeId, ids.get(0));
             } else {
-              return progress -> metadataApiService.deleteAttributes(ids);
+              return progress -> metadataApiService.deleteAttributes(entityTypeId, ids);
             }
           default:
             throw new UnexpectedEnumException(deleteType);

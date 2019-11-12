@@ -113,12 +113,14 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   @Test
   void testGetAttribute() {
     String attributeId = "MyAttributeId";
+    String entityTypeId = "entityTypeId";
 
     ReadAttributeRequest readAttributeRequest = new ReadAttributeRequest();
     readAttributeRequest.setAttributeId(attributeId);
+    readAttributeRequest.setEntityTypeId(entityTypeId);
 
     Attribute attribute = mock(Attribute.class);
-    when(metadataApiService.findAttribute(attributeId)).thenReturn(attribute);
+    when(metadataApiService.findAttribute(entityTypeId, attributeId)).thenReturn(attribute);
 
     AttributeResponse attributeResponse = mock(AttributeResponse.class);
     when(attributeV3Mapper.mapAttribute(attribute, false)).thenReturn(attributeResponse);
