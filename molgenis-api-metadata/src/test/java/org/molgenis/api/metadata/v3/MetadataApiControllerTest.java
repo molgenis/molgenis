@@ -43,7 +43,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class MetadataApiControllerTest extends AbstractMockitoTest {
 
   @Mock private MetadataApiService metadataApiService;
-  @Mock private MetadataApiJobService metadataApiJobService;
   @Mock private EntityTypeV3Mapper entityTypeV3Mapper;
   @Mock private AttributeV3Mapper attributeV3Mapper;
   @Mock private MessageSource messageSource;
@@ -52,8 +51,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   @BeforeEach
   void setUpBeforeEach() {
     metadataApiController =
-        new MetadataApiController(
-            metadataApiService, metadataApiJobService, entityTypeV3Mapper, attributeV3Mapper);
+        new MetadataApiController(metadataApiService, entityTypeV3Mapper, attributeV3Mapper);
     RequestContextHolder.setRequestAttributes(
         new ServletRequestAttributes(new MockHttpServletRequest()));
     MessageSourceHolder.setMessageSource(messageSource);
@@ -62,8 +60,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   @Test
   void testMetadataApiController() {
     assertThrows(
-        NullPointerException.class,
-        () -> new MetadataApiController(null, null, null, attributeV3Mapper));
+        NullPointerException.class, () -> new MetadataApiController(null, null, attributeV3Mapper));
   }
 
   @Test
@@ -174,13 +171,12 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     DeleteAttributeRequest deleteAttributeRequest = new DeleteAttributeRequest();
     deleteAttributeRequest.setEntityTypeId(entityTypeId);
     deleteAttributeRequest.setAttributeId(attributeId);
-    MetadataDeleteJobExecution jobExecution = mockJobExecution();
-    when(metadataApiJobService.scheduleDeleteAttribute(entityTypeId, attributeId))
-        .thenReturn(jobExecution);
+    MetadataUpsertJobExecution jobExecution = mockUpsertJobExecution();
+    when(metadataApiService.deleteAttribute(entityTypeId, attributeId)).thenReturn(jobExecution);
 
     metadataApiController.deleteAttribute(deleteAttributeRequest);
 
-    verify(metadataApiJobService).scheduleDeleteAttribute(entityTypeId, attributeId);
+    verify(metadataApiService).deleteAttribute(entityTypeId, attributeId);
   }
 
   @Test
@@ -190,13 +186,12 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     DeleteAttributesRequest deleteAttributesRequest = new DeleteAttributesRequest();
     deleteAttributesRequest.setEntityTypeId(entityTypeId);
     deleteAttributesRequest.setQ(query);
-    MetadataDeleteJobExecution jobExecution = mockJobExecution();
-    when(metadataApiJobService.scheduleDeleteAttribute(entityTypeId, query))
-        .thenReturn(jobExecution);
+    MetadataUpsertJobExecution jobExecution = mockUpsertJobExecution();
+    when(metadataApiService.deleteAttributes(entityTypeId, query)).thenReturn(jobExecution);
 
     metadataApiController.deleteAttributes(deleteAttributesRequest);
 
-    verify(metadataApiJobService).scheduleDeleteAttribute(entityTypeId, query);
+    verify(metadataApiService).deleteAttributes(entityTypeId, query);
   }
 
   @Test
@@ -210,7 +205,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
     when(metadataUpsertJobExecution.getEntityType()).thenReturn(entityType);
 
-    when(metadataApiJobService.scheduleUpdate(entityType)).thenReturn(metadataUpsertJobExecution);
+    when(metadataApiService.updateEntityType(entityType)).thenReturn(metadataUpsertJobExecution);
 
     ResponseEntity responseEntity =
         ResponseEntity.accepted()
@@ -227,12 +222,12 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     String entityTypeId = "MyEntityTypeId";
     DeleteEntityTypeRequest deleteEntityTypeRequest = new DeleteEntityTypeRequest();
     deleteEntityTypeRequest.setEntityTypeId(entityTypeId);
-    MetadataDeleteJobExecution jobExecution = mockJobExecution();
-    when(metadataApiJobService.scheduleDeleteEntityType(entityTypeId)).thenReturn(jobExecution);
+    MetadataDeleteJobExecution jobExecution = mockDeleteJobExecution();
+    when(metadataApiService.deleteEntityType(entityTypeId)).thenReturn(jobExecution);
 
     metadataApiController.deleteEntityType(deleteEntityTypeRequest);
 
-    verify(metadataApiJobService).scheduleDeleteEntityType(entityTypeId);
+    verify(metadataApiService).deleteEntityType(entityTypeId);
   }
 
   @Test
@@ -240,17 +235,24 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     Query query = Query.create("id", IN, asList("MyEntityTypeId0", "MyEntityTypeId1"));
     DeleteEntityTypesRequest deleteEntityTypesRequest = new DeleteEntityTypesRequest();
     deleteEntityTypesRequest.setQ(query);
-    MetadataDeleteJobExecution jobExecution = mockJobExecution();
-    when(metadataApiJobService.scheduleDeleteEntityType(query)).thenReturn(jobExecution);
+    MetadataDeleteJobExecution jobExecution = mockDeleteJobExecution();
+    when(metadataApiService.deleteEntityTypes(query)).thenReturn(jobExecution);
 
     metadataApiController.deleteEntityTypes(deleteEntityTypesRequest);
 
-    verify(metadataApiJobService).scheduleDeleteEntityType(query);
+    verify(metadataApiService).deleteEntityTypes(query);
   }
 
-  private static MetadataDeleteJobExecution mockJobExecution() {
+  private static MetadataDeleteJobExecution mockDeleteJobExecution() {
     EntityType entityType = mock(EntityType.class);
     MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(entityType);
+    return jobExecution;
+  }
+
+  private static MetadataUpsertJobExecution mockUpsertJobExecution() {
+    EntityType entityType = mock(EntityType.class);
+    MetadataUpsertJobExecution jobExecution = mock(MetadataUpsertJobExecution.class);
     when(jobExecution.getEntityType()).thenReturn(entityType);
     return jobExecution;
   }
