@@ -5,20 +5,17 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.getValueString;
-import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import com.baggonius.gson.immutable.ImmutableListDeserializer;
 import com.baggonius.gson.immutable.ImmutableMapDeserializer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
 import java.util.stream.Stream;
+import org.molgenis.api.metadata.v3.MetadataUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -81,9 +78,9 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setId(entityType.getId())
         .setPackageId(packageId)
         .setLabel(entityType.getLabel())
-        .setLabelI18n(getI18n(entityType, EntityTypeMetadata.LABEL))
+        .setLabelI18n(MetadataUtils.getI18n(entityType, EntityTypeMetadata.LABEL))
         .setDescription(entityType.getDescription())
-        .setDescriptionI18n(getI18n(entityType, EntityTypeMetadata.DESCRIPTION))
+        .setDescriptionI18n(MetadataUtils.getI18n(entityType, EntityTypeMetadata.DESCRIPTION))
         .setAttributes(
             ImmutableList.copyOf(
                 stream(entityType.getOwnAllAttributes())
@@ -123,9 +120,9 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
-        .setLabelI18n(getI18n(attribute, AttributeMetadata.LABEL))
+        .setLabelI18n(MetadataUtils.getI18n(attribute, AttributeMetadata.LABEL))
         .setDescription(attribute.getDescription())
-        .setDescriptionI18n(getI18n(attribute, AttributeMetadata.DESCRIPTION))
+        .setDescriptionI18n(MetadataUtils.getI18n(attribute, AttributeMetadata.DESCRIPTION))
         .setNullable(attribute.isNillable())
         .setAuto(attribute.isAuto())
         .setVisible(attribute.isVisible())
@@ -174,19 +171,6 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
   private Package getPackage(String packageId) {
     return dataService.findOneById(
         PackageMetadata.PACKAGE, packageId, new Fetch().field(PackageMetadata.ID), Package.class);
-  }
-
-  private static ImmutableMap<String, String> getI18n(Entity entity, String attributeName) {
-    Builder<String, String> builder = ImmutableMap.builder();
-    getLanguageCodes()
-        .forEach(
-            languageCode -> {
-              String value = entity.getString(getI18nAttributeName(attributeName, languageCode));
-              if (value != null) {
-                builder.put(languageCode, value);
-              }
-            });
-    return builder.build();
   }
 
   @SuppressWarnings("unchecked")
