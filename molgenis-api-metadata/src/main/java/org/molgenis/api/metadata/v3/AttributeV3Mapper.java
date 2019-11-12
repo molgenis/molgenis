@@ -52,6 +52,7 @@ import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.w3c.dom.Attr;
 
 @Component
 public class AttributeV3Mapper {
@@ -240,19 +241,38 @@ public class AttributeV3Mapper {
     return attribute;
   }
 
-  List<Attribute> toAttributes(List<Map<String,Object>> attributeValueMaps, EntityType entityType){
-    List<Attribute> attributes = new ArrayList<>();
+  Map<String, Attribute> toAttributes(List<Map<String,Object>> attributeValueMaps, EntityType entityType){
+    Map<String, Attribute> attributes = new HashMap<>();
     int index = 0;
     for(Map<String,Object> attributeValueMap : attributeValueMaps){
       Attribute attr = toAttribute(attributeValueMap, entityType);
       if(attr.getSequenceNumber() == null){
         attr.setSequenceNumber(index);
       }
-      attributes.add(attr);
+      attributes.put(attr.getIdentifier(), attr);
       index++;
     }
-    //TODO: "parent" and "mapped by" from either this entity or metadataService
+    for(Map<String,Object> attributeValueMap : attributeValueMaps){
+      processParentAndMappedby(attributeValueMap, attributes);
+    }
     return attributes;
+  }
+
+  private void processParentAndMappedby(Map<String, Object> attributeRequest, Map<String, Attribute> attributes) {
+    String attributeId = attributeRequest.get("id").toString();
+    for(Entry<String, Object> entry : attributeRequest.entrySet()){
+      if (entry.getKey().equals("mappedByAttribute")) {
+        String mappedByAttrId = getStringValue(entry.getValue());
+        Attribute mappedByAttr = attributes.get(mappedByAttrId);
+        Attribute attribute = attributes.get(attributeId);
+        attribute.setMappedBy(mappedByAttr);
+      }else if (entry.getKey().equals("parent")) {
+        String parentId = getStringValue(entry.getValue());
+        Attribute parentAttr = attributes.get(parentId);
+        Attribute attribute = attributes.get(attributeId);
+        attribute.setMappedBy(parentAttr);
+      }
+    }
   }
 
   private Attribute toAttribute(

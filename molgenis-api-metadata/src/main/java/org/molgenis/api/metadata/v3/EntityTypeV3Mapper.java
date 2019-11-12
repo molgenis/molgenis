@@ -369,6 +369,6 @@ public class EntityTypeV3Mapper {
   }
 
   private Iterable<Attribute> mapAttributes(List<Map<String, Object>> values, EntityType entityType) {
-    return attributeV3Mapper.toAttributes(values, entityType);
+    return attributeV3Mapper.toAttributes(values, entityType).values();
   }
 }
