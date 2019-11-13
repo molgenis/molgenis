@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -168,11 +167,12 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   @Test
   void testDeleteEntityType() {
     String entityTypeId = "MyEntityTypeId";
-    when(metadataService.hasEntityType(entityTypeId)).thenReturn(true);
+    EntityType entityType = mock(EntityType.class);
+    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
 
     metadataApiService.deleteEntityType(entityTypeId);
 
-    verify(metadataApiJobService).scheduleDelete(singletonList(entityTypeId));
+    verify(metadataApiJobService).scheduleDelete(entityType);
   }
 
   @Test
@@ -191,9 +191,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     Query query = Query.create("id", IN, asList(entityTypeId0, entityTypeId1));
     org.molgenis.data.Query<EntityType> dataServiceQuery = mock(org.molgenis.data.Query.class);
     EntityType entityType0 = mock(EntityType.class);
-    when(entityType0.getId()).thenReturn(entityTypeId0);
     EntityType entityType1 = mock(EntityType.class);
-    when(entityType1.getId()).thenReturn(entityTypeId1);
     when(dataServiceQuery.findAll()).thenReturn(Stream.of(entityType0, entityType1));
     Repository<EntityType> entityTypeRepository = mock(Repository.class);
     when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
@@ -202,8 +200,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     metadataApiService.deleteEntityTypes(query);
 
-    assertAll(
-        () -> verify(metadataApiJobService).scheduleDelete(asList(entityTypeId0, entityTypeId1)));
+    assertAll(() -> verify(metadataApiJobService).scheduleDelete(asList(entityType0, entityType1)));
   }
 
   @SuppressWarnings("unchecked")

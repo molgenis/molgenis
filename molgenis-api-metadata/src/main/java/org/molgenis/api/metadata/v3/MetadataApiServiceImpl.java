@@ -1,6 +1,5 @@
 package org.molgenis.api.metadata.v3;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -74,12 +73,14 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return EntityTypes.builder().setEntityTypes(entityTypes).setTotal(count).build();
   }
 
+  @Override
   public EntityType findEntityType(String identifier) {
     return metadataService
         .getEntityType(identifier)
         .orElseThrow(() -> new UnknownEntityTypeException(identifier));
   }
 
+  @Override
   public Attributes findAttributes(
       String entityTypeId, Query query, Sort sort, int size, int number) {
     Repository<Attribute> repository =
@@ -159,13 +160,13 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   @Override
   public MetadataDeleteJobExecution deleteEntityType(String entityTypeId) {
-    validateEntityTypeExists(entityTypeId);
-    return metadataApiJobService.scheduleDelete(singletonList(entityTypeId));
+    EntityType entityType = findEntityType(entityTypeId);
+    return metadataApiJobService.scheduleDelete(entityType);
   }
 
   @Override
   public MetadataDeleteJobExecution deleteEntityTypes(Query query) {
-    return metadataApiJobService.scheduleDelete(getEntityTypeIds(query));
+    return metadataApiJobService.scheduleDelete(getEntityTypes(query));
   }
 
   // TODO remove code duplication with molgenis-data-import DataPersisterImpl
@@ -186,23 +187,16 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     }
   }
 
-  private void validateEntityTypeExists(String entityTypeId) {
-    if (!metadataService.hasEntityType(entityTypeId)) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
-  }
-
-  private List<String> getEntityTypeIds(Query q) {
+  private List<EntityType> getEntityTypes(Query q) {
     Repository<EntityType> entityTypeRepository =
         dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
     org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
     dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
-    List<String> entityTypeIds =
-        dataServiceQuery.findAll().map(EntityType::getId).collect(toList());
-    if (entityTypeIds.isEmpty()) {
+    List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
+    if (entityTypes.isEmpty()) {
       throw new ZeroResultsException(q);
     }
-    return entityTypeIds;
+    return entityTypes;
   }
 
   private List<Attribute> findAttributes(String entityTypeId, Query q) {

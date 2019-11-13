@@ -1,7 +1,10 @@
 package org.molgenis.api.metadata.v3;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
 import org.molgenis.api.metadata.v3.job.EntityTypeSerializer;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
@@ -43,7 +46,16 @@ public class MetadataApiJobServiceImpl implements MetadataApiJobService {
   }
 
   @Override
-  public MetadataDeleteJobExecution scheduleDelete(List<String> entityTypeIds) {
+  public MetadataDeleteJobExecution scheduleDelete(EntityType entityType) {
+    return scheduleDelete(singletonList(entityType.getId()));
+  }
+
+  @Override
+  public MetadataDeleteJobExecution scheduleDelete(Collection<EntityType> entityTypes) {
+    return scheduleDelete(entityTypes.stream().map(EntityType::getId).collect(toList()));
+  }
+
+  private MetadataDeleteJobExecution scheduleDelete(List<String> entityTypeIds) {
     MetadataDeleteJobExecution jobExecution = metadataDeleteJobExecutionFactory.create();
     jobExecution.setIds(entityTypeIds);
     jobExecutor.submit(jobExecution);
