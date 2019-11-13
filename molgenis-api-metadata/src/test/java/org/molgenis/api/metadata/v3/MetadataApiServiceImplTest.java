@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.model.Query;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -32,22 +31,20 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   @Mock private MetaDataService metadataService;
   @Mock private QueryMapper queryMapper;
   @Mock private SortMapper sortMapper;
-  @Mock private DataService dataService;
   @Mock private MetadataApiJobService metadataApiJobService;
   private MetadataApiServiceImpl metadataApiService;
 
   @BeforeEach
   void setUpBeforeEach() {
     metadataApiService =
-        new MetadataApiServiceImpl(
-            metadataService, queryMapper, sortMapper, dataService, metadataApiJobService);
+        new MetadataApiServiceImpl(metadataService, queryMapper, sortMapper, metadataApiJobService);
   }
 
   @Test
   void testMetadataApiServiceImpl() {
     assertThrows(
         NullPointerException.class,
-        () -> new MetadataApiServiceImpl(null, null, null, null, metadataApiJobService));
+        () -> new MetadataApiServiceImpl(null, null, null, metadataApiJobService));
   }
 
   @Test
@@ -59,8 +56,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     String attributeId = "attr1";
     Attribute attr = mock(Attribute.class);
     when(attr.getEntity()).thenReturn(entityType);
-    when(dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class))
-        .thenReturn(attr);
+    when(metadataService.getAttribute(attributeId)).thenReturn(Optional.of(attr));
 
     metadataApiService.deleteAttributeAsync(entityTypeId, attributeId);
 
@@ -100,8 +96,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     String attributeId = "unknown";
     Attribute attribute = mock(Attribute.class);
-    when(dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class))
-        .thenReturn(attribute);
+    when(metadataService.getAttribute(attributeId)).thenReturn(Optional.of(attribute));
     when(attribute.getEntity()).thenReturn(otherEntityType);
 
     assertThrows(
@@ -123,8 +118,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     Attribute attribute2 = mock(Attribute.class);
     when(dataServiceQuery.findAll()).thenReturn(Stream.of(attribute1, attribute2));
     Repository<Attribute> attributeRepository = mock(Repository.class);
-    when(dataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class))
-        .thenReturn(attributeRepository);
+    when(metadataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class))
+        .thenReturn(Optional.of(attributeRepository));
     when(queryMapper.map(query, attributeRepository)).thenReturn(dataServiceQuery);
 
     metadataApiService.deleteAttributesAsync(entityTypeId, query);
@@ -156,8 +151,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     when(dataServiceQuery.eq(AttributeMetadata.ENTITY, entityTypeId)).thenReturn(dataServiceQuery);
     when(dataServiceQuery.findAll()).thenReturn(Stream.empty());
     Repository<Attribute> attributeRepository = mock(Repository.class);
-    when(dataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class))
-        .thenReturn(attributeRepository);
+    when(metadataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class))
+        .thenReturn(Optional.of(attributeRepository));
     when(queryMapper.map(query, attributeRepository)).thenReturn(dataServiceQuery);
 
     assertThrows(
@@ -196,8 +191,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     EntityType entityType1 = mock(EntityType.class);
     when(dataServiceQuery.findAll()).thenReturn(Stream.of(entityType0, entityType1));
     Repository<EntityType> entityTypeRepository = mock(Repository.class);
-    when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
-        .thenReturn(entityTypeRepository);
+    when(metadataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
+        .thenReturn(Optional.of(entityTypeRepository));
     when(queryMapper.map(query, entityTypeRepository)).thenReturn(dataServiceQuery);
 
     metadataApiService.deleteEntityTypesAsync(query);
@@ -212,8 +207,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     org.molgenis.data.Query<EntityType> dataServiceQuery = mock(org.molgenis.data.Query.class);
     when(dataServiceQuery.findAll()).thenReturn(Stream.empty());
     Repository<EntityType> entityTypeRepository = mock(Repository.class);
-    when(dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
-        .thenReturn(entityTypeRepository);
+    when(metadataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
+        .thenReturn(Optional.of(entityTypeRepository));
     when(queryMapper.map(query, entityTypeRepository)).thenReturn(dataServiceQuery);
 
     assertThrows(

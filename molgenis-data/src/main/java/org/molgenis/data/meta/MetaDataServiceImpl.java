@@ -357,6 +357,13 @@ public class MetaDataServiceImpl implements MetaDataService {
     upsertAttributes(entityType, existingEntityType);
   }
 
+  @Override
+  public Optional<Attribute> getAttribute(String attributeId) {
+    Attribute attribute =
+        dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class);
+    return Optional.ofNullable(attribute);
+  }
+
   @Transactional
   @Override
   public void addAttribute(Attribute attr) {
@@ -383,7 +390,7 @@ public class MetaDataServiceImpl implements MetaDataService {
       return Optional.of(entityType);
     } else {
       entityType = getEntityTypeBypassingRegistry(entityTypeId);
-      return entityType != null ? Optional.of(entityType) : Optional.empty();
+      return Optional.ofNullable(entityType);
     }
   }
 
