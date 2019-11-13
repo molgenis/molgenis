@@ -134,7 +134,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public MetadataUpsertJobExecution deleteAttribute(String entityTypeId, String attributeId) {
+  public MetadataUpsertJobExecution deleteAttributeAsync(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
     Attribute attribute = findAttribute(entityType, attributeId);
     entityType.removeAttribute(attribute);
@@ -142,7 +142,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public MetadataUpsertJobExecution deleteAttributes(String entityTypeId, Query query) {
+  public MetadataUpsertJobExecution deleteAttributesAsync(String entityTypeId, Query query) {
     EntityType entityType = findEntityType(entityTypeId);
     findAttributes(entityTypeId, query).forEach(entityType::removeAttribute);
     return metadataApiJobService.scheduleUpdate(entityType);
@@ -154,18 +154,18 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public MetadataUpsertJobExecution updateEntityType(EntityType entityType) {
+  public MetadataUpsertJobExecution updateEntityTypeAsync(EntityType entityType) {
     return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   @Override
-  public MetadataDeleteJobExecution deleteEntityType(String entityTypeId) {
+  public MetadataDeleteJobExecution deleteEntityTypeAsync(String entityTypeId) {
     EntityType entityType = findEntityType(entityTypeId);
     return metadataApiJobService.scheduleDelete(entityType);
   }
 
   @Override
-  public MetadataDeleteJobExecution deleteEntityTypes(Query query) {
+  public MetadataDeleteJobExecution deleteEntityTypesAsync(Query query) {
     return metadataApiJobService.scheduleDelete(getEntityTypes(query));
   }
 

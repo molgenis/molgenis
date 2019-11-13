@@ -129,7 +129,7 @@ class MetadataApiController extends ApiController {
   @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
   public ResponseEntity deleteAttribute(@Valid DeleteAttributeRequest deleteAttributeRequest) {
     JobExecution jobExecution =
-        metadataApiService.deleteAttribute(
+        metadataApiService.deleteAttributeAsync(
             deleteAttributeRequest.getEntityTypeId(), deleteAttributeRequest.getAttributeId());
     return toLocationResponse(jobExecution);
   }
@@ -138,7 +138,7 @@ class MetadataApiController extends ApiController {
   @DeleteMapping("/{entityTypeId}/attributes")
   public ResponseEntity deleteAttributes(@Valid DeleteAttributesRequest deleteAttributesRequest) {
     JobExecution jobExecution =
-        metadataApiService.deleteAttributes(
+        metadataApiService.deleteAttributesAsync(
             deleteAttributesRequest.getEntityTypeId(), deleteAttributesRequest.getQ());
     return toLocationResponse(jobExecution);
   }
@@ -151,7 +151,7 @@ class MetadataApiController extends ApiController {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     entityType.setId(entityTypeId);
 
-    JobExecution jobExecution = metadataApiService.updateEntityType(entityType);
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
   }
 
@@ -166,7 +166,7 @@ class MetadataApiController extends ApiController {
     // note: we can't use CreateEntityTypeRequest because we can't distinguish between null and not
     // defined values then)
 
-    JobExecution jobExecution = metadataApiService.updateEntityType(entityType);
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
   }
 
@@ -174,7 +174,7 @@ class MetadataApiController extends ApiController {
   @DeleteMapping("/{entityTypeId}")
   public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
     JobExecution jobExecution =
-        metadataApiService.deleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
+        metadataApiService.deleteEntityTypeAsync(deleteEntityTypeRequest.getEntityTypeId());
     return toLocationResponse(jobExecution);
   }
 
@@ -183,7 +183,7 @@ class MetadataApiController extends ApiController {
   public ResponseEntity deleteEntityTypes(
       @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
     JobExecution jobExecution =
-        metadataApiService.deleteEntityTypes(deleteEntityTypesRequest.getQ());
+        metadataApiService.deleteEntityTypesAsync(deleteEntityTypesRequest.getQ());
     return toLocationResponse(jobExecution);
   }
 

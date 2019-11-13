@@ -62,7 +62,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class))
         .thenReturn(attr);
 
-    metadataApiService.deleteAttribute(entityTypeId, attributeId);
+    metadataApiService.deleteAttributeAsync(entityTypeId, attributeId);
 
     assertAll(
         () -> verify(entityType).removeAttribute(attr),
@@ -75,7 +75,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     assertThrows(
         UnknownEntityTypeException.class,
-        () -> metadataApiService.deleteAttribute(entityTypeId, "attr1"));
+        () -> metadataApiService.deleteAttributeAsync(entityTypeId, "attr1"));
   }
 
   @Test
@@ -87,7 +87,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     assertThrows(
         UnknownAttributeException.class,
-        () -> metadataApiService.deleteAttribute(entityTypeId, attributeId));
+        () -> metadataApiService.deleteAttributeAsync(entityTypeId, attributeId));
   }
 
   @Test
@@ -106,7 +106,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     assertThrows(
         UnknownAttributeException.class,
-        () -> metadataApiService.deleteAttribute(entityTypeId, attributeId));
+        () -> metadataApiService.deleteAttributeAsync(entityTypeId, attributeId));
   }
 
   @SuppressWarnings("unchecked")
@@ -127,7 +127,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
         .thenReturn(attributeRepository);
     when(queryMapper.map(query, attributeRepository)).thenReturn(dataServiceQuery);
 
-    metadataApiService.deleteAttributes(entityTypeId, query);
+    metadataApiService.deleteAttributesAsync(entityTypeId, query);
 
     assertAll(
         () -> verify(entityType).removeAttribute(attribute1),
@@ -141,7 +141,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     assertThrows(
         UnknownEntityTypeException.class,
-        () -> metadataApiService.deleteAttributes(entityTypeId, mock(Query.class)));
+        () -> metadataApiService.deleteAttributesAsync(entityTypeId, mock(Query.class)));
   }
 
   @SuppressWarnings("unchecked")
@@ -161,7 +161,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     when(queryMapper.map(query, attributeRepository)).thenReturn(dataServiceQuery);
 
     assertThrows(
-        ZeroResultsException.class, () -> metadataApiService.deleteAttributes(entityTypeId, query));
+        ZeroResultsException.class,
+        () -> metadataApiService.deleteAttributesAsync(entityTypeId, query));
   }
 
   @Test
@@ -170,7 +171,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    metadataApiService.deleteEntityType(entityTypeId);
+    metadataApiService.deleteEntityTypeAsync(entityTypeId);
 
     verify(metadataApiJobService).scheduleDelete(entityType);
   }
@@ -180,7 +181,8 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     String entityTypeId = "unknown";
 
     assertThrows(
-        UnknownEntityTypeException.class, () -> metadataApiService.deleteEntityType(entityTypeId));
+        UnknownEntityTypeException.class,
+        () -> metadataApiService.deleteEntityTypeAsync(entityTypeId));
   }
 
   @SuppressWarnings("unchecked")
@@ -198,7 +200,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
         .thenReturn(entityTypeRepository);
     when(queryMapper.map(query, entityTypeRepository)).thenReturn(dataServiceQuery);
 
-    metadataApiService.deleteEntityTypes(query);
+    metadataApiService.deleteEntityTypesAsync(query);
 
     assertAll(() -> verify(metadataApiJobService).scheduleDelete(asList(entityType0, entityType1)));
   }
@@ -214,6 +216,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
         .thenReturn(entityTypeRepository);
     when(queryMapper.map(query, entityTypeRepository)).thenReturn(dataServiceQuery);
 
-    assertThrows(ZeroResultsException.class, () -> metadataApiService.deleteEntityTypes(query));
+    assertThrows(
+        ZeroResultsException.class, () -> metadataApiService.deleteEntityTypesAsync(query));
   }
 }
