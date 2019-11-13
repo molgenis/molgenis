@@ -7,10 +7,10 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
-import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.util.ArrayList;
@@ -43,7 +43,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
@@ -52,11 +51,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class AttributeV3Mapper {
-  public static final String ATTRIBUTES = "attributes";
-  public static final String PAGE = "page";
+class AttributeV3Mapper {
+  private static final String ATTRIBUTES = "attributes";
+  private static final String PAGE = "page";
 
-  private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
   private final SortMapper sortMapper;
@@ -64,15 +62,13 @@ public class AttributeV3Mapper {
   private final EntityManager entityManager;
   private final EntityTypeMetadata entityTypeMetadata;
 
-  public AttributeV3Mapper(
-      EntityTypeFactory entityTypeFactory,
+  AttributeV3Mapper(
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
       SortMapper sortMapper,
       SortConverter sortConverter,
       EntityManager entityManager,
       EntityTypeMetadata entityTypeMetadata) {
-    this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attributeFactory = requireNonNull(attributeFactory);
     this.metaDataService = requireNonNull(metaDataService);
     this.sortMapper = requireNonNull(sortMapper);
@@ -168,12 +164,11 @@ public class AttributeV3Mapper {
         .query()
         .findAll()
         .map(
-            entity -> {
-              return Category.builder()
-                  .setId(entity.get(idAttribute))
-                  .setLabel(entity.get(labelAttribute).toString())
-                  .build();
-            })
+            entity ->
+                Category.builder()
+                    .setId(entity.get(idAttribute))
+                    .setLabel(entity.get(labelAttribute).toString())
+                    .build())
         .collect(toList());
   }
 
@@ -219,7 +214,8 @@ public class AttributeV3Mapper {
       attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
     }
     String orderBy = attributeRequest.getOrderBy();
-    attribute.setOrderBy(orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
+    attribute.setOrderBy(
+        orderBy != null ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy))) : null);
     attribute.setExpression(attributeRequest.getExpression());
     attribute.setNillable(attributeRequest.isNullable());
     attribute.setAuto(attributeRequest.isAuto());
@@ -377,28 +373,21 @@ public class AttributeV3Mapper {
       if (translations != null) {
         getLanguageCodes()
             .forEach(
-                languageCode -> {
-                  attribute.setDescription(languageCode, translations.get(languageCode));
-                });
+                languageCode ->
+                    attribute.setDescription(languageCode, translations.get(languageCode)));
       }
     }
   }
 
   private I18nValue getI18nAttrLabel(Attribute attr) {
     String defaultValue = attr.getLabel();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes()
-        .forEach(code -> translations.put(code, attr.getString(getI18nAttributeName(LABEL, code))));
+    ImmutableMap<String, String> translations = MetadataUtils.getI18n(attr, LABEL);
     return I18nValue.create(defaultValue, translations);
   }
 
   private I18nValue getI18nAttrDesc(Attribute attr) {
     String defaultValue = attr.getDescription();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes()
-        .forEach(
-            code ->
-                translations.put(code, attr.getString(getI18nAttributeName(DESCRIPTION, code))));
+    ImmutableMap<String, String> translations = MetadataUtils.getI18n(attr, DESCRIPTION);
     return I18nValue.create(defaultValue, translations);
   }
 }
