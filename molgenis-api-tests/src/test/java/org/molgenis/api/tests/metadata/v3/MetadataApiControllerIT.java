@@ -176,49 +176,6 @@ class MetadataApiControllerIT extends AbstractApiTest {
     assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
   }
 
-  @Test
-  @Order(8)
-  void testPartialUpdateMetadataEntityTypeErr() throws IOException {
-    String bodyJson =
-        TestResourceUtils.getRenderedString(
-            getClass(),
-            "partialUpdateMetadataEntityTypeMyStringsERREUR.json",
-            ImmutableMap.of("baseUri", RestAssured.baseURI));
-
-    String location =
-        given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .body(bodyJson)
-            .patch("/api/metadata/v3meta_MyStrings")
-            .then()
-            .statusCode(ACCEPTED.value())
-            .extract()
-            .header(LOCATION);
-
-    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
-  }
-
-  @Test
-  @Order(9)
-  void testPartialUpdateMetadataEntityTypeErr2() throws IOException {
-    String bodyJson =
-        TestResourceUtils.getRenderedString(
-            getClass(),
-            "partialUpdateMetadataEntityTypeMyStringsERREUR2.json",
-            ImmutableMap.of("baseUri", RestAssured.baseURI));
-
-    String location =
-        given()
-            .contentType(APPLICATION_JSON_VALUE)
-            .body(bodyJson)
-            .patch("/api/metadata/v3meta_MyStrings")
-            .then()
-            .statusCode(ACCEPTED.value())
-            .extract()
-            .header(LOCATION);
-
-    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
-  }
   // TODO enable after endpoint is async
   @Disabled
   @Test

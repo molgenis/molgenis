@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.api.convert.SortConverter;
+import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
@@ -35,24 +36,22 @@ import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Attr;
 
 @Component
 public class AttributeV3Mapper {
@@ -293,8 +292,7 @@ public class AttributeV3Mapper {
             if (sequenceString != null) {
               attribute.setSequenceNumber(Integer.valueOf(sequenceString));
             }else{
-              //FIXME: coded exception
-              throw new RuntimeException("invalid value for "+ entry.getKey());
+              throw new InvalidValueTypeException(sequenceString,"int",null);
             }
             break;
           case "type":
@@ -302,8 +300,7 @@ public class AttributeV3Mapper {
             if (typeString != null) {
               attribute.setDataType(AttributeType.toEnum(typeString));
             }else{
-              //FIXME: coded exception
-              throw new RuntimeException("invalid value for "+ entry.getKey());
+              throw new InvalidValueTypeException(typeString,"AttributeType",null);
             }
             break;
           case "refEntityType":
@@ -372,8 +369,7 @@ public class AttributeV3Mapper {
               if(entry.getValue() instanceof List){
               options = (List<String>) entry.getValue();
               }else{
-                //FIXME: coded exception
-                throw new RuntimeException("invalid value for "+ entry.getKey());
+                throw new InvalidValueTypeException(options.toString(),"list",null);
               }
             }
             attribute.setEnumOptions(options);
@@ -389,8 +385,7 @@ public class AttributeV3Mapper {
             if(readOnlyValue!=null) {
               attribute.setReadOnly(Boolean.valueOf(readOnlyValue));
             }else{
-              //FIXME: coded exception
-              throw new RuntimeException("invalid value for "+ entry.getKey());
+              throw new InvalidValueTypeException(readOnlyValue,"boolean",null);
             }
             break;
           case "unique":
@@ -398,8 +393,7 @@ public class AttributeV3Mapper {
             if(uniqueValue!=null) {
               attribute.setUnique(Boolean.valueOf(uniqueValue));
             }else{
-              //FIXME: coded exception
-              throw new RuntimeException("invalid value for "+ entry.getKey());
+              throw new InvalidValueTypeException(uniqueValue,"boolean",null);
             }
             break;
           case "defaultValue":
@@ -419,29 +413,26 @@ public class AttributeV3Mapper {
             //Skip now and process after all attributes in the request have been processed
             break;
           default:
-            //FIXME: coded exception
-            throw new RuntimeException("not a attr value: "+entry.getKey());
+            throw new InvalidKeyException("attribute", entry.getKey());
         }
       }
     return attribute;
   }
 
-
   private String getStringValue(Object value) {
     return value != null ? value.toString():null;
   }
 
-  //FIXME: move to utility class
   I18nValue mapI18nValue(Object value) {
     I18nValue.Builder builder = I18nValue.builder();
-    if(value!=null && value instanceof Map){
+    if(value instanceof Map){
       Map valueMap = (Map)value;
       Object defaultValue = valueMap.get("defaultValue");
       if(defaultValue != null){
         builder.setDefaultValue(defaultValue.toString());
       }
       Object translations = valueMap.get("translations");
-      if(translations!=null && translations instanceof Map) {
+      if(translations instanceof Map) {
         Map<?,?> translationsMap = (Map)translations;
         Map<String, String> typedTranslations = new HashMap<>();
         for(Entry entry : translationsMap.entrySet()){
@@ -458,7 +449,7 @@ public class AttributeV3Mapper {
   private Range mapRange(Object value) {
     Long minLong = null;
     Long maxLong = null;
-    if(value!=null && value instanceof Map) {
+    if(value instanceof Map) {
       Map valueMap = (Map) value;
       Object min = valueMap.get("min");
       if(min != null){
@@ -607,9 +598,8 @@ public class AttributeV3Mapper {
       if (translations != null) {
         getLanguageCodes()
             .forEach(
-                languageCode -> {
-                  attribute.setDescription(languageCode, translations.get(languageCode));
-                });
+                languageCode ->
+                  attribute.setDescription(languageCode, translations.get(languageCode)));
       }
     }
   }

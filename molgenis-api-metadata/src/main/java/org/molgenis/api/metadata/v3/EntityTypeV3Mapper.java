@@ -3,22 +3,10 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
-import com.google.common.collect.Iterables;
-import com.google.gson.Gson;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.molgenis.api.metadata.v3.exception.EmptyAttributesException;
+import org.molgenis.api.metadata.v3.exception.IdModificationException;
+import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
@@ -36,8 +27,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.data.InvalidAttributeValueException;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -300,9 +290,10 @@ public class EntityTypeV3Mapper {
   }
 
   public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {
+    Iterable<Attribute> updatedAttributes = null;
     for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
       if (entry.getKey() == "id") {
-        throw new RuntimeException("Cannot modify ID");//TODO: coded
+        throw new IdModificationException();
       }
       if (entry.getValue() == null) {
         entityType.set(entry.getKey(), null);
@@ -317,7 +308,7 @@ public class EntityTypeV3Mapper {
           case "abstract_":
             String stringValue = entry.getValue().toString();
             if (!stringValue.equalsIgnoreCase("true") && !stringValue.equalsIgnoreCase("false")) {
-              throw new RuntimeException("Invalid boolean");//TODO: coded
+              throw new InvalidValueTypeException(stringValue,"boolean",null);
             }
             Boolean isAbstract = Boolean.valueOf(stringValue);
             entityType.setAbstract(isAbstract);
@@ -338,54 +329,56 @@ public class EntityTypeV3Mapper {
             break;
           case "attributes":
             if (entry.getValue() != null) {
-              Iterable<Attribute> attrs = mapAttributes(entityType, entry);
-              entityType.setOwnAllAttributes(attrs);
+              updatedAttributes = mapAttributes(entityType, entry);
             } else {
-              throw new RuntimeException("entitytype must have entities");//TODO coded
+              throw new EmptyAttributesException();
             }
             break;
           case "idAttribute":
           case "labelAttribute":
-          case "lookupAttribute":
-            //ignore now and process at the end, we need to be sure the attributes have been processed.
+          case "lookupAttributes":
+            //get a list of attributes if not already set, process values for these cases after other updates are done.
+            if (updatedAttributes == null) {
+              updatedAttributes = entityType.getOwnAllAttributes();
+            }
             break;
           default:
-            throw new RuntimeException("not a entityType attr");//TODO coded
+            throw new InvalidKeyException("entityType", entry.getKey());
         }
       }
     }
-    for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
-      Iterable<Attribute> attributes = entityType.getAttributes();
-      switch (entry.getKey()) {
-        case "idAttribute":
-          String idAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
-          Attribute idAttribute = getAttribute(idAttributeId, attributes, entityType);
-          idAttribute.setIdAttribute(true);
-          //FIXME set all others to false
-          entityType.setOwnAllAttributes(attributes);
-          break;
-        case "labelAttribute":
-          String labelAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
-          Attribute labelAttribute = getAttribute(labelAttributeId, attributes, entityType);
-          labelAttribute.setLabelAttribute(true);
-          //FIXME set all others to false
-          entityType.setOwnAllAttributes(attributes);
-          break;
-        case "lookupAttributes":
-          //FIXME implement -> update all attrs with lookupindex or null
-          entityType.setOwnAllAttributes(attributes);
-          break;
+    if (updatedAttributes != null) {
+      for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
+        switch (entry.getKey()) {
+          case "idAttribute":
+            String idAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
+            updatedAttributes.forEach(attribute -> attribute
+                .setIdAttribute(attribute.getIdentifier().equals(idAttributeId)));
+            break;
+          case "labelAttribute":
+            String labelAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
+            updatedAttributes.forEach(attribute -> attribute
+                .setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId)));
+            break;
+          case "lookupAttributes":
+            if (entry.getValue() instanceof Iterable) {
+              List<?> lookupAttributes = (List) entry.getValue();
+              for (Attribute attribute : updatedAttributes) {
+                int lookupAttributeIndex = lookupAttributes.indexOf(attribute.getIdentifier());
+                if (lookupAttributeIndex != -1) {
+                  attribute.setLookupAttributeIndex(lookupAttributeIndex);
+                } else {
+                  attribute.setLookupAttributeIndex(null);
+                }
+              }
+            } else {
+              throw new RuntimeException("expecting list of attrs");//TODO coded
+            }
+            break;
+        }
+        entityType.setOwnAllAttributes(updatedAttributes);
       }
     }
-  }
-
-  private Attribute getAttribute(String labelAttributeId, Iterable<Attribute> attributes, EntityType entityType) {
-    for(Attribute attribute : attributes){
-      if(attribute.getIdentifier().equals(labelAttributeId)){
-        return attribute;
-      }
-    }
-    throw new UnknownAttributeException(entityType, labelAttributeId);
   }
 
   private Iterable<Attribute> mapAttributes(EntityType entityType, Entry<String, Object> entry) {

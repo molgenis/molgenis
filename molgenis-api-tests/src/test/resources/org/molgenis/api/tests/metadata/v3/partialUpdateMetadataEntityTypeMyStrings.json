@@ -1,7 +1,12 @@
 {
   "label": {
-    "defaultValue": "My Strings (updated)"
-  }, "attributes": [
+    "defaultValue": "My Strings (updated)",
+    "translations": {
+      "en": "My Strings (updated in english)",
+      "nl": "Mijn tekstjes (bijgewerkt in het nederlands)"
+    }
+  },
+  "attributes": [
     {
       "id": "v3meta_MyStrings_id",
       "name": "id",
@@ -10,8 +15,29 @@
     {
       "id": "v3meta_MyStrings_label2",
       "name": "label",
+      "label": {
+        "defaultValue": "Label of the label attribute",
+        "translations": {
+          "nl": "Label van het label attribuut"
+        }
+      },
       "type": "string",
       "visible": true
+    },
+    {
+      "id": "v3meta_MyStrings_label3",
+      "name": "label",
+      "type": "int",
+      "range": {
+        "min": 1,
+        "max": 2
+      },
+      "visible": true
     }
-  ]
+  ],
+  "lookupAttributes": [
+    "v3meta_MyStrings_label2",
+    "v3meta_MyStrings_label3"
+  ],
+  "labelAttribute": "v3meta_MyStrings_label2"
 }
