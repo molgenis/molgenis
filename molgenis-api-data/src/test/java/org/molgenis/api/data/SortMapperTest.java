@@ -5,7 +5,6 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.Sort.Order;
 import org.molgenis.api.model.Sort.Order.Direction;

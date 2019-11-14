@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.molgenis.api.data.QueryMapper;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
 import org.molgenis.data.Entity;
