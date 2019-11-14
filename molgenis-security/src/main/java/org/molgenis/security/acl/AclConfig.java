@@ -1,4 +1,4 @@
-package org.springframework.security.acls.jdbc;
+package org.molgenis.security.acl;
 
 import static java.util.Objects.requireNonNull;
 
@@ -7,13 +7,6 @@ import javax.sql.DataSource;
 import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.NoOpAuditLogger;
-import org.molgenis.security.acl.AclCacheTransactionListener;
-import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
-import org.molgenis.security.acl.MutableAclClassService;
-import org.molgenis.security.acl.MutableAclClassServiceImpl;
-import org.molgenis.security.acl.ObjectIdentityService;
-import org.molgenis.security.acl.ObjectIdentityServiceImpl;
-import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -21,7 +14,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.acls.AclPermissionEvaluator;
@@ -30,6 +23,9 @@ import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
 import org.springframework.security.acls.domain.AuditLogger;
 import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
 import org.springframework.security.acls.domain.SpringCacheBasedAclCache;
+import org.springframework.security.acls.jdbc.BasicLookupStrategy;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.AclCache;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
@@ -37,23 +33,24 @@ import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-/**
- * TODO move to org.molgenis sub-package once we upgraded to a spring-security-acl release with
- * https://github.com/spring-projects/spring-security/issues/4814.
- */
 @Configuration
-@Import({DataSourceConfig.class})
+@Import(DataSourceConfig.class)
 public class AclConfig {
   private final DataSource dataSource;
   private final TransactionManager transactionManager;
   private final RoleHierarchy roleHierarchy;
+  private final ConversionService conversionService;
   @Autowired JdbcTemplate jdbcTemplate;
 
   public AclConfig(
-      DataSource dataSource, TransactionManager transactionManager, RoleHierarchy roleHierarchy) {
+      DataSource dataSource,
+      TransactionManager transactionManager,
+      RoleHierarchy roleHierarchy,
+      ConversionService conversionService) {
     this.dataSource = requireNonNull(dataSource);
     this.transactionManager = requireNonNull(transactionManager);
     this.roleHierarchy = requireNonNull(roleHierarchy);
+    this.conversionService = requireNonNull(conversionService);
   }
 
   @Bean
@@ -111,19 +108,12 @@ public class AclConfig {
   }
 
   @Bean
-  public AclClassIdUtils aclClassIdUtils() {
-    AclClassIdUtils aclClassIdUtils = new AclClassIdUtils();
-    aclClassIdUtils.setConversionService(new DefaultConversionService());
-    return aclClassIdUtils;
-  }
-
-  @Bean
   public LookupStrategy lookupStrategy() {
     BasicLookupStrategy basicLookupStrategy =
         new BasicLookupStrategy(
             dataSource, aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
     basicLookupStrategy.setAclClassIdSupported(true);
-    basicLookupStrategy.setAclClassIdUtils(aclClassIdUtils());
+    basicLookupStrategy.setConversionService(conversionService);
     return basicLookupStrategy;
   }
 
@@ -132,7 +122,7 @@ public class AclConfig {
     JdbcMutableAclService aclService =
         new TransactionalJdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
     aclService.setAclClassIdSupported(true);
-    aclService.setAclClassIdUtils(aclClassIdUtils());
+    aclService.setConversionService(conversionService);
     aclService.setClassIdentityQuery("select currval(pg_get_serial_sequence('acl_class', 'id'))");
     aclService.setSidIdentityQuery("select currval(pg_get_serial_sequence('acl_sid', 'id'))");
     aclService.setObjectIdentityPrimaryKeyQuery(
