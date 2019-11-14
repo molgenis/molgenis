@@ -105,18 +105,18 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     Attribute parent = attribute.getParent();
     String parentId = parent != null ? parent.getIdentifier() : null;
     Boolean cascadeDelete = attribute.getCascadeDelete();
-    boolean isCascadeDelete = cascadeDelete != null ? cascadeDelete : false;
 
     return SerializableAttribute.builder()
         .setId(attribute.getIdentifier())
         .setName(attribute.getName())
+        .setEntityTypeId(attribute.getEntity().getId())
         .setSequenceNr(attribute.getSequenceNumber())
         .setType(getValueString(attribute.getDataType()))
         .setIdAttribute(attribute.isIdAttribute())
         .setLabelAttribute(attribute.isLabelAttribute())
         .setLookupAttributeIndex(attribute.getLookupAttributeIndex())
         .setRefEntityTypeId(refEntityTypeId)
-        .setCascadeDelete(isCascadeDelete)
+        .setCascadeDelete(cascadeDelete)
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
@@ -202,13 +202,14 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     Attribute attribute = attributeFactory.create();
     attribute.setIdentifier(serializableAttribute.getId());
     attribute.setName(serializableAttribute.getName());
+    attribute.setEntity(getEntityType(serializableAttribute.getEntityTypeId()));
     attribute.setSequenceNumber(serializableAttribute.getSequenceNr());
     attribute.setDataType(AttributeType.toEnum(serializableAttribute.getType()));
     attribute.setIdAttribute(serializableAttribute.isIdAttribute());
     attribute.setLabelAttribute(serializableAttribute.isLabelAttribute());
     attribute.setLookupAttributeIndex(serializableAttribute.getLookupAttributeIndex());
     attribute.setRefEntity(refEntityType);
-    attribute.setCascadeDelete(serializableAttribute.isCascadeDelete());
+    attribute.setCascadeDelete(serializableAttribute.getCascadeDelete());
     attribute.setMappedBy(mappedByAttr);
     attribute.setOrderBy(sort);
     attribute.setLabel(serializableAttribute.getLabel());

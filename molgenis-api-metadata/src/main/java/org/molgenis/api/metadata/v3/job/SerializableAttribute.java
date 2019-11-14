@@ -16,6 +16,8 @@ abstract class SerializableAttribute {
 
   abstract String getName();
 
+  abstract String getEntityTypeId();
+
   abstract int getSequenceNr();
 
   abstract String getType();
@@ -32,8 +34,9 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getRefEntityTypeId();
 
-  // strange build errors is you turn this into a Boolean with capital B
-  abstract boolean isCascadeDelete();
+  @Nullable
+  @CheckForNull
+  abstract Boolean getCascadeDelete();
 
   @Nullable
   @CheckForNull
@@ -106,13 +109,14 @@ abstract class SerializableAttribute {
   public static SerializableAttribute create(
       String newId,
       String newName,
+      String newEntityTypeId,
       int newSequenceNr,
       String newType,
       boolean newIdAttribute,
       boolean newLabelAttribute,
       Integer newLookupAttributeIndex,
       String newRefEntityTypeId,
-      boolean newCascadeDelete,
+      Boolean newCascadeDelete,
       String newMappedById,
       String newOrderBy,
       String newLabel,
@@ -138,6 +142,7 @@ abstract class SerializableAttribute {
     return builder()
         .setId(newId)
         .setName(newName)
+        .setEntityTypeId(newEntityTypeId)
         .setSequenceNr(newSequenceNr)
         .setType(newType)
         .setIdAttribute(newIdAttribute)
@@ -181,6 +186,8 @@ abstract class SerializableAttribute {
 
     public abstract Builder setName(String newName);
 
+    public abstract Builder setEntityTypeId(String newEntityTypeId);
+
     public abstract Builder setSequenceNr(int newSequenceNr);
 
     public abstract Builder setType(String newType);
@@ -193,7 +200,7 @@ abstract class SerializableAttribute {
 
     public abstract Builder setRefEntityTypeId(String newRefEntityTypeId);
 
-    public abstract Builder setCascadeDelete(boolean newCascadeDelete);
+    public abstract Builder setCascadeDelete(Boolean newCascadeDelete);
 
     public abstract Builder setMappedById(String newMappedById);
 
