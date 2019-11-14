@@ -369,13 +369,11 @@ class AttributeV3Mapper {
             break;
           case "enumOptions":
             List<String> options = null;
-            if(options != null){
               if(entry.getValue() instanceof List){
               options = (List<String>) entry.getValue();
               }else{
                 throw new InvalidValueTypeException(options.toString(),"list",null);
               }
-            }
             attribute.setEnumOptions(options);
             break;
           case "range":

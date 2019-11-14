@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +35,11 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
+import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -318,6 +322,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     attributeValueMap.put("nullable", true);
     attributeValueMap.put("cascadeDelete", true);
     attributeValueMap.put("aggregatable", true);
+    attributeValueMap.put("unique", true);
     EntityType entityType = mock(EntityType.class);
     attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
 
@@ -327,6 +332,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
         () -> verify(attribute).setAuto(true),
         () -> verify(attribute).setNillable(true),
         () -> verify(attribute).setCascadeDelete(true),
+        () -> verify(attribute).setUnique(true),
         () -> verify(attribute).setAggregatable(true));
   }
 
@@ -414,4 +420,92 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
     verify(attribute).setMappedBy(mappedByAttr);
   }
+
+  @Test
+  void toAttributesString() {
+    Attribute attribute = mock(Attribute.class);
+    when(attributeFactory.create()).thenReturn(attribute);
+
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", 1);
+    attributeValueMap.put("expression", "expression");
+    attributeValueMap.put("visibleExpression", "visibleExpression");
+    attributeValueMap.put("nullableExpression", "nillableExpression");
+    attributeValueMap.put("defaultValue", "defaultValue");
+    attributeValueMap.put("validationExpression", "validationExpression");
+    EntityType entityType = mock(EntityType.class);
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+
+    assertAll(
+        () -> verify(attribute).setExpression("expression"),
+        () -> verify(attribute).setNullableExpression("nillableExpression"),
+        () -> verify(attribute).setValidationExpression("validationExpression"),
+        () -> verify(attribute).setDefaultValue("defaultValue"),
+        () -> verify(attribute).setVisibleExpression("visibleExpression"));
+  }
+
+  @Test
+  void toAttributesEnum() {
+    Attribute attribute = mock(Attribute.class);
+    when(attributeFactory.create()).thenReturn(attribute);
+
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", 1);
+    attributeValueMap.put("enumOptions", Arrays.asList("1", "2"));
+    EntityType entityType = mock(EntityType.class);
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+
+    verify(attribute).setEnumOptions(Arrays.asList("1", "2"));
+  }
+
+  @Test
+  void toAttributesOrder() {
+    Attribute attribute = mock(Attribute.class);
+    when(attributeFactory.create()).thenReturn(attribute);
+    org.molgenis.api.model.Sort sort = mock(org.molgenis.api.model.Sort.class);
+    when(sortConverter.convert("-id")).thenReturn(sort);
+    Sort molgenisSort = new Sort("id", Direction.DESC);
+    when(sortMapper.map(sort)).thenReturn(molgenisSort);
+
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", 1);
+    attributeValueMap.put("orderBy", "-id");
+    EntityType entityType = mock(EntityType.class);
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+
+    verify(attribute).setOrderBy(molgenisSort);
+  }
+
+  @Test
+  void toAttributesType() {
+    Attribute attribute = mock(Attribute.class);
+    when(attributeFactory.create()).thenReturn(attribute);
+
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", 1);
+    attributeValueMap.put("type", "onetomany");
+    EntityType entityType = mock(EntityType.class);
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+
+    verify(attribute).setDataType(AttributeType.ONE_TO_MANY);
+  }
+
+  @Test
+  void toAttributesRefEntity() {
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getIdentifier()).thenReturn("attribute");
+    when(attributeFactory.create()).thenReturn(attribute);
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityManager.getReference(entityTypeMetadata, "ref")).thenReturn(entityType);
+
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", "attribute");
+    attributeValueMap.put("refEntityType", "ref");
+
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+
+    verify(attribute).setRefEntity(entityType);
+  }
+
 }
