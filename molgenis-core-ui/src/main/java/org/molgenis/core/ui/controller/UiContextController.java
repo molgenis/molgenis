@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAuthenticated;
 
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -34,8 +35,7 @@ public class UiContextController {
   public static final String ID = "app-ui-context";
 
   public static final String LOGIN_HREF = "/login";
-  public static final String HELP_LINK_JSON =
-      "{label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}";
+  public static final String HELP_HREF = "https://molgenis.gitbooks.io/molgenis/content/";
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
@@ -87,7 +87,7 @@ public class UiContextController {
         .setLogoTop(appSettings.getLogoTopHref())
         .setLogoTopMaxHeight(appSettings.getLogoTopMaxHeight())
         .setLoginHref(LOGIN_HREF)
-        .setHelpLink(HELP_LINK_JSON)
+        .setHelpLink(ImmutableMap.of("label", "Help", "href", HELP_HREF))
         .setShowCookieWall(cookieWallService.showCookieWall())
         .setAuthenticated(currentUserIsAuthenticated())
         .setUsername(user.getUsername())

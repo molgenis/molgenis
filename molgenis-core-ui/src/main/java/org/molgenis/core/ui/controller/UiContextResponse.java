@@ -2,6 +2,7 @@ package org.molgenis.core.ui.controller;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.web.menu.model.Menu;
@@ -26,7 +27,7 @@ public abstract class UiContextResponse {
 
   public abstract String getloginHref();
 
-  public abstract String gethelpLink();
+  public abstract Map<String, String> gethelpLink();
 
   public abstract Boolean getAuthenticated();
 
@@ -67,7 +68,7 @@ public abstract class UiContextResponse {
 
     public abstract Builder setLoginHref(String loginHref);
 
-    public abstract Builder setHelpLink(String helpLink);
+    public abstract Builder setHelpLink(Map<String, String> helpLink);
 
     public abstract Builder setMenu(Menu menu);
 
