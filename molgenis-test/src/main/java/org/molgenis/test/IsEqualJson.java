@@ -2,7 +2,6 @@ package org.molgenis.test;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -34,12 +33,10 @@ public class IsEqualJson extends BaseMatcher<String> {
     description.appendText(expectedJson);
   }
 
-  @Factory
   public static IsEqualJson isEqualJson(String expected) {
     return new IsEqualJson(expected);
   }
 
-  @Factory
   public static IsEqualJson isEqualJson(String expected, JSONCompareMode jsonCompareMode) {
     return new IsEqualJson(expected, jsonCompareMode);
   }
