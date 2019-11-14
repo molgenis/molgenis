@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
@@ -32,8 +33,7 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getRefEntityTypeId();
 
-  // strange build errors is you turn this into a Boolean with capital B
-  abstract boolean isCascadeDelete();
+  abstract Optional<Boolean> getCascadeDelete();
 
   @Nullable
   @CheckForNull
@@ -103,6 +103,7 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getDefaultValue();
 
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   public static SerializableAttribute create(
       String newId,
       String newName,
@@ -112,7 +113,7 @@ abstract class SerializableAttribute {
       boolean newLabelAttribute,
       Integer newLookupAttributeIndex,
       String newRefEntityTypeId,
-      boolean newCascadeDelete,
+      Optional<Boolean> newCascadeDelete,
       String newMappedById,
       String newOrderBy,
       String newLabel,
@@ -193,7 +194,8 @@ abstract class SerializableAttribute {
 
     public abstract Builder setRefEntityTypeId(String newRefEntityTypeId);
 
-    public abstract Builder setCascadeDelete(boolean newCascadeDelete);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public abstract Builder setCascadeDelete(Optional<Boolean> newCascadeDelete);
 
     public abstract Builder setMappedById(String newMappedById);
 

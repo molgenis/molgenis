@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.api.metadata.v3.MetadataUtils;
 import org.molgenis.data.DataService;
@@ -104,8 +105,6 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     String orderBy = sort != null ? sort.toSortString() : null;
     Attribute parent = attribute.getParent();
     String parentId = parent != null ? parent.getIdentifier() : null;
-    Boolean cascadeDelete = attribute.getCascadeDelete();
-    boolean isCascadeDelete = cascadeDelete != null ? cascadeDelete : false;
 
     return SerializableAttribute.builder()
         .setId(attribute.getIdentifier())
@@ -116,7 +115,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setLabelAttribute(attribute.isLabelAttribute())
         .setLookupAttributeIndex(attribute.getLookupAttributeIndex())
         .setRefEntityTypeId(refEntityTypeId)
-        .setCascadeDelete(isCascadeDelete)
+        .setCascadeDelete(Optional.ofNullable(attribute.getCascadeDelete()))
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
@@ -159,7 +158,10 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     entityType.setDescription(serializableEntityType.getDescription());
     serializableEntityType.getDescriptionI18n().forEach(entityType::setDescription);
     entityType.setOwnAllAttributes(
-        serializableEntityType.getAttributes().stream().map(this::toAttribute).collect(toList()));
+        serializableEntityType.getAttributes().stream()
+            .map(this::toAttribute)
+            .map(attr -> attr.setEntity(entityType))
+            .collect(toList()));
     entityType.setAbstract(serializableEntityType.isAbstract());
     entityType.setExtends(anExtends);
     entityType.setTags(tags);
@@ -208,7 +210,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     attribute.setLabelAttribute(serializableAttribute.isLabelAttribute());
     attribute.setLookupAttributeIndex(serializableAttribute.getLookupAttributeIndex());
     attribute.setRefEntity(refEntityType);
-    attribute.setCascadeDelete(serializableAttribute.isCascadeDelete());
+    attribute.setCascadeDelete(serializableAttribute.getCascadeDelete().orElse(null));
     attribute.setMappedBy(mappedByAttr);
     attribute.setOrderBy(sort);
     attribute.setLabel(serializableAttribute.getLabel());

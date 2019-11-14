@@ -122,7 +122,7 @@ class EntityTypeSerializerImplTest extends AbstractMockitoTest {
     when(entityType.getIndexingDepth()).thenReturn(2);
 
     String serializedEntityType =
-        "{\"id\":\"MyEntityTypeId\",\"packageId\":\"MyPackage\",\"label\":\"My Entity Type\",\"labelI18n\":{},\"description\":\"My Entity Type description\",\"descriptionI18n\":{},\"attributes\":[{\"id\":\"MyAttributeId\",\"name\":\"myAttributeName\",\"sequenceNr\":4,\"type\":\"onetomany\",\"idAttribute\":true,\"labelAttribute\":true,\"lookupAttributeIndex\":3,\"refEntityTypeId\":\"MyRefEntityType\",\"cascadeDelete\":true,\"mappedById\":\"myMappedByAttributeId\",\"orderBy\":\"myAttributeName,DESC\",\"label\":\"My Attribute\",\"labelI18n\":{},\"description\":\"My Attribute description\",\"descriptionI18n\":{},\"nullable\":true,\"auto\":false,\"visible\":true,\"unique\":true,\"readOnly\":true,\"aggregatable\":true,\"expression\":\"MyExpression\",\"enumOptions\":[],\"tagIds\":[\"MyAttributeTagId\"],\"nullableExpression\":\"MyNullableExpression\",\"visibleExpression\":\"MyVisibleExpression\",\"validationExpression\":\"MyValidationExpression\",\"defaultValue\":\"MyDefaultValue\"}],\"abstract0\":true,\"extendsId\":\"MyExtendsEntityTypeId\",\"tagIds\":[\"MyTagId\"],\"backend\":\"PostgreSQL\",\"indexingDepth\":2}";
+        "{\"id\":\"MyEntityTypeId\",\"packageId\":\"MyPackage\",\"label\":\"My Entity Type\",\"labelI18n\":{},\"description\":\"My Entity Type description\",\"descriptionI18n\":{},\"attributes\":[{\"id\":\"MyAttributeId\",\"name\":\"myAttributeName\",\"sequenceNr\":4,\"type\":\"onetomany\",\"idAttribute\":true,\"labelAttribute\":true,\"lookupAttributeIndex\":3,\"refEntityTypeId\":\"MyRefEntityType\",\"cascadeDelete\":{\"value\":true},\"mappedById\":\"myMappedByAttributeId\",\"orderBy\":\"myAttributeName,DESC\",\"label\":\"My Attribute\",\"labelI18n\":{},\"description\":\"My Attribute description\",\"descriptionI18n\":{},\"nullable\":true,\"auto\":false,\"visible\":true,\"unique\":true,\"readOnly\":true,\"aggregatable\":true,\"expression\":\"MyExpression\",\"enumOptions\":[],\"tagIds\":[\"MyAttributeTagId\"],\"nullableExpression\":\"MyNullableExpression\",\"visibleExpression\":\"MyVisibleExpression\",\"validationExpression\":\"MyValidationExpression\",\"defaultValue\":\"MyDefaultValue\"}],\"abstract0\":true,\"extendsId\":\"MyExtendsEntityTypeId\",\"tagIds\":[\"MyTagId\"],\"backend\":\"PostgreSQL\",\"indexingDepth\":2}";
     String actualSerializedEntityType = entityTypeSerializerImpl.serializeEntityType(entityType);
     assertTrue(new IsEqualJson(serializedEntityType).matches(actualSerializedEntityType));
   }
@@ -142,14 +142,16 @@ class EntityTypeSerializerImplTest extends AbstractMockitoTest {
         () -> verify(deserializedEntityType).setLabel("en", "My Entity Type (en)"));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void deserializeEntityTypeWithAttributes() {
     String serializedEntityType =
-        "{\"id\":\"MyEntityTypeId\",\"packageId\":\"MyPackage\",\"label\":\"My Entity Type\",\"labelI18n\":{},\"description\":\"My Entity Type description\",\"descriptionI18n\":{},\"attributes\":[{\"id\":\"MyAttributeId\",\"name\":\"myAttributeName\",\"sequenceNr\":4,\"type\":\"onetomany\",\"idAttribute\":true,\"labelAttribute\":true,\"lookupAttributeIndex\":3,\"refEntityTypeId\":\"MyRefEntityType\",\"cascadeDelete\":true,\"mappedById\":\"myMappedByAttributeId\",\"orderBy\":\"myAttributeName,DESC\",\"label\":\"My Attribute\",\"labelI18n\":{},\"description\":\"My Attribute description\",\"descriptionI18n\":{},\"nullable\":true,\"auto\":false,\"visible\":true,\"unique\":true,\"readOnly\":true,\"aggregatable\":true,\"expression\":\"MyExpression\",\"enumOptions\":[],\"tagIds\":[\"MyAttributeTagId\"],\"nullableExpression\":\"MyNullableExpression\",\"visibleExpression\":\"MyVisibleExpression\",\"validationExpression\":\"MyValidationExpression\",\"defaultValue\":\"MyDefaultValue\"}],\"abstract0\":true,\"extendsId\":\"MyExtendsEntityTypeId\",\"tagIds\":[\"MyTagId\"],\"backend\":\"PostgreSQL\",\"indexingDepth\":2}";
+        "{\"id\":\"MyEntityTypeId\",\"packageId\":\"MyPackage\",\"label\":\"My Entity Type\",\"labelI18n\":{},\"description\":\"My Entity Type description\",\"descriptionI18n\":{},\"attributes\":[{\"id\":\"MyAttributeId\",\"name\":\"myAttributeName\",\"sequenceNr\":4,\"type\":\"onetomany\",\"idAttribute\":true,\"labelAttribute\":true,\"lookupAttributeIndex\":3,\"refEntityTypeId\":\"MyRefEntityType\",\"cascadeDelete\":{\"value\":true},\"mappedById\":\"myMappedByAttributeId\",\"orderBy\":\"myAttributeName,DESC\",\"label\":\"My Attribute\",\"labelI18n\":{},\"description\":\"My Attribute description\",\"descriptionI18n\":{},\"nullable\":true,\"auto\":false,\"visible\":true,\"unique\":true,\"readOnly\":true,\"aggregatable\":true,\"expression\":\"MyExpression\",\"enumOptions\":[],\"tagIds\":[\"MyAttributeTagId\"],\"nullableExpression\":\"MyNullableExpression\",\"visibleExpression\":\"MyVisibleExpression\",\"validationExpression\":\"MyValidationExpression\",\"defaultValue\":\"MyDefaultValue\"}],\"abstract0\":true,\"extendsId\":\"MyExtendsEntityTypeId\",\"tagIds\":[\"MyTagId\"],\"backend\":\"PostgreSQL\",\"indexingDepth\":2}";
     EntityType entityType = mock(EntityType.class);
     when(entityTypeFactory.create()).thenReturn(entityType);
     Attribute attribute = mock(Attribute.class);
     when(attributeFactory.create()).thenReturn(attribute);
+    when(attribute.setEntity(entityType)).thenReturn(attribute);
 
     EntityType extendsEntityType = mock(EntityType.class);
     doReturn(extendsEntityType)
@@ -208,6 +210,7 @@ class EntityTypeSerializerImplTest extends AbstractMockitoTest {
         () -> verifyNoMoreInteractions(deserializedEntityType),
         () -> verify(attribute).setIdentifier("MyAttributeId"),
         () -> verify(attribute).setName("myAttributeName"),
+        () -> verify(attribute).setEntity(entityType),
         () -> verify(attribute).setSequenceNumber(4),
         () -> verify(attribute).setDataType(AttributeType.ONE_TO_MANY),
         () -> verify(attribute).setIdAttribute(true),
