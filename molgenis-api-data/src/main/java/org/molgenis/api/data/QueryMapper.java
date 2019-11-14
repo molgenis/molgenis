@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -17,10 +17,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.rsql.RSQLValueParser;
 
-class QueryV3Mapper {
+public class QueryMapper {
   private final RSQLValueParser rsqlValueParser;
 
-  QueryV3Mapper(RSQLValueParser rsqlValueParser) {
+  QueryMapper(RSQLValueParser rsqlValueParser) {
     this.rsqlValueParser = requireNonNull(rsqlValueParser);
   }
 
