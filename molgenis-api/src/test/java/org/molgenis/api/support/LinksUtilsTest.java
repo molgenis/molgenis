@@ -49,9 +49,7 @@ class LinksUtilsTest extends AbstractMockitoTest {
   void createLinksResponseOnePage() throws URISyntaxException {
     request.setQueryString("page=0");
     LinksResponse linksResponse =
-        LinksResponse.builder()
-            .setSelf(new URI("http://localhost?page=0"))
-            .build();
+        LinksResponse.builder().setSelf(new URI("http://localhost?page=0")).build();
     assertEquals(linksResponse, LinksUtils.createLinksResponse(0, 10, 10));
   }
 
