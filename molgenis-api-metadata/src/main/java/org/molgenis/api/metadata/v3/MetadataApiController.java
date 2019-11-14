@@ -1,23 +1,9 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
 
-import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
 import org.molgenis.api.ApiNamespace;
@@ -38,7 +24,6 @@ import org.molgenis.api.metadata.v3.model.ReadEntityTypesRequest;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.model.JobExecution;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,18 +46,15 @@ class MetadataApiController extends ApiController {
   static final String API_META_PATH = ApiNamespace.API_PATH + '/' + API_META_ID;
 
   private final MetadataApiService metadataApiService;
-  private final MetadataApiJobService metadataApiJobService;
   private final EntityTypeV3Mapper entityTypeV3Mapper;
   private final AttributeV3Mapper attributeV3Mapper;
 
   MetadataApiController(
       MetadataApiService metadataApiService,
-      MetadataApiJobService metadataApiJobService,
       EntityTypeV3Mapper entityTypeV3Mapper,
       AttributeV3Mapper attributeV3Mapper) {
     super(API_META_ID, 3);
     this.metadataApiService = requireNonNull(metadataApiService);
-    this.metadataApiJobService = requireNonNull(metadataApiJobService);
     this.entityTypeV3Mapper = requireNonNull(entityTypeV3Mapper);
     this.attributeV3Mapper = requireNonNull(attributeV3Mapper);
   }
@@ -147,7 +129,7 @@ class MetadataApiController extends ApiController {
   @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
   public ResponseEntity deleteAttribute(@Valid DeleteAttributeRequest deleteAttributeRequest) {
     JobExecution jobExecution =
-        metadataApiJobService.scheduleDeleteAttribute(
+        metadataApiService.deleteAttributeAsync(
             deleteAttributeRequest.getEntityTypeId(), deleteAttributeRequest.getAttributeId());
     return toLocationResponse(jobExecution);
   }
@@ -156,7 +138,7 @@ class MetadataApiController extends ApiController {
   @DeleteMapping("/{entityTypeId}/attributes")
   public ResponseEntity deleteAttributes(@Valid DeleteAttributesRequest deleteAttributesRequest) {
     JobExecution jobExecution =
-        metadataApiJobService.scheduleDeleteAttribute(
+        metadataApiService.deleteAttributesAsync(
             deleteAttributesRequest.getEntityTypeId(), deleteAttributesRequest.getQ());
     return toLocationResponse(jobExecution);
   }
@@ -169,7 +151,7 @@ class MetadataApiController extends ApiController {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     entityType.setId(entityTypeId);
 
-    JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
   }
 
@@ -180,27 +162,26 @@ class MetadataApiController extends ApiController {
       @RequestBody Map<String, Object> entityTypeValues) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
     entityTypeV3Mapper.toEntityType(entityType, entityTypeValues);
-      JobExecution jobExecution = metadataApiJobService.scheduleUpdate(entityType);
-      return toLocationResponse(jobExecution);
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
+    return toLocationResponse(jobExecution);
     }
-
 
   @Transactional
-    @DeleteMapping("/{entityTypeId}")
-    public ResponseEntity deleteEntityType (@Valid DeleteEntityTypeRequest deleteEntityTypeRequest){
-      JobExecution jobExecution =
-          metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypeRequest.getEntityTypeId());
-      return toLocationResponse(jobExecution);
-    }
+  @DeleteMapping("/{entityTypeId}")
+  public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
+    JobExecution jobExecution =
+        metadataApiService.deleteEntityTypeAsync(deleteEntityTypeRequest.getEntityTypeId());
+    return toLocationResponse(jobExecution);
+  }
 
-    @Transactional
-    @DeleteMapping
-    public ResponseEntity deleteEntityTypes (
-        @Valid DeleteEntityTypesRequest deleteEntityTypesRequest){
-      JobExecution jobExecution =
-          metadataApiJobService.scheduleDeleteEntityType(deleteEntityTypesRequest.getQ());
-      return toLocationResponse(jobExecution);
-    }
+  @Transactional
+  @DeleteMapping
+  public ResponseEntity deleteEntityTypes(
+      @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
+    JobExecution jobExecution =
+        metadataApiService.deleteEntityTypesAsync(deleteEntityTypesRequest.getQ());
+    return toLocationResponse(jobExecution);
+  }
 
     private ResponseEntity toLocationResponse (JobExecution jobExecution){
       URI location =

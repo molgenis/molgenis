@@ -7,10 +7,10 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,6 +34,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
@@ -117,13 +118,8 @@ public class EntityTypeV3Mapper {
                 ownAttributes
                     .get(lookupAttribute)
                     .setLookupAttributeIndex(count.getAndIncrement()));
-    entityType.setOwnAllAttributes(ownAttributes.values());
+    entityType.setOwnAllAttributes(new ArrayList<>(ownAttributes.values()));
     entityType.setAbstract(entityTypeRequest.isAbstract());
-    Optional<EntityType> extendsEntityType =
-        metaDataService.getEntityType(entityTypeRequest.getExtends());
-    if (extendsEntityType.isPresent()) {
-      entityType.setExtends(extendsEntityType.get());
-    }
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
     processSelfReferencingAttributes(entityType, ownAttributes.values());
@@ -277,15 +273,15 @@ public class EntityTypeV3Mapper {
 
   private I18nValue getI18nEntityTypeLabel(EntityType entityType) {
     String defaultValue = entityType.getLabel();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, entityType.getLabel(code)));
+    ImmutableMap<String, String> translations =
+        MetadataUtils.getI18n(entityType, EntityTypeMetadata.LABEL);
     return I18nValue.create(defaultValue, translations);
   }
 
   private I18nValue getI18nEntityTypeDesc(EntityType entityType) {
     String defaultValue = entityType.getDescription();
-    Map<String, String> translations = new HashMap<>();
-    getLanguageCodes().forEach(code -> translations.put(code, entityType.getDescription(code)));
+    ImmutableMap<String, String> translations =
+        MetadataUtils.getI18n(entityType, EntityTypeMetadata.DESCRIPTION);
     return I18nValue.create(defaultValue, translations);
   }
 

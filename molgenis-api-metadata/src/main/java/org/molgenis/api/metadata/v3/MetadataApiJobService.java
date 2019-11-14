@@ -1,8 +1,8 @@
 package org.molgenis.api.metadata.v3;
 
+import java.util.Collection;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
-import org.molgenis.api.model.Query;
 import org.molgenis.data.meta.model.EntityType;
 
 public interface MetadataApiJobService {
@@ -26,20 +26,16 @@ public interface MetadataApiJobService {
   /**
    * Schedule an entity type delete job.
    *
-   * @param entityTypeId entity type to delete
+   * @param entityType deleted entity type
    * @return job execution
    */
-  MetadataDeleteJobExecution scheduleDeleteEntityType(String entityTypeId);
+  MetadataDeleteJobExecution scheduleDelete(EntityType entityType);
 
   /**
    * Schedule an entity type delete job.
    *
-   * @param q a query describing which entity types to delete
+   * @param entityTypes deleted entity types
    * @return job execution
    */
-  MetadataDeleteJobExecution scheduleDeleteEntityType(Query q);
-
-  MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, String attributeId);
-
-  MetadataDeleteJobExecution scheduleDeleteAttribute(String entityTypeId, Query query);
+  MetadataDeleteJobExecution scheduleDelete(Collection<EntityType> entityTypes);
 }

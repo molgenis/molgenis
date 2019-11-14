@@ -2,13 +2,17 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
-import java.util.Optional;
+import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
+import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -18,6 +22,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 
@@ -29,38 +34,38 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   private final SortMapper sortMapper;
   // TODO replace usage of DataService with new methods in MetaDataService
   private final DataService dataService;
+  private final MetadataApiJobService metadataApiJobService;
 
   MetadataApiServiceImpl(
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
       SortMapper sortMapper,
-      DataService dataService) {
+      DataService dataService,
+      MetadataApiJobService metadataApiJobService) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
     this.dataService = requireNonNull(dataService);
+    this.metadataApiJobService = requireNonNull(metadataApiJobService);
   }
 
   public EntityTypes findEntityTypes(Query query, Sort sort, int size, int number) {
-    Repository<org.molgenis.data.meta.model.EntityType> repository =
+    Repository<EntityType> repository =
         metadataService
-            .getRepository(ENTITY_TYPE_META_DATA, org.molgenis.data.meta.model.EntityType.class)
+            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
             .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> molgenisQuery =
+    org.molgenis.data.Query<EntityType> molgenisQuery =
         query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     // get entities
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> findQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<EntityType> findQuery = new QueryImpl<>(molgenisQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapper.map(sort));
-    List<org.molgenis.data.meta.model.EntityType> entityTypes =
-        repository.findAll(findQuery).collect(toList());
+    List<EntityType> entityTypes = repository.findAll(findQuery).collect(toList());
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.EntityType> countQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<EntityType> countQuery = new QueryImpl<>(molgenisQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
@@ -68,24 +73,23 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return EntityTypes.builder().setEntityTypes(entityTypes).setTotal(count).build();
   }
 
+  @Override
   public EntityType findEntityType(String identifier) {
-    Optional<EntityType> entityType = metadataService.getEntityType(identifier);
-    if (!entityType.isPresent()) {
-      throw new UnknownEntityTypeException(identifier);
-    }
-    return entityType.get();
+    return metadataService
+        .getEntityType(identifier)
+        .orElseThrow(() -> new UnknownEntityTypeException(identifier));
   }
 
+  @Override
   public Attributes findAttributes(
       String entityTypeId, Query query, Sort sort, int size, int number) {
-    Repository<org.molgenis.data.meta.model.Attribute> repository =
+    Repository<Attribute> repository =
         metadataService
-            .getRepository(
-                AttributeMetadata.ATTRIBUTE_META_DATA, org.molgenis.data.meta.model.Attribute.class)
+            .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)
             .orElseThrow(
                 () -> new UnknownRepositoryException(AttributeMetadata.ATTRIBUTE_META_DATA));
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> molgenisQuery =
+    org.molgenis.data.Query<Attribute> molgenisQuery =
         query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     boolean nest = !molgenisQuery.getRules().isEmpty();
@@ -102,11 +106,9 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     findQuery.offset(number * size);
     findQuery.pageSize(size);
     findQuery.sort(sortMapper.map(sort));
-    List<org.molgenis.data.meta.model.Attribute> attributes =
-        repository.findAll(findQuery).collect(toList());
+    List<Attribute> attributes = repository.findAll(findQuery).collect(toList());
 
-    org.molgenis.data.Query<org.molgenis.data.meta.model.Attribute> countQuery =
-        new QueryImpl<>(molgenisQuery);
+    org.molgenis.data.Query<Attribute> countQuery = new QueryImpl<>(molgenisQuery);
     countQuery.offset(0);
     countQuery.pageSize(Integer.MAX_VALUE);
     int count = Math.toIntExact(repository.count(countQuery));
@@ -117,29 +119,33 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public Attribute findAttribute(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
+    return findAttribute(entityType, attributeId);
+  }
 
+  private Attribute findAttribute(EntityType entityType, String attributeId) {
     // TODO use MetaDataService instead of DataService
     Attribute attribute =
         dataService.findOneById(
             AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
-    if (attribute == null) {
+    if (attribute == null || !attribute.getEntity().getId().equals(entityType.getId())) {
       throw new UnknownAttributeException(entityType, attributeId);
     }
     return attribute;
   }
 
   @Override
-  public Void deleteAttribute(String entityTypeId, String attributeId) {
-    findEntityType(entityTypeId);
-    metadataService.deleteAttributeById(attributeId);
-    return null;
+  public MetadataUpsertJobExecution deleteAttributeAsync(String entityTypeId, String attributeId) {
+    EntityType entityType = findEntityType(entityTypeId);
+    Attribute attribute = findAttribute(entityType, attributeId);
+    entityType.removeAttribute(attribute);
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   @Override
-  public Void deleteAttributes(String entityTypeId, List<String> attributeIds) {
-    findEntityType(entityTypeId);
-    metadataService.deleteAttributesById(attributeIds);
-    return null;
+  public MetadataUpsertJobExecution deleteAttributesAsync(String entityTypeId, Query query) {
+    EntityType entityType = findEntityType(entityTypeId);
+    findAttributes(entityTypeId, query).forEach(entityType::removeAttribute);
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   public void createEntityType(EntityType entityType) {
@@ -148,20 +154,19 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   @Override
-  public Void updateEntityType(EntityType entityType) {
-    return null; // FIXME
+  public MetadataUpsertJobExecution updateEntityTypeAsync(EntityType entityType) {
+    return metadataApiJobService.scheduleUpdate(entityType);
   }
 
   @Override
-  public Void deleteEntityType(String entityTypeId) {
-    metadataService.deleteEntityType(entityTypeId);
-    return null;
+  public MetadataDeleteJobExecution deleteEntityTypeAsync(String entityTypeId) {
+    EntityType entityType = findEntityType(entityTypeId);
+    return metadataApiJobService.scheduleDelete(entityType);
   }
 
   @Override
-  public Void deleteEntityTypes(List<String> entityTypeIds) {
-    metadataService.deleteEntityTypes(entityTypeIds);
-    return null;
+  public MetadataDeleteJobExecution deleteEntityTypesAsync(Query query) {
+    return metadataApiJobService.scheduleDelete(getEntityTypes(query));
   }
 
   // TODO remove code duplication with molgenis-data-import DataPersisterImpl
@@ -180,5 +185,30 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     if (entityType.hasMappedByAttributes()) {
       metadataService.updateEntityType(entityType);
     }
+  }
+
+  private List<EntityType> getEntityTypes(Query q) {
+    Repository<EntityType> entityTypeRepository =
+        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
+    org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
+    dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
+    List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
+    if (entityTypes.isEmpty()) {
+      throw new ZeroResultsException(q);
+    }
+    return entityTypes;
+  }
+
+  private List<Attribute> findAttributes(String entityTypeId, Query q) {
+    Repository<Attribute> attributeRepository =
+        dataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class);
+    org.molgenis.data.Query<Attribute> dataServiceQuery =
+        queryMapper.map(q, attributeRepository).and().eq(AttributeMetadata.ENTITY, entityTypeId);
+    dataServiceQuery.setFetch(new Fetch().field(AttributeMetadata.ID));
+    List<Attribute> attributes = dataServiceQuery.findAll().collect(toList());
+    if (attributes.isEmpty()) {
+      throw new ZeroResultsException(q);
+    }
+    return attributes;
   }
 }
