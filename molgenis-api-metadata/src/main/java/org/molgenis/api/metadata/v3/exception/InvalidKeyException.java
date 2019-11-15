@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.util.exception.BadRequestException;
 
 public class InvalidKeyException extends BadRequestException {
-  private final static String ERROR_CODE = "MAPI04";
+  private static final String ERROR_CODE = "MAPI04";
   private String target;
   private String key;
 
@@ -23,6 +23,6 @@ public class InvalidKeyException extends BadRequestException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[]{target, key};
+    return new Object[] {target, key};
   }
 }

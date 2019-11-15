@@ -6,9 +6,6 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.molgenis.data.Query;
-import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
 class ZeroResultsExceptionTest extends ExceptionMessageTest {
@@ -27,10 +24,7 @@ class ZeroResultsExceptionTest extends ExceptionMessageTest {
   }
 
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {
-        "en",
-        "Query 'QUERY' didn't lead to any results."
-    };
+    Object[] enParams = {"en", "Query 'QUERY' didn't lead to any results."};
     return new Object[][] {enParams};
   }
 }

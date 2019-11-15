@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,19 +34,16 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
-import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.AbstractMockitoTest;
@@ -57,18 +53,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 class AttributeV3MapperTest extends AbstractMockitoTest {
 
-  @Mock
-  private AttributeFactory attributeFactory;
-  @Mock
-  private MetaDataService metaDataService;
-  @Mock
-  private SortMapper sortMapper;
-  @Mock
-  private SortConverter sortConverter;
-  @Mock
-  private EntityManager entityManager;
-  @Mock
-  private EntityTypeMetadata entityTypeMetadata;
+  @Mock private AttributeFactory attributeFactory;
+  @Mock private MetaDataService metaDataService;
+  @Mock private SortMapper sortMapper;
+  @Mock private SortConverter sortConverter;
+  @Mock private EntityManager entityManager;
+  @Mock private EntityTypeMetadata entityTypeMetadata;
 
   private AttributeV3Mapper attributeV3Mapper;
 
@@ -338,19 +328,19 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
   @Test
   void toAttributesRange() {
-      Attribute attribute = mock(Attribute.class);
-      when(attributeFactory.create()).thenReturn(attribute);
+    Attribute attribute = mock(Attribute.class);
+    when(attributeFactory.create()).thenReturn(attribute);
 
-      Map<String, Long> range = new HashMap<>();
-      range.put("min",1l);
-      range.put("max", 10l);
-      Map<String, Object> attributeValueMap = new HashMap<>();
-      attributeValueMap.put("id", 1);
-      attributeValueMap.put("range", range);
-      EntityType entityType = mock(EntityType.class);
-      attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
+    Map<String, Long> range = new HashMap<>();
+    range.put("min", 1l);
+    range.put("max", 10l);
+    Map<String, Object> attributeValueMap = new HashMap<>();
+    attributeValueMap.put("id", 1);
+    attributeValueMap.put("range", range);
+    EntityType entityType = mock(EntityType.class);
+    attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
 
-      verify(attribute).setRange(new org.molgenis.data.Range(1l,10l));
+    verify(attribute).setRange(new org.molgenis.data.Range(1l, 10l));
   }
 
   @Test
@@ -361,7 +351,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     Map<String, Object> i18n = new HashMap<>();
     Map<String, String> translations = new HashMap<>();
     translations.put("nl", "nederlands");
-    i18n.put("defaultValue","default");
+    i18n.put("defaultValue", "default");
     i18n.put("translations", translations);
     Map<String, Object> attributeValueMap = new HashMap<>();
     attributeValueMap.put("id", 1);
@@ -372,9 +362,9 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
     assertAll(
         () -> verify(attribute).setLabel("default"),
-        () -> verify(attribute).setLabel("nl","nederlands"),
+        () -> verify(attribute).setLabel("nl", "nederlands"),
         () -> verify(attribute).setDescription("default"),
-        () -> verify(attribute).setDescription("nl","nederlands"));
+        () -> verify(attribute).setDescription("nl", "nederlands"));
   }
 
   @Test
@@ -397,7 +387,6 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     verify(attribute).setParent(parentAttr);
   }
 
-
   @Test
   void toAttributesMappedBy() {
     Attribute attribute = mock(Attribute.class);
@@ -407,9 +396,8 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     Attribute mappedByAttr = mock(Attribute.class);
 
     Repository<Attribute> repo = mock(Repository.class);
-    when(metaDataService
-        .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)).thenReturn(
-        Optional.of(repo));
+    when(metaDataService.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class))
+        .thenReturn(Optional.of(repo));
     when(repo.findOneById("test")).thenReturn(mappedByAttr);
 
     Map<String, Object> attributeValueMap = new HashMap<>();
@@ -507,5 +495,4 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
     verify(attribute).setRefEntity(entityType);
   }
-
 }

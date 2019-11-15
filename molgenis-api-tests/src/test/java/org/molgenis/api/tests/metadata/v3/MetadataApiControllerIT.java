@@ -191,7 +191,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   // TODO enable after endpoint is async
   @Disabled
   @Test
-  //@Order(8)
+  // @Order(8)
   void testCreateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -211,7 +211,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   // TODO enable after endpoint is async
   @Disabled
   @Test
-  //@Order(9)
+  // @Order(9)
   void testUpdateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(

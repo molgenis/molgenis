@@ -164,7 +164,7 @@ class MetadataApiController extends ApiController {
     entityTypeV3Mapper.toEntityType(entityType, entityTypeValues);
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
-    }
+  }
 
   @Transactional
   @DeleteMapping("/{entityTypeId}")
@@ -183,13 +183,13 @@ class MetadataApiController extends ApiController {
     return toLocationResponse(jobExecution);
   }
 
-    private ResponseEntity toLocationResponse (JobExecution jobExecution){
-      URI location =
-          ServletUriComponentsBuilder.fromCurrentRequestUri()
-              .replacePath(EntityController.API_ENTITY_PATH)
-              .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
-              .build()
-              .toUri();
-      return ResponseEntity.accepted().location(location).build();
-    }
+  private ResponseEntity toLocationResponse(JobExecution jobExecution) {
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequestUri()
+            .replacePath(EntityController.API_ENTITY_PATH)
+            .pathSegment(jobExecution.getEntityType().getId(), jobExecution.getIdentifier())
+            .build()
+            .toUri();
+    return ResponseEntity.accepted().location(location).build();
   }
+}

@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -15,9 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,16 +41,12 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.w3c.dom.Attr;
 
 class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
-  @Mock
-  private EntityTypeFactory entityTypeFactory;
-  @Mock
-  private AttributeV3Mapper attributeV3Mapper;
-  @Mock
-  private MetaDataService metaDataService;
+  @Mock private EntityTypeFactory entityTypeFactory;
+  @Mock private AttributeV3Mapper attributeV3Mapper;
+  @Mock private MetaDataService metaDataService;
   private EntityTypeV3Mapper entityTypeV3Mapper;
 
   @BeforeEach
@@ -265,9 +258,12 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     valueMap.put("label", i18n);
     valueMap.put("description", i18n);
 
-    when(attributeV3Mapper.mapI18nValue(i18n)).thenReturn(
-        I18nValue.builder().setDefaultValue("default")
-            .setTranslations(singletonMap("nl", "nederlands")).build());
+    when(attributeV3Mapper.mapI18nValue(i18n))
+        .thenReturn(
+            I18nValue.builder()
+                .setDefaultValue("default")
+                .setTranslations(singletonMap("nl", "nederlands"))
+                .build());
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
@@ -283,8 +279,8 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
 
     Map<String, Object> valueMap = new HashMap<>();
-    Map<String,Object> attrMap1 = new HashMap<>();
-    Map<String,Object> attrMap2 = new HashMap<>();
+    Map<String, Object> attrMap1 = new HashMap<>();
+    Map<String, Object> attrMap2 = new HashMap<>();
     valueMap.put("attributes", Arrays.asList(attrMap1, attrMap2));
 
     Map<String, Attribute> attrs = new HashMap<>();
@@ -292,9 +288,10 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     when(attr1.getIdentifier()).thenReturn("1");
     Attribute attr2 = mock(Attribute.class);
     when(attr2.getIdentifier()).thenReturn("2");
-    attrs.put("1",attr1);
-    attrs.put("2",attr2);
-    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1,attrMap2), entityType)).thenReturn(attrs);
+    attrs.put("1", attr1);
+    attrs.put("2", attr2);
+    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
+        .thenReturn(attrs);
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
@@ -306,8 +303,8 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
 
     Map<String, Object> valueMap = new HashMap<>();
-    Map<String,Object> attrMap1 = new HashMap<>();
-    Map<String,Object> attrMap2 = new HashMap<>();
+    Map<String, Object> attrMap1 = new HashMap<>();
+    Map<String, Object> attrMap2 = new HashMap<>();
     valueMap.put("attributes", Arrays.asList(attrMap1, attrMap2));
     valueMap.put("idAttribute", "id");
     valueMap.put("labelAttribute", "label");
@@ -324,12 +321,13 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     when(attr4.getIdentifier()).thenReturn("lookup2");
     Attribute attr5 = mock(Attribute.class);
     when(attr5.getIdentifier()).thenReturn("lookup3");
-    attrs.put("id",attr1);
-    attrs.put("label",attr2);
-    attrs.put("lookup1",attr3);
-    attrs.put("lookup2",attr4);
-    attrs.put("lookup3",attr5);
-    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1,attrMap2), entityType)).thenReturn(attrs);
+    attrs.put("id", attr1);
+    attrs.put("label", attr2);
+    attrs.put("lookup1", attr3);
+    attrs.put("lookup2", attr4);
+    attrs.put("lookup3", attr5);
+    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
+        .thenReturn(attrs);
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 

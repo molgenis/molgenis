@@ -132,9 +132,10 @@ public class EntityTypeV3Mapper {
   private void processSelfReferencingAttributes(
       EntityType entityType, Collection<Attribute> attributes) {
     for (Attribute attribute : attributes) {
-      if (isReferenceType(attribute) && attribute.getRefEntity().getId().equals(entityType.getId())) {
-          attribute.setRefEntity(entityType);
-        }
+      if (isReferenceType(attribute)
+          && attribute.getRefEntity().getId().equals(entityType.getId())) {
+        attribute.setRefEntity(entityType);
+      }
     }
   }
 
@@ -256,8 +257,7 @@ public class EntityTypeV3Mapper {
     }
   }
 
-  private void processI18nDescription(
-      I18nValue i18nValue, EntityType entityType) {
+  private void processI18nDescription(I18nValue i18nValue, EntityType entityType) {
     if (i18nValue != null) {
       entityType.setDescription(i18nValue.getDefaultValue());
       getLanguageCodes()
@@ -297,8 +297,10 @@ public class EntityTypeV3Mapper {
         switch (entry.getKey()) {
           case "package_":
             String packageId = String.valueOf(entry.getValue());
-            Package pack = metaDataService.getPackage(packageId)
-                .orElseThrow(() -> new UnknownPackageException(packageId));
+            Package pack =
+                metaDataService
+                    .getPackage(packageId)
+                    .orElseThrow(() -> new UnknownPackageException(packageId));
             entityType.setPackage(pack);
             break;
           case "abstract_":
@@ -311,8 +313,10 @@ public class EntityTypeV3Mapper {
             break;
           case "extends_":
             String extendsValue = String.valueOf(entry.getValue());
-            EntityType parent = metaDataService.getEntityType(extendsValue)
-                .orElseThrow(() -> new UnknownEntityTypeException(extendsValue));
+            EntityType parent =
+                metaDataService
+                    .getEntityType(extendsValue)
+                    .orElseThrow(() -> new UnknownEntityTypeException(extendsValue));
             entityType.setExtends(parent);
             break;
           case "label":
@@ -333,7 +337,8 @@ public class EntityTypeV3Mapper {
           case "idAttribute":
           case "labelAttribute":
           case "lookupAttributes":
-            //get a list of attributes if not already set, process values for these cases after other updates are done.
+            // get a list of attributes if not already set, process values for these cases after
+            // other updates are done.
             if (updatedAttributes == null) {
               updatedAttributes = entityType.getOwnAllAttributes();
             }
@@ -348,18 +353,20 @@ public class EntityTypeV3Mapper {
     }
   }
 
-  private void setSpecialAttributes(EntityType entityType, Map<String, Object> entityTypeValues,
+  private void setSpecialAttributes(
+      EntityType entityType,
+      Map<String, Object> entityTypeValues,
       Iterable<Attribute> updatedAttributes) {
-    List currentLookupAttributes = StreamSupport
-        .stream(entityType.getLookupAttributes().spliterator(), false)
-        .map(Attribute::getIdentifier).collect(
-            Collectors.toList());
+    List currentLookupAttributes =
+        StreamSupport.stream(entityType.getLookupAttributes().spliterator(), false)
+            .map(Attribute::getIdentifier)
+            .collect(Collectors.toList());
     String currentLabelAttributeId =
-        entityType.getLabelAttribute() != null ? entityType.getLabelAttribute().getIdentifier()
+        entityType.getLabelAttribute() != null
+            ? entityType.getLabelAttribute().getIdentifier()
             : null;
     String currentIdAttributeId =
-        entityType.getIdAttribute() != null ? entityType.getIdAttribute().getIdentifier()
-            : null;
+        entityType.getIdAttribute() != null ? entityType.getIdAttribute().getIdentifier() : null;
 
     String newIdAttributeId = null;
     String newLabelAttributeId = null;
@@ -383,27 +390,42 @@ public class EntityTypeV3Mapper {
           break;
       }
     }
-    updateSpecialAttributes(entityType, updatedAttributes, currentLookupAttributes,
-        currentLabelAttributeId, currentIdAttributeId, newIdAttributeId, newLabelAttributeId,
+    updateSpecialAttributes(
+        entityType,
+        updatedAttributes,
+        currentLookupAttributes,
+        currentLabelAttributeId,
+        currentIdAttributeId,
+        newIdAttributeId,
+        newLabelAttributeId,
         newLookupAttributes);
   }
 
-  private void updateSpecialAttributes(EntityType entityType, Iterable<Attribute> updatedAttributes,
-      List currentLookupAttributes, String currentLabelAttributeId, String currentIdAttributeId,
-      String newIdAttributeId, String newLabelAttributeId, List newLookupAttributes) {
+  private void updateSpecialAttributes(
+      EntityType entityType,
+      Iterable<Attribute> updatedAttributes,
+      List currentLookupAttributes,
+      String currentLabelAttributeId,
+      String currentIdAttributeId,
+      String newIdAttributeId,
+      String newLabelAttributeId,
+      List newLookupAttributes) {
     String idAttributeId = newIdAttributeId != null ? newIdAttributeId : currentIdAttributeId;
-    updatedAttributes.forEach(attribute -> attribute
-        .setIdAttribute(attribute.getIdentifier().equals(idAttributeId)));
+    updatedAttributes.forEach(
+        attribute -> attribute.setIdAttribute(attribute.getIdentifier().equals(idAttributeId)));
     String labelAttributeId =
         newLabelAttributeId != null ? newLabelAttributeId : currentLabelAttributeId;
-    updatedAttributes.forEach(attribute -> attribute
-        .setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId)));
+    updatedAttributes.forEach(
+        attribute ->
+            attribute.setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId)));
     setLookupAttributes(updatedAttributes, currentLookupAttributes, newLookupAttributes);
     entityType.setOwnAllAttributes(updatedAttributes);
   }
 
-  private void setLookupAttributes(Iterable<Attribute> updatedAttributes,
-      List currentLookupAttributes, List newLookupAttributes) {
+  private void setLookupAttributes(
+      Iterable<Attribute> updatedAttributes,
+      List currentLookupAttributes,
+      List newLookupAttributes) {
     for (Attribute attribute : updatedAttributes) {
       List lookupAttributes =
           newLookupAttributes != null ? newLookupAttributes : currentLookupAttributes;
@@ -429,8 +451,8 @@ public class EntityTypeV3Mapper {
     return mapAttributes(requestAttributes, entityType);
   }
 
-  private Iterable<Attribute> mapAttributes(List<Map<String, Object>> values,
-      EntityType entityType) {
+  private Iterable<Attribute> mapAttributes(
+      List<Map<String, Object>> values, EntityType entityType) {
     return attributeV3Mapper.toAttributes(values, entityType).values();
   }
 }
