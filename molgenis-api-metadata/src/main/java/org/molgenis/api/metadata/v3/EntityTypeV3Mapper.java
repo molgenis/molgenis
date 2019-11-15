@@ -379,7 +379,7 @@ public class EntityTypeV3Mapper {
 
   private Iterable<Attribute> mapAttributes(EntityType entityType, Entry<String, Object> entry) {
     if (!(entry.getValue() instanceof Iterable<?>)) {
-      throw new RuntimeException("not a valid attributes value, expecting a list");//TODO coded
+      throw new InvalidValueTypeException(entry.getValue().toString(), "list",null);
     }
     List<Object> attrValues = (List<Object>) entry.getValue();
     List<Map<String, Object>> requestAttributes = new ArrayList<>();
