@@ -54,7 +54,6 @@ import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Attr;
 
 @Component
 class AttributeV3Mapper {
@@ -372,7 +371,7 @@ class AttributeV3Mapper {
               if(entry.getValue() instanceof List){
               options = (List<String>) entry.getValue();
               }else{
-                throw new InvalidValueTypeException(options.toString(),"list",null);
+                throw new InvalidValueTypeException(entry.getValue().toString(),"list",null);
               }
             attribute.setEnumOptions(options);
             break;

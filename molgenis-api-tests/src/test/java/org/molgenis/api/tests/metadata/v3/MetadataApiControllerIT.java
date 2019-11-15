@@ -174,6 +174,18 @@ class MetadataApiControllerIT extends AbstractApiTest {
             .header(LOCATION);
 
     assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
+
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(),
+            "retrieveMetadataPartialUpdateEntityType.json",
+            ImmutableMap.of("baseUri", RestAssured.baseURI));
+
+    given()
+        .get("/api/metadata/v3meta_MyStrings")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   // TODO enable after endpoint is async

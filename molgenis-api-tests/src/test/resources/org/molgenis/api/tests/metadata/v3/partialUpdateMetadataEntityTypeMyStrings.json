@@ -13,7 +13,7 @@
       "type": "string"
     },
     {
-      "id": "v3meta_MyStrings_label2",
+      "id": "v3meta_MyStrings_label",
       "name": "label",
       "label": {
         "defaultValue": "Label of the label attribute",
@@ -22,11 +22,12 @@
         }
       },
       "type": "string",
-      "visible": true
+      "visible": true,
+      "nullable": false
     },
     {
-      "id": "v3meta_MyStrings_label3",
-      "name": "label",
+      "id": "v3meta_MyStrings_int",
+      "name": "int",
       "type": "int",
       "range": {
         "min": 1,
@@ -36,8 +37,8 @@
     }
   ],
   "lookupAttributes": [
-    "v3meta_MyStrings_label2",
-    "v3meta_MyStrings_label3"
+    "v3meta_MyStrings_label",
+    "v3meta_MyStrings_int"
   ],
-  "labelAttribute": "v3meta_MyStrings_label2"
+  "labelAttribute": "v3meta_MyStrings_label"
 }

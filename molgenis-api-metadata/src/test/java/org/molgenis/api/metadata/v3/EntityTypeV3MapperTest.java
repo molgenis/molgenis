@@ -289,7 +289,9 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
     Map<String, Attribute> attrs = new HashMap<>();
     Attribute attr1 = mock(Attribute.class);
+    when(attr1.getIdentifier()).thenReturn("1");
     Attribute attr2 = mock(Attribute.class);
+    when(attr2.getIdentifier()).thenReturn("2");
     attrs.put("1",attr1);
     attrs.put("2",attr2);
     when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1,attrMap2), entityType)).thenReturn(attrs);
