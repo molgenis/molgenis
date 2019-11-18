@@ -1,4 +1,4 @@
-package org.molgenis.api.metadata.v3;
+package org.molgenis.api.data;
 
 import org.molgenis.api.model.Sort.Order;
 import org.molgenis.data.Sort;

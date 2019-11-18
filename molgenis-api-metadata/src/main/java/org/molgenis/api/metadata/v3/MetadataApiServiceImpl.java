@@ -6,6 +6,8 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
+import org.molgenis.api.data.QueryMapper;
+import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;

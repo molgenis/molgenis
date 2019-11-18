@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -17,20 +17,20 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.rsql.RSQLValueParser;
 
-class QueryV3Mapper {
+public class QueryMapper {
   private final RSQLValueParser rsqlValueParser;
 
-  QueryV3Mapper(RSQLValueParser rsqlValueParser) {
+  QueryMapper(RSQLValueParser rsqlValueParser) {
     this.rsqlValueParser = requireNonNull(rsqlValueParser);
   }
 
-  public org.molgenis.data.Query<Entity> map(Query query, Repository<Entity> repository) {
-    QueryImpl<Entity> entityQuery = new QueryImpl<>(repository);
+  public <E extends Entity> org.molgenis.data.Query<E> map(Query query, Repository<E> repository) {
+    QueryImpl<E> entityQuery = new QueryImpl<>(repository);
     map(query, entityQuery, repository.getEntityType());
     return entityQuery;
   }
 
-  private void map(Query query, QueryImpl<Entity> entityQuery, EntityType entityType) {
+  private void map(Query query, QueryImpl<? extends Entity> entityQuery, EntityType entityType) {
     Operator operator = query.getOperator();
     switch (operator) {
       case EQUALS:

@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.molgenis.api.data.QueryMapper;
+import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.model.Query;
 import org.molgenis.data.Repository;
