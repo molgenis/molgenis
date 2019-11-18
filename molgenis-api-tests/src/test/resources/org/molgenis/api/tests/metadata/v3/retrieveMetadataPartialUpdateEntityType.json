@@ -1,23 +1,23 @@
 {
   "links": {
-    "self": "http://localhost:8080/api/metadata/v3meta_MyStrings"
+    "self": "${baseUri}/api/metadata/v3meta_MyStrings"
   },
   "data": {
     "id": "v3meta_MyStrings",
     "label": "My Strings (updated)",
     "package_": {
       "links": {
-        "self": "http://localhost:8080/api/data/sys_md_Package/v3meta"
+        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
       }
     },
     "attributes": {
       "links": {
-        "self": "http://localhost:8080/api/metadata/v3meta_MyStrings/attributes"
+        "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes"
       },
       "items": [
         {
           "link": {
-            "self": "http://localhost:8080/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_id"
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_id"
           },
           "data": {
             "id": "v3meta_MyStrings_id",
@@ -37,7 +37,7 @@
         },
         {
           "link": {
-            "self": "http://localhost:8080/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_label"
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_label"
           },
           "data": {
             "id": "v3meta_MyStrings_label",
@@ -58,7 +58,7 @@
         },
         {
           "link": {
-            "self": "http://localhost:8080/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_int"
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_int"
           },
           "data": {
             "id": "v3meta_MyStrings_int",
