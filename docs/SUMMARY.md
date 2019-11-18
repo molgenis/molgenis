@@ -32,6 +32,7 @@
   * [Localization](guide-l10n.md)
   * [Apps in MOLGENIS](guide-app-manager.md)
   * [Creating themes](guide-creating-themes.md)
+  * [Migration](guide-migration.md)
 * Interoperability
   * [Swagger specification](guide-swagger.md)
   * [Data API](guide-api-data.md)
@@ -55,10 +56,7 @@
   * [Running the integration tests](guide-integration-tests.md)
   * [Jobs](guide-jobs.md)
   * [Security](guide-security.md)
-* For system administrators
-  * [Kubernetes \(experimental\)](guide-kubernetes.md)
-  * [Standalone server \(tomcat\)](guide-standalone-server.md)
-  * [Migration guide](guide-migration.md)
+* [For system administrators](guide-deploy-molgenis.md)
 
 #* User Documentation
 #  * Data

@@ -6,12 +6,13 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.List;
+import org.molgenis.api.data.QueryMapper;
+import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
@@ -32,20 +33,16 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   private final MetaDataService metadataService;
   private final QueryMapper queryMapper;
   private final SortMapper sortMapper;
-  // TODO replace usage of DataService with new methods in MetaDataService
-  private final DataService dataService;
   private final MetadataApiJobService metadataApiJobService;
 
   MetadataApiServiceImpl(
       MetaDataService metadataService,
       QueryMapper queryMapperV3,
       SortMapper sortMapper,
-      DataService dataService,
       MetadataApiJobService metadataApiJobService) {
     this.metadataService = requireNonNull(metadataService);
     this.queryMapper = requireNonNull(queryMapperV3);
     this.sortMapper = requireNonNull(sortMapper);
-    this.dataService = requireNonNull(dataService);
     this.metadataApiJobService = requireNonNull(metadataApiJobService);
   }
 
@@ -123,11 +120,11 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   }
 
   private Attribute findAttribute(EntityType entityType, String attributeId) {
-    // TODO use MetaDataService instead of DataService
     Attribute attribute =
-        dataService.findOneById(
-            AttributeMetadata.ATTRIBUTE_META_DATA, attributeId, Attribute.class);
-    if (attribute == null || !attribute.getEntity().getId().equals(entityType.getId())) {
+        metadataService
+            .getAttribute(attributeId)
+            .orElseThrow(() -> new UnknownAttributeException(entityType, attributeId));
+    if (!entityTypeHasAttribute(entityType, attribute)) {
       throw new UnknownAttributeException(entityType, attributeId);
     }
     return attribute;
@@ -179,7 +176,6 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     }
     metadataService.addEntityType(persistableEntityType);
   }
-
   // TODO remove code duplication with molgenis-data-import DataPersisterImpl
   private void updateEntityTypeSecondPass(EntityType entityType) {
     if (entityType.hasMappedByAttributes()) {
@@ -187,12 +183,19 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     }
   }
 
+  private static boolean entityTypeHasAttribute(EntityType entityType, Attribute attribute) {
+    return attribute.getEntity().getId().equals(entityType.getId());
+  }
+
   private List<EntityType> getEntityTypes(Query q) {
     Repository<EntityType> entityTypeRepository =
-        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
+        metadataService
+            .getRepository(ENTITY_TYPE_META_DATA, EntityType.class)
+            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
     org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
     dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
     List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
+
     if (entityTypes.isEmpty()) {
       throw new ZeroResultsException(q);
     }
@@ -201,7 +204,9 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
   private List<Attribute> findAttributes(String entityTypeId, Query q) {
     Repository<Attribute> attributeRepository =
-        dataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class);
+        metadataService
+            .getRepository(ATTRIBUTE_META_DATA, Attribute.class)
+            .orElseThrow(() -> new UnknownRepositoryException(ENTITY_TYPE_META_DATA));
     org.molgenis.data.Query<Attribute> dataServiceQuery =
         queryMapper.map(q, attributeRepository).and().eq(AttributeMetadata.ENTITY, entityTypeId);
     dataServiceQuery.setFetch(new Fetch().field(AttributeMetadata.ID));

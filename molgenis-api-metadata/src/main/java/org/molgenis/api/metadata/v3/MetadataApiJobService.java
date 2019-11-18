@@ -26,7 +26,7 @@ public interface MetadataApiJobService {
   /**
    * Schedule an entity type delete job.
    *
-   * @param entityType deleted entity type
+   * @param entityType entity type to delete
    * @return job execution
    */
   MetadataDeleteJobExecution scheduleDelete(EntityType entityType);
@@ -34,7 +34,7 @@ public interface MetadataApiJobService {
   /**
    * Schedule an entity type delete job.
    *
-   * @param entityTypes deleted entity types
+   * @param entityTypes entity types to delete
    * @return job execution
    */
   MetadataDeleteJobExecution scheduleDelete(Collection<EntityType> entityTypes);

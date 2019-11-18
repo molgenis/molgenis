@@ -36,6 +36,7 @@ import static org.molgenis.data.util.EntityTypeUtils.getEntityTypeFetch;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -971,6 +972,34 @@ class MetaDataServiceImplTest extends AbstractMockitoTest {
     assertEquals(singletonList(attrDeleted), attrDeletedCaptor.getValue().collect(toList()));
 
     inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  void getAttribute() {
+    String attributeId = "attr1";
+    Attribute attribute = mock(Attribute.class);
+    when(dataService.findOneById(eq(ATTRIBUTE_META_DATA), eq(attributeId), eq(Attribute.class)))
+        .thenReturn(attribute);
+
+    Optional<Attribute> actualAttribute = metaDataServiceImpl.getAttribute(attributeId);
+
+    assertEquals(of(attribute), actualAttribute);
+  }
+
+  @Test
+  void getAttributeNull() {
+    Optional<Attribute> actualAttribute = metaDataServiceImpl.getAttribute(null);
+
+    assertEquals(empty(), actualAttribute);
+  }
+
+  @Test
+  void getAttributeUnknownEntityType() {
+    String attributeId = "attr1";
+
+    Optional<Attribute> actualAttribute = metaDataServiceImpl.getAttribute(attributeId);
+
+    assertEquals(empty(), actualAttribute);
   }
 
   @Test

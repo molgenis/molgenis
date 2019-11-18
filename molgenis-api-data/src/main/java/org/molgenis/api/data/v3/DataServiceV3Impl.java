@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.api.data.QueryMapper;
+import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
@@ -38,8 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 class DataServiceV3Impl implements DataServiceV3 {
   private final MetaDataService metaDataService;
   private final EntityManagerV3 entityManagerV3;
-  private final QueryV3Mapper queryMapperV3;
-  private final SortV3Mapper sortMapperV3;
+  private final QueryMapper queryMapper;
+  private final SortMapper sortMapper;
   private final FetchMapper fetchMapper;
   private final EntityValidator entityValidator;
 
@@ -51,14 +53,14 @@ class DataServiceV3Impl implements DataServiceV3 {
   DataServiceV3Impl(
       MetaDataService metaDataService,
       EntityManagerV3 entityManagerV3,
-      QueryV3Mapper queryMapperV3,
-      SortV3Mapper sortMapperV3,
+      QueryMapper queryMapper,
+      SortMapper sortMapper,
       FetchMapper fetchMapper,
       EntityValidator entityValidator) {
     this.metaDataService = requireNonNull(metaDataService);
     this.entityManagerV3 = requireNonNull(entityManagerV3);
-    this.queryMapperV3 = requireNonNull(queryMapperV3);
-    this.sortMapperV3 = requireNonNull(sortMapperV3);
+    this.queryMapper = requireNonNull(queryMapper);
+    this.sortMapper = requireNonNull(sortMapper);
     this.fetchMapper = requireNonNull(fetchMapper);
     this.entityValidator = requireNonNull(entityValidator);
   }
@@ -135,7 +137,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     // Add 'in' query for the mref entity ID's
     Repository<Entity> refRepository = getRepository(refEntityType.getId(), OperationType.READ);
     org.molgenis.data.Query<Entity> findQuery =
-        query != null ? queryMapperV3.map(query, refRepository) : new QueryImpl<>(refRepository);
+        query != null ? queryMapper.map(query, refRepository) : new QueryImpl<>(refRepository);
 
     QueryImpl<Entity> q = new QueryImpl<>();
     if (!findQuery.getRules().isEmpty()) {
@@ -169,7 +171,7 @@ class DataServiceV3Impl implements DataServiceV3 {
       int number) {
     Repository<Entity> repository = getRepository(entityTypeId, OperationType.READ);
     org.molgenis.data.Query<Entity> findQuery =
-        query != null ? queryMapperV3.map(query, repository) : new QueryImpl<>(repository);
+        query != null ? queryMapper.map(query, repository) : new QueryImpl<>(repository);
 
     return getEntities(filter, expand, sort, size, number, repository, findQuery);
   }
@@ -189,7 +191,7 @@ class DataServiceV3Impl implements DataServiceV3 {
     findQuery.fetch(fetch);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapperV3.map(sort));
+    findQuery.sort(sortMapper.map(sort));
     List<Entity> entities = repository.findAll(findQuery).collect(toList());
 
     org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(query);
@@ -259,7 +261,7 @@ class DataServiceV3Impl implements DataServiceV3 {
   public void deleteAll(String entityTypeId, @Nullable @CheckForNull Query query) {
     Repository<Entity> repo = getRepository(entityTypeId, OperationType.MODIFY);
     org.molgenis.data.Query<Entity> molgenisQuery =
-        query != null ? queryMapperV3.map(query, repo) : new QueryImpl<>(repo);
+        query != null ? queryMapper.map(query, repo) : new QueryImpl<>(repo);
     repo.delete(molgenisQuery.findAll());
   }
 

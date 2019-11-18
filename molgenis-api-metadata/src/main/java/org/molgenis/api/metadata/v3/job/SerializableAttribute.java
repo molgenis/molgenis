@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
@@ -15,8 +16,6 @@ abstract class SerializableAttribute {
   abstract String getId();
 
   abstract String getName();
-
-  abstract String getEntityTypeId();
 
   abstract int getSequenceNr();
 
@@ -34,9 +33,7 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getRefEntityTypeId();
 
-  @Nullable
-  @CheckForNull
-  abstract Boolean getCascadeDelete();
+  abstract Optional<Boolean> getCascadeDelete();
 
   @Nullable
   @CheckForNull
@@ -106,17 +103,17 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getDefaultValue();
 
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   public static SerializableAttribute create(
       String newId,
       String newName,
-      String newEntityTypeId,
       int newSequenceNr,
       String newType,
       boolean newIdAttribute,
       boolean newLabelAttribute,
       Integer newLookupAttributeIndex,
       String newRefEntityTypeId,
-      Boolean newCascadeDelete,
+      Optional<Boolean> newCascadeDelete,
       String newMappedById,
       String newOrderBy,
       String newLabel,
@@ -142,7 +139,6 @@ abstract class SerializableAttribute {
     return builder()
         .setId(newId)
         .setName(newName)
-        .setEntityTypeId(newEntityTypeId)
         .setSequenceNr(newSequenceNr)
         .setType(newType)
         .setIdAttribute(newIdAttribute)
@@ -186,8 +182,6 @@ abstract class SerializableAttribute {
 
     public abstract Builder setName(String newName);
 
-    public abstract Builder setEntityTypeId(String newEntityTypeId);
-
     public abstract Builder setSequenceNr(int newSequenceNr);
 
     public abstract Builder setType(String newType);
@@ -200,7 +194,8 @@ abstract class SerializableAttribute {
 
     public abstract Builder setRefEntityTypeId(String newRefEntityTypeId);
 
-    public abstract Builder setCascadeDelete(Boolean newCascadeDelete);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public abstract Builder setCascadeDelete(Optional<Boolean> newCascadeDelete);
 
     public abstract Builder setMappedById(String newMappedById);
 
