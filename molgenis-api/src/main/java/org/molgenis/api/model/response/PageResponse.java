@@ -1,7 +1,8 @@
 package org.molgenis.api.model.response;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Preconditions;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -17,11 +18,39 @@ public abstract class PageResponse {
 
   public abstract int getNumber();
 
-  public static PageResponse create(int size, int totalElements, int totalPages, int number) {
-    Preconditions.checkState(size >= 0, "Negative number of results on the page");
-    Preconditions.checkState(totalElements >= 0, "Negative number of results in the system");
-    Preconditions.checkState(totalPages >= 0, "Negative number of pages");
-    Preconditions.checkState(number >= 0, "Negative number of items");
-    return new AutoValue_PageResponse(size, totalElements, totalPages, number);
+  public static PageResponse create(
+      int newSize, int newTotalElements, int newTotalPages, int newNumber) {
+    return builder()
+        .setSize(newSize)
+        .setTotalElements(newTotalElements)
+        .setTotalPages(newTotalPages)
+        .setNumber(newNumber)
+        .build();
+  }
+
+  public static Builder builder() {
+    return new AutoValue_PageResponse.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setSize(int newSize);
+
+    public abstract Builder setTotalElements(int newTotalElements);
+
+    public abstract Builder setTotalPages(int newTotalPages);
+
+    public abstract Builder setNumber(int newNumber);
+
+    abstract PageResponse autoBuild();
+
+    public PageResponse build() {
+      PageResponse pageResponse = autoBuild();
+      checkState(pageResponse.getSize() >= 0, "Negative number of results on the page");
+      checkState(pageResponse.getTotalElements() >= 0, "Negative number of results in the system");
+      checkState(pageResponse.getTotalPages() >= 0, "Negative number of pages");
+      checkState(pageResponse.getNumber() >= 0, "Negative number of items");
+      return pageResponse;
+    }
   }
 }

@@ -10,7 +10,7 @@ import org.molgenis.metadata.manager.model.EditorOrder;
 import org.molgenis.metadata.manager.model.EditorSort;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component(value = "metadataManagerSortMapper")
 class SortMapper {
   Sort toSort(EditorSort editorSort) {
     if (editorSort == null) {

@@ -1,4 +1,4 @@
-package org.molgenis.api.data.v3;
+package org.molgenis.api.data;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,18 +23,18 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.rsql.RSQLValueParser;
 
-class QueryV3MapperTest extends AbstractMockitoTest {
+class QueryMapperTest extends AbstractMockitoTest {
   @Mock private RSQLValueParser rsqlValueParser;
-  private QueryV3Mapper queryMapper;
+  private QueryMapper queryMapper;
 
   @BeforeEach
   void setUpBeforeMethod() {
-    queryMapper = new QueryV3Mapper(rsqlValueParser);
+    queryMapper = new QueryMapper(rsqlValueParser);
   }
 
   @Test
   void testQueryV3Mapper() {
-    assertThrows(NullPointerException.class, () -> new QueryV3Mapper(null));
+    assertThrows(NullPointerException.class, () -> new QueryMapper(null));
   }
 
   @Test

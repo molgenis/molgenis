@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.api.convert.SortConverter;
+import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
