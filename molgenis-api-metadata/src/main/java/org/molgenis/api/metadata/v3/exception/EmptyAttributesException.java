@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3.exception;
 
 import org.molgenis.util.exception.BadRequestException;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EmptyAttributesException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI02";
 
