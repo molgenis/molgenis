@@ -23,7 +23,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
+import org.molgenis.api.support.LinksUtils;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -41,7 +41,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class EntityTypeV3Mapper {
 
   public static final String ATTRIBUTES = "attributes";
-  public static final String PAGE = "page";
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeV3Mapper attributeV3Mapper;
   private final MetaDataService metaDataService;
@@ -64,7 +63,7 @@ public class EntityTypeV3Mapper {
     }
 
     return EntityTypesResponse.create(
-        createLinksResponse(pagenumber, pagesize, totalElements),
+        LinksUtils.createLinksResponse(pagenumber, pagesize, totalElements),
         results,
         getPageResponse(
             entityTypes.getEntityTypes().size(), pagenumber * pagesize, totalElements, pagesize));
@@ -178,34 +177,6 @@ public class EntityTypeV3Mapper {
     }
 
     return entityTypeResponseBuilder.build();
-  }
-
-  private LinksResponse createLinksResponse(int number, int size, int total) {
-    URI self = createEntitiesResponseUri();
-    URI previous = null;
-    URI next = null;
-    if (number > 0) {
-      previous = createEntitiesResponseUri(number - 1);
-    }
-    if ((number * size) + size < total) {
-      next = createEntitiesResponseUri(number + 1);
-    }
-    return LinksResponse.create(previous, self, next);
-  }
-
-  private URI createEntitiesResponseUri() {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    return builder.build().toUri();
-  }
-
-  private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    if (pageNumber != null) {
-      builder.replaceQueryParam(PAGE, pageNumber);
-    }
-    return builder.build().toUri();
   }
 
   private URI createEntityTypeResponseUri(EntityType entityType) {
