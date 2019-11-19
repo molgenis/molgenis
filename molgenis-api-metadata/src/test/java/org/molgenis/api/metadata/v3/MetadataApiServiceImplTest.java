@@ -22,7 +22,6 @@ import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -70,12 +69,10 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   void testDeleteAttribute() {
     String entityTypeId = "entityTypeId";
     EntityType entityType = mock(EntityType.class);
-    when(entityType.getId()).thenReturn(entityTypeId);
     when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
     String attributeId = "attr1";
     Attribute attr = mock(Attribute.class);
-    when(attr.getEntity()).thenReturn(entityType);
-    when(metadataService.getAttribute(attributeId)).thenReturn(Optional.of(attr));
+    when(entityType.getOwnAttributeById(attributeId)).thenReturn(attr);
 
     metadataApiService.deleteAttributeAsync(entityTypeId, attributeId);
 
@@ -91,36 +88,6 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     assertThrows(
         UnknownEntityTypeException.class,
         () -> metadataApiService.deleteAttributeAsync(entityTypeId, "attr1"));
-  }
-
-  @Test
-  void testDeleteAttributeUnknownAttribute() {
-    String entityTypeId = "test_entity1";
-    String attributeId = "unknown";
-    EntityType entityType = mock(EntityType.class);
-    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
-
-    assertThrows(
-        UnknownAttributeException.class,
-        () -> metadataApiService.deleteAttributeAsync(entityTypeId, attributeId));
-  }
-
-  @Test
-  void testDeleteAttributeNotPartOfThisEntityType() {
-    String entityTypeId = "test_entity1";
-    EntityType entityType = mock(EntityType.class);
-    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
-    EntityType otherEntityType = mock(EntityType.class);
-    when(otherEntityType.getId()).thenReturn("test_entity2");
-
-    String attributeId = "unknown";
-    Attribute attribute = mock(Attribute.class);
-    when(metadataService.getAttribute(attributeId)).thenReturn(Optional.of(attribute));
-    when(attribute.getEntity()).thenReturn(otherEntityType);
-
-    assertThrows(
-        UnknownAttributeException.class,
-        () -> metadataApiService.deleteAttributeAsync(entityTypeId, attributeId));
   }
 
   @SuppressWarnings("unchecked")

@@ -192,16 +192,6 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Transactional
   @Override
   public void deleteAttributeById(Object id) {
-    deleteAttribute(id);
-  }
-
-  @Transactional
-  @Override
-  public void deleteAttributesById(Collection<String> attributeIds) {
-    attributeIds.forEach(this::deleteAttribute);
-  }
-
-  private void deleteAttribute(Object id) {
     Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, id, Attribute.class);
     if (attribute == null) {
       throw new UnknownEntityException(ATTRIBUTE_META_DATA, id);
@@ -355,13 +345,6 @@ public class MetaDataServiceImpl implements MetaDataService {
     }
     // add new attributes, update modified attributes
     upsertAttributes(entityType, existingEntityType);
-  }
-
-  @Override
-  public Optional<Attribute> getAttribute(String attributeId) {
-    Attribute attribute =
-        dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class);
-    return Optional.ofNullable(attribute);
   }
 
   @Transactional

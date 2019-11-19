@@ -238,22 +238,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
    */
   void deleteEntityTypes(Collection<String> entityTypeIds);
 
-  /**
-   * Gets the Attribute for a given identifier.
-   *
-   * @param attributeId the identifier of the Attribute
-   * @return optional Attribute
-   */
-  Optional<Attribute> getAttribute(String attributeId);
-
   /** Adds an Attribute to an EntityType */
   void addAttribute(Attribute attribute);
 
   /** Deletes an Attribute from an Entity */
   void deleteAttributeById(Object id);
-
-  /** Deletes multiple attributes */
-  void deleteAttributesById(Collection<String> attributeIds);
 
   /**
    * Check the integration of an entity type with existing entities Check only if the existing
