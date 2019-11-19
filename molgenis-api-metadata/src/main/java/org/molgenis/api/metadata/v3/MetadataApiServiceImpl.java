@@ -15,7 +15,6 @@ import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Sort;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.MetaDataService;
@@ -115,24 +114,13 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public Attribute findAttribute(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
-    return findAttribute(entityType, attributeId);
-  }
-
-  private Attribute findAttribute(EntityType entityType, String attributeId) {
-    Attribute attribute =
-        metadataService
-            .getAttribute(attributeId)
-            .orElseThrow(() -> new UnknownAttributeException(entityType, attributeId));
-    if (!entityTypeHasAttribute(entityType, attribute)) {
-      throw new UnknownAttributeException(entityType, attributeId);
-    }
-    return attribute;
+    return entityType.getOwnAttributeById(attributeId);
   }
 
   @Override
   public MetadataUpsertJobExecution deleteAttributeAsync(String entityTypeId, String attributeId) {
     EntityType entityType = findEntityType(entityTypeId);
-    Attribute attribute = findAttribute(entityType, attributeId);
+    Attribute attribute = entityType.getOwnAttributeById(attributeId);
     entityType.removeAttribute(attribute);
     return metadataApiJobService.scheduleUpdate(entityType);
   }
@@ -163,10 +151,6 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public MetadataDeleteJobExecution deleteEntityTypesAsync(Query query) {
     return metadataApiJobService.scheduleDelete(getEntityTypes(query));
-  }
-
-  private static boolean entityTypeHasAttribute(EntityType entityType, Attribute attribute) {
-    return attribute.getEntity().getId().equals(entityType.getId());
   }
 
   private List<EntityType> getEntityTypes(Query q) {
