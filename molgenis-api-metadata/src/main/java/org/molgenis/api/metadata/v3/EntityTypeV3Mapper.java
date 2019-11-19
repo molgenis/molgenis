@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -87,10 +86,14 @@ class EntityTypeV3Mapper {
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
-    Optional<Package> pack =
-        packageId != null ? metaDataService.getPackage(packageId) : Optional.empty();
-    entityType.setPackage(
-        pack.orElseThrow(() -> new UnknownPackageException(entityTypeRequest.getPackage())));
+    Package pack = null;
+    if (packageId != null) {
+      pack =
+          metaDataService
+              .getPackage(packageId)
+              .orElseThrow(() -> new UnknownPackageException(entityTypeRequest.getPackage()));
+    }
+    entityType.setPackage(pack);
     String extendsEntityTypeId = entityTypeRequest.getExtends();
     if (extendsEntityTypeId != null) {
       EntityType extendsEntityType =
