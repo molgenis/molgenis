@@ -3,8 +3,6 @@ package org.molgenis.api.metadata.v3.job;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -103,78 +101,12 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getDefaultValue();
 
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  public static SerializableAttribute create(
-      String newId,
-      String newName,
-      int newSequenceNr,
-      String newType,
-      boolean newIdAttribute,
-      boolean newLabelAttribute,
-      Integer newLookupAttributeIndex,
-      String newRefEntityTypeId,
-      Optional<Boolean> newCascadeDelete,
-      String newMappedById,
-      String newOrderBy,
-      String newLabel,
-      Map<String, String> newLabelI18n,
-      String newDescription,
-      Map<String, String> newDescriptionI18n,
-      boolean newNullable,
-      boolean newAuto,
-      boolean newVisible,
-      boolean newUnique,
-      boolean newReadOnly,
-      boolean newAggregatable,
-      String newExpression,
-      List<String> newEnumOptions,
-      Long newRangeMin,
-      Long newRangeMax,
-      String newParentId,
-      List<String> newTagIds,
-      String newNullableExpression,
-      String newVisibleExpression,
-      String newValidationExpression,
-      String newDefaultValue) {
-    return builder()
-        .setId(newId)
-        .setName(newName)
-        .setSequenceNr(newSequenceNr)
-        .setType(newType)
-        .setIdAttribute(newIdAttribute)
-        .setLabelAttribute(newLabelAttribute)
-        .setLookupAttributeIndex(newLookupAttributeIndex)
-        .setRefEntityTypeId(newRefEntityTypeId)
-        .setCascadeDelete(newCascadeDelete)
-        .setMappedById(newMappedById)
-        .setOrderBy(newOrderBy)
-        .setLabel(newLabel)
-        .setLabelI18n(ImmutableMap.copyOf(newLabelI18n))
-        .setDescription(newDescription)
-        .setDescriptionI18n(ImmutableMap.copyOf(newDescriptionI18n))
-        .setNullable(newNullable)
-        .setAuto(newAuto)
-        .setVisible(newVisible)
-        .setUnique(newUnique)
-        .setReadOnly(newReadOnly)
-        .setAggregatable(newAggregatable)
-        .setExpression(newExpression)
-        .setEnumOptions(ImmutableList.copyOf(newEnumOptions))
-        .setRangeMin(newRangeMin)
-        .setRangeMax(newRangeMax)
-        .setParentId(newParentId)
-        .setTagIds(ImmutableList.copyOf(newTagIds))
-        .setNullableExpression(newNullableExpression)
-        .setVisibleExpression(newVisibleExpression)
-        .setValidationExpression(newValidationExpression)
-        .setDefaultValue(newDefaultValue)
-        .build();
-  }
-
   public static Builder builder() {
     return new AutoValue_SerializableAttribute.Builder();
   }
 
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   public abstract static class Builder {
 
