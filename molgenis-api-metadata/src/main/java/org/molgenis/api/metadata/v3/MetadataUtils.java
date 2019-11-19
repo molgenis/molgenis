@@ -29,7 +29,6 @@ public class MetadataUtils {
     return builder.build();
   }
 
-
   static void setSequenceNumber(Attribute attribute, Entry<String, Object> entry) {
     String sequenceString = getStringValue(entry.getValue());
     if (sequenceString != null) {

@@ -32,7 +32,6 @@ import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.support.LinksUtils;
-import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
 import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
@@ -274,9 +273,11 @@ class EntityTypeV3Mapper {
     }
   }
 
-  @SuppressWarnings({"squid:S1192"}) //ATTRIBUTES constant in this class is not related to the one in this switch
-  private Iterable<Attribute> updateEntityType(EntityType entityType,
-      Iterable<Attribute> updatedAttributes, Entry<String, Object> entry) {
+  @SuppressWarnings({
+    "squid:S1192"
+  }) // ATTRIBUTES constant in this class is not related to the one in this switch
+  private Iterable<Attribute> updateEntityType(
+      EntityType entityType, Iterable<Attribute> updatedAttributes, Entry<String, Object> entry) {
     switch (entry.getKey()) {
       case "package_":
         String packageId = String.valueOf(entry.getValue());

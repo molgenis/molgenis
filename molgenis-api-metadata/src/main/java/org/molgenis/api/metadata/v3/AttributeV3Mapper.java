@@ -324,7 +324,7 @@ class AttributeV3Mapper {
           break;
         case "cascadeDelete":
           String cascadeValue = getStringValue(entry.getValue());
-          Boolean isCascade = cascadeValue != null?Boolean.valueOf(cascadeValue):null;
+          Boolean isCascade = cascadeValue != null ? Boolean.valueOf(cascadeValue) : null;
           attribute.setCascadeDelete(isCascade);
           break;
         case "orderBy":
@@ -400,10 +400,9 @@ class AttributeV3Mapper {
     EntityType refEntityType;
     String refEntityTypeId = getStringValue(entry.getValue());
     if (refEntityTypeId != null) {
-      refEntityType =
-          (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
+      refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
-    }else{
+    } else {
       throw new UnknownEntityTypeException(refEntityTypeId);
     }
   }

@@ -217,7 +217,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
-    verify(entityType).set(IS_ABSTRACT,true);
+    verify(entityType).set(IS_ABSTRACT, true);
   }
 
   @Test
