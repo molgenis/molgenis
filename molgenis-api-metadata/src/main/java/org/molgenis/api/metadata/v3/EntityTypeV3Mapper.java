@@ -38,14 +38,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class EntityTypeV3Mapper {
+class EntityTypeV3Mapper {
 
-  public static final String ATTRIBUTES = "attributes";
+  private static final String ATTRIBUTES = "attributes";
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeV3Mapper attributeV3Mapper;
   private final MetaDataService metaDataService;
 
-  public EntityTypeV3Mapper(
+  EntityTypeV3Mapper(
       EntityTypeFactory entityTypeFactory,
       AttributeV3Mapper attributeV3Mapper,
       MetaDataService metaDataService) {
@@ -54,8 +54,8 @@ public class EntityTypeV3Mapper {
     this.metaDataService = requireNonNull(metaDataService);
   }
 
-  public EntityTypesResponse toEntityTypesResponse(
-      EntityTypes entityTypes, int pagesize, int pagenumber, int totalElements) {
+  EntityTypesResponse toEntityTypesResponse(
+      EntityTypes entityTypes, int pageSize, int pageNumber, int totalElements) {
 
     List<EntityTypeResponse> results = new ArrayList<>();
     for (EntityType entityType : entityTypes.getEntityTypes()) {
@@ -63,18 +63,18 @@ public class EntityTypeV3Mapper {
     }
 
     return EntityTypesResponse.create(
-        LinksUtils.createLinksResponse(pagenumber, pagesize, totalElements),
+        LinksUtils.createLinksResponse(pageNumber, pageSize, totalElements),
         results,
         getPageResponse(
-            entityTypes.getEntityTypes().size(), pagenumber * pagesize, totalElements, pagesize));
+            entityTypes.getEntityTypes().size(), pageNumber * pageSize, totalElements, pageSize));
   }
 
-  public EntityTypeResponse toEntityTypeResponse(
+  EntityTypeResponse toEntityTypeResponse(
       EntityType entityType, boolean flattenAttrs, boolean i18n) {
     return mapInternal(entityType, flattenAttrs, true, true, i18n);
   }
 
-  public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
+  EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
@@ -124,10 +124,9 @@ public class EntityTypeV3Mapper {
   private void processSelfReferencingAttributes(
       EntityType entityType, Collection<Attribute> attributes) {
     for (Attribute attribute : attributes) {
-      if (isReferenceType(attribute)) {
-        if (attribute.getRefEntity().getId().equals(entityType.getId())) {
-          attribute.setRefEntity(entityType);
-        }
+      if (isReferenceType(attribute)
+          && attribute.getRefEntity().getId().equals(entityType.getId())) {
+        attribute.setRefEntity(entityType);
       }
     }
   }
