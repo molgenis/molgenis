@@ -338,6 +338,11 @@ public class EntityTypeWithoutMappedByAttributes extends EntityType {
   }
 
   @Override
+  public Attribute getOwnAttributeById(String attributeIdentifier) {
+    return entityType.getOwnAttributeById(attributeIdentifier);
+  }
+
+  @Override
   public EntityType addAttribute(Attribute attr, AttributeRole... attrTypes) {
     return entityType.addAttribute(attr, attrTypes);
   }
