@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
+import org.molgenis.api.metadata.v3.exception.UnsupportedFieldException;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData;
 import org.molgenis.api.metadata.v3.model.AttributeResponseData.Builder;
@@ -45,6 +46,7 @@ import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.support.LinksUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
@@ -389,6 +391,8 @@ class AttributeV3Mapper {
         case "parent":
           // Skip now and process after all attributes in the request have been processed
           break;
+        case "tags":
+          throw new UnsupportedFieldException(entry.getKey());
         default:
           throw new InvalidKeyException("attribute", entry.getKey());
       }
@@ -426,6 +430,8 @@ class AttributeV3Mapper {
         }
         builder.setTranslations(typedTranslations);
       }
+    } else {
+      throw new InvalidValueTypeException(value.toString(), "I18nValue", null);
     }
     return builder.build();
   }

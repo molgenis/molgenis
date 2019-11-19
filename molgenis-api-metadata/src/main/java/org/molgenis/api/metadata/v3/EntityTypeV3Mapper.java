@@ -22,6 +22,8 @@ import java.util.stream.StreamSupport;
 import org.molgenis.api.metadata.v3.exception.EmptyAttributesException;
 import org.molgenis.api.metadata.v3.exception.IdModificationException;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
+import org.molgenis.api.metadata.v3.exception.UnknownLookupAttributesException;
+import org.molgenis.api.metadata.v3.exception.UnsupportedFieldException;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
@@ -32,6 +34,7 @@ import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.support.LinksUtils;
 import org.molgenis.data.InvalidValueTypeException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -325,6 +328,9 @@ class EntityTypeV3Mapper {
           updatedAttributes = entityType.getOwnAllAttributes();
         }
         break;
+      case "tags":
+      case "backend":
+        throw new UnsupportedFieldException(entry.getKey());
       default:
         throw new InvalidKeyException("entityType", entry.getKey());
     }
@@ -346,11 +352,13 @@ class EntityTypeV3Mapper {
             .map(Attribute::getIdentifier)
             .collect(Collectors.toList());
     String currentLabelAttributeId =
-        entityType.getLabelAttribute() != null
-            ? entityType.getLabelAttribute().getIdentifier()
+        entityType.getOwnLabelAttribute() != null
+            ? entityType.getOwnLabelAttribute().getIdentifier()
             : null;
     String currentIdAttributeId =
-        entityType.getIdAttribute() != null ? entityType.getIdAttribute().getIdentifier() : null;
+        entityType.getOwnIdAttribute() != null
+            ? entityType.getOwnIdAttribute().getIdentifier()
+            : null;
 
     String newIdAttributeId = null;
     String newLabelAttributeId = null;
@@ -372,15 +380,41 @@ class EntityTypeV3Mapper {
     }
 
     String idAttributeId = newIdAttributeId != null ? newIdAttributeId : currentIdAttributeId;
-    updatedAttributes.forEach(
-        attribute -> attribute.setIdAttribute(attribute.getIdentifier().equals(idAttributeId)));
     String labelAttributeId =
         newLabelAttributeId != null ? newLabelAttributeId : currentLabelAttributeId;
-    updatedAttributes.forEach(
-        attribute ->
-            attribute.setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId)));
-    setLookupAttributes(updatedAttributes, currentLookupAttributes, newLookupAttributes);
+    updateIdAttribute(entityType, updatedAttributes, idAttributeId);
+    updateLabelAttribute(entityType, updatedAttributes, labelAttributeId);
+    setLookupAttributes(
+        updatedAttributes, currentLookupAttributes, newLookupAttributes, entityType);
     entityType.setOwnAllAttributes(updatedAttributes);
+  }
+
+  private void updateLabelAttribute(
+      EntityType entityType, Iterable<Attribute> updatedAttributes, String labelAttributeId) {
+    boolean isLabelSet = labelAttributeId == null;
+    for (Attribute attribute : updatedAttributes) {
+      if (!isLabelSet) {
+        isLabelSet = attribute.getIdentifier().equals(labelAttributeId);
+      }
+      attribute.setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId));
+    }
+    if (!isLabelSet) {
+      throw new UnknownAttributeException(entityType, labelAttributeId);
+    }
+  }
+
+  private void updateIdAttribute(
+      EntityType entityType, Iterable<Attribute> updatedAttributes, String idAttributeId) {
+    boolean isIdSet = idAttributeId == null;
+    for (Attribute attribute : updatedAttributes) {
+      if (!isIdSet) {
+        isIdSet = attribute.getIdentifier().equals(idAttributeId);
+      }
+      attribute.setIdAttribute(attribute.getIdentifier().equals(idAttributeId));
+    }
+    if (!isIdSet) {
+      throw new UnknownAttributeException(entityType, idAttributeId);
+    }
   }
 
   private List getNewLookupAttributes(Entry<String, Object> entry) {
@@ -396,16 +430,31 @@ class EntityTypeV3Mapper {
   private void setLookupAttributes(
       Iterable<Attribute> updatedAttributes,
       List currentLookupAttributes,
-      List newLookupAttributes) {
+      List newLookupAttributes,
+      EntityType entityType) {
+    List<Attribute> processedAttrs = new ArrayList<>();
+    List<String> lookupAttributes =
+        newLookupAttributes != null ? newLookupAttributes : currentLookupAttributes;
     for (Attribute attribute : updatedAttributes) {
-      List lookupAttributes =
-          newLookupAttributes != null ? newLookupAttributes : currentLookupAttributes;
       int lookupAttributeIndex = lookupAttributes.indexOf(attribute.getIdentifier());
       if (lookupAttributeIndex != -1) {
         attribute.setLookupAttributeIndex(lookupAttributeIndex);
+        processedAttrs.add(attribute);
       } else {
         attribute.setLookupAttributeIndex(null);
       }
+    }
+
+    List<String> processedAttrIds =
+        processedAttrs.stream().map(Attribute::getIdentifier).collect(Collectors.toList());
+    if (!processedAttrIds.containsAll(lookupAttributes)) {
+      ArrayList<String> missingAttrs = new ArrayList<>();
+      for (String lookup : lookupAttributes) {
+        if (!processedAttrIds.contains(lookup)) {
+          missingAttrs.add(lookup);
+        }
+      }
+      throw new UnknownLookupAttributesException(entityType, missingAttrs);
     }
   }
 
