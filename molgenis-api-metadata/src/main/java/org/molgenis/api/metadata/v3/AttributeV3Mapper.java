@@ -3,9 +3,16 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.metadata.v3.MetadataUtils.getStringValue;
+import static org.molgenis.api.metadata.v3.MetadataUtils.setAttributeType;
+import static org.molgenis.api.metadata.v3.MetadataUtils.setBooleanValue;
+import static org.molgenis.api.metadata.v3.MetadataUtils.setEnumOptions;
+import static org.molgenis.api.metadata.v3.MetadataUtils.setSequenceNumber;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetadata.IS_READ_ONLY;
+import static org.molgenis.data.meta.model.AttributeMetadata.IS_UNIQUE;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
@@ -38,11 +45,11 @@ import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Order;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -308,37 +315,18 @@ class AttributeV3Mapper {
           attribute.setName(getStringValue(entry.getValue()));
           break;
         case "sequenceNumber":
-          String sequenceString = getStringValue(entry.getValue());
-          if (sequenceString != null) {
-            attribute.setSequenceNumber(Integer.valueOf(sequenceString));
-          } else {
-            throw new InvalidValueTypeException(sequenceString, "int", null);
-          }
+          setSequenceNumber(attribute, entry);
           break;
         case "type":
-          String typeString = getStringValue(entry.getValue());
-          if (typeString != null) {
-            attribute.setDataType(AttributeType.toEnum(typeString));
-          } else {
-            throw new InvalidValueTypeException(typeString, "AttributeType", null);
-          }
+          setAttributeType(attribute, entry);
           break;
         case "refEntityType":
-          EntityType refEntityType;
-          String refEntityTypeId = getStringValue(entry.getValue());
-          if (refEntityTypeId != null) {
-            refEntityType =
-                (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
-            attribute.setRefEntity(refEntityType);
-          }
+          setRefEntityType(attribute, entry);
           break;
         case "cascadeDelete":
           String cascadeValue = getStringValue(entry.getValue());
-          if (cascadeValue != null) {
-            attribute.setCascadeDelete(Boolean.valueOf(cascadeValue));
-          } else {
-            attribute.setCascadeDelete(null);
-          }
+          Boolean isCascade = cascadeValue != null?Boolean.valueOf(cascadeValue):null;
+          attribute.setCascadeDelete(isCascade);
           break;
         case "orderBy":
           String orderBy = getStringValue(entry.getValue());
@@ -372,13 +360,7 @@ class AttributeV3Mapper {
           attribute.setAggregatable(Boolean.valueOf(entry.getValue().toString()));
           break;
         case "enumOptions":
-          List<String> options = null;
-          if (entry.getValue() instanceof List) {
-            options = (List<String>) entry.getValue();
-          } else {
-            throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
-          }
-          attribute.setEnumOptions(options);
+          setEnumOptions(attribute, entry);
           break;
         case "range":
           Range range = mapRange(entry.getValue());
@@ -387,20 +369,10 @@ class AttributeV3Mapper {
           }
           break;
         case "readonly":
-          String readOnlyValue = getStringValue(entry.getValue());
-          if (readOnlyValue != null) {
-            attribute.setReadOnly(Boolean.valueOf(readOnlyValue));
-          } else {
-            throw new InvalidValueTypeException(readOnlyValue, "boolean", null);
-          }
+          setBooleanValue(attribute, entry, IS_READ_ONLY);
           break;
         case "unique":
-          String uniqueValue = getStringValue(entry.getValue());
-          if (uniqueValue != null) {
-            attribute.setUnique(Boolean.valueOf(uniqueValue));
-          } else {
-            throw new InvalidValueTypeException(uniqueValue, "boolean", null);
-          }
+          setBooleanValue(attribute, entry, IS_UNIQUE);
           break;
         case "defaultValue":
           attribute.setDefaultValue(getStringValue(entry.getValue()));
@@ -425,8 +397,16 @@ class AttributeV3Mapper {
     return attribute;
   }
 
-  private String getStringValue(Object value) {
-    return value != null ? value.toString() : null;
+  private void setRefEntityType(Attribute attribute, Entry<String, Object> entry) {
+    EntityType refEntityType;
+    String refEntityTypeId = getStringValue(entry.getValue());
+    if (refEntityTypeId != null) {
+      refEntityType =
+          (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
+      attribute.setRefEntity(refEntityType);
+    }else{
+      throw new UnknownEntityTypeException(refEntityTypeId);
+    }
   }
 
   I18nValue mapI18nValue(Object value) {
@@ -507,11 +487,11 @@ class AttributeV3Mapper {
       String parentEntityId) {
     for (CreateAttributeRequest attributeRequest : attributes) {
       if (attributeRequest.getMappedByAttribute() != null) {
-        Attribute mappedBy = null;
+        Attribute mappedBy;
         if (attributeMap.containsKey(attributeRequest.getMappedByAttribute())) {
           mappedBy = attributeMap.get(attributeRequest.getMappedByAttribute());
         } else {
-          mappedBy = getAttributeFromParent(parentEntityId, attributeRequest, mappedBy);
+          mappedBy = getAttributeFromParent(parentEntityId, attributeRequest);
         }
         if (mappedBy != null) {
           Attribute attr = attributeMap.get(attributeRequest.getId());
@@ -522,14 +502,15 @@ class AttributeV3Mapper {
   }
 
   private Attribute getAttributeFromParent(
-      String parentEntityId, CreateAttributeRequest attributeRequest, Attribute mappedBy) {
+      String parentEntityId, CreateAttributeRequest attributeRequest) {
     Optional<EntityType> parentOptional = metaDataService.getEntityType(parentEntityId);
+    Attribute mappedBy = null;
     if (parentOptional.isPresent()) {
       EntityType parent = parentOptional.get();
       mappedBy = parent.getAttribute(attributeRequest.getMappedByAttribute());
       EntityType parentExtends = parent.getExtends();
       if (mappedBy == null && parentExtends != null) {
-        mappedBy = getAttributeFromParent(parentExtends.getId(), attributeRequest, mappedBy);
+        mappedBy = getAttributeFromParent(parentExtends.getId(), attributeRequest);
       }
     }
     return mappedBy;

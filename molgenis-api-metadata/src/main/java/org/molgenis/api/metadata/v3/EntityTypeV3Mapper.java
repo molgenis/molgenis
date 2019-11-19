@@ -3,6 +3,8 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
+import static org.molgenis.api.metadata.v3.MetadataUtils.setBooleanValue;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
@@ -288,68 +290,74 @@ public class EntityTypeV3Mapper {
   public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {
     Iterable<Attribute> updatedAttributes = null;
     for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
-      if (entry.getKey().equals("id")) {
-        throw new IdModificationException();
-      }
+      checkIdModification(entry);
       if (entry.getValue() == null) {
         entityType.set(entry.getKey(), null);
       } else {
-        switch (entry.getKey()) {
-          case "package_":
-            String packageId = String.valueOf(entry.getValue());
-            Package pack =
-                metaDataService
-                    .getPackage(packageId)
-                    .orElseThrow(() -> new UnknownPackageException(packageId));
-            entityType.setPackage(pack);
-            break;
-          case "abstract_":
-            String stringValue = entry.getValue().toString();
-            if (!stringValue.equalsIgnoreCase("true") && !stringValue.equalsIgnoreCase("false")) {
-              throw new InvalidValueTypeException(stringValue, "boolean", null);
-            }
-            Boolean isAbstract = Boolean.valueOf(stringValue);
-            entityType.setAbstract(isAbstract);
-            break;
-          case "extends_":
-            String extendsValue = String.valueOf(entry.getValue());
-            EntityType parent =
-                metaDataService
-                    .getEntityType(extendsValue)
-                    .orElseThrow(() -> new UnknownEntityTypeException(extendsValue));
-            entityType.setExtends(parent);
-            break;
-          case "label":
-            I18nValue label = attributeV3Mapper.mapI18nValue(entry.getValue());
-            processI18nLabel(label, entityType);
-            break;
-          case "description":
-            I18nValue description = attributeV3Mapper.mapI18nValue(entry.getValue());
-            processI18nDescription(description, entityType);
-            break;
-          case "attributes":
-            if (entry.getValue() != null) {
-              updatedAttributes = mapAttributes(entityType, entry);
-            } else {
-              throw new EmptyAttributesException();
-            }
-            break;
-          case "idAttribute":
-          case "labelAttribute":
-          case "lookupAttributes":
-            // get a list of attributes if not already set, process values for these cases after
-            // other updates are done.
-            if (updatedAttributes == null) {
-              updatedAttributes = entityType.getOwnAllAttributes();
-            }
-            break;
-          default:
-            throw new InvalidKeyException("entityType", entry.getKey());
-        }
+        updatedAttributes = updateEntityType(entityType, updatedAttributes, entry);
       }
     }
     if (updatedAttributes != null) {
       setSpecialAttributes(entityType, entityTypeValues, updatedAttributes);
+    }
+  }
+
+  @SuppressWarnings({"squid:S1192"}) //ATTRIBUTES constant in this class is not related to the one in this switch
+  private Iterable<Attribute> updateEntityType(EntityType entityType,
+      Iterable<Attribute> updatedAttributes, Entry<String, Object> entry) {
+    switch (entry.getKey()) {
+      case "package_":
+        String packageId = String.valueOf(entry.getValue());
+        Package pack =
+            metaDataService
+                .getPackage(packageId)
+                .orElseThrow(() -> new UnknownPackageException(packageId));
+        entityType.setPackage(pack);
+        break;
+      case "abstract_":
+        setBooleanValue(entityType, entry, IS_ABSTRACT);
+        break;
+      case "extends_":
+        String extendsValue = String.valueOf(entry.getValue());
+        EntityType parent =
+            metaDataService
+                .getEntityType(extendsValue)
+                .orElseThrow(() -> new UnknownEntityTypeException(extendsValue));
+        entityType.setExtends(parent);
+        break;
+      case "label":
+        I18nValue label = attributeV3Mapper.mapI18nValue(entry.getValue());
+        processI18nLabel(label, entityType);
+        break;
+      case "description":
+        I18nValue description = attributeV3Mapper.mapI18nValue(entry.getValue());
+        processI18nDescription(description, entityType);
+        break;
+      case "attributes":
+        if (entry.getValue() != null) {
+          updatedAttributes = mapAttributes(entityType, entry);
+        } else {
+          throw new EmptyAttributesException();
+        }
+        break;
+      case "idAttribute":
+      case "labelAttribute":
+      case "lookupAttributes":
+        // get a list of attributes if not already set, process values for these cases after
+        // other updates are done.
+        if (updatedAttributes == null) {
+          updatedAttributes = entityType.getOwnAllAttributes();
+        }
+        break;
+      default:
+        throw new InvalidKeyException("entityType", entry.getKey());
+    }
+    return updatedAttributes;
+  }
+
+  private void checkIdModification(Entry<String, Object> entry) {
+    if (entry.getKey().equals("id")) {
+      throw new IdModificationException();
     }
   }
 
@@ -380,36 +388,13 @@ public class EntityTypeV3Mapper {
           newLabelAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
           break;
         case "lookupAttributes":
-          if (entry.getValue() instanceof Iterable) {
-            newLookupAttributes = (List) entry.getValue();
-          } else {
-            throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
-          }
+          newLookupAttributes = getNewLookupAttributes(entry);
           break;
         default:
           break;
       }
     }
-    updateSpecialAttributes(
-        entityType,
-        updatedAttributes,
-        currentLookupAttributes,
-        currentLabelAttributeId,
-        currentIdAttributeId,
-        newIdAttributeId,
-        newLabelAttributeId,
-        newLookupAttributes);
-  }
 
-  private void updateSpecialAttributes(
-      EntityType entityType,
-      Iterable<Attribute> updatedAttributes,
-      List currentLookupAttributes,
-      String currentLabelAttributeId,
-      String currentIdAttributeId,
-      String newIdAttributeId,
-      String newLabelAttributeId,
-      List newLookupAttributes) {
     String idAttributeId = newIdAttributeId != null ? newIdAttributeId : currentIdAttributeId;
     updatedAttributes.forEach(
         attribute -> attribute.setIdAttribute(attribute.getIdentifier().equals(idAttributeId)));
@@ -420,6 +405,16 @@ public class EntityTypeV3Mapper {
             attribute.setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId)));
     setLookupAttributes(updatedAttributes, currentLookupAttributes, newLookupAttributes);
     entityType.setOwnAllAttributes(updatedAttributes);
+  }
+
+  private List getNewLookupAttributes(Entry<String, Object> entry) {
+    List newLookupAttributes;
+    if (entry.getValue() instanceof Iterable) {
+      newLookupAttributes = (List) entry.getValue();
+    } else {
+      throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
+    }
+    return newLookupAttributes;
   }
 
   private void setLookupAttributes(

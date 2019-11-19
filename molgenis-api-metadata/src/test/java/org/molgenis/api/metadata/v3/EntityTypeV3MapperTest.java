@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -216,7 +217,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
-    verify(entityType).setAbstract(true);
+    verify(entityType).set(IS_ABSTRACT,true);
   }
 
   @Test

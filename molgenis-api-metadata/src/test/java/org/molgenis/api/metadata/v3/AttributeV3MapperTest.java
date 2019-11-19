@@ -11,6 +11,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.model.AttributeMetadata.IS_READ_ONLY;
+import static org.molgenis.data.meta.model.AttributeMetadata.IS_UNIQUE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -318,12 +320,12 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
 
     assertAll(
-        () -> verify(attribute).setReadOnly(true),
+        () -> verify(attribute).set(IS_READ_ONLY, true),
         () -> verify(attribute).setVisible(true),
         () -> verify(attribute).setAuto(true),
         () -> verify(attribute).setNillable(true),
         () -> verify(attribute).setCascadeDelete(true),
-        () -> verify(attribute).setUnique(true),
+        () -> verify(attribute).set(IS_UNIQUE, true),
         () -> verify(attribute).setAggregatable(true));
   }
 
