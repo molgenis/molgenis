@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.molgenis.api.data.QueryMapper;
 import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
@@ -47,6 +49,21 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     assertThrows(
         NullPointerException.class,
         () -> new MetadataApiServiceImpl(null, null, null, metadataApiJobService));
+  }
+
+  @Test
+  void testCreateEntityType() {
+    EntityType entityType = mock(EntityType.class);
+    metadataApiService.createEntityType(entityType);
+    verify(metadataService).addEntityType(entityType);
+  }
+
+  @Test
+  void testUpdateEntityTypeAsync() {
+    EntityType entityType = mock(EntityType.class);
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataApiJobService.scheduleUpdate(entityType)).thenReturn(metadataUpsertJobExecution);
+    assertEquals(metadataUpsertJobExecution, metadataApiService.updateEntityTypeAsync(entityType));
   }
 
   @Test
