@@ -53,6 +53,11 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-api-data</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-data</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -79,12 +84,6 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-util</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <!--FIXME remove-->
-    <dependency>
-      <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-api-data</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- third party dependencies -->
