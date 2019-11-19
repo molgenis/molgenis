@@ -31,6 +31,7 @@ import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
+import org.molgenis.api.support.LinksUtils;
 import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
 import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -47,15 +48,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class EntityTypeV3Mapper {
+class EntityTypeV3Mapper {
 
-  public static final String ATTRIBUTES = "attributes";
-  public static final String PAGE = "page";
+  private static final String ATTRIBUTES = "attributes";
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeV3Mapper attributeV3Mapper;
   private final MetaDataService metaDataService;
 
-  public EntityTypeV3Mapper(
+  EntityTypeV3Mapper(
       EntityTypeFactory entityTypeFactory,
       AttributeV3Mapper attributeV3Mapper,
       MetaDataService metaDataService) {
@@ -64,8 +64,8 @@ public class EntityTypeV3Mapper {
     this.metaDataService = requireNonNull(metaDataService);
   }
 
-  public EntityTypesResponse toEntityTypesResponse(
-      EntityTypes entityTypes, int pagesize, int pagenumber, int totalElements) {
+  EntityTypesResponse toEntityTypesResponse(
+      EntityTypes entityTypes, int pageSize, int pageNumber, int totalElements) {
 
     List<EntityTypeResponse> results = new ArrayList<>();
     for (EntityType entityType : entityTypes.getEntityTypes()) {
@@ -73,18 +73,18 @@ public class EntityTypeV3Mapper {
     }
 
     return EntityTypesResponse.create(
-        createLinksResponse(pagenumber, pagesize, totalElements),
+        LinksUtils.createLinksResponse(pageNumber, pageSize, totalElements),
         results,
         getPageResponse(
-            entityTypes.getEntityTypes().size(), pagenumber * pagesize, totalElements, pagesize));
+            entityTypes.getEntityTypes().size(), pageNumber * pageSize, totalElements, pageSize));
   }
 
-  public EntityTypeResponse toEntityTypeResponse(
+  EntityTypeResponse toEntityTypeResponse(
       EntityType entityType, boolean flattenAttrs, boolean i18n) {
     return mapInternal(entityType, flattenAttrs, true, true, i18n);
   }
 
-  public EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
+  EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
     EntityType entityType = entityTypeFactory.create();
     entityType.setId(entityTypeRequest.getId());
     String packageId = entityTypeRequest.getPackage();
@@ -186,34 +186,6 @@ public class EntityTypeV3Mapper {
     }
 
     return entityTypeResponseBuilder.build();
-  }
-
-  private LinksResponse createLinksResponse(int number, int size, int total) {
-    URI self = createEntitiesResponseUri();
-    URI previous = null;
-    URI next = null;
-    if (number > 0) {
-      previous = createEntitiesResponseUri(number - 1);
-    }
-    if ((number * size) + size < total) {
-      next = createEntitiesResponseUri(number + 1);
-    }
-    return LinksResponse.create(previous, self, next);
-  }
-
-  private URI createEntitiesResponseUri() {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    return builder.build().toUri();
-  }
-
-  private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    if (pageNumber != null) {
-      builder.replaceQueryParam(PAGE, pageNumber);
-    }
-    return builder.build().toUri();
   }
 
   private URI createEntityTypeResponseUri(EntityType entityType) {

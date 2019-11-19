@@ -42,7 +42,7 @@ import org.molgenis.api.metadata.v3.model.Range;
 import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
-import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
+import org.molgenis.api.support.LinksUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
@@ -66,7 +66,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 class AttributeV3Mapper {
   private static final String ATTRIBUTES = "attributes";
-  private static final String PAGE = "page";
 
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
@@ -92,7 +91,7 @@ class AttributeV3Mapper {
 
   AttributesResponse mapAttributes(Attributes attributes, int size, int number, int total) {
     return AttributesResponse.create(
-        createLinksResponse(number, size, total),
+        LinksUtils.createLinksResponse(number, size, total),
         attributes.getAttributes().stream()
             .map(attribute -> this.mapAttribute(attribute, false))
             .collect(toList()),
@@ -526,34 +525,6 @@ class AttributeV3Mapper {
       }
     }
     return attribute;
-  }
-
-  private LinksResponse createLinksResponse(int number, int size, int total) {
-    URI self = createEntitiesResponseUri();
-    URI previous = null;
-    URI next = null;
-    if (number > 0) {
-      previous = createEntitiesResponseUri(number - 1);
-    }
-    if ((number * size) + size < total) {
-      next = createEntitiesResponseUri(number + 1);
-    }
-    return LinksResponse.create(previous, self, next);
-  }
-
-  private URI createEntitiesResponseUri() {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    return builder.build().toUri();
-  }
-
-  private URI createEntitiesResponseUri(Integer pageNumber) {
-    UriComponentsBuilder builder =
-        MolgenisServletUriComponentsBuilder.fromCurrentRequestDecodedQuery();
-    if (pageNumber != null) {
-      builder.replaceQueryParam(PAGE, pageNumber);
-    }
-    return builder.build().toUri();
   }
 
   private URI createAttributeResponseUri(Attribute attr) {

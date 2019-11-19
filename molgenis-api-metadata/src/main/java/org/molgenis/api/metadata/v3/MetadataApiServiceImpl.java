@@ -18,7 +18,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryException;
-import org.molgenis.data.meta.EntityTypeWithoutMappedByAttributes;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -145,9 +144,9 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     return metadataApiJobService.scheduleUpdate(entityType);
   }
 
+  @Override
   public void createEntityType(EntityType entityType) {
-    addEntityTypeFirstPass(entityType);
-    updateEntityTypeSecondPass(entityType);
+    metadataService.addEntityType(entityType);
   }
 
   @Override
@@ -164,23 +163,6 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public MetadataDeleteJobExecution deleteEntityTypesAsync(Query query) {
     return metadataApiJobService.scheduleDelete(getEntityTypes(query));
-  }
-
-  // TODO remove code duplication with molgenis-data-import DataPersisterImpl
-  private void addEntityTypeFirstPass(EntityType entityType) {
-    EntityType persistableEntityType;
-    if (entityType.hasMappedByAttributes()) {
-      persistableEntityType = new EntityTypeWithoutMappedByAttributes(entityType);
-    } else {
-      persistableEntityType = entityType;
-    }
-    metadataService.addEntityType(persistableEntityType);
-  }
-  // TODO remove code duplication with molgenis-data-import DataPersisterImpl
-  private void updateEntityTypeSecondPass(EntityType entityType) {
-    if (entityType.hasMappedByAttributes()) {
-      metadataService.updateEntityType(entityType);
-    }
   }
 
   private static boolean entityTypeHasAttribute(EntityType entityType, Attribute attribute) {
