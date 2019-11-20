@@ -5,11 +5,11 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -23,6 +23,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.molgenis.api.metadata.v3.exception.ReadOnlyFieldException;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
@@ -215,9 +216,8 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("abstract_", true);
 
-    entityTypeV3Mapper.toEntityType(entityType, valueMap);
-
-    verify(entityType).set(IS_ABSTRACT, true);
+    assertThrows(
+        ReadOnlyFieldException.class, () -> entityTypeV3Mapper.toEntityType(entityType, valueMap));
   }
 
   @Test

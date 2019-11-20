@@ -3,8 +3,6 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
-import static org.molgenis.api.metadata.v3.MetadataUtils.setBooleanValue;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
@@ -20,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.molgenis.api.metadata.v3.exception.EmptyAttributesException;
-import org.molgenis.api.metadata.v3.exception.IdModificationException;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
 import org.molgenis.api.metadata.v3.exception.ReadOnlyFieldException;
 import org.molgenis.api.metadata.v3.exception.UnknownLookupAttributesException;
@@ -268,7 +265,6 @@ class EntityTypeV3Mapper {
   public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {
     Iterable<Attribute> updatedAttributes = null;
     for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
-      checkIdModification(entry);
       if (entry.getValue() == null) {
         entityType.set(entry.getKey(), null);
       } else {
@@ -294,6 +290,7 @@ class EntityTypeV3Mapper {
                 .orElseThrow(() -> new UnknownPackageException(packageId));
         entityType.setPackage(pack);
         break;
+      case "id":
       case "abstract_":
         throw new ReadOnlyFieldException(entry.getKey(), "entityType");
       case "extends_":
@@ -335,12 +332,6 @@ class EntityTypeV3Mapper {
         throw new InvalidKeyException("entityType", entry.getKey());
     }
     return updatedAttributes;
-  }
-
-  private void checkIdModification(Entry<String, Object> entry) {
-    if (entry.getKey().equals("id")) {
-      throw new IdModificationException();
-    }
   }
 
   private void setSpecialAttributes(

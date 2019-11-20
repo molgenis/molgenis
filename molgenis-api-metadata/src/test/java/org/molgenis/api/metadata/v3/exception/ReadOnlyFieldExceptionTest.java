@@ -15,11 +15,14 @@ class ReadOnlyFieldExceptionTest extends ExceptionMessageTest {
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
-    assertExceptionMessageEquals(new ReadOnlyFieldException("abstract", "entityType"), lang, message);
+    assertExceptionMessageEquals(
+        new ReadOnlyFieldException("abstract", "entityType"), lang, message);
   }
 
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {"en", "Field 'abstract' of 'entityType' cannot be updated because it is readonly."};
+    Object[] enParams = {
+      "en", "Field 'abstract' of 'entityType' cannot be updated because it is readonly."
+    };
     return new Object[][] {enParams};
   }
 }
