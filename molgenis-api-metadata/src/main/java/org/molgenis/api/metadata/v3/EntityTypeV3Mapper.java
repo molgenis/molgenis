@@ -22,6 +22,7 @@ import java.util.stream.StreamSupport;
 import org.molgenis.api.metadata.v3.exception.EmptyAttributesException;
 import org.molgenis.api.metadata.v3.exception.IdModificationException;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
+import org.molgenis.api.metadata.v3.exception.ReadOnlyFieldException;
 import org.molgenis.api.metadata.v3.exception.UnknownLookupAttributesException;
 import org.molgenis.api.metadata.v3.exception.UnsupportedFieldException;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
@@ -294,8 +295,7 @@ class EntityTypeV3Mapper {
         entityType.setPackage(pack);
         break;
       case "abstract_":
-        setBooleanValue(entityType, entry, IS_ABSTRACT);
-        break;
+        throw new ReadOnlyFieldException(entry.getKey(), "entityType");
       case "extends_":
         String extendsValue = String.valueOf(entry.getValue());
         EntityType parent =
