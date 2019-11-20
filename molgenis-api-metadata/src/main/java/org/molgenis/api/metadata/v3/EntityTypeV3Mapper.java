@@ -339,7 +339,7 @@ class EntityTypeV3Mapper {
       Map<String, Object> entityTypeValues,
       Iterable<Attribute> updatedAttributes) {
     List currentLookupAttributes =
-        StreamSupport.stream(entityType.getLookupAttributes().spliterator(), false)
+        StreamSupport.stream(entityType.getOwnLookupAttributes().spliterator(), false)
             .map(Attribute::getIdentifier)
             .collect(Collectors.toList());
     String currentLabelAttributeId =
