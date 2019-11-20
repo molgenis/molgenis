@@ -19,7 +19,7 @@ class InvalidKeyExceptionTest extends ExceptionMessageTest {
   }
 
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {"en", "Field 'TARGET' is unknown for 'KEY' requests."};
+    Object[] enParams = {"en", "Field 'KEY' is unknown for 'TARGET' requests."};
     return new Object[][] {enParams};
   }
 }
