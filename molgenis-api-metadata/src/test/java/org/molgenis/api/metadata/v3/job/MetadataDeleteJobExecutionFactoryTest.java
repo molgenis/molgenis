@@ -1,4 +1,4 @@
-package org.molgenis.api.metadata.v3.model;
+package org.molgenis.api.metadata.v3.job;
 
 import org.junit.jupiter.api.Test;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
