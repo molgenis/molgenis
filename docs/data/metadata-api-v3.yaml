@@ -549,7 +549,7 @@ components:
         id:
           type: string
         package_:
-          $ref: "#/components/schemas/Links"
+          type: string
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
@@ -574,7 +574,7 @@ components:
       type: object
       properties:
         package_:
-          $ref: "#/components/schemas/Links"
+          type: string
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
