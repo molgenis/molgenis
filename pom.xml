@@ -220,6 +220,12 @@
                 <artifactId>auto-value</artifactId>
                 <version>${google.auto-value.version}</version>
               </path>
+              <!-- workaround for https://stackoverflow.com/questions/58671279/maven-project-build-fails-in-intellij-when-annotation-processors-are-used-googl -->
+              <path>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>1.0-rc6</version>
+              </path>
             </annotationProcessorPaths>
           </configuration>
         </plugin>
