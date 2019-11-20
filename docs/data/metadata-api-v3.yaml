@@ -572,18 +572,13 @@ components:
             type: string
     EntityTypePatch:
       type: object
-      required: [id]
       properties:
-        id:
-          type: string
         package_:
           $ref: "#/components/schemas/Links"
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
-        abstract_:
-          type: string
         entityTypeParent:
           type: string
         attributes:
