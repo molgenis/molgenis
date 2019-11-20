@@ -17,17 +17,16 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(
     classes = {
-        EntityBaseTestConfig.class,
-        MetadataUpsertJobExecutionMetadata.class,
-        MetadataUpsertJobExecutionFactory.class,      JobExecutionMetaData.class,
-        JobPackage.class
+      EntityBaseTestConfig.class,
+      MetadataUpsertJobExecutionMetadata.class,
+      MetadataUpsertJobExecutionFactory.class,
+      JobExecutionMetaData.class,
+      JobPackage.class
     })
 public class MetadataUpsertJobExecutionTest extends AbstractSystemEntityTest {
 
-  @Autowired
-  MetadataUpsertJobExecutionMetadata metadata;
-  @Autowired
-  MetadataUpsertJobExecutionFactory factory;
+  @Autowired MetadataUpsertJobExecutionMetadata metadata;
+  @Autowired MetadataUpsertJobExecutionFactory factory;
 
   @Override
   protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
@@ -57,7 +56,10 @@ public class MetadataUpsertJobExecutionTest extends AbstractSystemEntityTest {
   @Test
   public void testSystemEntity() {
     internalTestAttributes(
-        metadata, MetadataUpsertJobExecution.class, factory, getOverriddenReturnTypes(),
+        metadata,
+        MetadataUpsertJobExecution.class,
+        factory,
+        getOverriddenReturnTypes(),
         getExcludedAttrs());
   }
 }

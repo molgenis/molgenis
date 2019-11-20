@@ -8,14 +8,17 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = {EntityBaseTestConfig.class,
-    MetadataUpsertJobExecutionMetadata.class, MetadataUpsertJobExecutionFactory.class,
-    JobExecutionMetaData.class,
-    JobPackage.class})
+@ContextConfiguration(
+    classes = {
+      EntityBaseTestConfig.class,
+      MetadataUpsertJobExecutionMetadata.class,
+      MetadataUpsertJobExecutionFactory.class,
+      JobExecutionMetaData.class,
+      JobPackage.class
+    })
 public class MetadataUpsertJobExecutionFactoryTest extends AbstractEntityFactoryTest {
 
-  @Autowired
-  MetadataUpsertJobExecutionFactory factory;
+  @Autowired MetadataUpsertJobExecutionFactory factory;
 
   @Override
   @Test
