@@ -2,7 +2,7 @@
   "id": "v3meta_MyOneToMany",
   "package_": "v3meta",
   "label": {
-    "defaultValue": "My Strings"
+    "defaultValue": "My OneToMany"
   },
   "attributes": [
     {
