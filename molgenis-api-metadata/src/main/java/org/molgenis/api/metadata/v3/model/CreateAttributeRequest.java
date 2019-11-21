@@ -105,6 +105,8 @@ public abstract class CreateAttributeRequest {
     return new AutoValue_CreateAttributeRequest.Builder();
   }
 
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   public abstract static class Builder {
 
