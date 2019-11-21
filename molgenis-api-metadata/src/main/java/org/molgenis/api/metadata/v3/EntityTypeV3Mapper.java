@@ -1,5 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.PageUtils.getPageResponse;
 import static org.molgenis.api.data.v3.EntityController.API_ENTITY_PATH;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
+import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponseData;
@@ -93,9 +95,11 @@ class EntityTypeV3Mapper {
 
     processI18nLabel(entityTypeRequest, entityType);
     processI18nDescription(entityTypeRequest, entityType);
+    List<CreateAttributeRequest> attributes = entityTypeRequest.getAttributes();
     Map<String, Attribute> ownAttributes =
-        attributeV3Mapper.toAttributes(
-            entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
+        attributes != null
+            ? attributeV3Mapper.toAttributes(attributes, entityTypeRequest, entityType)
+            : emptyMap();
     String idAttribute = entityTypeRequest.getIdAttribute();
     if (idAttribute != null) {
       ownAttributes.get(idAttribute).setIdAttribute(true);
@@ -105,15 +109,15 @@ class EntityTypeV3Mapper {
       ownAttributes.get(labelAttribute).setLabelAttribute(true);
     }
     AtomicInteger count = new AtomicInteger();
-    entityTypeRequest
-        .getLookupAttributes()
-        .forEach(
-            lookupAttribute ->
-                ownAttributes
-                    .get(lookupAttribute)
-                    .setLookupAttributeIndex(count.getAndIncrement()));
+    List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
+    if (lookupAttributes != null) {
+      lookupAttributes.forEach(
+          lookupAttribute ->
+              ownAttributes.get(lookupAttribute).setLookupAttributeIndex(count.getAndIncrement()));
+    }
     entityType.setOwnAllAttributes(new ArrayList<>(ownAttributes.values()));
-    entityType.setAbstract(entityTypeRequest.isAbstract());
+    Boolean abstractEntityType = entityTypeRequest.getAbstract();
+    entityType.setAbstract(abstractEntityType != null && abstractEntityType);
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
     processSelfReferencingAttributes(entityType, ownAttributes.values());

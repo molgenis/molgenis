@@ -39,7 +39,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -220,19 +219,10 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
             null,
             null);
     CreateEntityTypeRequest entityTypeRequest =
-        new CreateEntityTypeRequest(
-            "MyEntityTypeId",
-            null,
-            null,
-            true,
-            "MyPackageId",
-            null,
-            singletonList(createAttributeRequest),
-            null,
-            null,
-            emptyList());
-
-    Package entityTypePackage = mock(Package.class);
+        CreateEntityTypeRequest.builder()
+            .setPackage("MyPackageId")
+            .setAttributes(ImmutableList.of(createAttributeRequest))
+            .build();
 
     EntityType entityType = mock(EntityType.class);
 

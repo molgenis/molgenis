@@ -93,7 +93,7 @@ class MetadataApiController extends ApiController {
   @Transactional
   @PostMapping
   public ResponseEntity createEntityType(
-      @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+      @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     metadataApiService.createEntityType(entityType);
     URI location =
@@ -144,7 +144,7 @@ class MetadataApiController extends ApiController {
   @PutMapping("/{entityTypeId}")
   public ResponseEntity updateEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
-      @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+      @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     entityType.setId(entityTypeId);
 
