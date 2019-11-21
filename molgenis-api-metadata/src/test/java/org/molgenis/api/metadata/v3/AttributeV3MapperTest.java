@@ -220,6 +220,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
             null);
     CreateEntityTypeRequest entityTypeRequest =
         CreateEntityTypeRequest.builder()
+            .setLabel(I18nValue.builder().build())
             .setPackage("MyPackageId")
             .setAttributes(ImmutableList.of(createAttributeRequest))
             .build();
