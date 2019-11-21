@@ -161,11 +161,7 @@ class MetadataApiController extends ApiController {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody Map<String, Object> entityTypeValues) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
-
-    // TODO modify entity type based on entity type values
-    // note: we can't use CreateEntityTypeRequest because we can't distinguish between null and not
-    // defined values then)
-
+    entityTypeV3Mapper.toEntityType(entityType, entityTypeValues);
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
   }

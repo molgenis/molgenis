@@ -129,7 +129,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EntityTypeCreate'
+              $ref: '#/components/schemas/EntityTypePatch'
             example:
               TODO
       responses:
@@ -549,13 +549,36 @@ components:
         id:
           type: string
         package_:
-          $ref: "#/components/schemas/Links"
+          type: string
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
         abstract_:
           type: string
+        entityTypeParent:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeCreate"
+        idAttribute:
+          type: string
+        labelAttribute:
+          type: string
+        lookupAttributes:
+          type: array
+          items:
+            type: string
+    EntityTypePatch:
+      type: object
+      properties:
+        package_:
+          type: string
+        label:
+          $ref: "#/components/schemas/I18nValue"
+        description:
+          $ref: "#/components/schemas/I18nValue"
         entityTypeParent:
           type: string
         attributes:
