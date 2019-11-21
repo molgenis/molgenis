@@ -1,15 +1,11 @@
-package org.molgenis.api.metadata.v3.model;
-
-import static java.util.Arrays.asList;
+package org.molgenis.api.metadata.v3.job;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionFactory;
-import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecutionMetadata;
+import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecutionMetadata.Action;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
 import org.molgenis.jobs.model.JobExecution.Status;
@@ -22,24 +18,24 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(
     classes = {
       EntityBaseTestConfig.class,
-      MetadataDeleteJobExecutionMetadata.class,
-      MetadataDeleteJobExecutionFactory.class,
+      MetadataUpsertJobExecutionMetadata.class,
+      MetadataUpsertJobExecutionFactory.class,
       JobExecutionMetaData.class,
       JobPackage.class
     })
-public class MetadataDeleteJobExecutionTest extends AbstractSystemEntityTest {
+public class MetadataUpsertJobExecutionTest extends AbstractSystemEntityTest {
 
-  @Autowired MetadataDeleteJobExecutionMetadata metadata;
-  @Autowired MetadataDeleteJobExecutionFactory factory;
+  @Autowired MetadataUpsertJobExecutionMetadata metadata;
+  @Autowired MetadataUpsertJobExecutionFactory factory;
 
   @Override
   protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
     Map<String, Pair<Class, Object>> map = new HashMap<>();
 
-    Pair<Class, Object> entityTypeIds = new Pair<>();
-    entityTypeIds.setA(List.class);
-    entityTypeIds.setB(asList("id1", "id2"));
-    map.put(MetadataDeleteJobExecutionMetadata.IDS, entityTypeIds);
+    Pair<Class, Object> actions = new Pair<>();
+    actions.setA(Action.class);
+    actions.setB(Action.CREATE);
+    map.put(MetadataUpsertJobExecutionMetadata.ACTION, actions);
 
     Pair<Class, Object> status = new Pair<>();
     status.setA(Status.class);
@@ -57,12 +53,11 @@ public class MetadataDeleteJobExecutionTest extends AbstractSystemEntityTest {
     return attrs;
   }
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
   @Test
   public void testSystemEntity() {
     internalTestAttributes(
         metadata,
-        MetadataDeleteJobExecution.class,
+        MetadataUpsertJobExecution.class,
         factory,
         getOverriddenReturnTypes(),
         getExcludedAttrs());
