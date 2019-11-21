@@ -224,26 +224,47 @@ class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    if (attributeRequest.isCascadeDelete() != null) {
-      attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    if (attributeRequest.getCascadeDelete() != null) {
+      attribute.setCascadeDelete(attributeRequest.getCascadeDelete());
     }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(
         orderBy != null ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy))) : null);
     attribute.setExpression(attributeRequest.getExpression());
-    attribute.setNillable(attributeRequest.isNullable());
-    attribute.setAuto(attributeRequest.isAuto());
-    attribute.setVisible(attributeRequest.isVisible());
+    Boolean nullable = attributeRequest.getNullable();
+    if (nullable != null) {
+      attribute.setNillable(nullable);
+    }
+    Boolean auto = attributeRequest.getAuto();
+    if (auto != null) {
+      attribute.setAuto(auto);
+    }
+    Boolean visible = attributeRequest.getVisible();
+    if (visible != null) {
+      attribute.setVisible(visible);
+    }
     processI18nLabel(attributeRequest.getLabel(), attribute);
     processI18nDescription(attributeRequest.getDescription(), attribute);
-    attribute.setAggregatable(attributeRequest.isAggregatable());
-    attribute.setEnumOptions(attributeRequest.getEnumOptions());
+    Boolean aggregatable = attributeRequest.getAggregatable();
+    if (aggregatable != null) {
+      attribute.setAggregatable(aggregatable);
+    }
+    List<String> enumOptions = attributeRequest.getEnumOptions();
+    if (enumOptions != null) {
+      attribute.setEnumOptions(enumOptions);
+    }
     Range range = attributeRequest.getRange();
     if (range != null) {
       attribute.setRange(map(range));
     }
-    attribute.setReadOnly(attributeRequest.isReadonly());
-    attribute.setUnique(attributeRequest.isUnique());
+    Boolean readonly = attributeRequest.getReadonly();
+    if (readonly != null) {
+      attribute.setReadOnly(readonly);
+    }
+    Boolean unique = attributeRequest.getUnique();
+    if (unique != null) {
+      attribute.setUnique(unique);
+    }
     attribute.setNullableExpression(attributeRequest.getNullableExpression());
     attribute.setVisibleExpression(attributeRequest.getVisibleExpression());
     attribute.setValidationExpression(attributeRequest.getValidationExpression());

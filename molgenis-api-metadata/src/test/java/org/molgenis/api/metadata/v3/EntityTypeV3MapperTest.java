@@ -17,7 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -169,22 +168,23 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     Boolean abstract_ = false;
     String packageId = "MyPackageId";
     String extendsEntityTypeId = "MyExtendsEntityTypeId";
-    List<CreateAttributeRequest> attributes = emptyList();
+    ImmutableList<CreateAttributeRequest> attributes = ImmutableList.of();
     String idAttribute = null;
     String labelAttribute = null;
-    List<String> lookupAttributes = ImmutableList.of();
+    ImmutableList<String> lookupAttributes = ImmutableList.of();
     CreateEntityTypeRequest createEntityTypeRequest =
-        new CreateEntityTypeRequest(
-            id,
-            label,
-            description,
-            abstract_,
-            packageId,
-            extendsEntityTypeId,
-            attributes,
-            idAttribute,
-            labelAttribute,
-            lookupAttributes);
+        CreateEntityTypeRequest.builder()
+            .setId(id)
+            .setLabel(label)
+            .setDescription(description)
+            .setAbstract(abstract_)
+            .setPackage(packageId)
+            .setExtends(extendsEntityTypeId)
+            .setAttributes(attributes)
+            .setIdAttribute(idAttribute)
+            .setLabelAttribute(labelAttribute)
+            .setLookupAttributes(lookupAttributes)
+            .build();
 
     Package aPackage = mock(Package.class);
     when(metaDataService.getPackage(packageId)).thenReturn(Optional.of(aPackage));

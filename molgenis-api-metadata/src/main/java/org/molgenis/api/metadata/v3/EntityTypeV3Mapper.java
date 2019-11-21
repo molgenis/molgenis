@@ -126,7 +126,7 @@ class EntityTypeV3Mapper {
                     .get(lookupAttribute)
                     .setLookupAttributeIndex(count.getAndIncrement()));
     entityType.setOwnAllAttributes(new ArrayList<>(ownAttributes.values()));
-    entityType.setAbstract(entityTypeRequest.isAbstract());
+    entityType.setAbstract(entityTypeRequest.getAbstract());
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
     processSelfReferencingAttributes(entityType, ownAttributes.values());
