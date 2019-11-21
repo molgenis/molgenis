@@ -85,7 +85,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
                             new URI("http://localhost/api/metadata/MyEntityTypeId/attributes"),
                             null))
                     .build())
-            .setAbstract_(false)
+            .setAbstract(false)
             .setIndexingDepth(0)
             .build();
 
@@ -144,7 +144,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
                             null))
                     .setItems(ImmutableList.of())
                     .build())
-            .setAbstract_(false)
+            .setAbstract(false)
             .setIndexingDepth(0)
             .build();
 

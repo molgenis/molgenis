@@ -5,7 +5,7 @@
   "data": {
     "id": "v3meta_MyStrings",
     "label": "My Strings (updated)",
-    "package_": {
+    "package": {
       "links": {
         "self": "${baseUri}/api/data/sys_md_Package/v3meta"
       }
@@ -83,7 +83,7 @@
         }
       ]
     },
-    "abstract_": false,
+    "abstract": false,
     "indexingDepth": 1
   }
 }

@@ -1,6 +1,6 @@
 {
   "id": "v3meta_MyNumbers",
-  "package_": "v3meta",
+  "package": "v3meta",
   "label": {
     "defaultValue": "My Numbers"
   },
@@ -9,6 +9,7 @@
       "id": "v3meta_MyNumbers_id",
       "name": "id",
       "type": "int",
+      "visible": false,
       "label": {
         "defaultValue": "Identifier"
       }
@@ -17,7 +18,7 @@
       "id": "v3meta_MyNumbers_label",
       "name": "label",
       "type": "string",
-      "visible": true,
+      "nullable": false,
       "label": {
         "defaultValue": "Label"
       }

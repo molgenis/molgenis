@@ -1,7 +1,7 @@
 {
   "id": "v3meta_MyDataset",
-  "package_": "v3meta",
-  "extends_": "v3meta_Describable",
+  "package": "v3meta",
+  "extends": "v3meta_Describable",
   "label": {
     "defaultValue": "My Dataset"
   },

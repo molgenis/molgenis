@@ -10,7 +10,7 @@
       "data": {
         "id": "v3meta_Describable",
         "label": "Describable",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -20,8 +20,8 @@
             "self": "${baseUri}/api/metadata/v3meta_Describable/attributes"
           }
         },
-        "abstract_": true,
-        "extends_": {
+        "abstract": true,
+        "extends": {
           "links": {
             "self": "${baseUri}/api/metadata/v3meta_Identifiable"
           }
@@ -36,7 +36,7 @@
       "data": {
         "id": "v3meta_Identifiable",
         "label": "Identifiable",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -46,7 +46,7 @@
             "self": "${baseUri}/api/metadata/v3meta_Identifiable/attributes"
           }
         },
-        "abstract_": true,
+        "abstract": true,
         "indexingDepth": 1
       }
     },
@@ -58,7 +58,7 @@
         "id": "v3meta_MyDataset",
         "label": "My Dataset",
         "description": "My Dataset with data",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -68,8 +68,8 @@
             "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes"
           }
         },
-        "abstract_": false,
-        "extends_": {
+        "abstract": false,
+        "extends": {
           "links": {
             "self": "${baseUri}/api/metadata/v3meta_Describable"
           }
@@ -84,7 +84,7 @@
       "data": {
         "id": "v3meta_MyNumbers",
         "label": "My Numbers",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -94,7 +94,7 @@
             "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes"
           }
         },
-        "abstract_": false,
+        "abstract": false,
         "indexingDepth": 1
       }
     },
@@ -105,7 +105,7 @@
       "data": {
         "id": "v3meta_MyOneToMany",
         "label": "My OneToMany",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -115,7 +115,7 @@
             "self": "${baseUri}/api/metadata/v3meta_MyOneToMany/attributes"
           }
         },
-        "abstract_": false,
+        "abstract": false,
         "indexingDepth": 1
       }
     },
@@ -126,7 +126,7 @@
       "data": {
         "id": "v3meta_MyStrings",
         "label": "My Strings",
-        "package_": {
+        "package": {
           "links": {
             "self": "${baseUri}/api/data/sys_md_Package/v3meta"
           }
@@ -136,7 +136,7 @@
             "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes"
           }
         },
-        "abstract_": false,
+        "abstract": false,
         "indexingDepth": 1
       }
     }
