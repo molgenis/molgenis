@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -193,31 +192,12 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     when(attributeFactory.create()).thenReturn(attribute);
 
     CreateAttributeRequest createAttributeRequest =
-        new CreateAttributeRequest(
-            "MyAttributeId",
-            "MyAttributeName",
-            "long",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            false,
-            false,
-            null,
-            null,
-            false,
-            emptyList(),
-            Range.create(-1L, 1L),
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null);
+        CreateAttributeRequest.builder()
+            .setId("MyAttributeId")
+            .setName("MyAttributeName")
+            .setType("long")
+            .setRange(Range.create(-1L, 1L))
+            .build();
     CreateEntityTypeRequest entityTypeRequest =
         CreateEntityTypeRequest.builder()
             .setLabel(I18nValue.builder().build())
@@ -245,7 +225,6 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
         () -> verify(attribute).setAuto(false),
         () -> verify(attribute).setVisible(false),
         () -> verify(attribute).setAggregatable(false),
-        () -> verify(attribute).setEnumOptions(emptyList()),
         () -> verify(attribute).setRange(new org.molgenis.data.Range(-1L, 1L)),
         () -> verify(attribute).setReadOnly(false),
         () -> verify(attribute).setUnique(false),

@@ -210,26 +210,35 @@ class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    if (attributeRequest.isCascadeDelete() != null) {
-      attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    if (attributeRequest.getCascadeDelete() != null) {
+      attribute.setCascadeDelete(attributeRequest.getCascadeDelete());
     }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(
         orderBy != null ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy))) : null);
     attribute.setExpression(attributeRequest.getExpression());
-    attribute.setNillable(attributeRequest.isNullable());
-    attribute.setAuto(attributeRequest.isAuto());
-    attribute.setVisible(attributeRequest.isVisible());
+    Boolean nullable = attributeRequest.getNullable();
+    attribute.setNillable(nullable != null && nullable);
+    Boolean auto = attributeRequest.getAuto();
+    attribute.setAuto(auto != null && auto);
+    Boolean visible = attributeRequest.getVisible();
+    attribute.setVisible(visible != null && visible);
     processI18nLabel(attributeRequest, attribute);
     processI18nDescription(attributeRequest, attribute);
-    attribute.setAggregatable(attributeRequest.isAggregatable());
-    attribute.setEnumOptions(attributeRequest.getEnumOptions());
+    Boolean aggregatable = attributeRequest.getAggregatable();
+    attribute.setAggregatable(aggregatable != null && aggregatable);
+    List<String> enumOptions = attributeRequest.getEnumOptions();
+    if (enumOptions != null) {
+      attribute.setEnumOptions(enumOptions);
+    }
     Range range = attributeRequest.getRange();
     if (range != null) {
       attribute.setRange(map(range));
     }
-    attribute.setReadOnly(attributeRequest.isReadonly());
-    attribute.setUnique(attributeRequest.isUnique());
+    Boolean readonly = attributeRequest.getReadonly();
+    attribute.setReadOnly(readonly != null && readonly);
+    Boolean unique = attributeRequest.getUnique();
+    attribute.setUnique(unique != null && unique);
     attribute.setNullableExpression(attributeRequest.getNullableExpression());
     attribute.setVisibleExpression(attributeRequest.getVisibleExpression());
     attribute.setValidationExpression(attributeRequest.getValidationExpression());
