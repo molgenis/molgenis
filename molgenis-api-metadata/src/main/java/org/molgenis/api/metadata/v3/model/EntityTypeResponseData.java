@@ -1,6 +1,8 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
+import com.google.auto.value.AutoValue.CopyAnnotations;
+import com.google.gson.annotations.SerializedName;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
@@ -29,15 +31,21 @@ public abstract class EntityTypeResponseData {
 
   @Nullable
   @CheckForNull
-  public abstract PackageResponse getPackage_();
+  @CopyAnnotations
+  @SerializedName(value = "package")
+  public abstract PackageResponse getPackage();
 
   public abstract AttributesResponse getAttributes();
 
-  public abstract boolean isAbstract_();
+  @CopyAnnotations
+  @SerializedName(value = "abstract")
+  public abstract boolean isAbstract();
 
   @Nullable
   @CheckForNull
-  public abstract EntityTypeResponse getExtends_();
+  @CopyAnnotations
+  @SerializedName(value = "extends")
+  public abstract EntityTypeResponse getExtends();
 
   @Nullable
   @CheckForNull
@@ -62,13 +70,13 @@ public abstract class EntityTypeResponseData {
 
     public abstract Builder setDescriptionI18n(I18nValue description);
 
-    public abstract Builder setPackage_(PackageResponse packageResponse);
+    public abstract Builder setPackage(PackageResponse packageResponse);
 
     public abstract Builder setAttributes(AttributesResponse attributes);
 
-    public abstract Builder setAbstract_(boolean isAbstract);
+    public abstract Builder setAbstract(boolean isAbstract);
 
-    public abstract Builder setExtends_(EntityTypeResponse entityType);
+    public abstract Builder setExtends(EntityTypeResponse entityType);
 
     public abstract Builder setIndexingDepth(Integer indexingDepth);
 

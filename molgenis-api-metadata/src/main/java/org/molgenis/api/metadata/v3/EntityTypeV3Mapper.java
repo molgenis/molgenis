@@ -7,6 +7,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.util.ArrayList;
@@ -85,7 +86,10 @@ class EntityTypeV3Mapper {
 
   EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
     EntityType entityType = entityTypeFactory.create();
-    entityType.setId(entityTypeRequest.getId());
+    String entityTypeId = entityTypeRequest.getId();
+    if (entityTypeId != null) {
+      entityType.setId(entityTypeId);
+    }
     String packageId = entityTypeRequest.getPackage();
     Package pack = null;
     if (packageId != null) {
@@ -118,15 +122,17 @@ class EntityTypeV3Mapper {
       ownAttributes.get(labelAttribute).setLabelAttribute(true);
     }
     AtomicInteger count = new AtomicInteger();
-    entityTypeRequest
-        .getLookupAttributes()
-        .forEach(
-            lookupAttribute ->
-                ownAttributes
-                    .get(lookupAttribute)
-                    .setLookupAttributeIndex(count.getAndIncrement()));
+    ImmutableList<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
+    if (lookupAttributes != null) {
+      lookupAttributes.forEach(
+          lookupAttribute ->
+              ownAttributes.get(lookupAttribute).setLookupAttributeIndex(count.getAndIncrement()));
+    }
     entityType.setOwnAllAttributes(new ArrayList<>(ownAttributes.values()));
-    entityType.setAbstract(entityTypeRequest.isAbstract());
+    Boolean abstractEntityType = entityTypeRequest.getAbstract();
+    if (abstractEntityType != null) {
+      entityType.setAbstract(abstractEntityType);
+    }
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
     processSelfReferencingAttributes(entityType, ownAttributes.values());
@@ -159,7 +165,7 @@ class EntityTypeV3Mapper {
       builder.setId(entityType.getId());
       Package pack = entityType.getPackage();
       if (pack != null) {
-        builder.setPackage_(
+        builder.setPackage(
             PackageResponse.builder()
                 .setLinks(LinksResponse.create(null, createPackageResponseUri(pack), null))
                 .build());
@@ -181,9 +187,9 @@ class EntityTypeV3Mapper {
                 : attributeV3Mapper.mapInternal(entityType.getOwnAllAttributes(), i18n));
       }
       builder.setAttributes(attributesResponseBuilder.build());
-      builder.setAbstract_(entityType.isAbstract());
+      builder.setAbstract(entityType.isAbstract());
       EntityType parent = entityType.getExtends();
-      builder.setExtends_(parent != null ? mapInternal(parent, false, false, false, i18n) : null);
+      builder.setExtends(parent != null ? mapInternal(parent, false, false, false, i18n) : null);
       builder.setIndexingDepth(entityType.getIndexingDepth());
       entityTypeResponseBuilder.setData(builder.build());
     }

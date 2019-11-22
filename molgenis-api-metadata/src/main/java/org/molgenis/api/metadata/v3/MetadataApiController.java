@@ -11,13 +11,10 @@ import org.molgenis.api.data.v3.EntityController;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
-import org.molgenis.api.metadata.v3.model.DeleteAttributeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
-import org.molgenis.api.metadata.v3.model.DeleteEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
 import org.molgenis.api.metadata.v3.model.EntityTypeResponse;
 import org.molgenis.api.metadata.v3.model.EntityTypesResponse;
-import org.molgenis.api.metadata.v3.model.ReadAttributeRequest;
 import org.molgenis.api.metadata.v3.model.ReadAttributesRequest;
 import org.molgenis.api.metadata.v3.model.ReadEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.ReadEntityTypesRequest;
@@ -75,9 +72,10 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}")
-  public EntityTypeResponse getEntityType(@Valid ReadEntityTypeRequest readEntityTypeRequest) {
-    EntityType entityType =
-        metadataApiService.findEntityType(readEntityTypeRequest.getEntityTypeId());
+  public EntityTypeResponse getEntityType(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @Valid ReadEntityTypeRequest readEntityTypeRequest) {
+    EntityType entityType = metadataApiService.findEntityType(entityTypeId);
 
     return entityTypeV3Mapper.toEntityTypeResponse(
         entityType, readEntityTypeRequest.isFlattenAttrs(), readEntityTypeRequest.isI18n());
@@ -85,17 +83,17 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/attributes/{attributeId}")
-  public AttributeResponse getAttribute(@Valid ReadAttributeRequest readAttributeRequest) {
-    Attribute attribute =
-        metadataApiService.findAttribute(
-            readAttributeRequest.getEntityTypeId(), readAttributeRequest.getAttributeId());
+  public AttributeResponse getAttribute(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @PathVariable("attributeId") String attributeId) {
+    Attribute attribute = metadataApiService.findAttribute(entityTypeId, attributeId);
     return attributeV3Mapper.mapAttribute(attribute, false);
   }
 
   @Transactional
   @PostMapping
   public ResponseEntity createEntityType(
-      @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+      @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     metadataApiService.createEntityType(entityType);
     URI location =
@@ -109,37 +107,36 @@ class MetadataApiController extends ApiController {
 
   @Transactional(readOnly = true)
   @GetMapping("/{entityTypeId}/attributes")
-  public AttributesResponse getAttributes(@Valid ReadAttributesRequest readAttributesRequest) {
+  public AttributesResponse getAttributes(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @Valid ReadAttributesRequest readAttributesRequest) {
     int size = readAttributesRequest.getSize();
     int page = readAttributesRequest.getPage();
     Sort sort = readAttributesRequest.getSort();
 
     Attributes attributes =
         metadataApiService.findAttributes(
-            readAttributesRequest.getEntityTypeId(),
-            readAttributesRequest.getQ().orElse(null),
-            sort,
-            size,
-            page);
+            entityTypeId, readAttributesRequest.getQ().orElse(null), sort, size, page);
 
     return attributeV3Mapper.mapAttributes(attributes, size, page, attributes.getTotal());
   }
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
-  public ResponseEntity deleteAttribute(@Valid DeleteAttributeRequest deleteAttributeRequest) {
-    JobExecution jobExecution =
-        metadataApiService.deleteAttributeAsync(
-            deleteAttributeRequest.getEntityTypeId(), deleteAttributeRequest.getAttributeId());
+  public ResponseEntity deleteAttribute(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @PathVariable("attributeId") String attributeId) {
+    JobExecution jobExecution = metadataApiService.deleteAttributeAsync(entityTypeId, attributeId);
     return toLocationResponse(jobExecution);
   }
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes")
-  public ResponseEntity deleteAttributes(@Valid DeleteAttributesRequest deleteAttributesRequest) {
+  public ResponseEntity deleteAttributes(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @Valid DeleteAttributesRequest deleteAttributesRequest) {
     JobExecution jobExecution =
-        metadataApiService.deleteAttributesAsync(
-            deleteAttributesRequest.getEntityTypeId(), deleteAttributesRequest.getQ());
+        metadataApiService.deleteAttributesAsync(entityTypeId, deleteAttributesRequest.getQ());
     return toLocationResponse(jobExecution);
   }
 
@@ -147,7 +144,7 @@ class MetadataApiController extends ApiController {
   @PutMapping("/{entityTypeId}")
   public ResponseEntity updateEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
-      @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
+      @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeV3Mapper.toEntityType(createEntityTypeRequest);
     entityType.setId(entityTypeId);
 
@@ -168,9 +165,8 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}")
-  public ResponseEntity deleteEntityType(@Valid DeleteEntityTypeRequest deleteEntityTypeRequest) {
-    JobExecution jobExecution =
-        metadataApiService.deleteEntityTypeAsync(deleteEntityTypeRequest.getEntityTypeId());
+  public ResponseEntity deleteEntityType(@PathVariable("entityTypeId") String entityTypeId) {
+    JobExecution jobExecution = metadataApiService.deleteEntityTypeAsync(entityTypeId);
     return toLocationResponse(jobExecution);
   }
 

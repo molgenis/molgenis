@@ -1,17 +1,8 @@
 package org.molgenis.api.metadata.v3.model;
 
 public class ReadEntityTypeRequest {
-  private String entityTypeId;
   private boolean flattenAttrs;
   private boolean i18n;
-
-  public String getEntityTypeId() {
-    return entityTypeId;
-  }
-
-  public void setEntityTypeId(String entityTypeId) {
-    this.entityTypeId = entityTypeId;
-  }
 
   public boolean isI18n() {
     return i18n;

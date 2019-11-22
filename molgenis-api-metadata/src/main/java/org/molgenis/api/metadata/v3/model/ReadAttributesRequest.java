@@ -55,12 +55,4 @@ public class ReadAttributesRequest {
   public void setQ(Query q) {
     this.q = q;
   }
-
-  public String getEntityTypeId() {
-    return entityTypeId;
-  }
-
-  public void setEntityTypeId(String entityTypeId) {
-    this.entityTypeId = entityTypeId;
-  }
 }

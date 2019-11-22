@@ -208,7 +208,10 @@ class AttributeV3Mapper {
       CreateAttributeRequest attributeRequest, EntityType entityType, int index) {
     Attribute attribute = attributeFactory.create();
 
-    attribute.setIdentifier(attributeRequest.getId());
+    String id = attributeRequest.getId();
+    if (id != null) {
+      attribute.setIdentifier(id);
+    }
     attribute.setName(attributeRequest.getName());
     attribute.setEntity(entityType);
     Integer sequenceNumber = attributeRequest.getSequenceNumber();
@@ -216,7 +219,10 @@ class AttributeV3Mapper {
       sequenceNumber = index;
     }
     attribute.setSequenceNumber(sequenceNumber);
-    attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
+    String type = attributeRequest.getType();
+    if (type != null) {
+      attribute.setDataType(AttributeType.toEnum(type));
+    }
 
     EntityType refEntityType;
     String refEntityTypeId = attributeRequest.getRefEntityType();
@@ -224,26 +230,47 @@ class AttributeV3Mapper {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);
     }
-    if (attributeRequest.isCascadeDelete() != null) {
-      attribute.setCascadeDelete(attributeRequest.isCascadeDelete());
+    if (attributeRequest.getCascadeDelete() != null) {
+      attribute.setCascadeDelete(attributeRequest.getCascadeDelete());
     }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(
         orderBy != null ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy))) : null);
     attribute.setExpression(attributeRequest.getExpression());
-    attribute.setNillable(attributeRequest.isNullable());
-    attribute.setAuto(attributeRequest.isAuto());
-    attribute.setVisible(attributeRequest.isVisible());
+    Boolean nullable = attributeRequest.getNullable();
+    if (nullable != null) {
+      attribute.setNillable(nullable);
+    }
+    Boolean auto = attributeRequest.getAuto();
+    if (auto != null) {
+      attribute.setAuto(auto);
+    }
+    Boolean visible = attributeRequest.getVisible();
+    if (visible != null) {
+      attribute.setVisible(visible);
+    }
     processI18nLabel(attributeRequest.getLabel(), attribute);
     processI18nDescription(attributeRequest.getDescription(), attribute);
-    attribute.setAggregatable(attributeRequest.isAggregatable());
-    attribute.setEnumOptions(attributeRequest.getEnumOptions());
+    Boolean aggregatable = attributeRequest.getAggregatable();
+    if (aggregatable != null) {
+      attribute.setAggregatable(aggregatable);
+    }
+    List<String> enumOptions = attributeRequest.getEnumOptions();
+    if (enumOptions != null) {
+      attribute.setEnumOptions(enumOptions);
+    }
     Range range = attributeRequest.getRange();
     if (range != null) {
       attribute.setRange(map(range));
     }
-    attribute.setReadOnly(attributeRequest.isReadonly());
-    attribute.setUnique(attributeRequest.isUnique());
+    Boolean readonly = attributeRequest.getReadonly();
+    if (readonly != null) {
+      attribute.setReadOnly(readonly);
+    }
+    Boolean unique = attributeRequest.getUnique();
+    if (unique != null) {
+      attribute.setUnique(unique);
+    }
     attribute.setNullableExpression(attributeRequest.getNullableExpression());
     attribute.setVisibleExpression(attributeRequest.getVisibleExpression());
     attribute.setValidationExpression(attributeRequest.getValidationExpression());
@@ -465,12 +492,12 @@ class AttributeV3Mapper {
     AtomicInteger index = new AtomicInteger(0);
     for (CreateAttributeRequest attributeRequest : attributes) {
       Attribute attr = toAttribute(attributeRequest, entityType, index.getAndIncrement());
-      if (attributeRequest.getId().equals(entityTypeRequest.getIdAttribute())) {
+      String id = attributeRequest.getId();
+      if (id != null && id.equals(entityTypeRequest.getIdAttribute())) {
         attr.setIdAttribute(true);
       }
       Attribute labelAttribute = entityType.getLabelAttribute();
-      if (labelAttribute != null
-          && attributeRequest.getId().equals(labelAttribute.getIdentifier())) {
+      if (labelAttribute != null && id != null && id.equals(labelAttribute.getIdentifier())) {
         attr.setLabelAttribute(true);
       }
       List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();

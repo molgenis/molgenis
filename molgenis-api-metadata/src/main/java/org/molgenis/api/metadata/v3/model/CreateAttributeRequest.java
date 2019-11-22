@@ -1,178 +1,196 @@
 package org.molgenis.api.metadata.v3.model;
 
+import com.google.auto.value.AutoValue;
+import com.google.auto.value.AutoValue.CopyAnnotations;
 import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+import org.molgenis.util.AutoGson;
 
-@SuppressWarnings("squid:S1610") // classes without fields should be converted to interfaces
-public class CreateAttributeRequest {
-  String id;
-  String name;
-  String type;
-  String parent;
-  String refEntityType;
-  Boolean cascadeDelete;
-  String mappedByAttribute;
-  String orderBy;
-  String expression;
-  boolean nullable;
-  boolean auto;
-  boolean visible;
-  I18nValue label;
-  I18nValue description;
-  boolean aggregatable;
-  List<String> enumOptions;
-  Range range;
-  boolean readonly;
-  boolean unique;
-  String nullableExpression;
-  String visibleExpression;
-  String validationExpression;
-  String defaultValue;
-  Integer sequenceNumber;
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_CreateAttributeRequest.class)
+public abstract class CreateAttributeRequest {
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getId();
 
-  public CreateAttributeRequest(
-      String id,
-      String name,
-      String type,
-      String parent,
-      String refEntityType,
-      Boolean cascadeDelete,
-      String mappedByAttribute,
-      String orderBy,
-      String expression,
-      boolean nullable,
-      boolean auto,
-      boolean visible,
-      I18nValue label,
-      I18nValue description,
-      boolean aggregatable,
-      List<String> enumOptions,
-      Range range,
-      boolean readonly,
-      boolean unique,
-      String nullableExpression,
-      String visibleExpression,
-      String validationExpression,
-      String defaultValue,
-      Integer sequenceNumber) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    this.parent = parent;
-    this.refEntityType = refEntityType;
-    this.cascadeDelete = cascadeDelete;
-    this.mappedByAttribute = mappedByAttribute;
-    this.orderBy = orderBy;
-    this.expression = expression;
-    this.nullable = nullable;
-    this.auto = auto;
-    this.visible = visible;
-    this.label = label;
-    this.description = description;
-    this.aggregatable = aggregatable;
-    this.enumOptions = enumOptions;
-    this.range = range;
-    this.readonly = readonly;
-    this.unique = unique;
-    this.nullableExpression = nullableExpression;
-    this.visibleExpression = visibleExpression;
-    this.validationExpression = validationExpression;
-    this.defaultValue = defaultValue;
-    this.sequenceNumber = sequenceNumber;
+  @CopyAnnotations(exclude = NotNull.class)
+  @NotNull
+  public abstract String getName();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getType();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getParent();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getRefEntityType();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getCascadeDelete();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getMappedByAttribute();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getOrderBy();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getExpression();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getNullable();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getAuto();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getVisible();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract I18nValue getLabel();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract I18nValue getDescription();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getAggregatable();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract List<String> getEnumOptions();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Range getRange();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getReadonly();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getUnique();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getNullableExpression();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getVisibleExpression();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getValidationExpression();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getDefaultValue();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Integer getSequenceNumber();
+
+  public static Builder builder() {
+    return new AutoValue_CreateAttributeRequest.Builder();
   }
 
-  public String getId() {
-    return id;
-  }
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
+  @AutoValue.Builder
+  public abstract static class Builder {
 
-  public String getName() {
-    return name;
-  }
+    public abstract Builder setId(@Nullable @CheckForNull String newId);
 
-  public String getType() {
-    return type;
-  }
+    public abstract Builder setName(String newName);
 
-  public String getParent() {
-    return parent;
-  }
+    public abstract Builder setType(String newType);
 
-  public String getRefEntityType() {
-    return refEntityType;
-  }
+    public abstract Builder setParent(@Nullable @CheckForNull String newParent);
 
-  public Boolean isCascadeDelete() {
-    return cascadeDelete;
-  }
+    public abstract Builder setRefEntityType(@Nullable @CheckForNull String newRefEntityType);
 
-  public String getMappedByAttribute() {
-    return mappedByAttribute;
-  }
+    public abstract Builder setCascadeDelete(@Nullable @CheckForNull Boolean newCascadeDelete);
 
-  public String getOrderBy() {
-    return orderBy;
-  }
+    public abstract Builder setMappedByAttribute(
+        @Nullable @CheckForNull String newMappedByAttribute);
 
-  public String getExpression() {
-    return expression;
-  }
+    public abstract Builder setOrderBy(@Nullable @CheckForNull String newOrderBy);
 
-  public Boolean isNullable() {
-    return nullable;
-  }
+    public abstract Builder setExpression(@Nullable @CheckForNull String newExpression);
 
-  public Boolean isAuto() {
-    return auto;
-  }
+    public abstract Builder setNullable(@Nullable @CheckForNull Boolean newNullable);
 
-  public Boolean isVisible() {
-    return visible;
-  }
+    public abstract Builder setAuto(@Nullable @CheckForNull Boolean newAuto);
 
-  public I18nValue getLabel() {
-    return label;
-  }
+    public abstract Builder setVisible(@Nullable @CheckForNull Boolean newVisible);
 
-  public I18nValue getDescription() {
-    return description;
-  }
+    public abstract Builder setLabel(@Nullable @CheckForNull I18nValue newLabel);
 
-  public Boolean isAggregatable() {
-    return aggregatable;
-  }
+    public abstract Builder setDescription(@Nullable @CheckForNull I18nValue newDescription);
 
-  public List<String> getEnumOptions() {
-    return enumOptions;
-  }
+    public abstract Builder setAggregatable(@Nullable @CheckForNull Boolean newAggregatable);
 
-  public Range getRange() {
-    return range;
-  }
+    public abstract Builder setEnumOptions(@Nullable @CheckForNull List<String> newEnumOptions);
 
-  public Boolean isReadonly() {
-    return readonly;
-  }
+    public abstract Builder setRange(@Nullable @CheckForNull Range newRange);
 
-  public Boolean isUnique() {
-    return unique;
-  }
+    public abstract Builder setReadonly(@Nullable @CheckForNull Boolean newReadonly);
 
-  public String getNullableExpression() {
-    return nullableExpression;
-  }
+    public abstract Builder setUnique(@Nullable @CheckForNull Boolean newUnique);
 
-  public String getVisibleExpression() {
-    return visibleExpression;
-  }
+    public abstract Builder setNullableExpression(
+        @Nullable @CheckForNull String newNullableExpression);
 
-  public String getValidationExpression() {
-    return validationExpression;
-  }
+    public abstract Builder setVisibleExpression(
+        @Nullable @CheckForNull String newVisibleExpression);
 
-  public String getDefaultValue() {
-    return defaultValue;
-  }
+    public abstract Builder setValidationExpression(
+        @Nullable @CheckForNull String newValidationExpression);
 
-  public Integer getSequenceNumber() {
-    return sequenceNumber;
+    public abstract Builder setDefaultValue(@Nullable @CheckForNull String newDefaultValue);
+
+    public abstract Builder setSequenceNumber(@Nullable @CheckForNull Integer newSequenceNumber);
+
+    public abstract CreateAttributeRequest build();
   }
 }

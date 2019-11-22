@@ -1,81 +1,103 @@
 package org.molgenis.api.metadata.v3.model;
 
-import static java.util.Collections.emptyList;
+import com.google.auto.value.AutoValue;
+import com.google.auto.value.AutoValue.CopyAnnotations;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.annotations.SerializedName;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import org.molgenis.util.AutoGson;
 
-import java.util.List;
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_CreateEntityTypeRequest.class)
+public abstract class CreateEntityTypeRequest {
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getId();
 
-public class CreateEntityTypeRequest {
-  String id;
-  I18nValue label;
-  I18nValue description;
-  Boolean abstract_;
-  String package_;
-  String extends_;
-  List<CreateAttributeRequest> attributes;
-  String idAttribute;
-  String labelAttribute;
-  List<String> lookupAttributes;
+  @CopyAnnotations(exclude = {NotNull.class, Valid.class})
+  @Valid
+  @NotNull
+  public abstract I18nValue getLabel();
 
-  public CreateEntityTypeRequest(
-      String id,
-      I18nValue label,
-      I18nValue description,
-      Boolean abstract_,
-      String package_,
-      String extends_,
-      List<CreateAttributeRequest> attributes,
-      String idAttribute,
-      String labelAttribute,
-      List<String> lookupAttributes) {
-    this.id = id;
-    this.label = label;
-    this.description = description;
-    this.abstract_ = abstract_;
-    this.package_ = package_;
-    this.extends_ = extends_;
-    this.attributes = attributes;
-    this.idAttribute = idAttribute;
-    this.labelAttribute = labelAttribute;
-    this.lookupAttributes = lookupAttributes;
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract I18nValue getDescription();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  @SerializedName(value = "abstract")
+  public abstract Boolean getAbstract();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  @SerializedName(value = "package")
+  public abstract String getPackage();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  @SerializedName(value = "extends")
+  public abstract String getExtends();
+
+  @CopyAnnotations(exclude = {NotEmpty.class, Valid.class})
+  @Valid
+  @NotEmpty
+  public abstract ImmutableList<CreateAttributeRequest> getAttributes();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getIdAttribute();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract String getLabelAttribute();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract ImmutableList<String> getLookupAttributes();
+
+  public static Builder builder() {
+    return new AutoValue_CreateEntityTypeRequest.Builder();
   }
 
-  public String getId() {
-    return id;
-  }
+  @SuppressWarnings(
+      "squid:S1610") // Abstract classes without fields should be converted to interfaces
+  @AutoValue.Builder
+  public abstract static class Builder {
 
-  public I18nValue getLabel() {
-    return label;
-  }
+    public abstract Builder setId(@Nullable @CheckForNull String newId);
 
-  public I18nValue getDescription() {
-    return description;
-  }
+    public abstract Builder setLabel(I18nValue newLabel);
 
-  public boolean isAbstract() {
-    return abstract_ != null ? abstract_ : false;
-  }
+    public abstract Builder setDescription(@Nullable @CheckForNull I18nValue newDescription);
 
-  public String getPackage() {
-    return package_;
-  }
+    public abstract Builder setAbstract(@Nullable @CheckForNull Boolean newAbstract);
 
-  public String getExtends() {
-    return extends_;
-  }
+    public abstract Builder setPackage(@Nullable @CheckForNull String newPackage);
 
-  public List<CreateAttributeRequest> getAttributes() {
-    return attributes;
-  }
+    public abstract Builder setExtends(@Nullable @CheckForNull String newExtends);
 
-  public String getIdAttribute() {
-    return idAttribute;
-  }
+    public abstract Builder setAttributes(
+        @Nullable @CheckForNull ImmutableList<CreateAttributeRequest> newAttributes);
 
-  public String getLabelAttribute() {
-    return labelAttribute;
-  }
+    public abstract Builder setIdAttribute(@Nullable @CheckForNull String newIdAttribute);
 
-  public List<String> getLookupAttributes() {
-    return lookupAttributes != null ? lookupAttributes : emptyList();
+    public abstract Builder setLabelAttribute(@Nullable @CheckForNull String newLabelAttribute);
+
+    public abstract Builder setLookupAttributes(
+        @Nullable @CheckForNull ImmutableList<String> newLookupAttributes);
+
+    public abstract CreateEntityTypeRequest build();
   }
 }

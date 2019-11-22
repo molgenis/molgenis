@@ -1,12 +1,12 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -48,7 +48,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -158,6 +157,10 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     Attribute attribute = mock(Attribute.class);
     when(attribute.getIdentifier()).thenReturn("MyAttributeId");
     when(attribute.getName()).thenReturn("MyAttributeName");
+    doReturn("My Attribute").when(attribute).getLabel();
+    doReturn(null).when(attribute).getLabel("en");
+    doReturn("My Attribute description").when(attribute).getDescription();
+    doReturn(null).when(attribute).getDescription("en");
     when(attribute.getSequenceNumber()).thenReturn(2);
     when(attribute.getEntity()).thenReturn(entityType);
     when(attribute.getDataType()).thenReturn(AttributeType.ENUM);
@@ -180,8 +183,16 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
             .setUnique(false)
             .setReadOnly(false)
             .setAggregatable(false)
-            .setLabelI18n(I18nValue.builder().setTranslations(ImmutableMap.of()).build())
-            .setDescriptionI18n(I18nValue.builder().setTranslations(ImmutableMap.of()).build())
+            .setLabelI18n(
+                I18nValue.builder()
+                    .setDefaultValue("My Attribute")
+                    .setTranslations(ImmutableMap.of())
+                    .build())
+            .setDescriptionI18n(
+                I18nValue.builder()
+                    .setDefaultValue("My Attribute description")
+                    .setTranslations(ImmutableMap.of())
+                    .build())
             .build();
 
     AttributeResponse attributeResponse =
@@ -203,45 +214,18 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     when(attributeFactory.create()).thenReturn(attribute);
 
     CreateAttributeRequest createAttributeRequest =
-        new CreateAttributeRequest(
-            "MyAttributeId",
-            "MyAttributeName",
-            "long",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            false,
-            false,
-            null,
-            null,
-            false,
-            emptyList(),
-            Range.create(-1L, 1L),
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null);
+        CreateAttributeRequest.builder()
+            .setId("MyAttributeId")
+            .setName("MyAttributeName")
+            .setType("long")
+            .setRange(Range.create(-1L, 1L))
+            .build();
     CreateEntityTypeRequest entityTypeRequest =
-        new CreateEntityTypeRequest(
-            "MyEntityTypeId",
-            null,
-            null,
-            true,
-            "MyPackageId",
-            null,
-            singletonList(createAttributeRequest),
-            null,
-            null,
-            emptyList());
-
-    Package entityTypePackage = mock(Package.class);
+        CreateEntityTypeRequest.builder()
+            .setLabel(I18nValue.builder().setDefaultValue("My Entity Type").build())
+            .setPackage("MyPackageId")
+            .setAttributes(ImmutableList.of(createAttributeRequest))
+            .build();
 
     EntityType entityType = mock(EntityType.class);
 
@@ -259,14 +243,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
         () -> verify(attribute).setDataType(AttributeType.LONG),
         () -> verify(attribute).setOrderBy(null),
         () -> verify(attribute).setExpression(null),
-        () -> verify(attribute).setNillable(false),
-        () -> verify(attribute).setAuto(false),
-        () -> verify(attribute).setVisible(false),
-        () -> verify(attribute).setAggregatable(false),
-        () -> verify(attribute).setEnumOptions(emptyList()),
         () -> verify(attribute).setRange(new org.molgenis.data.Range(-1L, 1L)),
-        () -> verify(attribute).setReadOnly(false),
-        () -> verify(attribute).setUnique(false),
         () -> verify(attribute).setNullableExpression(null),
         () -> verify(attribute).setVisibleExpression(null),
         () -> verify(attribute).setValidationExpression(null),

@@ -1,6 +1,6 @@
 {
   "id": "v3meta_MyStrings",
-  "package_": "v3meta",
+  "package": "v3meta",
   "label": {
     "defaultValue": "My Strings"
   },
@@ -8,13 +8,15 @@
     {
       "id": "v3meta_MyStrings_id",
       "name": "id",
-      "type": "string"
+      "type": "string",
+      "visible": false,
+      "nullable": false
     },
     {
       "id": "v3meta_MyStrings_label",
       "name": "label",
       "type": "string",
-      "visible": true
+      "nullable": false
     }
   ],
   "idAttribute": "v3meta_MyStrings_id",

@@ -1,6 +1,6 @@
 {
   "id": "v3meta_Identifiable",
-  "package_": "v3meta",
+  "package": "v3meta",
   "label": {
     "defaultValue": "Identifiable"
   },
@@ -8,16 +8,18 @@
     {
       "id": "v3meta_Identifiable_id",
       "name": "id",
-      "type": "int"
+      "type": "int",
+      "visible": false,
+      "nullable": false
     },
     {
       "id": "v3meta_Identifiable_label",
       "name": "label",
       "type": "string",
-      "visible": true
+      "nullable": false
     }
   ],
   "idAttribute": "v3meta_Identifiable_id",
   "labelAttribute": "v3meta_Identifiable_label",
-  "abstract_": true
+  "abstract": true
 }

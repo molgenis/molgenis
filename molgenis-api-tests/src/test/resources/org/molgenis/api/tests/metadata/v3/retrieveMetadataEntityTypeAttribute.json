@@ -10,9 +10,9 @@
     "idAttribute": false,
     "labelAttribute": false,
     "label": "myString",
-    "nullable": false,
+    "nullable": true,
     "auto": false,
-    "visible": false,
+    "visible": true,
     "unique": false,
     "readOnly": false,
     "aggregatable": false

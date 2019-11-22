@@ -5,7 +5,7 @@
   "data": {
     "id": "v3meta_MyNumbers",
     "label": "My Numbers",
-    "package_": {
+    "package": {
       "links": {
         "self": "${baseUri}/api/data/sys_md_Package/v3meta"
       }
@@ -58,7 +58,7 @@
         }
       ]
     },
-    "abstract_": false,
+    "abstract": false,
     "indexingDepth": 1
   }
 }
