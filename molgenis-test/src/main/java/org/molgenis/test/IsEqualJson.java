@@ -21,7 +21,6 @@ public class IsEqualJson extends BaseMatcher<String> {
 
   @Override
   public boolean matches(Object item) {
-    System.out.println(item);
     try {
       return matches(expectedJson, item);
     } catch (JSONException e) {
