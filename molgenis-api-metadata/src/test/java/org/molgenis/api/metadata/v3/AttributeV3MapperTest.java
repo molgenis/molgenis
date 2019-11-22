@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -156,6 +157,10 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
     Attribute attribute = mock(Attribute.class);
     when(attribute.getIdentifier()).thenReturn("MyAttributeId");
     when(attribute.getName()).thenReturn("MyAttributeName");
+    doReturn("My Attribute").when(attribute).getLabel();
+    doReturn(null).when(attribute).getLabel("en");
+    doReturn("My Attribute description").when(attribute).getDescription();
+    doReturn(null).when(attribute).getDescription("en");
     when(attribute.getSequenceNumber()).thenReturn(2);
     when(attribute.getEntity()).thenReturn(entityType);
     when(attribute.getDataType()).thenReturn(AttributeType.ENUM);
@@ -178,8 +183,16 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
             .setUnique(false)
             .setReadOnly(false)
             .setAggregatable(false)
-            .setLabelI18n(I18nValue.builder().setTranslations(ImmutableMap.of()).build())
-            .setDescriptionI18n(I18nValue.builder().setTranslations(ImmutableMap.of()).build())
+            .setLabelI18n(
+                I18nValue.builder()
+                    .setDefaultValue("My Attribute")
+                    .setTranslations(ImmutableMap.of())
+                    .build())
+            .setDescriptionI18n(
+                I18nValue.builder()
+                    .setDefaultValue("My Attribute description")
+                    .setTranslations(ImmutableMap.of())
+                    .build())
             .build();
 
     AttributeResponse attributeResponse =
@@ -209,7 +222,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
             .build();
     CreateEntityTypeRequest entityTypeRequest =
         CreateEntityTypeRequest.builder()
-            .setLabel(I18nValue.builder().build())
+            .setLabel(I18nValue.builder().setDefaultValue("My Entity Type").build())
             .setPackage("MyPackageId")
             .setAttributes(ImmutableList.of(createAttributeRequest))
             .build();

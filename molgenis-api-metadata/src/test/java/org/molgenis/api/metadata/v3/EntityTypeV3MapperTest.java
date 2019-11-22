@@ -6,6 +6,7 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -121,8 +122,11 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("MyEntityTypeId");
-    when(entityType.getLabel()).thenReturn("My Entity Type");
-    when(entityType.getLabel("en")).thenReturn("My Entity Type");
+    doReturn("My Entity Type").when(entityType).getLabel();
+    doReturn("My Entity Type").when(entityType).getLabel("en");
+    doReturn("My Entity Type description").when(entityType).getDescription();
+    doReturn("My Entity Type description").when(entityType).getDescription("en");
+    when(entityType.getDescription()).thenReturn("My Entity Type description");
     when(entityType.getString("labelEn")).thenReturn("My Entity Type (en)");
 
     EntityTypeResponseData entityTypeResponseData =
@@ -134,7 +138,12 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
                     .setDefaultValue("My Entity Type")
                     .setTranslations(ImmutableMap.of("en", "My Entity Type (en)"))
                     .build())
-            .setDescriptionI18n(I18nValue.builder().setTranslations(ImmutableMap.of()).build())
+            .setDescription("My Entity Type description")
+            .setDescriptionI18n(
+                I18nValue.builder()
+                    .setDefaultValue("My Entity Type description")
+                    .setTranslations(ImmutableMap.of())
+                    .build())
             .setAttributes(
                 AttributesResponse.builder()
                     .setLinks(
