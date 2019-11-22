@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -21,10 +20,7 @@ public abstract class CreateAttributeRequest {
   @NotNull
   public abstract String getName();
 
-  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class, Pattern.class})
-  @Pattern(
-      regexp =
-          "bool|categorical|categorical_mref|compound|date|date_time|decimal|email|enum|file|html|hyperlink|int|long|mref|one_to_many|script|string|text|xref")
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getType();
