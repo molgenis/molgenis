@@ -208,7 +208,10 @@ class AttributeV3Mapper {
       CreateAttributeRequest attributeRequest, EntityType entityType, int index) {
     Attribute attribute = attributeFactory.create();
 
-    attribute.setIdentifier(attributeRequest.getId());
+    String id = attributeRequest.getId();
+    if (id != null) {
+      attribute.setIdentifier(id);
+    }
     attribute.setName(attributeRequest.getName());
     attribute.setEntity(entityType);
     Integer sequenceNumber = attributeRequest.getSequenceNumber();
