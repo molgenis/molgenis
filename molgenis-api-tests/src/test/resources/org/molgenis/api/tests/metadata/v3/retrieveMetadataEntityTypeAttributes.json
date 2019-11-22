@@ -1,13 +1,13 @@
 {
   "links": {
-    "previous": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes?size=3&page=1",
-    "self": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes?size=3&page=2",
-    "next": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes?size=3&page=3"
+    "previous": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=1",
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=2",
+    "next": "${baseUri}/api/metadata/v3meta_MyDataset/attributes?size=3&page=3"
   },
   "items": [
     {
       "link": {
-        "self": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myDecimal"
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myDecimal"
       },
       "data": {
         "id": "v3meta_MyDataset_myDecimal",
@@ -27,7 +27,7 @@
     },
     {
       "link": {
-        "self": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myEnum"
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myEnum"
       },
       "data": {
         "id": "v3meta_MyDataset_myEnum",
@@ -52,7 +52,7 @@
     },
     {
       "link": {
-        "self": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myInt"
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myInt"
       },
       "data": {
         "id": "v3meta_MyDataset_myInt",
