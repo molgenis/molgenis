@@ -78,6 +78,10 @@ public class MetadataApiServiceImpl implements MetadataApiService {
   @Override
   public Attributes findAttributes(
       String entityTypeId, Query query, Sort sort, int size, int number) {
+    if (!metadataService.hasEntityType(entityTypeId)) {
+      throw new UnknownEntityTypeException(entityTypeId);
+    }
+
     Repository<Attribute> repository =
         metadataService
             .getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class)
