@@ -1,6 +1,6 @@
 {
   "link": {
-    "self": "http://localhost:8080/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString"
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString"
   },
   "data": {
     "id": "v3meta_MyDataset_myString",
