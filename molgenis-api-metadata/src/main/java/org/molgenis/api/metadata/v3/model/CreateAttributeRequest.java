@@ -1,102 +1,131 @@
 package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
+import com.google.auto.value.AutoValue.CopyAnnotations;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CreateAttributeRequest.class)
 public abstract class CreateAttributeRequest {
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getId();
 
+  @CopyAnnotations(exclude = NotNull.class)
+  @NotNull
   public abstract String getName();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
   public abstract String getType();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getParent();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getRefEntityType();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getCascadeDelete();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getMappedByAttribute();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getOrderBy();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getExpression();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getNullable();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getAuto();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getVisible();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract I18nValue getLabel();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract I18nValue getDescription();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getAggregatable();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract List<String> getEnumOptions();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Range getRange();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getReadonly();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Boolean getUnique();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getNullableExpression();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getVisibleExpression();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getValidationExpression();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getDefaultValue();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract Integer getSequenceNumber();

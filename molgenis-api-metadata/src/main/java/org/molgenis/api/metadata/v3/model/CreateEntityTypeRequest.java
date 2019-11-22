@@ -6,51 +6,63 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.SerializedName;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CreateEntityTypeRequest.class)
 public abstract class CreateEntityTypeRequest {
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getId();
 
+  @CopyAnnotations(exclude = {NotNull.class, Valid.class})
+  @Valid
+  @NotNull
   public abstract I18nValue getLabel();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract I18nValue getDescription();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
-  @CopyAnnotations
   @SerializedName(value = "abstract")
   public abstract Boolean getAbstract();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
-  @CopyAnnotations
   @SerializedName(value = "package")
   public abstract String getPackage();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
-  @CopyAnnotations
   @SerializedName(value = "extends")
   public abstract String getExtends();
 
-  @Nullable
-  @CheckForNull
+  @CopyAnnotations(exclude = {NotEmpty.class, Valid.class})
+  @Valid
+  @NotEmpty
   public abstract ImmutableList<CreateAttributeRequest> getAttributes();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getIdAttribute();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract String getLabelAttribute();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
   public abstract ImmutableList<String> getLookupAttributes();

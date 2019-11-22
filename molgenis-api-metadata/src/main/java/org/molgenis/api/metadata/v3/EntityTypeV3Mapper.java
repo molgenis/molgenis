@@ -86,7 +86,10 @@ class EntityTypeV3Mapper {
 
   EntityType toEntityType(CreateEntityTypeRequest entityTypeRequest) {
     EntityType entityType = entityTypeFactory.create();
-    entityType.setId(entityTypeRequest.getId());
+    String entityTypeId = entityTypeRequest.getId();
+    if (entityTypeId != null) {
+      entityType.setId(entityTypeId);
+    }
     String packageId = entityTypeRequest.getPackage();
     Package pack = null;
     if (packageId != null) {

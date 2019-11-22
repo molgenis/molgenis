@@ -216,7 +216,10 @@ class AttributeV3Mapper {
       sequenceNumber = index;
     }
     attribute.setSequenceNumber(sequenceNumber);
-    attribute.setDataType(AttributeType.toEnum(attributeRequest.getType()));
+    String type = attributeRequest.getType();
+    if (type != null) {
+      attribute.setDataType(AttributeType.toEnum(type));
+    }
 
     EntityType refEntityType;
     String refEntityTypeId = attributeRequest.getRefEntityType();
@@ -486,12 +489,12 @@ class AttributeV3Mapper {
     AtomicInteger index = new AtomicInteger(0);
     for (CreateAttributeRequest attributeRequest : attributes) {
       Attribute attr = toAttribute(attributeRequest, entityType, index.getAndIncrement());
-      if (attributeRequest.getId().equals(entityTypeRequest.getIdAttribute())) {
+      String id = attributeRequest.getId();
+      if (id != null && id.equals(entityTypeRequest.getIdAttribute())) {
         attr.setIdAttribute(true);
       }
       Attribute labelAttribute = entityType.getLabelAttribute();
-      if (labelAttribute != null
-          && attributeRequest.getId().equals(labelAttribute.getIdentifier())) {
+      if (labelAttribute != null && id != null && id.equals(labelAttribute.getIdentifier())) {
         attr.setLabelAttribute(true);
       }
       List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
