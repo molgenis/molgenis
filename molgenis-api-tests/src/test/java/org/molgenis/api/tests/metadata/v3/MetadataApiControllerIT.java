@@ -1,5 +1,6 @@
 package org.molgenis.api.tests.metadata.v3;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -117,17 +118,10 @@ class MetadataApiControllerIT extends AbstractApiTest {
   @Test
   @Order(5)
   void testRetrieveMetadataEntityTypeAttribute() throws IOException {
-    String expectedJson =
-        TestResourceUtils.getRenderedString(
-            getClass(),
-            "retrieveMetadataEntityTypeAttribute.json",
-            ImmutableMap.of("baseUri", RestAssured.baseURI));
-
-    given()
-        .get("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
-        .then()
-        .statusCode(HttpStatus.OK.value())
-        .body(isEqualJson(expectedJson));
+    testRetrieveMetadataEntityTypeAttribute(
+        "v3meta_MyDataset",
+        "v3meta_MyDataset_myString",
+        "retrieveMetadataEntityTypeAttribute.json");
   }
 
   @Test
@@ -227,8 +221,6 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .statusCode(NO_CONTENT.value());
   }
 
-  // TODO enable after endpoint is async
-  @Disabled
   @Test
   @Order(10)
   void testPartialUpdateMetadataEntityTypeAttribute() throws IOException {
@@ -238,12 +230,23 @@ class MetadataApiControllerIT extends AbstractApiTest {
             "partialUpdateMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .patch("/api/metadata/v3meta_MyDataset/attributes/myString")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .patch("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () ->
+            testRetrieveMetadataEntityTypeAttribute(
+                "v3meta_MyDataset",
+                "v3meta_MyDataset_myString",
+                "partialUpdateRetrieveMetadataEntityTypeAttribute.json"));
   }
 
   @Test
@@ -301,6 +304,19 @@ class MetadataApiControllerIT extends AbstractApiTest {
             .header(LOCATION);
 
     assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
+  }
+
+  private void testRetrieveMetadataEntityTypeAttribute(
+      String entityTypeId, String attributeId, String resourceName) throws IOException {
+    String expectedJson =
+        TestResourceUtils.getRenderedString(
+            getClass(), resourceName, ImmutableMap.of("baseUri", RestAssured.baseURI));
+
+    given()
+        .get("/api/metadata/" + entityTypeId + "/attributes/" + attributeId)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body(isEqualJson(expectedJson));
   }
 
   private static void createPackage() {
