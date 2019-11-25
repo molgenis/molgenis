@@ -162,6 +162,38 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testCreateAttribute() throws URISyntaxException {
+    String entityTypeId = "MyEntityTypeId";
+    String attibuteId = "myAttributeId";
+    CreateAttributeRequest createAttributeRequest =
+        CreateAttributeRequest.builder().setId(attibuteId).setName("updatedMyAttribute").build();
+
+    EntityType entityType = mock(EntityType.class);
+    when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
+
+    Attribute newAttribute = mock(Attribute.class);
+    when(attributeV3Mapper.toAttribute(createAttributeRequest, entityType))
+        .thenReturn(newAttribute);
+
+    EntityType jobEntityType = mock(EntityType.class);
+    when(jobEntityType.getId()).thenReturn("MyJobEntityTypeId");
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataUpsertJobExecution.getEntityType()).thenReturn(jobEntityType);
+    when(metadataUpsertJobExecution.getIdentifier()).thenReturn("MyJobEntityId");
+    when(metadataApiService.updateEntityTypeAsync(entityType))
+        .thenReturn(metadataUpsertJobExecution);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.accepted()
+            .location(new URI("http://localhost/api/data/MyJobEntityTypeId/MyJobEntityId"))
+            .build();
+    assertEquals(
+        responseEntity,
+        metadataApiController.createAttribute(entityTypeId, createAttributeRequest));
+    verify(entityType).addAttribute(newAttribute);
+  }
+
+  @Test
   void testDeleteAttribute() {
     String entityTypeId = "MyEntityTypeId";
     String attributeId = "attrId";

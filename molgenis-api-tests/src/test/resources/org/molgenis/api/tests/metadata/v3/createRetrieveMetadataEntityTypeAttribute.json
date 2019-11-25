@@ -1,0 +1,20 @@
+{
+  "link": {
+    "self": "http://localhost:8080/api/metadata/v3meta_MyStrings/attributes/v3meta_MyDataset_myStringNew"
+  },
+  "data": {
+    "id": "v3meta_MyDataset_myStringNew",
+    "name": "myStringNew",
+    "sequenceNr": 3,
+    "type": "string",
+    "idAttribute": false,
+    "labelAttribute": false,
+    "label": "myStringNew",
+    "nullable": true,
+    "auto": false,
+    "visible": true,
+    "unique": false,
+    "readOnly": false,
+    "aggregatable": false
+  }
+}
