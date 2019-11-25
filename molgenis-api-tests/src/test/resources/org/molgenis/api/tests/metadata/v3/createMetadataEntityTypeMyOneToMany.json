@@ -14,7 +14,7 @@
     {
       "id": "v3meta_MyOneToManyAttr",
       "name": "OTM",
-      "type": "onetomany",
+      "type": "one_to_many",
       "mappedByAttribute": "v3meta_MyOneToManyMappedBy",
       "refEntityType": "v3meta_MyOneToMany"
     },
