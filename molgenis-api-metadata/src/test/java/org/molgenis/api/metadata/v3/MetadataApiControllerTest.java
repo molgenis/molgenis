@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -17,6 +18,7 @@ import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
+import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
@@ -207,6 +209,44 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     assertEquals(
         responseEntity,
         metadataApiController.updateEntityType(entityTypeId, createEntityTypeRequest));
+  }
+
+  @Test
+  void testUpdateAttribute() throws URISyntaxException {
+    String entityTypeId = "MyEntityTypeId";
+    String attibuteId = "myAttributeId";
+    CreateAttributeRequest createAttributeRequest =
+        CreateAttributeRequest.builder().setId(attibuteId).setName("updatedMyAttribute").build();
+
+    EntityType entityType = mock(EntityType.class);
+    Attribute currentAttribute =
+        when(mock(Attribute.class).getIdentifier()).thenReturn(attibuteId).getMock();
+    when(currentAttribute.getSequenceNumber()).thenReturn(1);
+    when(entityType.getOwnAllAttributes()).thenReturn(singletonList(currentAttribute));
+    when(entityType.getOwnAttributeById(attibuteId)).thenReturn(currentAttribute);
+    when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
+
+    Attribute newAttribute =
+        when(mock(Attribute.class).getIdentifier()).thenReturn(attibuteId).getMock();
+    when(attributeV3Mapper.toAttribute(createAttributeRequest, entityType))
+        .thenReturn(newAttribute);
+
+    EntityType jobEntityType = mock(EntityType.class);
+    when(jobEntityType.getId()).thenReturn("MyJobEntityTypeId");
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataUpsertJobExecution.getEntityType()).thenReturn(jobEntityType);
+    when(metadataUpsertJobExecution.getIdentifier()).thenReturn("MyJobEntityId");
+    when(metadataApiService.updateEntityTypeAsync(entityType))
+        .thenReturn(metadataUpsertJobExecution);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.accepted()
+            .location(new URI("http://localhost/api/data/MyJobEntityTypeId/MyJobEntityId"))
+            .build();
+    assertEquals(
+        responseEntity,
+        metadataApiController.updateAttribute(entityTypeId, attibuteId, createAttributeRequest));
+    verify(entityType).setOwnAllAttributes(singletonList(newAttribute));
   }
 
   @Test
