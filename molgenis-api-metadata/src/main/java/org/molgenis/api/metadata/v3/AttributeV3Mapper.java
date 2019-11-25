@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
@@ -204,8 +206,14 @@ class AttributeV3Mapper {
     return orders;
   }
 
+  public Attribute toAttribute(CreateAttributeRequest attributeRequest, EntityType entityType) {
+    return toAttribute(attributeRequest, entityType, null);
+  }
+
   private Attribute toAttribute(
-      CreateAttributeRequest attributeRequest, EntityType entityType, int index) {
+      CreateAttributeRequest attributeRequest,
+      EntityType entityType,
+      @Nullable @CheckForNull Integer index) {
     Attribute attribute = attributeFactory.create();
 
     String id = attributeRequest.getId();
@@ -218,7 +226,9 @@ class AttributeV3Mapper {
     if (sequenceNumber == null) {
       sequenceNumber = index;
     }
-    attribute.setSequenceNumber(sequenceNumber);
+    if (sequenceNumber != null) {
+      attribute.setSequenceNumber(sequenceNumber);
+    }
     String type = attributeRequest.getType();
     if (type != null) {
       attribute.setDataType(AttributeType.toEnum(type));

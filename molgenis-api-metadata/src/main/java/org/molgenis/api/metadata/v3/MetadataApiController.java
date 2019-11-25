@@ -3,6 +3,8 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Objects.requireNonNull;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.molgenis.api.ApiController;
@@ -10,6 +12,7 @@ import org.molgenis.api.ApiNamespace;
 import org.molgenis.api.data.v3.EntityController;
 import org.molgenis.api.metadata.v3.model.AttributeResponse;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
+import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.DeleteAttributesRequest;
 import org.molgenis.api.metadata.v3.model.DeleteEntityTypesRequest;
@@ -153,6 +156,25 @@ class MetadataApiController extends ApiController {
   }
 
   @Transactional
+  @PutMapping("/{entityTypeId}/attributes/{attributeId}")
+  public ResponseEntity updateAttribute(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @PathVariable("attributeId") String attributeId,
+      @Valid @RequestBody CreateAttributeRequest createAttributeRequest) {
+    EntityType entityType = metadataApiService.findEntityType(entityTypeId);
+    Attribute currentAttribute = entityType.getOwnAttributeById(attributeId);
+
+    Attribute updatedAttribute = attributeV3Mapper.toAttribute(createAttributeRequest, entityType);
+    updatedAttribute.setIdentifier(attributeId);
+    updatedAttribute.setSequenceNumber(currentAttribute.getSequenceNumber());
+
+    replaceAttribute(entityType, updatedAttribute);
+
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
   @PatchMapping("/{entityTypeId}")
   public ResponseEntity updatePartialEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -177,6 +199,21 @@ class MetadataApiController extends ApiController {
     JobExecution jobExecution =
         metadataApiService.deleteEntityTypesAsync(deleteEntityTypesRequest.getQ());
     return toLocationResponse(jobExecution);
+  }
+
+  private void replaceAttribute(EntityType entityType, Attribute attribute) {
+    List<Attribute> updatedAttributes = new ArrayList<>();
+    entityType
+        .getOwnAllAttributes()
+        .forEach(
+            currentAttribute -> {
+              if (currentAttribute.getIdentifier().equals(attribute.getIdentifier())) {
+                updatedAttributes.add(attribute);
+              } else {
+                updatedAttributes.add(currentAttribute);
+              }
+            });
+    entityType.setOwnAllAttributes(updatedAttributes);
   }
 
   private ResponseEntity toLocationResponse(JobExecution jobExecution) {
