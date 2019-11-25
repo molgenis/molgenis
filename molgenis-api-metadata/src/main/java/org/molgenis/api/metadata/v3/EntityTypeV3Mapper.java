@@ -288,7 +288,7 @@ class EntityTypeV3Mapper {
   private Iterable<Attribute> updateEntityType(
       EntityType entityType, Iterable<Attribute> updatedAttributes, Entry<String, Object> entry) {
     switch (entry.getKey()) {
-      case "package_":
+      case "package":
         String packageId = String.valueOf(entry.getValue());
         Package pack =
             metaDataService
@@ -297,9 +297,9 @@ class EntityTypeV3Mapper {
         entityType.setPackage(pack);
         break;
       case "id":
-      case "abstract_":
+      case "abstract":
         throw new ReadOnlyFieldException(entry.getKey(), "entityType");
-      case "extends_":
+      case "extends":
         String extendsValue = String.valueOf(entry.getValue());
         EntityType parent =
             metaDataService
