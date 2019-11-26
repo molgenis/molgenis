@@ -106,9 +106,6 @@ public class GroupRestController {
     }
 
     groupService.persist(groupValue);
-    groupPermissionService.grantDefaultPermissions(groupValue);
-    roleMembershipService.addUserToRole(
-        SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()

@@ -3,10 +3,7 @@ package org.molgenis.data.security.auth;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.GroupValueFactory.createRoleName;
@@ -83,25 +80,7 @@ public class GroupService {
   @Transactional
   public void persist(GroupValue groupValue) {
     Package rootPackage = packageFactory.create(groupValue.getRootPackage());
-
-    Map<String, Role> roles =
-        groupValue.getRoles().stream()
-            .map(roleFactory::create)
-            .collect(toMap(Role::getName, identity()));
-
-    roles
-        .values()
-        .forEach(role -> addIncludedRolesBasedOnLabels(role, roles, groupValue.getName()));
-
-    Group group = groupFactory.create(groupValue);
-    group.setRootPackage(rootPackage);
-    group.setRoles(roles.values());
-
     dataService.add(PACKAGE, rootPackage);
-    dataService.add(GROUP, group);
-    roles.values().forEach(role -> role.setGroup(group));
-
-    dataService.add(ROLE, roles.values().stream());
   }
 
   @RunAsSystem

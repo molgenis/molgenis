@@ -155,8 +155,6 @@ class GroupRestControllerTest extends AbstractMockitoSpringContextTests {
         groupValueFactory.createGroup(
             "devs", "Developers", null, true, ImmutableSet.of("Manager", "Editor", "Viewer"));
     verify(groupService).persist(groupValue);
-    verify(groupPermissionService).grantDefaultPermissions(groupValue);
-    verify(roleMembershipService).addUserToRole("henkie", "DEVS_MANAGER");
   }
 
   @Test
