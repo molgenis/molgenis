@@ -22,7 +22,8 @@ public class GroupValueFactoryTest {
             "BBMRI Eric",
             "The world's largest biobank catalogue",
             true,
-            ImmutableList.of("Manager", "Editor", "Viewer"));
+            ImmutableList.of("Manager", "Editor", "Viewer"),
+            "bbmri_eric");
 
     GroupValue groupValue = getTestGroupValue();
     assertEquals(groupValue, bbmri_eric);

@@ -76,8 +76,7 @@ public class GroupMetadata extends SystemEntityType {
         .setRefEntity(roleMetadata)
         .setMappedBy(roleMetadata.getAttribute(RoleMetadata.GROUP))
         .setLabel("Roles")
-        .setDescription("Roles a User can have within this Group")
-        .setCascadeDelete(true);
+        .setDescription("Roles a User can have within this Group");
     addAttribute(ROOT_PACKAGE)
         .setLabel("Root package")
         .setDescription("Package where this Group's resources reside.")
@@ -85,7 +84,6 @@ public class GroupMetadata extends SystemEntityType {
         .setRefEntity(packageMetadata)
         .setNillable(false)
         .setReadOnly(true)
-        .setCascadeDelete(true)
         .setUnique(true);
   }
 

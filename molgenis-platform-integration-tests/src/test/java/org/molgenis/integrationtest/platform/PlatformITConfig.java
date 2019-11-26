@@ -16,7 +16,9 @@ import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.security.GroupPackageServiceImpl;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
+import org.molgenis.data.security.auth.GroupPackageService;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionServiceImpl;
@@ -37,6 +39,7 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -147,6 +150,7 @@ in org.molgenis.data and subpackages from included modules
   PermissionRegistry.class,
   DataPermissionConfig.class,
   JsonTestConfig.class,
+  GroupValueFactory.class
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
   @Autowired private PlatformBootstrapper platformBootstrapper;
@@ -188,6 +192,16 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
     pspc.setIgnoreResourceNotFound(true);
     pspc.setNullValue("@null");
     return pspc;
+  }
+
+  /**
+   * Introduction of the {@link GroupPackageServiceImpl} broke all integration tests that create
+   * packages. As a workaround the service if effectively disabled by default by using a mock
+   * service.
+   */
+  @Bean
+  public GroupPackageService groupPackageService() {
+    return mock(GroupPackageService.class);
   }
 
   @Bean
