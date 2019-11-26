@@ -1,22 +1,15 @@
 package org.molgenis.data.security.auth;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
-import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 import static org.molgenis.security.core.SidUtils.createRoleAuthority;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
@@ -36,12 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GroupService {
   private final DataService dataService;
-  private final GroupFactory groupFactory;
-  private final RoleFactory roleFactory;
   private final PackageFactory packageFactory;
   private final GroupMetadata groupMetadata;
   private final RoleMembershipService roleMembershipService;
-  private final RoleMetadata roleMetadata;
   private final RoleMembershipMetadata roleMembershipMetadata;
 
   public static final String MANAGER = "Manager";
@@ -56,21 +46,15 @@ public class GroupService {
 
   @SuppressWarnings("squid:S00107")
   GroupService(
-      GroupFactory groupFactory,
-      RoleFactory roleFactory,
       PackageFactory packageFactory,
       DataService dataService,
       GroupMetadata groupMetadata,
       RoleMembershipService roleMembershipService,
-      RoleMetadata roleMetadata,
       RoleMembershipMetadata roleMembershipMetadata) {
-    this.groupFactory = requireNonNull(groupFactory);
-    this.roleFactory = requireNonNull(roleFactory);
     this.packageFactory = requireNonNull(packageFactory);
     this.dataService = requireNonNull(dataService);
     this.groupMetadata = requireNonNull(groupMetadata);
     this.roleMembershipService = requireNonNull(roleMembershipService);
-    this.roleMetadata = requireNonNull(roleMetadata);
     this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
   }
 
@@ -83,25 +67,7 @@ public class GroupService {
   @Transactional
   public void persist(GroupValue groupValue) {
     Package rootPackage = packageFactory.create(groupValue.getRootPackage());
-
-    Map<String, Role> roles =
-        groupValue.getRoles().stream()
-            .map(roleFactory::create)
-            .collect(toMap(Role::getName, identity()));
-
-    roles
-        .values()
-        .forEach(role -> addIncludedRolesBasedOnLabels(role, roles, groupValue.getName()));
-
-    Group group = groupFactory.create(groupValue);
-    group.setRootPackage(rootPackage);
-    group.setRoles(roles.values());
-
     dataService.add(PACKAGE, rootPackage);
-    dataService.add(GROUP, group);
-    roles.values().forEach(role -> role.setGroup(group));
-
-    dataService.add(ROLE, roles.values().stream());
   }
 
   @RunAsSystem
@@ -214,28 +180,6 @@ public class GroupService {
         .filter(m -> m.getUser().getId().equals(member.getId()))
         .findFirst()
         .orElseThrow(() -> unknownMembershipForUser(member));
-  }
-
-  private void addIncludedRolesBasedOnLabels(
-      Role role, Map<String, Role> groupRoles, String groupName) {
-    List<Role> toInclude = newArrayList();
-    Role defaultRole = findRoleNamed(role.getLabel().toUpperCase());
-    toInclude.add(defaultRole);
-
-    stream(defaultRole.getIncludes())
-        .map(includedRole -> createRoleName(groupName, includedRole.getLabel()))
-        .map(groupRoles::get)
-        .forEach(toInclude::add);
-
-    role.setIncludes(toInclude);
-  }
-
-  private Role findRoleNamed(String rolename) {
-    Role result = dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne();
-    if (result == null) {
-      throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), rolename);
-    }
-    return result;
   }
 
   public void deleteGroup(String groupName) {
