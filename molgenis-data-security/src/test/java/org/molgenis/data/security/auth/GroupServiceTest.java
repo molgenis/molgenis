@@ -39,15 +39,12 @@ import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
 
 class GroupServiceTest extends AbstractMockitoTest {
-  @Mock private GroupFactory groupFactory;
-  @Mock private RoleFactory roleFactory;
   @Mock private PackageFactory packageFactory;
 
   @Mock private DataService dataService;
 
   @Mock private GroupMetadata groupMetadata;
   @Mock private RoleMembershipService roleMembershipService;
-  @Mock private RoleMetadata roleMetadata;
   @Mock private Attribute attribute;
 
   @Mock private Group group;
@@ -86,13 +83,10 @@ class GroupServiceTest extends AbstractMockitoTest {
 
     groupService =
         new GroupService(
-            groupFactory,
-            roleFactory,
             packageFactory,
             dataService,
             groupMetadata,
             roleMembershipService,
-            roleMetadata,
             roleMembershipMetadata);
   }
 

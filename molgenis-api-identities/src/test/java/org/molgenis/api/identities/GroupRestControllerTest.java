@@ -131,8 +131,7 @@ class GroupRestControllerTest extends AbstractMockitoSpringContextTests {
             roleMembershipService,
             roleService,
             userService,
-            userPermissionEvaluator,
-            groupPermissionService);
+            userPermissionEvaluator);
     mockMvc =
         MockMvcBuilders.standaloneSetup(groupRestController)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
