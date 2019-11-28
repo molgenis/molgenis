@@ -223,7 +223,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
 
     Map<String, Object> valueMap = new HashMap<>();
-    valueMap.put("abstract_", true);
+    valueMap.put("abstract", true);
 
     assertThrows(
         ReadOnlyFieldException.class, () -> entityTypeV3Mapper.toEntityType(entityType, valueMap));
@@ -236,7 +236,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     when(metaDataService.getPackage("pack1")).thenReturn(Optional.of(pack));
 
     Map<String, Object> valueMap = new HashMap<>();
-    valueMap.put("package_", "pack1");
+    valueMap.put("package", "pack1");
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
     verify(entityType).setPackage(pack);
@@ -248,7 +248,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     EntityType parent = mock(EntityType.class);
     when(metaDataService.getEntityType("parent")).thenReturn(Optional.of(parent));
     Map<String, Object> valueMap = new HashMap<>();
-    valueMap.put("extends_", "parent");
+    valueMap.put("extends", "parent");
 
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 

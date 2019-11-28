@@ -177,6 +177,21 @@ class MetadataApiController extends ApiController {
   }
 
   @Transactional
+  @PatchMapping("/{entityTypeId}/attributes/{attributeId}")
+  public ResponseEntity updatePartialAttribute(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @PathVariable("attributeId") String attributeId,
+      @RequestBody Map<String, Object> attributeValues) {
+    EntityType entityType = metadataApiService.findEntityType(entityTypeId);
+    Attribute attribute = entityType.getOwnAttributeById(attributeId);
+
+    attributeV3Mapper.updateAttribute(attribute, attributeValues);
+
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
   @PatchMapping("/{entityTypeId}")
   public ResponseEntity updatePartialEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
