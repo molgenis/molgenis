@@ -195,6 +195,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   }
 
   // TODO enable after endpoint is async
+
   @Disabled
   @Test
   // @Order(8)
@@ -214,10 +215,8 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .header(LOCATION, RestAssured.baseURI + "/api/metadata/v3meta_MyDataset/fixme");
   }
 
-  // TODO enable after endpoint is async
-  @Disabled
   @Test
-  // @Order(9)
+  @Order(9)
   void testUpdateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
@@ -225,12 +224,23 @@ class MetadataApiControllerIT extends AbstractApiTest {
             "updateMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .put("/api/metadata/v3meta_MyDataset/attributes/myString")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .put("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () ->
+            testRetrieveMetadataEntityTypeAttribute(
+                "v3meta_MyDataset",
+                "v3meta_MyDataset_myString",
+                "updateRetrieveMetadataEntityTypeAttribute.json"));
   }
 
   @Test
