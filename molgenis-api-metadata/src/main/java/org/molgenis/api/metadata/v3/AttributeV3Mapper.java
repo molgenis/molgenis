@@ -330,10 +330,7 @@ class AttributeV3Mapper {
     }
   }
 
-  private Attribute toAttribute(Map<String, Object> attributeRequest, EntityType entityType) {
-    Attribute attribute = attributeFactory.create();
-    attribute.setEntity(entityType);
-
+  void updateAttribute(Attribute attribute, Map<String, Object> attributeRequest) {
     for (Entry<String, Object> entry : attributeRequest.entrySet()) {
       switch (entry.getKey()) {
         case "id":
@@ -424,6 +421,12 @@ class AttributeV3Mapper {
           throw new InvalidKeyException("attribute", entry.getKey());
       }
     }
+  }
+
+  private Attribute toAttribute(Map<String, Object> attributeRequest, EntityType entityType) {
+    Attribute attribute = attributeFactory.create();
+    attribute.setEntity(entityType);
+    updateAttribute(attribute, attributeRequest);
     return attribute;
   }
 

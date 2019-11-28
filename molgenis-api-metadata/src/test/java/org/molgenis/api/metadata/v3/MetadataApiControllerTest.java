@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -10,6 +11,7 @@ import static org.molgenis.api.model.Query.Operator.IN;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -207,6 +209,35 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     assertEquals(
         responseEntity,
         metadataApiController.updateEntityType(entityTypeId, createEntityTypeRequest));
+  }
+
+  @Test
+  void testUpdatePartialAttribute() throws URISyntaxException {
+    String entityTypeId = "MyEntityTypeId";
+    String attibuteId = "myAttributeId";
+    Map<String, Object> attributeValues = singletonMap("unique", true);
+
+    EntityType entityType = mock(EntityType.class);
+    Attribute currentAttribute = mock(Attribute.class);
+    when(entityType.getOwnAttributeById(attibuteId)).thenReturn(currentAttribute);
+
+    when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
+
+    EntityType jobEntityType = mock(EntityType.class);
+    when(jobEntityType.getId()).thenReturn("MyJobEntityTypeId");
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataUpsertJobExecution.getEntityType()).thenReturn(jobEntityType);
+    when(metadataUpsertJobExecution.getIdentifier()).thenReturn("MyJobEntityId");
+    when(metadataApiService.updateEntityTypeAsync(entityType))
+        .thenReturn(metadataUpsertJobExecution);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.accepted()
+            .location(new URI("http://localhost/api/data/MyJobEntityTypeId/MyJobEntityId"))
+            .build();
+    assertEquals(
+        responseEntity,
+        metadataApiController.updatePartialAttribute(entityTypeId, attibuteId, attributeValues));
   }
 
   @Test
