@@ -221,7 +221,6 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     Attribute currentAttribute =
         when(mock(Attribute.class).getIdentifier()).thenReturn(attibuteId).getMock();
-    when(currentAttribute.getSequenceNumber()).thenReturn(1);
     when(entityType.getOwnAllAttributes()).thenReturn(singletonList(currentAttribute));
     when(entityType.getOwnAttributeById(attibuteId)).thenReturn(currentAttribute);
     when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);

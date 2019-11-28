@@ -162,11 +162,10 @@ class MetadataApiController extends ApiController {
       @PathVariable("attributeId") String attributeId,
       @Valid @RequestBody CreateAttributeRequest createAttributeRequest) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
-    Attribute currentAttribute = entityType.getOwnAttributeById(attributeId);
+    entityType.getOwnAttributeById(attributeId);
 
     Attribute updatedAttribute = attributeV3Mapper.toAttribute(createAttributeRequest, entityType);
     updatedAttribute.setIdentifier(attributeId);
-    updatedAttribute.setSequenceNumber(currentAttribute.getSequenceNumber());
 
     replaceAttribute(entityType, updatedAttribute);
 
