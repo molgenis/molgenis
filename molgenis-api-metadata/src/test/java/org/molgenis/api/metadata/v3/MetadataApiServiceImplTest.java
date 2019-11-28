@@ -21,6 +21,7 @@ import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
+import org.molgenis.api.model.Sort;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
@@ -55,6 +56,16 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     metadataApiService.createEntityType(entityType);
     verify(metadataService).addEntityType(entityType);
+  }
+
+  @Test
+  void findAttributesUnknownEntityType() {
+    String entityTypeId = "UnknownEntityType";
+    assertThrows(
+        UnknownEntityTypeException.class,
+        () ->
+            metadataApiService.findAttributes(
+                entityTypeId, mock(Query.class), mock(Sort.class), 1, 1));
   }
 
   @Test

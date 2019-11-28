@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -11,6 +12,7 @@ import static org.molgenis.api.model.Query.Operator.IN;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -253,7 +255,6 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     Attribute currentAttribute =
         when(mock(Attribute.class).getIdentifier()).thenReturn(attibuteId).getMock();
-    when(currentAttribute.getSequenceNumber()).thenReturn(1);
     when(entityType.getOwnAllAttributes()).thenReturn(singletonList(currentAttribute));
     when(entityType.getOwnAttributeById(attibuteId)).thenReturn(currentAttribute);
     when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
@@ -279,6 +280,35 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
         responseEntity,
         metadataApiController.updateAttribute(entityTypeId, attibuteId, createAttributeRequest));
     verify(entityType).setOwnAllAttributes(singletonList(newAttribute));
+  }
+
+  @Test
+  void testUpdatePartialAttribute() throws URISyntaxException {
+    String entityTypeId = "MyEntityTypeId";
+    String attibuteId = "myAttributeId";
+    Map<String, Object> attributeValues = singletonMap("unique", true);
+
+    EntityType entityType = mock(EntityType.class);
+    Attribute currentAttribute = mock(Attribute.class);
+    when(entityType.getOwnAttributeById(attibuteId)).thenReturn(currentAttribute);
+
+    when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
+
+    EntityType jobEntityType = mock(EntityType.class);
+    when(jobEntityType.getId()).thenReturn("MyJobEntityTypeId");
+    MetadataUpsertJobExecution metadataUpsertJobExecution = mock(MetadataUpsertJobExecution.class);
+    when(metadataUpsertJobExecution.getEntityType()).thenReturn(jobEntityType);
+    when(metadataUpsertJobExecution.getIdentifier()).thenReturn("MyJobEntityId");
+    when(metadataApiService.updateEntityTypeAsync(entityType))
+        .thenReturn(metadataUpsertJobExecution);
+
+    ResponseEntity responseEntity =
+        ResponseEntity.accepted()
+            .location(new URI("http://localhost/api/data/MyJobEntityTypeId/MyJobEntityId"))
+            .build();
+    assertEquals(
+        responseEntity,
+        metadataApiController.updatePartialAttribute(entityTypeId, attibuteId, attributeValues));
   }
 
   @Test

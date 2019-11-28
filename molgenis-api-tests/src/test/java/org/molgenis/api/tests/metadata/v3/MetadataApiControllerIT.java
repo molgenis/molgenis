@@ -143,9 +143,21 @@ class MetadataApiControllerIT extends AbstractApiTest {
             .extract()
             .header(LOCATION);
 
-    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () -> {
+          String expectedJson =
+              TestResourceUtils.getRenderedString(
+                  getClass(),
+                  "updateRetrieveMetadataEntityTypeMyNumbers.json",
+                  ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    // TODO validate updated entity type
+          given()
+              .get("/api/metadata/v3meta_MyNumbers")
+              .then()
+              .statusCode(HttpStatus.OK.value())
+              .body(isEqualJson(expectedJson));
+        });
   }
 
   @Test
@@ -238,9 +250,6 @@ class MetadataApiControllerIT extends AbstractApiTest {
                 "updateRetrieveMetadataEntityTypeAttribute.json"));
   }
 
-  // TODO enable after endpoint is async
-
-  @Disabled
   @Test
   @Order(10)
   void testPartialUpdateMetadataEntityTypeAttribute() throws IOException {
@@ -250,12 +259,23 @@ class MetadataApiControllerIT extends AbstractApiTest {
             "partialUpdateMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .patch("/api/metadata/v3meta_MyDataset/attributes/myString")
-        .then()
-        .statusCode(NO_CONTENT.value());
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .patch("/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () ->
+            testRetrieveMetadataEntityTypeAttribute(
+                "v3meta_MyDataset",
+                "v3meta_MyDataset_myString",
+                "partialUpdateRetrieveMetadataEntityTypeAttribute.json"));
   }
 
   @Test

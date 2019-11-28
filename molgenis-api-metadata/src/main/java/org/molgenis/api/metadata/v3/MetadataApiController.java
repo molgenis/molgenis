@@ -179,9 +179,26 @@ class MetadataApiController extends ApiController {
 
     Attribute updatedAttribute = attributeV3Mapper.toAttribute(createAttributeRequest, entityType);
     updatedAttribute.setIdentifier(attributeId);
-    updatedAttribute.setSequenceNumber(currentAttribute.getSequenceNumber());
+    if (updatedAttribute.getSequenceNumber() == null) {
+      updatedAttribute.setSequenceNumber(currentAttribute.getSequenceNumber());
+    }
 
     replaceAttribute(entityType, updatedAttribute);
+
+    JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
+    return toLocationResponse(jobExecution);
+  }
+
+  @Transactional
+  @PatchMapping("/{entityTypeId}/attributes/{attributeId}")
+  public ResponseEntity updatePartialAttribute(
+      @PathVariable("entityTypeId") String entityTypeId,
+      @PathVariable("attributeId") String attributeId,
+      @RequestBody Map<String, Object> attributeValues) {
+    EntityType entityType = metadataApiService.findEntityType(entityTypeId);
+    Attribute attribute = entityType.getOwnAttributeById(attributeId);
+
+    attributeV3Mapper.updateAttribute(attribute, attributeValues);
 
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);

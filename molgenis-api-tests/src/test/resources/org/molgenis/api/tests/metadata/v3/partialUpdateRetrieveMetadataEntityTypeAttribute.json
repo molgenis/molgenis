@@ -1,0 +1,20 @@
+{
+  "link": {
+    "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes/v3meta_MyDataset_myString"
+  },
+  "data": {
+    "id": "v3meta_MyDataset_myString",
+    "name": "myString",
+    "sequenceNr": 10,
+    "type": "string",
+    "idAttribute": false,
+    "labelAttribute": false,
+    "label": "myString",
+    "nullable": true,
+    "auto": false,
+    "visible": true,
+    "unique": false,
+    "readOnly": false,
+    "aggregatable": false
+  }
+}
