@@ -1,5 +1,6 @@
 package org.molgenis.api.tests.metadata.v3;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -149,9 +150,21 @@ class MetadataApiControllerIT extends AbstractApiTest {
             .extract()
             .header(LOCATION);
 
-    assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location));
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () -> {
+          String expectedJson =
+              TestResourceUtils.getRenderedString(
+                  getClass(),
+                  "updateRetrieveMetadataEntityTypeMyNumbers.json",
+                  ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    // TODO validate updated entity type
+          given()
+              .get("/api/metadata/v3meta_MyNumbers")
+              .then()
+              .statusCode(HttpStatus.OK.value())
+              .body(isEqualJson(expectedJson));
+        });
   }
 
   @Test
