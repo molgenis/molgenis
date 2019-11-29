@@ -14,7 +14,6 @@ import io.restassured.RestAssured;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -194,25 +193,32 @@ class MetadataApiControllerIT extends AbstractApiTest {
         .body(isEqualJson(expectedJson));
   }
 
-  // TODO enable after endpoint is async
-
-  @Disabled
   @Test
-  // @Order(8)
+  @Order(8)
   void testCreateMetadataEntityTypeAttribute() throws IOException {
     String bodyJson =
         TestResourceUtils.getRenderedString(
             getClass(),
-            "createMetadataEntityType.json",
+            "createMetadataEntityTypeAttribute.json",
             ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .body(bodyJson)
-        .post("/api/metadata/v3meta_MyDataset")
-        .then()
-        .statusCode(CREATED.value())
-        .header(LOCATION, RestAssured.baseURI + "/api/metadata/v3meta_MyDataset/fixme");
+    String location =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .body(bodyJson)
+            .post("/api/metadata/v3meta_MyStrings/attributes")
+            .then()
+            .statusCode(ACCEPTED.value())
+            .extract()
+            .header(LOCATION);
+
+    assertAll(
+        () -> assertEquals("SUCCESS", JobUtils.waitJobCompletion(given(), location)),
+        () ->
+            testRetrieveMetadataEntityTypeAttribute(
+                "v3meta_MyStrings",
+                "v3meta_MyDataset_myStringNew",
+                "createRetrieveMetadataEntityTypeAttribute.json"));
   }
 
   @Test
