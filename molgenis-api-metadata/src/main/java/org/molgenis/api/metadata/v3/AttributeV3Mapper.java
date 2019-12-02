@@ -139,7 +139,7 @@ class AttributeV3Mapper {
     builder.setDescription(attr.getDescription(LocaleContextHolder.getLocale().getLanguage()));
     if (i18n) {
       builder.setLabelI18n(getI18nAttrLabel(attr));
-      builder.setDescriptionI18n(getI18nAttrDesc(attr));
+      getI18nAttrDesc(attr).ifPresent(builder::setDescriptionI18n);
     }
     builder.setNullable(attr.isNillable());
     builder.setAuto(attr.isAuto());
@@ -623,9 +623,12 @@ class AttributeV3Mapper {
     return I18nValue.create(defaultValue, translations);
   }
 
-  private I18nValue getI18nAttrDesc(Attribute attr) {
+  private Optional<I18nValue> getI18nAttrDesc(Attribute attr) {
     String defaultValue = attr.getDescription();
+    if (defaultValue == null) {
+      return Optional.empty();
+    }
     ImmutableMap<String, String> translations = MetadataUtils.getI18n(attr, DESCRIPTION);
-    return I18nValue.create(defaultValue, translations);
+    return Optional.of(I18nValue.create(defaultValue, translations));
   }
 }

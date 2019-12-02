@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -175,7 +176,7 @@ class EntityTypeV3Mapper {
           entityType.getDescription(LocaleContextHolder.getLocale().getLanguage()));
       if (i18n) {
         builder.setLabelI18n(getI18nEntityTypeLabel(entityType));
-        builder.setDescriptionI18n(getI18nEntityTypeDesc(entityType));
+        getI18nEntityTypeDesc(entityType).ifPresent(builder::setDescriptionI18n);
       }
       AttributesResponse.Builder attributesResponseBuilder =
           AttributesResponse.builder()
@@ -261,11 +262,14 @@ class EntityTypeV3Mapper {
     return I18nValue.create(defaultValue, translations);
   }
 
-  private I18nValue getI18nEntityTypeDesc(EntityType entityType) {
+  private Optional<I18nValue> getI18nEntityTypeDesc(EntityType entityType) {
     String defaultValue = entityType.getDescription();
+    if (defaultValue == null) {
+      return Optional.empty();
+    }
     ImmutableMap<String, String> translations =
         MetadataUtils.getI18n(entityType, EntityTypeMetadata.DESCRIPTION);
-    return I18nValue.create(defaultValue, translations);
+    return Optional.of(I18nValue.create(defaultValue, translations));
   }
 
   public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {

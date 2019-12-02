@@ -8,8 +8,8 @@ import org.molgenis.util.exception.BadRequestException;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ReadOnlyFieldException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI07";
-  private String field;
-  private String entity;
+  private final String field;
+  private final String entity;
 
   public ReadOnlyFieldException(String field, String entity) {
     super(ERROR_CODE);

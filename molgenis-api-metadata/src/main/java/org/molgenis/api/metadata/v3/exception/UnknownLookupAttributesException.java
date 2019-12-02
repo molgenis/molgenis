@@ -12,23 +12,22 @@ import org.molgenis.util.exception.BadRequestException;
 public class UnknownLookupAttributesException extends BadRequestException {
 
   private static final String ERROR_CODE = "MAPI05";
-  private static EntityType entityType;
-  private static List<String> attributeIds;
+  private final String entityTypeId;
+  private final List<String> attributeIds;
 
   public UnknownLookupAttributesException(EntityType entityType, List<String> attributeIds) {
     super(ERROR_CODE);
-    this.entityType = requireNonNull(entityType);
+    this.entityTypeId = requireNonNull(entityType).getId();
     this.attributeIds = requireNonNull(attributeIds);
   }
 
   @Override
   public String getMessage() {
-    return format(
-        "entityType:%s attributeIds:%s", entityType.getId(), Strings.join(attributeIds, ','));
+    return format("entityType:%s attributeIds:%s", entityTypeId, Strings.join(attributeIds, ','));
   }
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[] {entityType.getId(), Strings.join(attributeIds, ',')};
+    return new Object[] {entityTypeId, Strings.join(attributeIds, ',')};
   }
 }

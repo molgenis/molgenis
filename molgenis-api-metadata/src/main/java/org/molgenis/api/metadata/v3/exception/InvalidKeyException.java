@@ -8,8 +8,8 @@ import org.molgenis.util.exception.BadRequestException;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class InvalidKeyException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI04";
-  private String target;
-  private String key;
+  private final String target;
+  private final String key;
 
   public InvalidKeyException(String target, String key) {
     super(ERROR_CODE);

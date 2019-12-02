@@ -7,6 +7,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
+@SuppressWarnings("common-java:DuplicatedBlocks")
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EntityTypeResponseData.class)
 public abstract class EntityTypeResponseData {
