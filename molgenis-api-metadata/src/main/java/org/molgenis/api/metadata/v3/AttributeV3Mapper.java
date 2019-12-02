@@ -222,7 +222,7 @@ class AttributeV3Mapper {
     }
     attribute.setName(attributeRequest.getName());
     attribute.setEntity(entityType);
-    Integer sequenceNumber = attributeRequest.getSequenceNumber();
+    Integer sequenceNumber = attributeRequest.getSequenceNr();
     if (sequenceNumber == null) {
       sequenceNumber = index;
     }
