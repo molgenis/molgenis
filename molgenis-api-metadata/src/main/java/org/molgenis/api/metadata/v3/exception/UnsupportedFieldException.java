@@ -8,7 +8,7 @@ import org.molgenis.util.exception.BadRequestException;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class UnsupportedFieldException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI06";
-  private String field;
+  private final String field;
 
   public UnsupportedFieldException(String field) {
     super(ERROR_CODE);

@@ -8,6 +8,7 @@ import org.molgenis.api.model.Sort;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.util.AutoGson;
 
+@SuppressWarnings("common-java:DuplicatedBlocks")
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AttributeResponseData.class)
 public abstract class AttributeResponseData {
