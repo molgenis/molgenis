@@ -37,6 +37,7 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -147,6 +148,7 @@ in org.molgenis.data and subpackages from included modules
   PermissionRegistry.class,
   DataPermissionConfig.class,
   JsonTestConfig.class,
+  GroupValueFactory.class
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
   @Autowired private PlatformBootstrapper platformBootstrapper;

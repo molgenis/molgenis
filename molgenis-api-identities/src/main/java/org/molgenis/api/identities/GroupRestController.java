@@ -16,7 +16,6 @@ import org.molgenis.api.ApiNamespace;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupPermission;
-import org.molgenis.data.security.auth.GroupPermissionService;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleService;
@@ -29,8 +28,6 @@ import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
-import org.molgenis.security.core.model.RoleValue;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,7 +66,6 @@ public class GroupRestController {
   private final RoleService roleService;
   private final UserService userService;
   private final UserPermissionEvaluator userPermissionEvaluator;
-  private final GroupPermissionService groupPermissionService;
 
   GroupRestController(
       GroupValueFactory groupValueFactory,
@@ -77,8 +73,7 @@ public class GroupRestController {
       RoleMembershipService roleMembershipService,
       RoleService roleService,
       UserService userService,
-      UserPermissionEvaluator userPermissionEvaluator,
-      GroupPermissionService groupPermissionService) {
+      UserPermissionEvaluator userPermissionEvaluator) {
 
     this.groupValueFactory = requireNonNull(groupValueFactory);
     this.groupService = requireNonNull(groupService);
@@ -86,7 +81,6 @@ public class GroupRestController {
     this.roleService = requireNonNull(roleService);
     this.userService = requireNonNull(userService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
-    this.groupPermissionService = requireNonNull(groupPermissionService);
   }
 
   @PostMapping(GROUP_END_POINT)
@@ -106,9 +100,6 @@ public class GroupRestController {
     }
 
     groupService.persist(groupValue);
-    groupPermissionService.grantDefaultPermissions(groupValue);
-    roleMembershipService.addUserToRole(
-        SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
@@ -306,14 +297,6 @@ public class GroupRestController {
       @PathVariable(value = "groupName") String groupName) {
     return userPermissionEvaluator.getPermissions(
         new GroupIdentity(groupName), GroupPermission.values());
-  }
-
-  private String getManagerRoleName(GroupValue groupValue) {
-    return groupValue.getRoles().stream()
-        .filter(role -> role.getLabel().equals(GroupService.MANAGER))
-        .map(RoleValue::getName)
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Manager role is missing"));
   }
 
   private void checkGroupPermission(
