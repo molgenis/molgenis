@@ -132,7 +132,7 @@ public abstract class CreateAttributeRequest {
   @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
-  public abstract Integer getSequenceNumber();
+  public abstract Integer getSequenceNr();
 
   public static Builder builder() {
     return new AutoValue_CreateAttributeRequest.Builder();
@@ -193,7 +193,7 @@ public abstract class CreateAttributeRequest {
 
     public abstract Builder setDefaultValue(@Nullable @CheckForNull String newDefaultValue);
 
-    public abstract Builder setSequenceNumber(@Nullable @CheckForNull Integer newSequenceNumber);
+    public abstract Builder setSequenceNr(@Nullable @CheckForNull Integer newSequenceNr);
 
     public abstract CreateAttributeRequest build();
   }
