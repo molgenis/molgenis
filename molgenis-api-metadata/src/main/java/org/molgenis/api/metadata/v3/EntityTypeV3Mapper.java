@@ -7,7 +7,6 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.util.ArrayList;
@@ -16,13 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.molgenis.api.metadata.v3.exception.EmptyAttributesException;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
 import org.molgenis.api.metadata.v3.exception.ReadOnlyFieldException;
-import org.molgenis.api.metadata.v3.exception.UnknownLookupAttributesException;
 import org.molgenis.api.metadata.v3.exception.UnsupportedFieldException;
 import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
@@ -34,7 +29,6 @@ import org.molgenis.api.metadata.v3.model.PackageResponse;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.support.LinksUtils;
 import org.molgenis.data.InvalidValueTypeException;
-import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
@@ -111,32 +105,17 @@ class EntityTypeV3Mapper {
 
     processI18nLabel(entityTypeRequest.getLabel(), entityType);
     processI18nDescription(entityTypeRequest.getDescription(), entityType);
-    Map<String, Attribute> ownAttributes =
+    List<Attribute> ownAttributes =
         attributeV3Mapper.toAttributes(
             entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
-    String idAttribute = entityTypeRequest.getIdAttribute();
-    if (idAttribute != null) {
-      ownAttributes.get(idAttribute).setIdAttribute(true);
-    }
-    String labelAttribute = entityTypeRequest.getLabelAttribute();
-    if (labelAttribute != null) {
-      ownAttributes.get(labelAttribute).setLabelAttribute(true);
-    }
-    AtomicInteger count = new AtomicInteger();
-    ImmutableList<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
-    if (lookupAttributes != null) {
-      lookupAttributes.forEach(
-          lookupAttribute ->
-              ownAttributes.get(lookupAttribute).setLookupAttributeIndex(count.getAndIncrement()));
-    }
-    entityType.setOwnAllAttributes(new ArrayList<>(ownAttributes.values()));
+    entityType.setOwnAllAttributes(ownAttributes);
     Boolean abstractEntityType = entityTypeRequest.getAbstract();
     if (abstractEntityType != null) {
       entityType.setAbstract(abstractEntityType);
     }
     entityType.setBackend(metaDataService.getDefaultBackend().getName());
 
-    processSelfReferencingAttributes(entityType, ownAttributes.values());
+    processSelfReferencingAttributes(entityType, ownAttributes);
 
     return entityType;
   }
@@ -273,24 +252,19 @@ class EntityTypeV3Mapper {
   }
 
   public void toEntityType(EntityType entityType, Map<String, Object> entityTypeValues) {
-    Iterable<Attribute> updatedAttributes = null;
     for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
       if (entry.getValue() == null) {
         entityType.set(entry.getKey(), null);
       } else {
-        updatedAttributes = updateEntityType(entityType, updatedAttributes, entry);
+        updateEntityType(entityType, entry);
       }
-    }
-    if (updatedAttributes != null) {
-      setSpecialAttributes(entityType, entityTypeValues, updatedAttributes);
     }
   }
 
   @SuppressWarnings({
     "squid:S1192"
   }) // ATTRIBUTES constant in this class is not related to the one in this switch
-  private Iterable<Attribute> updateEntityType(
-      EntityType entityType, Iterable<Attribute> updatedAttributes, Entry<String, Object> entry) {
+  private void updateEntityType(EntityType entityType, Entry<String, Object> entry) {
     switch (entry.getKey()) {
       case "package":
         String packageId = String.valueOf(entry.getValue());
@@ -321,18 +295,10 @@ class EntityTypeV3Mapper {
         break;
       case "attributes":
         if (entry.getValue() != null) {
-          updatedAttributes = mapAttributes(entityType, entry);
+          Iterable<Attribute> attributes = mapAttributes(entityType, entry);
+          entityType.setOwnAllAttributes(attributes);
         } else {
           throw new EmptyAttributesException();
-        }
-        break;
-      case "idAttribute":
-      case "labelAttribute":
-      case "lookupAttributes":
-        // get a list of attributes if not already set, process values for these cases after
-        // other updates are done.
-        if (updatedAttributes == null) {
-          updatedAttributes = entityType.getOwnAllAttributes();
         }
         break;
       case "tags":
@@ -340,122 +306,6 @@ class EntityTypeV3Mapper {
         throw new UnsupportedFieldException(entry.getKey());
       default:
         throw new InvalidKeyException("entityType", entry.getKey());
-    }
-    return updatedAttributes;
-  }
-
-  private void setSpecialAttributes(
-      EntityType entityType,
-      Map<String, Object> entityTypeValues,
-      Iterable<Attribute> updatedAttributes) {
-    List currentLookupAttributes =
-        StreamSupport.stream(entityType.getOwnLookupAttributes().spliterator(), false)
-            .map(Attribute::getIdentifier)
-            .collect(Collectors.toList());
-    String currentLabelAttributeId =
-        entityType.getOwnLabelAttribute() != null
-            ? entityType.getOwnLabelAttribute().getIdentifier()
-            : null;
-    String currentIdAttributeId =
-        entityType.getOwnIdAttribute() != null
-            ? entityType.getOwnIdAttribute().getIdentifier()
-            : null;
-
-    String newIdAttributeId = null;
-    String newLabelAttributeId = null;
-    List newLookupAttributes = null;
-    for (Entry<String, Object> entry : entityTypeValues.entrySet()) {
-      switch (entry.getKey()) {
-        case "idAttribute":
-          newIdAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
-          break;
-        case "labelAttribute":
-          newLabelAttributeId = entry.getValue() != null ? entry.getValue().toString() : null;
-          break;
-        case "lookupAttributes":
-          newLookupAttributes = getNewLookupAttributes(entry);
-          break;
-        default:
-          break;
-      }
-    }
-
-    String idAttributeId = newIdAttributeId != null ? newIdAttributeId : currentIdAttributeId;
-    String labelAttributeId =
-        newLabelAttributeId != null ? newLabelAttributeId : currentLabelAttributeId;
-    updateIdAttribute(entityType, updatedAttributes, idAttributeId);
-    updateLabelAttribute(entityType, updatedAttributes, labelAttributeId);
-    setLookupAttributes(
-        updatedAttributes, currentLookupAttributes, newLookupAttributes, entityType);
-    entityType.setOwnAllAttributes(updatedAttributes);
-  }
-
-  private void updateLabelAttribute(
-      EntityType entityType, Iterable<Attribute> updatedAttributes, String labelAttributeId) {
-    boolean isLabelSet = labelAttributeId == null;
-    for (Attribute attribute : updatedAttributes) {
-      if (!isLabelSet) {
-        isLabelSet = attribute.getIdentifier().equals(labelAttributeId);
-      }
-      attribute.setLabelAttribute(attribute.getIdentifier().equals(labelAttributeId));
-    }
-    if (!isLabelSet) {
-      throw new UnknownAttributeException(entityType, labelAttributeId);
-    }
-  }
-
-  private void updateIdAttribute(
-      EntityType entityType, Iterable<Attribute> updatedAttributes, String idAttributeId) {
-    boolean isIdSet = idAttributeId == null;
-    for (Attribute attribute : updatedAttributes) {
-      if (!isIdSet) {
-        isIdSet = attribute.getIdentifier().equals(idAttributeId);
-      }
-      attribute.setIdAttribute(attribute.getIdentifier().equals(idAttributeId));
-    }
-    if (!isIdSet) {
-      throw new UnknownAttributeException(entityType, idAttributeId);
-    }
-  }
-
-  private List getNewLookupAttributes(Entry<String, Object> entry) {
-    List newLookupAttributes;
-    if (entry.getValue() instanceof Iterable) {
-      newLookupAttributes = (List) entry.getValue();
-    } else {
-      throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
-    }
-    return newLookupAttributes;
-  }
-
-  private void setLookupAttributes(
-      Iterable<Attribute> updatedAttributes,
-      List currentLookupAttributes,
-      List newLookupAttributes,
-      EntityType entityType) {
-    List<Attribute> processedAttrs = new ArrayList<>();
-    List<String> lookupAttributes =
-        newLookupAttributes != null ? newLookupAttributes : currentLookupAttributes;
-    for (Attribute attribute : updatedAttributes) {
-      int lookupAttributeIndex = lookupAttributes.indexOf(attribute.getIdentifier());
-      if (lookupAttributeIndex != -1) {
-        attribute.setLookupAttributeIndex(lookupAttributeIndex);
-        processedAttrs.add(attribute);
-      } else {
-        attribute.setLookupAttributeIndex(null);
-      }
-    }
-
-    List<String> processedAttrIds =
-        processedAttrs.stream().map(Attribute::getIdentifier).collect(Collectors.toList());
-    if (!processedAttrIds.containsAll(lookupAttributes)) {
-      ArrayList<String> missingAttrs = new ArrayList<>();
-      for (String lookup : lookupAttributes) {
-        if (!processedAttrIds.contains(lookup)) {
-          missingAttrs.add(lookup);
-        }
-      }
-      throw new UnknownLookupAttributesException(entityType, missingAttrs);
     }
   }
 

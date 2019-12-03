@@ -9,7 +9,9 @@
       "id": "v3meta_MyOneToMany_id",
       "name": "id",
       "type": "string",
-      "nullable": false
+      "nullable": false,
+      "idAttribute": true,
+      "labelAttribute": true
     },
     {
       "id": "v3meta_MyOneToManyAttr",
@@ -24,7 +26,5 @@
       "type": "xref",
       "refEntityType": "v3meta_MyOneToMany"
     }
-  ],
-  "idAttribute": "v3meta_MyOneToMany_id",
-  "labelAttribute": "v3meta_MyOneToMany_id"
+  ]
 }

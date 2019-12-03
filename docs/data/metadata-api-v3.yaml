@@ -544,7 +544,7 @@ components:
           nullable: true
     EntityTypeCreate:
       type: object
-      required: [id, attributes, idAttribute, labelAttribute]
+      required: [id, attributes]
       properties:
         id:
           type: string
@@ -562,14 +562,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AttributeCreate"
-        idAttribute:
-          type: string
-        labelAttribute:
-          type: string
-        lookupAttributes:
-          type: array
-          items:
-            type: string
     EntityTypePatch:
       type: object
       properties:
@@ -585,14 +577,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AttributeCreate"
-        idAttribute:
-          type: string
-        labelAttribute:
-          type: string
-        lookupAttributes:
-          type: array
-          items:
-            type: string
     AttributeCreate:
       type: object
       required: [name, type]
@@ -651,6 +635,12 @@ components:
         defaultValue:
           type: string
         sequenceNumber:
+          type: integer
+        idAttribute:
+          type: boolean
+        labelAttribute:
+          type: boolean
+        lookupAttributeIndex:
           type: integer
     EntityTypeCollection:
       type: object

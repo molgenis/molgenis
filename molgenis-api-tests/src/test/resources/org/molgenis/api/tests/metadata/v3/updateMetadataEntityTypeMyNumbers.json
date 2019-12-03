@@ -12,7 +12,8 @@
       "visible": false,
       "label": {
         "defaultValue": "Identifier"
-      }
+      },
+      "idAttribute": true
     },
     {
       "id": "v3meta_MyNumbers_label",
@@ -21,12 +22,9 @@
       "nullable": false,
       "label": {
         "defaultValue": "Label"
-      }
+      },
+      "labelAttribute": true,
+      "lookupAttributeIndex": 0
     }
-  ],
-  "idAttribute": "v3meta_MyNumbers_id",
-  "labelAttribute": "v3meta_MyNumbers_label",
-  "lookupAttributes": [
-    "v3meta_MyNumbers_label"
   ]
 }

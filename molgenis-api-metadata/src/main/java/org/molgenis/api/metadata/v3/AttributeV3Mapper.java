@@ -19,6 +19,7 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.support.LinksUtils;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.InvalidValueTypeException;
@@ -215,6 +217,11 @@ class AttributeV3Mapper {
       EntityType entityType,
       @Nullable @CheckForNull Integer index) {
     Attribute attribute = attributeFactory.create();
+
+    // set id/label/lookupIndex before setting other properties
+    attribute.setIdAttribute(attributeRequest.getIdAttribute());
+    attribute.setLabelAttribute(attributeRequest.getLabelAttribute());
+    attribute.setLookupAttributeIndex(attributeRequest.getLookupAttributeIndex());
 
     String id = attributeRequest.getId();
     if (id != null) {
@@ -427,6 +434,15 @@ class AttributeV3Mapper {
           break;
         case "tags":
           throw new UnsupportedFieldException(entry.getKey());
+        case "idAttribute":
+          attribute.setIdAttribute(DataConverter.toBoolean(entry.getValue()));
+          break;
+        case "labelAttribute":
+          attribute.setLabelAttribute(DataConverter.toBoolean(entry.getValue()));
+          break;
+        case "lookupAttributeIndex":
+          attribute.setLookupAttributeIndex(DataConverter.toInt(entry.getValue()));
+          break;
         default:
           throw new InvalidKeyException("attribute", entry.getKey());
       }
@@ -497,32 +513,20 @@ class AttributeV3Mapper {
     return new org.molgenis.data.Range(range.getMin(), range.getMax());
   }
 
-  Map<String, Attribute> toAttributes(
+  List<Attribute> toAttributes(
       List<CreateAttributeRequest> attributes,
       CreateEntityTypeRequest entityTypeRequest,
       EntityType entityType) {
-    Map<String, Attribute> attributeMap = new HashMap<>();
+    Map<String, Attribute> mappedAttributes = Maps.newHashMapWithExpectedSize(attributes.size());
     AtomicInteger index = new AtomicInteger(0);
-    for (CreateAttributeRequest attributeRequest : attributes) {
-      Attribute attr = toAttribute(attributeRequest, entityType, index.getAndIncrement());
-      String id = attributeRequest.getId();
-      if (id != null && id.equals(entityTypeRequest.getIdAttribute())) {
-        attr.setIdAttribute(true);
-      }
-      Attribute labelAttribute = entityType.getLabelAttribute();
-      if (labelAttribute != null && id != null && id.equals(labelAttribute.getIdentifier())) {
-        attr.setLabelAttribute(true);
-      }
-      List<String> lookupAttributes = entityTypeRequest.getLookupAttributes();
-      if (lookupAttributes != null && lookupAttributes.contains(attributeRequest.getId())) {
-        attr.setLookupAttributeIndex(lookupAttributes.indexOf(attributeRequest.getId()));
-      }
-      attributeMap.put(attributeRequest.getId(), attr);
+    for (CreateAttributeRequest attribute : attributes) {
+      Attribute mappedAttribute = toAttribute(attribute, entityType, index.getAndIncrement());
+      mappedAttributes.put(mappedAttribute.getIdentifier(), mappedAttribute);
     }
 
-    resolveMappedBy(attributes, attributeMap, entityTypeRequest.getExtends());
+    resolveMappedBy(attributes, mappedAttributes, entityTypeRequest.getExtends());
 
-    return attributeMap;
+    return new ArrayList<>(mappedAttributes.values());
   }
 
   private void resolveMappedBy(
