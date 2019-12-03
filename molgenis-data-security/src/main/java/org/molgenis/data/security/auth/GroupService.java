@@ -188,8 +188,11 @@ public class GroupService {
             .query(GroupMetadata.GROUP, Group.class)
             .eq(GroupMetadata.NAME, groupName)
             .findOne();
-
-    dataService.delete(GroupMetadata.GROUP, group);
+    if (group == null) {
+      throw new UnknownEntityException(
+          groupMetadata, groupMetadata.getAttribute(GroupMetadata.NAME), groupName);
+    }
+    dataService.delete(PACKAGE, group.getRootPackage());
   }
 
   public void updateExtendsRole(Group group, Role groupRole, Role memberRole) {

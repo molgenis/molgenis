@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownPackageException;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils;
 
@@ -19,11 +20,15 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
   private static final int BATCH_SIZE = 1000;
 
   private final GroupPackageService groupPackageService;
+  private final MetaDataService metadataService;
 
   public GroupPackageRepositoryDecorator(
-      Repository<Package> delegateRepository, GroupPackageService groupPackageService) {
+      Repository<Package> delegateRepository,
+      GroupPackageService groupPackageService,
+      MetaDataService metadataService) {
     super(delegateRepository);
     this.groupPackageService = requireNonNull(groupPackageService);
+    this.metadataService = metadataService;
   }
 
   @Override
@@ -94,6 +99,61 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
             });
   }
 
+  @Override
+  public void delete(Package aPackage) {
+    if (isGroupPackage(aPackage)) {
+      groupPackageService.deleteGroup(aPackage);
+    }
+    super.delete(aPackage);
+  }
+
+  @Override
+  public void deleteById(Object id) {
+    Package aPackage = getPackage(id);
+    if (isGroupPackage(aPackage)) {
+      groupPackageService.deleteGroup(aPackage);
+    }
+    super.deleteById(id);
+  }
+
+  @Override
+  public void deleteAll() {
+    forEachBatched(packages -> delete(packages.stream()), 1000);
+  }
+
+  @Override
+  public void delete(Stream<Package> packages) {
+    packages =
+        packages.filter(
+            pack -> {
+              if (isGroupPackage(pack)) {
+                groupPackageService.deleteGroup(pack);
+              }
+              return true;
+            });
+    super.delete(packages);
+  }
+
+  @Override
+  public void deleteAll(Stream<Object> ids) {
+    ids =
+        ids.filter(
+            id -> {
+              Package pack = getPackage(id);
+              if (isGroupPackage(pack)) {
+                groupPackageService.deleteGroup(pack);
+              }
+              return true;
+            });
+    super.deleteAll(ids);
+  }
+
+  private Package getPackage(Object id) {
+    return metadataService
+        .getPackage(id.toString())
+        .orElseThrow(() -> new UnknownPackageException(id.toString()));
+  }
+
   private void validateUpdate(Package currentPackage, Package updatedPackage) {
     if (isGroupPackage(currentPackage) && !isGroupPackage(updatedPackage)) {
       throw new RuntimeException(
@@ -102,7 +162,6 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
   }
 
   private boolean isGroupPackage(Package aPackage) {
-    // TODO enable creation of group for system package (currently fails during bootstrapping
     return aPackage.getParent() == null && !PackageUtils.isSystemPackage(aPackage);
   }
 }

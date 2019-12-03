@@ -12,14 +12,17 @@ import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,6 +34,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
   private final DataService dataService;
   private final GroupFactory groupFactory;
   private final RoleMetadata roleMetadata;
+  private final MutableAclService mutableAclService;
 
   GroupPackageServiceImpl(
       GroupValueFactory groupValueFactory,
@@ -39,7 +43,8 @@ public class GroupPackageServiceImpl implements GroupPackageService {
       RoleFactory roleFactory,
       DataService dataService,
       GroupFactory groupFactory,
-      RoleMetadata roleMetadata) {
+      RoleMetadata roleMetadata,
+      MutableAclService mutableAclService) {
 
     this.groupValueFactory = requireNonNull(groupValueFactory);
     this.roleMembershipService = requireNonNull(roleMembershipService);
@@ -48,6 +53,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
     this.dataService = requireNonNull(dataService);
     this.groupFactory = requireNonNull(groupFactory);
     this.roleMetadata = requireNonNull(roleMetadata);
+    this.mutableAclService = requireNonNull(mutableAclService);
   }
 
   @Override
@@ -84,6 +90,38 @@ public class GroupPackageServiceImpl implements GroupPackageService {
   @Override
   public void createGroups(List<Package> packages) {
     packages.forEach(this::createGroup);
+  }
+
+  @Override
+  public void deleteGroup(Package rootPackage) {
+    Group group = getGroup(rootPackage);
+    if (group != null) {
+      deleteRoles(group);
+      dataService.delete(GROUP, group);
+      mutableAclService.deleteAcl(new GroupIdentity(group.getName()), true);
+    }
+  }
+
+  private Group getGroup(Package rootPackage) {
+    return dataService
+        .query(GroupMetadata.GROUP, Group.class)
+        .eq(GroupMetadata.ROOT_PACKAGE, rootPackage.getId())
+        .findOne();
+  }
+
+  private void deleteRoles(Group group) {
+    Iterable<Role> roles = group.getRoles();
+    roles.forEach(this::deleteMembers);
+    dataService.delete(RoleMetadata.ROLE, stream(roles));
+  }
+
+  private void deleteMembers(Role role) {
+    Stream<RoleMembership> memberships =
+        dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, role.getId())
+            .findAll();
+    dataService.delete(RoleMembershipMetadata.ROLE_MEMBERSHIP, memberships);
   }
 
   private String getManagerRoleName(GroupValue groupValue) {
