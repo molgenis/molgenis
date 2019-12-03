@@ -28,7 +28,7 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
       MetaDataService metadataService) {
     super(delegateRepository);
     this.groupPackageService = requireNonNull(groupPackageService);
-    this.metadataService = metadataService;
+    this.metadataService = requireNonNull(metadataService);
   }
 
   @Override
@@ -118,7 +118,7 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
 
   @Override
   public void deleteAll() {
-    forEachBatched(packages -> delete(packages.stream()), 1000);
+    forEachBatched(packages -> delete(packages.stream()), BATCH_SIZE);
   }
 
   @Override
