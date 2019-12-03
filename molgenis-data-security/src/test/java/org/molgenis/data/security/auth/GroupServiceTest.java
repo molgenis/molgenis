@@ -280,7 +280,7 @@ class GroupServiceTest extends AbstractMockitoTest {
     when(dataService.query(GroupMetadata.GROUP, Group.class)).thenReturn(query);
     when(query.eq(GroupMetadata.NAME, "devs").findOne()).thenReturn(group);
     groupService.deleteGroup("devs");
-    verify(dataService).delete(GroupMetadata.GROUP, group);
+    verify(dataService).delete(PackageMetadata.PACKAGE, group.getRootPackage());
   }
 
   @Test

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -26,6 +27,7 @@ class PackageRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   @Mock private MutableAclService mutableAclService;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;
   @Mock private GroupPackageService groupPackageService;
+  @Mock private MetaDataService metaDataService;
 
   private PackageRepositoryDecoratorFactory packageRepositoryDecoratorFactory;
 
@@ -38,14 +40,15 @@ class PackageRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
             packageValidator,
             mutableAclService,
             userPermissionEvaluator,
-            groupPackageService);
+            groupPackageService,
+            metaDataService);
   }
 
   @Test
   void testPackageRepositoryDecoratorFactory() {
     assertThrows(
         NullPointerException.class,
-        () -> new PackageRepositoryDecoratorFactory(null, null, null, null, null, null));
+        () -> new PackageRepositoryDecoratorFactory(null, null, null, null, null, null, null));
   }
 
   @Test
