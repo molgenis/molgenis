@@ -49,8 +49,7 @@ public class PackageRepositoryDecoratorFactory
   @Override
   public Repository<Package> createDecoratedRepository(Repository<Package> repository) {
     repository = new PackageRepositoryDecorator(repository, dataService);
-    repository =
-        new GroupPackageRepositoryDecorator(repository, groupPackageService, metadataService);
+    repository = new GroupPackageRepositoryDecorator(repository, groupPackageService);
     repository =
         new PackageRepositorySecurityDecorator(
             repository, mutableAclService, userPermissionEvaluator);
