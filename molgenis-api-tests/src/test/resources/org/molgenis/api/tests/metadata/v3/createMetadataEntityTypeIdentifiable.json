@@ -10,16 +10,16 @@
       "name": "id",
       "type": "int",
       "visible": false,
-      "nullable": false
+      "nullable": false,
+      "idAttribute": true
     },
     {
       "id": "v3meta_Identifiable_label",
       "name": "label",
       "type": "string",
-      "nullable": false
+      "nullable": false,
+      "labelAttribute": true
     }
   ],
-  "idAttribute": "v3meta_Identifiable_id",
-  "labelAttribute": "v3meta_Identifiable_label",
   "abstract": true
 }

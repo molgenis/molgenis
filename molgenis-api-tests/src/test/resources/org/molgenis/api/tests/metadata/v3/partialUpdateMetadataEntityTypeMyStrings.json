@@ -10,7 +10,8 @@
     {
       "id": "v3meta_MyStrings_id",
       "name": "id",
-      "type": "string"
+      "type": "string",
+      "idAttribute": true
     },
     {
       "id": "v3meta_MyStrings_label",
@@ -23,7 +24,9 @@
       },
       "type": "string",
       "visible": true,
-      "nullable": false
+      "nullable": false,
+      "labelAttribute": true,
+      "lookupAttributeIndex": 0
     },
     {
       "id": "v3meta_MyStrings_int",
@@ -33,12 +36,8 @@
         "min": 1,
         "max": 2
       },
-      "visible": true
+      "visible": true,
+      "lookupAttributeIndex": 1
     }
-  ],
-  "lookupAttributes": [
-    "v3meta_MyStrings_label",
-    "v3meta_MyStrings_int"
-  ],
-  "labelAttribute": "v3meta_MyStrings_label"
+  ]
 }

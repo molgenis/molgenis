@@ -5,6 +5,7 @@ import com.google.auto.value.AutoValue.CopyAnnotations;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import org.molgenis.util.AutoGson;
@@ -134,6 +135,22 @@ public abstract class CreateAttributeRequest {
   @CheckForNull
   public abstract Integer getSequenceNr();
 
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getIdAttribute();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
+  @Nullable
+  @CheckForNull
+  public abstract Boolean getLabelAttribute();
+
+  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class, Min.class})
+  @Nullable
+  @CheckForNull
+  @Min(0)
+  public abstract Integer getLookupAttributeIndex();
+
   public static Builder builder() {
     return new AutoValue_CreateAttributeRequest.Builder();
   }
@@ -194,6 +211,13 @@ public abstract class CreateAttributeRequest {
     public abstract Builder setDefaultValue(@Nullable @CheckForNull String newDefaultValue);
 
     public abstract Builder setSequenceNr(@Nullable @CheckForNull Integer newSequenceNr);
+
+    public abstract Builder setIdAttribute(@Nullable @CheckForNull Boolean newIdAttribute);
+
+    public abstract Builder setLabelAttribute(@Nullable @CheckForNull Boolean newLabelAttribute);
+
+    public abstract Builder setLookupAttributeIndex(
+        @Nullable @CheckForNull Integer newLookupAttributeIndex);
 
     public abstract CreateAttributeRequest build();
   }

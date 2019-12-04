@@ -190,9 +190,6 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
             .setPackage(packageId)
             .setExtends(extendsEntityTypeId)
             .setAttributes(attributes)
-            .setIdAttribute(idAttribute)
-            .setLabelAttribute(labelAttribute)
-            .setLookupAttributes(lookupAttributes)
             .build();
 
     Package aPackage = mock(Package.class);
@@ -295,9 +292,7 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
 
     Map<String, Attribute> attrs = new HashMap<>();
     Attribute attr1 = mock(Attribute.class);
-    when(attr1.getIdentifier()).thenReturn("1");
     Attribute attr2 = mock(Attribute.class);
-    when(attr2.getIdentifier()).thenReturn("2");
     attrs.put("1", attr1);
     attrs.put("2", attr2);
     when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
@@ -306,56 +301,5 @@ class EntityTypeV3MapperTest extends AbstractMockitoTest {
     entityTypeV3Mapper.toEntityType(entityType, valueMap);
 
     verify(entityType).setOwnAllAttributes(attrs.values());
-  }
-
-  @Test
-  void toEntityTypeSpecialAttrs() {
-    EntityType entityType = mock(EntityType.class);
-
-    Map<String, Object> valueMap = new HashMap<>();
-    Map<String, Object> attrMap1 = new HashMap<>();
-    Map<String, Object> attrMap2 = new HashMap<>();
-    valueMap.put("attributes", Arrays.asList(attrMap1, attrMap2));
-    valueMap.put("idAttribute", "id");
-    valueMap.put("labelAttribute", "label");
-    valueMap.put("lookupAttributes", Arrays.asList("lookup1", "lookup2"));
-
-    Map<String, Attribute> attrs = new HashMap<>();
-    Attribute attr1 = mock(Attribute.class);
-    when(attr1.getIdentifier()).thenReturn("id");
-    Attribute attr2 = mock(Attribute.class);
-    when(attr2.getIdentifier()).thenReturn("label");
-    Attribute attr3 = mock(Attribute.class);
-    when(attr3.getIdentifier()).thenReturn("lookup1");
-    Attribute attr4 = mock(Attribute.class);
-    when(attr4.getIdentifier()).thenReturn("lookup2");
-    Attribute attr5 = mock(Attribute.class);
-    when(attr5.getIdentifier()).thenReturn("lookup3");
-    attrs.put("id", attr1);
-    attrs.put("label", attr2);
-    attrs.put("lookup1", attr3);
-    attrs.put("lookup2", attr4);
-    attrs.put("lookup3", attr5);
-    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
-        .thenReturn(attrs);
-
-    entityTypeV3Mapper.toEntityType(entityType, valueMap);
-
-    assertAll(
-        () -> verify(attr1).setIdAttribute(true),
-        () -> verify(attr1).setLabelAttribute(false),
-        () -> verify(attr1).setLookupAttributeIndex(null),
-        () -> verify(attr2).setIdAttribute(false),
-        () -> verify(attr2).setLabelAttribute(true),
-        () -> verify(attr2).setLookupAttributeIndex(null),
-        () -> verify(attr3).setIdAttribute(false),
-        () -> verify(attr3).setLabelAttribute(false),
-        () -> verify(attr3).setLookupAttributeIndex(0),
-        () -> verify(attr4).setIdAttribute(false),
-        () -> verify(attr4).setLabelAttribute(false),
-        () -> verify(attr4).setLookupAttributeIndex(1),
-        () -> verify(attr5).setIdAttribute(false),
-        () -> verify(attr5).setLabelAttribute(false),
-        () -> verify(attr5).setLookupAttributeIndex(null));
   }
 }

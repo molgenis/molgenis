@@ -52,21 +52,6 @@ public abstract class CreateEntityTypeRequest {
   @NotEmpty
   public abstract ImmutableList<CreateAttributeRequest> getAttributes();
 
-  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
-  @Nullable
-  @CheckForNull
-  public abstract String getIdAttribute();
-
-  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
-  @Nullable
-  @CheckForNull
-  public abstract String getLabelAttribute();
-
-  @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
-  @Nullable
-  @CheckForNull
-  public abstract ImmutableList<String> getLookupAttributes();
-
   public static Builder builder() {
     return new AutoValue_CreateEntityTypeRequest.Builder();
   }
@@ -90,13 +75,6 @@ public abstract class CreateEntityTypeRequest {
 
     public abstract Builder setAttributes(
         @Nullable @CheckForNull ImmutableList<CreateAttributeRequest> newAttributes);
-
-    public abstract Builder setIdAttribute(@Nullable @CheckForNull String newIdAttribute);
-
-    public abstract Builder setLabelAttribute(@Nullable @CheckForNull String newLabelAttribute);
-
-    public abstract Builder setLookupAttributes(
-        @Nullable @CheckForNull ImmutableList<String> newLookupAttributes);
 
     public abstract CreateEntityTypeRequest build();
   }

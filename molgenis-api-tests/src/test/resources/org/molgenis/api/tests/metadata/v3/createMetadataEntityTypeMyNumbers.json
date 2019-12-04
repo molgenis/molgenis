@@ -10,16 +10,16 @@
       "name": "id",
       "type": "int",
       "visible": false,
-      "nullable": false
+      "nullable": false,
+      "idAttribute": true
     },
     {
       "id": "v3meta_MyNumbers_label",
       "name": "label",
       "type": "string",
-      "nullable": false
+      "nullable": false,
+      "labelAttribute": true,
+      "lookupAttributeIndex": 0
     }
-  ],
-  "idAttribute": "v3meta_MyNumbers_id",
-  "labelAttribute": "v3meta_MyNumbers_label",
-  "lookupAttributes": ["v3meta_MyNumbers_label"]
+  ]
 }

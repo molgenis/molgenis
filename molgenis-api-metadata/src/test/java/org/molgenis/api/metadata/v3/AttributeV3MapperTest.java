@@ -5,7 +5,6 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -229,13 +229,15 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
     EntityType entityType = mock(EntityType.class);
 
-    Map<String, Attribute> attributes =
+    List<Attribute> attributes =
         attributeV3Mapper.toAttributes(
             singletonList(createAttributeRequest), entityTypeRequest, entityType);
 
     assertAll(
-        () -> assertTrue(attributes.containsKey("MyAttributeId")),
         () -> assertEquals(1, attributes.size()),
+        () -> verify(attribute).setIdAttribute(null),
+        () -> verify(attribute).setLabelAttribute(null),
+        () -> verify(attribute).setLookupAttributeIndex(null),
         () -> verify(attribute).setIdentifier("MyAttributeId"),
         () -> verify(attribute).setName("MyAttributeName"),
         () -> verify(attribute).setEntity(entityType),
@@ -248,6 +250,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
         () -> verify(attribute).setVisibleExpression(null),
         () -> verify(attribute).setValidationExpression(null),
         () -> verify(attribute).setDefaultValue(null),
+        () -> verify(attribute).getIdentifier(),
         () -> verifyNoMoreInteractions(attribute));
   }
 
