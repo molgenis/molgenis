@@ -26,6 +26,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.exception.GroupPackageDowngradeException;
 import org.molgenis.test.AbstractMockitoTest;
 
 class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
@@ -42,7 +43,9 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testNull() {
-    assertThrows(NullPointerException.class, () -> new GroupPackageRepositoryDecorator(null, null));
+    assertThrows(
+        GroupPackageDowngradeException.class,
+        () -> new GroupPackageRepositoryDecorator(null, null));
   }
 
   @Test
@@ -121,7 +124,8 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
     when(delegateRepository.findOneById("test")).thenReturn(existingGroupPackage);
 
     assertThrows(
-        RuntimeException.class, () -> groupPackageRepositoryDecorator.update(newGroupPackage));
+        GroupPackageDowngradeException.class,
+        () -> groupPackageRepositoryDecorator.update(newGroupPackage));
   }
 
   @Test
@@ -174,7 +178,9 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
     when(delegateRepository.findAll(any(Stream.class))).thenReturn(Stream.of(existingGroupPackage));
     Stream<Package> packages = Stream.of(newGroupPackage);
 
-    assertThrows(RuntimeException.class, () -> groupPackageRepositoryDecorator.update(packages));
+    assertThrows(
+        GroupPackageDowngradeException.class,
+        () -> groupPackageRepositoryDecorator.update(packages));
   }
 
   @Test

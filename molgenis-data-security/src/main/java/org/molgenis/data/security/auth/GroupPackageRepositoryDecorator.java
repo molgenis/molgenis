@@ -13,6 +13,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.exception.GroupPackageDowngradeException;
 import org.molgenis.data.util.PackageUtils;
 
 public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator<Package> {
@@ -150,8 +151,7 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
 
   private void validateUpdate(Package currentPackage, Package updatedPackage) {
     if (isGroupPackage(currentPackage) && !isGroupPackage(updatedPackage)) {
-      throw new RuntimeException(
-          "cannot update group package to non-group package"); // TODO coded exception
+      throw new GroupPackageDowngradeException(updatedPackage);
     }
   }
 
