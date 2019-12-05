@@ -6,8 +6,11 @@ import com.google.common.cache.Cache;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
@@ -51,18 +54,24 @@ public class CombinedEntityCache {
         .forEach(cache::invalidate);
   }
 
+  public Optional<CacheHit<Entity>> getIfPresent(EntityType entityType, Object id) {
+    return getIfPresent(entityType, id, null);
+  }
+
   /**
    * Retrieves an entity from the cache if present.
    *
    * @param entityType EntityType of the entity to retrieve
    * @param id id value of the entity to retrieve
+   * @param fetch containing attributes to retrieve, can be null
    * @return Optional {@link CacheHit<Entity>} with the result from the cache, empty if no record of
    *     the entity is present in the cache
    */
-  public Optional<CacheHit<Entity>> getIfPresent(EntityType entityType, Object id) {
+  public Optional<CacheHit<Entity>> getIfPresent(
+      EntityType entityType, Object id, @Nullable @CheckForNull Fetch fetch) {
     EntityKey key = EntityKey.create(entityType, id);
     return Optional.ofNullable(cache.getIfPresent(key))
-        .map(cacheHit -> hydrate(cacheHit, entityType));
+        .map(cacheHit -> hydrate(cacheHit, entityType, fetch));
   }
 
   /**
@@ -82,11 +91,13 @@ public class CombinedEntityCache {
   }
 
   private CacheHit<Entity> hydrate(
-      CacheHit<Map<String, Object>> cacheHitAsMap, EntityType entityType) {
+      CacheHit<Map<String, Object>> cacheHitAsMap,
+      EntityType entityType,
+      @Nullable @CheckForNull Fetch fetch) {
     if (cacheHitAsMap.isEmpty()) {
       return CacheHit.empty();
     } else {
-      return CacheHit.of(entityHydration.hydrate(cacheHitAsMap.getValue(), entityType));
+      return CacheHit.of(entityHydration.hydrate(cacheHitAsMap.getValue(), entityType, fetch));
     }
   }
 }

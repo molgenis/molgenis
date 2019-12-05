@@ -5,6 +5,8 @@ import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -19,6 +21,7 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -63,6 +66,8 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
 
     Mockito.when(entityManager.create(entityType, NO_POPULATE))
         .thenReturn(new DynamicEntity(entityType));
+    Mockito.when(entityManager.createFetch(eq(entityType), any()))
+        .thenReturn(new DynamicEntity(entityType));
 
     entity1 = new DynamicEntity(entityType);
     entity1.set("ID", entityID1);
@@ -100,6 +105,28 @@ class L1CacheTest extends AbstractMolgenisSpringTest {
     // Cleanup after transaction and expect the cache to be cleared, return no CacheHit
     l1Cache.doCleanupAfterCompletion(transactionID);
     actualEntity = l1Cache.get(repository, entityID1, entityType);
+    assertEquals(empty(), actualEntity);
+  }
+
+  @Test
+  void testPutAndGetFetchWhenInTransaction() {
+    Fetch fetch = new Fetch().field("ID");
+
+    // Start transaction
+    l1Cache.transactionStarted(transactionID);
+
+    // Entity has not been added to cache, return no CacheHit
+    Optional<CacheHit<Entity>> actualEntity = l1Cache.get(repository, entityID1, entityType, fetch);
+    assertEquals(empty(), actualEntity);
+
+    // Entity has been added to cache, return entity
+    l1Cache.put(repository, entity1);
+    CacheHit<Entity> result = l1Cache.get(repository, entityID1, entityType, fetch).get();
+    assertEquals(entityID1, result.getValue().getString("ID"));
+
+    // Cleanup after transaction and expect the cache to be cleared, return no CacheHit
+    l1Cache.doCleanupAfterCompletion(transactionID);
+    actualEntity = l1Cache.get(repository, entityID1, entityType, fetch);
     assertEquals(empty(), actualEntity);
   }
 
