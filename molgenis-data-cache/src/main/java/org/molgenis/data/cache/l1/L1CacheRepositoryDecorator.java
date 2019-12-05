@@ -3,16 +3,11 @@ package org.molgenis.data.cache.l1;
 import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.SORTED;
-import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Streams;
 import java.util.Iterator;
 import java.util.List;
@@ -20,9 +15,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.cache.utils.CacheHit;
@@ -67,26 +65,48 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public Entity findOneById(Object id) {
+    return findOneByIdUsingCache(id, null);
+  }
+
+  @Override
+  public Entity findOneById(Object id, Fetch fetch) {
+    return findOneByIdUsingCache(id, fetch);
+  }
+
+  private Entity findOneByIdUsingCache(Object id, @Nullable @CheckForNull Fetch fetch) {
     if (cacheable) {
       Optional<CacheHit<Entity>> cacheHit =
-          l1Cache.get(getEntityType().getId(), id, getEntityType());
+          l1Cache.get(getEntityType().getId(), id, getEntityType(), fetch);
       if (cacheHit.isPresent()) {
         return cacheHit.get().getValue();
       }
     }
-    return delegate().findOneById(id);
+    Repository<Entity> delegate = delegate();
+    return fetch != null ? delegate.findOneById(id, fetch) : delegate.findOneById(id);
   }
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
+    return findAllUsingCache(ids, null);
+  }
+
+  @Override
+  public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
+    return findAllUsingCache(ids, fetch);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private Stream<Entity> findAllUsingCache(
+      Stream<Object> ids, @Nullable @CheckForNull Fetch fetch) {
     if (cacheable) {
       Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
-      Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
-      return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false)
+      return Streams.stream(idBatches)
+          .map(idBatch -> findAllBatch(idBatch, fetch))
           .flatMap(List::stream)
           .filter(Objects::nonNull);
     }
-    return delegate().findAll(ids);
+    Repository<Entity> delegate = delegate();
+    return fetch != null ? delegate.findAll(ids, fetch) : delegate.findAll(ids);
   }
 
   /**
@@ -94,24 +114,29 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    * cache. The missing ones are retrieved from the decoratedRepository.
    *
    * @param batch list of entity IDs to look up
+   * @param fetch containing attributes to retrieve, can be null
    * @return List of {@link Entity}s
    */
-  private List<Entity> findAllBatch(List<Object> batch) {
+  private List<Entity> findAllBatch(List<Object> batch, @Nullable @CheckForNull Fetch fetch) {
     String entityId = getEntityType().getId();
     EntityType entityType = getEntityType();
     List<Object> missingIds =
         batch.stream()
-            .filter(id -> !l1Cache.get(entityId, id, entityType).isPresent())
+            .filter(id -> !l1Cache.get(entityId, id, entityType, fetch).isPresent())
             .collect(toList());
 
+    Stream<Entity> missingEntityStream =
+        fetch != null
+            ? delegate().findAll(missingIds.stream(), fetch)
+            : delegate().findAll(missingIds.stream());
     Map<Object, Entity> missingEntities =
-        delegate().findAll(missingIds.stream()).collect(toMap(Entity::getIdValue, e -> e));
+        missingEntityStream.collect(toMap(Entity::getIdValue, e -> e));
 
     return batch.stream()
         .map(
             id ->
                 l1Cache
-                    .get(entityId, id, getEntityType())
+                    .get(entityId, id, getEntityType(), fetch)
                     .map(CacheHit::getValue)
                     .orElse(missingEntities.get(id)))
         .collect(toList());
@@ -194,6 +219,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    *
    * @param entity the entity whose references need to be evicted
    */
+  @SuppressWarnings("UnstableApiUsage")
   private void evictBiDiReferencedEntities(Entity entity) {
     Stream<EntityKey> backreffingEntities =
         getEntityType()
