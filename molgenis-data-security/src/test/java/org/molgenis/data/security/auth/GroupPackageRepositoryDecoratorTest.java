@@ -43,9 +43,7 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testNull() {
-    assertThrows(
-        GroupPackageDowngradeException.class,
-        () -> new GroupPackageRepositoryDecorator(null, null));
+    assertThrows(NullPointerException.class, () -> new GroupPackageRepositoryDecorator(null, null));
   }
 
   @Test
@@ -84,8 +82,8 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
         () -> verify(delegateRepository).add(streamCaptor.capture()),
         () ->
             assertEquals(
-                streamCaptor.getValue().collect(Collectors.toList()),
-                asList(groupPackage, nonGroupPackage)),
+                asList(groupPackage, nonGroupPackage),
+                streamCaptor.getValue().collect(Collectors.toList())),
         () -> verify(groupPackageService).createGroups(singletonList(groupPackage)),
         () -> verifyNoMoreInteractions(groupPackageService));
   }
@@ -164,8 +162,8 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
         () -> verify(delegateRepository).update(streamCaptor.capture()),
         () ->
             assertEquals(
-                streamCaptor.getValue().collect(Collectors.toList()),
-                asList(newGroupPackage, newNonGroupPackage, newUpdateToGroupPackage)),
+                asList(newGroupPackage, newNonGroupPackage, newUpdateToGroupPackage),
+                streamCaptor.getValue().collect(Collectors.toList())),
         () -> verify(groupPackageService).createGroup(newUpdateToGroupPackage),
         () -> verifyNoMoreInteractions(groupPackageService));
   }
@@ -253,8 +251,8 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
         () -> verify(delegateRepository).delete(streamCaptor.capture()),
         () ->
             assertEquals(
-                streamCaptor.getValue().collect(Collectors.toList()),
-                asList(groupPackage, nonGroupPackage)),
+                asList(groupPackage, nonGroupPackage),
+                streamCaptor.getValue().collect(Collectors.toList())),
         () -> verify(groupPackageService).deleteGroup(groupPackage),
         () -> verifyNoMoreInteractions(groupPackageService));
   }
@@ -273,8 +271,8 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
         () -> verify(delegateRepository).delete(streamCaptor.capture()),
         () ->
             assertEquals(
-                streamCaptor.getValue().collect(Collectors.toList()),
-                asList(groupPackage, nonGroupPackage)),
+                asList(groupPackage, nonGroupPackage),
+                streamCaptor.getValue().collect(Collectors.toList())),
         () -> verify(groupPackageService).deleteGroup(groupPackage),
         () -> verifyNoMoreInteractions(groupPackageService));
   }
@@ -290,13 +288,12 @@ class GroupPackageRepositoryDecoratorTest extends AbstractMockitoTest {
 
     groupPackageRepositoryDecorator.deleteAll(packageIds);
 
-    ArgumentCaptor<Stream<Package>> streamCaptor = ArgumentCaptor.forClass(Stream.class);
+    ArgumentCaptor<Stream<Object>> streamCaptor = ArgumentCaptor.forClass(Stream.class);
     assertAll(
-        () -> verify(delegateRepository).delete(streamCaptor.capture()),
+        () -> verify(delegateRepository).deleteAll(streamCaptor.capture()),
         () ->
             assertEquals(
-                streamCaptor.getValue().collect(Collectors.toList()),
-                asList(groupPackage, nonGroupPackage)),
+                asList("group", "nonGroup"), streamCaptor.getValue().collect(Collectors.toList())),
         () -> verify(groupPackageService).deleteGroup(groupPackage),
         () -> verifyNoMoreInteractions(groupPackageService));
   }

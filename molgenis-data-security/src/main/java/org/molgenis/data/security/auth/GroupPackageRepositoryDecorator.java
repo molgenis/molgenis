@@ -129,16 +129,16 @@ public class GroupPackageRepositoryDecorator extends AbstractRepositoryDecorator
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    Stream<Package> packages =
-        ids.map(
+    Stream<Object> packages =
+        ids.filter(
             id -> {
               Package pack = getPackage(id);
               if (isGroupPackage(pack)) {
                 groupPackageService.deleteGroup(pack);
               }
-              return pack;
+              return true;
             });
-    super.delete(packages);
+    super.deleteAll(packages);
   }
 
   private Package getPackage(Object id) {
