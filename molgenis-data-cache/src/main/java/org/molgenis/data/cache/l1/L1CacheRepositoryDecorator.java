@@ -207,11 +207,11 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    * relation.
    */
   private void evictBiDiReferencedEntityTypes() {
-    getEntityType().getMappedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
-    getEntityType()
-        .getInversedByAttributes()
-        .map(Attribute::getRefEntity)
-        .forEach(l1Cache::evictAll);
+//    getEntityType().getMappedByAttributes().map(Attribute::getRefEntity).forEach(l1Cache::evictAll);
+//    getEntityType()
+//        .getInversedByAttributes()
+//        .map(Attribute::getRefEntity)
+//        .forEach(l1Cache::evictAll);
   }
 
   /**
@@ -221,18 +221,18 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
    */
   @SuppressWarnings("UnstableApiUsage")
   private void evictBiDiReferencedEntities(Entity entity) {
-    Stream<EntityKey> backreffingEntities =
-        getEntityType()
-            .getMappedByAttributes()
-            .flatMap(mappedByAttr -> Streams.stream(entity.getEntities(mappedByAttr.getName())))
-            .map(EntityKey::create);
-    Stream<EntityKey> manyToOneEntities =
-        getEntityType()
-            .getInversedByAttributes()
-            .map(inversedByAttr -> entity.getEntity(inversedByAttr.getName()))
-            .filter(Objects::nonNull)
-            .map(EntityKey::create);
-
-    l1Cache.evict(Stream.concat(backreffingEntities, manyToOneEntities));
+//    Stream<EntityKey> backreffingEntities =
+//        getEntityType()
+//            .getMappedByAttributes()
+//            .flatMap(mappedByAttr -> Streams.stream(entity.getEntities(mappedByAttr.getName())))
+//            .map(EntityKey::create);
+//    Stream<EntityKey> manyToOneEntities =
+//        getEntityType()
+//            .getInversedByAttributes()
+//            .map(inversedByAttr -> entity.getEntity(inversedByAttr.getName()))
+//            .filter(Objects::nonNull)
+//            .map(EntityKey::create);
+//
+//    l1Cache.evict(Stream.concat(backreffingEntities, manyToOneEntities));
   }
 }

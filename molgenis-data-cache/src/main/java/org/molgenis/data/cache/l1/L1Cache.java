@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class L1Cache implements TransactionListener {
   private static final Logger LOG = getLogger(L1Cache.class);
-  private static final int MAX_CACHE_SIZE = 1000;
+  private static final int MAX_CACHE_SIZE = 25_000;
   private final ThreadLocal<CombinedEntityCache> caches;
   private final EntityHydration entityHydration;
 
