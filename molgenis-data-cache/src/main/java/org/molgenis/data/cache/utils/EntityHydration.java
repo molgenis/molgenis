@@ -9,6 +9,8 @@ import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
@@ -59,7 +61,10 @@ public class EntityHydration {
    * @param fetch containing attributes to retrieve, can be null
    * @return hydrated entity
    */
-  public Entity hydrate(Map<String, Object> dehydratedEntity, EntityType entityType, Fetch fetch) {
+  public Entity hydrate(
+      Map<String, Object> dehydratedEntity,
+      EntityType entityType,
+      @Nullable @CheckForNull Fetch fetch) {
     if (fetch == null) {
       return hydrate(dehydratedEntity, entityType);
     }
