@@ -331,7 +331,7 @@ components:
         type: string
       example: my_column
     number:
-      name: number
+      name: page
       description: Page number
       in: query
       required: false
