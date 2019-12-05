@@ -9,8 +9,11 @@ import com.google.common.cache.Cache;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
@@ -82,21 +85,27 @@ public class L1Cache implements TransactionListener {
     }
   }
 
+  public Optional<CacheHit<Entity>> get(String entityTypeId, Object id, EntityType entityType) {
+    return get(entityTypeId, id, entityType, null);
+  }
+
   /**
    * Retrieves an entity from the L1 cache based on a combination of entity name and entity id.
    *
    * @param entityTypeId name of the entity to retrieve
    * @param id id value of the entity to retrieve
+   * @param fetch containing attributes to retrieve, can be null
    * @return an {@link Optional<CacheHit>} of which the CacheHit contains an {@link Entity} or is
    *     empty if deletion of this entity is stored in the cache, or Optional.empty() if there's no
    *     information available about this entity in the cache
    */
-  public Optional<CacheHit<Entity>> get(String entityTypeId, Object id, EntityType entityType) {
+  public Optional<CacheHit<Entity>> get(
+      String entityTypeId, Object id, EntityType entityType, @Nullable @CheckForNull Fetch fetch) {
     CombinedEntityCache cache = caches.get();
     if (cache == null) {
       return Optional.empty();
     }
-    Optional<CacheHit<Entity>> result = cache.getIfPresent(entityType, id);
+    Optional<CacheHit<Entity>> result = cache.getIfPresent(entityType, id, fetch);
     if (result.isPresent()) {
       LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityTypeId);
     } else {
