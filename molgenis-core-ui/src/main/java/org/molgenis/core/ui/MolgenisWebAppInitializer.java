@@ -13,7 +13,6 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -58,13 +57,7 @@ public class MolgenisWebAppInitializer {
       dispatcherServletRegistration.setAsyncSupported(true);
     }
 
-    // add filters
-    Dynamic forwardedHeaderFilter =
-        servletContext.addFilter("forwardedHeaderFilter", ForwardedHeaderFilter.class);
-    forwardedHeaderFilter.setAsyncSupported(true);
-    forwardedHeaderFilter.addMappingForUrlPatterns(
-        EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC), false, "*");
-
+    // Add filters
     Dynamic browserDetectionFiler =
         servletContext.addFilter("browserDetectionFilter", BrowserDetectionFilter.class);
     browserDetectionFiler.setAsyncSupported(true);
