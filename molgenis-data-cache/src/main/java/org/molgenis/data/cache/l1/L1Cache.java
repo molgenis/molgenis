@@ -8,7 +8,6 @@ import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.Cache;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -61,9 +60,18 @@ public class L1Cache implements TransactionListener {
     }
   }
 
-  void putDeletion(EntityKey entityKey) {
+  void putDeletion(Entity entity) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
+      EntityKey entityKey = EntityKey.create(entity.getEntityType().getId(), entity.getIdValue());
+      entityCache.putDeletion(entityKey);
+    }
+  }
+
+  void putDeletion(EntityType entityType, Object entityId) {
+    CombinedEntityCache entityCache = caches.get();
+    if (entityCache != null) {
+      EntityKey entityKey = EntityKey.create(entityType.getId(), entityId);
       entityCache.putDeletion(entityKey);
     }
   }
@@ -77,57 +85,54 @@ public class L1Cache implements TransactionListener {
     }
   }
 
-  void evict(Stream<EntityKey> entityKeys) {
-    CombinedEntityCache entityCache = caches.get();
-    if (entityCache != null) {
-      LOG.trace("Removing entity keys from L1 cache.");
-      entityCache.evict(entityKeys);
-    }
-  }
-
-  public Optional<CacheHit<Entity>> get(String entityTypeId, Object id, EntityType entityType) {
-    return get(entityTypeId, id, entityType, null);
+  public Optional<CacheHit<Entity>> get(EntityType entityType, Object entityId) {
+    return get(entityType, entityId, null);
   }
 
   /**
    * Retrieves an entity from the L1 cache based on a combination of entity name and entity id.
    *
-   * @param entityTypeId name of the entity to retrieve
-   * @param id id value of the entity to retrieve
+   * @param entityType entity type
+   * @param entityId id value of the entity to retrieve
    * @param fetch containing attributes to retrieve, can be null
    * @return an {@link Optional<CacheHit>} of which the CacheHit contains an {@link Entity} or is
    *     empty if deletion of this entity is stored in the cache, or Optional.empty() if there's no
    *     information available about this entity in the cache
    */
   public Optional<CacheHit<Entity>> get(
-      String entityTypeId, Object id, EntityType entityType, @Nullable @CheckForNull Fetch fetch) {
+      EntityType entityType, Object entityId, @Nullable @CheckForNull Fetch fetch) {
     CombinedEntityCache cache = caches.get();
     if (cache == null) {
       return Optional.empty();
     }
-    Optional<CacheHit<Entity>> result = cache.getIfPresent(entityType, id, fetch);
-    if (result.isPresent()) {
-      LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityTypeId);
-    } else {
-      LOG.trace("No entity with id [{}] present in L1 cache that belongs to {}", id, entityTypeId);
+    Optional<CacheHit<Entity>> result = cache.getIfPresent(entityType, entityId, fetch);
+
+    if (LOG.isDebugEnabled()) {
+      if (result.isPresent()) {
+        LOG.debug(
+            "Retrieved entity [{}] from L1 cache that belongs to {}", entityId, entityType.getId());
+      } else if (LOG.isTraceEnabled()) {
+        LOG.trace(
+            "No entity with id [{}] present in L1 cache that belongs to {}",
+            entityId,
+            entityType.getId());
+      }
     }
+
     return result;
   }
 
-  /**
-   * Puts an entity into the L1 cache, if the cache exists for the current thread.
-   *
-   * @param entityTypeId name of the entity to put into the cache
-   * @param entity the entity to put into the cache
-   */
-  public void put(String entityTypeId, Entity entity) {
+  /** Puts an entity into the L1 cache, if the cache exists for the current thread. */
+  public void put(Entity entity) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       entityCache.put(entity);
-      LOG.trace(
-          "Added dehydrated row [{}] from entity {} to the L1 cache",
-          entity.getIdValue(),
-          entityTypeId);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace(
+            "Added dehydrated row [{}] from entity {} to the L1 cache",
+            entity.getIdValue(),
+            entity.getEntityType().getId());
+      }
     }
   }
 }

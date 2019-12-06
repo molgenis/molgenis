@@ -1,332 +1,263 @@
 package org.molgenis.data.cache.l1;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
-import com.google.common.collect.Sets;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityKey;
-import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.CacheHit;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.LazyEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
+import org.molgenis.test.AbstractMockitoTest;
 
-@MockitoSettings(strictness = Strictness.LENIENT)
-@ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
-class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
+class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
+  @Mock private Repository<Entity> delegateRepository;
+  @Mock private L1Cache l1Cache;
   private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
 
-  private EntityType authorMetaData;
-  private EntityType bookMetaData;
-
-  private final String authorEntityName = "Author";
-  private final String bookEntityName = "Book";
-  private final String authorID = "1";
-  private final String authorID2 = "2";
-  private final String bookID = "b1";
-  private final String bookID2 = "b2";
-  private Entity author;
-  private Entity author2;
-
-  @Autowired private EntityTypeFactory entityTypeFactory;
-
-  @Autowired private AttributeFactory attributeFactory;
-
-  @Autowired private DataService dataService;
-
-  @Mock private L1Cache l1Cache;
-
-  @Mock private Repository<Entity> authorRepository;
-
-  @Mock private Repository<Entity> bookRepository;
-
-  @Captor private ArgumentCaptor<Stream<Entity>> entitiesCaptor;
-
-  @Captor private ArgumentCaptor<Stream<Object>> entityIdsCaptor;
-
-  @Captor private ArgumentCaptor<Stream<EntityKey>> entityKeysCaptor;
-
   @BeforeEach
-  void beforeMethod() {
-    authorMetaData = entityTypeFactory.create(authorEntityName);
-    bookMetaData = entityTypeFactory.create(bookEntityName);
-
-    authorMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
-    authorMetaData.addAttribute(attributeFactory.create().setName("name"));
-    Attribute authorAttribute =
-        attributeFactory.create().setName("author").setDataType(XREF).setRefEntity(authorMetaData);
-    authorMetaData.addAttribute(
-        attributeFactory
-            .create()
-            .setName("books")
-            .setDataType(ONE_TO_MANY)
-            .setMappedBy(authorAttribute)
-            .setRefEntity(bookMetaData));
-    bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
-    bookMetaData.addAttribute(attributeFactory.create().setName("title"));
-    bookMetaData.addAttribute(authorAttribute);
-
-    author = new DynamicEntity(authorMetaData);
-    author.set("ID", authorID);
-    author.set("name", "Terry Pratchett");
-    author.set(
-        "books",
-        Arrays.asList(
-            new LazyEntity(bookMetaData, dataService, bookID),
-            new LazyEntity(bookMetaData, dataService, bookID2)));
-
-    author2 = new DynamicEntity(authorMetaData);
-    author2.set("ID", authorID2);
-    author2.set("name", "Stephen King");
-
-    when(authorRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
-    when(authorRepository.getName()).thenReturn(authorEntityName);
-    when(authorRepository.getEntityType()).thenReturn(authorMetaData);
-
-    l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(authorRepository, l1Cache);
+  public void setUpBeforeEach() {
+    when(delegateRepository.getCapabilities()).thenReturn(singleton(CACHEABLE));
+    l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(delegateRepository, l1Cache);
   }
 
   @Test
   void testAdd() {
-    l1CacheRepositoryDecorator.add(author);
-    verify(l1Cache).put(authorEntityName, author);
-    verify(l1Cache).evict(entityKeysCaptor.capture());
+    Entity entity = mock(Entity.class);
+    l1CacheRepositoryDecorator.add(entity);
+    verify(l1Cache).put(entity);
+    verify(delegateRepository).add(entity);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testAddStream() {
+    Entity entity0 = mock(Entity.class);
+    Entity entity1 = mock(Entity.class);
+    doAnswer(invocation -> (int) ((Stream<?>) invocation.getArguments()[0]).count())
+        .when(delegateRepository)
+        .add(any(Stream.class));
+    assertEquals(2, l1CacheRepositoryDecorator.add(Stream.of(entity0, entity1)));
+    verify(l1Cache).put(entity0);
+    verify(l1Cache).put(entity1);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @Test
+  void testFindOneById() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+    Object entityId = mock(Object.class);
+    Entity entity = mock(Entity.class);
+    when(l1Cache.get(entityType, entityId, null)).thenReturn(Optional.of(CacheHit.of(entity)));
+    assertEquals(entity, l1CacheRepositoryDecorator.findOneById(entityId));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @Test
+  void testFindOneByIdCacheMiss() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+    Object entityId = mock(Object.class);
+    Entity entity = mock(Entity.class);
+    when(l1Cache.get(entityType, entityId, null)).thenReturn(Optional.empty());
+    when(delegateRepository.findOneById(entityId)).thenReturn(entity);
+    assertEquals(entity, l1CacheRepositoryDecorator.findOneById(entityId));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @Test
+  void testFindOneByIdCacheNull() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+    Object entityId = mock(Object.class);
+    when(l1Cache.get(entityType, entityId, null)).thenReturn(Optional.of(CacheHit.empty()));
+    assertNull(l1CacheRepositoryDecorator.findOneById(entityId));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @Test
+  void testFindOneByIdFetch() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+
+    Object entityId = mock(Object.class);
+    Fetch fetch = mock(Fetch.class);
+    Entity entity = mock(Entity.class);
+    when(l1Cache.get(entityType, entityId, fetch)).thenReturn(Optional.of(CacheHit.of(entity)));
+    assertEquals(entity, l1CacheRepositoryDecorator.findOneById(entityId, fetch));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testFindAll() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+
+    Object entityId0 = mock(Object.class);
+    Object entityId1 = mock(Object.class);
+    Object entityId2 = mock(Object.class);
+    Object entityId3 = mock(Object.class);
+    Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(entityId0).getMock();
+    Entity entity1 = mock(Entity.class);
+    Entity entity3 = when(mock(Entity.class).getIdValue()).thenReturn(entityId3).getMock();
+
+    when(l1Cache.get(entityType, entityId0, null)).thenReturn(Optional.empty());
+    when(l1Cache.get(entityType, entityId1, null)).thenReturn(Optional.of(CacheHit.of(entity1)));
+    when(l1Cache.get(entityType, entityId2, null)).thenReturn(Optional.of(CacheHit.empty()));
+    when(l1Cache.get(entityType, entityId3, null)).thenReturn(Optional.empty());
+
+    doAnswer(invocation -> Stream.of(entity0, entity3))
+        .when(delegateRepository)
+        .findAll(any(Stream.class));
     assertEquals(
-        asList(create(bookEntityName, bookID), create(bookEntityName, bookID2)),
-        entityKeysCaptor.getValue().collect(toList()));
-    verifyNoMoreInteractions(l1Cache);
+        asList(entity0, entity1, entity3),
+        l1CacheRepositoryDecorator
+            .findAll(Stream.of(entityId0, entityId1, entityId2, entityId3))
+            .collect(Collectors.toList()));
+    ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(delegateRepository).findAll(entityStreamCaptor.capture());
+    assertEquals(asList(entityId0, entityId3), entityStreamCaptor.getValue().collect(toList()));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
-  void testAddWithStreamOfEntities() {
-    l1CacheRepositoryDecorator.add(Stream.of(author));
+  void testFindAllFetch() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
 
-    verify(authorRepository).add(entitiesCaptor.capture());
-    entitiesCaptor.getValue().collect(Collectors.toList());
-    verify(l1Cache).put(authorEntityName, author);
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
-  }
+    Object entityId0 = mock(Object.class);
+    Object entityId1 = mock(Object.class);
+    Object entityId2 = mock(Object.class);
+    Object entityId3 = mock(Object.class);
+    Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(entityId0).getMock();
+    Entity entity1 = mock(Entity.class);
+    Entity entity3 = when(mock(Entity.class).getIdValue()).thenReturn(entityId3).getMock();
 
-  @Test
-  void testDelete() {
-    l1CacheRepositoryDecorator.delete(author);
-    verify(l1Cache).putDeletion(create(author));
-    verify(l1Cache).evict(entityKeysCaptor.capture());
+    Fetch fetch = mock(Fetch.class);
+    when(l1Cache.get(entityType, entityId0, fetch)).thenReturn(Optional.empty());
+    when(l1Cache.get(entityType, entityId1, fetch)).thenReturn(Optional.of(CacheHit.of(entity1)));
+    when(l1Cache.get(entityType, entityId2, fetch)).thenReturn(Optional.of(CacheHit.empty()));
+    when(l1Cache.get(entityType, entityId3, fetch)).thenReturn(Optional.empty());
+
+    doAnswer(invocation -> Stream.of(entity0, entity3))
+        .when(delegateRepository)
+        .findAll(any(Stream.class), eq(fetch));
     assertEquals(
-        asList(create(bookEntityName, bookID), create(bookEntityName, bookID2)),
-        entityKeysCaptor.getValue().collect(toList()));
-
-    verifyNoMoreInteractions(l1Cache);
-  }
-
-  @Test
-  void testDeleteById() {
-    l1CacheRepositoryDecorator.deleteById(authorID);
-    verify(l1Cache).putDeletion(create(author));
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
-  }
-
-  @Test
-  void testDeleteByStreamOfEntities() {
-    l1CacheRepositoryDecorator.delete(Stream.of(author));
-
-    verify(authorRepository).delete(entitiesCaptor.capture());
-    entitiesCaptor.getValue().collect(Collectors.toList());
-    verify(l1Cache).putDeletion(EntityKey.create(author));
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
-  }
-
-  @Test
-  void testDeleteAll() {
-    l1CacheRepositoryDecorator.deleteAll();
-    verify(l1Cache).evictAll(authorMetaData);
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
-  }
-
-  @Test
-  void testDeleteAllByStreamOfIds() {
-    l1CacheRepositoryDecorator.deleteAll(Stream.of(authorID));
-
-    verify(authorRepository).deleteAll(entityIdsCaptor.capture());
-    entityIdsCaptor.getValue().collect(Collectors.toList());
-    verify(l1Cache).putDeletion(EntityKey.create(authorEntityName, authorID));
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
+        asList(entity0, entity1, entity3),
+        l1CacheRepositoryDecorator
+            .findAll(Stream.of(entityId0, entityId1, entityId2, entityId3), fetch)
+            .collect(Collectors.toList()));
+    ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(delegateRepository).findAll(entityStreamCaptor.capture(), eq(fetch));
+    assertEquals(asList(entityId0, entityId3), entityStreamCaptor.getValue().collect(toList()));
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
   @Test
   void testUpdate() {
-    l1CacheRepositoryDecorator.update(author);
-    verify(l1Cache).put(authorEntityName, author);
-    verify(authorRepository).update(author);
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
+    Entity entity = mock(Entity.class);
+    l1CacheRepositoryDecorator.update(entity);
+    verify(l1Cache).put(entity);
+    verify(delegateRepository).update(entity);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testUpdateStream() {
+    Entity entity0 = mock(Entity.class);
+    Entity entity1 = mock(Entity.class);
+    doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
+        .when(delegateRepository)
+        .update(any(Stream.class));
+    l1CacheRepositoryDecorator.update(Stream.of(entity0, entity1));
+    verify(l1Cache).put(entity0);
+    verify(l1Cache).put(entity1);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
   @Test
-  void testUpdateWithStreamOfEntities() {
-    l1CacheRepositoryDecorator.update(Stream.of(author));
+  void testDelete() {
+    Entity entity = mock(Entity.class);
+    l1CacheRepositoryDecorator.delete(entity);
+    verify(l1Cache).putDeletion(entity);
+    verify(delegateRepository).delete(entity);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
 
-    verify(authorRepository).update(entitiesCaptor.capture());
-    entitiesCaptor.getValue().collect(Collectors.toList());
-    verify(l1Cache).put(authorEntityName, author);
-    verify(l1Cache).evictAll(bookMetaData);
-    verifyNoMoreInteractions(l1Cache);
+  @SuppressWarnings("unchecked")
+  @Test
+  void testDeleteStream() {
+    Entity entity0 = mock(Entity.class);
+    Entity entity1 = mock(Entity.class);
+    doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
+        .when(delegateRepository)
+        .delete(any(Stream.class));
+    l1CacheRepositoryDecorator.delete(Stream.of(entity0, entity1));
+    verify(l1Cache).putDeletion(entity0);
+    verify(l1Cache).putDeletion(entity1);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
   @Test
-  void testFindOneByIdReturnsEntity() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
-        .thenReturn(Optional.of(CacheHit.of(author)));
-    Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
-    assertEquals(author, actualEntity);
+  void testDeleteById() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
 
-    verify(authorRepository, never()).findOneById(Mockito.any());
+    Object entityId = mock(Object.class);
+    l1CacheRepositoryDecorator.deleteById(entityId);
+    verify(l1Cache).putDeletion(entityType, entityId);
+    verify(delegateRepository).deleteById(entityId);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testDeleteAllStream() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+
+    Object entityId0 = mock(Object.class);
+    Object entityId1 = mock(Object.class);
+    doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
+        .when(delegateRepository)
+        .deleteAll(any(Stream.class));
+    l1CacheRepositoryDecorator.deleteAll(Stream.of(entityId0, entityId1));
+    verify(l1Cache).putDeletion(entityType, entityId0);
+    verify(l1Cache).putDeletion(entityType, entityId1);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
   @Test
-  void testFindOneByIdReturnsEmptyCacheHit() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
-        .thenReturn(Optional.of(CacheHit.empty()));
-    Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
-    assertNull(actualEntity);
+  void testDeleteAll() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
 
-    verify(authorRepository, never()).findOneById(Mockito.any());
-  }
-
-  @Test
-  void testFindOneByIdReturnsNull() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
-    Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
-    assertNull(actualEntity);
-
-    verify(authorRepository).findOneById(authorID);
-  }
-
-  @Test
-  void testFindOneByIdFetchReturnsEntity() {
-    Fetch fetch = mock(Fetch.class);
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, fetch))
-        .thenReturn(Optional.of(CacheHit.of(author)));
-    Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID, fetch);
-    assertEquals(author, actualEntity);
-
-    verify(authorRepository, never()).findOneById(Mockito.any());
-  }
-
-  @Test
-  void testFindAllByStreamOfIdsEntityNotPresentInCache() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
-        .thenReturn(Optional.empty());
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, null))
-        .thenReturn(Optional.empty());
-    when(authorRepository.findAll(entityIdsCaptor.capture()))
-        .thenReturn(Stream.of(author, author2));
-
-    List<Entity> actual =
-        l1CacheRepositoryDecorator
-            .findAll(Stream.of(authorID, authorID2))
-            .collect(Collectors.toList());
-    assertEquals(asList(author, author2), actual);
-
-    List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
-    assertEquals(asList(authorID, authorID2), ids);
-  }
-
-  @Test
-  void testFindAllByStreamOfIdsFetchEntityNotPresentInCache() {
-    Fetch fetch = mock(Fetch.class);
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, fetch))
-        .thenReturn(Optional.empty());
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, fetch))
-        .thenReturn(Optional.empty());
-    when(authorRepository.findAll(entityIdsCaptor.capture(), eq(fetch)))
-        .thenReturn(Stream.of(author, author2));
-
-    List<Entity> actual =
-        l1CacheRepositoryDecorator
-            .findAll(Stream.of(authorID, authorID2), fetch)
-            .collect(Collectors.toList());
-    assertEquals(asList(author, author2), actual);
-
-    List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
-    assertEquals(asList(authorID, authorID2), ids);
-  }
-
-  @Test
-  void testFindAllByStreamOfIdsOneCachedOneMissing() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
-        .thenReturn(Optional.of(CacheHit.of(author)));
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, null))
-        .thenReturn(Optional.empty());
-
-    when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author2));
-
-    List<Entity> actual =
-        l1CacheRepositoryDecorator
-            .findAll(Stream.of(authorID, authorID2))
-            .collect(Collectors.toList());
-
-    List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
-    assertEquals(singletonList(authorID2), ids);
-    assertEquals(asList(author, author2), actual);
-  }
-
-  @Configuration
-  static class Config {
-    @Mock private EntityManager entityManager;
-
-    Config() {
-      org.mockito.MockitoAnnotations.initMocks(this);
-    }
-
-    @Bean
-    EntityManager entityManager() {
-      return entityManager;
-    }
+    l1CacheRepositoryDecorator.deleteAll();
+    verify(l1Cache).evictAll(entityType);
+    verify(delegateRepository).deleteAll();
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 }
