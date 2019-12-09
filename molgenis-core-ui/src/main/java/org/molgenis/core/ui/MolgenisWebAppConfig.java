@@ -18,11 +18,15 @@ import freemarker.template.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.core.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
@@ -286,9 +290,26 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     String molgenisFileStoreDirStr =
         Paths.get(appDataRoot.toString(), "data", "filestore").toString();
     File molgenisDataDir = new File(molgenisFileStoreDirStr);
+
     if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
       throw new UncheckedIOException(
           new IOException("failed to create directory: " + molgenisFileStoreDirStr));
+    }
+
+    Set<PosixFilePermission> perms = new HashSet<>();
+    perms.add(PosixFilePermission.OWNER_READ);
+    perms.add(PosixFilePermission.OWNER_WRITE);
+    perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+    perms.add(PosixFilePermission.GROUP_READ);
+    perms.add(PosixFilePermission.GROUP_WRITE);
+    perms.add(PosixFilePermission.GROUP_EXECUTE);
+
+    try {
+      Files.setPosixFilePermissions(molgenisDataDir.toPath(), perms);
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          new IOException("failed to set file permissions: " + molgenisFileStoreDirStr, e));
     }
 
     return new FileStore(molgenisFileStoreDirStr);
