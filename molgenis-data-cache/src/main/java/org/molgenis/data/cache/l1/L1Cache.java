@@ -8,6 +8,7 @@ import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.Cache;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -73,6 +74,14 @@ public class L1Cache implements TransactionListener {
     if (entityCache != null) {
       EntityKey entityKey = EntityKey.create(entityType.getId(), entityId);
       entityCache.putDeletion(entityKey);
+    }
+  }
+
+  void evict(Entity entity) {
+    CombinedEntityCache entityCache = caches.get();
+    if (entityCache != null) {
+      entityCache.evict(
+          Stream.of(EntityKey.create(entity.getEntityType().getId(), entity.getIdValue())));
     }
   }
 

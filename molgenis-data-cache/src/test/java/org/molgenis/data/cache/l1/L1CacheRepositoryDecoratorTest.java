@@ -2,7 +2,6 @@ package org.molgenis.data.cache.l1;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -31,35 +29,43 @@ import org.molgenis.test.AbstractMockitoTest;
 class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
   @Mock private Repository<Entity> delegateRepository;
   @Mock private L1Cache l1Cache;
+  @Mock private L1CacheJanitor l1CacheJanitor;
   private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
 
   @BeforeEach
   public void setUpBeforeEach() {
     when(delegateRepository.getCapabilities()).thenReturn(singleton(CACHEABLE));
-    l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(delegateRepository, l1Cache);
+    l1CacheRepositoryDecorator =
+        new L1CacheRepositoryDecorator(delegateRepository, l1Cache, l1CacheJanitor);
   }
 
   @Test
   void testAdd() {
     Entity entity = mock(Entity.class);
     l1CacheRepositoryDecorator.add(entity);
+    verify(l1CacheJanitor).cleanCacheBeforeAdd(entity);
     verify(l1Cache).put(entity);
     verify(delegateRepository).add(entity);
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testAddStream() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
     Entity entity0 = mock(Entity.class);
     Entity entity1 = mock(Entity.class);
     doAnswer(invocation -> (int) ((Stream<?>) invocation.getArguments()[0]).count())
         .when(delegateRepository)
         .add(any(Stream.class));
+    doAnswer(invocation -> invocation.getArguments()[1])
+        .when(l1CacheJanitor)
+        .cleanCacheBeforeAdd(eq(entityType), any(Stream.class));
     assertEquals(2, l1CacheRepositoryDecorator.add(Stream.of(entity0, entity1)));
     verify(l1Cache).put(entity0);
     verify(l1Cache).put(entity1);
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 
   @Test
@@ -82,6 +88,19 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
     when(l1Cache.get(entityType, entityId, null)).thenReturn(Optional.empty());
     when(delegateRepository.findOneById(entityId)).thenReturn(entity);
     assertEquals(entity, l1CacheRepositoryDecorator.findOneById(entityId));
+    verify(l1Cache).put(entity);
+    verifyNoMoreInteractions(l1Cache, delegateRepository);
+  }
+
+  @Test
+  void testFindOneByIdCacheMissNull() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+    Object entityId = mock(Object.class);
+    when(l1Cache.get(entityType, entityId, null)).thenReturn(Optional.empty());
+    when(delegateRepository.findOneById(entityId)).thenReturn(null);
+    assertNull(l1CacheRepositoryDecorator.findOneById(entityId));
+    verify(l1Cache).putDeletion(entityType, entityId);
     verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
@@ -135,9 +154,8 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
         l1CacheRepositoryDecorator
             .findAll(Stream.of(entityId0, entityId1, entityId2, entityId3))
             .collect(Collectors.toList()));
-    ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(delegateRepository).findAll(entityStreamCaptor.capture());
-    assertEquals(asList(entityId0, entityId3), entityStreamCaptor.getValue().collect(toList()));
+    verify(l1Cache).put(entity0);
+    verify(l1Cache).put(entity3);
     verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
@@ -163,15 +181,14 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
 
     doAnswer(invocation -> Stream.of(entity0, entity3))
         .when(delegateRepository)
-        .findAll(any(Stream.class), eq(fetch));
+        .findAll(any(Stream.class)); // no fetch: see todo in L1CacheRepositoryDecorator
     assertEquals(
         asList(entity0, entity1, entity3),
         l1CacheRepositoryDecorator
             .findAll(Stream.of(entityId0, entityId1, entityId2, entityId3), fetch)
             .collect(Collectors.toList()));
-    ArgumentCaptor<Stream<Object>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(delegateRepository).findAll(entityStreamCaptor.capture(), eq(fetch));
-    assertEquals(asList(entityId0, entityId3), entityStreamCaptor.getValue().collect(toList()));
+    verify(l1Cache).put(entity0);
+    verify(l1Cache).put(entity3);
     verifyNoMoreInteractions(l1Cache, delegateRepository);
   }
 
@@ -179,19 +196,25 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
   void testUpdate() {
     Entity entity = mock(Entity.class);
     l1CacheRepositoryDecorator.update(entity);
+    verify(l1CacheJanitor).cleanCacheBeforeUpdate(entity);
     verify(l1Cache).put(entity);
     verify(delegateRepository).update(entity);
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testUpdateStream() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
     Entity entity0 = mock(Entity.class);
     Entity entity1 = mock(Entity.class);
     doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
         .when(delegateRepository)
         .update(any(Stream.class));
+    doAnswer(invocation -> invocation.getArguments()[1])
+        .when(l1CacheJanitor)
+        .cleanCacheBeforeUpdate(eq(entityType), any(Stream.class));
     l1CacheRepositoryDecorator.update(Stream.of(entity0, entity1));
     verify(l1Cache).put(entity0);
     verify(l1Cache).put(entity1);
@@ -202,19 +225,25 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
   void testDelete() {
     Entity entity = mock(Entity.class);
     l1CacheRepositoryDecorator.delete(entity);
+    verify(l1CacheJanitor).cleanCacheBeforeDelete(entity);
     verify(l1Cache).putDeletion(entity);
     verify(delegateRepository).delete(entity);
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testDeleteStream() {
+    EntityType entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
     Entity entity0 = mock(Entity.class);
     Entity entity1 = mock(Entity.class);
     doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
         .when(delegateRepository)
         .delete(any(Stream.class));
+    doAnswer(invocation -> invocation.getArguments()[1])
+        .when(l1CacheJanitor)
+        .cleanCacheBeforeDelete(eq(entityType), any(Stream.class));
     l1CacheRepositoryDecorator.delete(Stream.of(entity0, entity1));
     verify(l1Cache).putDeletion(entity0);
     verify(l1Cache).putDeletion(entity1);
@@ -228,9 +257,10 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
 
     Object entityId = mock(Object.class);
     l1CacheRepositoryDecorator.deleteById(entityId);
+    verify(l1CacheJanitor).cleanCacheBeforeDeleteById(entityType, entityId);
     verify(l1Cache).putDeletion(entityType, entityId);
     verify(delegateRepository).deleteById(entityId);
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 
   @SuppressWarnings("unchecked")
@@ -244,6 +274,9 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
     doAnswer(invocation -> ((Stream<?>) invocation.getArguments()[0]).count())
         .when(delegateRepository)
         .deleteAll(any(Stream.class));
+    doAnswer(invocation -> invocation.getArguments()[1])
+        .when(l1CacheJanitor)
+        .cleanCacheBeforeDeleteById(eq(entityType), any(Stream.class));
     l1CacheRepositoryDecorator.deleteAll(Stream.of(entityId0, entityId1));
     verify(l1Cache).putDeletion(entityType, entityId0);
     verify(l1Cache).putDeletion(entityType, entityId1);
@@ -256,8 +289,9 @@ class L1CacheRepositoryDecoratorTest extends AbstractMockitoTest {
     when(delegateRepository.getEntityType()).thenReturn(entityType);
 
     l1CacheRepositoryDecorator.deleteAll();
+    verify(l1CacheJanitor).cleanCacheBeforeDeleteAll(entityType);
     verify(l1Cache).evictAll(entityType);
     verify(delegateRepository).deleteAll();
-    verifyNoMoreInteractions(l1Cache, delegateRepository);
+    verifyNoMoreInteractions(l1CacheJanitor, l1Cache, delegateRepository);
   }
 }

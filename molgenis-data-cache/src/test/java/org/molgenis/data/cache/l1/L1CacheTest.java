@@ -93,6 +93,20 @@ class L1CacheTest extends AbstractMockitoTest {
   }
 
   @Test
+  void evict() {
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    Object entityId = mock(Object.class);
+    Entity entity = when(mock(Entity.class).getIdValue()).thenReturn(entityId).getMock();
+    when(entity.getEntityType()).thenReturn(entityType);
+
+    l1Cache.put(entity);
+    l1Cache.evict(entity);
+
+    assertEquals(Optional.empty(), l1Cache.get(entityType, entityId));
+  }
+
+  @Test
   void evictAll() {
     String entityTypeId = "MyEntityTypeId";
     EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
