@@ -599,4 +599,11 @@ public class EntityUtils {
     }
     return isNullValue;
   }
+
+  /** Returns whether two entities have the same identifier and same entity type identifier. */
+  public static boolean isSame(Entity thisEntity, Entity thatEntity) {
+    return thisEntity == thatEntity
+        || thisEntity.getIdValue().equals(thatEntity.getIdValue())
+            && thisEntity.getEntityType().getId().equals(thatEntity.getEntityType().getId());
+  }
 }

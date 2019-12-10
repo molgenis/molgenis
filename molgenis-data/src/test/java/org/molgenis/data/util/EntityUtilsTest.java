@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -859,6 +860,61 @@ class EntityUtilsTest {
         () ->
             EntityUtils.isNullValue(
                 getIsNullValueMockEntity(), getIsNullValueMockAttribute("attribute", COMPOUND)));
+  }
+
+  @Test
+  public void isSame() {
+    String entityTypeId = "MyEntityTypeId";
+    EntityType thisEntityType =
+        when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    EntityType thatEntityType =
+        when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    String entityId = "MyEntityId";
+    Entity thisEntity = mock(Entity.class);
+    when(thisEntity.getEntityType()).thenReturn(thisEntityType);
+    when(thisEntity.getIdValue()).thenReturn(entityId);
+    Entity thatEntity = mock(Entity.class);
+    when(thatEntity.getEntityType()).thenReturn(thatEntityType);
+    when(thatEntity.getIdValue()).thenReturn(entityId);
+    assertTrue(EntityUtils.isSame(thisEntity, thatEntity));
+  }
+
+  @Test
+  public void isSameEquals() {
+    Entity entity = mock(Entity.class);
+    assertTrue(EntityUtils.isSame(entity, entity));
+  }
+
+  @Test
+  public void isSameDifferentEntityId() {
+    String entityTypeId = "MyEntityTypeId";
+    EntityType thisEntityType =
+        when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    EntityType thatEntityType =
+        when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+    Entity thisEntity = mock(Entity.class);
+    when(thisEntity.getEntityType()).thenReturn(thisEntityType);
+    when(thisEntity.getIdValue()).thenReturn("ThisEntityId");
+    Entity thatEntity = mock(Entity.class);
+    when(thatEntity.getEntityType()).thenReturn(thatEntityType);
+    when(thatEntity.getIdValue()).thenReturn("ThatEntityId");
+    assertFalse(EntityUtils.isSame(thisEntity, thatEntity));
+  }
+
+  @Test
+  public void isSameDifferentEntityTypeId() {
+    EntityType thisEntityType =
+        when(mock(EntityType.class).getId()).thenReturn("ThisEntityTypeId").getMock();
+    EntityType thatEntityType =
+        when(mock(EntityType.class).getId()).thenReturn("ThatEntityTypeId").getMock();
+    String entityId = "MyEntityId";
+    Entity thisEntity = mock(Entity.class);
+    when(thisEntity.getEntityType()).thenReturn(thisEntityType);
+    when(thisEntity.getIdValue()).thenReturn(entityId);
+    Entity thatEntity = mock(Entity.class);
+    when(thatEntity.getEntityType()).thenReturn(thatEntityType);
+    when(thatEntity.getIdValue()).thenReturn(entityId);
+    assertFalse(EntityUtils.isSame(thisEntity, thatEntity));
   }
 
   private static Entity getIsNullValueMockEntity() {
