@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.IS_AGGREGATABLE;
@@ -302,6 +304,67 @@ class AttributeTest extends AbstractSystemEntityTest {
     verify(attributeCopy).setVisible(true);
     verify(attributeCopy).setNullableExpression("nullableExpression");
     verify(attributeCopy).setValidationExpression("expression");
+  }
+
+  @Test
+  void testIsInversedBy() {
+    EntityType entityType =
+        when(mock(EntityType.class).getId()).thenReturn("MyEntityTypeId").getMock();
+    EntityType refEntityType = mock(EntityType.class);
+
+    Attribute attribute = factory.create("MyAttributeId");
+    attribute.setName("MyAttributeName");
+    attribute.setEntity(entityType);
+    attribute.setDataType(XREF);
+    attribute.setRefEntity(refEntityType);
+
+    Attribute mappedByAttr = factory.create("MyMappedByAttributeId");
+    mappedByAttr.setName("MyAttributeName");
+    mappedByAttr.setEntity(refEntityType);
+    mappedByAttr.setDataType(ONE_TO_MANY);
+    mappedByAttr.setRefEntity(entityType);
+    mappedByAttr.setMappedBy(attribute);
+
+    when(refEntityType.getAtomicAttributes()).thenReturn(singletonList(mappedByAttr));
+
+    assertTrue(attribute.isInversedBy());
+  }
+
+  @Test
+  void testIsInversedByString() {
+    EntityType entityType = mock(EntityType.class);
+
+    Attribute attribute = factory.create("MyAttributeId");
+    attribute.setEntity(entityType);
+    attribute.setDataType(STRING);
+
+    assertFalse(attribute.isInversedBy());
+  }
+
+  @Test
+  void testIsInversedByDifferentIdentifiers() {
+    EntityType entityType =
+        when(mock(EntityType.class).getId()).thenReturn("MyEntityTypeId").getMock();
+    EntityType otherEntityType =
+        when(mock(EntityType.class).getId()).thenReturn("MyOtherEntityTypeId").getMock();
+    EntityType refEntityType = mock(EntityType.class);
+
+    Attribute attribute = factory.create("MyAttributeId");
+    attribute.setName("MyAttributeName");
+    attribute.setEntity(entityType);
+    attribute.setDataType(XREF);
+    attribute.setRefEntity(refEntityType);
+
+    Attribute mappedByAttr = factory.create("MyMappedByAttributeId");
+    mappedByAttr.setName("MyAttributeName");
+    mappedByAttr.setEntity(refEntityType);
+    mappedByAttr.setDataType(ONE_TO_MANY);
+    mappedByAttr.setRefEntity(otherEntityType);
+    mappedByAttr.setMappedBy(attribute);
+
+    when(refEntityType.getAtomicAttributes()).thenReturn(singletonList(mappedByAttr));
+
+    assertFalse(attribute.isInversedBy());
   }
 
   private EntityType createMockEntityType() {
