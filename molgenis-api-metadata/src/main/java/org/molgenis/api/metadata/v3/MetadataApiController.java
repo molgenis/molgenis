@@ -81,7 +81,7 @@ class MetadataApiController extends ApiController {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
 
     return entityTypeV3Mapper.toEntityTypeResponse(
-        entityType, readEntityTypeRequest.isFlattenAttrs(), readEntityTypeRequest.isI18n());
+        entityType, readEntityTypeRequest.isFlattenAttributes(), readEntityTypeRequest.isI18n());
   }
 
   @Transactional(readOnly = true)
