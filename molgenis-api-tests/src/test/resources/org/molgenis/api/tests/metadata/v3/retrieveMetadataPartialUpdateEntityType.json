@@ -4,7 +4,7 @@
   },
   "data": {
     "id": "v3meta_MyStrings",
-    "label": "My Strings (updated)",
+    "label": "My Strings (updated in english)",
     "package": {
       "links": {
         "self": "${baseUri}/api/data/sys_md_Package/v3meta"
