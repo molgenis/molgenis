@@ -365,7 +365,7 @@ components:
       in: query
       required: false
       schema:
-        type: string
+        type: str
       example: label=q=node
     expandParents:
       name: expandParents
@@ -444,7 +444,7 @@ components:
       properties:
         id:
           type: string
-        package_:
+        package:
           type: string
         idAttribute:
           $ref: "#/components/schemas/Attribute"
@@ -454,7 +454,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Attribute"
-        extends_:
+        extends:
           $ref: "#/components/schemas/EntityType"
         description:
           type: string
@@ -464,7 +464,7 @@ components:
           type: string
         label_i18n:
           $ref: "#/components/schemas/I18nValue"
-        abstract_:
+        abstract:
           type: boolean
         indexingDepth:
           type: integer
@@ -548,13 +548,13 @@ components:
       properties:
         id:
           type: string
-        package_:
+        package:
           type: string
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
-        abstract_:
+        abstract:
           type: string
         entityTypeParent:
           type: string
@@ -565,7 +565,7 @@ components:
     EntityTypePatch:
       type: object
       properties:
-        package_:
+        package:
           type: string
         label:
           $ref: "#/components/schemas/I18nValue"
