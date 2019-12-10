@@ -365,7 +365,7 @@ components:
       in: query
       required: false
       schema:
-        type: str
+        type: string
       example: label=q=node
     expandParents:
       name: expandParents
