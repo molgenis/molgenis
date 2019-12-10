@@ -1,7 +1,7 @@
 package org.molgenis.api.metadata.v3.model;
 
 public class ReadEntityTypeRequest {
-  private boolean flattenAttrs;
+  private boolean flattenAttributes;
   private boolean i18n;
 
   public boolean isI18n() {
@@ -12,11 +12,11 @@ public class ReadEntityTypeRequest {
     this.i18n = i18n;
   }
 
-  public boolean isFlattenAttrs() {
-    return flattenAttrs;
+  public boolean isFlattenAttributes() {
+    return flattenAttributes;
   }
 
-  public void setFlattenAttrs(boolean flattenAttrs) {
-    this.flattenAttrs = flattenAttrs;
+  public void setFlattenAttributes(boolean flattenAttrs) {
+    this.flattenAttributes = flattenAttrs;
   }
 }

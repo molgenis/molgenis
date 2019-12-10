@@ -356,7 +356,7 @@ class AttributeV3Mapper {
         case "name":
           attribute.setName(getStringValue(entry.getValue()));
           break;
-        case "sequenceNumber":
+        case "sequenceNr":
           setSequenceNumber(attribute, entry);
           break;
         case "type":

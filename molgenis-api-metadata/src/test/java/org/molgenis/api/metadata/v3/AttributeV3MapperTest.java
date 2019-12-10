@@ -261,7 +261,7 @@ class AttributeV3MapperTest extends AbstractMockitoTest {
 
     Map<String, Object> attributeValueMap = new HashMap<>();
     attributeValueMap.put("id", 1);
-    attributeValueMap.put("sequenceNumber", 1);
+    attributeValueMap.put("sequenceNr", 1);
     EntityType entityType = mock(EntityType.class);
     attributeV3Mapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
 

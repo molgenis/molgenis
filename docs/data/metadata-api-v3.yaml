@@ -28,7 +28,6 @@ paths:
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
-        - $ref: '#/components/parameters/flattenAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkAttributeCollectionResponse'
@@ -86,6 +85,7 @@ paths:
       summary: Retrieves the metadata of an entitytype.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
+        - $ref: '#/components/parameters/flattenAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkEntityTypeResponse'
@@ -171,7 +171,6 @@ paths:
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
-        - $ref: '#/components/parameters/includeParentAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkAttributeCollectionResponse'
@@ -331,7 +330,7 @@ components:
         type: string
       example: my_column
     number:
-      name: number
+      name: page
       description: Page number
       in: query
       required: false
@@ -376,13 +375,6 @@ components:
         type: boolean
     flattenAttributes:
       name: flattenAttributes
-      description: TODO
-      in: query
-      required: false
-      schema:
-        type: boolean
-    includeParentAttributes:
-      name: includeParentAttributes
       description: TODO
       in: query
       required: false
@@ -444,7 +436,7 @@ components:
       properties:
         id:
           type: string
-        package_:
+        package:
           type: string
         idAttribute:
           $ref: "#/components/schemas/Attribute"
@@ -454,7 +446,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Attribute"
-        extends_:
+        extends:
           $ref: "#/components/schemas/EntityType"
         description:
           type: string
@@ -464,7 +456,7 @@ components:
           type: string
         label_i18n:
           $ref: "#/components/schemas/I18nValue"
-        abstract_:
+        abstract:
           type: boolean
         indexingDepth:
           type: integer
@@ -548,13 +540,13 @@ components:
       properties:
         id:
           type: string
-        package_:
+        package:
           type: string
         label:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
-        abstract_:
+        abstract:
           type: string
         entityTypeParent:
           type: string
@@ -565,7 +557,7 @@ components:
     EntityTypePatch:
       type: object
       properties:
-        package_:
+        package:
           type: string
         label:
           $ref: "#/components/schemas/I18nValue"

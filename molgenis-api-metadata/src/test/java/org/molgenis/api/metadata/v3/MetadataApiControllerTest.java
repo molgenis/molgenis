@@ -95,7 +95,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     boolean i18n = false;
 
     ReadEntityTypeRequest readEntityTypeRequest = new ReadEntityTypeRequest();
-    readEntityTypeRequest.setFlattenAttrs(flattenAttrs);
+    readEntityTypeRequest.setFlattenAttributes(flattenAttrs);
     readEntityTypeRequest.setI18n(i18n);
 
     EntityType entityType = mock(EntityType.class);
