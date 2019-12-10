@@ -171,7 +171,6 @@ paths:
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
-        - $ref: '#/components/parameters/includeParentAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkAttributeCollectionResponse'
@@ -376,13 +375,6 @@ components:
         type: boolean
     flattenAttributes:
       name: flattenAttributes
-      description: TODO
-      in: query
-      required: false
-      schema:
-        type: boolean
-    includeParentAttributes:
-      name: includeParentAttributes
       description: TODO
       in: query
       required: false
