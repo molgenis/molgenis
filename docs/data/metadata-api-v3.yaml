@@ -28,7 +28,6 @@ paths:
         - $ref: '#/components/parameters/size'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sort'
-        - $ref: '#/components/parameters/flattenAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkAttributeCollectionResponse'
@@ -86,6 +85,7 @@ paths:
       summary: Retrieves the metadata of an entitytype.
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
+        - $ref: '#/components/parameters/flattenAttributes'
       responses:
         '200':
           $ref: '#/components/responses/OkEntityTypeResponse'
