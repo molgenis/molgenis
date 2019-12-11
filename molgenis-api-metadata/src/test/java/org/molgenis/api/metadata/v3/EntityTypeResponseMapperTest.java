@@ -28,7 +28,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 class EntityTypeResponseMapperTest extends AbstractMockitoTest {
 
-  @Mock private AttributeV3Mapper attributeV3Mapper;
+  @Mock private AttributeResponseMapper attributeV3Mapper;
   private EntityTypeResponseMapper entityTypeV3Mapper;
 
   @BeforeEach

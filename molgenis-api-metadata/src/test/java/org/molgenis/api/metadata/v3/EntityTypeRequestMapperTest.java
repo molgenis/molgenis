@@ -31,14 +31,14 @@ import org.molgenis.test.AbstractMockitoTest;
 
 class EntityTypeRequestMapperTest extends AbstractMockitoTest {
   @Mock private EntityTypeFactory entityTypeFactory;
-  @Mock private AttributeV3Mapper attributeV3Mapper;
+  @Mock private AttributeRequestMapper attributeRequestMapper;
   @Mock private MetaDataService metaDataService;
   private EntityTypeRequestMapper entityTypeRequestMapper;
 
   @BeforeEach
   void setUpBeforeEach() {
     entityTypeRequestMapper =
-        new EntityTypeRequestMapper(entityTypeFactory, attributeV3Mapper, metaDataService);
+        new EntityTypeRequestMapper(entityTypeFactory, attributeRequestMapper, metaDataService);
   }
 
   @Test
@@ -92,7 +92,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
     valueMap.put("label", i18n);
     valueMap.put("description", i18n);
 
-    when(attributeV3Mapper.mapI18nValue(i18n))
+    when(attributeRequestMapper.mapI18nValue(i18n))
         .thenReturn(
             I18nValue.builder()
                 .setDefaultValue("default")
@@ -122,7 +122,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
     Attribute attr2 = mock(Attribute.class);
     attrs.put("1", attr1);
     attrs.put("2", attr2);
-    when(attributeV3Mapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
+    when(attributeRequestMapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
         .thenReturn(attrs);
 
     entityTypeRequestMapper.toEntityType(entityType, valueMap);

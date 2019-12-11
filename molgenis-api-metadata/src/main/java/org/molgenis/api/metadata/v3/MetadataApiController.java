@@ -48,18 +48,21 @@ class MetadataApiController extends ApiController {
   private final MetadataApiService metadataApiService;
   private final EntityTypeResponseMapper entityTypeResponseMapper;
   private final EntityTypeRequestMapper entityTypeRequestMapper;
-  private final AttributeV3Mapper attributeV3Mapper;
+  private final AttributeResponseMapper attributeResponseMapper;
+  private final AttributeRequestMapper attributeRequestMapper;
 
   MetadataApiController(
       MetadataApiService metadataApiService,
       EntityTypeResponseMapper entityTypeResponseMapper,
       EntityTypeRequestMapper entityTypeRequestMapper,
-      AttributeV3Mapper attributeV3Mapper) {
+      AttributeResponseMapper attributeResponseMapper,
+      AttributeRequestMapper attributeRequestMapper) {
     super(API_META_ID, 3);
     this.metadataApiService = requireNonNull(metadataApiService);
     this.entityTypeResponseMapper = requireNonNull(entityTypeResponseMapper);
     this.entityTypeRequestMapper = requireNonNull(entityTypeRequestMapper);
-    this.attributeV3Mapper = requireNonNull(attributeV3Mapper);
+    this.attributeResponseMapper = requireNonNull(attributeResponseMapper);
+    this.attributeRequestMapper = requireNonNull(attributeRequestMapper);
   }
 
   @Transactional(readOnly = true)
@@ -93,7 +96,7 @@ class MetadataApiController extends ApiController {
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeId") String attributeId) {
     Attribute attribute = metadataApiService.findAttribute(entityTypeId, attributeId);
-    return attributeV3Mapper.mapAttribute(attribute, false);
+    return attributeResponseMapper.mapAttribute(attribute, false);
   }
 
   @Transactional
@@ -124,7 +127,7 @@ class MetadataApiController extends ApiController {
         metadataApiService.findAttributes(
             entityTypeId, readAttributesRequest.getQ().orElse(null), sort, size, page);
 
-    return attributeV3Mapper.mapAttributes(attributes, size, page, attributes.getTotal());
+    return attributeResponseMapper.mapAttributes(attributes, size, page, attributes.getTotal());
   }
 
   @Transactional
@@ -133,7 +136,7 @@ class MetadataApiController extends ApiController {
       @PathVariable("entityTypeId") String entityTypeId,
       @Valid @RequestBody CreateAttributeRequest createAttributeRequest) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
-    Attribute attribute = attributeV3Mapper.toAttribute(createAttributeRequest, entityType);
+    Attribute attribute = attributeRequestMapper.toAttribute(createAttributeRequest, entityType);
     entityType.addAttribute(attribute);
 
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
@@ -180,7 +183,8 @@ class MetadataApiController extends ApiController {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
     Attribute currentAttribute = entityType.getOwnAttributeById(attributeId);
 
-    Attribute updatedAttribute = attributeV3Mapper.toAttribute(createAttributeRequest, entityType);
+    Attribute updatedAttribute =
+        attributeRequestMapper.toAttribute(createAttributeRequest, entityType);
     updatedAttribute.setIdentifier(attributeId);
     if (updatedAttribute.getSequenceNumber() == null) {
       updatedAttribute.setSequenceNumber(currentAttribute.getSequenceNumber());
@@ -201,7 +205,7 @@ class MetadataApiController extends ApiController {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
     Attribute attribute = entityType.getOwnAttributeById(attributeId);
 
-    attributeV3Mapper.updateAttribute(attribute, attributeValues);
+    attributeRequestMapper.updateAttribute(attribute, attributeValues);
 
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);

@@ -30,10 +30,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 class EntityTypeResponseMapper {
 
   private static final String ATTRIBUTES = "attributes";
-  private final AttributeV3Mapper attributeV3Mapper;
+  private final AttributeResponseMapper attributeResponseMapper;
 
-  EntityTypeResponseMapper(AttributeV3Mapper attributeV3Mapper) {
-    this.attributeV3Mapper = requireNonNull(attributeV3Mapper);
+  EntityTypeResponseMapper(AttributeResponseMapper attributeResponseMapper) {
+    this.attributeResponseMapper = requireNonNull(attributeResponseMapper);
   }
 
   EntityTypesResponse toEntityTypesResponse(
@@ -89,8 +89,8 @@ class EntityTypeResponseMapper {
       if (expandAttrs) {
         attributesResponseBuilder.setItems(
             flattenAttrs
-                ? attributeV3Mapper.mapInternal(entityType.getAllAttributes(), i18n)
-                : attributeV3Mapper.mapInternal(entityType.getOwnAllAttributes(), i18n));
+                ? attributeResponseMapper.mapInternal(entityType.getAllAttributes(), i18n)
+                : attributeResponseMapper.mapInternal(entityType.getOwnAllAttributes(), i18n));
       }
       builder.setAttributes(attributesResponseBuilder.build());
       builder.setAbstract(entityType.isAbstract());

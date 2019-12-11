@@ -46,7 +46,8 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   @Mock private MetadataApiService metadataApiService;
   @Mock private EntityTypeResponseMapper entityTypeResponseMapper;
   @Mock private EntityTypeRequestMapper entityTypeRequestMapper;
-  @Mock private AttributeV3Mapper attributeV3Mapper;
+  @Mock private AttributeResponseMapper attributeResponseMapper;
+  @Mock private AttributeRequestMapper attributeRequestMapper;
   @Mock private MessageSource messageSource;
   private MetadataApiController metadataApiController;
 
@@ -57,7 +58,8 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
             metadataApiService,
             entityTypeResponseMapper,
             entityTypeRequestMapper,
-            attributeV3Mapper);
+            attributeResponseMapper,
+            attributeRequestMapper);
     RequestContextHolder.setRequestAttributes(
         new ServletRequestAttributes(new MockHttpServletRequest()));
     MessageSourceHolder.setMessageSource(messageSource);
@@ -67,7 +69,9 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
   void testMetadataApiController() {
     assertThrows(
         NullPointerException.class,
-        () -> new MetadataApiController(null, null, null, attributeV3Mapper));
+        () ->
+            new MetadataApiController(
+                null, null, null, attributeResponseMapper, attributeRequestMapper));
   }
 
   @Test
@@ -124,7 +128,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     when(metadataApiService.findAttribute(entityTypeId, attributeId)).thenReturn(attribute);
 
     AttributeResponse attributeResponse = mock(AttributeResponse.class);
-    when(attributeV3Mapper.mapAttribute(attribute, false)).thenReturn(attributeResponse);
+    when(attributeResponseMapper.mapAttribute(attribute, false)).thenReturn(attributeResponse);
     assertEquals(attributeResponse, metadataApiController.getAttribute(entityTypeId, attributeId));
   }
 
@@ -161,7 +165,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
         .thenReturn(attributes);
 
     AttributesResponse attributesResponse = mock(AttributesResponse.class);
-    when(attributeV3Mapper.mapAttributes(attributes, size, page, total))
+    when(attributeResponseMapper.mapAttributes(attributes, size, page, total))
         .thenReturn(attributesResponse);
 
     assertEquals(
@@ -180,7 +184,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     when(metadataApiService.findEntityType(entityTypeId)).thenReturn(entityType);
 
     Attribute newAttribute = mock(Attribute.class);
-    when(attributeV3Mapper.toAttribute(createAttributeRequest, entityType))
+    when(attributeRequestMapper.toAttribute(createAttributeRequest, entityType))
         .thenReturn(newAttribute);
 
     EntityType jobEntityType = mock(EntityType.class);
@@ -267,7 +271,7 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
 
     Attribute newAttribute =
         when(mock(Attribute.class).getIdentifier()).thenReturn(attibuteId).getMock();
-    when(attributeV3Mapper.toAttribute(createAttributeRequest, entityType))
+    when(attributeRequestMapper.toAttribute(createAttributeRequest, entityType))
         .thenReturn(newAttribute);
 
     EntityType jobEntityType = mock(EntityType.class);

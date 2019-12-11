@@ -29,15 +29,15 @@ import org.springframework.stereotype.Component;
 public class EntityTypeRequestMapper {
 
   private final EntityTypeFactory entityTypeFactory;
-  private final AttributeV3Mapper attributeV3Mapper;
+  private final AttributeRequestMapper attributeRequestMapper;
   private final MetaDataService metaDataService;
 
   EntityTypeRequestMapper(
       EntityTypeFactory entityTypeFactory,
-      AttributeV3Mapper attributeV3Mapper,
+      AttributeRequestMapper attributeRequestMapper,
       MetaDataService metaDataService) {
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
-    this.attributeV3Mapper = requireNonNull(attributeV3Mapper);
+    this.attributeRequestMapper = requireNonNull(attributeRequestMapper);
     this.metaDataService = requireNonNull(metaDataService);
   }
 
@@ -68,7 +68,7 @@ public class EntityTypeRequestMapper {
     processI18nLabel(entityTypeRequest.getLabel(), entityType);
     processI18nDescription(entityTypeRequest.getDescription(), entityType);
     List<Attribute> ownAttributes =
-        attributeV3Mapper.toAttributes(
+        attributeRequestMapper.toAttributes(
             entityTypeRequest.getAttributes(), entityTypeRequest, entityType);
     entityType.setOwnAllAttributes(ownAttributes);
     Boolean abstractEntityType = entityTypeRequest.getAbstract();
@@ -117,11 +117,11 @@ public class EntityTypeRequestMapper {
         entityType.setExtends(parent);
         break;
       case "label":
-        I18nValue label = attributeV3Mapper.mapI18nValue(entry.getValue());
+        I18nValue label = attributeRequestMapper.mapI18nValue(entry.getValue());
         processI18nLabel(label, entityType);
         break;
       case "description":
-        I18nValue description = attributeV3Mapper.mapI18nValue(entry.getValue());
+        I18nValue description = attributeRequestMapper.mapI18nValue(entry.getValue());
         processI18nDescription(description, entityType);
         break;
       case "attributes":
@@ -155,7 +155,7 @@ public class EntityTypeRequestMapper {
 
   private Iterable<Attribute> mapAttributes(
       List<Map<String, Object>> values, EntityType entityType) {
-    return attributeV3Mapper.toAttributes(values, entityType).values();
+    return attributeRequestMapper.toAttributes(values, entityType).values();
   }
 
   private void processSelfReferencingAttributes(
