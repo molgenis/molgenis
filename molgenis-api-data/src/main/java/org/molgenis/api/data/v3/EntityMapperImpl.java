@@ -2,6 +2,7 @@ package org.molgenis.api.data.v3;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.support.PageUtils.getPageResponse;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -15,7 +16,6 @@ import org.molgenis.api.data.v3.model.EntitiesResponse.Builder;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.support.LinksUtils;
 import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
 import org.molgenis.data.Entity;
@@ -56,15 +56,9 @@ public class EntityMapperImpl implements EntityMapper {
   private void setPageResponse(EntityCollection entityCollection, Builder builder) {
     Page page = entityCollection.getPage();
     if (page != null) {
-      PageResponse pageResponse =
-          PageResponse.create(
-              entityCollection.getSize(),
-              page.getTotal(),
-              page.getTotal() > 0
-                  ? (int) Math.ceil(page.getTotal() / (double) page.getPageSize())
-                  : 0,
-              page.getOffset() / page.getPageSize());
-      builder.setPage(pageResponse);
+      builder.setPage(
+          getPageResponse(
+              entityCollection.getSize(), page.getOffset(), page.getTotal(), page.getPageSize()));
     }
   }
 
