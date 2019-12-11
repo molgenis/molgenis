@@ -1,8 +1,6 @@
 package org.molgenis.metadata.manager.controller;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
@@ -14,13 +12,11 @@ import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -82,14 +78,5 @@ public class MetadataManagerController extends VuePluginController {
   @GetMapping(value = "/create/attribute", produces = "application/json")
   public EditorAttributeResponse createEditorAttribute() {
     return metadataManagerService.createEditorAttribute();
-  }
-
-  @ResponseBody
-  @ResponseStatus(INTERNAL_SERVER_ERROR)
-  @ExceptionHandler(RuntimeException.class)
-  public ErrorMessageResponse handleRuntimeException(RuntimeException e) {
-    LOG.error("", e);
-    return new ErrorMessageResponse(
-        singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
   }
 }

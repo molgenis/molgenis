@@ -71,7 +71,9 @@ public class ImportWriter {
             new EmxDataProvider(job, entityManager),
             toMetadataMode(job.getMetadataAction()),
             toDataMode(job.getDataAction()));
-    permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
+    if (job.getMetadataAction() != MetadataAction.IGNORE) {
+      permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
+    }
 
     persistResult
         .getNrPersistedEntitiesMap()

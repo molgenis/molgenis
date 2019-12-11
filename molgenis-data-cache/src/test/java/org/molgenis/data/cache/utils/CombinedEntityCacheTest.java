@@ -4,6 +4,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.cache.Cache;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 
@@ -47,8 +49,20 @@ class CombinedEntityCacheTest extends AbstractMockitoTest {
   void getIfPresentIntegerIdEntityPresentInCache() {
     when(cache.getIfPresent(EntityKey.create("TestEntity", 123)))
         .thenReturn(CacheHit.of(dehydratedEntity));
-    when(entityHydration.hydrate(dehydratedEntity, entityType)).thenReturn(entity);
+    when(entityHydration.hydrate(dehydratedEntity, entityType, null)).thenReturn(entity);
     assertSame(
         entityCache.getIfPresent(entityType, 123).get().getValue(), CacheHit.of(entity).getValue());
+  }
+
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
+  @Test
+  void getIfPresentFetchIntegerIdEntityPresentInCache() {
+    Fetch fetch = mock(Fetch.class);
+    when(cache.getIfPresent(EntityKey.create("TestEntity", 123)))
+        .thenReturn(CacheHit.of(dehydratedEntity));
+    when(entityHydration.hydrate(dehydratedEntity, entityType, fetch)).thenReturn(entity);
+    assertSame(
+        entityCache.getIfPresent(entityType, 123, fetch).get().getValue(),
+        CacheHit.of(entity).getValue());
   }
 }
