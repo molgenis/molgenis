@@ -5,6 +5,8 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,6 +37,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.meta.model.Attribute;
@@ -217,7 +220,7 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   void testFindOneByIdReturnsEntity() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
         .thenReturn(Optional.of(CacheHit.of(author)));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertEquals(author, actualEntity);
@@ -227,7 +230,7 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   void testFindOneByIdReturnsEmptyCacheHit() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
         .thenReturn(Optional.of(CacheHit.empty()));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertNull(actualEntity);
@@ -245,9 +248,22 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
+  void testFindOneByIdFetchReturnsEntity() {
+    Fetch fetch = mock(Fetch.class);
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, fetch))
+        .thenReturn(Optional.of(CacheHit.of(author)));
+    Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID, fetch);
+    assertEquals(author, actualEntity);
+
+    verify(authorRepository, never()).findOneById(Mockito.any());
+  }
+
+  @Test
   void testFindAllByStreamOfIdsEntityNotPresentInCache() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
+        .thenReturn(Optional.empty());
+    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, null))
+        .thenReturn(Optional.empty());
     when(authorRepository.findAll(entityIdsCaptor.capture()))
         .thenReturn(Stream.of(author, author2));
 
@@ -262,10 +278,31 @@ class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
+  void testFindAllByStreamOfIdsFetchEntityNotPresentInCache() {
+    Fetch fetch = mock(Fetch.class);
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, fetch))
+        .thenReturn(Optional.empty());
+    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, fetch))
+        .thenReturn(Optional.empty());
+    when(authorRepository.findAll(entityIdsCaptor.capture(), eq(fetch)))
+        .thenReturn(Stream.of(author, author2));
+
+    List<Entity> actual =
+        l1CacheRepositoryDecorator
+            .findAll(Stream.of(authorID, authorID2), fetch)
+            .collect(Collectors.toList());
+    assertEquals(asList(author, author2), actual);
+
+    List<Object> ids = entityIdsCaptor.getValue().collect(Collectors.toList());
+    assertEquals(asList(authorID, authorID2), ids);
+  }
+
+  @Test
   void testFindAllByStreamOfIdsOneCachedOneMissing() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData, null))
         .thenReturn(Optional.of(CacheHit.of(author)));
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
+    when(l1Cache.get(authorEntityName, authorID2, authorMetaData, null))
+        .thenReturn(Optional.empty());
 
     when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author2));
 
