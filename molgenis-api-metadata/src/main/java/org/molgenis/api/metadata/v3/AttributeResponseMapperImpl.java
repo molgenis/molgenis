@@ -62,7 +62,7 @@ class AttributeResponseMapperImpl implements AttributeResponseMapper {
         attributes.getAttributes().stream()
             .map(attribute -> this.toAttributeResponse(attribute, false))
             .collect(toList()),
-        PageResponse.create(size, total, total / size, number));
+        PageResponse.create(size, total, number));
   }
 
   @Override

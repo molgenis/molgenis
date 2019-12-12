@@ -99,7 +99,7 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
                     new URI("http://localhost/api/metadata/MyEntityType/attributes?page=1"),
                     new URI("http://localhost/api/metadata/MyEntityType/attributes?page=2")))
             .setItems(ImmutableList.of(attributeResponse))
-            .setPage(PageResponse.create(1, 5, 5, 1))
+            .setPage(PageResponse.create(1, 5, 1))
             .build();
 
     assertEquals(

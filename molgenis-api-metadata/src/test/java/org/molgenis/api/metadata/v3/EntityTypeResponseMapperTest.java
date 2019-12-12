@@ -85,7 +85,7 @@ class EntityTypeResponseMapperTest extends AbstractMockitoTest {
                     new URI("http://localhost/api/metadata?page=1"),
                     new URI("http://localhost/api/metadata?page=2")))
             .setItems(singletonList(entityTypeResponse))
-            .setPage(PageResponse.create(size, total, 5, number))
+            .setPage(PageResponse.create(size, total, number))
             .build();
     assertEquals(
         entityTypesResponse, entityTypeV3Mapper.toEntityTypesResponse(entityTypes, size, number));
