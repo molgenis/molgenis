@@ -29,11 +29,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class EntityTypeResponseMapperTest extends AbstractMockitoTest {
 
   @Mock private AttributeResponseMapper attributeV3Mapper;
-  private EntityTypeResponseMapper entityTypeV3Mapper;
+  private EntityTypeResponseMapperImpl entityTypeV3Mapper;
 
   @BeforeEach
   void setUpBeforeEach() {
-    entityTypeV3Mapper = new EntityTypeResponseMapper(attributeV3Mapper);
+    entityTypeV3Mapper = new EntityTypeResponseMapperImpl(attributeV3Mapper);
   }
 
   @Test
@@ -88,8 +88,7 @@ class EntityTypeResponseMapperTest extends AbstractMockitoTest {
             .setPage(PageResponse.create(size, total, 5, number))
             .build();
     assertEquals(
-        entityTypesResponse,
-        entityTypeV3Mapper.toEntityTypesResponse(entityTypes, size, number, total));
+        entityTypesResponse, entityTypeV3Mapper.toEntityTypesResponse(entityTypes, size, number));
   }
 
   @Test

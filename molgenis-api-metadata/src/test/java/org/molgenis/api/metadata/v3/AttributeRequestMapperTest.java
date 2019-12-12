@@ -49,12 +49,12 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
   @Mock private EntityManager entityManager;
   @Mock private EntityTypeMetadata entityTypeMetadata;
 
-  private AttributeRequestMapper attributeRequestMapper;
+  private AttributeRequestMapperImpl attributeRequestMapper;
 
   @BeforeEach
   void setUpBeforeEach() {
     attributeRequestMapper =
-        new AttributeRequestMapper(
+        new AttributeRequestMapperImpl(
             attributeFactory,
             metaDataService,
             sortMapper,
@@ -67,7 +67,7 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
   void testAttributeV3Mapper() {
     assertThrows(
         NullPointerException.class,
-        () -> new AttributeRequestMapper(null, null, null, null, null, null));
+        () -> new AttributeRequestMapperImpl(null, null, null, null, null, null));
   }
 
   @Test

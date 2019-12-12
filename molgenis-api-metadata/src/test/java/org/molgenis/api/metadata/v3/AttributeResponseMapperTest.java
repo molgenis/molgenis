@@ -33,16 +33,16 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
 
   @Mock private MetaDataService metaDataService;
 
-  private AttributeResponseMapper attributeResponseMapper;
+  private AttributeResponseMapperImpl attributeResponseMapper;
 
   @BeforeEach
   void setUpBeforeEach() {
-    attributeResponseMapper = new AttributeResponseMapper(metaDataService);
+    attributeResponseMapper = new AttributeResponseMapperImpl(metaDataService);
   }
 
   @Test
   void testAttributeV3Mapper() {
-    assertThrows(NullPointerException.class, () -> new AttributeResponseMapper(null));
+    assertThrows(NullPointerException.class, () -> new AttributeResponseMapperImpl(null));
   }
 
   @Test
@@ -104,8 +104,8 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
 
     assertEquals(
         attributesResponse,
-        attributeResponseMapper.mapAttributes(
-            Attributes.create(ImmutableList.of(attribute), 5), 1, 1, 5));
+        attributeResponseMapper.toAttributesResponse(
+            Attributes.create(ImmutableList.of(attribute), 5), 1, 1));
   }
 
   @Test
@@ -167,6 +167,6 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
                     null))
             .setData(attributeResponseData)
             .build();
-    assertEquals(attributeResponse, attributeResponseMapper.mapAttribute(attribute, true));
+    assertEquals(attributeResponse, attributeResponseMapper.toAttributeResponse(attribute, true));
   }
 }

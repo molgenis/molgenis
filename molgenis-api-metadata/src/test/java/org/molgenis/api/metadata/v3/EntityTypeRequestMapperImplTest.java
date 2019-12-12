@@ -1,7 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -29,16 +28,16 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.test.AbstractMockitoTest;
 
-class EntityTypeRequestMapperTest extends AbstractMockitoTest {
+class EntityTypeRequestMapperImplTest extends AbstractMockitoTest {
   @Mock private EntityTypeFactory entityTypeFactory;
-  @Mock private AttributeRequestMapper attributeRequestMapper;
+  @Mock private AttributeRequestMapperImpl attributeRequestMapper;
   @Mock private MetaDataService metaDataService;
   private EntityTypeRequestMapper entityTypeRequestMapper;
 
   @BeforeEach
   void setUpBeforeEach() {
     entityTypeRequestMapper =
-        new EntityTypeRequestMapper(entityTypeFactory, attributeRequestMapper, metaDataService);
+        new EntityTypeRequestMapperImpl(entityTypeFactory, attributeRequestMapper, metaDataService);
   }
 
   @Test
@@ -50,7 +49,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
 
     assertThrows(
         ReadOnlyFieldException.class,
-        () -> entityTypeRequestMapper.toEntityType(entityType, valueMap));
+        () -> entityTypeRequestMapper.updateEntityType(entityType, valueMap));
   }
 
   @Test
@@ -61,7 +60,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
 
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("package", "pack1");
-    entityTypeRequestMapper.toEntityType(entityType, valueMap);
+    entityTypeRequestMapper.updateEntityType(entityType, valueMap);
 
     verify(entityType).setPackage(pack);
   }
@@ -74,7 +73,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
     Map<String, Object> valueMap = new HashMap<>();
     valueMap.put("extends", "parent");
 
-    entityTypeRequestMapper.toEntityType(entityType, valueMap);
+    entityTypeRequestMapper.updateEntityType(entityType, valueMap);
 
     verify(entityType).setExtends(parent);
   }
@@ -92,14 +91,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
     valueMap.put("label", i18n);
     valueMap.put("description", i18n);
 
-    when(attributeRequestMapper.mapI18nValue(i18n))
-        .thenReturn(
-            I18nValue.builder()
-                .setDefaultValue("default")
-                .setTranslations(singletonMap("nl", "nederlands"))
-                .build());
-
-    entityTypeRequestMapper.toEntityType(entityType, valueMap);
+    entityTypeRequestMapper.updateEntityType(entityType, valueMap);
 
     assertAll(
         () -> verify(entityType).setLabel("default"),
@@ -125,7 +117,7 @@ class EntityTypeRequestMapperTest extends AbstractMockitoTest {
     when(attributeRequestMapper.toAttributes(Arrays.asList(attrMap1, attrMap2), entityType))
         .thenReturn(attrs);
 
-    entityTypeRequestMapper.toEntityType(entityType, valueMap);
+    entityTypeRequestMapper.updateEntityType(entityType, valueMap);
 
     verify(entityType).setOwnAllAttributes(attrs.values());
   }

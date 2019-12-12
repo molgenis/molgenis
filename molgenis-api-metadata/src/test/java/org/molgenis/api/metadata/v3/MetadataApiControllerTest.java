@@ -44,9 +44,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class MetadataApiControllerTest extends AbstractMockitoTest {
 
   @Mock private MetadataApiService metadataApiService;
-  @Mock private EntityTypeResponseMapper entityTypeResponseMapper;
+  @Mock private EntityTypeResponseMapperImpl entityTypeResponseMapper;
   @Mock private EntityTypeRequestMapper entityTypeRequestMapper;
-  @Mock private AttributeResponseMapper attributeResponseMapper;
+  @Mock private AttributeResponseMapperImpl attributeResponseMapper;
   @Mock private AttributeRequestMapper attributeRequestMapper;
   @Mock private MessageSource messageSource;
   private MetadataApiController metadataApiController;
@@ -87,12 +87,11 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     readEntityTypesRequest.setSort(sort);
     readEntityTypesRequest.setQ(query);
 
-    int total = 3;
-    EntityTypes entityTypes = when(mock(EntityTypes.class).getTotal()).thenReturn(total).getMock();
+    EntityTypes entityTypes = mock(EntityTypes.class);
     when(metadataApiService.findEntityTypes(query, sort, size, page)).thenReturn(entityTypes);
 
     EntityTypesResponse entityTypesResponse = mock(EntityTypesResponse.class);
-    when(entityTypeResponseMapper.toEntityTypesResponse(entityTypes, size, page, total))
+    when(entityTypeResponseMapper.toEntityTypesResponse(entityTypes, size, page))
         .thenReturn(entityTypesResponse);
 
     assertEquals(entityTypesResponse, metadataApiController.getEntityTypes(readEntityTypesRequest));
@@ -128,7 +127,8 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     when(metadataApiService.findAttribute(entityTypeId, attributeId)).thenReturn(attribute);
 
     AttributeResponse attributeResponse = mock(AttributeResponse.class);
-    when(attributeResponseMapper.mapAttribute(attribute, false)).thenReturn(attributeResponse);
+    when(attributeResponseMapper.toAttributeResponse(attribute, false))
+        .thenReturn(attributeResponse);
     assertEquals(attributeResponse, metadataApiController.getAttribute(entityTypeId, attributeId));
   }
 
@@ -159,13 +159,12 @@ class MetadataApiControllerTest extends AbstractMockitoTest {
     readAttributesRequest.setSize(size);
     readAttributesRequest.setPage(page);
 
-    int total = 3;
-    Attributes attributes = when(mock(Attributes.class).getTotal()).thenReturn(total).getMock();
+    Attributes attributes = mock(Attributes.class);
     when(metadataApiService.findAttributes(entityTypeId, query, sort, size, page))
         .thenReturn(attributes);
 
     AttributesResponse attributesResponse = mock(AttributesResponse.class);
-    when(attributeResponseMapper.mapAttributes(attributes, size, page, total))
+    when(attributeResponseMapper.toAttributesResponse(attributes, size, page))
         .thenReturn(attributesResponse);
 
     assertEquals(

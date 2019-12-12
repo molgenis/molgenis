@@ -75,8 +75,7 @@ class MetadataApiController extends ApiController {
     EntityTypes entityTypes =
         metadataApiService.findEntityTypes(entitiesRequest.getQ().orElse(null), sort, size, page);
 
-    return entityTypeResponseMapper.toEntityTypesResponse(
-        entityTypes, size, page, entityTypes.getTotal());
+    return entityTypeResponseMapper.toEntityTypesResponse(entityTypes, size, page);
   }
 
   @Transactional(readOnly = true)
@@ -96,12 +95,12 @@ class MetadataApiController extends ApiController {
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeId") String attributeId) {
     Attribute attribute = metadataApiService.findAttribute(entityTypeId, attributeId);
-    return attributeResponseMapper.mapAttribute(attribute, false);
+    return attributeResponseMapper.toAttributeResponse(attribute, false);
   }
 
   @Transactional
   @PostMapping
-  public ResponseEntity createEntityType(
+  public ResponseEntity<Void> createEntityType(
       @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeRequestMapper.toEntityType(createEntityTypeRequest);
     metadataApiService.createEntityType(entityType);
@@ -127,12 +126,12 @@ class MetadataApiController extends ApiController {
         metadataApiService.findAttributes(
             entityTypeId, readAttributesRequest.getQ().orElse(null), sort, size, page);
 
-    return attributeResponseMapper.mapAttributes(attributes, size, page, attributes.getTotal());
+    return attributeResponseMapper.toAttributesResponse(attributes, size, page);
   }
 
   @Transactional
   @PostMapping("/{entityTypeId}/attributes")
-  public ResponseEntity createAttribute(
+  public ResponseEntity<Void> createAttribute(
       @PathVariable("entityTypeId") String entityTypeId,
       @Valid @RequestBody CreateAttributeRequest createAttributeRequest) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
@@ -145,7 +144,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes/{attributeId}")
-  public ResponseEntity deleteAttribute(
+  public ResponseEntity<Void> deleteAttribute(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeId") String attributeId) {
     JobExecution jobExecution = metadataApiService.deleteAttributeAsync(entityTypeId, attributeId);
@@ -154,7 +153,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @DeleteMapping("/{entityTypeId}/attributes")
-  public ResponseEntity deleteAttributes(
+  public ResponseEntity<Void> deleteAttributes(
       @PathVariable("entityTypeId") String entityTypeId,
       @Valid DeleteAttributesRequest deleteAttributesRequest) {
     JobExecution jobExecution =
@@ -164,7 +163,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PutMapping("/{entityTypeId}")
-  public ResponseEntity updateEntityType(
+  public ResponseEntity<Void> updateEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
       @Valid @RequestBody CreateEntityTypeRequest createEntityTypeRequest) {
     EntityType entityType = entityTypeRequestMapper.toEntityType(createEntityTypeRequest);
@@ -176,7 +175,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PutMapping("/{entityTypeId}/attributes/{attributeId}")
-  public ResponseEntity updateAttribute(
+  public ResponseEntity<Void> updateAttribute(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeId") String attributeId,
       @Valid @RequestBody CreateAttributeRequest createAttributeRequest) {
@@ -198,7 +197,7 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PatchMapping("/{entityTypeId}/attributes/{attributeId}")
-  public ResponseEntity updatePartialAttribute(
+  public ResponseEntity<Void> updatePartialAttribute(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeId") String attributeId,
       @RequestBody Map<String, Object> attributeValues) {
@@ -213,25 +212,25 @@ class MetadataApiController extends ApiController {
 
   @Transactional
   @PatchMapping("/{entityTypeId}")
-  public ResponseEntity updatePartialEntityType(
+  public ResponseEntity<Void> updatePartialEntityType(
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody Map<String, Object> entityTypeValues) {
     EntityType entityType = metadataApiService.findEntityType(entityTypeId);
-    entityTypeRequestMapper.toEntityType(entityType, entityTypeValues);
+    entityTypeRequestMapper.updateEntityType(entityType, entityTypeValues);
     JobExecution jobExecution = metadataApiService.updateEntityTypeAsync(entityType);
     return toLocationResponse(jobExecution);
   }
 
   @Transactional
   @DeleteMapping("/{entityTypeId}")
-  public ResponseEntity deleteEntityType(@PathVariable("entityTypeId") String entityTypeId) {
+  public ResponseEntity<Void> deleteEntityType(@PathVariable("entityTypeId") String entityTypeId) {
     JobExecution jobExecution = metadataApiService.deleteEntityTypeAsync(entityTypeId);
     return toLocationResponse(jobExecution);
   }
 
   @Transactional
   @DeleteMapping
-  public ResponseEntity deleteEntityTypes(
+  public ResponseEntity<Void> deleteEntityTypes(
       @Valid DeleteEntityTypesRequest deleteEntityTypesRequest) {
     JobExecution jobExecution =
         metadataApiService.deleteEntityTypesAsync(deleteEntityTypesRequest.getQ());
@@ -253,7 +252,7 @@ class MetadataApiController extends ApiController {
     entityType.setOwnAllAttributes(updatedAttributes);
   }
 
-  private ResponseEntity toLocationResponse(JobExecution jobExecution) {
+  private ResponseEntity<Void> toLocationResponse(JobExecution jobExecution) {
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequestUri()
             .replacePath(EntityController.API_ENTITY_PATH)
