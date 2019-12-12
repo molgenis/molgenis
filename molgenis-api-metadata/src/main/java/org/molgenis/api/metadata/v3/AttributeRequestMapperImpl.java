@@ -210,104 +210,106 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
 
   @Override
   public void updateAttribute(Attribute attribute, Map<String, Object> attributeValues) {
-    for (Entry<String, Object> entry : attributeValues.entrySet()) {
-      switch (entry.getKey()) {
-        case "id":
-          attribute.setIdentifier(getStringValue(entry.getValue()));
-          break;
-        case "name":
-          attribute.setName(getStringValue(entry.getValue()));
-          break;
-        case "sequenceNr":
-          setSequenceNumber(attribute, entry);
-          break;
-        case "type":
-          setAttributeType(attribute, entry);
-          break;
-        case "refEntityType":
-          setRefEntityType(attribute, entry);
-          break;
-        case "cascadeDelete":
-          String cascadeValue = getStringValue(entry.getValue());
-          Boolean isCascade = cascadeValue != null ? Boolean.valueOf(cascadeValue) : null;
-          attribute.setCascadeDelete(isCascade);
-          break;
-        case "orderBy":
-          String orderBy = getStringValue(entry.getValue());
-          attribute.setOrderBy(
-              orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
-          break;
-        case "expression":
-          attribute.setExpression(getStringValue(entry.getValue()));
-          break;
-        case "nullable":
-          String nullableValue = getStringValue(entry.getValue());
-          attribute.setNillable(Boolean.valueOf(nullableValue));
-          break;
-        case "auto":
-          String autoValue = getStringValue(entry.getValue());
-          attribute.setAuto(Boolean.valueOf(autoValue));
-          break;
-        case "visible":
-          String visibleValue = getStringValue(entry.getValue());
-          attribute.setVisible(Boolean.valueOf(visibleValue));
-          break;
-        case "label":
-          I18nValue i18Label = I18nValueMapper.toI18nValue(entry.getValue());
-          processI18nLabel(i18Label, attribute);
-          break;
-        case "description":
-          I18nValue i18Description = I18nValueMapper.toI18nValue(entry.getValue());
-          processI18nDescription(i18Description, attribute);
-          break;
-        case "aggregatable":
-          attribute.setAggregatable(Boolean.valueOf(entry.getValue().toString()));
-          break;
-        case "enumOptions":
-          setEnumOptions(attribute, entry);
-          break;
-        case "range":
-          Range range = mapRange(entry.getValue());
-          if (range != null) {
-            attribute.setRange(map(range));
-          }
-          break;
-        case "readonly":
-          setBooleanValue(attribute, entry, IS_READ_ONLY);
-          break;
-        case "unique":
-          setBooleanValue(attribute, entry, IS_UNIQUE);
-          break;
-        case "defaultValue":
-          attribute.setDefaultValue(getStringValue(entry.getValue()));
-          break;
-        case "nullableExpression":
-          attribute.setNullableExpression(getStringValue(entry.getValue()));
-          break;
-        case "visibleExpression":
-          attribute.setVisibleExpression(getStringValue(entry.getValue()));
-          break;
-        case "validationExpression":
-          attribute.setValidationExpression(getStringValue(entry.getValue()));
-          break;
-        case "mappedByAttribute":
-        case "parent":
-          // Skip now and process after all attributes in the request have been processed
-          break;
-        case "tags":
-          throw new UnsupportedFieldException(entry.getKey());
-        case "idAttribute":
-          attribute.setIdAttribute(DataConverter.toBoolean(entry.getValue()));
-          break;
-        case "labelAttribute":
-          attribute.setLabelAttribute(DataConverter.toBoolean(entry.getValue()));
-          break;
-        case "lookupAttributeIndex":
-          attribute.setLookupAttributeIndex(DataConverter.toInt(entry.getValue()));
-          break;
-        default:
-          throw new InvalidKeyException("attribute", entry.getKey());
-      }
+    attributeValues.forEach((key, value) -> updateAttributeValue(attribute, key, value));
+  }
+
+  private void updateAttributeValue(Attribute attribute, String key, Object value) {
+    switch (key) {
+      case "id":
+        attribute.setIdentifier(getStringValue(value));
+        break;
+      case "name":
+        attribute.setName(getStringValue(value));
+        break;
+      case "sequenceNr":
+        setSequenceNumber(attribute, value);
+        break;
+      case "type":
+        setAttributeType(attribute, value);
+        break;
+      case "refEntityType":
+        setRefEntityType(attribute, value);
+        break;
+      case "cascadeDelete":
+        String cascadeValue = getStringValue(value);
+        Boolean isCascade = cascadeValue != null ? Boolean.valueOf(cascadeValue) : null;
+        attribute.setCascadeDelete(isCascade);
+        break;
+      case "orderBy":
+        String orderBy = getStringValue(value);
+        attribute.setOrderBy(
+            orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
+        break;
+      case "expression":
+        attribute.setExpression(getStringValue(value));
+        break;
+      case "nullable":
+        String nullableValue = getStringValue(value);
+        attribute.setNillable(Boolean.valueOf(nullableValue));
+        break;
+      case "auto":
+        String autoValue = getStringValue(value);
+        attribute.setAuto(Boolean.valueOf(autoValue));
+        break;
+      case "visible":
+        String visibleValue = getStringValue(value);
+        attribute.setVisible(Boolean.valueOf(visibleValue));
+        break;
+      case "label":
+        I18nValue i18Label = I18nValueMapper.toI18nValue(value);
+        processI18nLabel(i18Label, attribute);
+        break;
+      case "description":
+        I18nValue i18Description = I18nValueMapper.toI18nValue(value);
+        processI18nDescription(i18Description, attribute);
+        break;
+      case "aggregatable":
+        attribute.setAggregatable(Boolean.valueOf(value.toString()));
+        break;
+      case "enumOptions":
+        setEnumOptions(attribute, value);
+        break;
+      case "range":
+        Range range = mapRange(value);
+        if (range != null) {
+          attribute.setRange(map(range));
+        }
+        break;
+      case "readonly":
+        setBooleanValue(attribute, value, IS_READ_ONLY);
+        break;
+      case "unique":
+        setBooleanValue(attribute, value, IS_UNIQUE);
+        break;
+      case "defaultValue":
+        attribute.setDefaultValue(getStringValue(value));
+        break;
+      case "nullableExpression":
+        attribute.setNullableExpression(getStringValue(value));
+        break;
+      case "visibleExpression":
+        attribute.setVisibleExpression(getStringValue(value));
+        break;
+      case "validationExpression":
+        attribute.setValidationExpression(getStringValue(value));
+        break;
+      case "mappedByAttribute":
+      case "parent":
+        // Skip now and process after all attributes in the request have been processed
+        break;
+      case "tags":
+        throw new UnsupportedFieldException(key);
+      case "idAttribute":
+        attribute.setIdAttribute(DataConverter.toBoolean(value));
+        break;
+      case "labelAttribute":
+        attribute.setLabelAttribute(DataConverter.toBoolean(value));
+        break;
+      case "lookupAttributeIndex":
+        attribute.setLookupAttributeIndex(DataConverter.toInt(value));
+        break;
+      default:
+        throw new InvalidKeyException("attribute", key);
     }
   }
 
@@ -318,9 +320,9 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
     return attribute;
   }
 
-  private void setRefEntityType(Attribute attribute, Entry<String, Object> entry) {
+  private void setRefEntityType(Attribute attribute, Object value) {
     EntityType refEntityType;
-    String refEntityTypeId = getStringValue(entry.getValue());
+    String refEntityTypeId = getStringValue(value);
     if (refEntityTypeId != null) {
       refEntityType = (EntityType) entityManager.getReference(entityTypeMetadata, refEntityTypeId);
       attribute.setRefEntity(refEntityType);

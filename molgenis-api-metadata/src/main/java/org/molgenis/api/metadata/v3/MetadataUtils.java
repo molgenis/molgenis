@@ -6,7 +6,6 @@ import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.List;
-import java.util.Map.Entry;
 import org.molgenis.data.Entity;
 import org.molgenis.data.InvalidValueTypeException;
 import org.molgenis.data.meta.AttributeType;
@@ -29,17 +28,17 @@ public class MetadataUtils {
     return builder.build();
   }
 
-  static void setSequenceNumber(Attribute attribute, Entry<String, Object> entry) {
-    String sequenceString = getStringValue(entry.getValue());
+  static void setSequenceNumber(Attribute attribute, Object value) {
+    String sequenceString = getStringValue(value);
     if (sequenceString != null) {
-      attribute.setSequenceNumber(Integer.valueOf(sequenceString));
+      attribute.setSequenceNumber(Double.valueOf(sequenceString).intValue());
     } else {
       throw new InvalidValueTypeException(sequenceString, "int", null);
     }
   }
 
-  static void setAttributeType(Attribute attribute, Entry<String, Object> entry) {
-    String typeString = getStringValue(entry.getValue());
+  static void setAttributeType(Attribute attribute, Object value) {
+    String typeString = getStringValue(value);
     if (typeString != null) {
       attribute.setDataType(AttributeType.toEnum(typeString));
     } else {
@@ -47,18 +46,18 @@ public class MetadataUtils {
     }
   }
 
-  static void setEnumOptions(Attribute attribute, Entry<String, Object> entry) {
+  static void setEnumOptions(Attribute attribute, Object value) {
     List<String> options;
-    if (entry.getValue() instanceof List) {
-      options = (List<String>) entry.getValue();
+    if (value instanceof List) {
+      options = (List<String>) value;
     } else {
-      throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
+      throw new InvalidValueTypeException(value.toString(), "list", null);
     }
     attribute.setEnumOptions(options);
   }
 
-  static void setBooleanValue(Entity entity, Entry<String, Object> entry, String fieldName) {
-    String readOnlyValue = getStringValue(entry.getValue());
+  static void setBooleanValue(Entity entity, Object value, String fieldName) {
+    String readOnlyValue = getStringValue(value);
     if (readOnlyValue != null) {
       entity.set(fieldName, Boolean.valueOf(readOnlyValue));
     } else {
