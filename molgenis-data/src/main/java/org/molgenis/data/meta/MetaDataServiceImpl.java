@@ -469,29 +469,29 @@ public class MetaDataServiceImpl implements MetaDataService {
             .collect(toMap(Attribute::getIdentifier, Function.identity()));
 
     // determine attributes to add, update and delete
-    Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
-    Set<String> sharedAttrNames = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
-    Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
+    Set<String> addedAttrIds = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
+    Set<String> sharedAttrIds = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
+    Set<String> deletedAttrIds = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
 
     // add new attributes
-    if (!addedAttrNames.isEmpty()) {
-      dataService.add(ATTRIBUTE_META_DATA, addedAttrNames.stream().map(attrsMap::get));
+    if (!addedAttrIds.isEmpty()) {
+      dataService.add(ATTRIBUTE_META_DATA, addedAttrIds.stream().map(attrsMap::get));
     }
 
     // update changed attributes
-    List<String> updatedAttrNames =
-        sharedAttrNames.stream()
+    List<String> updatedAttrIds =
+        sharedAttrIds.stream()
             .filter(
                 attrName ->
                     !EntityUtils.equals(attrsMap.get(attrName), existingAttrsMap.get(attrName)))
             .collect(toList());
-    if (!updatedAttrNames.isEmpty()) {
-      dataService.update(ATTRIBUTE_META_DATA, updatedAttrNames.stream().map(attrsMap::get));
+    if (!updatedAttrIds.isEmpty()) {
+      dataService.update(ATTRIBUTE_META_DATA, updatedAttrIds.stream().map(attrsMap::get));
     }
 
     // delete removed attributes
-    if (!deletedAttrNames.isEmpty()) {
-      dataService.delete(ATTRIBUTE_META_DATA, deletedAttrNames.stream().map(existingAttrsMap::get));
+    if (!deletedAttrIds.isEmpty()) {
+      dataService.delete(ATTRIBUTE_META_DATA, deletedAttrIds.stream().map(existingAttrsMap::get));
     }
   }
 
