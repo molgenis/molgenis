@@ -8,8 +8,7 @@ public class PageUtils {
   private PageUtils() {}
 
   public static PageResponse getPageResponse(int size, int offset, int total, int pageSize) {
-    int newTotalPages = total > 0 ? (int) Math.ceil(total / (double) pageSize) : 0;
     int newNumber = offset / pageSize;
-    return PageResponse.create(size, total, newTotalPages, newNumber);
+    return PageResponse.create(size, total, newNumber);
   }
 }

@@ -2,7 +2,7 @@ package org.molgenis.api.data.v3;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.api.PageUtils.getPageResponse;
+import static org.molgenis.api.support.PageUtils.getPageResponse;
 
 import java.net.URI;
 import java.util.LinkedHashMap;

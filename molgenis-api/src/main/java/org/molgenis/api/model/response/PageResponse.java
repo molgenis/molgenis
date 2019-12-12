@@ -18,12 +18,11 @@ public abstract class PageResponse {
 
   public abstract int getNumber();
 
-  public static PageResponse create(
-      int newSize, int newTotalElements, int newTotalPages, int newNumber) {
+  public static PageResponse create(int newSize, int newTotalElements, int newNumber) {
     return builder()
         .setSize(newSize)
         .setTotalElements(newTotalElements)
-        .setTotalPages(newTotalPages)
+        .setTotalPages(getTotalPages(newSize, newTotalElements))
         .setNumber(newNumber)
         .build();
   }
@@ -34,6 +33,7 @@ public abstract class PageResponse {
 
   @AutoValue.Builder
   public abstract static class Builder {
+
     public abstract Builder setSize(int newSize);
 
     public abstract Builder setTotalElements(int newTotalElements);
@@ -52,5 +52,9 @@ public abstract class PageResponse {
       checkState(pageResponse.getNumber() >= 0, "Negative number of items");
       return pageResponse;
     }
+  }
+
+  private static int getTotalPages(int pageSize, int totalElements) {
+    return (int) Math.ceil(totalElements / (double) pageSize);
   }
 }

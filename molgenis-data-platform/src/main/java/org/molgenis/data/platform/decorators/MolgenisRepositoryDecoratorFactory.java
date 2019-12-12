@@ -11,6 +11,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.SystemRepositoryDecoratorRegistry;
 import org.molgenis.data.cache.l1.L1Cache;
+import org.molgenis.data.cache.l1.L1CacheJanitor;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
@@ -62,6 +63,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
   private final UserPermissionEvaluator permissionService;
   private final RowLevelSecurityRepositoryDecoratorFactory
       rowLevelSecurityRepositoryDecoratorFactory;
+  private final L1CacheJanitor l1CacheJanitor;
 
   public MolgenisRepositoryDecoratorFactory(
       EntityManager entityManager,
@@ -83,7 +85,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       FetchValidator fetchValidator,
       DefaultValueReferenceValidator defaultValueReferenceValidator,
       UserPermissionEvaluator permissionService,
-      RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory) {
+      RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory,
+      L1CacheJanitor l1CacheJanitor) {
 
     this.entityManager = requireNonNull(entityManager);
     this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -106,6 +109,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     this.permissionService = requireNonNull(permissionService);
     this.rowLevelSecurityRepositoryDecoratorFactory =
         requireNonNull(rowLevelSecurityRepositoryDecoratorFactory);
+    this.l1CacheJanitor = requireNonNull(l1CacheJanitor);
   }
 
   @Override
@@ -117,7 +121,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
         new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
     // 14. Query the L1 cache before querying the database
-    decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
+    decoratedRepository =
+        new L1CacheRepositoryDecorator(decoratedRepository, l1Cache, l1CacheJanitor);
 
     // 13. Route specific queries to the index
     decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
