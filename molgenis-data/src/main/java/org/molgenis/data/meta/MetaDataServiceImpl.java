@@ -463,10 +463,10 @@ public class MetaDataServiceImpl implements MetaDataService {
     // analyze both compound and atomic attributes owned by the entity
     Map<String, Attribute> attrsMap =
         stream(entityType.getOwnAllAttributes())
-            .collect(toMap(Attribute::getName, Function.identity()));
+            .collect(toMap(Attribute::getIdentifier, Function.identity()));
     Map<String, Attribute> existingAttrsMap =
         stream(existingEntityType.getOwnAllAttributes())
-            .collect(toMap(Attribute::getName, Function.identity()));
+            .collect(toMap(Attribute::getIdentifier, Function.identity()));
 
     // determine attributes to add, update and delete
     Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
