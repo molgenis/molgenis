@@ -375,7 +375,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
-            .setPage(PageResponse.create(1, 2, 2, 0))
+            .setPage(PageResponse.create(1, 2, 0))
             .build();
     assertEquals(
         expectedEntitiesResponse,
@@ -431,7 +431,7 @@ class EntityMapperImplTest extends AbstractMockitoTest {
         EntitiesResponse.builder()
             .setLinks(LinksResponse.create(entitiesPrevious, entitiesSelf, entitiesNext))
             .setItems(singletonList(expectedEntityResponse))
-            .setPage(PageResponse.create(1, 2, 2, 0))
+            .setPage(PageResponse.create(1, 2, 0))
             .build();
     assertEquals(
         expectedEntitiesResponse,
