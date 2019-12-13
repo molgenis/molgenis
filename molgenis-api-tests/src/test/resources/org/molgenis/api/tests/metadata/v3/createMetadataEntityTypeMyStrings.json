@@ -1,0 +1,24 @@
+{
+  "id": "v3meta_MyStrings",
+  "package": "v3meta",
+  "label": {
+    "defaultValue": "My Strings"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyStrings_id",
+      "name": "id",
+      "type": "string",
+      "visible": false,
+      "nullable": false,
+      "idAttribute": true
+    },
+    {
+      "id": "v3meta_MyStrings_label",
+      "name": "label",
+      "type": "string",
+      "nullable": false,
+      "labelAttribute": true
+    }
+  ]
+}

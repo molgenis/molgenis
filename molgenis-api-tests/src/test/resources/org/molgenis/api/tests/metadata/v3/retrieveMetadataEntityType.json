@@ -1,0 +1,64 @@
+{
+  "links": {
+    "self": "${baseUri}/api/metadata/v3meta_MyNumbers"
+  },
+  "data": {
+    "id": "v3meta_MyNumbers",
+    "label": "My Numbers",
+    "package": {
+      "links": {
+        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+      }
+    },
+    "attributes": {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes"
+      },
+      "items": [
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/v3meta_MyNumbers_id"
+          },
+          "data": {
+            "id": "v3meta_MyNumbers_id",
+            "name": "id",
+            "sequenceNr": 0,
+            "type": "int",
+            "idAttribute": true,
+            "labelAttribute": false,
+            "label": "id",
+            "nullable": false,
+            "auto": false,
+            "visible": false,
+            "unique": true,
+            "readOnly": true,
+            "aggregatable": false
+          }
+        },
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes/v3meta_MyNumbers_label"
+          },
+          "data": {
+            "id": "v3meta_MyNumbers_label",
+            "name": "label",
+            "sequenceNr": 1,
+            "type": "string",
+            "idAttribute": false,
+            "labelAttribute": true,
+            "lookupAttributeIndex": 0,
+            "label": "label",
+            "nullable": false,
+            "auto": false,
+            "visible": true,
+            "unique": false,
+            "readOnly": false,
+            "aggregatable": false
+          }
+        }
+      ]
+    },
+    "abstract": false,
+    "indexingDepth": 1
+  }
+}
