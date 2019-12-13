@@ -1,6 +1,7 @@
 package org.molgenis.api.metadata.v3;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,23 +12,29 @@ import static org.molgenis.api.model.Query.Operator.IN;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.api.data.QueryMapper;
 import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
+import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Sort;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 
 class MetadataApiServiceImplTest extends AbstractMockitoTest {
@@ -52,6 +59,220 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testFindEntityTypes() {
+    @SuppressWarnings("unchecked")
+    Repository<EntityType> entityTypeRepository = mock(Repository.class);
+    when(metadataService.getRepository("sys_md_EntityType", EntityType.class))
+        .thenReturn(Optional.of(entityTypeRepository));
+
+    Query query =
+        Query.builder().setItem("id").setOperator(Operator.EQUALS).setValue("id0").build();
+    when(queryMapper.map(query, entityTypeRepository)).thenReturn(new QueryImpl<>());
+
+    EntityType entityType = mock(EntityType.class);
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<org.molgenis.data.Query<EntityType>> findQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(entityTypeRepository.findAll(findQueryCaptor.capture())).thenReturn(Stream.of(entityType));
+
+    long total = 100L;
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<org.molgenis.data.Query<EntityType>> countQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(entityTypeRepository.count(countQueryCaptor.capture())).thenReturn(total);
+
+    Sort sort = Sort.EMPTY_SORT;
+    org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
+    when(sortMapper.map(sort)).thenReturn(repositorySort);
+
+    int size = 5;
+    int number = 2;
+
+    EntityTypes expectedEntityTypes =
+        EntityTypes.builder()
+            .setEntityTypes(ImmutableList.of(entityType))
+            .setTotal((int) total)
+            .build();
+    assertEquals(
+        expectedEntityTypes, metadataApiService.findEntityTypes(query, sort, size, number));
+
+    org.molgenis.data.Query<EntityType> findQuery = findQueryCaptor.getValue();
+    assertEquals(findQuery.getOffset(), size * number);
+    assertEquals(findQuery.getPageSize(), size);
+    assertEquals(findQuery.getSort(), repositorySort);
+
+    org.molgenis.data.Query<EntityType> countQuery = countQueryCaptor.getValue();
+    assertEquals(countQuery.getOffset(), 0);
+    assertEquals(countQuery.getPageSize(), Integer.MAX_VALUE);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testFindAttributes() {
+    Repository<Attribute> attributeRepository = mock(Repository.class);
+    when(metadataService.getRepository("sys_md_Attribute", Attribute.class))
+        .thenReturn(Optional.of(attributeRepository));
+
+    Query query = mock(Query.class);
+    when(queryMapper.map(query, attributeRepository)).thenReturn(new QueryImpl<>());
+
+    Attribute attribute = mock(Attribute.class);
+    ArgumentCaptor<org.molgenis.data.Query<Attribute>> findQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(attributeRepository.findAll(findQueryCaptor.capture())).thenReturn(Stream.of(attribute));
+
+    long total = 100L;
+    ArgumentCaptor<org.molgenis.data.Query<Attribute>> countQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(attributeRepository.count(countQueryCaptor.capture())).thenReturn(total);
+
+    Sort sort = Sort.EMPTY_SORT;
+    org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
+    when(sortMapper.map(sort)).thenReturn(repositorySort);
+
+    int size = 5;
+    int number = 2;
+
+    Attributes expectedAttributes =
+        Attributes.builder()
+            .setAttributes(ImmutableList.of(attribute))
+            .setTotal((int) total)
+            .build();
+
+    String entityTypeId = "MyEntityTypeId";
+    when(metadataService.hasEntityType(entityTypeId)).thenReturn(true);
+
+    Attributes attributes =
+        metadataApiService.findAttributes(entityTypeId, query, sort, size, number);
+    org.molgenis.data.Query<Attribute> findQuery = findQueryCaptor.getValue();
+    org.molgenis.data.Query<Attribute> countQuery = countQueryCaptor.getValue();
+    assertAll(
+        () -> assertEquals(expectedAttributes, attributes),
+        () ->
+            assertEquals(
+                singletonList(new QueryRule("entity", QueryRule.Operator.EQUALS, entityTypeId)),
+                findQuery.getRules()),
+        () -> assertEquals(size * number, findQuery.getOffset()),
+        () -> assertEquals(size, findQuery.getPageSize()),
+        () -> assertEquals(repositorySort, findQuery.getSort()),
+        () ->
+            assertEquals(
+                singletonList(new QueryRule("entity", QueryRule.Operator.EQUALS, entityTypeId)),
+                countQuery.getRules()),
+        () -> assertEquals(0, countQuery.getOffset()),
+        () -> assertEquals(Integer.MAX_VALUE, countQuery.getPageSize()));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testFindAttributesNestedQuery() {
+    Repository<Attribute> attributeRepository = mock(Repository.class);
+    when(metadataService.getRepository("sys_md_Attribute", Attribute.class))
+        .thenReturn(Optional.of(attributeRepository));
+
+    Query query = mock(Query.class);
+    org.molgenis.data.Query<Attribute> repositoryQuery =
+        new QueryImpl<>(
+            asList(
+                new QueryRule("id", QueryRule.Operator.EQUALS, "id0"),
+                new QueryRule(QueryRule.Operator.OR),
+                new QueryRule("id", QueryRule.Operator.EQUALS, "id1")));
+    when(queryMapper.map(query, attributeRepository)).thenReturn(repositoryQuery);
+
+    Attribute attribute = mock(Attribute.class);
+    ArgumentCaptor<org.molgenis.data.Query<Attribute>> findQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(attributeRepository.findAll(findQueryCaptor.capture())).thenReturn(Stream.of(attribute));
+
+    long total = 100L;
+    ArgumentCaptor<org.molgenis.data.Query<Attribute>> countQueryCaptor =
+        ArgumentCaptor.forClass(org.molgenis.data.Query.class);
+    when(attributeRepository.count(countQueryCaptor.capture())).thenReturn(total);
+
+    Sort sort = Sort.EMPTY_SORT;
+    org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
+    when(sortMapper.map(sort)).thenReturn(repositorySort);
+
+    int size = 5;
+    int number = 2;
+
+    Attributes expectedAttributes =
+        Attributes.builder()
+            .setAttributes(ImmutableList.of(attribute))
+            .setTotal((int) total)
+            .build();
+
+    String entityTypeId = "MyEntityTypeId";
+    when(metadataService.hasEntityType(entityTypeId)).thenReturn(true);
+
+    Attributes attributes =
+        metadataApiService.findAttributes(entityTypeId, query, sort, size, number);
+    org.molgenis.data.Query<Attribute> findQuery = findQueryCaptor.getValue();
+    org.molgenis.data.Query<Attribute> countQuery = countQueryCaptor.getValue();
+    assertAll(
+        () -> assertEquals(expectedAttributes, attributes),
+        () ->
+            assertEquals(
+                asList(
+                    new QueryRule(
+                        asList(
+                            new QueryRule("id", QueryRule.Operator.EQUALS, "id0"),
+                            new QueryRule(QueryRule.Operator.OR),
+                            new QueryRule("id", QueryRule.Operator.EQUALS, "id1"))),
+                    new QueryRule(QueryRule.Operator.AND),
+                    new QueryRule("entity", QueryRule.Operator.EQUALS, entityTypeId)),
+                findQuery.getRules()),
+        () -> assertEquals(size * number, findQuery.getOffset()),
+        () -> assertEquals(size, findQuery.getPageSize()),
+        () -> assertEquals(repositorySort, findQuery.getSort()),
+        () ->
+            assertEquals(
+                asList(
+                    new QueryRule(
+                        asList(
+                            new QueryRule("id", QueryRule.Operator.EQUALS, "id0"),
+                            new QueryRule(QueryRule.Operator.OR),
+                            new QueryRule("id", QueryRule.Operator.EQUALS, "id1"))),
+                    new QueryRule(QueryRule.Operator.AND),
+                    new QueryRule("entity", QueryRule.Operator.EQUALS, entityTypeId)),
+                countQuery.getRules()),
+        () -> assertEquals(0, countQuery.getOffset()),
+        () -> assertEquals(Integer.MAX_VALUE, countQuery.getPageSize()));
+  }
+
+  @Test
+  void testFindAttribute() {
+    String attributeId = "MyAttributeId";
+    Attribute attribute = mock(Attribute.class);
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getOwnAttributeById(attributeId)).thenReturn(attribute);
+
+    String entityTypeId = "MyEntityTypeId";
+    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
+
+    assertEquals(attribute, metadataApiService.findAttribute(entityTypeId, attributeId));
+  }
+
+  @Test
+  void testFindAttributeUnknownEntityType() {
+    assertThrows(
+        UnknownEntityTypeException.class,
+        () -> metadataApiService.findAttribute("UnknownEntityTypeId", "MyAttributeId"));
+  }
+
+  @Test
+  void testFindAttributeUnknownAttribute() {
+    EntityType entityType = mock(EntityType.class);
+    String entityTypeId = "MyEntityTypeId";
+    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
+
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> metadataApiService.findAttribute(entityTypeId, "UnknownAttributeId"));
+  }
+
+  @Test
   void testCreateEntityType() {
     EntityType entityType = mock(EntityType.class);
     metadataApiService.createEntityType(entityType);
@@ -59,7 +280,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  void findAttributesUnknownEntityType() {
+  void testFindAttributesUnknownEntityType() {
     String entityTypeId = "UnknownEntityType";
     assertThrows(
         UnknownEntityTypeException.class,
@@ -109,7 +330,6 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
     Query query = Query.create("identifier", IN, asList("attr1", "attr2"));
     org.molgenis.data.Query<Attribute> dataServiceQuery = mock(org.molgenis.data.Query.class);
-    when(dataServiceQuery.and()).thenReturn(dataServiceQuery);
     when(dataServiceQuery.eq(AttributeMetadata.ENTITY, entityTypeId)).thenReturn(dataServiceQuery);
     Attribute attribute1 = mock(Attribute.class);
     Attribute attribute2 = mock(Attribute.class);
@@ -144,7 +364,6 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
     Query query = Query.create("identifier", IN, asList("attr1", "attr2"));
     org.molgenis.data.Query<Attribute> dataServiceQuery = mock(org.molgenis.data.Query.class);
-    when(dataServiceQuery.and()).thenReturn(dataServiceQuery);
     when(dataServiceQuery.eq(AttributeMetadata.ENTITY, entityTypeId)).thenReturn(dataServiceQuery);
     when(dataServiceQuery.findAll()).thenReturn(Stream.empty());
     Repository<Attribute> attributeRepository = mock(Repository.class);
