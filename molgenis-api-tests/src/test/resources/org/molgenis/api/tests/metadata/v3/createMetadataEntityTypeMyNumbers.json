@@ -1,0 +1,25 @@
+{
+  "id": "v3meta_MyNumbers",
+  "package": "v3meta",
+  "label": {
+    "defaultValue": "My Numbers"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyNumbers_id",
+      "name": "id",
+      "type": "int",
+      "visible": false,
+      "nullable": false,
+      "idAttribute": true
+    },
+    {
+      "id": "v3meta_MyNumbers_label",
+      "name": "label",
+      "type": "string",
+      "nullable": false,
+      "labelAttribute": true,
+      "lookupAttributeIndex": 0
+    }
+  ]
+}

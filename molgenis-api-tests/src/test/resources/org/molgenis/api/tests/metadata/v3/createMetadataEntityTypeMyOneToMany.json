@@ -1,0 +1,30 @@
+{
+  "id": "v3meta_MyOneToMany",
+  "package": "v3meta",
+  "label": {
+    "defaultValue": "My OneToMany"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyOneToMany_id",
+      "name": "id",
+      "type": "string",
+      "nullable": false,
+      "idAttribute": true,
+      "labelAttribute": true
+    },
+    {
+      "id": "v3meta_MyOneToManyAttr",
+      "name": "OTM",
+      "type": "one_to_many",
+      "mappedByAttribute": "v3meta_MyOneToManyMappedBy",
+      "refEntityType": "v3meta_MyOneToMany"
+    },
+    {
+      "id": "v3meta_MyOneToManyMappedBy",
+      "name": "MappedBy",
+      "type": "xref",
+      "refEntityType": "v3meta_MyOneToMany"
+    }
+  ]
+}
