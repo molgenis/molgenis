@@ -373,7 +373,7 @@ public class MetaDataServiceImpl implements MetaDataService {
       return Optional.of(entityType);
     } else {
       entityType = getEntityTypeBypassingRegistry(entityTypeId);
-      return entityType != null ? Optional.of(entityType) : Optional.empty();
+      return Optional.ofNullable(entityType);
     }
   }
 
