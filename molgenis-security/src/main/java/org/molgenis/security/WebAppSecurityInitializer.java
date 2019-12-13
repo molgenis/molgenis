@@ -1,7 +1,7 @@
 package org.molgenis.security;
 
 import static javax.servlet.DispatcherType.ASYNC;
-import static javax.servlet.DispatcherType.FORWARD;
+import static javax.servlet.DispatcherType.ERROR;
 import static javax.servlet.DispatcherType.REQUEST;
 
 import java.util.EnumSet;
@@ -18,6 +18,6 @@ public class WebAppSecurityInitializer extends AbstractSecurityWebApplicationIni
     Dynamic forwardedHeaderFilter =
         servletContext.addFilter("forwardedHeaderFilter", ForwardedHeaderFilter.class);
     forwardedHeaderFilter.setAsyncSupported(true);
-    forwardedHeaderFilter.addMappingForUrlPatterns(EnumSet.of(REQUEST, FORWARD, ASYNC), false, "*");
+    forwardedHeaderFilter.addMappingForUrlPatterns(EnumSet.of(REQUEST, ERROR, ASYNC), false, "*");
   }
 }
