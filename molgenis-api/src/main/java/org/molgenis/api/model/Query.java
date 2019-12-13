@@ -1,13 +1,16 @@
 package org.molgenis.api.model;
 
 import com.google.auto.value.AutoValue;
+import java.io.Serializable;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.UnexpectedEnumException;
 
 @AutoValue
-public abstract class Query {
+public abstract class Query implements Serializable {
+  private static final long serialVersionUID = 1L;
+
   public enum Operator {
     /** item: not-null value: String */
     EQUALS,
