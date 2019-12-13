@@ -62,7 +62,7 @@ The permissions you have once authenticated are the default user permissions set
 As administrator single sign-on configuration consists of the following one-time steps:
 1. Register MOLGENIS with the ID providers
 2. Configure one or more OpenID Connect clients, one for each identity provider
-2. Modify the authentication settings, activating clients for the identity providers.
+3. Modify the authentication settings, activating clients for the identity providers.
 
 ### Registering MOLGENIS with an ID provider
 Your MOLGENIS server needs to be registered with the identity provider as a client.
@@ -105,47 +105,30 @@ The identity provider specifies a set of endpoints where the user and MOLGENIS
 can interact with the provider. These are provided by the ID provider but may
 be nontrivial to find. Here are suggested values for a couple of common OpenID providers:
 
-##### Google
+Many providers have a discovery endpoint where they present these endpoints.
+Here's the discovery endpoints for some common providers:
 
-|  | value |
+| provider | discovery endpoint |
 | --- | --- |
-| Authorization URI  | `https://accounts.google.com/o/oauth2/v2/auth` |
-| Token URI          | `https://www.googleapis.com/oauth2/v4/token` |
-| JWKS URI           | `https://www.googleapis.com/oauth2/v3/certs` |
-| User info URI      | `https://www.googleapis.com/oauth2/v3/userinfo` |
-| Username attribute | `sub` |
-
-(See: `https://accounts.google.com/.well-known/openid-configuration`)
-
-##### Auth0
-
-|  | value |
-| --- | --- |
-| Authorization URI  | `https://<realm>.auth0.com/authorize` |
-| Token URI          | `https://<realm>.auth0.com/oauth/token` |
-| JWKS URI           | `https://<realm>.auth0.com/.well-known/jwks.json` |
-| User info URI      | `https://<realm>.auth0.com/userinfo` |
-| Username attribute | `sub` |
-
-(See `https://<realm>.auth0.com/.well-known/openid-configuration`)
-
-##### Keycloak
-
-|  | value |
-| --- | --- |
-| Authorization URI  | `https://<server>/auth/realms/<realm>/protocol/openid-connect/auth` |
-| Token URI          | `https://<server>/auth/realms/<realm>/protocol/openid-connect/token` |
-| JWKS URI           | `https://<server>/auth/realms/<realm/protocol/openid-connect/certs` |
-| User info URI      | `https://<server>/auth/realms/<realm>/protocol/openid-connect/userinfo` |
-| Username attribute | `sub` |
-
-(See `https://<server>/auth/realms/<realm>/.well-known/openid-configuration`)
+| Google        | `https://accounts.google.com/.well-known/openid-configuration`          |
+| Auth0         | `https://<realm>.auth0.com/.well-known/openid-configuration`            |
+| Keycloak      | `https://<server>/auth/realms/<realm>/.well-known/openid-configuration` |
+| MITRE (perun) | `https://<server>/oidc/.well-known/openid-configuration`                |
 
 ### Activating OpenID Connect clients
-Configured OpenID Connect clients can be selected in the 'Authentication settings' part of the 'Settings manager' plugin. Activating clients
-requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
+The OpenID Connect clients you have created in the previous step can now be selected in the
+'Authentication settings' part of the 'Settings manager' plugin.
+
+> N.B. Only the clients that are created in entity 'OIDC client' can be selected.
+
+Activating clients requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
 
 ![Single sign-on authentication settings](images/security/authentication/authentication_settings_oidc.png?raw=true, "Single sign-on authentication settings")
+
+### Beware of time skew between the servers
+The authentication tokens from the ID provider are signed with a timestamp.
+If the server times are skewed, token validation may fail.
+Activating [NTP](https://nl.wikipedia.org/wiki/Network_Time_Protocol) will help fix this. 
 
 ### Advanced: OpenID Connect user to MOLGENIS user mapping
 When a user signs in through e.g. Google the user is automatically mapped to a MOLGENIS user based on the email address. If no MOLGENIS user exists
