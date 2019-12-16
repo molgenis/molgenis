@@ -5,11 +5,11 @@ In case data is access controlled, you need to authenticate yourself. In MOLGENI
  * Single sign-on
  * Token-authentication
 
-## Username/password sign in
+# Username/password sign in
 The default way to authenticate in MOLGENIS is to click 'Sign in'. You can register a new account by using the 'Sign-up'-link. If there is no 'Sign-up'-link, you'll have to contact the administrator to register an account.
 >note: If you want to use reCaptcha when you enable 'Sign up' then you can configure that [here](guide-settings.md).  
 
-### Two-factor authentication
+## Two-factor authentication
 If you have an existing MOLGENIS-account you can secure it with two-factor authentication, depending on the server's settings.
 
 **prompted:** Two-factor authentication cannot be combined with single sign-on
@@ -42,12 +42,12 @@ Each time you sign in, you will have to enter the verification code.
 
 Depending on the server's settings, you can enable, disable and reset your two-factor authentication in your account settings (under Security).
 
-### TROUBLESHOOTING  
+## TROUBLESHOOTING  
 When you have lost your phone or misplaced it, you have to use one of the recovery codes to unlock your account. You can view your recovery codes
 in the *Account-Security*-tab. Make sure to store the recovery codes somewhere outside MOLGENIS. You can click on the 'Enter a recovery code'-link,
 in the screen where you have to enter the verification code. You can then enter the recovery code to unlock your account.
 
-## Single sign-on
+# Single sign-on
 In addition to username/password authentication MOLGENIS supports authentication with identity providers that support [OpenID Connect](https://openid.net/connect/)
 such as [Google](https://developers.google.com/identity/protocols/OpenIDConnect) and [SURFconext](https://wiki.surfnet.nl/display/surfconextdev/OpenID+Connect+reference).
 
@@ -58,21 +58,77 @@ Once enabled the sign in dialog will display additional sign in options:
 Selecting e.g. Google will redirect the browser to their website so the user can authenticate there and return to MOLGENIS once authentication has successfully completed.
 The permissions you have once authenticated are the default user permissions set by an administrator.   
 
-### Configuring single sign-on   
+## Configuring single sign-on   
 As administrator single sign-on configuration consists of the following one-time steps:
-1. Configuring one or more OpenID Connect client
-2. Modify authentication settings
+1. Register MOLGENIS with the ID providers
+2. Configure one or more OpenID Connect clients, one for each identity provider
+3. Modify the authentication settings, activating clients for the identity providers.
 
-#### Configuring OpenID Connect clients
+### Registering MOLGENIS with an ID provider
+Your MOLGENIS server needs to be registered with the identity provider as a client.
+The identity provider typically has a web interface where you can do this.
+
+*  A `client ID` and a `client secret` are issued by the identity provider and used
+by MOLGENIS to authenticate with the provider.
+*  The provider will typically also ask you how it can validate the
+`redirect URI`.
+The redirect URI is an endpoint on the MOLGENIS server: 
+`https://<serverURL>/login/oauth2/code/<registrationID>`
+The registration ID is an ID that you assign to the provider when you register the
+OIDC client.
+*  Since the user will be authenticating with the ID provider in the browser,
+the provider may allow you to add some branding to the login page,
+such as a logo or styling.
+
+### Registering an ID provider with MOLGENIS
+MOLGENIS uses an OpenID Connect client to communicate with the ID provider.
 OpenID Connect clients can be configured by adding entities to the 'OIDC client' entity type (e.g. using the data explorer, importer or REST API).
-The required information is provided by the identity provider. MOLGENIS requires at least the 'sub' and 'email' claims and ideally the
-'given_name' and 'family_name' claims as well. These claimes are requested by specifying the scopes 'openid,email,profile'.  
 
-#### Activating OpenID Connect clients
-Configured OpenID Connect clients can be selected in the 'Authentication settings' part of the 'Settings manager' plugin. Activating clients
-requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
+#### Registration ID
+This is the registration ID that ends up in the redirect URI on the MOLGENIS server.
+
+#### Client ID and secret
+You need to fill in the client ID and client secret that you got from the ID
+provider.
+
+#### Client name
+How the end user sees the identity provider.
+This becomes the label on the button on the login page.
+
+#### Scopes and claims
+MOLGENIS requires at least the `sub` and `email` claims and ideally the `given_name`
+and `family_name` claims as well.
+These claims are requested by specifying the scopes `openid,email,profile`.
+
+#### Endpoints
+The identity provider specifies a set of endpoints where the user and MOLGENIS
+can interact with the provider. These are provided by the ID provider but may
+be nontrivial to find. Here are suggested values for a couple of common OpenID providers:
+
+Many providers have a discovery endpoint where they present these endpoints.
+Here's the discovery endpoints for some common providers:
+
+| provider | discovery endpoint |
+| --- | --- |
+| Google        | `https://accounts.google.com/.well-known/openid-configuration`          |
+| Auth0         | `https://<realm>.auth0.com/.well-known/openid-configuration`            |
+| Keycloak      | `https://<server>/auth/realms/<realm>/.well-known/openid-configuration` |
+| MITRE (perun) | `https://<server>/oidc/.well-known/openid-configuration`                |
+
+### Activating OpenID Connect clients
+The OpenID Connect clients you have created in the previous step can now be selected in the
+'Authentication settings' part of the 'Settings manager' plugin.
+
+> N.B. Only the clients that are created in entity 'OIDC client' can be selected.
+
+Activating clients requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
 
 ![Single sign-on authentication settings](images/security/authentication/authentication_settings_oidc.png?raw=true, "Single sign-on authentication settings")
+
+### Beware of time skew between the servers
+The authentication tokens from the ID provider are signed with a timestamp.
+If the server times are skewed, token validation may fail.
+Activating [NTP](https://nl.wikipedia.org/wiki/Network_Time_Protocol) will help fix this. 
 
 ### Advanced: OpenID Connect user to MOLGENIS user mapping
 When a user signs in through e.g. Google the user is automatically mapped to a MOLGENIS user based on the email address. If no MOLGENIS user exists
