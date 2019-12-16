@@ -11,12 +11,13 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class PageResponse {
+  /** Returns the requested size of the page. */
   public abstract int getSize();
-
+  /** Returns the total number of elements available. */
   public abstract int getTotalElements();
-
+  /** Returns how many pages are available in total. */
   public abstract int getTotalPages();
-
+  /** Returns the number of the current page. */
   public abstract int getNumber();
 
   public static PageResponse create(int newSize, int newTotalElements, int newNumber) {
