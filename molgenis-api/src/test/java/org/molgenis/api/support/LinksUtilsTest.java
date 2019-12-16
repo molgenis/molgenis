@@ -63,4 +63,23 @@ class LinksUtilsTest extends AbstractMockitoTest {
             .build();
     assertEquals(linksResponse, LinksUtils.createLinksResponse(2, 10, 30));
   }
+
+  @Test
+  void createLinksResponseOutOfRangePage() throws URISyntaxException {
+    request.setQueryString("page=100");
+    LinksResponse linksResponse =
+        LinksResponse.builder()
+            .setPrevious(new URI("http://localhost?page=2"))
+            .setSelf(new URI("http://localhost?page=100"))
+            .build();
+    assertEquals(linksResponse, LinksUtils.createLinksResponse(100, 10, 30));
+  }
+
+  @Test
+  void createLinksResponseOutOfRangePageZeroTotalElements() throws URISyntaxException {
+    request.setQueryString("page=100");
+    LinksResponse linksResponse =
+        LinksResponse.builder().setSelf(new URI("http://localhost?page=100")).build();
+    assertEquals(linksResponse, LinksUtils.createLinksResponse(100, 10, 0));
+  }
 }

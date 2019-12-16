@@ -3,6 +3,7 @@ package org.molgenis.api.model.response;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.api.support.PageUtils;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -19,10 +20,11 @@ public abstract class PageResponse {
   public abstract int getNumber();
 
   public static PageResponse create(int newSize, int newTotalElements, int newNumber) {
+    int totalPages = PageUtils.getTotalPages(newSize, newTotalElements);
     return builder()
         .setSize(newSize)
         .setTotalElements(newTotalElements)
-        .setTotalPages(getTotalPages(newSize, newTotalElements))
+        .setTotalPages(totalPages)
         .setNumber(newNumber)
         .build();
   }
@@ -52,9 +54,5 @@ public abstract class PageResponse {
       checkState(pageResponse.getNumber() >= 0, "Negative number of items");
       return pageResponse;
     }
-  }
-
-  private static int getTotalPages(int pageSize, int totalElements) {
-    return (int) Math.ceil(totalElements / (double) pageSize);
   }
 }
