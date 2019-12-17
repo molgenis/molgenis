@@ -29,7 +29,7 @@ import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.Sort;
-import org.molgenis.api.model.Sort.Order.Direction;
+import org.molgenis.api.model.Order.Direction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
