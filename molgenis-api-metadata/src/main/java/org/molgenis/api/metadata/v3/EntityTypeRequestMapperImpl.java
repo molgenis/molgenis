@@ -146,9 +146,11 @@ public class EntityTypeRequestMapperImpl implements EntityTypeRequestMapper {
     if (!(entry.getValue() instanceof Iterable<?>)) {
       throw new InvalidValueTypeException(entry.getValue().toString(), "list", null);
     }
+    @SuppressWarnings("unchecked")
     List<Object> attrValues = (List<Object>) entry.getValue();
     List<Map<String, Object>> requestAttributes = new ArrayList<>();
     for (Object attrValue : attrValues) {
+      @SuppressWarnings("unchecked")
       Map<String, Object> valueMap = (Map<String, Object>) attrValue;
       requestAttributes.add(valueMap);
     }

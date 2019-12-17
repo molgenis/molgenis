@@ -3,6 +3,7 @@ package org.molgenis.api.metadata.v3;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,9 +48,11 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     when(metadataUpsertJobExecutionFactory.create()).thenReturn(jobExecution);
     when(entityTypeSerializer.serializeEntityType(entityType)).thenReturn("entity data");
 
-    metadataApiJobService.scheduleCreate(entityType);
+    MetadataUpsertJobExecution actualJobExecution =
+        metadataApiJobService.scheduleCreate(entityType);
 
     assertAll(
+        () -> assertEquals(jobExecution, actualJobExecution),
         () -> verify(jobExecution).setEntityTypeData("entity data"),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -61,9 +64,11 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     when(metadataUpsertJobExecutionFactory.create()).thenReturn(jobExecution);
     when(entityTypeSerializer.serializeEntityType(entityType)).thenReturn("entity data");
 
-    metadataApiJobService.scheduleUpdate(entityType);
+    MetadataUpsertJobExecution actualJobExecution =
+        metadataApiJobService.scheduleUpdate(entityType);
 
     assertAll(
+        () -> assertEquals(jobExecution, actualJobExecution),
         () -> verify(jobExecution).setAction(Action.UPDATE),
         () -> verify(jobExecution).setEntityTypeData("entity data"),
         () -> verify(jobExecutor).submit(jobExecution));
@@ -76,9 +81,11 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
     when(metadataDeleteJobExecutionFactory.create()).thenReturn(jobExecution);
 
-    metadataApiJobService.scheduleDelete(entityType);
+    MetadataDeleteJobExecution actualJobExecution =
+        metadataApiJobService.scheduleDelete(entityType);
 
     assertAll(
+        () -> assertEquals(jobExecution, actualJobExecution),
         () -> verify(jobExecution).setIds(singletonList("entity1")),
         () -> verify(jobExecutor).submit(jobExecution));
   }
@@ -92,9 +99,11 @@ class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
     MetadataDeleteJobExecution jobExecution = mock(MetadataDeleteJobExecution.class);
     when(metadataDeleteJobExecutionFactory.create()).thenReturn(jobExecution);
 
-    metadataApiJobService.scheduleDelete(asList(entityType1, entityType2));
+    MetadataDeleteJobExecution actualJobExecution =
+        metadataApiJobService.scheduleDelete(asList(entityType1, entityType2));
 
     assertAll(
+        () -> assertEquals(jobExecution, actualJobExecution),
         () -> verify(jobExecution).setIds(asList("entity1", "entity2")),
         () -> verify(jobExecutor).submit(jobExecution));
   }

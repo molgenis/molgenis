@@ -46,6 +46,7 @@ public class MetadataUtils {
     }
   }
 
+  @SuppressWarnings("unchecked")
   static void setEnumOptions(Attribute attribute, Object value) {
     List<String> options;
     if (value instanceof List) {

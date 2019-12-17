@@ -242,7 +242,8 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
         attribute.setOrderBy(
             orderBy != null
                 ? sortMapper.map(
-                    sortConverter.convert(orderBy), attributeFactory.getAttributeMetadata())
+                    requireNonNull(sortConverter.convert(orderBy)),
+                    attributeFactory.getAttributeMetadata())
                 : null);
         break;
       case "expression":
@@ -250,15 +251,15 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
         break;
       case "nullable":
         String nullableValue = getStringValue(value);
-        attribute.setNillable(Boolean.valueOf(nullableValue));
+        attribute.setNillable(Boolean.parseBoolean(nullableValue));
         break;
       case "auto":
         String autoValue = getStringValue(value);
-        attribute.setAuto(Boolean.valueOf(autoValue));
+        attribute.setAuto(Boolean.parseBoolean(autoValue));
         break;
       case "visible":
         String visibleValue = getStringValue(value);
-        attribute.setVisible(Boolean.valueOf(visibleValue));
+        attribute.setVisible(Boolean.parseBoolean(visibleValue));
         break;
       case "label":
         I18nValue i18Label = I18nValueMapper.toI18nValue(value);
@@ -269,7 +270,7 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
         processI18nDescription(i18Description, attribute);
         break;
       case "aggregatable":
-        attribute.setAggregatable(Boolean.valueOf(value.toString()));
+        attribute.setAggregatable(Boolean.parseBoolean(value.toString()));
         break;
       case "enumOptions":
         setEnumOptions(attribute, value);
@@ -339,8 +340,9 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
   private Range mapRange(Object value) {
     Long minLong = null;
     Long maxLong = null;
-    if (value instanceof Map) {
-      Map valueMap = (Map) value;
+    if (value instanceof Map<?, ?>) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> valueMap = (Map<String, Object>) value;
       Object min = valueMap.get("min");
       if (min != null) {
         minLong = Double.valueOf(min.toString()).longValue();

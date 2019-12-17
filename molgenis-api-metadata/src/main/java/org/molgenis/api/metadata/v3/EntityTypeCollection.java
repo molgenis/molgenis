@@ -16,10 +16,6 @@ abstract class EntityTypeCollection {
   /** @return entity id for embedded entity collections, otherwise null */
   abstract @Nullable @CheckForNull String getEntityId();
 
-  int getSize() {
-    return getEntityTypes().size();
-  }
-
   @SuppressWarnings(
       "squid:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
@@ -34,6 +30,7 @@ abstract class EntityTypeCollection {
     abstract EntityTypeCollection build();
   }
 
+  @SuppressWarnings("unused")
   static EntityTypeCollection create(
       List<EntityType> newEntities, @Nullable @CheckForNull Page newPage, String newEntityId) {
     return builder().setEntityTypes(newEntities).setPage(newPage).setEntityId(newEntityId).build();
@@ -52,6 +49,7 @@ abstract class EntityTypeCollection {
 
     abstract int getPageSize();
 
+    @SuppressWarnings("unused")
     static Page create(int newOffset, int newTotal, int newPageSize) {
       return builder().setOffset(newOffset).setTotal(newTotal).setPageSize(newPageSize).build();
     }
