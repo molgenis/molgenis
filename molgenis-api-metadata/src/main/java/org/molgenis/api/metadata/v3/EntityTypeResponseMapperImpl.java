@@ -49,8 +49,7 @@ class EntityTypeResponseMapperImpl implements EntityTypeResponseMapper {
     return EntityTypesResponse.create(
         LinksUtils.createLinksResponse(pageNumber, pageSize, total),
         results,
-        PageUtils.getPageResponse(
-            entityTypes.getEntityTypes().size(), pageNumber * pageSize, total, pageSize));
+        PageUtils.getPageResponse(pageSize, pageNumber * pageSize, total));
   }
 
   @Override
