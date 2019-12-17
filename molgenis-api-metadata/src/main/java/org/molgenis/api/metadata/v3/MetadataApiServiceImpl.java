@@ -11,7 +11,6 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.data.QueryMapper;
 import org.molgenis.api.data.SortMapper;
-import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
@@ -155,12 +154,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
 
     org.molgenis.data.Query<EntityType> dataServiceQuery = queryMapper.map(q, entityTypeRepository);
     dataServiceQuery.setFetch(new Fetch().field(EntityTypeMetadata.ID));
-    List<EntityType> entityTypes = dataServiceQuery.findAll().collect(toList());
-
-    if (entityTypes.isEmpty()) {
-      throw new ZeroResultsException(q);
-    }
-    return entityTypes;
+    return dataServiceQuery.findAll().collect(toList());
   }
 
   private org.molgenis.data.Query<Attribute> toAttributeRepositoryQuery(
@@ -194,11 +188,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     org.molgenis.data.Query<Attribute> repositoryQuery =
         toAttributeRepositoryQuery(entityTypeId, q, getAttributeRepository());
     repositoryQuery.setFetch(new Fetch().field(AttributeMetadata.ID));
-    List<Attribute> attributes = repositoryQuery.findAll().collect(toList());
-    if (attributes.isEmpty()) {
-      throw new ZeroResultsException(q);
-    }
-    return attributes;
+    return repositoryQuery.findAll().collect(toList());
   }
 
   private Repository<EntityType> getEntityTypeRepository() {

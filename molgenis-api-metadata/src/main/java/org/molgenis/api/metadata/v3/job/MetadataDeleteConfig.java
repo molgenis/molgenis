@@ -22,7 +22,7 @@ public class MetadataDeleteConfig {
       @Override
       public Job createJob(MetadataDeleteJobExecution metadataDeleteJobExecution) {
         List<String> ids = metadataDeleteJobExecution.getIds();
-        if (ids.size() == 1) {
+        if (ids.size() == 1 && !ids.get(0).isEmpty()) {
           return progress -> deleteEntityType(ids.get(0));
         } else {
           return progress -> deleteEntityTypes(ids);
