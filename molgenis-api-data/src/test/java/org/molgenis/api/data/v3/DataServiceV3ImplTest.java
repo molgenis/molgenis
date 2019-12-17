@@ -250,7 +250,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     when(repository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
     when(repository.count(countQuery)).thenReturn(100L);
     when(queryMapper.map(q, repository)).thenReturn(findAllQuery).thenReturn(countQuery);
-    when(sortMapper.map(sort)).thenReturn(dataSort);
+    when(sortMapper.map(sort, entityType)).thenReturn(dataSort);
 
     when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
 
@@ -327,7 +327,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     countQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
     when(refRepository.count(countQuery)).thenReturn(100L);
     when(refRepository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
-    when(sortMapper.map(sort)).thenReturn(dataSort);
+    when(sortMapper.map(sort, refEntityType)).thenReturn(dataSort);
 
     doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
     doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
@@ -410,7 +410,7 @@ class DataServiceV3ImplTest extends AbstractMockitoTest {
     countQuery.in("id", Arrays.asList("entity1", "entity2", "entity3"));
     when(refRepository.count(countQuery)).thenReturn(100L);
     when(refRepository.findAll(findQuery)).thenReturn(Stream.of(entity1, entity2));
-    when(sortMapper.map(sort)).thenReturn(dataSort);
+    when(sortMapper.map(sort, refEntityType)).thenReturn(dataSort);
 
     doReturn(Optional.of(repository)).when(metaDataService).getRepository(entityTypeId);
     doReturn(Optional.of(refRepository)).when(metaDataService).getRepository(refEntityTypeId);
