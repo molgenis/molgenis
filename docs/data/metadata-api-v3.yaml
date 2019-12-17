@@ -130,8 +130,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EntityTypePatch'
-            example:
-              TODO
       responses:
         '202':
           $ref: '#/components/responses/Accepted'
@@ -366,16 +364,9 @@ components:
       schema:
         type: string
       example: label=q=node
-    expandParents:
-      name: expandParents
-      description: TODO
-      in: query
-      required: false
-      schema:
-        type: boolean
     flattenAttributes:
       name: flattenAttributes
-      description: TODO
+      description: Include attributes of parent entity types
       in: query
       required: false
       schema:
@@ -548,7 +539,7 @@ components:
           $ref: "#/components/schemas/I18nValue"
         abstract:
           type: string
-        entityTypeParent:
+        extends:
           type: string
         attributes:
           type: array
@@ -563,7 +554,7 @@ components:
           $ref: "#/components/schemas/I18nValue"
         description:
           $ref: "#/components/schemas/I18nValue"
-        entityTypeParent:
+        extends:
           type: string
         attributes:
           type: array
