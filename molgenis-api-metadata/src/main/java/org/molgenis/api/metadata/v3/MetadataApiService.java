@@ -2,7 +2,6 @@ package org.molgenis.api.metadata.v3;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataDeleteJobExecution;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
@@ -53,7 +52,6 @@ public interface MetadataApiService {
    * @param entityTypeId identifier of the Attribute's EntityType
    * @param query a query that selects attributes
    * @throws UnknownEntityTypeException if no EntityType exists for the given identifier
-   * @throws ZeroResultsException if the query has zero results
    * @return a JobExecution describing the status of the job
    */
   MetadataUpsertJobExecution deleteAttributesAsync(String entityTypeId, Query query);
@@ -70,7 +68,6 @@ public interface MetadataApiService {
   /**
    * Deletes one or more EntityTypes asynchronously based on a query.
    *
-   * @throws ZeroResultsException if the query has zero results
    * @return a JobExecution describing the status of the job
    */
   MetadataDeleteJobExecution deleteEntityTypesAsync(Query query);
