@@ -56,9 +56,7 @@ public class EntityMapperImpl implements EntityMapper {
   private void setPageResponse(EntityCollection entityCollection, Builder builder) {
     Page page = entityCollection.getPage();
     if (page != null) {
-      builder.setPage(
-          getPageResponse(
-              entityCollection.getSize(), page.getOffset(), page.getTotal(), page.getPageSize()));
+      builder.setPage(getPageResponse(page.getPageSize(), page.getOffset(), page.getTotal()));
     }
   }
 
