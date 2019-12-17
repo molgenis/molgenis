@@ -22,7 +22,7 @@ import org.molgenis.api.metadata.v3.model.AttributesResponse;
 import org.molgenis.api.metadata.v3.model.Category;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
-import org.molgenis.api.model.Sort.Order.Direction;
+import org.molgenis.api.model.Order.Direction;
 import org.molgenis.api.model.response.LinksResponse;
 import org.molgenis.api.model.response.PageResponse;
 import org.molgenis.api.support.LinksUtils;

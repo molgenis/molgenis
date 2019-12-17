@@ -2,12 +2,14 @@ package org.molgenis.api.metadata.v3.model;
 
 import com.google.auto.value.AutoValue;
 import com.google.auto.value.AutoValue.CopyAnnotations;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import org.molgenis.api.model.Order;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -53,7 +55,7 @@ public abstract class CreateAttributeRequest {
   @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
-  public abstract String getOrderBy();
+  public abstract ImmutableList<Order> getOrderBy();
 
   @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
@@ -175,7 +177,7 @@ public abstract class CreateAttributeRequest {
     public abstract Builder setMappedByAttribute(
         @Nullable @CheckForNull String newMappedByAttribute);
 
-    public abstract Builder setOrderBy(@Nullable @CheckForNull String newOrderBy);
+    public abstract Builder setOrderBy(@Nullable @CheckForNull ImmutableList<Order> newOrderBy);
 
     public abstract Builder setExpression(@Nullable @CheckForNull String newExpression);
 

@@ -1,6 +1,6 @@
 package org.molgenis.api.data;
 
-import org.molgenis.api.model.Sort.Order;
+import org.molgenis.api.model.Order;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownSortAttributeException;
@@ -19,7 +19,7 @@ public class SortMapper {
     sort.getOrders()
         .forEach(
             order -> {
-              String attributeName = order.getItem();
+              String attributeName = order.getId();
               if (entityType.getAttribute(attributeName) == null) {
                 throw new UnknownSortAttributeException(entityType, attributeName);
               }

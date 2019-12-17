@@ -8,9 +8,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.molgenis.api.model.Order;
+import org.molgenis.api.model.Order.Direction;
 import org.molgenis.api.model.Sort;
-import org.molgenis.api.model.Sort.Order;
-import org.molgenis.api.model.Sort.Order.Direction;
 import org.molgenis.data.UnknownSortAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
