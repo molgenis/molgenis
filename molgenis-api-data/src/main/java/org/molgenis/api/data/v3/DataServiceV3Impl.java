@@ -184,14 +184,15 @@ class DataServiceV3Impl implements DataServiceV3 {
       int number,
       Repository<Entity> repository,
       org.molgenis.data.Query<Entity> query) {
-    Fetch fetch = fetchMapper.toFetch(repository.getEntityType(), filter, expand);
+    EntityType entityType = repository.getEntityType();
+    Fetch fetch = fetchMapper.toFetch(entityType, filter, expand);
 
     // get entities
     org.molgenis.data.Query<Entity> findQuery = new QueryImpl<>(query);
     findQuery.fetch(fetch);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapper.map(sort));
+    findQuery.sort(sortMapper.map(sort, entityType));
     List<Entity> entities = repository.findAll(findQuery).collect(toList());
 
     org.molgenis.data.Query<Entity> countQuery = new QueryImpl<>(query);
