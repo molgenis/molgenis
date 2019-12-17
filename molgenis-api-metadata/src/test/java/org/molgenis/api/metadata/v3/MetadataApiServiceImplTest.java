@@ -21,7 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.api.data.QueryMapper;
 import org.molgenis.api.data.SortMapper;
-import org.molgenis.api.metadata.v3.exception.ZeroResultsException;
 import org.molgenis.api.metadata.v3.job.MetadataUpsertJobExecution;
 import org.molgenis.api.model.Query;
 import org.molgenis.api.model.Query.Operator;
@@ -361,26 +360,6 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
         () -> metadataApiService.deleteAttributesAsync(entityTypeId, mock(Query.class)));
   }
 
-  @SuppressWarnings("unchecked")
-  @Test
-  void testDeleteAttributesQueryNoResults() {
-    String entityTypeId = "test_entity1";
-    EntityType entityType = mock(EntityType.class);
-    when(metadataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
-    Query query = Query.create("identifier", IN, asList("attr1", "attr2"));
-    org.molgenis.data.Query<Attribute> dataServiceQuery = mock(org.molgenis.data.Query.class);
-    when(dataServiceQuery.eq(AttributeMetadata.ENTITY, entityTypeId)).thenReturn(dataServiceQuery);
-    when(dataServiceQuery.findAll()).thenReturn(Stream.empty());
-    Repository<Attribute> attributeRepository = mock(Repository.class);
-    when(metadataService.getRepository(ATTRIBUTE_META_DATA, Attribute.class))
-        .thenReturn(Optional.of(attributeRepository));
-    when(queryMapper.map(query, attributeRepository)).thenReturn(dataServiceQuery);
-
-    assertThrows(
-        ZeroResultsException.class,
-        () -> metadataApiService.deleteAttributesAsync(entityTypeId, query));
-  }
-
   @Test
   void testDeleteEntityType() {
     String entityTypeId = "MyEntityTypeId";
@@ -419,20 +398,5 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
     metadataApiService.deleteEntityTypesAsync(query);
 
     assertAll(() -> verify(metadataApiJobService).scheduleDelete(asList(entityType0, entityType1)));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  void testDeleteEntityTypesQueryNoResults() {
-    Query query = Query.create("id", IN, asList("MyEntityTypeId0", "MyEntityTypeId1"));
-    org.molgenis.data.Query<EntityType> dataServiceQuery = mock(org.molgenis.data.Query.class);
-    when(dataServiceQuery.findAll()).thenReturn(Stream.empty());
-    Repository<EntityType> entityTypeRepository = mock(Repository.class);
-    when(metadataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class))
-        .thenReturn(Optional.of(entityTypeRepository));
-    when(queryMapper.map(query, entityTypeRepository)).thenReturn(dataServiceQuery);
-
-    assertThrows(
-        ZeroResultsException.class, () -> metadataApiService.deleteEntityTypesAsync(query));
   }
 }
