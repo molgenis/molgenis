@@ -30,6 +30,6 @@ public class CouldNotUploadAppExceptionTest extends ExceptionMessageTest {
   }
 
   public static Object[][] languageMessageProvider() {
-    return new Object[][] {new Object[] {"en", "Could not upload file 'app.zip'"}};
+    return new Object[][] {new Object[] {"en", "Couldn't upload file 'app.zip'"}};
   }
 }

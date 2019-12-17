@@ -30,6 +30,6 @@ public class CouldNotDeleteAppExceptionTest extends ExceptionMessageTest {
   }
 
   public static Object[][] languageMessageProvider() {
-    return new Object[][] {new Object[] {"en", "Could not delete app with id app."}};
+    return new Object[][] {new Object[] {"en", "Couldn't delete app with id app."}};
   }
 }
