@@ -1,5 +1,6 @@
 package org.molgenis.api.metadata.v3;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.api.metadata.v3.MetadataUtils.getStringValue;
 import static org.molgenis.api.metadata.v3.MetadataUtils.setAttributeType;
@@ -10,6 +11,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.IS_READ_ONLY;
 import static org.molgenis.data.meta.model.AttributeMetadata.IS_UNIQUE;
 import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.api.convert.SortConverter;
 import org.molgenis.api.data.SortMapper;
 import org.molgenis.api.metadata.v3.exception.InvalidKeyException;
 import org.molgenis.api.metadata.v3.exception.UnsupportedFieldException;
@@ -28,6 +29,10 @@ import org.molgenis.api.metadata.v3.model.CreateAttributeRequest;
 import org.molgenis.api.metadata.v3.model.CreateEntityTypeRequest;
 import org.molgenis.api.metadata.v3.model.I18nValue;
 import org.molgenis.api.metadata.v3.model.Range;
+import org.molgenis.api.model.Order;
+import org.molgenis.api.model.Order.Builder;
+import org.molgenis.api.model.Order.Direction;
+import org.molgenis.api.model.Sort;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
@@ -48,7 +53,6 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
   private final AttributeFactory attributeFactory;
   private final MetaDataService metaDataService;
   private final SortMapper sortMapper;
-  private final SortConverter sortConverter;
   private final EntityManager entityManager;
   private final EntityTypeMetadata entityTypeMetadata;
 
@@ -56,13 +60,11 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
       AttributeFactory attributeFactory,
       MetaDataService metaDataService,
       SortMapper sortMapper,
-      SortConverter sortConverter,
       EntityManager entityManager,
       EntityTypeMetadata entityTypeMetadata) {
     this.attributeFactory = requireNonNull(attributeFactory);
     this.metaDataService = requireNonNull(metaDataService);
     this.sortMapper = requireNonNull(sortMapper);
-    this.sortConverter = requireNonNull(sortConverter);
     this.entityManager = requireNonNull(entityManager);
     this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
   }
@@ -110,11 +112,8 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
     if (attributeRequest.getCascadeDelete() != null) {
       attribute.setCascadeDelete(attributeRequest.getCascadeDelete());
     }
-    String orderBy = attributeRequest.getOrderBy();
-    attribute.setOrderBy(
-        orderBy != null
-            ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy)), entityType)
-            : null);
+    ImmutableList<Order> orderBy = attributeRequest.getOrderBy();
+    attribute.setOrderBy(orderBy != null ? sortMapper.map(Sort.create(orderBy), entityType) : null);
     attribute.setExpression(attributeRequest.getExpression());
     Boolean nullable = attributeRequest.getNullable();
     if (nullable != null) {
@@ -238,13 +237,7 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
         attribute.setCascadeDelete(isCascade);
         break;
       case "orderBy":
-        String orderBy = getStringValue(value);
-        attribute.setOrderBy(
-            orderBy != null
-                ? sortMapper.map(
-                    requireNonNull(sortConverter.convert(orderBy)),
-                    attributeFactory.getAttributeMetadata())
-                : null);
+        mapOrderBy(value).ifPresent(attribute::setOrderBy);
         break;
       case "expression":
         attribute.setExpression(getStringValue(value));
@@ -335,6 +328,27 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
     } else {
       throw new UnknownEntityTypeException(refEntityTypeId);
     }
+  }
+
+  @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+  private Optional<org.molgenis.data.Sort> mapOrderBy(Object value) {
+    List<Object> values = (List<Object>) value;
+    ImmutableList<Order> orders =
+        values.stream()
+            .map(item -> mapOrderByItem((Map<String, String>) item))
+            .collect(toImmutableList());
+    Sort sort = Sort.create(orders);
+
+    return Optional.of(sortMapper.map(sort, attributeFactory.getAttributeMetadata()));
+  }
+
+  private Order mapOrderByItem(Map<String, String> orderbyItem) {
+    Builder orderBuilder = Order.builder().setId(orderbyItem.get("id"));
+    String order = orderbyItem.get("order");
+    if (order != null) {
+      orderBuilder.setDirection(Direction.valueOf(order));
+    }
+    return orderBuilder.build();
   }
 
   private Range mapRange(Object value) {
