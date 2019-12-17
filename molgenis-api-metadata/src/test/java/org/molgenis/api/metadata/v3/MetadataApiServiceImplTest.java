@@ -83,7 +83,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     Sort sort = Sort.EMPTY_SORT;
     org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
-    when(sortMapper.map(sort)).thenReturn(repositorySort);
+    when(sortMapper.map(sort, null)).thenReturn(repositorySort); // FIXME
 
     int size = 5;
     int number = 2;
@@ -128,7 +128,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     Sort sort = Sort.EMPTY_SORT;
     org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
-    when(sortMapper.map(sort)).thenReturn(repositorySort);
+    when(sortMapper.map(sort, null)).thenReturn(repositorySort); // FIXME
 
     int size = 5;
     int number = 2;
@@ -191,7 +191,7 @@ class MetadataApiServiceImplTest extends AbstractMockitoTest {
 
     Sort sort = Sort.EMPTY_SORT;
     org.molgenis.data.Sort repositorySort = mock(org.molgenis.data.Sort.class);
-    when(sortMapper.map(sort)).thenReturn(repositorySort);
+    when(sortMapper.map(sort, null)).thenReturn(repositorySort); // FIXME
 
     int size = 5;
     int number = 2;

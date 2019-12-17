@@ -112,7 +112,9 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
     }
     String orderBy = attributeRequest.getOrderBy();
     attribute.setOrderBy(
-        orderBy != null ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy))) : null);
+        orderBy != null
+            ? sortMapper.map(requireNonNull(sortConverter.convert(orderBy)), entityType)
+            : null);
     attribute.setExpression(attributeRequest.getExpression());
     Boolean nullable = attributeRequest.getNullable();
     if (nullable != null) {
@@ -238,7 +240,10 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
       case "orderBy":
         String orderBy = getStringValue(value);
         attribute.setOrderBy(
-            orderBy != null ? sortMapper.map(sortConverter.convert(orderBy)) : null);
+            orderBy != null
+                ? sortMapper.map(
+                    sortConverter.convert(orderBy), attributeFactory.getAttributeMetadata())
+                : null);
         break;
       case "expression":
         attribute.setExpression(getStringValue(value));

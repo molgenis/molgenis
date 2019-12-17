@@ -60,7 +60,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     org.molgenis.data.Query<EntityType> findQuery = new QueryImpl<>(repositoryQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapper.map(sort));
+    findQuery.sort(sortMapper.map(sort, repository.getEntityType()));
     List<EntityType> entityTypes = repository.findAll(findQuery).collect(toList());
 
     org.molgenis.data.Query<EntityType> countQuery = new QueryImpl<>(repositoryQuery);
@@ -93,7 +93,7 @@ public class MetadataApiServiceImpl implements MetadataApiService {
     org.molgenis.data.Query<Attribute> findQuery = new QueryImpl<>(repositoryQuery);
     findQuery.offset(number * size);
     findQuery.pageSize(size);
-    findQuery.sort(sortMapper.map(sort));
+    findQuery.sort(sortMapper.map(sort, repository.getEntityType()));
     List<Attribute> attributes = repository.findAll(findQuery).collect(toList());
 
     org.molgenis.data.Query<Attribute> countQuery = new QueryImpl<>(repositoryQuery);

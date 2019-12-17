@@ -298,7 +298,7 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
     org.molgenis.api.model.Sort sort = mock(org.molgenis.api.model.Sort.class);
     when(sortConverter.convert("-id")).thenReturn(sort);
     Sort molgenisSort = new Sort("id", Direction.DESC);
-    when(sortMapper.map(sort)).thenReturn(molgenisSort);
+    when(sortMapper.map(sort, null)).thenReturn(molgenisSort); // FIXME
 
     Map<String, Object> attributeValueMap = new HashMap<>();
     attributeValueMap.put("id", 1);
