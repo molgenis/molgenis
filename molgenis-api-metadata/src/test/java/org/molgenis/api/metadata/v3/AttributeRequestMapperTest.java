@@ -177,15 +177,15 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
     when(attributeFactory.create()).thenReturn(attribute);
 
     Map<String, Long> range = new HashMap<>();
-    range.put("min", 1l);
-    range.put("max", 10l);
+    range.put("min", 1L);
+    range.put("max", 10L);
     Map<String, Object> attributeValueMap = new HashMap<>();
     attributeValueMap.put("id", 1);
     attributeValueMap.put("range", range);
     EntityType entityType = mock(EntityType.class);
     attributeRequestMapper.toAttributes(Collections.singletonList(attributeValueMap), entityType);
 
-    verify(attribute).setRange(new org.molgenis.data.Range(1l, 10l));
+    verify(attribute).setRange(new org.molgenis.data.Range(1L, 10L));
   }
 
   @Test
@@ -240,6 +240,7 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
 
     Attribute mappedByAttr = mock(Attribute.class);
 
+    @SuppressWarnings("unchecked")
     Repository<Attribute> repo = mock(Repository.class);
     when(metaDataService.getRepository(AttributeMetadata.ATTRIBUTE_META_DATA, Attribute.class))
         .thenReturn(Optional.of(repo));
@@ -294,11 +295,13 @@ class AttributeRequestMapperTest extends AbstractMockitoTest {
   @Test
   void toAttributesOrder() {
     Attribute attribute = mock(Attribute.class);
+    AttributeMetadata attributeMetadata = mock(AttributeMetadata.class);
+    when(attributeFactory.getAttributeMetadata()).thenReturn(attributeMetadata);
     when(attributeFactory.create()).thenReturn(attribute);
     org.molgenis.api.model.Sort sort = mock(org.molgenis.api.model.Sort.class);
     when(sortConverter.convert("-id")).thenReturn(sort);
     Sort molgenisSort = new Sort("id", Direction.DESC);
-    when(sortMapper.map(sort, null)).thenReturn(molgenisSort); // FIXME
+    when(sortMapper.map(sort, attributeMetadata)).thenReturn(molgenisSort);
 
     Map<String, Object> attributeValueMap = new HashMap<>();
     attributeValueMap.put("id", 1);
