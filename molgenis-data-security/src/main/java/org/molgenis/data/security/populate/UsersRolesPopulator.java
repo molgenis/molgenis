@@ -1,4 +1,4 @@
-package org.molgenis.bootstrap.populate;
+package org.molgenis.data.security.populate;
 
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.UserMetadata;

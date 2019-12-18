@@ -13,6 +13,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
+import org.molgenis.data.security.populate.UsersRolesPopulatorImpl;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.jobs.JobFactoryRegistrar;
@@ -45,6 +46,7 @@ public class PlatformBootstrapper {
   private final I18nPopulator i18nPopulator;
   private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
   private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
+  private final UsersRolesPopulatorImpl usersRolesPopulator;
 
   PlatformBootstrapper(
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
@@ -61,7 +63,8 @@ public class PlatformBootstrapper {
       TransactionManager transactionManager,
       I18nPopulator i18nPopulator,
       DynamicDecoratorPopulator dynamicDecoratorPopulator,
-      EntityTypeRegistryPopulator entityTypeRegistryPopulator) {
+      EntityTypeRegistryPopulator entityTypeRegistryPopulator,
+      UsersRolesPopulatorImpl usersRolesPopulator) {
     this.dataSourceAclTablesPopulator = dataSourceAclTablesPopulator;
     this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
     this.repoCollectionBootstrapper = repoCollectionBootstrapper;
@@ -77,6 +80,7 @@ public class PlatformBootstrapper {
     this.i18nPopulator = i18nPopulator;
     this.dynamicDecoratorPopulator = dynamicDecoratorPopulator;
     this.entityTypeRegistryPopulator = entityTypeRegistryPopulator;
+    this.usersRolesPopulator = usersRolesPopulator;
   }
 
   public void bootstrap(ContextRefreshedEvent event) {
@@ -143,6 +147,10 @@ public class PlatformBootstrapper {
                   LOG.trace("Populating the entity type registry ...");
                   entityTypeRegistryPopulator.populate();
                   LOG.trace("Populated the entity type registry");
+
+                  LOG.trace("Populating users and roles ...");
+                  usersRolesPopulator.populate();
+                  LOG.trace("Populated users and roles");
 
                   bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
                 });

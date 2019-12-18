@@ -1,4 +1,4 @@
-package org.molgenis.bootstrap.populate;
+package org.molgenis.data.security.populate;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupService.AUTHORITY_EDITOR;
