@@ -2,10 +2,12 @@ package org.molgenis.data.security.auth;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Answers.RETURNS_SELF;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -15,7 +17,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
+import static org.molgenis.data.security.auth.GroupService.EDITOR;
+import static org.molgenis.data.security.auth.GroupService.MANAGER;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -31,6 +37,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
+import org.molgenis.security.core.model.GroupValue;
+import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
 
@@ -47,8 +55,6 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
 
   @Captor private ArgumentCaptor<Stream<Role>> roleCaptor;
   @Captor private ArgumentCaptor<Stream<RoleMembership>> memberCaptor;
-  @Captor private ArgumentCaptor<String> groupCaptor;
-  @Captor private ArgumentCaptor<GroupIdentity> identityCaptor;
 
   private GroupPackageService groupPackageService;
 
@@ -64,6 +70,116 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
             groupFactory,
             roleMetadata,
             mutableAclService);
+  }
+
+  @Test
+  void testCreateGroup() {
+    String id = "test";
+    Package aPackage = mock(Package.class);
+    when(aPackage.getId()).thenReturn(id);
+    when(aPackage.getLabel()).thenReturn(id);
+    GroupValue groupValue = mock(GroupValue.class);
+    when(groupValue.getName()).thenReturn("group");
+    Group group = mock(Group.class);
+    Role editorRole = mock(Role.class);
+    Role managerRole = mock(Role.class);
+
+    RoleValue editorRoleValue =
+        RoleValue.builder().setName("GROUP_EDITOR").setLabel(EDITOR).build();
+    RoleValue managerRoleValue =
+        RoleValue.builder().setName("GROUP_MANAGER").setLabel(MANAGER).build();
+
+    when(groupValueFactory.createGroup(id, id, GroupService.DEFAULT_ROLES)).thenReturn(groupValue);
+    when(groupFactory.create(groupValue)).thenReturn(group);
+
+    when(editorRole.getName()).thenReturn("GROUP_EDITOR");
+    when(editorRole.getLabel()).thenReturn(EDITOR);
+    doReturn(editorRole).when(roleFactory).create(editorRoleValue);
+
+    when(managerRole.getName()).thenReturn("GROUP_MANAGER");
+    when(managerRole.getLabel()).thenReturn(MANAGER);
+    doReturn(managerRole).when(roleFactory).create(managerRoleValue);
+
+    Role defaultEditorRole = mock(Role.class);
+    when(defaultEditorRole.getLabel()).thenReturn(EDITOR);
+
+    Role defaultManagerRole = mock(Role.class);
+    when(defaultManagerRole.getIncludes()).thenReturn(singletonList(defaultEditorRole));
+
+    when(groupValue.getRoles()).thenReturn(ImmutableList.of(editorRoleValue, managerRoleValue));
+
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(query);
+    when(query.eq(eq(RoleMetadata.NAME), any(String.class)).findOne())
+        .thenReturn(defaultManagerRole, defaultEditorRole);
+
+    groupPackageService.createGroup(aPackage);
+
+    verify(dataService).add(GROUP, group);
+    verify(dataService).add(eq(ROLE), roleCaptor.capture());
+    assertEquals(asList(managerRole, editorRole), roleCaptor.getValue().collect(toList()));
+
+    verify(managerRole).setGroup(group);
+    verify(managerRole).setIncludes(asList(defaultManagerRole, editorRole));
+
+    verify(editorRole).setGroup(group);
+    verify(editorRole).setIncludes(singletonList(defaultEditorRole));
+  }
+
+  @Test
+  void testCreateGroups() {
+    String id = "test";
+    Package aPackage = mock(Package.class);
+    when(aPackage.getId()).thenReturn(id);
+    when(aPackage.getLabel()).thenReturn(id);
+    GroupValue groupValue = mock(GroupValue.class);
+    when(groupValue.getName()).thenReturn("group");
+    Group group = mock(Group.class);
+    Role editorRole = mock(Role.class);
+    Role managerRole = mock(Role.class);
+
+    RoleValue editorRoleValue =
+        RoleValue.builder().setName("GROUP_EDITOR").setLabel(EDITOR).build();
+    RoleValue managerRoleValue =
+        RoleValue.builder().setName("GROUP_MANAGER").setLabel(MANAGER).build();
+
+    when(groupValueFactory.createGroup(id, id, GroupService.DEFAULT_ROLES)).thenReturn(groupValue);
+    when(groupFactory.create(groupValue)).thenReturn(group);
+
+    when(editorRole.getName()).thenReturn("GROUP_EDITOR");
+    when(editorRole.getLabel()).thenReturn(EDITOR);
+    doReturn(editorRole).when(roleFactory).create(editorRoleValue);
+
+    when(managerRole.getName()).thenReturn("GROUP_MANAGER");
+    when(managerRole.getLabel()).thenReturn(MANAGER);
+    doReturn(managerRole).when(roleFactory).create(managerRoleValue);
+
+    Role defaultEditorRole = mock(Role.class);
+    when(defaultEditorRole.getLabel()).thenReturn(EDITOR);
+
+    Role defaultManagerRole = mock(Role.class);
+    when(defaultManagerRole.getIncludes()).thenReturn(singletonList(defaultEditorRole));
+
+    when(groupValue.getRoles()).thenReturn(ImmutableList.of(editorRoleValue, managerRoleValue));
+
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(query);
+    when(query.eq(eq(RoleMetadata.NAME), any(String.class)).findOne())
+        .thenReturn(defaultManagerRole, defaultEditorRole);
+
+    groupPackageService.createGroups(singletonList(aPackage));
+
+    verify(dataService).add(GROUP, group);
+    verify(dataService).add(eq(ROLE), roleCaptor.capture());
+    assertEquals(asList(managerRole, editorRole), roleCaptor.getValue().collect(toList()));
+
+    verify(managerRole).setGroup(group);
+    verify(managerRole).setIncludes(asList(defaultManagerRole, editorRole));
+
+    verify(editorRole).setGroup(group);
+    verify(editorRole).setIncludes(singletonList(defaultEditorRole));
   }
 
   @SuppressWarnings("unchecked")
@@ -108,7 +224,7 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
     List<Stream<RoleMembership>> values = memberCaptor.getAllValues();
     assertEquals(emptyList(), values.get(1).collect(toList()));
     assertEquals(asList(member1, member2), values.get(0).collect(toList()));
-    verify(dataService).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
+    verify(dataService).delete(eq(ROLE), roleCaptor.capture());
     assertEquals(asList(role1, role2), roleCaptor.getValue().collect(toList()));
     verify(dataService).delete(GROUP, group);
     verify(mutableAclService).deleteAcl(new GroupIdentity(groupName), true);
