@@ -1,0 +1,102 @@
+{
+  "id": "v3meta_MyDataset",
+  "package": "v3meta",
+  "extends": "v3meta_Describable",
+  "label": {
+    "defaultValue": "My Dataset"
+  },
+  "description": {
+    "defaultValue": "My Dataset with data"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_MyDataset_myBool",
+      "name": "myBool",
+      "type": "bool"
+    },
+    {
+      "id": "v3meta_MyDataset_myCategorical",
+      "name": "myCategorical",
+      "type": "categorical",
+      "refEntityType": "v3meta_MyStrings"
+    },
+    {
+      "id": "v3meta_MyDataset_myCategoricalMref",
+      "name": "myCategoricalMref",
+      "type": "categorical_mref",
+      "refEntityType": "v3meta_MyNumbers"
+    },
+    {
+      "id": "v3meta_MyDataset_myDate",
+      "name": "myDate",
+      "type": "date"
+    },
+    {
+      "id": "v3meta_MyDataset_myDateTime",
+      "name": "myDateTime",
+      "type": "date_time"
+    },
+    {
+      "id": "v3meta_MyDataset_myEnum",
+      "name": "myEnum",
+      "type": "enum",
+      "enumOptions": [
+        "option0",
+        "option1",
+        "option2"
+      ]
+    },
+    {
+      "id": "v3meta_MyDataset_myNumbers",
+      "name": "myNumbers",
+      "type": "compound"
+    },
+    {
+      "id": "v3meta_MyDataset_myDecimal",
+      "name": "myDecimal",
+      "type": "decimal"
+    },
+    {
+      "id": "v3meta_MyDataset_myInt",
+      "name": "myInt",
+      "type": "int",
+      "range": {
+        "min": 2,
+        "max": 4
+      }
+    },
+    {
+      "id": "v3meta_MyDataset_myLong",
+      "name": "myLong",
+      "type": "long"
+    },
+    {
+      "id": "v3meta_MyDataset_myString",
+      "name": "myString",
+      "type": "string"
+    },
+    {
+      "id": "v3meta_MyDataset_myText",
+      "name": "myText",
+      "type": "text"
+    },
+    {
+      "id": "v3meta_MyDataset_myXref",
+      "name": "myXref",
+      "type": "xref",
+      "refEntityType": "v3meta_MyNumbers"
+    },
+    {
+      "id": "v3meta_MyDataset_myMref",
+      "name": "myMref",
+      "type": "mref",
+      "refEntityType": "v3meta_MyStrings"
+    },
+    {
+      "id": "v3meta_MyDataset_myComputed",
+      "name": "myComputed",
+      "type": "string",
+      "expression": "{\"template\":\"static\"}"
+    }
+  ]
+}

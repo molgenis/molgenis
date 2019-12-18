@@ -1,0 +1,89 @@
+{
+  "links": {
+    "self": "${baseUri}/api/metadata/v3meta_MyStrings"
+  },
+  "data": {
+    "id": "v3meta_MyStrings",
+    "label": "My Strings (updated in english)",
+    "package": {
+      "links": {
+        "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+      }
+    },
+    "attributes": {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes"
+      },
+      "items": [
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_id"
+          },
+          "data": {
+            "id": "v3meta_MyStrings_id",
+            "name": "id",
+            "sequenceNr": 0,
+            "type": "string",
+            "idAttribute": true,
+            "labelAttribute": false,
+            "label": "id",
+            "nullable": false,
+            "auto": false,
+            "visible": true,
+            "unique": true,
+            "readOnly": true,
+            "aggregatable": false
+          }
+        },
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_label"
+          },
+          "data": {
+            "id": "v3meta_MyStrings_label",
+            "name": "label",
+            "sequenceNr": 1,
+            "type": "string",
+            "idAttribute": false,
+            "labelAttribute": true,
+            "lookupAttributeIndex": 0,
+            "label": "Label of the label attribute",
+            "nullable": false,
+            "auto": false,
+            "visible": true,
+            "unique": false,
+            "readOnly": false,
+            "aggregatable": false
+          }
+        },
+        {
+          "link": {
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes/v3meta_MyStrings_int"
+          },
+          "data": {
+            "id": "v3meta_MyStrings_int",
+            "name": "int",
+            "sequenceNr": 2,
+            "type": "int",
+            "idAttribute": false,
+            "labelAttribute": false,
+            "lookupAttributeIndex": 1,
+            "label": "int",
+            "nullable": true,
+            "auto": false,
+            "visible": true,
+            "unique": false,
+            "readOnly": false,
+            "aggregatable": false,
+            "range": {
+              "min": 1,
+              "max": 2
+            }
+          }
+        }
+      ]
+    },
+    "abstract": false,
+    "indexingDepth": 1
+  }
+}

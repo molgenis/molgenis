@@ -1,0 +1,150 @@
+{
+  "links": {
+    "self": "${baseUri}/api/metadata?q=package==v3meta"
+  },
+  "items": [
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_Describable"
+      },
+      "data": {
+        "id": "v3meta_Describable",
+        "label": "Describable",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_Describable/attributes"
+          }
+        },
+        "abstract": true,
+        "extends": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_Identifiable"
+          }
+        },
+        "indexingDepth": 1
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_Identifiable"
+      },
+      "data": {
+        "id": "v3meta_Identifiable",
+        "label": "Identifiable",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_Identifiable/attributes"
+          }
+        },
+        "abstract": true,
+        "indexingDepth": 1
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyDataset"
+      },
+      "data": {
+        "id": "v3meta_MyDataset",
+        "label": "My Dataset",
+        "description": "My Dataset with data",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_MyDataset/attributes"
+          }
+        },
+        "abstract": false,
+        "extends": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_Describable"
+          }
+        },
+        "indexingDepth": 1
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyNumbers"
+      },
+      "data": {
+        "id": "v3meta_MyNumbers",
+        "label": "My Numbers",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_MyNumbers/attributes"
+          }
+        },
+        "abstract": false,
+        "indexingDepth": 1
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyOneToMany"
+      },
+      "data": {
+        "id": "v3meta_MyOneToMany",
+        "label": "My OneToMany",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_MyOneToMany/attributes"
+          }
+        },
+        "abstract": false,
+        "indexingDepth": 1
+      }
+    },
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/v3meta_MyStrings"
+      },
+      "data": {
+        "id": "v3meta_MyStrings",
+        "label": "My Strings",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/v3meta"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/v3meta_MyStrings/attributes"
+          }
+        },
+        "abstract": false,
+        "indexingDepth": 1
+      }
+    }
+  ],
+  "page": {
+    "size": 100,
+    "totalElements": 6,
+    "totalPages": 1,
+    "number": 0
+  }
+}

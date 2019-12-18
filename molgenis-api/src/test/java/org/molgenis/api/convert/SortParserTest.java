@@ -3,11 +3,11 @@ package org.molgenis.api.convert;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.molgenis.api.model.Sort.Order.Direction.DESC;
+import static org.molgenis.api.model.Order.Direction.DESC;
 import static org.molgenis.api.model.Sort.create;
 
 import org.junit.jupiter.api.Test;
-import org.molgenis.api.model.Sort.Order;
+import org.molgenis.api.model.Order;
 
 class SortParserTest {
 
