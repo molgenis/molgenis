@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Step38AddAnonymouseRoleToDb extends MolgenisUpgrade {
-  private static final Logger LOG = LoggerFactory.getLogger(Step33UpdateForeignKeyDeferred.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Step38AddAnonymouseRoleToDb.class);
 
   private final DataSource dataSource;
 
@@ -23,13 +23,13 @@ public class Step38AddAnonymouseRoleToDb extends MolgenisUpgrade {
 
   @Override
   public void upgrade() {
-    LOG.debug("Adding role ANONYMOUSE to roles tabel and including it for the USER role");
+    LOG.debug("Adding role ANONYMOUS to roles table and including it for the USER role");
     try {
       addAnonymouseRoleToDb();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    LOG.info("Added role ANONYMOUSE to roles tabel and included it for the USER role");
+    LOG.info("Added role ANONYMOUS to roles table and included it for the USER role");
   }
 
   private void addAnonymouseRoleToDb() throws IOException {
