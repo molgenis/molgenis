@@ -113,6 +113,11 @@ For all technical names in the EMX format, the following rules apply:
 
 These rules only apply to the technical names, labels are not limited by these rules.
 
+## Packages without a parent
+Creating a package without a parent package (also known as a root package) automatically results in the creation of a group. Initially the group name is set to the package identifier, unless the package identifier is not a valid group name. In this case a unique group name is generated. The initial group label is set to the package label. Otherwise the group creation is the same as when created using the security manager plugin. Both name and label can be modified afterwards.  
+
+View the section on [groups and roles](guide-groups-roles.md), for information on creating a group.
+
 ## Attributes options
 
 ### Required columns
