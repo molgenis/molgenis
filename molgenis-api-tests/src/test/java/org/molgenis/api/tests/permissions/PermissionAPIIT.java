@@ -1,6 +1,5 @@
 package org.molgenis.api.tests.permissions;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.api.permissions.PermissionsController.OBJECTS;
@@ -13,6 +12,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFileWithoutPackage;
+import static org.molgenis.test.IsEqualJson.isEqualJson;
 
 import com.google.common.collect.ImmutableMap;
 import io.restassured.http.ContentType;
@@ -179,10 +179,9 @@ class PermissionAPIIT extends AbstractApiTests {
         .statusCode(201);
 
     String response =
-        "{data={permissions=[{permission=WRITEMETA, user=admin}, {user="
+        "{data={permissions=[{role=PERM1_EDITOR, inheritedPermissions=[{permission=WRITE, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=PERM1_VIEWER, permission=READ, inheritedPermissions=[]}], object={id=perm1, label=perm1}}]}, {role=PERM1_MANAGER, inheritedPermissions=[{permission=WRITEMETA, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=PERM1_EDITOR, permission=WRITE, inheritedPermissions=[{role=PERM1_VIEWER, permission=READ, inheritedPermissions=[]}]}], object={id=perm1, label=perm1}}]}, {role=PERM1_VIEWER, inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}, {permission=WRITEMETA, user=admin, inheritedPermissions=[{type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=PERM1_MANAGER, permission=WRITEMETA, inheritedPermissions=[{role=PERM1_EDITOR, permission=WRITE, inheritedPermissions=[{role=PERM1_VIEWER, permission=READ, inheritedPermissions=[]}]}]}], object={id=perm1, label=perm1}}]}, {user="
             + testUserName
-            + ", inheritedPermissions=["
-            + "{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], id=perm1_entity1, label=entity1}}";
+            + ", inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], id=perm1_entity1, label=entity1}}";
 
     Response actual =
         given()
@@ -341,7 +340,7 @@ class PermissionAPIIT extends AbstractApiTests {
         .get(PermissionsController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta")
         .then()
         .statusCode(200)
-        .body(equalTo("{\"data\":[\"READ\",\"WRITE\"]}"));
+        .body(isEqualJson("{\"data\":[\"READ\",\"WRITE\"]}"));
   }
 
   @Test
@@ -367,7 +366,7 @@ class PermissionAPIIT extends AbstractApiTests {
         .get(PermissionsController.BASE_URI + "/entityType/perm1_entity2?q=user==" + testUserName)
         .then()
         .statusCode(200)
-        .body(equalTo(response));
+        .body(isEqualJson(response));
 
     String delete = "{user:" + testUserName + "}";
     given()
