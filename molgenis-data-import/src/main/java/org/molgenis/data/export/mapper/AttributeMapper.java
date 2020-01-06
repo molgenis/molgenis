@@ -44,7 +44,7 @@ public class AttributeMapper {
   public static final ImmutableMap<String, String> ATTRIBUTE_ATTRS;
 
   static {
-    Builder builder =
+    Builder<String, String> builder =
         ImmutableMap.<String, String>builder()
             .put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME)
             .put(EMX_ATTRIBUTES_LABEL, AttributeMetadata.LABEL)

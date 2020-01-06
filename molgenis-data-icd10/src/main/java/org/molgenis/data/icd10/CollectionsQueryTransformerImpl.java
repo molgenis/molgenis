@@ -43,6 +43,7 @@ public class CollectionsQueryTransformerImpl implements CollectionsQueryTransfor
     return query;
   }
 
+  @SuppressWarnings("unchecked")
   private void transformQueryRule(QueryRule rule, String icd10EntityTypeId) {
     List<Object> queryValues;
 
@@ -52,7 +53,6 @@ public class CollectionsQueryTransformerImpl implements CollectionsQueryTransfor
         rule.setOperator(QueryRule.Operator.IN);
         break;
       case IN:
-        //noinspection unchecked
         queryValues = (List<Object>) rule.getValue();
         break;
       default:

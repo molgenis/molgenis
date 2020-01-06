@@ -32,7 +32,7 @@ public class EntityTypeMapper {
   public static final ImmutableMap<String, String> ENTITIES_ATTRS;
 
   static {
-    Builder builder =
+    Builder<String, String> builder =
         ImmutableMap.<String, String>builder()
             .put(EMX_ENTITIES_NAME, EntityTypeMetadata.ID)
             .put(EMX_ENTITIES_PACKAGE, EntityTypeMetadata.PACKAGE)

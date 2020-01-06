@@ -27,7 +27,7 @@ public class OwnershipDecoratorFactory implements DynamicRepositoryDecoratorFact
 
   @Override
   @SuppressWarnings("unchecked")
-  public Repository createDecoratedRepository(
+  public Repository<Entity> createDecoratedRepository(
       Repository<Entity> repository, Map<String, Object> parameters) {
     String ownerAttribute = parameters.get(OWNER_ATTRIBUTE).toString();
     return new OwnershipDecorator(repository, mutableAclService, ownerAttribute);
