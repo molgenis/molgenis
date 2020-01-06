@@ -31,12 +31,12 @@ import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -67,7 +67,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
     mockMvc =
         MockMvcBuilders.standaloneSetup(authenticationController)
             .setMessageConverters(
-                new FormHttpMessageConverter(), new MolgenisGsonHttpMessageConverter(new Gson()))
+                new FormHttpMessageConverter(), new GsonHttpMessageConverter(new Gson()))
             .build();
 
     reset(authenticationSettings);
