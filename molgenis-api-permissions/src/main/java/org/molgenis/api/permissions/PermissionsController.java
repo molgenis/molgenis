@@ -377,7 +377,7 @@ public class PermissionsController extends ApiController {
   }
 
   private Set<PermissionResponse> convertToPermissions(Set<LabelledPermission> permissions) {
-    LinkedHashSet<PermissionResponse> result = new LinkedHashSet();
+    LinkedHashSet<PermissionResponse> result = new LinkedHashSet<>();
     permissions.stream()
         .map(
             labelledPermission ->

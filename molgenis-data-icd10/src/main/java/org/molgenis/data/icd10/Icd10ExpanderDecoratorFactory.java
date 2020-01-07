@@ -31,7 +31,7 @@ public class Icd10ExpanderDecoratorFactory implements DynamicRepositoryDecorator
 
   @Override
   @SuppressWarnings("unchecked")
-  public Repository createDecoratedRepository(
+  public Repository<Entity> createDecoratedRepository(
       Repository<Entity> repository, Map<String, Object> parameters) {
     return new Icd10ExpanderDecorator(
         repository,
