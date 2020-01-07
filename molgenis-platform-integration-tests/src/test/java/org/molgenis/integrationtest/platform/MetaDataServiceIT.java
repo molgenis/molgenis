@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -127,8 +128,14 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
         });
   }
 
+  @BeforeEach
+  void beforeEach(ApplicationContext applicationContext) {
+    waitForAllIndicesStable(applicationContext);
+  }
+
   @AfterAll
   public static void tearDownAfterAll(ApplicationContext applicationContext) {
+    waitForAllIndicesStable(applicationContext);
     runAsSystem(
         () -> {
           depopulate(applicationContext);
@@ -243,7 +250,7 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
         metaDataService
             .getEntityType(ENTITY_TYPE_ID)
             .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
-    ;
+
     updatedEntityType.getAttribute(ATTR_COMPOUND_CHILD_INT).setDataType(DATE_TIME);
     Exception exception =
         assertThrows(

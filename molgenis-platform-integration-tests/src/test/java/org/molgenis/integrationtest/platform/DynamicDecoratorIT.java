@@ -171,6 +171,7 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
   public static void tearDownAfterClass(ApplicationContext applicationContext) {
     DataService dataService = applicationContext.getBean(DataService.class);
     MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
 
     runAsSystem(
         () -> {
@@ -178,6 +179,8 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
           dataService.deleteAll(refEntityTypeDynamic.getId());
           dataService.deleteAll(DECORATOR_CONFIGURATION);
           dataService.deleteAll(DecoratorParametersMetadata.DECORATOR_PARAMETERS);
+          waitForIndexToBeStable(entityTypeDynamic, indexJobScheduler, LOG);
+          waitForIndexToBeStable(refEntityTypeDynamic, indexJobScheduler, LOG);
           metaDataService.deleteEntityType(entityTypeDynamic.getId());
           metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
         });
@@ -209,12 +212,20 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
     }
   }
 
-  private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+  /**
+   * Wait till the index is stable. Index job is executed asynchronously. This method waits for all
+   * index jobs relevant for this entity to be finished.
+   *
+   * @param entityType name of the entity whose index needs to be stable
+   */
+  static void waitForIndexToBeStable(
+      EntityType entityType, IndexJobScheduler indexService, Logger log) {
     try {
-      indexJobScheduler.waitForAllIndicesStable();
+      indexService.waitForIndexToBeStableIncludingReferences(entityType);
+      log.info("Index for entity [{}] incl. references is stable", entityType.getId());
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      log.info(
+          "Interrupted waiting for [{}] incl. references to become stable", entityType.getId(), e);
     }
   }
 }

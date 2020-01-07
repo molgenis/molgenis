@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -300,7 +301,12 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
 
   @AfterEach
   void tearDownAfterClass() {
-    runAsSystem(() -> dataService.deleteAll(PACKAGE, Stream.of(PACKAGE_A)));
+    waitForWorkToBeFinished(indexService, LOG);
+    runAsSystem(() -> dataService.delete(ENTITY_TYPE_META_DATA, entityTypeA));
+    runAsSystem(() -> dataService.delete(ENTITY_TYPE_META_DATA, entityTypeB));
+
+    runAsSystem(() -> dataService.delete(PACKAGE, packageB));
+    runAsSystem(() -> dataService.delete(PACKAGE, packageA));
     waitForWorkToBeFinished(indexService, LOG);
   }
 
