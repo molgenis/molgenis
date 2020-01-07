@@ -11,6 +11,7 @@ import org.molgenis.data.validation.meta.TagValidator;
 import org.springframework.stereotype.Component;
 
 /** Due to a circular dependency this decorator factory is not stored in molgenis-data. */
+@SuppressWarnings("unused")
 @Component
 public class TagRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<Tag, TagMetadata> {

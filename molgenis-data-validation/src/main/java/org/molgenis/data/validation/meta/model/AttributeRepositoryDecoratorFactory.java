@@ -16,6 +16,7 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Component;
 
 /** Due to a circular dependency this decorator factory is not stored in molgenis-data. */
+@SuppressWarnings("unused")
 @Component
 public class AttributeRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<Attribute, AttributeMetadata> {

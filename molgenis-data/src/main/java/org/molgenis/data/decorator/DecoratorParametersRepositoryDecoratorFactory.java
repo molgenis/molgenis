@@ -9,6 +9,7 @@ import org.molgenis.data.decorator.meta.DecoratorParametersMetadata;
 import org.molgenis.validation.JsonValidator;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class DecoratorParametersRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<

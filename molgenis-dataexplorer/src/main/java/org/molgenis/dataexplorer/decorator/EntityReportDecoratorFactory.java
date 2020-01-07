@@ -10,6 +10,7 @@ import org.molgenis.data.decorator.PermissionCheckingDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class EntityReportDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<

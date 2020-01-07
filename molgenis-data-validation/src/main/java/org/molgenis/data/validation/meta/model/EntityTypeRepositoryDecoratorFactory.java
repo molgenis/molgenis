@@ -19,6 +19,7 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
 /** Due to a circular dependency this decorator factory is not stored in molgenis-data. */
+@SuppressWarnings("unused")
 @Component
 public class EntityTypeRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<EntityType, EntityTypeMetadata> {

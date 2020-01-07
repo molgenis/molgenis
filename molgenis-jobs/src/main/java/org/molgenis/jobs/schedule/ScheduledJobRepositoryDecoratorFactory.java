@@ -9,6 +9,7 @@ import org.molgenis.jobs.model.ScheduledJobMetadata;
 import org.molgenis.validation.JsonValidator;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class ScheduledJobRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<ScheduledJob, ScheduledJobMetadata> {
