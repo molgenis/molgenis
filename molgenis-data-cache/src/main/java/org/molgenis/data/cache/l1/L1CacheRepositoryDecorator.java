@@ -23,6 +23,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.meta.model.EntityType;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Adds, removes and retrieves entities from the {@link L1Cache} when a {@link Repository} is {@link
@@ -46,7 +47,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void add(Entity entity) {
-    if (cacheable) {
+    if (useCache()) {
       l1CacheJanitor.cleanCacheBeforeAdd(entity);
       putCache(entity);
     }
@@ -55,7 +56,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public Integer add(Stream<Entity> entities) {
-    if (cacheable) {
+    if (useCache()) {
       entities =
           l1CacheJanitor.cleanCacheBeforeAdd(getEntityType(), entities).filter(this::putCache);
     }
@@ -64,12 +65,12 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public Entity findOneById(Object id) {
-    return cacheable ? findOneByIdWithCache(id, null) : delegate().findOneById(id);
+    return useCache() ? findOneByIdWithCache(id, null) : delegate().findOneById(id);
   }
 
   @Override
   public Entity findOneById(Object id, Fetch fetch) {
-    return cacheable ? findOneByIdWithCache(id, fetch) : delegate().findOneById(id, fetch);
+    return useCache() ? findOneByIdWithCache(id, fetch) : delegate().findOneById(id, fetch);
   }
 
   private Entity findOneByIdWithCache(Object id, @Nullable @CheckForNull Fetch fetch) {
@@ -91,12 +92,12 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
-    return cacheable ? findAllWithCache(ids, null) : delegate().findAll(ids);
+    return useCache() ? findAllWithCache(ids, null) : delegate().findAll(ids);
   }
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
-    return cacheable ? findAllWithCache(ids, fetch) : delegate().findAll(ids, fetch);
+    return useCache() ? findAllWithCache(ids, fetch) : delegate().findAll(ids, fetch);
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -155,7 +156,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void update(Entity entity) {
-    if (cacheable) {
+    if (useCache()) {
       l1CacheJanitor.cleanCacheBeforeUpdate(entity);
       putCache(entity);
     }
@@ -164,7 +165,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void update(Stream<Entity> entities) {
-    if (cacheable) {
+    if (useCache()) {
       entities =
           l1CacheJanitor.cleanCacheBeforeUpdate(getEntityType(), entities).filter(this::putCache);
     }
@@ -173,7 +174,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void delete(Entity entity) {
-    if (cacheable) {
+    if (useCache()) {
       l1CacheJanitor.cleanCacheBeforeDelete(entity);
       delCache(entity);
     }
@@ -182,7 +183,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void delete(Stream<Entity> entities) {
-    if (cacheable) {
+    if (useCache()) {
       entities =
           l1CacheJanitor.cleanCacheBeforeDelete(getEntityType(), entities).filter(this::delCache);
     }
@@ -191,7 +192,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void deleteById(Object id) {
-    if (cacheable) {
+    if (useCache()) {
       EntityType entityType = getEntityType();
       l1CacheJanitor.cleanCacheBeforeDeleteById(entityType, id);
       delCache(entityType, id);
@@ -201,7 +202,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    if (cacheable) {
+    if (useCache()) {
       EntityType entityType = getEntityType();
       ids =
           l1CacheJanitor
@@ -213,7 +214,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
   @Override
   public void deleteAll() {
-    if (cacheable) {
+    if (useCache()) {
       EntityType entityType = getEntityType();
       l1CacheJanitor.cleanCacheBeforeDeleteAll(entityType);
       l1Cache.evictAll(entityType);
@@ -237,5 +238,9 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
   private boolean delCache(EntityType entityType, Object entityId) {
     l1Cache.putDeletion(entityType, entityId);
     return true;
+  }
+
+  private boolean useCache() {
+    return cacheable && !TransactionSynchronizationManager.isCurrentTransactionReadOnly();
   }
 }
