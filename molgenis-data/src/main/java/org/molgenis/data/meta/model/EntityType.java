@@ -35,6 +35,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.util.i18n.Labeled;
@@ -518,6 +519,19 @@ public class EntityType extends StaticEntity implements Labeled {
       }
     }
     return attr;
+  }
+
+  /**
+   * Get own attribute by identifier
+   *
+   * @throws UnknownAttributeException if no attribute exists for the given identifier
+   */
+  public Attribute getOwnAttributeById(String attributeIdentifier) {
+    // best effort: throws UnknownAttributeException with identifier instead of name
+    return getCachedOwnAttrs().values().stream()
+        .filter(attribute -> attribute.getIdentifier().equals(attributeIdentifier))
+        .findFirst()
+        .orElseThrow(() -> new UnknownAttributeException(this, attributeIdentifier));
   }
 
   public EntityType addAttribute(Attribute attr, AttributeRole... attrTypes) {

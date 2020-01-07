@@ -14,6 +14,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class IndexAction extends StaticEntity {
   public IndexAction(Entity entity) {
     super(entity);

@@ -742,12 +742,15 @@ public class Attribute extends StaticEntity implements Labeled {
    * not a reference type attribute, or no inverse attribute exists.
    */
   public Attribute getInversedBy() {
-    // FIXME besides checking mappedBy attr name also check
-    // attr.getRefEntity().getFullyQualifiedName
     if (hasRefEntity()) {
-      return Streams.stream(getRefEntity().getAtomicAttributes())
+      EntityType entityType = getEntity();
+      EntityType refEntityType = getRefEntity();
+      return Streams.stream(refEntityType.getAtomicAttributes())
           .filter(Attribute::isMappedBy)
-          .filter(attr -> getName().equals(attr.getMappedBy().getName()))
+          .filter(
+              attr ->
+                  getName().equals(attr.getMappedBy().getName())
+                      && entityType.getId().equals(attr.getRefEntity().getId()))
           .findFirst()
           .orElse(null);
     } else {

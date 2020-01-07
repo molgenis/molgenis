@@ -40,6 +40,8 @@ class IndexDependencyModel {
               ATTRIBUTES,
               new Fetch()
                   .field(AttributeMetadata.ID)
+                  .field(AttributeMetadata.NAME)
+                  .field(AttributeMetadata.TYPE)
                   .field(AttributeMetadata.REF_ENTITY_TYPE, new Fetch().field(ID)));
 
   /**

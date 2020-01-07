@@ -79,6 +79,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @Transactional
 class PlatformIT extends AbstractMockitoSpringContextTests {
+
   private static final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
   private static final String USERNAME = "platform-user";
@@ -199,8 +200,11 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
           entityTypeDynamic = dataService.getEntityType(entityTypeDynamic.getId());
           refEntityTypeDynamic = dataService.getEntityType(refEntityTypeDynamic.getId());
           selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
-          metaDataService.deleteEntityType(
-              asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType));
+          metaDataService.deleteEntityTypes(
+              asList(
+                  refEntityTypeDynamic.getId(),
+                  entityTypeDynamic.getId(),
+                  selfXrefEntityType.getId()));
         });
 
     waitForWorkToBeFinished(applicationContext, LOG);

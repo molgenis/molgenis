@@ -1,0 +1,16 @@
+{
+  "id": "v3meta_Describable",
+  "package": "v3meta",
+  "extends": "v3meta_Identifiable",
+  "label": {
+    "defaultValue": "Describable"
+  },
+  "attributes": [
+    {
+      "id": "v3meta_Describable_description",
+      "name": "description",
+      "type": "string"
+    }
+  ],
+  "abstract": true
+}

@@ -1,7 +1,5 @@
 package org.molgenis.api.permissions;
 
-import static java.lang.Math.ceil;
-
 import java.net.URI;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.api.model.response.LinksResponse;
@@ -15,8 +13,7 @@ class PermissionResponseUtils {
 
   static PagedApiResponse getPermissionResponse(
       String query, int page, int pageSize, int totalItems, Object data) {
-    PageResponse pageResponse =
-        PageResponse.create(pageSize, totalItems, getTotalPages(pageSize, totalItems), page);
+    PageResponse pageResponse = PageResponse.create(pageSize, totalItems, page);
     LinksResponse linksResponse = getLinks(query, page, pageSize, totalItems);
     return PagedApiResponse.create(pageResponse, linksResponse, data);
   }
@@ -72,9 +69,5 @@ class PermissionResponseUtils {
       queryStringBuffer.append("page=").append(page).append("&pageSize=").append(pageSize);
     }
     return queryStringBuffer.toString();
-  }
-
-  private static int getTotalPages(int pageSize, int totalItems) {
-    return (int) ceil((double) totalItems / (double) pageSize);
   }
 }

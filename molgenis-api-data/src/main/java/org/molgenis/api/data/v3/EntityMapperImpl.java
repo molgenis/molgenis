@@ -2,6 +2,7 @@ package org.molgenis.api.data.v3;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.api.support.PageUtils.getPageResponse;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -15,13 +16,13 @@ import org.molgenis.api.data.v3.model.EntitiesResponse.Builder;
 import org.molgenis.api.data.v3.model.EntityResponse;
 import org.molgenis.api.model.Selection;
 import org.molgenis.api.model.response.LinksResponse;
-import org.molgenis.api.model.response.PageResponse;
+import org.molgenis.api.support.LinksUtils;
+import org.molgenis.api.support.MolgenisServletUriComponentsBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.web.support.MolgenisServletUriComponentsBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,16 +46,7 @@ public class EntityMapperImpl implements EntityMapper {
       int total) {
     EntitiesResponse.Builder builder = mapRecursive(entityCollection, filter, expand, 0);
 
-    URI self = createEntitiesResponseUri();
-    URI previous = null;
-    URI next = null;
-    if (number > 0) {
-      previous = createEntitiesResponseUri(number - 1);
-    }
-    if ((number * size) + size < total) {
-      next = createEntitiesResponseUri(number + 1);
-    }
-    LinksResponse linksResponse = LinksResponse.create(previous, self, next);
+    LinksResponse linksResponse = LinksUtils.createLinksResponse(number, size, total);
 
     setPageResponse(entityCollection, builder);
 
@@ -64,15 +56,7 @@ public class EntityMapperImpl implements EntityMapper {
   private void setPageResponse(EntityCollection entityCollection, Builder builder) {
     Page page = entityCollection.getPage();
     if (page != null) {
-      PageResponse pageResponse =
-          PageResponse.create(
-              entityCollection.getSize(),
-              page.getTotal(),
-              page.getTotal() > 0
-                  ? (int) Math.ceil(page.getTotal() / (double) page.getPageSize())
-                  : 0,
-              page.getOffset() / page.getPageSize());
-      builder.setPage(pageResponse);
+      builder.setPage(getPageResponse(page.getPageSize(), page.getOffset(), page.getTotal()));
     }
   }
 

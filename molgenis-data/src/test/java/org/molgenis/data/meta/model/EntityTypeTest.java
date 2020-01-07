@@ -21,12 +21,15 @@ import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
 
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
@@ -243,6 +246,27 @@ class EntityTypeTest extends AbstractSystemEntityTest {
 
     assertEquals(1, size(entityType.getAllAttributes()));
     assertEquals(normalAttr, entityType.getAllAttributes().iterator().next());
+  }
+
+  @Test
+  void testGetOwnAttributeById() {
+    String attributeIdentifier = "MyAttributeIdentifier";
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getIdentifier()).thenReturn(attributeIdentifier);
+
+    Entity entity = mock(Entity.class);
+    EntityType entityType = new EntityType(entity);
+    when(entity.getEntities(ATTRIBUTES, Attribute.class)).thenReturn(singletonList(attribute));
+
+    assertEquals(attribute, entityType.getOwnAttributeById(attributeIdentifier));
+  }
+
+  @Test
+  void testGetOwnAttributeByIdUnknownAttribute() {
+    EntityType entityType = new EntityType(mock(Entity.class));
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> entityType.getOwnAttributeById("UnknownAttributeIdentifier"));
   }
 
   private EntityType mockEntityTypeMeta() {

@@ -4,7 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -59,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 /** Meta data service for retrieving and editing meta data. */
 @Component
 public class MetaDataServiceImpl implements MetaDataService {
+
   private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
 
   private final DataService dataService;
@@ -177,17 +177,15 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Transactional
   @Override
-  public void deleteEntityType(Collection<EntityType> entityTypes) {
-    if (entityTypes.isEmpty()) {
+  public void deleteEntityTypes(Collection<String> entityTypeIds) {
+    if (entityTypeIds.isEmpty()) {
       return;
     }
 
-    dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
+    dataService.deleteAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream().map(id -> (Object) id));
 
     if (LOG.isInfoEnabled()) {
-      LOG.info(
-          "Removed entities [{}]",
-          entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+      LOG.info("Removed entities [{}]", String.join(",", entityTypeIds));
     }
   }
 
@@ -375,7 +373,7 @@ public class MetaDataServiceImpl implements MetaDataService {
       return Optional.of(entityType);
     } else {
       entityType = getEntityTypeBypassingRegistry(entityTypeId);
-      return entityType != null ? Optional.of(entityType) : Optional.empty();
+      return Optional.ofNullable(entityType);
     }
   }
 
@@ -465,35 +463,35 @@ public class MetaDataServiceImpl implements MetaDataService {
     // analyze both compound and atomic attributes owned by the entity
     Map<String, Attribute> attrsMap =
         stream(entityType.getOwnAllAttributes())
-            .collect(toMap(Attribute::getName, Function.identity()));
+            .collect(toMap(Attribute::getIdentifier, Function.identity()));
     Map<String, Attribute> existingAttrsMap =
         stream(existingEntityType.getOwnAllAttributes())
-            .collect(toMap(Attribute::getName, Function.identity()));
+            .collect(toMap(Attribute::getIdentifier, Function.identity()));
 
     // determine attributes to add, update and delete
-    Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
-    Set<String> sharedAttrNames = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
-    Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
+    Set<String> addedAttrIds = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
+    Set<String> sharedAttrIds = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
+    Set<String> deletedAttrIds = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
 
     // add new attributes
-    if (!addedAttrNames.isEmpty()) {
-      dataService.add(ATTRIBUTE_META_DATA, addedAttrNames.stream().map(attrsMap::get));
+    if (!addedAttrIds.isEmpty()) {
+      dataService.add(ATTRIBUTE_META_DATA, addedAttrIds.stream().map(attrsMap::get));
     }
 
     // update changed attributes
-    List<String> updatedAttrNames =
-        sharedAttrNames.stream()
+    List<String> updatedAttrIds =
+        sharedAttrIds.stream()
             .filter(
                 attrName ->
                     !EntityUtils.equals(attrsMap.get(attrName), existingAttrsMap.get(attrName)))
             .collect(toList());
-    if (!updatedAttrNames.isEmpty()) {
-      dataService.update(ATTRIBUTE_META_DATA, updatedAttrNames.stream().map(attrsMap::get));
+    if (!updatedAttrIds.isEmpty()) {
+      dataService.update(ATTRIBUTE_META_DATA, updatedAttrIds.stream().map(attrsMap::get));
     }
 
     // delete removed attributes
-    if (!deletedAttrNames.isEmpty()) {
-      dataService.delete(ATTRIBUTE_META_DATA, deletedAttrNames.stream().map(existingAttrsMap::get));
+    if (!deletedAttrIds.isEmpty()) {
+      dataService.delete(ATTRIBUTE_META_DATA, deletedAttrIds.stream().map(existingAttrsMap::get));
     }
   }
 
@@ -531,6 +529,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
       for (Attribute oldAttribute : oldAtomicAttributes) {
         if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+
         // FIXME This implies that an attribute can never be different when doing an update import?
         if (!EntityUtils.equals(
             oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) return false;

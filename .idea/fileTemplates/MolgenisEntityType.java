@@ -68,6 +68,7 @@ public class $META_CLASS_NAME extends SystemEntityType {
   }
 }
 
+@SuppressWarnings("unused")
 public class $ENTITY_TYPE_NAME extends StaticEntity {
   public $ENTITY_TYPE_NAME(Entity entity) {
     super(entity);

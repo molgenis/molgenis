@@ -6,8 +6,8 @@ import java.lang.IllegalArgumentException;
 import java.util.List;
 import java.util.ArrayList;
 import org.molgenis.api.model.Sort;
-import org.molgenis.api.model.Sort.Order;
-import org.molgenis.api.model.Sort.Order.Direction;
+import org.molgenis.api.model.Order;
+import org.molgenis.api.model.Order.Direction;
 
 class SortParser {
   SortParser(String str) {

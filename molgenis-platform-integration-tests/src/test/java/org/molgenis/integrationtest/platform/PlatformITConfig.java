@@ -5,8 +5,6 @@ import static org.mockito.Mockito.mock;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.DataPersisterImpl;
@@ -17,7 +15,9 @@ import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.security.GroupPackageServiceImpl;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
+import org.molgenis.data.security.auth.GroupPackageService;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.JsonTestConfig;
@@ -29,8 +29,11 @@ import org.molgenis.jobs.JobExecutionConfig;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
+import org.molgenis.security.acl.AclConfig;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
+import org.molgenis.security.acl.ObjectIdentityService;
+import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
@@ -49,12 +52,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
-import org.springframework.security.acls.jdbc.AclConfig;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -97,6 +97,7 @@ in org.molgenis.data and subpackages from included modules
   "org.molgenis.metrics"
 })
 @Import({
+  PlatformITBaseConfig.class,
   SecurityCoreITConfig.class,
   PlatformBootstrapper.class,
   TestAppSettings.class,
@@ -141,6 +142,7 @@ in org.molgenis.data and subpackages from included modules
   PermissionRegistry.class,
   DataPermissionConfig.class,
   JsonTestConfig.class,
+  GroupValueFactory.class
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -163,17 +165,19 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
     return pspc;
   }
 
+  /**
+   * Introduction of the {@link GroupPackageServiceImpl} broke all integration tests that create
+   * packages. As a workaround the service if effectively disabled by default by using a mock
+   * service.
+   */
   @Bean
-  public MailSender mailSender() {
-    return mock(MailSender.class);
+  public GroupPackageService groupPackageService() {
+    return mock(GroupPackageService.class);
   }
 
   @Bean
-  public ConversionService conversionService() {
-    DefaultConversionService defaultConversionService = new DefaultConversionService();
-    defaultConversionService.addConverter(new StringToDateConverter());
-    defaultConversionService.addConverter(new StringToDateTimeConverter());
-    return defaultConversionService;
+  public MailSender mailSender() {
+    return mock(MailSender.class);
   }
 
   @Bean

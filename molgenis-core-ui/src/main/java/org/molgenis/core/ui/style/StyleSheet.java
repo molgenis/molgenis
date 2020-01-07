@@ -5,6 +5,7 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+@SuppressWarnings("unused")
 public class StyleSheet extends StaticEntity {
   public StyleSheet(Entity entity) {
     super(entity);

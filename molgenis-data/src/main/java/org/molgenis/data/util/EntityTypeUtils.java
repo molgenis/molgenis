@@ -11,7 +11,9 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.data.util.PackageUtils.isSystemPackage;
+import static org.molgenis.util.i18n.LanguageService.getLanguageCodes;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
@@ -338,15 +340,23 @@ public class EntityTypeUtils {
 
   public static Fetch getEntityTypeFetch() {
     // TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-    return new Fetch()
-        .field(ID)
-        .field(PACKAGE)
-        .field(LABEL)
-        .field(DESCRIPTION)
-        .field(ATTRIBUTES)
-        .field(IS_ABSTRACT)
-        .field(EXTENDS)
-        .field(TAGS)
-        .field(BACKEND);
+    Fetch fetch =
+        new Fetch()
+            .field(ID)
+            .field(PACKAGE)
+            .field(LABEL)
+            .field(DESCRIPTION)
+            .field(ATTRIBUTES)
+            .field(IS_ABSTRACT)
+            .field(EXTENDS)
+            .field(TAGS)
+            .field(BACKEND);
+    getLanguageCodes()
+        .forEach(
+            languageCode -> {
+              fetch.field(getI18nAttributeName(LABEL, languageCode));
+              fetch.field(getI18nAttributeName(DESCRIPTION, languageCode));
+            });
+    return fetch;
   }
 }

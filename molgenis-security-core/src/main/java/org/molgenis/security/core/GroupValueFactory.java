@@ -17,13 +17,14 @@ public class GroupValueFactory {
       String label,
       @Nullable @CheckForNull String description,
       boolean publiclyVisible,
-      Collection<String> roleLabels) {
+      Collection<String> roleLabels,
+      String packageValueName) {
     GroupValue.Builder groupBuilder =
         GroupValue.builder().setName(groupName).setLabel(label).setPublic(publiclyVisible);
     Optional.ofNullable(description).ifPresent(groupBuilder::setDescription);
 
     PackageValue.Builder packageBuilder =
-        PackageValue.builder().setName(groupName.replace('-', '_')).setLabel(label);
+        PackageValue.builder().setName(packageValueName).setLabel(label);
     Optional.ofNullable(description).ifPresent(packageBuilder::setDescription);
     PackageValue rootPackage = packageBuilder.build();
     groupBuilder.setRootPackage(rootPackage);
@@ -35,8 +36,9 @@ public class GroupValueFactory {
     return groupBuilder.build();
   }
 
-  public GroupValue createGroup(String groupName, String label, Collection<String> roleLabels) {
-    return this.createGroup(groupName, label, null, true, roleLabels);
+  public GroupValue createGroup(
+      String groupName, String label, Collection<String> roleLabels, String packageValueName) {
+    return this.createGroup(groupName, label, null, true, roleLabels, packageValueName);
   }
 
   public static String createRoleName(String groupName, String roleLabel) {

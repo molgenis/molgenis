@@ -33,6 +33,7 @@ import org.molgenis.data.support.StaticEntity;
  *
  * <p>Do not add abstract identifier to this class, see EntitySerializerTest
  */
+@SuppressWarnings("unused")
 public class JobExecution extends StaticEntity {
   public static final String TRUNCATION_BANNER = "<<< THIS LOG HAS BEEN TRUNCATED >>>";
   /**

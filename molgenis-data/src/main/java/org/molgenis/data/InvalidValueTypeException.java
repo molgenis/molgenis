@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -12,8 +14,8 @@ public class InvalidValueTypeException extends DataConstraintViolationException 
   public InvalidValueTypeException(
       String value, String type, @Nullable @CheckForNull Throwable cause) {
     super(ERROR_CODE, cause);
-    this.value = value;
-    this.type = type;
+    this.value = requireNonNull(value);
+    this.type = requireNonNull(type);
   }
 
   @Override

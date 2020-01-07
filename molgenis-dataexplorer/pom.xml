@@ -68,16 +68,11 @@
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
-      <artifactId>javax.el</artifactId>
+      <artifactId>jakarta.el</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.auto.value</groupId>
-      <artifactId>auto-value</artifactId>
-      <scope>provided</scope>
     </dependency>
     <!-- test dependencies -->
     <dependency>

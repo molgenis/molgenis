@@ -73,6 +73,7 @@ class RestControllerV2APIIT extends AbstractApiTests {
     adminToken = AbstractApiTests.getAdminToken();
 
     LOG.info("Importing Test data");
+    RestTestUtils.createPackage(adminToken, "base");
     uploadEMX(adminToken, V2_TEST_FILE);
     uploadEMX(adminToken, V2_DELETE_TEST_FILE);
     uploadEMX(adminToken, V2_COPY_TEST_FILE);
