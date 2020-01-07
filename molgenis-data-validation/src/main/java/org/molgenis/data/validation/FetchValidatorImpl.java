@@ -10,7 +10,11 @@ public class FetchValidatorImpl implements FetchValidator {
 
   @Override
   public Fetch validateFetch(Fetch fetch, EntityType entityType) {
-    Fetch validatedFetch = new Fetch();
+    if (fetch.isValidated()) {
+      return fetch;
+    }
+
+    Fetch validatedFetch = new Fetch(true);
     Attribute idAttribute = entityType.getIdAttribute();
     if (idAttribute != null && !fetch.hasField(idAttribute)) {
       validatedFetch.field(idAttribute.getName());

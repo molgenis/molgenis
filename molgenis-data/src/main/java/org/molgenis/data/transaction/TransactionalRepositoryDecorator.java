@@ -15,6 +15,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -36,158 +37,246 @@ public class TransactionalRepositoryDecorator<E extends Entity>
 
   @Override
   public void forEachBatched(Consumer<List<E>> consumer, int batchSize) {
-    createReadonlyTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().forEachBatched(consumer, batchSize);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().forEachBatched(consumer, batchSize);
+    } else {
+      createReadonlyTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().forEachBatched(consumer, batchSize);
+                return null;
+              });
+    }
   }
 
   @Override
   public void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize) {
-    createReadonlyTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().forEachBatched(fetch, consumer, batchSize);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().forEachBatched(fetch, consumer, batchSize);
+    } else {
+      createReadonlyTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().forEachBatched(fetch, consumer, batchSize);
+                return null;
+              });
+    }
   }
 
+  @SuppressWarnings("ConstantConditions")
   @Override
   public long count() {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().count());
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().count();
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().count());
+    }
   }
 
+  @SuppressWarnings("ConstantConditions")
   @Override
   public long count(Query<E> q) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().count(q));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().count(q);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().count(q));
+    }
   }
 
   @Override
   public Stream<E> findAll(Query<E> q) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(q));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findAll(q);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(q));
+    }
   }
 
   @Override
   public E findOne(Query<E> q) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findOne(q));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findOne(q);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().findOne(q));
+    }
   }
 
   @Override
   public E findOneById(Object id) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findOneById(id));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findOneById(id);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().findOneById(id));
+    }
   }
 
   @Override
   public E findOneById(Object id, Fetch fetch) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findOneById(id, fetch));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findOneById(id, fetch);
+    } else {
+      return createReadonlyTransactionTemplate()
+          .execute(status -> delegate().findOneById(id, fetch));
+    }
   }
 
   @Override
   public Stream<E> findAll(Stream<Object> ids) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(ids));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findAll(ids);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(ids));
+    }
   }
 
   @Override
   public Stream<E> findAll(Stream<Object> ids, Fetch fetch) {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(ids, fetch));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().findAll(ids, fetch);
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().findAll(ids, fetch));
+    }
   }
 
   @Override
   public AggregateResult aggregate(AggregateQuery aggregateQuery) {
-    return createReadonlyTransactionTemplate()
-        .execute(status -> delegate().aggregate(aggregateQuery));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().aggregate(aggregateQuery);
+    } else {
+      return createReadonlyTransactionTemplate()
+          .execute(status -> delegate().aggregate(aggregateQuery));
+    }
   }
 
   @Override
   public void update(E entity) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().update(entity);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().update(entity);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().update(entity);
+                return null;
+              });
+    }
   }
 
   @Override
   public void update(Stream<E> entities) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().update(entities);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().update(entities);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().update(entities);
+                return null;
+              });
+    }
   }
 
   @Override
   public void delete(E entity) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().delete(entity);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().delete(entity);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().delete(entity);
+                return null;
+              });
+    }
   }
 
   @Override
   public void delete(Stream<E> entities) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().delete(entities);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().delete(entities);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().delete(entities);
+                return null;
+              });
+    }
   }
 
   @Override
   public void deleteById(Object id) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().deleteById(id);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().deleteById(id);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().deleteById(id);
+                return null;
+              });
+    }
   }
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().deleteAll(ids);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().deleteAll(ids);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().deleteAll(ids);
+                return null;
+              });
+    }
   }
 
   @Override
   public void deleteAll() {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().deleteAll();
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().deleteAll();
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().deleteAll();
+                return null;
+              });
+    }
   }
 
   @Override
   public void add(E entity) {
-    createWriteTransactionTemplate()
-        .execute(
-            status -> {
-              delegate().add(entity);
-              return null;
-            });
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      delegate().add(entity);
+    } else {
+      createWriteTransactionTemplate()
+          .execute(
+              status -> {
+                delegate().add(entity);
+                return null;
+              });
+    }
   }
 
   @Override
   public Integer add(Stream<E> entities) {
-    return createWriteTransactionTemplate().execute(status -> delegate().add(entities));
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().add(entities);
+    } else {
+      return createWriteTransactionTemplate().execute(status -> delegate().add(entities));
+    }
   }
 
+  @SuppressWarnings({"ConstantConditions", "NullableProblems"})
   @Override
   public Iterator<E> iterator() {
-    return createReadonlyTransactionTemplate().execute(status -> delegate().iterator());
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      return delegate().iterator();
+    } else {
+      return createReadonlyTransactionTemplate().execute(status -> delegate().iterator());
+    }
   }
 
   private TransactionTemplate createWriteTransactionTemplate() {
