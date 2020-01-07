@@ -30,12 +30,11 @@ import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGenerator
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
-import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.test.AbstractMockitoTest;
 
 class AlgorithmServiceImplTest extends AbstractMockitoTest {
-  @Mock private OntologyTagService ontologyTagService;
+
   @Mock private SemanticSearchService semanticSearhService;
   @Mock private AlgorithmGeneratorService algorithmGeneratorService;
   @Mock private EntityManager entityManager;
@@ -154,7 +153,7 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Exception exception =
         assertThrows(
             AlgorithmException.class,
-            () -> algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3));
+            () -> algorithmServiceImpl.apply(attributeMapping, sourceEntity, 3));
     assertThat(exception.getMessage())
         .containsPattern("org.molgenis.script.core.ScriptException: algorithm is not defined");
   }
@@ -190,6 +189,6 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Entity sourceEntity = mock(Entity.class);
     when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3)).thenReturn(algorithmResult);
 
-    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3);
+    algorithmServiceImpl.apply(attributeMapping, sourceEntity, 3);
   }
 }

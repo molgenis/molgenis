@@ -31,6 +31,7 @@ import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.semantic.Hits;
 
 public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService {
+
   private final List<AlgorithmGenerator> generators;
   private final AlgorithmTemplateService algorithmTemplateService;
   private final UnitResolver unitResolver;
@@ -124,12 +125,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService 
             AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(
                 algorithm, sourceEntityType);
         algorithm =
-            convertUnitForTemplateAlgorithm(
-                algorithm,
-                targetAttribute,
-                targetEntityType,
-                mappedSourceAttributes,
-                sourceEntityType);
+            convertUnitForTemplateAlgorithm(algorithm, targetAttribute, mappedSourceAttributes);
         algorithmState = GENERATED_HIGH;
       } else {
         ExplainedAttribute attributeSearchHit =
@@ -152,17 +148,11 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService 
   }
 
   String convertUnitForTemplateAlgorithm(
-      String algorithm,
-      Attribute targetAttribute,
-      EntityType targetEntityType,
-      Set<Attribute> sourceAttributes,
-      EntityType sourceEntityType) {
-    Unit<? extends Quantity> targetUnit =
-        unitResolver.resolveUnit(targetAttribute, targetEntityType);
+      String algorithm, Attribute targetAttribute, Set<Attribute> sourceAttributes) {
+    Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute);
 
     for (Attribute sourceAttribute : sourceAttributes) {
-      Unit<? extends Quantity> sourceUnit =
-          unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
+      Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute);
 
       String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
 

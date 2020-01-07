@@ -88,6 +88,7 @@ public interface MappingService {
    * @param clonedMappingProjectName name of the cloned {@link MappingProject}
    * @return cloned {@link MappingProject}
    */
+  @SuppressWarnings("unused")
   MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
 
   /**

@@ -110,9 +110,4 @@ public class FrequencyCategoryMapper extends CategoryMapper {
 
     return (upperBoundDiff + lowerBoundDiff) / 2;
   }
-
-  boolean isMaxValueUndetermined(Amount<?> amount1) {
-    return CategoryMapperUtil.isAmountRanged(amount1)
-        && amount1.getMaximumValue() == Double.MAX_VALUE;
-  }
 }

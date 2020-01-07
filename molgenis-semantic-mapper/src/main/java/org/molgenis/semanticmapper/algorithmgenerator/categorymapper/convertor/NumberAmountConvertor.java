@@ -2,14 +2,13 @@ package org.molgenis.semanticmapper.algorithmgenerator.categorymapper.convertor;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.OptionalDouble;
-import java.util.Set;
 import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.semanticmapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 
 public class NumberAmountConvertor extends AmountConvertor {
+
   private static final int DEFAULT_NUMBER = 0;
 
   public boolean matchCriteria(String description) {
@@ -37,10 +36,5 @@ public class NumberAmountConvertor extends AmountConvertor {
     }
 
     return null;
-  }
-
-  Double average(Set<Double> values) {
-    OptionalDouble average = values.stream().mapToDouble(Double::doubleValue).average();
-    return average.isPresent() ? average.getAsDouble() : null;
   }
 }

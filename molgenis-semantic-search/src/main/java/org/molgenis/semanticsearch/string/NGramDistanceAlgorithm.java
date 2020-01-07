@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 @SuppressWarnings("squid:S2386") // false positive: Mutable fields should not be "public static"
 public class NGramDistanceAlgorithm {
+
   private static int N_GRAMS = 2;
   public static final Set<String> STOPWORDSLIST;
 
@@ -226,12 +227,6 @@ public class NGramDistanceAlgorithm {
         createNGrams(queryTwo.toLowerCase().trim(), true));
   }
 
-  public static double stringMatching(String queryOne, String queryTwo, boolean removeStopWords) {
-    return calculateScore(
-        createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
-        createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
-  }
-
   /**
    * create n-grams tokens of the string.
    *
@@ -240,7 +235,9 @@ public class NGramDistanceAlgorithm {
   public static Map<String, Integer> createNGrams(String inputQuery, boolean removeStopWords) {
     List<String> wordsInString =
         Lists.newArrayList(Stemmer.replaceIllegalCharacter(inputQuery).split(" "));
-    if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
+    if (removeStopWords) {
+      wordsInString.removeAll(STOPWORDSLIST);
+    }
     List<String> stemmedWordsInString =
         wordsInString.stream().map(Stemmer::stem).collect(Collectors.toList());
     Map<String, Integer> tokens = new HashMap<>();
@@ -275,7 +272,9 @@ public class NGramDistanceAlgorithm {
   /** Calculate the ngram distance */
   private static double calculateScore(
       Map<String, Integer> inputStringTokens, Map<String, Integer> ontologyTermTokens) {
-    if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
+    if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) {
+      return (double) 0;
+    }
     int totalToken = getTotalNumTokens(inputStringTokens) + getTotalNumTokens(ontologyTermTokens);
     int numMatchedToken = 0;
 

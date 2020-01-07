@@ -87,6 +87,7 @@ import org.springframework.test.context.ContextConfiguration;
       EntityBaseTestConfig.class
     })
 class MappingServiceImplTest extends AbstractMolgenisSpringTest {
+
   private static final String TARGET_HOP_ENTITY = "HopEntity";
   private static final String SOURCE_GENE_ENTITY = "Gene";
   private static final String SOURCE_EXON_ENTITY = "Exon";
@@ -370,9 +371,8 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // make project and apply mappings once
-    MappingProject project = createMappingProjectWithMappings();
-
+    // create project and apply mappings once
+    createMappingProjectWithMappings();
     Entity mappedEntity = mock(Entity.class);
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenReturn(mappedEntity);
@@ -444,9 +444,8 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .when(geneRepo)
         .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    // make project and apply mappings once
-    MappingProject project = createMappingProjectWithMappings();
-
+    // create mapping project and apply mappings once
+    createMappingProjectWithMappings();
     when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE))
         .thenAnswer(invocation -> new DynamicEntity(targetMeta));
 
@@ -784,14 +783,12 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()")),
               eq(geneEntity),
-              eq(geneMetaData),
               eq(3)))
           .thenReturn(geneEntity.getString("id"));
 
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()")),
               eq(geneEntity),
-              eq(geneMetaData),
               eq(3)))
           .thenReturn(geneEntity.getDouble("length"));
 
@@ -801,6 +798,11 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       expectedEntity.set("source", geneMetaData.getId());
       expectedEntities.add(expectedEntity);
     }
+  }
+
+  private MappingTarget getManualMappingTarget(
+      String identifier, Collection<EntityMapping> entityMappings) {
+    return new MappingTarget(identifier, hopMetaData, entityMappings);
   }
 
   private MappingProject createMappingProjectWithMappings() {
@@ -820,11 +822,6 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     return mappingProject;
   }
 
-  private MappingTarget getManualMappingTarget(
-      String identifier, Collection<EntityMapping> entityMappings) {
-    return new MappingTarget(identifier, hopMetaData, entityMappings);
-  }
-
   private MappingProject getManualMappingProject(
       String identifier, String projectName, int depth, MappingTarget mappingTarget) {
     return new MappingProject(identifier, projectName, depth, newArrayList(mappingTarget));
@@ -833,6 +830,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   @Configuration
   @Import(UserTestConfig.class)
   static class Config {
+
     @Bean
     EntityManager entityManager() {
       return mock(EntityManager.class);

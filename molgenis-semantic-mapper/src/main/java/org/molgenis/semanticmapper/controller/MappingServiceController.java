@@ -763,11 +763,7 @@ public class MappingServiceController extends PluginController {
                 sourceEntity -> {
                   try {
                     return AlgorithmResult.createSuccess(
-                        algorithmService.apply(
-                            algorithmTest,
-                            sourceEntity,
-                            sourceEntity.getEntityType(),
-                            project.getDepth()),
+                        algorithmService.apply(algorithmTest, sourceEntity, project.getDepth()),
                         sourceEntity);
                   } catch (Exception e) {
                     return AlgorithmResult.createFailure(e, sourceEntity);

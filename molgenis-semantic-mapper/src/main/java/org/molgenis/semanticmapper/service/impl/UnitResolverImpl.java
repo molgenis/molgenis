@@ -15,7 +15,6 @@ import javax.measure.unit.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -37,7 +36,7 @@ public class UnitResolverImpl implements UnitResolver {
   }
 
   @Override
-  public Unit<? extends Quantity> resolveUnit(Attribute attr, EntityType entityType) {
+  public Unit<? extends Quantity> resolveUnit(Attribute attr) {
     Set<String> tokens = tokenize(attr.getLabel(), attr.getDescription());
 
     // Option 1: Check if a term matches a unit

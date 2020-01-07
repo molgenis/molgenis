@@ -15,10 +15,6 @@ public class AlgorithmEvaluation {
     return entity;
   }
 
-  public boolean hasValue() {
-    return errorMessage == null;
-  }
-
   public Object getValue() {
     return value;
   }
