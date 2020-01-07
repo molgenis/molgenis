@@ -38,14 +38,6 @@ class EntityTypeResponseV2 {
   private String languageCode;
   private final Set<Permission> permissions;
 
-  public EntityTypeResponseV2(
-      EntityType meta,
-      UserPermissionEvaluator userPermissionEvaluator,
-      DataService dataService,
-      boolean includeCategories) {
-    this(meta, null, userPermissionEvaluator, dataService, includeCategories);
-  }
-
   /** @param fetch set of lowercase attribute names to include in response */
   public EntityTypeResponseV2(
       EntityType meta,

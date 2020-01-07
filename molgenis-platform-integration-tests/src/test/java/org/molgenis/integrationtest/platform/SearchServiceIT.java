@@ -63,6 +63,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
 class SearchServiceIT extends AbstractMockitoSpringContextTests {
+
   private static EntityType entityTypeDynamic;
   private static EntityType refEntityTypeDynamic;
 
@@ -180,8 +181,8 @@ class SearchServiceIT extends AbstractMockitoSpringContextTests {
             .map(id -> explainService.explain(query, entityTypeDynamic, id))
             .collect(toList());
 
-    List<Float> scores = explanations.stream().map(Explanation::getValue).collect(toList());
     // FIXME these scores vary between runs
+    // List<Float> scores = explanations.stream().map(Explanation::getValue).collect(toList());
     // assertEquals(scores, asList(0.3463153, 0, 0.7889965,
     // 1.7814579, 0.76421005, 1.0707202));
 

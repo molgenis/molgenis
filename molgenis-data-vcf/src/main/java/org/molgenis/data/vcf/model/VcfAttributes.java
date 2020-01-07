@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("unused")
 public class VcfAttributes {
   public static final String CHROM = "#CHROM";
   public static final String ALT = "ALT";

@@ -17,10 +17,8 @@ package org.molgenis.api.data.v1;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -39,49 +37,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
 
   private final List<OrderV1> orders;
 
-  /**
-   * Creates a new {@link SortV1} instance using the given {@link OrderV1}s.
-   *
-   * @param orders must not be {@literal null}.
-   */
-  public SortV1(OrderV1... orders) {
-    this(Arrays.asList(orders));
-  }
-
-  /**
-   * Creates a new {@link SortV1} instance.
-   *
-   * @param orders must not be {@literal null} or contain {@literal null}.
-   */
-  public SortV1(List<OrderV1> orders) {
-
-    if (null == orders || orders.isEmpty()) {
-      throw new IllegalArgumentException(
-          "You have to provide at least one sort property to sort by!");
-    }
-
-    this.orders = orders;
-  }
-
-  /**
-   * Creates a new {@link SortV1} instance. Order defaults to {@link DirectionV1#ASC}.
-   *
-   * @param properties must not be {@literal null} or contain {@literal null} or empty strings
-   */
-  public SortV1(String... properties) {
-    this(DEFAULT_DIRECTION, properties);
-  }
-
-  /**
-   * Creates a new {@link SortV1} instance.
-   *
-   * @param direction defaults to {@link SortV1#DEFAULT_DIRECTION} (for {@literal null} cases, too)
-   * @param properties must not be {@literal null} or contain {@literal null} or empty strings
-   */
-  public SortV1(DirectionV1 direction, String... properties) {
-    this(direction, properties == null ? new ArrayList<>() : Arrays.asList(properties));
-  }
-
   /** Creates a new {@link SortV1} instance. */
   public SortV1(DirectionV1 direction, List<String> properties) {
 
@@ -94,39 +49,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
     for (String property : properties) {
       this.orders.add(new OrderV1(direction, property));
     }
-  }
-
-  /**
-   * Returns a new {@link SortV1} consisting of the {@link OrderV1}s of the current {@link SortV1}
-   * combined with the given ones.
-   *
-   * @param sort can be {@literal null}.
-   */
-  public SortV1 and(SortV1 sort) {
-
-    if (sort == null) {
-      return this;
-    }
-
-    ArrayList<OrderV1> these = new ArrayList<>(this.orders);
-
-    for (OrderV1 order : sort) {
-      these.add(order);
-    }
-
-    return new SortV1(these);
-  }
-
-  /** Returns the order registered for the given property. */
-  public OrderV1 getOrderFor(String property) {
-
-    for (OrderV1 order : this) {
-      if (order.getProperty().equals(property)) {
-        return order;
-      }
-    }
-
-    return null;
   }
 
   /*
@@ -187,23 +109,10 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
    *
    * @author Oliver Gierke
    */
+  @SuppressWarnings("unused")
   public enum DirectionV1 {
     ASC,
-    DESC;
-
-    /** Returns the {@link DirectionV1} enum for the given {@link String} value. */
-    public static DirectionV1 fromString(String value) {
-
-      try {
-        return DirectionV1.valueOf(value.toUpperCase(Locale.US));
-      } catch (Exception e) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Invalid value '%s' for orders given! Has to be either 'desc' or 'asc' (case insensitive).",
-                value),
-            e);
-      }
-    }
+    DESC
   }
 
   /**
@@ -236,16 +145,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
       this.property = property;
     }
 
-    /**
-     * Creates a new {@link OrderV1} instance. Takes a single property. Direction defaults to {@link
-     * SortV1#DEFAULT_DIRECTION}.
-     *
-     * @param property must not be {@literal null} or empty.
-     */
-    public OrderV1(String property) {
-      this(DEFAULT_DIRECTION, property);
-    }
-
     /** @deprecated use {@link SortV1#SortV1(DirectionV1, List)} instead. */
     @Deprecated
     public static List<OrderV1> create(DirectionV1 direction, Iterable<String> properties) {
@@ -270,16 +169,6 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable {
     /** Returns whether sorting for this property shall be ascending. */
     public boolean isAscending() {
       return this.direction.equals(DirectionV1.ASC);
-    }
-
-    /** Returns a new {@link OrderV1} with the given {@link OrderV1}. */
-    public OrderV1 with(DirectionV1 order) {
-      return new OrderV1(order, this.property);
-    }
-
-    /** Returns a new {@link SortV1} instance for the given properties. */
-    public SortV1 withProperties(String... properties) {
-      return new SortV1(this.direction, properties);
     }
 
     /*

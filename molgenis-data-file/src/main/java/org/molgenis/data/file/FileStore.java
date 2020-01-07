@@ -17,10 +17,13 @@ import org.apache.commons.io.IOUtils;
 /** @deprecated use {@link BlobStore} */
 @Deprecated
 public class FileStore {
+
   private final String storageDir;
 
   public FileStore(String storageDir) {
-    if (storageDir == null) throw new IllegalArgumentException("storage dir is null");
+    if (storageDir == null) {
+      throw new IllegalArgumentException("storage dir is null");
+    }
     this.storageDir = storageDir;
   }
 
@@ -113,10 +116,6 @@ public class FileStore {
 
   public String getStorageDir() {
     return storageDir;
-  }
-
-  public void writeToFile(InputStream inputStream, String fileName) throws IOException {
-    FileUtils.copyInputStreamToFile(inputStream, getFileUnchecked(fileName));
   }
 
   /** http://cwe.mitre.org/data/definitions/22.html */

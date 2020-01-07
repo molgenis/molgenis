@@ -57,11 +57,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Mock private Stream<Entity> jobExecutions;
 
-  @Captor private ArgumentCaptor<IndexJobExecution> indexJobExecutionCaptor;
-
   @Captor private ArgumentCaptor<Query<Entity>> queryCaptor;
-
-  @Captor private ArgumentCaptor<Runnable> runnableArgumentCaptor;
 
   @Autowired private Config config;
 

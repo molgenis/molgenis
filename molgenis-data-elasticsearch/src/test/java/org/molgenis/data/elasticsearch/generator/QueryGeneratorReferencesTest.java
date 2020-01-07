@@ -60,8 +60,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 // FIXME add nillable tests
 @MockitoSettings(strictness = Strictness.LENIENT)
 class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
-  private static final String FIELD_NGRAM_ANALYZED = "ngram";
-
   private EntityType entityType;
 
   private final String refBoolAttributeName = "xbool";

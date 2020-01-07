@@ -63,7 +63,6 @@ class RepositoryValidationDecoratorTest {
   private DataService dataService;
   private MetaDataService metaDataService;
   private EntityAttributesValidator entityAttributesValidator;
-  private ExpressionValidator expressionValidator;
   private DefaultValueReferenceValidator defaultValueReferenceValidator;
   private RepositoryValidationDecorator repositoryValidationDecorator;
   private Entity refEntity0;
@@ -204,7 +203,6 @@ class RepositoryValidationDecoratorTest {
     metaDataService = mock(MetaDataService.class);
     when(dataService.getMeta()).thenReturn(metaDataService);
 
-    expressionValidator = mock(ExpressionValidator.class);
     entityAttributesValidator = mock(EntityAttributesValidator.class);
     defaultValueReferenceValidator = mock(DefaultValueReferenceValidator.class);
     repositoryValidationDecorator =
@@ -3879,7 +3877,6 @@ class RepositoryValidationDecoratorTest {
   void testDeleteAllStreamValidationException() {
     Object entityId = mock(Object.class);
     Stream<Object> entityIdStream = Stream.of(entityId);
-    Stream<Object> validatedEntityIdStream = Stream.of(entityId);
     doThrow(MolgenisValidationException.class)
         .when(defaultValueReferenceValidator)
         .validateEntitiesNotReferencedById(entityIdStream, entityType);

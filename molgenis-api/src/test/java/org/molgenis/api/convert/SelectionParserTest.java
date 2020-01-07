@@ -67,7 +67,6 @@ class SelectionParserTest {
 
   @Test
   void testSingleItemSubSelectionEmptyParenthesis() {
-    Map<String, Selection> itemSelections = Collections.singletonMap("abc", null);
     assertThrows(ParseException.class, () -> new SelectionParser("abc()").parse());
   }
 }

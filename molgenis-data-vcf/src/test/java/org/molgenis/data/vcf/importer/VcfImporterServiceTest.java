@@ -316,8 +316,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
 
-    File file = mock(File.class);
-
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
 
@@ -335,8 +333,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     RepositoryCollection source = mock(RepositoryCollection.class);
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertTrue(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
@@ -353,8 +350,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithoutSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
@@ -374,8 +369,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     when(dataService.hasRepository(entityTypeId0)).thenReturn(true);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertFalse(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     assertEquals(
@@ -393,8 +387,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithSamples() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
@@ -423,8 +415,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     RepositoryCollection source = mock(RepositoryCollection.class);
     when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertTrue(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();
@@ -445,8 +436,6 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
   void validateImportWithSamplesAlreadyExists() {
     // Test with multiple input repositories not possible due to
     // https://github.com/molgenis/molgenis/issues/4544
-
-    File file = mock(File.class);
 
     String entityTypeId0 = "entity0";
     List<String> entityTypeIds = singletonList(entityTypeId0);
@@ -477,8 +466,7 @@ class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     doReturn(true).when(dataService).hasRepository(entityTypeId0);
     doReturn(true).when(dataService).hasRepository(sampleEntityName0);
-    EntitiesValidationReport entitiesValidationReport =
-        vcfImporterService.validateImport(file, source);
+    EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(source);
     assertFalse(entitiesValidationReport.valid());
     assertEquals(emptyMap(), entitiesValidationReport.getFieldsAvailable());
     Map<String, List<String>> importableFields = new HashMap<>();

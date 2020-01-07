@@ -4,15 +4,13 @@ import java.io.Serializable;
 
 /** Specific pair to link String label to Object. */
 public class ValueLabel implements Serializable {
+
   /* The serial version UID of this class. Needed for serialization. */
   private static final long serialVersionUID = -6539081630192819896L;
   /** The label */
   private String label;
   /** The value */
   private Object value;
-
-  /** Construct a new ValueLabel */
-  public ValueLabel() {}
 
   /**
    * Construct a new ValueLabel

@@ -52,7 +52,6 @@ public class SortaServiceImpl implements SortaService {
   private static final int NUMBER_NGRAM_MATCHES = 10;
 
   // Global fields that are used by other classes
-  public static final String SIGNIFICANT_VALUE = "Significant";
   public static final Character DEFAULT_SEPARATOR = ';';
   public static final String DEFAULT_MATCHING_NAME_FIELD = "Name";
   public static final String DEFAULT_MATCHING_SYNONYM_PREFIX_FIELD = "Synonym";

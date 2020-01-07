@@ -60,6 +60,7 @@ import org.springframework.test.context.ContextConfiguration;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {TestHarnessConfig.class})
 class EntityHydrationTest extends AbstractMolgenisSpringTest {
+
   @Autowired private EntityTestHarness entityTestHarness;
 
   private EntityType entityType;
@@ -136,7 +137,6 @@ class EntityHydrationTest extends AbstractMolgenisSpringTest {
             new EntityWithComputedAttributes(
                 new PartialEntity(new DynamicEntity(entityType), fetch, entityManager)));
 
-    Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityType, fetch);
     assertEquals("0", hydratedEntity.getIdValue());
   }
 

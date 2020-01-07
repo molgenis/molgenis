@@ -25,11 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.data.security.auth.UserMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class RestControllerIT extends AbstractApiTests {
-  private static final Logger LOG = LoggerFactory.getLogger(RestControllerIT.class);
 
   // Request parameters
   private static final String PATH = "api/v1/";

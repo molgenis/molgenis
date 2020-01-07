@@ -61,8 +61,6 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
 
   @Mock private LocaleResolver localeResolver;
 
-  private static final String QUESTIONNAIRE_ID = "test_quest";
-
   private MockMvc mockMvc;
 
   @BeforeEach

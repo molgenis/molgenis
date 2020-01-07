@@ -88,6 +88,7 @@ import org.molgenis.test.AbstractMockitoTest;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EmxMetadataParserTest extends AbstractMockitoTest {
+
   @Mock private DataService dataService;
   @Mock private PackageFactory packageFactory;
   @Mock private AttributeFactory attrMetaFactory;
@@ -219,13 +220,10 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
   void validatePartOfAttribute() {
     initMetaFactories();
 
-    Entity emxAttrEntity = mock(Entity.class);
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     emxMetadataParser.validatePartOfAttribute(
         0, "entityTypeId", "attributeName", "partOfAttribute", emxAttr);
   }
@@ -381,8 +379,6 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     assertThrows(
         InvalidValueException.class,
         () -> emxMetadataParser.setLabelAttr(0, "emxEntityName", emxAttr, attr, "test"));
@@ -396,8 +392,6 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     assertThrows(
         InvalidValueException.class,
         () -> emxMetadataParser.setLookupAttr(0, "emxEntityName", emxAttr, attr, "test"));
@@ -451,13 +445,10 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
   void validateEmxIdAttrValue() {
     initMetaFactories();
 
-    Entity emxAttrEntity = mock(Entity.class);
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     emxMetadataParser.validateEmxIdAttrValue(0, attr, "AUTO");
   }
 
@@ -465,13 +456,10 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
   void validateEmxIdAttrValueInvalid() {
     initMetaFactories();
 
-    Entity emxAttrEntity = mock(Entity.class);
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
     when(emxAttr.getAttr()).thenReturn(attr);
-    IntermediateParseResults intermediateParseResults =
-        new IntermediateParseResults(entityTypeFactory);
     assertThrows(
         InvalidValueException.class,
         () -> emxMetadataParser.validateEmxIdAttrValue(0, attr, "test"));
@@ -601,7 +589,6 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
   void getPackage() {
     initMetaFactories();
 
-    Entity emxAttrEntity = mock(Entity.class);
     Attribute attr = mock(Attribute.class);
     when(attr.getDataType()).thenReturn(COMPOUND);
     EmxAttribute emxAttr = mock(EmxAttribute.class);
@@ -826,7 +813,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(emxEntity.getString("en")).thenReturn("english");
     when(emxEntity.getString("de")).thenReturn("deutch");
 
-    L10nString actual = emxMetadataParser.toL10nString(emxEntity);
+    emxMetadataParser.toL10nString(emxEntity);
     verify(l10nString).setMessageID("identifier");
     verify(l10nString).setNamespace(DEFAULT_NAMESPACE);
     verify(l10nString).setDescription("desc");
@@ -846,7 +833,7 @@ class EmxMetadataParserTest extends AbstractMockitoTest {
     when(emxEntity.getString("namespace")).thenReturn("dataexplorer");
     when(emxEntity.getString("nl")).thenReturn("nederlands");
 
-    L10nString actual = emxMetadataParser.toL10nString(emxEntity);
+    emxMetadataParser.toL10nString(emxEntity);
     verify(l10nString).setMessageID("identifier");
     verify(l10nString).setNamespace("dataexplorer");
     verify(l10nString).setDescription("desc");

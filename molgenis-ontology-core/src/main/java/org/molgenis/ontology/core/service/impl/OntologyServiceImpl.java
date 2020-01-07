@@ -14,6 +14,7 @@ import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 
 public class OntologyServiceImpl implements OntologyService {
+
   private OntologyRepository ontologyRepository;
   private OntologyTermRepository ontologyTermRepository;
 
@@ -48,11 +49,6 @@ public class OntologyServiceImpl implements OntologyService {
   @Override
   public OntologyTerm getOntologyTerm(String iri) {
     return ontologyTermRepository.getOntologyTerm(iri.split(","));
-  }
-
-  @Override
-  public List<OntologyTerm> getAllOntologyTerms(String ontologyIri) {
-    return ontologyTermRepository.getAllOntologyTerms(ontologyIri);
   }
 
   @Override

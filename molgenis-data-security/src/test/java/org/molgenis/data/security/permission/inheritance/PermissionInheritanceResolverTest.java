@@ -15,8 +15,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionTestUtils;
 import org.molgenis.data.security.permission.UserRoleTools;
@@ -85,8 +83,6 @@ class PermissionInheritanceResolverTest extends AbstractMockitoTest {
 
     InheritedPermissionsResult input =
         getInheritedPermissionsResult(packageAcl, parentPackageAcl, role1Sid, role2Sid, role3Sid);
-    @SuppressWarnings("unchecked")
-    Repository<Entity> packageRepo = mock(Repository.class);
 
     doReturn(labelledPackageObjectIdentity)
         .when(entityHelper)

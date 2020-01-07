@@ -16,7 +16,6 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.menu.MenuReaderService;
-import org.molgenis.web.menu.model.Menu;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -38,7 +37,6 @@ public class SecurityUiControllerTest {
   public void before() {
     initMocks(this);
 
-    Menu menu = mock(Menu.class);
     when(appSettings.getLanguageCode()).thenReturn(DEFAULT_LANG);
     User user = mock(User.class);
     when(userAccountService.getCurrentUser()).thenReturn(user);

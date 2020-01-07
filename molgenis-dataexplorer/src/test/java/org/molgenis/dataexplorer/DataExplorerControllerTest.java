@@ -154,7 +154,6 @@ class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void initSortEntitiesByLabel() {
-    MetaDataService metaDataService = mock(MetaDataService.class);
     Query<EntityType> query = mock(Query.class, RETURNS_DEEP_STUBS);
     when(query.eq(IS_ABSTRACT, false)).thenReturn(query);
     when(query.fetch(any())).thenReturn(query);

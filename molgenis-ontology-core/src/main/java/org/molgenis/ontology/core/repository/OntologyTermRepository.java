@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
@@ -36,22 +35,6 @@ public class OntologyTermRepository {
 
   public OntologyTermRepository(DataService dataService) {
     this.dataService = requireNonNull(dataService);
-  }
-
-  public List<OntologyTerm> findOntologyTerms(String term, int pageSize) {
-    Iterable<Entity> ontologyTermEntities;
-
-    // #1 find exact match
-    Query<Entity> termNameQuery =
-        new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY_TERM_NAME, term).pageSize(pageSize);
-    ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, termNameQuery).iterator();
-
-    if (!ontologyTermEntities.iterator().hasNext()) {
-      Query<Entity> termsQuery = new QueryImpl<>().search(term).pageSize(pageSize);
-      ontologyTermEntities = () -> dataService.findAll(ONTOLOGY_TERM, termsQuery).iterator();
-    }
-    return Lists.newArrayList(
-        Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
   }
 
   /**

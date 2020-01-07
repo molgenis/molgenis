@@ -55,7 +55,6 @@ class EntityHelperTest extends AbstractMockitoTest {
   @Test
   void testGetRowLabel() {
     Repository repository = mock(Repository.class);
-    EntityType entityType = mock(EntityType.class);
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
     when(repository.findOneById("identifier")).thenReturn(entity);

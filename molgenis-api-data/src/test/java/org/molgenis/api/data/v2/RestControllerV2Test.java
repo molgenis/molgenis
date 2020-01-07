@@ -703,8 +703,6 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
         .when(dataService)
         .getRepository(unknownEntityTypeId);
 
-    String expectedContent =
-        TestResourceUtils.getString(getClass(), "resourceCollectionResponseUnknownEntityType.json");
     try {
       mockMvc.perform(get(BASE_URI + '/' + unknownEntityTypeId));
     } catch (NestedServletException e) {
