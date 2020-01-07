@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScriptJobExecutionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "ScriptJobExecution";
+
+  @SuppressWarnings("unused")
   public static final String SCRIPT_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String NAME = "name";
