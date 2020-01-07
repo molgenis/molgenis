@@ -107,8 +107,8 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
 
   private List<Role> getRolesBatch(int offSet) {
     Query<Role> query = QueryImpl.query();
-    Fetch fetch = new Fetch();
-    Fetch childFetch = new Fetch();
+    Fetch fetch = new Fetch(true);
+    Fetch childFetch = new Fetch(true);
     childFetch.field(ID);
     childFetch.field(NAME);
     fetch.field(ID).field(NAME).field(INCLUDES, childFetch);

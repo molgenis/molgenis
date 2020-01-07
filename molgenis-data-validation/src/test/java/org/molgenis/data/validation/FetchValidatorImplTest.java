@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +35,18 @@ class FetchValidatorTest extends AbstractMockitoTest {
     when(refAttribute.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAttribute("ref")).thenReturn(refAttribute);
     Fetch expectedFetch =
-        new Fetch()
+        new Fetch(true)
             .field("id")
             .field("label")
-            .field("ref", new Fetch().field("refId").field("refLabel"));
+            .field("ref", new Fetch(true).field("refId").field("refLabel"));
     assertEquals(expectedFetch, fetchValidatorImpl.validateFetch(fetch, entityType));
+  }
+
+  @Test
+  void validateFetchNoValidationRequired() {
+    Fetch fetch = new Fetch(true);
+    EntityType entityType = mock(EntityType.class);
+    fetchValidatorImpl.validateFetch(fetch, entityType);
+    verifyNoInteractions(entityType);
   }
 }

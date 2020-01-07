@@ -341,7 +341,7 @@ public class EntityTypeUtils {
   public static Fetch getEntityTypeFetch() {
     // TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
     Fetch fetch =
-        new Fetch()
+        new Fetch(true)
             .field(ID)
             .field(PACKAGE)
             .field(LABEL)

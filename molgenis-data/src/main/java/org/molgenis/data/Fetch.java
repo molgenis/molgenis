@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -19,10 +20,22 @@ import org.molgenis.data.meta.model.Attribute;
  */
 public class Fetch implements Iterable<Entry<String, Fetch>> {
   private final Map<String, Fetch> attrFetchMap;
+  private final boolean validated;
 
   /** Creates an empty Fetch. */
   public Fetch() {
+    this(false);
+  }
+
+  /**
+   * Creates an empty valid Fetch. Can be used to improve performance in case of system entity type
+   * fetches defined by the system.
+   *
+   * @param validated whether or not the fetch has been validated
+   */
+  public Fetch(boolean validated) {
     this.attrFetchMap = new LinkedHashMap<>();
+    this.validated = validated;
   }
 
   /**
@@ -97,6 +110,10 @@ public class Fetch implements Iterable<Entry<String, Fetch>> {
     return Collections.unmodifiableMap(attrFetchMap).keySet();
   }
 
+  public boolean isValidated() {
+    return validated;
+  }
+
   /**
    * Iterates over all fields in this fetch. The key is the field name, the value is the {@link
    * Fetch} for that field, or null if no Fetch is provided for that field.
@@ -109,23 +126,20 @@ public class Fetch implements Iterable<Entry<String, Fetch>> {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((attrFetchMap == null) ? 0 : attrFetchMap.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Fetch fetch = (Fetch) o;
+    return validated == fetch.validated && attrFetchMap.equals(fetch.attrFetchMap);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    Fetch other = (Fetch) obj;
-    if (attrFetchMap == null) {
-      if (other.attrFetchMap != null) return false;
-    } else if (!attrFetchMap.equals(other.attrFetchMap)) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(attrFetchMap, validated);
   }
 
   @Override
