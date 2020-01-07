@@ -7,6 +7,7 @@ import static org.molgenis.api.data.v1.UriUtils.createEntityTypeMetadataAttribut
 import static org.molgenis.api.data.v1.UriUtils.createEntityTypeMetadataUriPath;
 import static org.molgenis.api.data.v1.UriUtils.createEntityUriPath;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -14,6 +15,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 class UriUtilsTest {
+  @AfterAll
+  static void tearDownAfterAll() {
+    RequestContextHolder.setRequestAttributes(
+        new ServletRequestAttributes(new MockHttpServletRequest()));
+  }
+
   @BeforeEach
   void setUpBeforeMethod() {
     MockHttpServletRequest request = new MockHttpServletRequest();

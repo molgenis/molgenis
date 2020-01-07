@@ -74,10 +74,15 @@ class UriUtils {
     return builder.build();
   }
 
+  /** package-private for testability */
+  static ServletUriComponentsBuilder cachedServletUriComponentsBuilder;
+
   private static ServletUriComponentsBuilder createBuilder() {
-    ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-    builder.encode();
-    return builder;
+    if (cachedServletUriComponentsBuilder == null) {
+      cachedServletUriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentServletMapping();
+      cachedServletUriComponentsBuilder.encode();
+    }
+    return cachedServletUriComponentsBuilder.cloneBuilder();
   }
 
   /**
