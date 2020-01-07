@@ -23,8 +23,8 @@ import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
-import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -60,7 +60,7 @@ class AppManagerControllerTest {
     AppManagerController controller = new AppManagerController(appManagerService, dataService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
-            .setMessageConverters(new MolgenisGsonHttpMessageConverter(new Gson()))
+            .setMessageConverters(new GsonHttpMessageConverter(new Gson()))
             .build();
   }
 

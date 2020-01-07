@@ -27,7 +27,7 @@ public class GsonConfig {
 
   @Bean
   public GsonHttpMessageConverter gsonHttpMessageConverter() {
-    return new MolgenisGsonHttpMessageConverter(gsonFactoryBean().getObject());
+    return new GsonHttpMessageConverter(gsonFactoryBean().getObject());
   }
 
   @SuppressWarnings("unchecked")
