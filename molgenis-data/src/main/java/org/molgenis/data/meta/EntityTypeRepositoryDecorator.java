@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.Spliterators.spliteratorUnknownSize;
@@ -11,15 +12,12 @@ import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
-import com.google.common.collect.Streams;
-import com.google.common.collect.TreeTraverser;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -171,8 +169,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
   }
 
   private Map<String, Attribute> toAttributesMap(EntityType entityType) {
-    return Streams.stream(entityType.getOwnAllAttributes())
-        .collect(toMap(Attribute::getName, identity()));
+    return stream(entityType.getOwnAllAttributes()).collect(toMap(Attribute::getName, identity()));
   }
 
   private void deleteRemovedAttributesInBackend(
@@ -225,27 +222,15 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
     delegate().delete(entityType);
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private void deleteEntityAttributes(EntityType entityType) {
+    // compound attributes cascade delete their children
     Iterable<Attribute> rootAttrs = entityType.getOwnAttributes();
-    Stream<Attribute> allAttrs =
-        Streams.stream(rootAttrs)
-            .flatMap(
-                attrEntity ->
-                    StreamSupport.stream(
-                        new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
-                        false));
-    dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
+    dataService.delete(ATTRIBUTE_META_DATA, stream(rootAttrs));
   }
 
   private void deleteEntityRepository(EntityType entityType) {
     String backend = entityType.getBackend();
     dataService.getMeta().getBackend(backend).deleteRepository(entityType);
-  }
-
-  private static class AttributeTreeTraverser extends TreeTraverser<Attribute> {
-    @Override
-    public Iterable<Attribute> children(@Nonnull Attribute attr) {
-      return attr.getChildren();
-    }
   }
 }

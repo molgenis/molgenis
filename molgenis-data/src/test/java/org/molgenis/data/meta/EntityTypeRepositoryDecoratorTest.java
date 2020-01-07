@@ -86,11 +86,8 @@ class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
     when(metaDataService.getBackend(backend)).thenReturn(repositoryCollection);
 
     Attribute attr0 = mock(Attribute.class);
-    Attribute attrCompound = mock(Attribute.class);
-    Attribute attr1a = mock(Attribute.class);
-    Attribute attr1b = mock(Attribute.class);
-    when(attrCompound.getChildren()).thenReturn(newArrayList(attr1a, attr1b));
-    when(entityType1.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
+    Attribute attr1 = mock(Attribute.class);
+    when(entityType1.getOwnAttributes()).thenReturn(newArrayList(attr0, attr1));
 
     repo.delete(entityType1);
 
@@ -100,15 +97,13 @@ class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Attribute>> attrCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
-    assertEquals(
-        newArrayList(attr0, attrCompound, attr1a, attr1b), attrCaptor.getValue().collect(toList()));
+    assertEquals(newArrayList(attr0, attr1), attrCaptor.getValue().collect(toList()));
   }
 
   @Test
   void deleteAbstract() {
     when(entityType1.isAbstract()).thenReturn(true);
     Attribute attr0 = mock(Attribute.class);
-    when(attr0.getChildren()).thenReturn(emptyList());
     when(entityType1.getOwnAttributes()).thenReturn(singletonList(attr0));
 
     repo.delete(entityType1);
