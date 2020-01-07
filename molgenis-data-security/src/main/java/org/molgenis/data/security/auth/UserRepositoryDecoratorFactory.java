@@ -7,6 +7,7 @@ import org.molgenis.data.Repository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class UserRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<User, UserMetadata> {

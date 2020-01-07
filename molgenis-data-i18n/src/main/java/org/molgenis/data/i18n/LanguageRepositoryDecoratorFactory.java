@@ -6,6 +6,7 @@ import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class LanguageRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<Language, LanguageMetadata> {

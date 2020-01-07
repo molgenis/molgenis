@@ -9,9 +9,11 @@ import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class AppsRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<App, AppMetadata> {
+
   private final AppManagerService appManagerService;
 
   public AppsRepositoryDecoratorFactory(

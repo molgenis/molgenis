@@ -8,6 +8,7 @@ import org.molgenis.settings.AppSettings;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class PluginRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<Plugin, PluginMetadata> {
