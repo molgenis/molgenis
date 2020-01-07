@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SettingsEntityType extends SystemEntityType {
   private static final String SIMPLE_NAME = "settings";
+
+  @SuppressWarnings("unused")
   public static final String SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";

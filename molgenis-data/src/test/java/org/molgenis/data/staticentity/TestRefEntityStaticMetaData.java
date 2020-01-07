@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestRefEntityStaticMetaData extends SystemEntityType {
   private static final String SIMPLE_NAME = "TypeTestRefStatic";
+
+  @SuppressWarnings("unused")
   public static final String TEST_REF_ENTITY =
       TestPackage.PACKAGE_TEST_ENTITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 

@@ -20,7 +20,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AuthorMetaData1 extends SystemEntityType {
+
   private static final String SIMPLE_NAME = "Author1";
+
+  @SuppressWarnings("unused")
   public static final String MY_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";

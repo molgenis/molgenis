@@ -25,6 +25,8 @@ public class MembershipInvitationMetadata extends SystemEntityType {
   }
 
   private static final String SIMPLE_NAME = "MembershipInvitation";
+
+  @SuppressWarnings("unused")
   public static final String MEMBERSHIP_INVITATION =
       PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 

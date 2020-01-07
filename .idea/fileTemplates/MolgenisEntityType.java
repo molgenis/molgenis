@@ -1,4 +1,4 @@
-## Generates boilerplate for an EntityType. Creates the Metadata, Factory and implementation classes in one file. 
+## Generates boilerplate for an EntityType. Creates the Metadata, Factory and implementation classes in one file.
 
 ## Pretty form variable names
 #set( $ENTITY_TYPE_NAME = $EntityType_name)
@@ -13,7 +13,7 @@
 #set( $META_CLASS_NAME = $ENTITY_TYPE_NAME + "Metadata" )
 #set( $FACTORY_CLASS_NAME = $ENTITY_TYPE_NAME + "Factory" )
 
-## Create package fully qualified-, class- and variable names 
+## Create package fully qualified-, class- and variable names
 #set( $PACKAGE_FQN_VAR = "PACKAGE_" +  $PACK_NAME.replaceAll($regex, $underscore).toUpperCase())
 #set( $PACKAGE_CLASS = $PACK_NAME + "Package" )
 #set( $PACKAGE_VAR = $PACKAGE_CLASS.substring(0,1).toLowerCase() + $PACKAGE_CLASS.substring(1) )
@@ -44,6 +44,7 @@ import org.molgenis.data.populate.EntityPopulator;
 @Component
 public class $META_CLASS_NAME extends SystemEntityType {
   private static final String SIMPLE_NAME = "$ENTITY_TYPE_NAME";
+
   public static final String $FQN_VAR = $PACKAGE_FQN_VAR + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";
@@ -89,7 +90,7 @@ public class $ENTITY_TYPE_NAME extends StaticEntity {
     return getString(ID);
   }
 }
-    
+
 @Component
 public class $FACTORY_CLASS_NAME extends AbstractSystemEntityFactory<$ENTITY_TYPE_NAME, $META_CLASS_NAME, String> {
   $FACTORY_CLASS_NAME($META_CLASS_NAME $META_CLASS_VAR, EntityPopulator entityPopulator) {

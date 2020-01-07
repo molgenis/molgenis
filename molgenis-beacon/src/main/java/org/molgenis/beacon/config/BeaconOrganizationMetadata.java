@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BeaconOrganizationMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "BeaconOrganization";
+
+  @SuppressWarnings("unused")
   public static final String BEACON_ORGANIZATION = PACKAGE_BEACON + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";

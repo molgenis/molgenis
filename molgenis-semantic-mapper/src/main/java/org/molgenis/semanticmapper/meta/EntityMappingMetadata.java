@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityMappingMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "EntityMapping";
+
+  @SuppressWarnings("unused")
   public static final String ENTITY_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String IDENTIFIER = "identifier";

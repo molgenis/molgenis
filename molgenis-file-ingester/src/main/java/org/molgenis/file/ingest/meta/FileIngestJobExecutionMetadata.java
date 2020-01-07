@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileIngestJobExecutionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "FileIngestJobExecution";
+
+  @SuppressWarnings("unused")
   public static final String FILE_INGEST_JOB_EXECUTION =
       PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
