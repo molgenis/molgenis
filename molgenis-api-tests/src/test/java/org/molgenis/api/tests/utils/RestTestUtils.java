@@ -155,7 +155,6 @@ public class RestTestUtils {
    * @param fileName name of the file to upload
    * @return String indicating state of completed job
    */
-  @SuppressWarnings("unused")
   public static String uploadEMX(String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 

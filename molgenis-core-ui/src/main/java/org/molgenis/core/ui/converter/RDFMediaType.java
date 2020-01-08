@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.http.MediaType;
 
-@SuppressWarnings("unused")
 public class RDFMediaType {
 
   public static final MediaType TEXT_TURTLE = new MediaType("text", "turtle");

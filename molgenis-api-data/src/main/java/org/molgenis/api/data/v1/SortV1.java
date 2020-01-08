@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Copy of org.springframework.data.domain.Sort for backwards compatibility
+ * Adapted from org.springframework.data.domain.Sort for backwards compatibility
  *
  * <p>Sort option for queries. You have to provide at least a list of properties to sort for that
  * must not include {@literal null} or empty strings. The direction defaults to {@link
