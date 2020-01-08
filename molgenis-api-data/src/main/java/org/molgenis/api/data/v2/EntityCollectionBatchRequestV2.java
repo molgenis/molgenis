@@ -3,8 +3,6 @@ package org.molgenis.api.data.v2;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import org.molgenis.util.AutoGson;
@@ -14,8 +12,6 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EntityCollectionBatchRequestV2 {
-  @Nullable
-  @CheckForNull // See #3897. If hashCode fails, the validation throws an exception
   @NotEmpty(message = "Please provide at least one entity in the entities property.")
   @Size(
       max = RestControllerV2.MAX_ENTITIES,
