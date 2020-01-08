@@ -15,7 +15,6 @@ public abstract class CategoryMapper {
   public abstract Category findBestCategoryMatch(
       Category sourceCategory, List<Category> targetCategories);
 
-  @SuppressWarnings("unused")
   public abstract CategoryMatchQuality<?> applyCustomRules(
       Category sourceCategory, Category targetCategory);
 }
