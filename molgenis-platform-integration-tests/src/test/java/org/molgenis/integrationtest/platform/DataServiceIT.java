@@ -86,6 +86,8 @@ import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -101,6 +103,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Commit
 public class DataServiceIT extends AbstractMockitoSpringContextTests {
+  private static final Logger LOG = LoggerFactory.getLogger(DataServiceIT.class);
+
   private static final String USERNAME_READ = "dataService-user-read";
   private static final String USERNAME_WRITE = "dataService-user-write";
 
@@ -1079,6 +1083,10 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         applicationContext.getBean(TestEntityStaticMetaData.class);
     TestRefEntityStaticMetaData refEntityTypeStatic =
         applicationContext.getBean(TestRefEntityStaticMetaData.class);
+    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+
+    waitForIndexToBeStable(entityType, indexJobScheduler, LOG);
+    waitForIndexToBeStable(refEntityType, indexJobScheduler, LOG);
 
     dataService.getMeta().deleteEntityTypes(asList(entityType.getId(), refEntityType.getId()));
     dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
@@ -1093,6 +1101,23 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
       indexJobScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Wait till the index is stable. Index job is executed asynchronously. This method waits for all
+   * index jobs relevant for this entity to be finished.
+   *
+   * @param entityType name of the entity whose index needs to be stable
+   */
+  static void waitForIndexToBeStable(
+      EntityType entityType, IndexJobScheduler indexService, Logger log) {
+    try {
+      indexService.waitForIndexToBeStableIncludingReferences(entityType);
+      log.info("Index for entity [{}] incl. references is stable", entityType.getId());
+    } catch (InterruptedException e) {
+      log.info(
+          "Interrupted waiting for [{}] incl. references to become stable", entityType.getId(), e);
     }
   }
 }
