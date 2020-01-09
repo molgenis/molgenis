@@ -44,20 +44,6 @@ public interface TagService<O, C> {
   void removeAttributeTag(EntityType entityType, SemanticTag<Attribute, O, C> tag);
 
   /**
-   * Tags an entity.
-   *
-   * @param tag the tag to add
-   */
-  void addEntityTag(SemanticTag<EntityType, O, C> tag);
-
-  /**
-   * Removes an entity tag.
-   *
-   * @param tag the tag to remove
-   */
-  void removeEntityTag(SemanticTag<EntityType, O, C> tag);
-
-  /**
    * Removes all tags for a given entity
    *
    * @param entityTypeId the name of the entity for which all tags should be removed

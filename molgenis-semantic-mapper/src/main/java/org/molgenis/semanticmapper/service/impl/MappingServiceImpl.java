@@ -45,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @PreAuthorize("hasAnyRole('ROLE_SU')")
 public class MappingServiceImpl implements MappingService {
+
   public static final int MAPPING_BATCH_SIZE = 1000;
 
   static final String SOURCE = "source";
@@ -389,23 +390,14 @@ public class MappingServiceImpl implements MappingService {
         .getAttributeMappings()
         .forEach(
             attributeMapping ->
-                applyMappingToAttribute(
-                    attributeMapping,
-                    sourceEntity,
-                    target,
-                    sourceMapping.getSourceEntityType(),
-                    depth));
+                applyMappingToAttribute(attributeMapping, sourceEntity, target, depth));
     return target;
   }
 
   private void applyMappingToAttribute(
-      AttributeMapping attributeMapping,
-      Entity sourceEntity,
-      Entity target,
-      EntityType entityType,
-      int depth) {
+      AttributeMapping attributeMapping, Entity sourceEntity, Entity target, int depth) {
     String targetAttributeName = attributeMapping.getTargetAttribute().getName();
-    Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType, depth);
+    Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, depth);
     target.set(targetAttributeName, typedValue);
   }
 

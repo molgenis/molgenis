@@ -9,12 +9,9 @@ import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.ENTITY_MAPP
 import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.IDENTIFIER;
 import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.TARGET;
 
-import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -68,8 +65,6 @@ class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest {
   private List<Entity> entityMappingEntities;
 
   private List<EntityMapping> entityMappings;
-
-  @Captor ArgumentCaptor<Collection<EntityMapping>> entityMappingCaptor;
 
   @BeforeEach
   void beforeMethod() {

@@ -8,7 +8,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -131,26 +130,6 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
     dataService.update(ATTRIBUTE_META_DATA, entity);
   }
 
-  @Override
-  public void addEntityTag(SemanticTag<EntityType, LabeledResource, LabeledResource> tag) {
-    Entity entity = findEntity(tag.getSubject());
-    if (entity == null) {
-      throw new UnknownEntityTypeException(tag.getSubject().getId());
-    }
-    ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags =
-        ImmutableList.copyOf(getTagsForEntity(tag.getSubject()));
-    if (existingTags.contains(tag)) {
-      LOG.debug("Tag already present");
-      return;
-    }
-
-    ImmutableList.Builder<Entity> builder = ImmutableList.builder();
-    builder.addAll(entity.getEntities(EntityTypeMetadata.TAGS));
-    builder.add(getTagEntity(tag));
-    entity.set(EntityTypeMetadata.TAGS, builder.build());
-    dataService.update(ENTITY_TYPE_META_DATA, entity);
-  }
-
   public Entity getTagEntity(SemanticTag<?, LabeledResource, LabeledResource> tag) {
     return tagRepository.getTagEntity(
         tag.getObject().getIri(),
@@ -176,11 +155,6 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
     }
 
     return tags;
-  }
-
-  @Override
-  public void removeEntityTag(SemanticTag<EntityType, LabeledResource, LabeledResource> tag) {
-    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override

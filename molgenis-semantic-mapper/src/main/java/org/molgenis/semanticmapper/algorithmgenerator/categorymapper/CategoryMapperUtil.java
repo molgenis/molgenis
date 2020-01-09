@@ -86,15 +86,6 @@ public class CategoryMapperUtil {
     return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCase::contains);
   }
 
-  public static Unit<?> getMoreSpecificUnit(Unit<?> unit) {
-    int indexOf = DURATION_UNITS.indexOf(unit);
-    if (indexOf <= 0) {
-      return unit;
-    } else {
-      return DURATION_UNITS.get(--indexOf);
-    }
-  }
-
   public static AmountWrapper convertDescriptionToAmount(String description) {
     String cleanedDescription = convertWordToNumber(description);
     for (AmountConvertor convertor : CONVERTORS) {
@@ -154,11 +145,6 @@ public class CategoryMapperUtil {
       extractedNumbers.add(Double.parseDouble(mather.group()));
     }
     return extractedNumbers;
-  }
-
-  public static boolean containsNegativeAdjectives(String description) {
-    String lowerCasedDesc = description.toLowerCase();
-    return NEGATIVE_ADJECTIVES.stream().anyMatch(lowerCasedDesc::contains);
   }
 
   public static boolean isAmountRanged(Amount<?> amount) {

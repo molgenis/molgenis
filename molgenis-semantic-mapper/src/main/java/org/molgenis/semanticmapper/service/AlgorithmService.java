@@ -25,11 +25,7 @@ public interface AlgorithmService {
    * @param sourceEntity {@link Entity} to apply the mapping to
    * @return Object containing the mapped value
    */
-  Object apply(
-      AttributeMapping attributeMapping,
-      Entity sourceEntity,
-      EntityType sourceEntityType,
-      int depth);
+  Object apply(AttributeMapping attributeMapping, Entity sourceEntity, int depth);
 
   /**
    * Retrieves the names of the source attributes in an algorithm
