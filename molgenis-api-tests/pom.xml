@@ -196,11 +196,7 @@
           <skip>${skipITs}</skip>
           <container>
             <containerId>tomcat9x</containerId>
-            <zipUrlInstaller>
-              <url>
-                http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
-              </url>
-            </zipUrlInstaller>
+            <embedded>true</embedded>
             <systemProperties>
               <molgenis.home>${project.build.testOutputDirectory}/home</molgenis.home>
             </systemProperties>
