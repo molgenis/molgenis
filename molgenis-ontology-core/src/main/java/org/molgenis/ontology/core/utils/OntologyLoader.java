@@ -46,24 +46,6 @@ public class OntologyLoader {
                 "http://www.ebi.ac.uk/efo/alternative_term"));
   }
 
-  private Set<String> owlObjectProperties;
-
-  {
-    owlObjectProperties =
-        new HashSet<>(
-            Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#is_associated_with"));
-  }
-
-  private Set<String> ontologyTermDefinitions;
-
-  {
-    ontologyTermDefinitions =
-        new HashSet<>(
-            Arrays.asList(
-                "http://purl.obolibrary.org/obo/",
-                "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#DEFINITION"));
-  }
-
   private Map<String, OWLClass> hashToRetrieveClass = new HashMap<>();
 
   public OntologyLoader(String ontologyName, File ontologyFile)
@@ -110,19 +92,6 @@ public class OntologyLoader {
       }
     }
     return listOfClasses;
-  }
-
-  private boolean ifExistsAnnotation(String propertyUrl, String keyword) {
-    String pattern = "[\\W_]*" + keyword + "[\\W_]*";
-    // Use # as the separator
-    String[] urlFragments = propertyUrl.split("[#/]");
-    if (urlFragments.length > 1) {
-      String label = urlFragments[urlFragments.length - 1].replaceAll("[\\W]", "_");
-      for (String token : label.split("_")) {
-        if (token.matches(pattern)) return true;
-      }
-    }
-    return false;
   }
 
   public Set<String> getSynonyms(OWLClass cls) {
