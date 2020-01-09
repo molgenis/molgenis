@@ -198,7 +198,7 @@
             <containerId>tomcat9x</containerId>
             <zipUrlInstaller>
               <url>
-                http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
+                https://maven-central.storage-download.googleapis.com/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
               </url>
             </zipUrlInstaller>
             <systemProperties>
