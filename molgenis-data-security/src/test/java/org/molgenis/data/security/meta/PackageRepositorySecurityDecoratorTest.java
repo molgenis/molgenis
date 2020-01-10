@@ -108,8 +108,6 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     when(pack.getParent()).thenReturn(parent);
     when(oldPack.getParent()).thenReturn(oldParent);
 
-    MutableAcl acl = mock(MutableAcl.class);
-
     when(delegateRepository.findOneById(pack.getId())).thenReturn(oldPack);
 
     assertThrows(PackagePermissionDeniedException.class, () -> repo.update(pack));
@@ -120,7 +118,6 @@ class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest 
     Package pack = mock(Package.class);
     when(pack.getId()).thenReturn("pack");
     when(pack.getParent()).thenReturn(null);
-    MutableAcl acl1 = mock(MutableAcl.class);
     Package oldPack = mock(Package.class);
     Package oldParent = mock(Package.class);
     when(oldPack.getId()).thenReturn("pack");

@@ -5,10 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -17,11 +15,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.processor.TrimProcessor;
 import org.molgenis.data.file.support.FileRepositoryCollection;
-import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -31,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Repository name
  */
 public class ExcelRepositoryCollection extends FileRepositoryCollection {
+
   private static final String REPOSITORY_COLLECTION_NAME = "EXCEL";
 
   private final Workbook workbook;
@@ -96,27 +93,6 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
     return new ExcelRepository(poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
   }
 
-  public ExcelSheetWriter createWritable(
-      String entityTypeId, List<Attribute> attributes, AttributeWriteMode attributeWriteMode) {
-    Sheet sheet = workbook.createSheet(entityTypeId);
-    return new ExcelSheetWriter(sheet, attributes, attributeWriteMode, cellProcessors);
-  }
-
-  public ExcelSheetWriter createWritable(String entityTypeId, List<String> attributeNames) {
-    List<Attribute> attributes =
-        attributeNames != null
-            ? attributeNames.stream()
-                .map(attrName -> attributeFactory.create().setName(attrName))
-                .collect(Collectors.toList())
-            : null;
-
-    return createWritable(entityTypeId, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
-  }
-
-  public void save(OutputStream out) throws IOException {
-    workbook.write(out);
-  }
-
   @Override
   public String getName() {
     return REPOSITORY_COLLECTION_NAME;
@@ -141,9 +117,13 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
 
   @Override
   public boolean hasRepository(String name) {
-    if (null == name) return false;
+    if (null == name) {
+      return false;
+    }
     for (String s : getEntityTypeIds()) {
-      if (s.equals(name)) return true;
+      if (s.equals(name)) {
+        return true;
+      }
     }
     return false;
   }

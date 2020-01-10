@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 
 class DataServiceImplTest {
-  private final List<String> entityTypeIds = asList("Entity1", "Entity2", "Entity3");
+
   private Repository<Entity> repo1;
   private Repository<Entity> repo2;
   private Repository<Entity> repoToRemove;

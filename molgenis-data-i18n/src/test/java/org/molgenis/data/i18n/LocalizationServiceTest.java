@@ -46,7 +46,6 @@ class LocalizationServiceTest extends AbstractMockitoTest {
   @Mock private L10nString enPlusNl;
   @Mock private L10nString nlOnly;
   @Mock private L10nString newString1;
-  @Mock private L10nString newString2;
 
   @Captor private ArgumentCaptor<Stream<L10nString>> updateCaptor;
   @Captor private ArgumentCaptor<Stream<L10nString>> addCaptor;

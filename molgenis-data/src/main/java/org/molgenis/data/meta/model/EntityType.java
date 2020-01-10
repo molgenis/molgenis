@@ -666,6 +666,7 @@ public class EntityType extends StaticEntity implements Labeled {
    *
    * @param tag entity tag
    */
+  @SuppressWarnings("unused")
   public void addTag(Tag tag) {
     set(TAGS, concat(getTags(), singletonList(tag)));
   }

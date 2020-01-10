@@ -8,7 +8,6 @@ import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,8 +16,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class SystemEntityTestUtils {
-  protected static final List<String> LANGUAGES =
-      newArrayList("En", "Nl", "De", "Es", "It", "Pt", "Fr", "Xx");
 
   private static final Class[] LONG_CLASS = {Long.class, long.class};
   private static final Class[] INT_CLASS = {Integer.class, int.class};

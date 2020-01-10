@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 
 /** Methods shared by Rest Api tests */
 public class RestTestUtils {
+
   private static final Logger LOG = getLogger(RestTestUtils.class);
 
   public static final String APPLICATION_JSON = "application/json";
@@ -44,15 +45,13 @@ public class RestTestUtils {
   public static final int NO_CONTENT = 204;
   public static final int BAD_REQUEST = 400;
   public static final int UNAUTHORIZED = 401;
-  public static final int FORBIDDEN = 403;
   public static final int NOT_FOUND = 404;
 
   public enum Permission {
     READ,
     WRITE,
     COUNT,
-    WRITEMETA,
-    NONE
+    WRITEMETA
   }
 
   /**

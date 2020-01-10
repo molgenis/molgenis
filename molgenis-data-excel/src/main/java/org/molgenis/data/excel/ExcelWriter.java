@@ -2,9 +2,6 @@ package org.molgenis.data.excel;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -42,15 +39,6 @@ public class ExcelWriter implements WritableFactory {
     this.attrMetaFactory = requireNonNull(attrMetaFactory);
     this.workbook =
         requireNonNull(format) == FileFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
-  }
-
-  public ExcelWriter(File file, AttributeFactory attrMetaFactory) throws FileNotFoundException {
-    this(new FileOutputStream(file), attrMetaFactory, FileFormat.XLS);
-  }
-
-  public ExcelWriter(File file, AttributeFactory attrMetaFactory, FileFormat format)
-      throws FileNotFoundException {
-    this(new FileOutputStream(file), attrMetaFactory, format);
   }
 
   public void addCellProcessor(CellProcessor cellProcessor) {

@@ -2,7 +2,6 @@ package org.molgenis.test;
 
 import static freemarker.template.Configuration.VERSION_2_3_21;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptyMap;
 
 import com.google.common.io.Resources;
 import freemarker.core.InvalidReferenceException;
@@ -19,11 +18,6 @@ public class TestResourceUtils {
   private static final Configuration CONFIGURATION = new Configuration(VERSION_2_3_21);
 
   private TestResourceUtils() {}
-
-  public static String getRenderedString(Class<?> contextClass, String resourceName)
-      throws IOException {
-    return getRenderedString(contextClass, resourceName, emptyMap());
-  }
 
   public static String getRenderedString(
       Class<?> contextClass, String resourceName, Map<String, String> model) throws IOException {

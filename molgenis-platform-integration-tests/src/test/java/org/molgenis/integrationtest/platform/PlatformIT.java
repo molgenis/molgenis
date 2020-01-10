@@ -388,31 +388,6 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
     return testHarness.createTestEntities(entityType, count, refEntities);
   }
 
-  private void assertPresent(EntityType emd, List<Entity> entities) {
-    entities.forEach(e -> assertPresent(emd, e));
-  }
-
-  private void assertPresent(EntityType emd, Entity entity) {
-    // Found in PostgreSQL
-    assertNotNull(dataService.findOneById(emd.getId(), entity.getIdValue()));
-
-    // Found in index Elasticsearch
-    Query<Entity> q = new QueryImpl<>();
-    q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
-    assertEquals(1, searchService.count(emd, q));
-  }
-
-  private void assertNotPresent(Entity entity) {
-    // Found in PostgreSQL
-    org.junit.jupiter.api.Assertions.assertNull(
-        dataService.findOneById(entityTypeDynamic.getId(), entity.getIdValue()));
-
-    // Not found in index Elasticsearch
-    Query<Entity> q = new QueryImpl<>();
-    q.eq(entityTypeDynamic.getIdAttribute().getName(), entity.getIdValue());
-    assertEquals(0, searchService.count(entityTypeDynamic, q));
-  }
-
   @WithMockUser(username = USERNAME)
   @Test
   void testIndexCreateMetaData() {

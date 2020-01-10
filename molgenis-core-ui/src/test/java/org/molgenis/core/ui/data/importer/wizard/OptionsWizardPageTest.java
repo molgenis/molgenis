@@ -29,6 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 class OptionsWizardPageTest extends AbstractMockitoTest {
+
   @Mock private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
   @Mock private ImportServiceFactory importServiceFactory;
   @Mock private DataService dataService;
@@ -59,7 +60,7 @@ class OptionsWizardPageTest extends AbstractMockitoTest {
         .thenReturn(fileRepositoryCollection);
     ImportService importService = mock(ImportService.class);
     EntitiesValidationReport entitiesValidationReport = mock(EntitiesValidationReport.class);
-    when(importService.validateImport(file, fileRepositoryCollection))
+    when(importService.validateImport(fileRepositoryCollection))
         .thenReturn(entitiesValidationReport);
     when(importServiceFactory.getImportService(file, fileRepositoryCollection))
         .thenReturn(importService);
@@ -91,7 +92,7 @@ class OptionsWizardPageTest extends AbstractMockitoTest {
     EntitiesValidationReport entitiesValidationReport = mock(EntitiesValidationReport.class);
     when(entitiesValidationReport.getSheetsImportable())
         .thenReturn(singletonMap("MyEntityType", true));
-    when(importService.validateImport(file, fileRepositoryCollection))
+    when(importService.validateImport(fileRepositoryCollection))
         .thenReturn(entitiesValidationReport);
     when(importServiceFactory.getImportService(file, fileRepositoryCollection))
         .thenReturn(importService);

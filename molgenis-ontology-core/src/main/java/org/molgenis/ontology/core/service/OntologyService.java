@@ -6,6 +6,7 @@ import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
 public interface OntologyService {
+
   /** Retrieves all ontologies. */
   List<Ontology> getOntologies();
 
@@ -36,15 +37,6 @@ public interface OntologyService {
    * @return List of {@link OntologyTerm}s that match the search term.
    */
   List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
-
-  /**
-   * Retrieve all ontology terms from the specified ontology
-   *
-   * @return all the {@link OntologyTerm}
-   */
-  List<OntologyTerm> getAllOntologyTerms(String ontologyIri);
-
-  // voor de tag service
 
   /**
    * Retrieves a specific OntologyTerm

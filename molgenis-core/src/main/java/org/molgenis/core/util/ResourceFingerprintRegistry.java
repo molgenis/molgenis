@@ -15,6 +15,8 @@ public class ResourceFingerprintRegistry {
     resourceFingerprints = new ConcurrentHashMap<>();
   }
 
+  // Used in freemarker macros (see org.molgenis.core.ui.MolgenisInterceptor)
+  @SuppressWarnings("unused")
   public String getFingerprint(String resourceName) throws IOException {
     return getFingerprint(this.getClass(), resourceName);
   }

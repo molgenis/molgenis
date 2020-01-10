@@ -20,8 +20,6 @@ import org.springframework.stereotype.Component;
 /** Application settings that are read from a data source and persisted to a data source. */
 @Component
 public class AppDbSettings extends DefaultSettingsEntity implements AppSettings {
-  private static final long serialVersionUID = 1L;
-
   private static final String ID = "app";
 
   public AppDbSettings() {

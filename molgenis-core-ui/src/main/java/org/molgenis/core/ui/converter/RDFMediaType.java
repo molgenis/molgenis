@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 
 public class RDFMediaType {
+
   public static final MediaType TEXT_TURTLE = new MediaType("text", "turtle");
   public static final String APPLICATION = "application";
   public static final MediaType APPLICATION_RDF_XML = new MediaType(APPLICATION, "rdf+xml");

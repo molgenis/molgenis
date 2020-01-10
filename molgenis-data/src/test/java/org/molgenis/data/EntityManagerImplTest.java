@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,10 +33,6 @@ class EntityManagerImplTest {
     entityManagerImpl =
         new EntityManagerImpl(
             dataService, entityFactoryRegistry, entityPopulator, entityReferenceCreator);
-  }
-
-  void EntityManagerImpl() {
-    assertThrows(NullPointerException.class, () -> new EntityManagerImpl(null, null, null, null));
   }
 
   @Test

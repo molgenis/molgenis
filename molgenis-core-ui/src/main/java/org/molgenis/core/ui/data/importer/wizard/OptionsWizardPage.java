@@ -144,7 +144,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     RepositoryCollection source =
         fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
     ImportService importService = importServiceFactory.getImportService(file, source);
-    EntitiesValidationReport validationReport = importService.validateImport(file, source);
+    EntitiesValidationReport validationReport = importService.validateImport(source);
 
     wizard.setEntitiesImportable(validationReport.getSheetsImportable());
     wizard.setFieldsDetected(validationReport.getFieldsImportable());

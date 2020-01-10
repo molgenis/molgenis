@@ -93,7 +93,7 @@ public class VcfImporterService implements ImportService {
   }
 
   @Override
-  public EntitiesValidationReport validateImport(File file, RepositoryCollection source) {
+  public EntitiesValidationReport validateImport(RepositoryCollection source) {
     EntitiesValidationReport report = new EntitiesValidationReportImpl();
     Iterator<String> it = source.getEntityTypeIds().iterator();
     if (it.hasNext()) {

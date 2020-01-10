@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OntologyImportService implements ImportService {
+
   private static final Logger LOG = LoggerFactory.getLogger(OntologyImportService.class);
 
   private final DataService dataService;
@@ -70,11 +71,12 @@ public class OntologyImportService implements ImportService {
   }
 
   @Override
-  public EntitiesValidationReport validateImport(File file, RepositoryCollection source) {
+  public EntitiesValidationReport validateImport(RepositoryCollection source) {
     EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-    if (source.getRepository(ONTOLOGY) == null)
+    if (source.getRepository(ONTOLOGY) == null) {
       throw new MolgenisDataException("Exception Repository [" + ONTOLOGY + "] is missing");
+    }
 
     boolean ontologyExists = false;
     for (Entity ontologyEntity : source.getRepository(ONTOLOGY)) {
@@ -91,8 +93,9 @@ public class OntologyImportService implements ImportService {
       ontologyExists = ontologyQueryEntity != null;
     }
 
-    if (ontologyExists)
+    if (ontologyExists) {
       throw new MolgenisDataException("The ontology you are trying to import already exists");
+    }
 
     for (String entityTypeId : source.getEntityTypeIds()) {
       report.getSheetsImportable().put(entityTypeId, !ontologyExists);

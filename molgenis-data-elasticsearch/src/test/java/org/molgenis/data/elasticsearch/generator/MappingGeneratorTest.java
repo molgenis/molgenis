@@ -70,15 +70,6 @@ class MappingGeneratorTest extends AbstractMockitoTest {
     assertEquals(expectedMapping, mapping);
   }
 
-  static Iterator<Object[]> createMappingProviderAnalyzeNGrams() {
-    List<Object[]> dataItems = new ArrayList<>();
-    dataItems.add(new Object[] {AttributeType.EMAIL});
-    dataItems.add(new Object[] {AttributeType.ENUM});
-    dataItems.add(new Object[] {AttributeType.STRING});
-    dataItems.add(new Object[] {AttributeType.TEXT});
-    return dataItems.iterator();
-  }
-
   static Iterator<Object[]> createMappingProviderNested() {
     List<Object[]> dataItems = new ArrayList<>();
     dataItems.add(new Object[] {AttributeType.CATEGORICAL});

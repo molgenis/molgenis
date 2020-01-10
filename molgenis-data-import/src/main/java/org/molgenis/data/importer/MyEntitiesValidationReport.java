@@ -14,6 +14,7 @@ import org.molgenis.util.UnexpectedEnumException;
 
 /** Value object to store the {@link EntitiesValidationReport}. */
 public class MyEntitiesValidationReport implements EntitiesValidationReport {
+
   public enum AttributeState {
     /** Present in the source, known in the target. */
     IMPORTABLE(true),
@@ -62,16 +63,6 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport {
       importOrder.add(entityTypeId);
     }
     return this;
-  }
-
-  /**
-   * Creates a new report, with an attribute with state {@link AttributeState#IMPORTABLE} added to
-   * the last added entity;
-   *
-   * @return new {@link MyEntitiesValidationReport} with attribute added.
-   */
-  public MyEntitiesValidationReport addAttribute(String attributeName) {
-    return addAttribute(attributeName, AttributeState.IMPORTABLE);
   }
 
   /** Add a package to the report */
@@ -177,8 +168,12 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     MyEntitiesValidationReport that = (MyEntitiesValidationReport) o;
     return valid == that.valid
         && Objects.equals(sheetsImportable, that.sheetsImportable)

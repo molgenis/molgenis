@@ -100,6 +100,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @RequestMapping(SortaController.URI)
 public class SortaController extends PluginController {
+
   private static final Logger LOG = LoggerFactory.getLogger(SortaController.class);
 
   public static final String ID = "sorta";
@@ -363,7 +364,9 @@ public class SortaController extends PluginController {
       Model model,
       HttpServletRequest httpServletRequest)
       throws IOException {
-    if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
+    if (isEmpty(ontologyIri) || isEmpty(inputTerms)) {
+      return init(model);
+    }
     validateJobName(jobName);
     try (ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"))) {
       return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
@@ -378,7 +381,9 @@ public class SortaController extends PluginController {
       Model model,
       HttpServletRequest httpServletRequest)
       throws IOException {
-    if (isEmpty(ontologyIri) || file == null) return init(model);
+    if (isEmpty(ontologyIri) || file == null) {
+      return init(model);
+    }
     validateJobName(jobName);
     try (InputStream inputStream = file.getInputStream()) {
       return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
@@ -395,14 +400,17 @@ public class SortaController extends PluginController {
         && !isEmpty(request.get(IDENTIFIER).toString())) {
       String sortaJobExecutionId = request.get("sortaJobExecutionId").toString();
       SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
-      if (sortaJobExecution == null)
+      if (sortaJobExecution == null) {
         return new SortaServiceResponse("sortaJobExecutionId is invalid!");
+      }
 
       String inputTermIdentifier = request.get(IDENTIFIER).toString();
       Entity inputEntity =
           dataService.findOneById(sortaJobExecution.getSourceEntityName(), inputTermIdentifier);
 
-      if (inputEntity == null) return new SortaServiceResponse("inputTerm identifier is invalid!");
+      if (inputEntity == null) {
+        return new SortaServiceResponse("inputTerm identifier is invalid!");
+      }
 
       return new SortaServiceResponse(
           inputEntity,
