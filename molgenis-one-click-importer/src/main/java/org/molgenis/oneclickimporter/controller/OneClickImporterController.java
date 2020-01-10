@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeParseException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -19,9 +18,8 @@ import org.molgenis.navigator.NavigatorController;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.settings.AppSettings;
 import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -37,32 +35,34 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping(OneClickImporterController.URI)
-public class OneClickImporterController extends VuePluginController {
+public class OneClickImporterController extends PluginController {
   public static final String ONE_CLICK_IMPORTER = "one-click-importer";
   public static final String URI = PLUGIN_URI_PREFIX + ONE_CLICK_IMPORTER;
 
   private FileStore fileStore;
   private OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory;
   private JobExecutor jobExecutor;
+  private MenuReaderService menuReaderService;
 
   public OneClickImporterController(
       MenuReaderService menuReaderService,
-      AppSettings appSettings,
-      UserAccountService userAccountService,
       FileStore fileStore,
       OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory,
       JobExecutor jobExecutor) {
-    super(URI, menuReaderService, appSettings, userAccountService);
+    super(URI);
     this.fileStore = requireNonNull(fileStore);
     this.oneClickImportJobExecutionFactory = requireNonNull(oneClickImportJobExecutionFactory);
     this.jobExecutor = requireNonNull(jobExecutor);
+    this.menuReaderService = requireNonNull(menuReaderService);
   }
 
   @GetMapping
   public String init(Model model) {
-    super.init(model, ONE_CLICK_IMPORTER);
-    model.addAttribute("navigatorBaseUrl", getBaseUrl(NavigatorController.ID));
-    model.addAttribute("dataExplorerBaseUrl", getBaseUrl(DataExplorerController.ID));
+    model.addAttribute(KEY_BASE_URL, menuReaderService.findMenuItemPath(ONE_CLICK_IMPORTER));
+    model.addAttribute(
+        "navigatorBaseUrl", menuReaderService.findMenuItemPath(NavigatorController.ID));
+    model.addAttribute(
+        "dataExplorerBaseUrl", menuReaderService.findMenuItemPath(DataExplorerController.ID));
 
     return "view-one-click-importer";
   }

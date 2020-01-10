@@ -43,7 +43,7 @@ class DataRowEditControllerTest {
     when(user.isSuperuser()).thenReturn(false);
 
     DataRowEditController settingsController =
-        new DataRowEditController(menuReaderService, appSettings, userAccountService);
+        new DataRowEditController(menuReaderService, appSettings);
     mockMvc = standaloneSetup(settingsController).build();
   }
 

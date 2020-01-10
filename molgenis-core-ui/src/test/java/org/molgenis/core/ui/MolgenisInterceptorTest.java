@@ -29,6 +29,7 @@ import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.PluginAttributes;
@@ -42,6 +43,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   @Mock private AuthenticationSettings authenticationSettings;
   @Mock private MessageSource messageSource;
   @Mock private TransactionManager transactionManager;
+  @Mock private UserAccountService userAccountService;
 
   private String environment;
   private Gson gson;
@@ -60,14 +62,15 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
             environment,
             messageSource,
             gson,
-            transactionManager);
+            transactionManager,
+            userAccountService);
   }
 
   @Test
   void MolgenisInterceptor() {
     assertThrows(
         NullPointerException.class,
-        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null));
+        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null, null));
   }
 
   @Test

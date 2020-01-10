@@ -61,8 +61,7 @@ class NavigatorControllerTest extends AbstractMockitoSpringContextTests {
   @BeforeEach
   void before() {
     NavigatorController navigatorController =
-        new NavigatorController(
-            menuReaderService, appSettings, userAccountService, navigatorService);
+        new NavigatorController(menuReaderService, navigatorService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(navigatorController)
             .setMessageConverters(gsonHttpMessageConverter)

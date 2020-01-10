@@ -25,6 +25,7 @@ import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -37,6 +38,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /** Interceptor that adds default model objects to all requests that return a view. */
 public class MolgenisInterceptor extends HandlerInterceptorAdapter {
+
+  public static final String KEY_LANGUAGE = "lng";
+  public static final String KEY_FALLBACK_LANGUAGE = "fallbackLng";
+  public static final String KEY_SUPER_USER = "isSuperUser";
   private final ResourceFingerprintRegistry resourceFingerprintRegistry;
   private final ThemeFingerprintRegistry themeFingerprintRegistry;
   private final AuthenticationSettings authenticationSettings;
@@ -45,6 +50,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
   private final MessageSource messageSource;
   private final Gson gson;
   private final PlatformTransactionManager transactionManager;
+  private final UserAccountService userAccountService;
 
   public static final String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
 
@@ -56,7 +62,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       @Value("${environment}") String environment,
       MessageSource messageSource,
       Gson gson,
-      PlatformTransactionManager transactionManager) {
+      PlatformTransactionManager transactionManager,
+      UserAccountService userAccountService) {
     this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
     this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
     this.appSettings = requireNonNull(appSettings);
@@ -65,6 +72,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
     this.messageSource = requireNonNull(messageSource);
     this.gson = requireNonNull(gson);
     this.transactionManager = requireNonNull(transactionManager);
+    this.userAccountService = requireNonNull(userAccountService);
   }
 
   @Override
@@ -95,6 +103,10 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
                   KEY_I18N,
                   new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
               modelAndView.addObject(KEY_GSON, gson);
+              modelAndView.addObject(KEY_LANGUAGE, LocaleContextHolder.getLocale().getLanguage());
+              modelAndView.addObject(KEY_FALLBACK_LANGUAGE, appSettings.getLanguageCode());
+              modelAndView.addObject(
+                  KEY_SUPER_USER, userAccountService.getCurrentUser().isSuperuser());
               return null;
             });
       }

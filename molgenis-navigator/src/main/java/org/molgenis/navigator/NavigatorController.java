@@ -8,11 +8,9 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
-import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.model.Resource;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.settings.AppSettings;
+import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,24 +26,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(NavigatorController.URI)
-public class NavigatorController extends VuePluginController {
+public class NavigatorController extends PluginController {
   public static final String ID = "navigator";
   public static final String URI = PLUGIN_URI_PREFIX + ID;
 
   private final NavigatorService navigatorService;
+  private final MenuReaderService menuReaderService;
 
-  NavigatorController(
-      MenuReaderService menuReaderService,
-      AppSettings appSettings,
-      UserAccountService userAccountService,
-      NavigatorService navigatorService) {
-    super(URI, menuReaderService, appSettings, userAccountService);
+  NavigatorController(MenuReaderService menuReaderService, NavigatorService navigatorService) {
+    super(URI);
+    this.menuReaderService = requireNonNull(menuReaderService);
     this.navigatorService = requireNonNull(navigatorService);
   }
 
   @GetMapping("/**")
   public String init(Model model) {
-    super.init(model, ID);
+    model.addAttribute(KEY_BASE_URL, menuReaderService.findMenuItemPath(ID));
 
     asList("dataexplorer", "metadata-manager", "importwizard")
         .forEach(

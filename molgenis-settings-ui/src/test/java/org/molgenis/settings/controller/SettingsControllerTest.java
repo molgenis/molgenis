@@ -41,8 +41,7 @@ public class SettingsControllerTest {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isSuperuser()).thenReturn(false);
 
-    SettingsController settingsController =
-        new SettingsController(menuReaderService, appSettings, userAccountService);
+    SettingsController settingsController = new SettingsController(menuReaderService);
     mockMvc = standaloneSetup(settingsController).build();
   }
 

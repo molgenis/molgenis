@@ -75,8 +75,6 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
     OneClickImporterController oneClickImporterController =
         new OneClickImporterController(
             menuReaderService,
-            appSettings,
-            userAccountService,
             fileStore,
             oneClickImportJobExecutionFactory,
             jobExecutor);

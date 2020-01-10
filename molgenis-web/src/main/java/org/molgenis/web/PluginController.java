@@ -1,16 +1,20 @@
 package org.molgenis.web;
 
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.settings.DefaultSettingsEntityType;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** Abstract base class for all MOLGENIS plugin controllers */
 public abstract class PluginController {
   public static final String PLUGIN_URI_PREFIX = "/plugin/";
+  public static final String KEY_BASE_URL = "baseUrl";
 
   @Autowired private DataService dataService;
+  @Autowired private MenuReaderService menuReaderService;
 
   /** Base URI for a plugin */
   private final String uri;

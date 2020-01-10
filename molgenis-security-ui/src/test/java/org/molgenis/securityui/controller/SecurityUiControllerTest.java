@@ -45,7 +45,7 @@ public class SecurityUiControllerTest {
         .thenReturn(MENU_PATH_SECURITY_UI);
 
     SecurityUiController securityUiController =
-        new SecurityUiController(menuReaderService, appSettings, userAccountService);
+        new SecurityUiController(menuReaderService);
     mockMvc = standaloneSetup(securityUiController).build();
   }
 
