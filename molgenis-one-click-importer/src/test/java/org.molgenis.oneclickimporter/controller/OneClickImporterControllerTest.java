@@ -74,10 +74,7 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
   void before() {
     OneClickImporterController oneClickImporterController =
         new OneClickImporterController(
-            menuReaderService,
-            fileStore,
-            oneClickImportJobExecutionFactory,
-            jobExecutor);
+            menuReaderService, fileStore, oneClickImportJobExecutionFactory, jobExecutor);
 
     when(menuReaderService.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER))
         .thenReturn("/test-path");

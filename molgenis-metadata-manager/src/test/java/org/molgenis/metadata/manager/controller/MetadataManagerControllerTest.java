@@ -78,8 +78,7 @@ class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     MetadataManagerController metadataEditorController =
-        new MetadataManagerController(
-            menuReaderService, metadataManagerService);
+        new MetadataManagerController(menuReaderService, metadataManagerService);
 
     mockMvc =
         MockMvcBuilders.standaloneSetup(metadataEditorController)

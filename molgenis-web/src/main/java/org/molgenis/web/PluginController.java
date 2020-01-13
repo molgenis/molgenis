@@ -1,6 +1,5 @@
 package org.molgenis.web;
 
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystemAspect;

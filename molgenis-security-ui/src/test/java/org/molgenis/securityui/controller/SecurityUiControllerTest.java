@@ -44,8 +44,7 @@ public class SecurityUiControllerTest {
     when(menuReaderService.findMenuItemPath(SecurityUiController.ID))
         .thenReturn(MENU_PATH_SECURITY_UI);
 
-    SecurityUiController securityUiController =
-        new SecurityUiController(menuReaderService);
+    SecurityUiController securityUiController = new SecurityUiController(menuReaderService);
     mockMvc = standaloneSetup(securityUiController).build();
   }
 

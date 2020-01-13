@@ -34,8 +34,8 @@ public class MetadataManagerController extends PluginController {
   private MetadataManagerService metadataManagerService;
   private final MenuReaderService menuReaderService;
 
-  public MetadataManagerController(MenuReaderService menuReaderService,
-      MetadataManagerService metadataManagerService) {
+  public MetadataManagerController(
+      MenuReaderService menuReaderService, MetadataManagerService metadataManagerService) {
     super(URI);
     this.metadataManagerService = requireNonNull(metadataManagerService);
     this.menuReaderService = requireNonNull(menuReaderService);
