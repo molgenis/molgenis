@@ -7,6 +7,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.validation.meta.PackageValidator.ValidationMode;
 
 /** Validates {@link Package packages} before adding or updating the delegated repository */
 public class PackageRepositoryValidationDecorator extends AbstractRepositoryDecorator<Package> {
@@ -20,7 +21,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 
   @Override
   public void add(Package aPackage) {
-    packageValidator.validate(aPackage);
+    packageValidator.validate(aPackage, ValidationMode.ADD);
     delegate().add(aPackage);
   }
 
@@ -30,14 +31,14 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
         .add(
             packageStream.filter(
                 entityType -> {
-                  packageValidator.validate(entityType);
+                  packageValidator.validate(entityType, ValidationMode.ADD);
                   return true;
                 }));
   }
 
   @Override
   public void update(Package aPackage) {
-    packageValidator.validate(aPackage);
+    packageValidator.validate(aPackage, ValidationMode.UPDATE);
     delegate().update(aPackage);
   }
 
@@ -47,14 +48,14 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
         .update(
             packageStream.filter(
                 entityType -> {
-                  packageValidator.validate(entityType);
+                  packageValidator.validate(entityType, ValidationMode.UPDATE);
                   return true;
                 }));
   }
 
   @Override
   public void delete(Package aPackage) {
-    packageValidator.validate(aPackage);
+    packageValidator.validate(aPackage, ValidationMode.DELETE);
     super.delete(aPackage);
   }
 
@@ -64,7 +65,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
         .delete(
             packageStream.filter(
                 aPackage -> {
-                  packageValidator.validate(aPackage);
+                  packageValidator.validate(aPackage, ValidationMode.DELETE);
                   return true;
                 }));
   }
@@ -75,13 +76,14 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
     if (aPackage == null) {
       throw new UnknownEntityException(getEntityType(), id);
     }
-    packageValidator.validate(aPackage);
+    packageValidator.validate(aPackage, ValidationMode.DELETE);
     super.deleteById(id);
   }
 
   @Override
   public void deleteAll() {
-    iterator().forEachRemaining(packageValidator::validate);
+    iterator()
+        .forEachRemaining(aPackage -> packageValidator.validate(aPackage, ValidationMode.DELETE));
     super.deleteAll();
   }
 
@@ -91,7 +93,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
         ids.map(this::findOneById)
             .filter(
                 aPackage -> {
-                  packageValidator.validate(aPackage);
+                  packageValidator.validate(aPackage, ValidationMode.DELETE);
                   return true;
                 })
             .map(Package::getId));
