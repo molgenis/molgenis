@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.util.PackageUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.validation.ConstraintViolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,23 +21,46 @@ import org.springframework.stereotype.Component;
 public class PackageValidator {
   private static final Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
 
+  public enum ValidationMode {
+    ADD,
+    UPDATE,
+    DELETE
+  }
+
   private final SystemPackageRegistry systemPackageRegistry;
 
   PackageValidator(SystemPackageRegistry systemPackageRegistry) {
     this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
   }
 
-  public void validate(Package aPackage) {
-    validatePackageAllowed(aPackage);
+  public void validate(Package aPackage, ValidationMode validationMode) {
+    validatePackageAllowed(aPackage, validationMode);
     validatePackageName(aPackage);
     runAsSystem(() -> validatePackageParent(aPackage));
   }
 
-  private void validatePackageAllowed(Package aPackage) {
-    if (PackageUtils.isSystemPackage(aPackage)
-        && !systemPackageRegistry.containsPackage(aPackage)) {
+  private void validatePackageAllowed(Package aPackage, ValidationMode validationMode) {
+    boolean isValid;
+
+    if (!PackageUtils.isSystemPackage(aPackage)) {
+      isValid = true;
+    } else {
+      switch (validationMode) {
+        case ADD:
+        case UPDATE:
+          isValid = systemPackageRegistry.containsPackage(aPackage);
+          break;
+        case DELETE:
+          isValid = !systemPackageRegistry.containsPackage(aPackage);
+          break;
+        default:
+          throw new UnexpectedEnumException(validationMode);
+      }
+    }
+
+    if (!isValid) {
       LOG.error(
-          "validatePackageAllowed, the system package registry does not contain package with id {} and label {}",
+          "modifying system package id {} and label {} is not allowed",
           aPackage.getId(),
           aPackage.getLabel());
       throw new MolgenisValidationException(
