@@ -14,8 +14,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.identities.AddGroupMemberCommand.addGroupMember;
 import static org.molgenis.api.identities.GroupCommand.createGroup;
-import static org.molgenis.api.identities.GroupRestController.GROUP_END_POINT;
-import static org.molgenis.api.identities.GroupRestController.TEMP_USER_END_POINT;
+import static org.molgenis.api.identities.IdentitiesApiController.GROUP_END_POINT;
+import static org.molgenis.api.identities.IdentitiesApiController.TEMP_USER_END_POINT;
 import static org.molgenis.api.identities.UpdateGroupMemberCommand.updateGroupMember;
 import static org.molgenis.data.security.auth.GroupPermission.ADD_MEMBERSHIP;
 import static org.molgenis.data.security.auth.GroupPermission.REMOVE_MEMBERSHIP;
@@ -82,8 +82,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.NestedServletException;
 
-@ContextConfiguration(classes = {GroupRestControllerTest.Config.class, GsonConfig.class})
-class GroupRestControllerTest extends AbstractMockitoSpringContextTests {
+@ContextConfiguration(classes = {IdentitiesApiControllerTest.Config.class, GsonConfig.class})
+class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private GroupPermissionService groupPermissionService;
@@ -124,8 +124,8 @@ class GroupRestControllerTest extends AbstractMockitoSpringContextTests {
 
   @BeforeEach
   void beforeMethod() {
-    GroupRestController groupRestController =
-        new GroupRestController(
+    IdentitiesApiController groupRestController =
+        new IdentitiesApiController(
             groupValueFactory,
             groupService,
             roleMembershipService,

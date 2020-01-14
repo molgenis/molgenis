@@ -47,7 +47,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @Validated
 @Api("Group")
-public class GroupRestController {
+public class IdentitiesApiController {
   public static final String USER = "/user";
 
   @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
@@ -67,7 +67,7 @@ public class GroupRestController {
   private final UserService userService;
   private final UserPermissionEvaluator userPermissionEvaluator;
 
-  GroupRestController(
+  IdentitiesApiController(
       GroupValueFactory groupValueFactory,
       GroupService groupService,
       RoleMembershipService roleMembershipService,
