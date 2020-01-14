@@ -1,5 +1,6 @@
 package org.molgenis.data.security.auth;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.TEXT;
@@ -49,7 +50,7 @@ public class RoleMetadata extends SystemEntityType {
         .setDescription("Name of the Role")
         .setUnique(true)
         .setNillable(false)
-        .setValidationExpression("$('name').matches(/^[a-zA-Z0-9_#-]+$/).value()")
+        .setValidationExpression(format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX))
         .setReadOnly(true);
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
     getLanguageCodes()

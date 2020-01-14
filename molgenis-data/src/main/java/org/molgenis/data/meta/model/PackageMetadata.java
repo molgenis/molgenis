@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
@@ -49,7 +50,7 @@ public class PackageMetadata extends SystemEntityType {
     addAttribute(ID, ROLE_ID)
         .setAuto(true)
         .setLabel("Identifier")
-        .setValidationExpression("$('id').matches(/^[a-zA-Z0-9_#-]+$/).value()");
+        .setValidationExpression(format("$('id').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX));
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
     addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
     Attribute parentAttr =
