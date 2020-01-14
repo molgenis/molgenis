@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class QuestionnaireController extends PluginController {
   public static final String ID = "questionnaires";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   private static final String QUESTIONNAIRE_VIEW = "view-questionnaire";
 

@@ -109,9 +109,7 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
         .perform(get(OneClickImporterController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name("view-one-click-importer"))
-        .andExpect(model().attribute("baseUrl", "/test-path"))
-        .andExpect(model().attribute("lng", "nl"))
-        .andExpect(model().attribute("fallbackLng", "en"));
+        .andExpect(model().attribute("baseUrl", "/test-path"));
   }
 
   @Test

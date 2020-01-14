@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ScriptPluginController extends PluginController {
   public static final String ID = "scripts";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
+
   private final MenuReaderService menuReaderService;
 
   public ScriptPluginController(MenuReaderService menuReaderService) {

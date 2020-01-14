@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SecurityUiController extends PluginController {
   public static final String ID = "security-ui";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   static final String VIEW_TEMPLATE = "view-security-ui";
   private final MenuReaderService menuReaderService;

@@ -54,8 +54,6 @@ public class SecurityUiControllerTest {
         .perform(get(SecurityUiController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name(SecurityUiController.VIEW_TEMPLATE))
-        .andExpect(model().attribute("baseUrl", MENU_PATH_SECURITY_UI))
-        .andExpect(model().attribute("lng", DEFAULT_LANG))
-        .andExpect(model().attribute("fallbackLng", DEFAULT_LANG));
+        .andExpect(model().attribute("baseUrl", MENU_PATH_SECURITY_UI));
   }
 }

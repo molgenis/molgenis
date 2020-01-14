@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class NavigatorController extends PluginController {
   public static final String ID = "navigator";
   public static final String URI = PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   private final NavigatorService navigatorService;
   private final MenuReaderService menuReaderService;

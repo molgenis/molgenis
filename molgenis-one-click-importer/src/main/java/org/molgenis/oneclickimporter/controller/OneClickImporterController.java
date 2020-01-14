@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class OneClickImporterController extends PluginController {
   public static final String ONE_CLICK_IMPORTER = "one-click-importer";
   public static final String URI = PLUGIN_URI_PREFIX + ONE_CLICK_IMPORTER;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   private FileStore fileStore;
   private OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory;

@@ -51,9 +51,6 @@ public class SettingsControllerTest {
         .perform(get(SettingsController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name(SettingsController.VIEW_TEMPLATE))
-        .andExpect(model().attribute("baseUrl", "/test/path"))
-        .andExpect(model().attribute("lng", "en"))
-        .andExpect(model().attribute("fallbackLng", "DDEEFF"))
-        .andExpect(model().attribute("isSuperUser", false));
+        .andExpect(model().attribute("baseUrl", "/test/path"));
   }
 }

@@ -93,10 +93,7 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
         .perform(get(QuestionnaireController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name("view-questionnaire"))
-        .andExpect(model().attribute("baseUrl", "/test/path"))
-        .andExpect(model().attribute("lng", "en"))
-        .andExpect(model().attribute("fallbackLng", "en"))
-        .andExpect(model().attribute("isSuperUser", false));
+        .andExpect(model().attribute("baseUrl", "/test/path"));
   }
 
   @Test

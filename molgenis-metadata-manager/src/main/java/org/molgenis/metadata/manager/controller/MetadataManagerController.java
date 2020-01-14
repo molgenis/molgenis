@@ -11,8 +11,6 @@ import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +24,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Controller
 @RequestMapping(MetadataManagerController.URI)
 public class MetadataManagerController extends PluginController {
-  private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 
   public static final String METADATA_MANAGER = "metadata-manager";
   public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   private MetadataManagerService metadataManagerService;
   private final MenuReaderService menuReaderService;

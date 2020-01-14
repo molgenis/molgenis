@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class SearchAllPluginController extends PluginController {
   public static final String ID = "searchAll";
   public static final String URI = PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   public static final String NAVIGATOR = "navigator";
   public static final String DATAEXPLORER = "dataexplorer";

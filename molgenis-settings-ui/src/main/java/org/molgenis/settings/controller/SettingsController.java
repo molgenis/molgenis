@@ -15,6 +15,7 @@ public class SettingsController extends PluginController {
 
   public static final String ID = "settings";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   public static final String VIEW_TEMPLATE = "view-settings";
   private final MenuReaderService menuReaderService;

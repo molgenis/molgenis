@@ -11,7 +11,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -24,7 +24,7 @@ import org.springframework.web.servlet.LocaleResolver;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {UserAccountControllerTestConfig.class, GsonConfig.class})
-class UserAccountControllerMockMvcTest extends AbstractMockitoSpringContextTests {
+class UserAccountControllerMockMvcTest extends AbstractMolgenisSpringTest {
   @Autowired private UserAccountControllerTestConfig config;
   @Autowired private UserAccountController userAccountController;
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
