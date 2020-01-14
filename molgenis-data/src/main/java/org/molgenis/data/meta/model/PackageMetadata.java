@@ -46,7 +46,10 @@ public class PackageMetadata extends SystemEntityType {
 
     setIndexingDepth(2);
 
-    addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
+    addAttribute(ID, ROLE_ID)
+        .setAuto(true)
+        .setLabel("Identifier")
+        .setValidationExpression("$('id').matches(/^[a-zA-Z0-9_#-]+$/).value()");
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
     addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
     Attribute parentAttr =

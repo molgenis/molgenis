@@ -91,10 +91,9 @@ public class IdentitiesApiController {
     @ApiResponse(code = 400, message = "Group name not available", response = ResponseEntity.class)
   })
   public ResponseEntity createGroup(@RequestBody GroupCommand group) {
-    String packageValueName = group.getName().replace('-', '_');
     GroupValue groupValue =
         groupValueFactory.createGroup(
-            group.getName(), group.getLabel(), GroupService.DEFAULT_ROLES, packageValueName);
+            group.getName(), group.getLabel(), GroupService.DEFAULT_ROLES, group.getName());
 
     if (!groupService.isGroupNameAvailable(groupValue)) {
       throw new GroupNameNotAvailableException(group.getName());

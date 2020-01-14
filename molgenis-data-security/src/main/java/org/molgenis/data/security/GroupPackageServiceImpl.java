@@ -9,12 +9,10 @@ import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.GroupValueFactory.createRoleName;
-import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.RandomUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
@@ -67,7 +65,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
   @Override
   public void createGroup(Package rootPackage) {
-    String groupName = createGroupName(rootPackage);
+    String groupName = rootPackage.getId();
     String groupLabel = rootPackage.getLabel();
 
     GroupValue groupValue =
@@ -110,27 +108,6 @@ public class GroupPackageServiceImpl implements GroupPackageService {
       dataService.delete(GROUP, group);
       mutableAclService.deleteAcl(new GroupIdentity(group.getName()), true);
     }
-  }
-
-  /**
-   * Group name must match the regular expression ^[a-z][a-z0-9]*(-[a-z0-9]+)*$, Package identifier
-   * doesn't have any restrictions.
-   */
-  private String createGroupName(Package rootPackage) {
-    String rootPackageId = rootPackage.getId();
-
-    String groupName;
-    if (rootPackageId.matches("^[a-z][a-z0-9]*(-[a-z0-9]+)*$")) {
-      groupName = rootPackageId;
-    } else {
-      // generate a group name that is guaranteed to be unique (uniqueness is not guaranteed by
-      // removing illegal characters from the package identifier, since the resulting group name
-      // might already correspond with an existing group e.g. due to the fact that the group name
-      // can be modified)
-      byte[] randomBytes = RandomUtils.nextBytes(10);
-      groupName = "group-" + md5DigestAsHex(randomBytes).substring(0, 8).toLowerCase();
-    }
-    return groupName;
   }
 
   private Group getGroup(Package rootPackage) {

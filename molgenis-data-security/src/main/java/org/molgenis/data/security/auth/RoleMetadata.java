@@ -46,10 +46,10 @@ public class RoleMetadata extends SystemEntityType {
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(NAME, ROLE_LOOKUP)
         .setLabel("Name")
-        .setDescription("Name of the Role. Use screaming snake case, e.g. MY_ROLE.")
+        .setDescription("Name of the Role")
         .setUnique(true)
         .setNillable(false)
-        .setValidationExpression("$('name').matches(/^[A-Z]+[A-Z0-9]*(_[A-Z0-9]+)*$/).value()")
+        .setValidationExpression("$('name').matches(/^[a-zA-Z0-9_#-]+$/).value()")
         .setReadOnly(true);
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
     getLanguageCodes()
