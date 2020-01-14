@@ -13,7 +13,9 @@ import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.List;
@@ -81,6 +83,25 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
               reachableRoles);
           return reachableRoles;
         });
+  }
+
+  public ImmutableMap<GrantedAuthority, ImmutableSet<GrantedAuthority>>
+      getAllGrantedAuthorityInclusions() {
+    ImmutableMap.Builder<GrantedAuthority, ImmutableSet<GrantedAuthority>> builder =
+        ImmutableMap.builder();
+    for (Role role : getAllRoles()) {
+      ImmutableSet.Builder<GrantedAuthority> includesBuilder = ImmutableSet.builder();
+      for (Role included : role.getIncludes()) {
+        includesBuilder.add(createGrantedAuthority(included));
+      }
+      builder.put(createGrantedAuthority(role), includesBuilder.build());
+    }
+    return builder.build();
+  }
+
+  private GrantedAuthority createGrantedAuthority(Role role) {
+    String roleAuthority = SidUtils.createRoleAuthority(role.getName());
+    return new SimpleGrantedAuthority(roleAuthority);
   }
 
   private Multimap<String, String> getAllRoleInclusions() {

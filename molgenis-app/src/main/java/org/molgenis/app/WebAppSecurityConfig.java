@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.core.ui.security.MolgenisAccessDecisionVoter;
 import org.molgenis.data.DataService;
+import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.security.auth.CachedRoleHierarchyImpl;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.molgenis.security.acl.AclConfig;
 import org.springframework.context.annotation.Bean;
@@ -23,14 +26,16 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 @Configuration
-@Import({AclConfig.class, DataServiceImpl.class})
+@Import({AclConfig.class, DatabaseConfig.class, DataServiceImpl.class})
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig {
   private final DataService dataService;
+  private final TransactionManager transactionManager;
 
-  public WebAppSecurityConfig(DataService dataService) {
+  public WebAppSecurityConfig(DataService dataService, TransactionManager transactionManager) {
     this.dataService = requireNonNull(dataService);
+    this.transactionManager = requireNonNull(transactionManager);
   }
 
   @Override
@@ -47,7 +52,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig {
 
   @Override
   public RoleHierarchy roleHierarchy() {
-    return new DataserviceRoleHierarchy(dataService);
+    return new CachedRoleHierarchyImpl(
+        new DataserviceRoleHierarchy(dataService), transactionManager);
   }
 
   @Bean

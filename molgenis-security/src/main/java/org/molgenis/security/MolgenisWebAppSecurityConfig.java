@@ -370,12 +370,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   @Bean
   public RoleVoter roleVoter() {
-    return new RoleHierarchyVoter(roleHierarchy());
+    return new RoleHierarchyVoter(roleHierarchyBean());
   }
 
   @Bean
   public GrantedAuthoritiesMapper roleHierarchyAuthoritiesMapper() {
-    return new RoleHierarchyAuthoritiesMapper(roleHierarchy());
+    return new RoleHierarchyAuthoritiesMapper(roleHierarchyBean());
   }
 
   @Bean

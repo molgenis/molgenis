@@ -14,13 +14,13 @@ import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
-import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.GroupPackageServiceImpl;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.auth.GroupPackageService;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.JsonTestConfig;
+import org.molgenis.integrationtest.config.RoleHierarchyTestConfig;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
 import org.molgenis.integrationtest.config.SecurityCoreITConfig;
 import org.molgenis.integrationtest.data.TestAppSettings;
@@ -128,7 +128,6 @@ in org.molgenis.data and subpackages from included modules
   org.molgenis.data.importer.ImportServiceRegistrar.class,
   EntityTypeRegistryPopulator.class,
   UserPermissionEvaluatorImpl.class,
-  DataserviceRoleHierarchy.class,
   SystemRepositoryDecoratorFactoryRegistrar.class,
   SemanticSearchConfig.class,
   OntologyConfig.class,
@@ -136,6 +135,7 @@ in org.molgenis.data and subpackages from included modules
   JobFactoryRegistrar.class,
   SystemEntityTypeRegistryImpl.class,
   ScriptTestConfig.class,
+  RoleHierarchyTestConfig.class,
   AclConfig.class,
   MutableAclClassServiceImpl.class,
   PermissionRegistry.class,
