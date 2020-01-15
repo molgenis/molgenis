@@ -18,7 +18,7 @@ public class GroupValueFactoryTest {
   void testCreateGroup() {
     GroupValue bbmri_eric =
         groupValueFactory.createGroup(
-            "bbmri-eric",
+            "bbmri_eric",
             "BBMRI Eric",
             "The world's largest biobank catalogue",
             true,
@@ -33,21 +33,21 @@ public class GroupValueFactoryTest {
   public static GroupValue getTestGroupValue() {
     RoleValue manager =
         RoleValue.builder()
-            .setName("BBMRI_ERIC_MANAGER")
+            .setName("bbmri_eric_MANAGER")
             .setLabel("Manager")
             .setDescription("BBMRI Eric Manager")
             .build();
 
     RoleValue editor =
         RoleValue.builder()
-            .setName("BBMRI_ERIC_EDITOR")
+            .setName("bbmri_eric_EDITOR")
             .setLabel("Editor")
             .setDescription("BBMRI Eric Editor")
             .build();
 
     RoleValue viewer =
         RoleValue.builder()
-            .setName("BBMRI_ERIC_VIEWER")
+            .setName("bbmri_eric_VIEWER")
             .setLabel("Viewer")
             .setDescription("BBMRI Eric Viewer")
             .build();
@@ -61,7 +61,7 @@ public class GroupValueFactoryTest {
 
     GroupValue.Builder expectedBuilder =
         GroupValue.builder()
-            .setName("bbmri-eric")
+            .setName("bbmri_eric")
             .setLabel("BBMRI Eric")
             .setDescription("The world's largest biobank catalogue")
             .setPublic(true)
@@ -80,9 +80,9 @@ public class GroupValueFactoryTest {
 
   static Object[][] roleNameProvider() {
     return new Object[][] {
-      new Object[] {"bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER"},
-      new Object[] {"bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER"},
-      new Object[] {"patientenfederatie-nederland", "Member", "PATIENTENFEDERATIE_NEDERLAND_MEMBER"}
+      new Object[] {"bbmri_eric", "Manager", "bbmri_eric_MANAGER"},
+      new Object[] {"bbmri_eric", "Manager", "bbmri_eric_MANAGER"},
+      new Object[] {"patientenfederatie-nederland", "Member", "patientenfederatie-nederland_MEMBER"}
     };
   }
 }

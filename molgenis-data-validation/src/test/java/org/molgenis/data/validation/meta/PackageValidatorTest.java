@@ -8,7 +8,6 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -58,20 +57,6 @@ class PackageValidatorTest {
             MolgenisValidationException.class,
             () -> packageValidator.validate(package_, ValidationMode.ADD));
     assertThat(exception.getMessage()).containsPattern("Modifying system packages is not allowed");
-  }
-
-  @SuppressWarnings("deprecation")
-  @Test
-  void testValidatePackageInvalidName() {
-    Package package_ = when(mock(Package.class).getId()).thenReturn("0package").getMock();
-    when(package_.getParent()).thenReturn(testPackage);
-    when(package_.getRootPackage()).thenReturn(testPackage);
-    Exception exception =
-        assertThrows(
-            MolgenisDataException.class,
-            () -> packageValidator.validate(package_, ValidationMode.ADD));
-    assertThat(exception.getMessage())
-        .containsPattern("Invalid name: \\[0package\\] Names must start with a letter.");
   }
 
   @Test
