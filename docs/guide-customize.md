@@ -48,7 +48,7 @@ First, create a new Menu item that has the following traits:
 
 * Plugin: redirect
 * Name: Wikipedia Link
-* Query string: https://en.wikipedia.org/wiki/Bioinformatics
+* Query string: url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FBioinformatics
 
 Second, move the new link below the Home item. Then press the 'Save the new menu layout' button.
 
