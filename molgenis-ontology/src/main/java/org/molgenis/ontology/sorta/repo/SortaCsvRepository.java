@@ -33,7 +33,7 @@ public class SortaCsvRepository extends AbstractRepository {
   private final String entityLabel;
   public static final String ALLOWED_IDENTIFIER = "Identifier";
   private static final List<CellProcessor> LOWERCASE_AND_TRIM =
-      Arrays.asList(new LowerCaseProcessor(), new TrimProcessor());
+      Arrays.asList(new LowerCaseProcessor(false, true), new TrimProcessor());
 
   public SortaCsvRepository(
       File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory) {
@@ -92,7 +92,7 @@ public class SortaCsvRepository extends AbstractRepository {
   public Iterator<Entity> iterator() {
     final AtomicInteger count = new AtomicInteger(0);
     final Iterator<Entity> iterator = csvRepository.iterator();
-    return new Iterator<Entity>() {
+    return new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iterator.hasNext();
