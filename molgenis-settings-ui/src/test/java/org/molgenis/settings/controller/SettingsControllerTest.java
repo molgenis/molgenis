@@ -41,8 +41,7 @@ public class SettingsControllerTest {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isSuperuser()).thenReturn(false);
 
-    SettingsController settingsController =
-        new SettingsController(menuReaderService, appSettings, userAccountService);
+    SettingsController settingsController = new SettingsController(menuReaderService);
     mockMvc = standaloneSetup(settingsController).build();
   }
 
@@ -52,9 +51,6 @@ public class SettingsControllerTest {
         .perform(get(SettingsController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name(SettingsController.VIEW_TEMPLATE))
-        .andExpect(model().attribute("baseUrl", "/test/path"))
-        .andExpect(model().attribute("lng", "en"))
-        .andExpect(model().attribute("fallbackLng", "DDEEFF"))
-        .andExpect(model().attribute("isSuperUser", false));
+        .andExpect(model().attribute("baseUrl", "/test/path"));
   }
 }

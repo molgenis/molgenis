@@ -78,8 +78,7 @@ class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     MetadataManagerController metadataEditorController =
-        new MetadataManagerController(
-            menuReaderService, appSettings, metadataManagerService, userAccountService);
+        new MetadataManagerController(menuReaderService, metadataManagerService);
 
     mockMvc =
         MockMvcBuilders.standaloneSetup(metadataEditorController)
@@ -95,9 +94,7 @@ class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
         .perform(get("/plugin/metadata-manager"))
         .andExpect(status().isOk())
         .andExpect(view().name("view-metadata-manager"))
-        .andExpect(model().attribute("baseUrl", "/test/path"))
-        .andExpect(model().attribute("lng", "de"))
-        .andExpect(model().attribute("fallbackLng", "nl"));
+        .andExpect(model().attribute("baseUrl", "/test/path"));
   }
 
   @Test

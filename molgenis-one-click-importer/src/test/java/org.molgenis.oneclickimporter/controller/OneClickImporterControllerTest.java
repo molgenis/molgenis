@@ -74,12 +74,7 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
   void before() {
     OneClickImporterController oneClickImporterController =
         new OneClickImporterController(
-            menuReaderService,
-            appSettings,
-            userAccountService,
-            fileStore,
-            oneClickImportJobExecutionFactory,
-            jobExecutor);
+            menuReaderService, fileStore, oneClickImportJobExecutionFactory, jobExecutor);
 
     when(menuReaderService.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER))
         .thenReturn("/test-path");
@@ -114,9 +109,7 @@ class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
         .perform(get(OneClickImporterController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name("view-one-click-importer"))
-        .andExpect(model().attribute("baseUrl", "/test-path"))
-        .andExpect(model().attribute("lng", "nl"))
-        .andExpect(model().attribute("fallbackLng", "en"));
+        .andExpect(model().attribute("baseUrl", "/test-path"));
   }
 
   @Test

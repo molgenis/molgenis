@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE;
+import static org.molgenis.core.ui.MolgenisInterceptor.KEY_FALLBACK_LANGUAGE;
+import static org.molgenis.core.ui.MolgenisInterceptor.KEY_SUPER_USER;
 import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
@@ -26,9 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.PluginAttributes;
@@ -42,6 +46,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   @Mock private AuthenticationSettings authenticationSettings;
   @Mock private MessageSource messageSource;
   @Mock private TransactionManager transactionManager;
+  @Mock private UserAccountService userAccountService;
 
   private String environment;
   private Gson gson;
@@ -60,14 +65,15 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
             environment,
             messageSource,
             gson,
-            transactionManager);
+            transactionManager,
+            userAccountService);
   }
 
   @Test
   void MolgenisInterceptor() {
     assertThrows(
         NullPointerException.class,
-        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null));
+        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null, null));
   }
 
   @Test
@@ -75,6 +81,12 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   void postHandle() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+
+    User user = mock(User.class);
+    when(user.isSuperuser()).thenReturn(true);
+    when(userAccountService.getCurrentUser()).thenReturn(user);
+    when(appSettings.getLanguageCode()).thenReturn("de");
+
     Object handler = mock(Object.class);
     ModelAndView modelAndView = new ModelAndView();
     molgenisInterceptor.postHandle(request, response, handler, modelAndView);
@@ -88,7 +100,9 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
     assertNotNull(model.get(KEY_APP_SETTINGS));
     assertEquals(environment, environmentAttributes.get(ATTRIBUTE_ENVIRONMENT_TYPE));
     assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
-    assertSame(model.get(KEY_GSON), gson);
+    assertSame(gson, model.get(KEY_GSON));
+    assertSame("de", model.get(KEY_FALLBACK_LANGUAGE));
+    assertSame(true, model.get(KEY_SUPER_USER));
   }
 
   @Test
@@ -102,6 +116,10 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
     when(authenticationSettings.getOidcClients()).thenReturn(ImmutableList.of(oidcClient));
     when(oidcClient.getRegistrationId()).thenReturn("registrationId");
     when(oidcClient.getClientName()).thenReturn("clientName");
+    User user = mock(User.class);
+    when(user.isSuperuser()).thenReturn(true);
+    when(userAccountService.getCurrentUser()).thenReturn(user);
+    when(appSettings.getLanguageCode()).thenReturn("de");
 
     molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 

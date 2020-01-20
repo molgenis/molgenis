@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.navigator.model.ResourceIdentifier;
@@ -61,8 +60,7 @@ class NavigatorControllerTest extends AbstractMockitoSpringContextTests {
   @BeforeEach
   void before() {
     NavigatorController navigatorController =
-        new NavigatorController(
-            menuReaderService, appSettings, userAccountService, navigatorService);
+        new NavigatorController(menuReaderService, navigatorService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(navigatorController)
             .setMessageConverters(gsonHttpMessageConverter)
@@ -74,20 +72,13 @@ class NavigatorControllerTest extends AbstractMockitoSpringContextTests {
   @Test
   void testInit() throws Exception {
     when(menuReaderService.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
-    when(appSettings.getLanguageCode()).thenReturn("de");
-    User user = mock(User.class);
-    when(userAccountService.getCurrentUser()).thenReturn(user);
-    when(user.isSuperuser()).thenReturn(false);
 
     when(localeResolver.resolveLocale(any())).thenReturn(Locale.FRENCH);
     mockMvc
         .perform(get(NavigatorController.URI))
         .andExpect(status().isOk())
         .andExpect(view().name("view-navigator"))
-        .andExpect(model().attribute("baseUrl", "/test/path"))
-        .andExpect(model().attribute("lng", "fr"))
-        .andExpect(model().attribute("fallbackLng", "de"))
-        .andExpect(model().attribute("isSuperUser", false));
+        .andExpect(model().attribute("baseUrl", "/test/path"));
   }
 
   @Test

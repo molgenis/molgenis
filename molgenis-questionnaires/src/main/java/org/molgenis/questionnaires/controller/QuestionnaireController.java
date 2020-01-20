@@ -5,7 +5,6 @@ import static org.molgenis.questionnaires.meta.QuestionnaireStatus.NOT_STARTED;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
@@ -24,28 +23,35 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(QuestionnaireController.URI)
-public class QuestionnaireController extends VuePluginController {
+public class QuestionnaireController extends PluginController {
   public static final String ID = "questionnaires";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   private static final String QUESTIONNAIRE_VIEW = "view-questionnaire";
 
   private final QuestionnaireService questionnaireService;
+  private final MenuReaderService menuReaderService;
+  private final AppSettings appSettings;
+  private final UserAccountService userAccountService;
 
   public QuestionnaireController(
       QuestionnaireService questionnaireService,
       MenuReaderService menuReaderService,
       AppSettings appSettings,
       UserAccountService userAccountService) {
-    super(URI, menuReaderService, appSettings, userAccountService);
+    super(URI);
     this.questionnaireService = requireNonNull(questionnaireService);
+    this.menuReaderService = requireNonNull(menuReaderService);
+    this.appSettings = requireNonNull(appSettings);
+    this.userAccountService = requireNonNull(userAccountService);
   }
 
   /** Loads the questionnaire view */
   @GetMapping("/**")
   public String initView(Model model) {
-    super.init(model, ID);
-    model.addAttribute("username", super.userAccountService.getCurrentUser().getUsername());
+    model.addAttribute(KEY_BASE_URL, menuReaderService.findMenuItemPath(ID));
+    model.addAttribute("username", userAccountService.getCurrentUser().getUsername());
     return QUESTIONNAIRE_VIEW;
   }
 
@@ -114,7 +120,7 @@ public class QuestionnaireController extends VuePluginController {
       status = questionnaireEntity.getStatus();
     }
 
-    String lng = this.getLanguageCode();
+    String lng = appSettings.getLanguageCode();
 
     return QuestionnaireResponse.create(
         entityTypeId, entityType.getLabel(lng), entityType.getDescription(lng), status);

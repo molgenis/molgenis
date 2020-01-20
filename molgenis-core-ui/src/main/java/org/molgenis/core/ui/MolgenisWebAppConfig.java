@@ -36,6 +36,7 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.util.AppDataRootProvider;
 import org.molgenis.util.ApplicationContextProvider;
@@ -98,6 +99,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Autowired private UserPermissionEvaluator userPermissionEvaluator;
 
   @Autowired private PlatformTransactionManager transactionManager;
+
+  @Autowired private UserAccountService userAccountService;
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
@@ -228,7 +231,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         environment,
         messageSource,
         gson,
-        transactionManager);
+        transactionManager,
+        userAccountService);
   }
 
   @Bean

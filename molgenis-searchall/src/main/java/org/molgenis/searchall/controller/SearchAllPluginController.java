@@ -3,11 +3,9 @@ package org.molgenis.searchall.controller;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.searchall.model.Result;
 import org.molgenis.searchall.service.SearchAllService;
-import org.molgenis.security.user.UserAccountService;
-import org.molgenis.settings.AppSettings;
+import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,27 +16,27 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(SearchAllPluginController.URI)
-public class SearchAllPluginController extends VuePluginController {
+public class SearchAllPluginController extends PluginController {
   public static final String ID = "searchAll";
   public static final String URI = PLUGIN_URI_PREFIX + ID;
+  private static final String KEY_BASE_URL = "baseUrl";
 
   public static final String NAVIGATOR = "navigator";
   public static final String DATAEXPLORER = "dataexplorer";
 
   private final SearchAllService searchAllService;
+  private final MenuReaderService menuReaderService;
 
   public SearchAllPluginController(
-      SearchAllService searchAllService,
-      AppSettings appSettings,
-      MenuReaderService menuReaderService,
-      UserAccountService userAccountService) {
-    super(URI, menuReaderService, appSettings, userAccountService);
+      MenuReaderService menuReaderService, SearchAllService searchAllService) {
+    super(URI);
+    this.menuReaderService = requireNonNull(menuReaderService);
     this.searchAllService = requireNonNull(searchAllService);
   }
 
   @GetMapping("/**")
   public String init(Model model) {
-    super.init(model, ID);
+    model.addAttribute(KEY_BASE_URL, menuReaderService.findMenuItemPath(ID));
     model.addAttribute("navigatorBaseUrl", menuReaderService.findMenuItemPath(NAVIGATOR));
     model.addAttribute("dataExplorerBaseUrl", menuReaderService.findMenuItemPath(DATAEXPLORER));
     return "view-search-all";
