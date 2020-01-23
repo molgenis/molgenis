@@ -81,7 +81,6 @@ public class GroupValueFactoryTest {
   static Object[][] roleNameProvider() {
     return new Object[][] {
       new Object[] {"bbmri_eric", "Manager", "bbmri_eric_MANAGER"},
-      new Object[] {"bbmri_eric", "Manager", "bbmri_eric_MANAGER"},
       new Object[] {"patientenfederatie-nederland", "Member", "patientenfederatie-nederland_MEMBER"}
     };
   }
