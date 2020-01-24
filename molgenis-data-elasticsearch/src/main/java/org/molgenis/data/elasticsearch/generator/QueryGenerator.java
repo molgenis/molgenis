@@ -40,7 +40,7 @@ public class QueryGenerator {
   static final String ATTRIBUTE_SEPARATOR = ".";
 
   private static final String CANNOT_FILTER_DEEP_REFERENCE_MSG =
-      "Can not filter on references deeper than 1.";
+      "Can not filter on references deeper than %d.";
   private static final String QUERY_VALUE_CANNOT_BE_NULL_MSG = "Query value cannot be null";
 
   private final DocumentIdGenerator documentIdGenerator;
@@ -207,15 +207,17 @@ public class QueryGenerator {
         if (useNotAnalyzedField(attr)) {
           fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
         }
-        return nestedQueryBuilder(attributePath, QueryBuilders.termQuery(fieldName, queryValue));
+        return nestedQueryBuilder(
+            entityType, attributePath, QueryBuilders.termQuery(fieldName, queryValue));
       case CATEGORICAL:
       case CATEGORICAL_MREF:
       case XREF:
       case MREF:
       case FILE:
       case ONE_TO_MANY:
-        if (attributePath.size() > 1) {
-          throw new MolgenisQueryException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
+        if (attributePath.size() > entityType.getIndexingDepth()) {
+          throw new MolgenisQueryException(
+              format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
         }
 
         Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -261,8 +263,9 @@ public class QueryGenerator {
       case MREF:
       case ONE_TO_MANY:
       case XREF:
-        if (attributePath.size() > 1) {
-          throw new MolgenisQueryException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
+        if (attributePath.size() > entityType.getIndexingDepth()) {
+          throw new MolgenisQueryException(
+              format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
         }
 
         Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -431,21 +434,25 @@ public class QueryGenerator {
       case SCRIPT:
       case STRING:
       case TEXT:
-        if (useNotAnalyzedField(attr)) {
-          fieldName = fieldName + '.' + FIELD_NOT_ANALYZED;
+        {
+          String indexFieldName = getQueryFieldName(attributePath);
+          if (useNotAnalyzedField(attr)) {
+            indexFieldName = indexFieldName + '.' + FIELD_NOT_ANALYZED;
+          }
+          // note: inFilter expects array, not iterable
+          queryBuilder = QueryBuilders.termsQuery(indexFieldName, queryValues);
+          queryBuilder = nestedQueryBuilder(entityType, attributePath, queryBuilder);
+          break;
         }
-        // note: inFilter expects array, not iterable
-        queryBuilder = QueryBuilders.termsQuery(fieldName, queryValues);
-        queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
-        break;
       case CATEGORICAL:
       case CATEGORICAL_MREF:
       case MREF:
       case XREF:
       case FILE:
       case ONE_TO_MANY:
-        if (attributePath.size() > 1) {
-          throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
+        if (attributePath.size() > entityType.getIndexingDepth()) {
+          throw new MolgenisQueryException(
+              format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
         }
 
         Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -480,6 +487,7 @@ public class QueryGenerator {
       case HYPERLINK:
       case STRING:
         return nestedQueryBuilder(
+            entityType,
             attributePath,
             QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue)
                 .maxExpansions(50)
@@ -540,6 +548,7 @@ public class QueryGenerator {
 
     return QueryBuilders.constantScoreQuery(
         nestedQueryBuilder(
+            entityType,
             attributePath,
             QueryBuilders.rangeQuery(fieldName).gte(queryValueFrom).lte(queryValueTo)));
   }
@@ -589,7 +598,8 @@ public class QueryGenerator {
         throw new UnexpectedEnumException(operator);
     }
 
-    return QueryBuilders.constantScoreQuery(nestedQueryBuilder(attributePath, filterBuilder));
+    return QueryBuilders.constantScoreQuery(
+        nestedQueryBuilder(entityType, attributePath, filterBuilder));
   }
 
   private QueryBuilder createQueryClauseSearch(QueryRule queryRule, EntityType entityType) {
@@ -629,15 +639,17 @@ public class QueryGenerator {
       case SCRIPT:
       case STRING:
       case TEXT:
-        return nestedQueryBuilder(attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
+        return nestedQueryBuilder(
+            entityType, attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
       case CATEGORICAL:
       case CATEGORICAL_MREF:
       case MREF:
       case ONE_TO_MANY:
       case XREF:
       case FILE:
-        if (attributePath.size() > 1) {
-          throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
+        if (attributePath.size() > entityType.getIndexingDepth()) {
+          throw new MolgenisQueryException(
+              format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
         }
         return QueryBuilders.nestedQuery(
             fieldName,
@@ -753,17 +765,29 @@ public class QueryGenerator {
   /**
    * Wraps the query in a nested query when a query is done on a reference entity. Returns the
    * original query when it is applied to the current entity.
+   *
+   * <p>Package-private for testability
    */
-  private QueryBuilder nestedQueryBuilder(
-      List<Attribute> attributePath, QueryBuilder queryBuilder) {
-    if (attributePath.size() == 1) {
-      return queryBuilder;
-    } else if (attributePath.size() == 2) {
-      return QueryBuilders.nestedQuery(
-          getQueryFieldName(attributePath.get(0)), queryBuilder, ScoreMode.Avg);
-    } else {
-      throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
+  QueryBuilder nestedQueryBuilder(
+      EntityType entityType, List<Attribute> attributePath, QueryBuilder queryBuilder) {
+    final int pathLength = attributePath.size();
+    if (pathLength - 1 > entityType.getIndexingDepth()) {
+      throw new UnsupportedOperationException(
+          format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
     }
+
+    QueryBuilder nestedQueryBuilder = queryBuilder;
+    if (pathLength > 1) {
+      List<String> fieldNamePath =
+          attributePath.stream().map(this::getQueryFieldName).collect(toList());
+
+      for (int i = pathLength - 1; i > 0; --i) {
+        String path = String.join(".", fieldNamePath.subList(0, i));
+        nestedQueryBuilder = QueryBuilders.nestedQuery(path, nestedQueryBuilder, ScoreMode.Avg);
+      }
+    }
+
+    return nestedQueryBuilder;
   }
 
   private String getQueryFieldName(List<Attribute> attributePath) {
