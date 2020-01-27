@@ -1,5 +1,6 @@
 package org.molgenis.data.security.auth;
 
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -52,10 +53,10 @@ public class GroupMetadata extends SystemEntityType {
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
     addAttribute(NAME, ROLE_LOOKUP)
         .setLabel("Name")
-        .setDescription("Name of the group. Use kebab-case, e.g. my-group.")
+        .setDescription("Name of the group")
         .setNillable(false)
         .setUnique(true)
-        .setValidationExpression("$('name').matches(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/).value()");
+        .setValidationExpression(format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX));
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
     getLanguageCodes()
         .map(languageCode -> getI18nAttributeName(LABEL, languageCode))

@@ -47,7 +47,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @Validated
 @Api("Group")
-public class GroupRestController {
+public class IdentitiesApiController {
   public static final String USER = "/user";
 
   @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
@@ -67,7 +67,7 @@ public class GroupRestController {
   private final UserService userService;
   private final UserPermissionEvaluator userPermissionEvaluator;
 
-  GroupRestController(
+  IdentitiesApiController(
       GroupValueFactory groupValueFactory,
       GroupService groupService,
       RoleMembershipService roleMembershipService,
@@ -91,10 +91,9 @@ public class GroupRestController {
     @ApiResponse(code = 400, message = "Group name not available", response = ResponseEntity.class)
   })
   public ResponseEntity createGroup(@RequestBody GroupCommand group) {
-    String packageValueName = group.getName().replace('-', '_');
     GroupValue groupValue =
         groupValueFactory.createGroup(
-            group.getName(), group.getLabel(), GroupService.DEFAULT_ROLES, packageValueName);
+            group.getName(), group.getLabel(), GroupService.DEFAULT_ROLES, group.getName());
 
     if (!groupService.isGroupNameAvailable(groupValue)) {
       throw new GroupNameNotAvailableException(group.getName());

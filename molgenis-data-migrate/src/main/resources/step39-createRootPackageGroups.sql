@@ -34,7 +34,13 @@ DO $$
                 roleGroupManagerId := rec.package_id || 'm';
                 roleGroupEditorId := rec.package_id || 'e';
                 roleGroupViewerId := rec.package_id || 'v';
-                groupName := 'group-' || LOWER(SUBSTRING(MD5(''||NOW()::TEXT||RANDOM()::TEXT) FOR 8));
+
+                SELECT "sys_sec_Group#d325f6e2"."name" INTO groupName FROM "sys_sec_Group#d325f6e2" WHERE "sys_sec_Group#d325f6e2"."name" = rec.package_id;
+                IF groupName IS NOT NULL THEN
+                    groupName := 'group-' || LOWER(SUBSTRING(MD5(''||NOW()::TEXT||RANDOM()::TEXT) FOR 8));
+                ELSE
+                    groupName := rec.package_id;
+                end if;
 
                 INSERT INTO "sys_sec_Group#d325f6e2" ("id", "name", "label", "public", "rootPackage") VALUES (rec.package_id, groupName, rec.package_label, true, rec.package_id);
 
