@@ -178,7 +178,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
             .setDataType(MREF)
             .setNillable(true)
             .setRefEntity(refEntityType));
-
+    emd.setIndexingDepth(1);
     this.entityType = emd;
 
     DocumentIdGenerator documentIdGenerator = mock(DocumentIdGenerator.class);
@@ -301,8 +301,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     Iterable<String> values = Arrays.asList("id0", "id1", "id2");
     Query<Entity> q = new QueryImpl<>().in(PREFIX + refCategoricalAttributeName, values);
     assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
+        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
@@ -424,8 +423,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     String value = "text";
     Query<Entity> q = new QueryImpl<>().search(PREFIX + refCategoricalAttributeName, value);
     assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
+        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
