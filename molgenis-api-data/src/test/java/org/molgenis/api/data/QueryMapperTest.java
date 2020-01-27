@@ -53,6 +53,31 @@ class QueryMapperTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testMapEqualsSubAttribute() {
+    String value = "value";
+    Query query =
+        Query.builder()
+            .setItem("test.subtest")
+            .setOperator(Operator.EQUALS)
+            .setValue(value)
+            .build();
+
+    Attribute subAttribute = mock(Attribute.class);
+    EntityType refEntityType = mock(EntityType.class);
+    when(refEntityType.getAttribute("subtest")).thenReturn(subAttribute);
+
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getRefEntity()).thenReturn(refEntityType);
+    Repository<Entity> repository = createMockRepository(attribute);
+    Object parsedValue = mock(Object.class);
+    when(rsqlValueParser.parse(value, subAttribute)).thenReturn(parsedValue);
+
+    assertEquals(
+        new QueryImpl<>(repository).eq("test.subtest", parsedValue),
+        queryMapper.map(query, repository));
+  }
+
+  @Test
   void testMapEqualsNull() {
     Query query = Query.builder().setItem("test").setOperator(Operator.EQUALS).build();
 
