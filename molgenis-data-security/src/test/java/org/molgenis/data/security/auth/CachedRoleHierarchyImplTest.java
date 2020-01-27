@@ -2,8 +2,10 @@ package org.molgenis.data.security.auth;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.security.exception.UnknownRoleException;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.GrantedAuthority;
@@ -91,5 +94,16 @@ class CachedRoleHierarchyImplTest extends AbstractMockitoTest {
         ImmutableSet.of(managerAuthority, editorAuthority, viewerAuthority),
         cachedRoleHierarchyImpl.getReachableGrantedAuthorities(
             asList(managerAuthority, editorAuthority)));
+  }
+
+  @Test
+  void testGetReachableGrantedAuthoritiesUsingCacheUnknownAuthority() {
+    TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
+
+    GrantedAuthority unknownAuthority = new SimpleGrantedAuthority("ROLE_UNKNOWN");
+    when(dataserviceRoleHierarchy.getAllGrantedAuthorityInclusions()).thenReturn(ImmutableMap.of());
+    assertThrows(
+        UnknownRoleException.class,
+        () -> cachedRoleHierarchyImpl.getReachableGrantedAuthorities(singleton(unknownAuthority)));
   }
 }
