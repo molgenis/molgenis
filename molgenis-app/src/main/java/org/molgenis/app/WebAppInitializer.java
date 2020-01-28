@@ -8,6 +8,7 @@ public class WebAppInitializer extends MolgenisWebAppInitializer
     implements WebApplicationInitializer {
   @Override
   public void onStartup(ServletContext servletContext) {
+    servletContext.addListener(new WebAppContextCleanupListener());
     super.onStartup(servletContext, WebAppConfig.class, 150);
   }
 }
