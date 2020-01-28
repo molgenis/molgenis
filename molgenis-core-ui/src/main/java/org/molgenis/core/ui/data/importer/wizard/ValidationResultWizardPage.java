@@ -76,6 +76,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
               importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false);
           ((ImportWizard) wizard).setImportRunId(importRun.getId());
 
+          long callingThreadId = Thread.currentThread().getId();
           asyncImportJobs.execute(
               new ImportJob(
                   importService,
@@ -86,7 +87,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
                   importRun.getId(),
                   importRunService,
                   request.getSession(),
-                  importWizard.getSelectedPackage()));
+                  importWizard.getSelectedPackage(),
+                  callingThreadId));
         }
 
       } catch (RuntimeException | IOException e) {

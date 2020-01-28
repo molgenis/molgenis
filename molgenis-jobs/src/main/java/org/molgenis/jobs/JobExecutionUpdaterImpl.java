@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
-  private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdater.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdaterImpl.class);
 
   private final JobExecutionContextFactory jobExecutionContextFactory;
   private final ExecutorService executorService;
@@ -32,7 +32,17 @@ public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
   public void update(JobExecution jobExecution) {
     JobExecutionContext jobExecutionContext =
         jobExecutionContextFactory.createJobExecutionContext(jobExecution);
-    executorService.execute(() -> updateInternal(jobExecution, jobExecutionContext));
+    long callingThreadId = Thread.currentThread().getId();
+    executorService.execute(() -> runJob(jobExecution, jobExecutionContext, callingThreadId));
+  }
+
+  private void runJob(
+      JobExecution jobExecution, JobExecutionContext jobExecutionContext, long callingThreadId) {
+    try {
+      updateInternal(jobExecution, jobExecutionContext);
+    } finally {
+      JobUtils.cleanupAfterRunJob(callingThreadId);
+    }
   }
 
   private void updateInternal(JobExecution jobExecution, JobExecutionContext jobExecutionContext) {
