@@ -61,6 +61,8 @@ class DataPermissionsAPIIT extends AbstractApiTests {
     deletePermission(permission, entityTypeId);
   }
 
+  // TODO testCreate & testUpdate & testDelete
+
   @ParameterizedTest
   @CsvSource({",404", "READMETA,401", "COUNT,401", "READ,401", "WRITE,204", "WRITEMETA,204"})
   void testWriteDataPermissions(@Nullable String permission, int expectedStatusCode) {
