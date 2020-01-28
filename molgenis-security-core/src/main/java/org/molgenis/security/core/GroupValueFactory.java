@@ -42,7 +42,7 @@ public class GroupValueFactory {
   }
 
   public static String createRoleName(String groupName, String roleLabel) {
-    return (groupName + " " + roleLabel).replaceAll("[- ]+", "_").toUpperCase();
+    return groupName + "_" + roleLabel.toUpperCase();
   }
 
   private static RoleValue createRoleValue(String groupName, String groupLabel, String roleLabel) {

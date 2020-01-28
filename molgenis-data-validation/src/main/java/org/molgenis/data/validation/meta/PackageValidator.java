@@ -35,7 +35,6 @@ public class PackageValidator {
 
   public void validate(Package aPackage, ValidationMode validationMode) {
     validatePackageAllowed(aPackage, validationMode);
-    validatePackageName(aPackage);
     runAsSystem(() -> validatePackageParent(aPackage));
   }
 
@@ -66,10 +65,6 @@ public class PackageValidator {
       throw new MolgenisValidationException(
           new ConstraintViolation("Modifying system packages is not allowed"));
     }
-  }
-
-  private static void validatePackageName(Package aPackage) {
-    NameValidator.validatePackageId(aPackage.getId());
   }
 
   private static void validatePackageParent(Package aPackage) {

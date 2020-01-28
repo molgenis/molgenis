@@ -44,11 +44,6 @@ public class NameValidator {
     checkForIllegalCharacters(name);
   }
 
-  public static void validatePackageId(String name) {
-    validateName(name);
-    checkForIllegalCharacters(name);
-  }
-
   private static void validateName(String name) {
     if (Character.isDigit(name.charAt(0))) {
       throw new MolgenisDataException(

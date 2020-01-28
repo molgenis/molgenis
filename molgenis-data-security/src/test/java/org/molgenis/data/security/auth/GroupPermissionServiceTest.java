@@ -37,11 +37,11 @@ class GroupPermissionServiceTest extends AbstractMockitoTest {
     verify(permissionService)
         .createPermission(
             Permission.create(
-                new PackageIdentity("bbmri_eric"), createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA));
-    verify(aclService).createAcl(new GroupIdentity("bbmri-eric"));
+                new PackageIdentity("bbmri_eric"), createRoleSid("bbmri_eric_MANAGER"), WRITEMETA));
+    verify(aclService).createAcl(new GroupIdentity("bbmri_eric"));
     verify(permissionService)
         .createPermission(
             Permission.create(
-                new GroupIdentity("bbmri-eric"), createRoleSid("BBMRI_ERIC_MANAGER"), WRITEMETA));
+                new GroupIdentity("bbmri_eric"), createRoleSid("bbmri_eric_MANAGER"), WRITEMETA));
   }
 }

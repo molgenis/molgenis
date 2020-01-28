@@ -14,6 +14,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_MODIFY_AUDITING;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 
 import com.google.common.collect.ImmutableList;
 import java.util.UUID;
@@ -160,6 +161,12 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     su.setIncludes(
         ImmutableList.of(aclTakeOwnership, aclModifyAuditing, aclGeneralChanges, metrics));
 
+    Role system = roleFactory.create();
+    system.setName(getRoleName(ROLE_SYSTEM));
+    system.setLabel("System");
+    system.setDescription("Role granted to system.");
+    system.setIncludes(ImmutableList.of(su));
+
     // persist entities
     dataService.add(USER, Stream.of(userAdmin, anonymousUser));
     dataService.add(
@@ -174,6 +181,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
             viewer,
             editor,
             manager,
-            su));
+            su,
+            system));
   }
 }

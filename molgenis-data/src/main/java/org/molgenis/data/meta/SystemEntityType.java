@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /** Base class for all system entity meta data. */
 public abstract class SystemEntityType extends EntityType {
+  public static final String UNIFIED_IDENTIFIER_REGEX = "/^[a-zA-Z0-9_#-]+$/";
+
   private AttributeFactory attributeFactory;
   private IdGenerator idGenerator;
 

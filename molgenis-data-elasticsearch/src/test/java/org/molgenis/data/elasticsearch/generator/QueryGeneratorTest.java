@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.existsQuery;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -164,6 +166,134 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     when(documentIdGenerator.generateId(any(Attribute.class)))
         .thenAnswer(invocation -> ((Attribute) invocation.getArguments()[0]).getName());
     queryGenerator = new QueryGenerator(documentIdGenerator);
+  }
+
+  @Test
+  void testNestedQueryBuilderSizeOne() {
+    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(1).getMock();
+    String fieldName = "attribute";
+    String queryValue = "value";
+    QueryBuilder queryBuilder = termQuery(fieldName, queryValue);
+
+    Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(fieldName).getMock();
+    QueryBuilder nestedQueryBuilder =
+        queryGenerator.nestedQueryBuilder(entityType, singletonList(attribute), queryBuilder);
+    assertQueryBuilderEquals(nestedQueryBuilder, queryBuilder);
+  }
+
+  @Test
+  void testNestedQueryBuilderSizeTwo() {
+    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(1).getMock();
+    String parentFieldName = "parent";
+    String childFieldName = "child";
+    String queryValue = "value";
+    QueryBuilder queryBuilder = termQuery(parentFieldName + '.' + childFieldName, queryValue);
+
+    Attribute parentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
+    Attribute childAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
+    QueryBuilder nestedQueryBuilder =
+        queryGenerator.nestedQueryBuilder(
+            entityType, asList(parentAttribute, childAttribute), queryBuilder);
+
+    QueryBuilder expectedQueryBuilder =
+        QueryBuilders.nestedQuery(
+            parentFieldName,
+            termQuery(parentFieldName + '.' + childFieldName, queryValue),
+            ScoreMode.Avg);
+    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
+  }
+
+  @Test
+  void testNestedQueryBuilderSizeThree() {
+    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(2).getMock();
+    String grandparentFieldName = "grandparent";
+    String parentFieldName = "parent";
+    String childFieldName = "child";
+    String queryValue = "value";
+    QueryBuilder queryBuilder =
+        termQuery(grandparentFieldName + '.' + parentFieldName + '.' + childFieldName, queryValue);
+
+    Attribute grandparentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(grandparentFieldName).getMock();
+    Attribute parentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
+    Attribute childAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
+    QueryBuilder nestedQueryBuilder =
+        queryGenerator.nestedQueryBuilder(
+            entityType,
+            asList(grandparentAttribute, parentAttribute, childAttribute),
+            queryBuilder);
+
+    QueryBuilder expectedQueryBuilder =
+        QueryBuilders.nestedQuery(
+            grandparentFieldName,
+            QueryBuilders.nestedQuery(
+                grandparentFieldName + '.' + parentFieldName,
+                termQuery(
+                    grandparentFieldName + '.' + parentFieldName + '.' + childFieldName,
+                    queryValue),
+                ScoreMode.Avg),
+            ScoreMode.Avg);
+    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
+  }
+
+  @Test
+  void testNestedQueryBuilderSizeFour() {
+    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(3).getMock();
+    String greatGrandparentFieldName = "grandGrandparent";
+    String grandparentFieldName = "grandparent";
+    String parentFieldName = "parent";
+    String childFieldName = "child";
+    String queryValue = "value";
+    QueryBuilder queryBuilder =
+        termQuery(
+            greatGrandparentFieldName
+                + '.'
+                + grandparentFieldName
+                + '.'
+                + parentFieldName
+                + '.'
+                + childFieldName,
+            queryValue);
+
+    Attribute greatGrandparentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(greatGrandparentFieldName).getMock();
+    Attribute grandparentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(grandparentFieldName).getMock();
+    Attribute parentAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
+    Attribute childAttribute =
+        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
+    QueryBuilder nestedQueryBuilder =
+        queryGenerator.nestedQueryBuilder(
+            entityType,
+            asList(
+                greatGrandparentAttribute, grandparentAttribute, parentAttribute, childAttribute),
+            queryBuilder);
+
+    QueryBuilder expectedQueryBuilder =
+        QueryBuilders.nestedQuery(
+            greatGrandparentFieldName,
+            QueryBuilders.nestedQuery(
+                greatGrandparentFieldName + '.' + grandparentFieldName,
+                QueryBuilders.nestedQuery(
+                    greatGrandparentFieldName + '.' + grandparentFieldName + '.' + parentFieldName,
+                    termQuery(
+                        greatGrandparentFieldName
+                            + '.'
+                            + grandparentFieldName
+                            + '.'
+                            + parentFieldName
+                            + '.'
+                            + childFieldName,
+                        queryValue),
+                    ScoreMode.Avg),
+                ScoreMode.Avg),
+            ScoreMode.Avg);
+    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
   }
 
   @Test

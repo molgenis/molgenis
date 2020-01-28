@@ -139,15 +139,36 @@ public class QueryMapper {
     return mappedValue;
   }
 
-  private Attribute getAttribute(String item, EntityType entityType) {
-    Attribute attribute = entityType.getAttribute(item);
-    if (attribute == null) {
-      throw new UnknownAttributeException(entityType, item);
+  /** @param attributePath e.g. child, parent.child or grandparent.parent.child */
+  private Attribute getAttribute(String attributePath, EntityType entityType) {
+    if (attributePath == null) {
+      throw new NullPointerException();
     }
 
-    AttributeType attributeType = attribute.getDataType();
-    if (attributeType == AttributeType.COMPOUND) {
-      throw new UnexpectedEnumException(attributeType);
+    EntityType entityTypeAtDepth = entityType;
+    Attribute attribute = null;
+    String[] attributePathTokens = attributePath.split("\\.");
+
+    for (int i = 0; i < attributePathTokens.length; ++i) {
+      String attributeName = attributePathTokens[i];
+
+      attribute = entityTypeAtDepth.getAttribute(attributeName);
+      if (attribute == null) {
+        throw new UnknownAttributeException(entityTypeAtDepth, attributeName);
+      }
+
+      AttributeType attributeType = attribute.getDataType();
+      if (attributeType == AttributeType.COMPOUND) {
+        throw new UnexpectedEnumException(attributeType);
+      }
+
+      if (i + 1 < attributePathTokens.length) {
+        entityTypeAtDepth = attribute.getRefEntity();
+      }
+    }
+
+    if (attribute == null) {
+      throw new UnknownAttributeException(entityType, attributePath);
     }
 
     return attribute;

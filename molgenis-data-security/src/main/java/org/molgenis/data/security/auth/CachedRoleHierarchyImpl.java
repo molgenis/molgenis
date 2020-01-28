@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.security.exception.UnknownRoleException;
 import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.security.core.GrantedAuthority;
@@ -54,13 +55,23 @@ public class CachedRoleHierarchyImpl implements TransactionListener, CachedRoleH
     Collection<GrantedAuthority> reachableGrantedAuthorities;
     if (authorities.size() == 1) {
       GrantedAuthority grantedAuthority = authorities.iterator().next();
-      reachableGrantedAuthorities = cachedReachableAuthoritiesMap.get(grantedAuthority);
+      reachableGrantedAuthorities = getCachedReachableAuthorities(grantedAuthority);
     } else {
       ImmutableSet.Builder<GrantedAuthority> builder = ImmutableSet.builder();
       for (GrantedAuthority authority : authorities) {
-        builder.addAll(cachedReachableAuthoritiesMap.get(authority));
+        builder.addAll(getCachedReachableAuthorities(authority));
       }
       reachableGrantedAuthorities = builder.build();
+    }
+    return reachableGrantedAuthorities;
+  }
+
+  private Collection<GrantedAuthority> getCachedReachableAuthorities(
+      GrantedAuthority grantedAuthority) {
+    Collection<GrantedAuthority> reachableGrantedAuthorities =
+        cachedReachableAuthoritiesMap.get(grantedAuthority);
+    if (reachableGrantedAuthorities == null) {
+      throw new UnknownRoleException(grantedAuthority.getAuthority());
     }
     return reachableGrantedAuthorities;
   }
