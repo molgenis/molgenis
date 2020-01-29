@@ -1,5 +1,9 @@
 package org.molgenis.data;
 
+import static java.lang.String.format;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Streams;
 import java.util.EnumSet;
 import java.util.List;
@@ -119,5 +123,88 @@ public class QueryUtils {
       }
     }
     return attr;
+  }
+
+  /**
+   * @param queryRuleField query rule field name, e.g. grandparent.parent.child
+   * @param entityType entity type
+   * @return attribute path
+   * @throws UnknownAttributeException if no attribute exists for a query rule field name part
+   * @throws MolgenisQueryException if query rule field is an invalid attribute path
+   */
+  public static List<Attribute> getAttributePath(String queryRuleField, EntityType entityType) {
+    ImmutableList<Attribute> attributePath;
+
+    if (queryRuleField.indexOf('.') == -1) {
+      attributePath = ImmutableList.of(entityType.getAttributeByName(queryRuleField));
+    } else {
+      String[] tokens = queryRuleField.split("\\.");
+
+      @SuppressWarnings("UnstableApiUsage")
+      Builder<Attribute> builder = ImmutableList.builderWithExpectedSize(tokens.length);
+
+      EntityType entityTypeAtDepth = entityType;
+      for (int depth = 0; depth < tokens.length; ++depth) {
+        String attributeName = tokens[depth];
+        Attribute attribute = entityTypeAtDepth.getAttributeByName(attributeName);
+        builder.add(attribute);
+
+        if (depth + 1 < tokens.length) {
+          if (!attribute.hasRefEntity()) {
+            throw new MolgenisQueryException(
+                format(
+                    "Invalid query field [%s]: attribute [%s] does not refer to another entity",
+                    queryRuleField, attribute.getName()));
+          }
+          entityTypeAtDepth = attribute.getRefEntity();
+        }
+      }
+
+      attributePath = builder.build();
+    }
+
+    return attributePath;
+  }
+
+  public static List<Attribute> getAttributePathExpanded(
+      String queryRuleField, EntityType entityType) {
+    return getAttributePathExpanded(queryRuleField, entityType, false);
+  }
+
+  /**
+   * Same as {@link #getAttributePath(String, EntityType)} but adds an id attribute to the path is
+   * the last element is a reference attribute.
+   *
+   * @param queryRuleField query rule field name, e.g. grandparent.parent.child
+   * @param entityType entity type
+   * @param expandLabelInsteadOfId expand with label attribute instead of id attribute
+   * @return attribute path
+   * @throws UnknownAttributeException if no attribute exists for a query rule field name part
+   * @throws MolgenisQueryException if query rule field is an invalid attribute path
+   */
+  public static List<Attribute> getAttributePathExpanded(
+      String queryRuleField, EntityType entityType, boolean expandLabelInsteadOfId) {
+    List<Attribute> attributePath = getAttributePath(queryRuleField, entityType);
+
+    List<Attribute> expandedAttributePath;
+    Attribute attribute = attributePath.get(attributePath.size() - 1);
+    if (attribute.hasRefEntity()) {
+      Attribute expandedAttribute;
+      if (expandLabelInsteadOfId) {
+        expandedAttribute = attribute.getRefEntity().getLabelAttribute();
+      } else {
+        expandedAttribute = attribute.getRefEntity().getIdAttribute();
+      }
+
+      @SuppressWarnings("UnstableApiUsage")
+      Builder<Attribute> builder = ImmutableList.builderWithExpectedSize(attributePath.size() + 1);
+      builder.addAll(attributePath);
+      builder.add(expandedAttribute);
+
+      expandedAttributePath = builder.build();
+    } else {
+      expandedAttributePath = attributePath;
+    }
+    return expandedAttributePath;
   }
 }
