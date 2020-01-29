@@ -121,7 +121,9 @@ A list of permissions that can be used for this resource type.
 
 ##### Example 
 Request:
+
 ```https://molgenis.mydomain.example/api/permissions/types/permissions/entityType```
+
 Response:
 ```
 "data": {
@@ -160,7 +162,9 @@ URL: 'typeId' as described in the [parameters section](##Parameters)
 Enable row level security on entity type 'hospital_neurology_patients'.
 
 Request:
-```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
+```
+https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients
+```
 
 ### Deleting a resource type from the system (Removing row level security from an entity type)
 
@@ -186,7 +190,9 @@ URL: 'typeId' as described in the [parameters section](##Parameters)
 Enable row level security on entity type 'hospital_neurology_patients'.
 
 Request:
-```https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients```
+```
+https://molgenis.mydomain.example/api/permissions/types/entity-hospital_neurology_patients
+```
 
 ### Creating a new access control list for a resource
 ##### Endpoint
@@ -687,7 +693,10 @@ The endpoint expects a list of permissions, each permission should contain a 'pe
 
 ##### Example 
 Request:
-URL: https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+URL: 
+```
+https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+```
 Body:
 ```{
    	permissions:[{
@@ -718,7 +727,10 @@ The endpoint expects a list of resources, each of which should contrain the iden
 |404 Not found | the type, object, user, role or permission does not exist |
 
 ##### Example
-URL: https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
+URL: 
+```
+https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
+```
 Body:
 ```
 {
