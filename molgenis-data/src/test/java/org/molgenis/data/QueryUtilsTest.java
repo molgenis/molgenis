@@ -14,29 +14,26 @@ import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
-import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SHOULD;
 import static org.molgenis.data.QueryUtils.getQueryRuleAttribute;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 
-class QueryUtilsTest {
-  private Query<Entity> query;
-  private QueryRule rule3;
+class QueryUtilsTest extends AbstractMockitoTest {
+  @Mock private Query<Entity> query;
 
-  @SuppressWarnings("unchecked")
-  @BeforeEach
-  void beforeMethod() {
-    query = mock(Query.class);
-
+  @Test
+  void containsAnyOperator() {
     QueryRule rule1 = mock(QueryRule.class);
     when(rule1.getOperator()).thenReturn(IN);
     when(rule1.getNestedRules()).thenReturn(Collections.emptyList());
@@ -45,32 +42,70 @@ class QueryUtilsTest {
     when(rule2.getOperator()).thenReturn(DIS_MAX);
     when(rule2.getNestedRules()).thenReturn(Collections.emptyList());
 
-    rule3 = mock(QueryRule.class);
-    when(rule3.getOperator()).thenReturn(NESTED);
-    when(rule3.getNestedRules()).thenReturn(Collections.emptyList());
+    QueryRule rule3 = mock(QueryRule.class);
 
     List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2, rule3);
     when(query.getRules()).thenReturn(queryRules);
-  }
 
-  @Test
-  void containsAnyOperator() {
     assertTrue(QueryUtils.containsAnyOperator(query, EnumSet.of(DIS_MAX, FUZZY_MATCH)));
   }
 
   @Test
   void notContainsAnyOperator() {
+    QueryRule rule1 = mock(QueryRule.class);
+    when(rule1.getOperator()).thenReturn(IN);
+    when(rule1.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule2 = mock(QueryRule.class);
+    when(rule2.getOperator()).thenReturn(DIS_MAX);
+    when(rule2.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule3 = mock(QueryRule.class);
+    when(rule3.getOperator()).thenReturn(NESTED);
+    when(rule3.getNestedRules()).thenReturn(Collections.emptyList());
+
+    List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2, rule3);
+    when(query.getRules()).thenReturn(queryRules);
+
     assertFalse(
         QueryUtils.containsAnyOperator(query, EnumSet.of(FUZZY_MATCH, GREATER_EQUAL, SHOULD)));
   }
 
   @Test
   void containsOperator() {
+    QueryRule rule1 = mock(QueryRule.class);
+    when(rule1.getOperator()).thenReturn(IN);
+    when(rule1.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule2 = mock(QueryRule.class);
+    when(rule2.getOperator()).thenReturn(DIS_MAX);
+    when(rule2.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule3 = mock(QueryRule.class);
+
+    List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2, rule3);
+    when(query.getRules()).thenReturn(queryRules);
+
     assertTrue(QueryUtils.containsOperator(query, DIS_MAX));
   }
 
   @Test
   void notContainsOperator() {
+    QueryRule rule1 = mock(QueryRule.class);
+    when(rule1.getOperator()).thenReturn(IN);
+    when(rule1.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule2 = mock(QueryRule.class);
+    when(rule2.getOperator()).thenReturn(DIS_MAX);
+    when(rule2.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule3 = mock(QueryRule.class);
+    when(rule3.getOperator()).thenReturn(NESTED);
+    when(rule3.getNestedRules()).thenReturn(Collections.emptyList());
+
+    List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2, rule3);
+    when(query.getRules()).thenReturn(queryRules);
+
     assertFalse(QueryUtils.containsOperator(query, FUZZY_MATCH));
   }
 
@@ -82,6 +117,20 @@ class QueryUtilsTest {
 
   @Test
   void nestedQueryRules() {
+    QueryRule rule1 = mock(QueryRule.class);
+    when(rule1.getOperator()).thenReturn(IN);
+    when(rule1.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule2 = mock(QueryRule.class);
+    when(rule2.getOperator()).thenReturn(DIS_MAX);
+    when(rule2.getNestedRules()).thenReturn(Collections.emptyList());
+
+    QueryRule rule3 = mock(QueryRule.class);
+    when(rule3.getNestedRules()).thenReturn(Collections.emptyList());
+
+    List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2, rule3);
+    when(query.getRules()).thenReturn(queryRules);
+
     QueryRule nestedRule = mock(QueryRule.class);
     when(nestedRule.getOperator()).thenReturn(EQUALS);
     when(rule3.getNestedRules()).thenReturn(Lists.newArrayList(nestedRule));
@@ -100,19 +149,15 @@ class QueryUtilsTest {
 
     when(qRule1.getField()).thenReturn("attr1");
     when(qRule2.getField()).thenReturn("attr2");
-    when(qRule1.getOperator()).thenReturn(EQUALS);
-    when(qRule2.getOperator()).thenReturn(OR);
     when(qRule1.getNestedRules()).thenReturn(Collections.emptyList());
     when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
     when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
 
     Attribute attr1 = mock(Attribute.class);
     when(entityType.getAttribute("attr1")).thenReturn(attr1);
-    when(attr1.getExpression()).thenReturn(null);
 
     Attribute attr2 = mock(Attribute.class);
     when(entityType.getAttribute("attr2")).thenReturn(attr2);
-    when(attr2.getExpression()).thenReturn(null);
 
     assertFalse(QueryUtils.containsComputedAttribute(q.getRules(), entityType));
   }
@@ -128,8 +173,6 @@ class QueryUtilsTest {
 
     when(qRule1.getField()).thenReturn("attr1");
     when(qRule2.getField()).thenReturn("attr2");
-    when(qRule1.getOperator()).thenReturn(EQUALS);
-    when(qRule2.getOperator()).thenReturn(OR);
     when(qRule1.getNestedRules()).thenReturn(Collections.emptyList());
     when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
     when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
@@ -171,34 +214,14 @@ class QueryUtilsTest {
     Query<Entity> q = mock(Query.class);
     QueryRule qRule1 = mock(QueryRule.class);
     QueryRule qRule2 = mock(QueryRule.class);
-    QueryRule nestedRule1 = mock(QueryRule.class);
-    QueryRule nestedRule2 = mock(QueryRule.class);
 
     when(qRule1.getField()).thenReturn("attr1");
-    when(qRule2.getField()).thenReturn("attr2");
-    when(nestedRule1.getField()).thenReturn("attr3");
-    when(nestedRule2.getField()).thenReturn("attr4");
 
-    when(qRule1.getOperator()).thenReturn(EQUALS);
-    when(qRule2.getOperator()).thenReturn(OR);
     when(qRule1.getNestedRules()).thenReturn(Collections.emptyList());
-    when(qRule2.getNestedRules()).thenReturn(Lists.newArrayList(nestedRule1, nestedRule2));
     when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
 
     Attribute attr1 = mock(Attribute.class);
     when(entityType.getAttribute("attr1")).thenReturn(attr1);
-    when(attr1.hasExpression()).thenReturn(false);
-
-    Attribute attr2 = mock(Attribute.class);
-    when(entityType.getAttribute("attr2")).thenReturn(attr2);
-    when(attr2.hasExpression()).thenReturn(false);
-
-    Attribute attr3 = mock(Attribute.class);
-    when(entityType.getAttribute("attr3")).thenReturn(attr3);
-    when(attr1.hasExpression()).thenReturn(false);
-
-    Attribute attr4 = mock(Attribute.class);
-    when(entityType.getAttribute("attr4")).thenReturn(attr4);
     when(attr1.hasExpression()).thenReturn(true);
 
     assertTrue(QueryUtils.containsComputedAttribute(q.getRules(), entityType));
@@ -288,5 +311,106 @@ class QueryUtilsTest {
     when(queryRule1.getNestedRules()).thenReturn(singletonList(nestedQueryRule0));
     when(q.getRules()).thenReturn(asList(queryRule0, queryRule1));
     assertFalse(QueryUtils.containsNestedQueryRuleField(q));
+  }
+
+  @Test
+  void testGetAttributePathOneElement() {
+    String attributePath = "grandparent";
+    EntityType entityType = mock(EntityType.class);
+    Attribute attribute = mock(Attribute.class);
+    when(entityType.getAttributeByName(attributePath)).thenReturn(attribute);
+    assertEquals(
+        ImmutableList.of(attribute), QueryUtils.getAttributePath(attributePath, entityType));
+  }
+
+  @Test
+  void testGetAttributePathMultipleElements() {
+    EntityType grandparentEntityType = mock(EntityType.class);
+    EntityType parentEntityType = mock(EntityType.class);
+    EntityType childEntityType = mock(EntityType.class);
+    Attribute grandparentAttribute = mock(Attribute.class);
+    when(grandparentAttribute.hasRefEntity()).thenReturn(true);
+    when(grandparentAttribute.getRefEntity()).thenReturn(parentEntityType);
+    Attribute parentAttribute = mock(Attribute.class);
+    when(parentAttribute.hasRefEntity()).thenReturn(true);
+    when(parentAttribute.getRefEntity()).thenReturn(childEntityType);
+    Attribute childAttribute = mock(Attribute.class);
+    when(grandparentEntityType.getAttributeByName("grandparent")).thenReturn(grandparentAttribute);
+    when(parentEntityType.getAttributeByName("parent")).thenReturn(parentAttribute);
+    when(childEntityType.getAttributeByName("child")).thenReturn(childAttribute);
+    assertEquals(
+        ImmutableList.of(grandparentAttribute, parentAttribute, childAttribute),
+        QueryUtils.getAttributePath("grandparent.parent.child", grandparentEntityType));
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  void testGetAttributePathMultipleElementsIllegalAttributeType() {
+    EntityType childEntityType = mock(EntityType.class);
+    Attribute childAttribute = mock(Attribute.class);
+    when(childEntityType.getAttributeByName("child")).thenReturn(childAttribute);
+    assertThrows(
+        MolgenisQueryException.class,
+        () -> QueryUtils.getAttributePath("child.parent", childEntityType));
+  }
+
+  @Test
+  void testGetAttributePathExpandedExpansionWithIdAttribute() {
+    EntityType grandparentEntityType = mock(EntityType.class);
+    EntityType parentEntityType = mock(EntityType.class);
+    EntityType childEntityType = mock(EntityType.class);
+    Attribute grandparentAttribute = mock(Attribute.class);
+    when(grandparentAttribute.hasRefEntity()).thenReturn(true);
+    when(grandparentAttribute.getRefEntity()).thenReturn(parentEntityType);
+    Attribute parentAttribute = mock(Attribute.class);
+    when(parentAttribute.hasRefEntity()).thenReturn(true);
+    when(parentAttribute.getRefEntity()).thenReturn(childEntityType);
+    Attribute childAttribute = mock(Attribute.class);
+    when(grandparentEntityType.getAttributeByName("grandparent")).thenReturn(grandparentAttribute);
+    when(parentEntityType.getAttributeByName("parent")).thenReturn(parentAttribute);
+    when(childEntityType.getIdAttribute()).thenReturn(childAttribute);
+    assertEquals(
+        ImmutableList.of(grandparentAttribute, parentAttribute, childAttribute),
+        QueryUtils.getAttributePathExpanded("grandparent.parent", grandparentEntityType));
+  }
+
+  @Test
+  void testGetAttributePathExpandedExpansionWithLabelAttribute() {
+    EntityType grandparentEntityType = mock(EntityType.class);
+    EntityType parentEntityType = mock(EntityType.class);
+    EntityType childEntityType = mock(EntityType.class);
+    Attribute grandparentAttribute = mock(Attribute.class);
+    when(grandparentAttribute.hasRefEntity()).thenReturn(true);
+    when(grandparentAttribute.getRefEntity()).thenReturn(parentEntityType);
+    Attribute parentAttribute = mock(Attribute.class);
+    when(parentAttribute.hasRefEntity()).thenReturn(true);
+    when(parentAttribute.getRefEntity()).thenReturn(childEntityType);
+    Attribute childAttribute = mock(Attribute.class);
+    when(grandparentEntityType.getAttributeByName("grandparent")).thenReturn(grandparentAttribute);
+    when(parentEntityType.getAttributeByName("parent")).thenReturn(parentAttribute);
+    when(childEntityType.getLabelAttribute()).thenReturn(childAttribute);
+    assertEquals(
+        ImmutableList.of(grandparentAttribute, parentAttribute, childAttribute),
+        QueryUtils.getAttributePathExpanded("grandparent.parent", grandparentEntityType, true));
+  }
+
+  @Test
+  void testGetAttributePathExpandedNoExpansion() {
+    EntityType grandparentEntityType = mock(EntityType.class);
+    EntityType parentEntityType = mock(EntityType.class);
+    EntityType childEntityType = mock(EntityType.class);
+    Attribute grandparentAttribute = mock(Attribute.class);
+    when(grandparentAttribute.hasRefEntity()).thenReturn(true);
+    when(grandparentAttribute.getRefEntity()).thenReturn(parentEntityType);
+    Attribute parentAttribute = mock(Attribute.class);
+    when(parentAttribute.hasRefEntity()).thenReturn(true);
+    when(parentAttribute.getRefEntity()).thenReturn(childEntityType);
+    Attribute childAttribute = mock(Attribute.class);
+    when(grandparentEntityType.getAttributeByName("grandparent")).thenReturn(grandparentAttribute);
+    when(parentEntityType.getAttributeByName("parent")).thenReturn(parentAttribute);
+    when(childEntityType.getAttributeByName("child")).thenReturn(childAttribute);
+    assertEquals(
+        ImmutableList.of(grandparentAttribute, parentAttribute, childAttribute),
+        QueryUtils.getAttributePathExpanded("grandparent.parent.child", grandparentEntityType));
   }
 }
