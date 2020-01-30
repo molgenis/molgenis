@@ -394,14 +394,6 @@ class QueryGeneratorReferencesIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleSearchOneFieldCategorical() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(PREFIX + refCategoricalAttributeName, value);
-    assertThrows(
-        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
   void generateOneQueryRuleSearchOneFieldCompoundPartString() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().search(PREFIX + refCompoundPart0AttributeName, value);
