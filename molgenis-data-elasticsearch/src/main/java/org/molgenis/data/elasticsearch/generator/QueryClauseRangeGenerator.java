@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.lang.String.format;
-import static org.molgenis.data.QueryUtils.getAttributePath;
+import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +19,7 @@ class QueryClauseRangeGenerator extends BaseQueryClauseGenerator {
   }
 
   QueryBuilder mapQueryRule(QueryRule queryRule, EntityType entityType) {
-    List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+    List<Attribute> attributePath = getAttributePathExpanded(queryRule.getField(), entityType);
     Attribute attr = attributePath.get(attributePath.size() - 1);
     validateNumericalQueryField(attr);
     String fieldName = getQueryFieldName(attributePath);

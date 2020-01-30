@@ -1,10 +1,9 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.lang.String.format;
-import static org.molgenis.data.QueryUtils.getAttributePath;
+import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
 
 import java.util.List;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.data.MolgenisQueryException;
@@ -38,7 +37,7 @@ class QueryClauseSearchGenerator extends BaseQueryClauseGenerator {
 
   private QueryBuilder createQueryClauseSearchAttribute(
       QueryRule queryRule, EntityType entityType) {
-    List<Attribute> attributePath = getAttributePath(queryRule.getField(), entityType);
+    List<Attribute> attributePath = getAttributePathExpanded(queryRule.getField(), entityType);
     Attribute attr = attributePath.get(attributePath.size() - 1);
     Object queryValue = getQueryValue(attr, queryRule.getValue());
 
@@ -59,23 +58,15 @@ class QueryClauseSearchGenerator extends BaseQueryClauseGenerator {
       case TEXT:
         return nestedQueryBuilder(
             entityType, attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
-      case CATEGORICAL:
-      case CATEGORICAL_MREF:
-      case MREF:
-      case ONE_TO_MANY:
-      case XREF:
-      case FILE:
-        if (attributePath.size() > entityType.getIndexingDepth()) {
-          throw new MolgenisQueryException(
-              format(CANNOT_FILTER_DEEP_REFERENCE_MSG, entityType.getIndexingDepth()));
-        }
-        return QueryBuilders.nestedQuery(
-            fieldName,
-            QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue),
-            ScoreMode.Avg);
       case BOOL:
         throw new MolgenisQueryException(
             "Cannot execute search query on [" + dataType + "] attribute");
+      case CATEGORICAL:
+      case CATEGORICAL_MREF:
+      case XREF:
+      case MREF:
+      case FILE:
+      case ONE_TO_MANY:
       case COMPOUND:
         throw new MolgenisQueryException(
             format(

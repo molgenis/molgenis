@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch.generator;
 
-import static java.lang.String.format;
 import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
 
 import java.util.List;
@@ -23,6 +22,7 @@ abstract class BaseQueryClauseRangeGenerator extends BaseQueryClauseGenerator {
     List<Attribute> attributePath = getAttributePathExpanded(queryRule.getField(), entityType);
     Attribute attr = attributePath.get(attributePath.size() - 1);
     validateNumericalQueryField(attr);
+
     String fieldName = getQueryFieldName(attributePath);
 
     Object queryValue = getQueryValue(attr, queryRule.getValue());
@@ -30,41 +30,24 @@ abstract class BaseQueryClauseRangeGenerator extends BaseQueryClauseGenerator {
       throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
     }
 
-    RangeQueryBuilder filterBuilder = QueryBuilders.rangeQuery(fieldName);
-    QueryRule.Operator operator = queryRule.getOperator();
-    switch (operator) {
+    RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(fieldName);
+    switch (getOperator()) {
       case GREATER:
-        filterBuilder = filterBuilder.gt(queryValue);
+        rangeQueryBuilder.gt(queryValue);
         break;
       case GREATER_EQUAL:
-        filterBuilder = filterBuilder.gte(queryValue);
+        rangeQueryBuilder.gte(queryValue);
         break;
       case LESS:
-        filterBuilder = filterBuilder.lt(queryValue);
+        rangeQueryBuilder.lt(queryValue);
         break;
       case LESS_EQUAL:
-        filterBuilder = filterBuilder.lte(queryValue);
+        rangeQueryBuilder.lte(queryValue);
         break;
-      case AND:
-      case DIS_MAX:
-      case EQUALS:
-      case FUZZY_MATCH:
-      case FUZZY_MATCH_NGRAM:
-      case IN:
-      case LIKE:
-      case NESTED:
-      case NOT:
-      case OR:
-      case RANGE:
-      case SEARCH:
-      case SHOULD:
-        throw new MolgenisQueryException(
-            format("Illegal query rule operator [%s]", operator.toString()));
       default:
-        throw new UnexpectedEnumException(operator);
+        throw new UnexpectedEnumException(getOperator());
     }
-
     return QueryBuilders.constantScoreQuery(
-        nestedQueryBuilder(entityType, attributePath, filterBuilder));
+        nestedQueryBuilder(entityType, attributePath, rangeQueryBuilder));
   }
 }

@@ -675,15 +675,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleLikeCategorical() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(categoricalAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
   void generateOneQueryRuleLikeCompound() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().like(compoundAttrName, value);
@@ -781,15 +772,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleLikeMref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(mrefAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
   void generateOneQueryRuleLikeScript() {
     String value = "int a = 1;";
     Query<Entity> q = new QueryImpl<>().like(scriptAttrName, value);
@@ -812,15 +794,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   void generateOneQueryRuleLikeText() {
     String value = "some long text";
     Query<Entity> q = new QueryImpl<>().like(textAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
-  void generateOneQueryRuleLikeXref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(xrefAttrName, value);
     assertThrows(
         UnsupportedOperationException.class,
         () -> queryGenerator.createQueryBuilder(q, entityType));
@@ -1606,17 +1579,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleSearchOneFieldCategorical() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(categoricalAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(
-            categoricalAttrName, matchQuery(categoricalAttrName + "._all", value), ScoreMode.Avg);
-    assertQueryBuilderEquals(expectedQuery, query);
-  }
-
-  @Test
   void generateOneQueryRuleSearchOneFieldCompound() {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().search(compoundAttrName, value);
@@ -1715,16 +1677,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleSearchOneFieldMref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().search(mrefAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(mrefAttrName, matchQuery(mrefAttrName + "._all", value), ScoreMode.Avg);
-    assertQueryBuilderEquals(expectedQuery, query);
-  }
-
-  @Test
   void generateOneQueryRuleSearchOneFieldScript() {
     String value = "int a = 1;";
     Query<Entity> q = new QueryImpl<>().search(scriptAttrName, value);
@@ -1748,16 +1700,6 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(textAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(textAttrName, value);
-    assertQueryBuilderEquals(expectedQuery, query);
-  }
-
-  @Test
-  void generateOneQueryRuleSearchOneFieldXref() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(xrefAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(xrefAttrName, matchQuery(xrefAttrName + "._all", value), ScoreMode.Avg);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
