@@ -163,7 +163,8 @@ class ImportWizardControllerTest extends AbstractMockitoSpringContextTests {
             importRunIdValue,
             importRunService,
             httpSession,
-            null),
+            null,
+            Thread.currentThread().getId()),
         importJobArgumentCaptor.getValue());
   }
 

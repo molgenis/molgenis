@@ -273,6 +273,8 @@ public class ImportWizardController extends AbstractWizardController {
     importRun =
         importRunService.addImportRun(
             SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
+
+    long callingThreadId = Thread.currentThread().getId();
     asyncImportJobs.execute(
         new ImportJob(
             importService,
@@ -283,7 +285,8 @@ public class ImportWizardController extends AbstractWizardController {
             importRun.getId(),
             importRunService,
             request.getSession(),
-            packageId));
+            packageId,
+            callingThreadId));
 
     return importRun;
   }

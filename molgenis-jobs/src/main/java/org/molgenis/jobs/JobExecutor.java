@@ -77,7 +77,8 @@ public class JobExecutor {
 
     Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
     try {
-      runJob(jobExecution, molgenisJob, progress);
+      long callingThreadId = Thread.currentThread().getId();
+      runJob(jobExecution, molgenisJob, progress, callingThreadId);
     } catch (Exception ex) {
       handleJobException(jobExecution, ex);
     } finally {
@@ -116,12 +117,13 @@ public class JobExecutor {
   public CompletableFuture<Void> submit(
       JobExecution jobExecution, ExecutorService executorService) {
     overwriteJobExecutionUser(jobExecution);
-    Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
+    Job<?> molgenisJob = saveExecutionAndCreateJob(jobExecution);
 
+    long callingThreadId = Thread.currentThread().getId();
     Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
     CompletableFuture<Void> completableFuture =
         CompletableFuture.runAsync(
-            () -> runJob(jobExecution, molgenisJob, progress), executorService);
+            () -> runJob(jobExecution, molgenisJob, progress, callingThreadId), executorService);
 
     return completableFuture.handle(
         (voidResult, throwable) -> {
@@ -174,10 +176,16 @@ public class JobExecutor {
     }
   }
 
-  private void runJob(JobExecution jobExecution, Job<?> job, Progress progress) {
-    JobExecutionContext jobExecutionContext =
-        jobExecutionContextFactory.createJobExecutionContext(jobExecution);
-    jobExecutionTemplate.call(job, progress, jobExecutionContext);
+  /** @param callingThreadId identifier of the thread that requested execution */
+  private void runJob(
+      JobExecution jobExecution, Job<?> job, Progress progress, long callingThreadId) {
+    try {
+      JobExecutionContext jobExecutionContext =
+          jobExecutionContextFactory.createJobExecutionContext(jobExecution);
+      jobExecutionTemplate.call(job, progress, jobExecutionContext);
+    } finally {
+      JobUtils.cleanupAfterRunJob(callingThreadId);
+    }
   }
 
   private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs) {

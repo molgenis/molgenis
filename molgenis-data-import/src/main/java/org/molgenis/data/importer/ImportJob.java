@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.jobs.JobUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,7 +25,12 @@ public class ImportJob implements Runnable {
   private final ImportRunService importRunService;
   private final HttpSession session;
   private final String packageId;
+  private final long callingThreadId;
 
+  /**
+   * @param callingThreadId identifier of the thread that requested execution (might be the same as
+   *     the execution thread)
+   */
   public ImportJob(
       ImportService importService,
       SecurityContext securityContext,
@@ -34,7 +40,8 @@ public class ImportJob implements Runnable {
       String importRunId,
       ImportRunService importRunService,
       HttpSession session,
-      String packageId) {
+      String packageId,
+      long callingThreadId) {
     this.importService = importService;
     this.securityContext = securityContext;
     this.source = source;
@@ -44,6 +51,7 @@ public class ImportJob implements Runnable {
     this.importRunService = importRunService;
     this.session = session;
     this.packageId = packageId;
+    this.callingThreadId = callingThreadId;
   }
 
   @Override
@@ -69,6 +77,8 @@ public class ImportJob implements Runnable {
     } catch (Exception e) {
       LOG.info("Import failed.", e);
       importRunService.failImportRun(importRunId, e.getLocalizedMessage());
+    } finally {
+      JobUtils.cleanupAfterRunJob(callingThreadId);
     }
   }
 
