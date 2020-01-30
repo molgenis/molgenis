@@ -172,8 +172,8 @@ public class IdentitiesApiController {
 
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{group}/member/{member}")
-            .buildAndExpand(groupName, username)
+            .path("/{member}")
+            .buildAndExpand(username)
             .toUri();
 
     return ResponseEntity.created(location).build();
