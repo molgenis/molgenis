@@ -49,10 +49,17 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     createUser(adminToken, testUserName2, REST_TEST_USER_PASSWORD);
     createUser(adminToken, testUserName3, REST_TEST_USER_PASSWORD);
 
-    anonymousID = given()
-        .contentType(APPLICATION_JSON_VALUE)
-        .get("/api/data/sys_sec_Role?q=name=q=ANONYMOUS").then().extract()
-        .response().getBody().jsonPath().getJsonObject("items[0].data.id").toString();
+    anonymousID =
+        given()
+            .contentType(APPLICATION_JSON_VALUE)
+            .get("/api/data/sys_sec_Role?q=name=q=ANONYMOUS")
+            .then()
+            .extract()
+            .response()
+            .getBody()
+            .jsonPath()
+            .getJsonObject("items[0].data.id")
+            .toString();
   }
 
   @AfterAll
@@ -64,18 +71,33 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
   @Order(1)
   void testCreateGroup() throws IOException {
     String createGroupRequest = "{\"name\":\"" + GROUP_NAME + "\",\"label\":\"My-Group\"}";
-    String addViewerRequest = "{\n"
-        + "  \"roleName\": \"" + GROUP_NAME + "_VIEWER\",\n"
-        + "  \"username\": \"" + testUserName1 + "\"\n"
-        + "}";
-    String addEditorRequest = "{\n"
-        + "  \"roleName\": \"" + GROUP_NAME + "_EDITOR\",\n"
-        + "  \"username\": \"" + testUserName2 + "\"\n"
-        + "}";
-    String addManagerRequest = "{\n"
-        + "  \"roleName\": \"" + GROUP_NAME + "_MANAGER\",\n"
-        + "  \"username\": \"" + testUserName3 + "\"\n"
-        + "}";
+    String addViewerRequest =
+        "{\n"
+            + "  \"roleName\": \""
+            + GROUP_NAME
+            + "_VIEWER\",\n"
+            + "  \"username\": \""
+            + testUserName1
+            + "\"\n"
+            + "}";
+    String addEditorRequest =
+        "{\n"
+            + "  \"roleName\": \""
+            + GROUP_NAME
+            + "_EDITOR\",\n"
+            + "  \"username\": \""
+            + testUserName2
+            + "\"\n"
+            + "}";
+    String addManagerRequest =
+        "{\n"
+            + "  \"roleName\": \""
+            + GROUP_NAME
+            + "_MANAGER\",\n"
+            + "  \"username\": \""
+            + testUserName3
+            + "\"\n"
+            + "}";
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
@@ -88,39 +110,68 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(addViewerRequest)
-        .post("/api/identities/group/" + GROUP_NAME + "/member").then()
+        .post("/api/identities/group/" + GROUP_NAME + "/member")
+        .then()
         .statusCode(CREATED.value())
-        .header(LOCATION,
-            RestAssured.baseURI + "/api/identities/group/" + GROUP_NAME + "/member/"
+        .header(
+            LOCATION,
+            RestAssured.baseURI
+                + "/api/identities/group/"
+                + GROUP_NAME
+                + "/member/"
                 + testUserName1);
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(addEditorRequest)
-        .post("/api/identities/group/" + GROUP_NAME + "/member").then()
+        .post("/api/identities/group/" + GROUP_NAME + "/member")
+        .then()
         .statusCode(CREATED.value())
-        .header(LOCATION,
-            RestAssured.baseURI + "/api/identities/group/" + GROUP_NAME + "/member/"
+        .header(
+            LOCATION,
+            RestAssured.baseURI
+                + "/api/identities/group/"
+                + GROUP_NAME
+                + "/member/"
                 + testUserName2);
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(addManagerRequest)
-        .post("/api/identities/group/" + GROUP_NAME + "/member").then()
+        .post("/api/identities/group/" + GROUP_NAME + "/member")
+        .then()
         .statusCode(CREATED.value())
-        .header(LOCATION,
-            RestAssured.baseURI + "/api/identities/group/" + GROUP_NAME + "/member/"
+        .header(
+            LOCATION,
+            RestAssured.baseURI
+                + "/api/identities/group/"
+                + GROUP_NAME
+                + "/member/"
                 + testUserName3);
 
     String expectedMembersJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "members1Response.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI, "user1", testUserName1, "user2", testUserName2,
-                    "user3", testUserName3));
+            getClass(),
+            "members1Response.json",
+            ImmutableMap.of(
+                "baseUri",
+                RestAssured.baseURI,
+                "user1",
+                testUserName1,
+                "user2",
+                testUserName2,
+                "user3",
+                testUserName3));
 
-    String response = given().get("/api/identities/group/" + GROUP_NAME + "/member").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/identities/group/" + GROUP_NAME + "/member")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedMembersJson, response, Collections.singletonList("id"));
 
     String expectedRoleJson =
@@ -137,25 +188,45 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
   @Test
   @Order(2)
   void testUpdateUserRole() throws IOException {
-    String updateUserRequest = "{\n"
-        + "  \"roleName\": \"" + GROUP_NAME + "_EDITOR\",\n"
-        + "  \"username\": \"" + testUserName1 + "\"\n"
-        + "}";
+    String updateUserRequest =
+        "{\n"
+            + "  \"roleName\": \""
+            + GROUP_NAME
+            + "_EDITOR\",\n"
+            + "  \"username\": \""
+            + testUserName1
+            + "\"\n"
+            + "}";
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(updateUserRequest)
-        .put("/api/identities/group/" + GROUP_NAME + "/member/" + testUserName1).then()
+        .put("/api/identities/group/" + GROUP_NAME + "/member/" + testUserName1)
+        .then()
         .statusCode(OK.value());
 
     String expectedMembersJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "members2Response.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI, "user1", testUserName1, "user2", testUserName2,
-                    "user3", testUserName3));
+            getClass(),
+            "members2Response.json",
+            ImmutableMap.of(
+                "baseUri",
+                RestAssured.baseURI,
+                "user1",
+                testUserName1,
+                "user2",
+                testUserName2,
+                "user3",
+                testUserName3));
 
-    String response = given().get("/api/identities/group/" + GROUP_NAME + "/member").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/identities/group/" + GROUP_NAME + "/member")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedMembersJson, response, Collections.singletonList("id"));
   }
 
@@ -164,18 +235,33 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
   void testDeleteUserRole() throws IOException {
     given()
         .contentType(APPLICATION_JSON_VALUE)
-        .delete("/api/identities/group/" + GROUP_NAME + "/member/" + testUserName1).then()
+        .delete("/api/identities/group/" + GROUP_NAME + "/member/" + testUserName1)
+        .then()
         .statusCode(NO_CONTENT.value());
 
     String expectedMembersJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "members3Response.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI, "user1", testUserName1, "user2", testUserName2,
-                    "user3", testUserName3));
+            getClass(),
+            "members3Response.json",
+            ImmutableMap.of(
+                "baseUri",
+                RestAssured.baseURI,
+                "user1",
+                testUserName1,
+                "user2",
+                testUserName2,
+                "user3",
+                testUserName3));
 
-    String response = given().get("/api/identities/group/" + GROUP_NAME + "/member").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/identities/group/" + GROUP_NAME + "/member")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedMembersJson, response, Collections.singletonList("id"));
   }
 
@@ -187,23 +273,30 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(anonymousRequest)
-        .put("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS").then()
+        .put("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS")
+        .then()
         .statusCode(NO_CONTENT.value());
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(userRequest)
-        .put("/api/identities/group/" + GROUP_NAME + "/role/USER").then()
+        .put("/api/identities/group/" + GROUP_NAME + "/role/USER")
+        .then()
         .statusCode(NO_CONTENT.value());
 
     String expectedV3RolesJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "V3RoleResponse.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI));
+            getClass(), "V3RoleResponse.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    String response = given().get("/api/data/sys_sec_Role/" + anonymousID + "/includes").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/data/sys_sec_Role/" + anonymousID + "/includes")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedV3RolesJson, response, Arrays.asList("id", "self"));
   }
 
@@ -214,17 +307,23 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     given()
         .contentType(APPLICATION_JSON_VALUE)
         .body(anonymousRequest)
-        .put("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS").then()
+        .put("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS")
+        .then()
         .statusCode(NO_CONTENT.value());
 
     String expectedV3RolesJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "V3Role2Response.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI));
+            getClass(), "V3Role2Response.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    String response = given().get("/api/data/sys_sec_Role/" + anonymousID + "/includes").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/data/sys_sec_Role/" + anonymousID + "/includes")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedV3RolesJson, response, Arrays.asList("id", "self"));
   }
 
@@ -233,46 +332,53 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
   void deleteExtendRole() throws IOException {
     given()
         .contentType(APPLICATION_JSON_VALUE)
-        .delete("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS").then()
+        .delete("/api/identities/group/" + GROUP_NAME + "/role/ANONYMOUS")
+        .then()
         .statusCode(NO_CONTENT.value());
 
     given()
         .contentType(APPLICATION_JSON_VALUE)
-        .delete("/api/identities/group/" + GROUP_NAME + "/role/USER").then()
+        .delete("/api/identities/group/" + GROUP_NAME + "/role/USER")
+        .then()
         .statusCode(NO_CONTENT.value());
 
     String expectedV3RolesJson =
         TestResourceUtils.getRenderedString(
-            getClass(), "V3Role3Response.json", ImmutableMap
-                .of("baseUri", RestAssured.baseURI));
+            getClass(), "V3Role3Response.json", ImmutableMap.of("baseUri", RestAssured.baseURI));
 
-    String response = given().get("/api/data/sys_sec_Role/" + anonymousID + "/includes").then()
-        .statusCode(OK.value()).extract()
-        .response().body().asString();
+    String response =
+        given()
+            .get("/api/data/sys_sec_Role/" + anonymousID + "/includes")
+            .then()
+            .statusCode(OK.value())
+            .extract()
+            .response()
+            .body()
+            .asString();
     autoIdReplacingIsEqualJson(expectedV3RolesJson, response, Arrays.asList("id", "self"));
   }
 
   @Test
   @Order(7)
   void testDeleteGroup() {
-    given()
-        .delete("/api/identities/group/" + GROUP_NAME)
-        .then()
-        .statusCode(NO_CONTENT.value());
+    given().delete("/api/identities/group/" + GROUP_NAME).then().statusCode(NO_CONTENT.value());
 
-    given().get("/api/identities/group/" + GROUP_NAME + "/member").then()
+    given()
+        .get("/api/identities/group/" + GROUP_NAME + "/member")
+        .then()
         .statusCode(HttpStatus.NOT_FOUND.value());
   }
 
   /*
    * Replace autoID's for specific fields in the response json and then match them to an 'expected' json string.
    */
-  private void autoIdReplacingIsEqualJson(String expectedJson, String response,
-      List<String> fields) {
+  private void autoIdReplacingIsEqualJson(
+      String expectedJson, String response, List<String> fields) {
     String result = response;
     for (String field : fields) {
-      result = result.replaceAll("\"" + field + "\":\"[a-zA-Z0-9/\\=\\?:\\-_]*\"",
-          "\"" + field + "\":\"AUTOID\"");
+      result =
+          result.replaceAll(
+              "\"" + field + "\":\"[a-zA-Z0-9/\\=\\?:\\-_]*\"", "\"" + field + "\":\"AUTOID\"");
     }
     assertThat(result, isEqualJson(expectedJson, JSONCompareMode.LENIENT));
   }

@@ -298,9 +298,7 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(status().isCreated())
         .andExpect(
             header()
-                .string(
-                    "Location",
-                    "http://localhost" + GROUP_END_POINT + "/devs/member/henkie"));
+                .string("Location", "http://localhost" + GROUP_END_POINT + "/devs/member/henkie"));
 
     verify(groupService).addMember(group, user, editor);
   }
