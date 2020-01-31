@@ -84,6 +84,7 @@ import org.springframework.web.util.NestedServletException;
 
 @ContextConfiguration(classes = {IdentitiesApiControllerTest.Config.class, GsonConfig.class})
 class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
+
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private GroupPermissionService groupPermissionService;
