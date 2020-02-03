@@ -38,3 +38,4 @@ mvnw.cmd
 
 release.properties
 pom.xml.releaseBackup
+molgenis-app/dev-env/.env

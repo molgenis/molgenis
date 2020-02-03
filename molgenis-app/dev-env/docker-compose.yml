@@ -1,25 +1,34 @@
 version: "3.4"
 services:
   frontend:
-    image: ${FRONTEND}
+    image: $FRONTEND_IMAGE
+    container_name: nginx
     ports:
       - 80:80
+    network_mode: $DOCKER_NETWORK_MODE
     volumes:
-      - ${BACKEND}:/etc/nginx/proxy.d/backend.conf
+      - ./backend.conf:/etc/nginx/proxy.d/backend.conf
+    extra_hosts:
+      - host.docker.internal:$DOCKER_HOST_IP
 
   postgres:
     image: postgres:11-alpine
+    container_name: postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
+    network_mode: $DOCKER_NETWORK_MODE
     volumes:
       - ./init_db.sql:/docker-entrypoint-initdb.d/init.sql
       - db-data:/var/lib/postgresql/data
+    extra_hosts:
+      - host.docker.internal:$DOCKER_HOST_IP
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.5.3
+    container_name: elasticsearch
     environment:
       - cluster.name=molgenis
       - bootstrap.memory_lock=true
@@ -37,22 +46,33 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    network_mode: $DOCKER_NETWORK_MODE
+    extra_hosts:
+      - host.docker.internal:$DOCKER_HOST_IP
 
   minio:
     image: minio/minio:RELEASE.2019-03-20T22-38-47Z
+    container_name: minio
     volumes:
       - ~/.molgenis/minio/:/data
     ports:
       - 9000:9000
+    network_mode: $DOCKER_NETWORK_MODE
     environment:
       MINIO_ACCESS_KEY: molgenis
       MINIO_SECRET_KEY: molgenis
     command: server /data
+    extra_hosts:
+      - host.docker.internal:$DOCKER_HOST_IP
 
   opencpu:
     image: molgenis/opencpu:opencpu-release-2019-03-20_12-07-11
+    container_name: opencpu
     ports:
       - 8004:8004
+    network_mode: $DOCKER_NETWORK_MODE
+    extra_hosts:
+      - host.docker.internal:$DOCKER_HOST_IP
 
 volumes:
   db-data:
