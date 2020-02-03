@@ -6,13 +6,13 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.generator.QueryBuilderAssertions.assertQueryBuilderEquals;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -57,9 +57,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** Copy of standard QueryGeneratorTest but now with queries done on the referenced entity */
-// FIXME add nillable tests
 @MockitoSettings(strictness = Strictness.LENIENT)
-class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
+class QueryGeneratorReferencesIT extends AbstractMolgenisSpringTest {
   private EntityType entityType;
 
   private final String refBoolAttributeName = "xbool";
@@ -197,7 +196,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
         constantScoreQuery(
             nestedQuery(
                 REF_ENTITY_ATT, rangeQuery(PREFIX + refDateAttributeName).gt(date), ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -211,7 +210,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refDateTimeAttributeName).gt(DataConverter.toString(value)),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -225,7 +224,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refDecimalAttributeName).gt(value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -237,7 +236,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
         constantScoreQuery(
             nestedQuery(
                 REF_ENTITY_ATT, rangeQuery(PREFIX + refIntAttributeName).gt(value), ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -251,7 +250,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refLongAttributeName).gt(value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -267,7 +266,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refDateAttributeName).gte(date),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -281,7 +280,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refDecimalAttributeName).lte(value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -293,15 +292,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
         constantScoreQuery(
             nestedQuery(
                 REF_ENTITY_ATT, rangeQuery(PREFIX + refIntAttributeName).lt(value), ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleInCategorical_Ids() {
-    Iterable<String> values = Arrays.asList("id0", "id1", "id2");
-    Query<Entity> q = new QueryImpl<>().in(PREFIX + refCategoricalAttributeName, values);
-    assertThrows(
-        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -316,7 +307,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 .slop(10)
                 .analyzer(DEFAULT_ANALYZER),
             ScoreMode.Avg);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -328,7 +319,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
         constantScoreQuery(
             nestedQuery(
                 REF_ENTITY_ATT, termQuery(PREFIX + refBoolAttributeName, value), ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -342,15 +333,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 termQuery(PREFIX + refStringAttributeName + '.' + FIELD_NOT_ANALYZED, value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleEqualsCategorical() {
-    String value = "id";
-    Query<Entity> q = new QueryImpl<>().eq(PREFIX + refCategoricalAttributeName, value);
-    assertThrows(
-        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -366,15 +349,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                         REF_ENTITY_ATT,
                         termQuery(PREFIX + refBoolAttributeName, value),
                         ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleNotEqualsCategorical() {
-    String value = "id";
-    Query<Entity> q = new QueryImpl<>().not().eq(PREFIX + refCategoricalAttributeName, value);
-    assertThrows(
-        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -400,7 +375,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                             PREFIX + refCompoundPart0AttributeName + '.' + FIELD_NOT_ANALYZED,
                             value),
                         ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -415,15 +390,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT,
                 rangeQuery(PREFIX + refIntAttributeName).gte(3).lte(9),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleSearchOneFieldCategorical() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(PREFIX + refCategoricalAttributeName, value);
-    assertThrows(
-        MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -436,7 +403,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
             REF_ENTITY_ATT,
             matchQuery(PREFIX + refCompoundPart0AttributeName, value),
             ScoreMode.Avg);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -470,7 +437,7 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
     BoolQueryBuilder stringIntQuery = QueryBuilders.boolQuery().must(stringQuery).must(intQuery);
     QueryBuilder expectedQuery =
         QueryBuilders.boolQuery().should(booleanQuery).should(stringIntQuery).minimumShouldMatch(1);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -503,12 +470,6 @@ class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest {
                 REF_ENTITY_ATT, termQuery(PREFIX + refIntAttributeName, intValue), ScoreMode.Avg));
     QueryBuilder expectedQuery =
         QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery).mustNot(intQuery);
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected) {
-    // QueryBuilder classes do not implement equals
-    assertEquals(
-        expected.toString().replaceAll("\\s", ""), actual.toString().replaceAll("\\s", ""));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 }

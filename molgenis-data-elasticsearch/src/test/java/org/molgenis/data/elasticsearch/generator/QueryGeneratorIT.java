@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.existsQuery;
@@ -12,13 +11,13 @@ import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.generator.QueryBuilderAssertions.assertQueryBuilderEquals;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -46,7 +45,6 @@ import java.util.Arrays;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -64,9 +62,8 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// FIXME add nillable tests
 @MockitoSettings(strictness = Strictness.LENIENT)
-class QueryGeneratorTest extends AbstractMolgenisSpringTest {
+class QueryGeneratorIT extends AbstractMolgenisSpringTest {
   private static final String idAttrName = "xid";
 
   private static final String boolAttrName = "xbool";
@@ -169,134 +166,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void testNestedQueryBuilderSizeOne() {
-    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(1).getMock();
-    String fieldName = "attribute";
-    String queryValue = "value";
-    QueryBuilder queryBuilder = termQuery(fieldName, queryValue);
-
-    Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(fieldName).getMock();
-    QueryBuilder nestedQueryBuilder =
-        queryGenerator.nestedQueryBuilder(entityType, singletonList(attribute), queryBuilder);
-    assertQueryBuilderEquals(nestedQueryBuilder, queryBuilder);
-  }
-
-  @Test
-  void testNestedQueryBuilderSizeTwo() {
-    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(1).getMock();
-    String parentFieldName = "parent";
-    String childFieldName = "child";
-    String queryValue = "value";
-    QueryBuilder queryBuilder = termQuery(parentFieldName + '.' + childFieldName, queryValue);
-
-    Attribute parentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
-    Attribute childAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
-    QueryBuilder nestedQueryBuilder =
-        queryGenerator.nestedQueryBuilder(
-            entityType, asList(parentAttribute, childAttribute), queryBuilder);
-
-    QueryBuilder expectedQueryBuilder =
-        QueryBuilders.nestedQuery(
-            parentFieldName,
-            termQuery(parentFieldName + '.' + childFieldName, queryValue),
-            ScoreMode.Avg);
-    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
-  }
-
-  @Test
-  void testNestedQueryBuilderSizeThree() {
-    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(2).getMock();
-    String grandparentFieldName = "grandparent";
-    String parentFieldName = "parent";
-    String childFieldName = "child";
-    String queryValue = "value";
-    QueryBuilder queryBuilder =
-        termQuery(grandparentFieldName + '.' + parentFieldName + '.' + childFieldName, queryValue);
-
-    Attribute grandparentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(grandparentFieldName).getMock();
-    Attribute parentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
-    Attribute childAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
-    QueryBuilder nestedQueryBuilder =
-        queryGenerator.nestedQueryBuilder(
-            entityType,
-            asList(grandparentAttribute, parentAttribute, childAttribute),
-            queryBuilder);
-
-    QueryBuilder expectedQueryBuilder =
-        QueryBuilders.nestedQuery(
-            grandparentFieldName,
-            QueryBuilders.nestedQuery(
-                grandparentFieldName + '.' + parentFieldName,
-                termQuery(
-                    grandparentFieldName + '.' + parentFieldName + '.' + childFieldName,
-                    queryValue),
-                ScoreMode.Avg),
-            ScoreMode.Avg);
-    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
-  }
-
-  @Test
-  void testNestedQueryBuilderSizeFour() {
-    EntityType entityType = when(mock(EntityType.class).getIndexingDepth()).thenReturn(3).getMock();
-    String greatGrandparentFieldName = "grandGrandparent";
-    String grandparentFieldName = "grandparent";
-    String parentFieldName = "parent";
-    String childFieldName = "child";
-    String queryValue = "value";
-    QueryBuilder queryBuilder =
-        termQuery(
-            greatGrandparentFieldName
-                + '.'
-                + grandparentFieldName
-                + '.'
-                + parentFieldName
-                + '.'
-                + childFieldName,
-            queryValue);
-
-    Attribute greatGrandparentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(greatGrandparentFieldName).getMock();
-    Attribute grandparentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(grandparentFieldName).getMock();
-    Attribute parentAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(parentFieldName).getMock();
-    Attribute childAttribute =
-        when(mock(Attribute.class).getName()).thenReturn(childFieldName).getMock();
-    QueryBuilder nestedQueryBuilder =
-        queryGenerator.nestedQueryBuilder(
-            entityType,
-            asList(
-                greatGrandparentAttribute, grandparentAttribute, parentAttribute, childAttribute),
-            queryBuilder);
-
-    QueryBuilder expectedQueryBuilder =
-        QueryBuilders.nestedQuery(
-            greatGrandparentFieldName,
-            QueryBuilders.nestedQuery(
-                greatGrandparentFieldName + '.' + grandparentFieldName,
-                QueryBuilders.nestedQuery(
-                    greatGrandparentFieldName + '.' + grandparentFieldName + '.' + parentFieldName,
-                    termQuery(
-                        greatGrandparentFieldName
-                            + '.'
-                            + grandparentFieldName
-                            + '.'
-                            + parentFieldName
-                            + '.'
-                            + childFieldName,
-                        queryValue),
-                    ScoreMode.Avg),
-                ScoreMode.Avg),
-            ScoreMode.Avg);
-    assertQueryBuilderEquals(nestedQueryBuilder, expectedQueryBuilder);
-  }
-
-  @Test
   void generateOneQueryRuleGreaterInvalidAttribute() {
     String value = "str";
     Query<Entity> q = new QueryImpl<>().gt(stringAttrName, value);
@@ -311,7 +180,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().gt(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(dateAttrName).gt(date));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -321,7 +190,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(rangeQuery(dateTimeAttrName).gt(DataConverter.toString(value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -330,7 +199,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().gt(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(decimalAttrName).gt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -339,7 +208,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().gt(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(intAttrName).gt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -348,7 +217,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().gt(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(longAttrName).gt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -366,7 +235,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().ge(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(dateAttrName).gte(date));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -376,7 +245,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(rangeQuery(dateTimeAttrName).gte(DataConverter.toString(value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -385,7 +254,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().ge(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(decimalAttrName).gte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -394,7 +263,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().ge(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(intAttrName).gte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -403,7 +272,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().ge(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(longAttrName).gte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -421,7 +290,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().le(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(dateAttrName).lte(date));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -431,7 +300,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(rangeQuery(dateTimeAttrName).lte(DataConverter.toString(value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -440,7 +309,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().le(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(decimalAttrName).lte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -449,7 +318,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().le(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(intAttrName).lte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -458,7 +327,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().le(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(longAttrName).lte(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -476,7 +345,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termsQuery(boolAttrName, Boolean.TRUE, Boolean.FALSE));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -492,7 +361,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     categoricalAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -515,7 +384,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     categoricalAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -528,7 +397,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(dateAttrName, new Object[] {date1.toString(), date2.toString()}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -541,7 +410,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(dateTimeAttrName, new Object[] {date1.toString(), date2.toString()}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -553,7 +422,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termsQuery(decimalAttrName, new Object[] {double1, double2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -566,7 +435,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(emailAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -579,7 +448,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(enumAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -592,7 +461,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(htmlAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -606,7 +475,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
         constantScoreQuery(
             termsQuery(
                 hyperlinkAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -618,7 +487,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termsQuery(intAttrName, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -630,7 +499,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termsQuery(longAttrName, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -653,7 +522,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     mrefAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -669,7 +538,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     mrefAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -682,7 +551,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(scriptAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -695,7 +564,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(stringAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -708,7 +577,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         constantScoreQuery(
             termsQuery(textAttrName + '.' + FIELD_NOT_ANALYZED, new Object[] {value1, value2}));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -724,7 +593,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     xrefAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -747,7 +616,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                     xrefAttrName + '.' + idAttrName + '.' + FIELD_NOT_ANALYZED,
                     new Object[] {"id0", "id1", "id2"}),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -757,7 +626,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().lt(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(dateAttrName).lt(date));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -767,7 +636,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(rangeQuery(dateTimeAttrName).lt(DataConverter.toString(value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -776,7 +645,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().lt(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(decimalAttrName).lt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -785,7 +654,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().lt(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(intAttrName).lt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -794,7 +663,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().lt(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(longAttrName).lt(value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -803,15 +672,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().like(boolAttrName, value);
     assertThrows(
         MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
-  void generateOneQueryRuleLikeCategorical() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(categoricalAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
   }
 
   @Test
@@ -829,7 +689,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         matchPhrasePrefixQuery(compoundPart0AttrName, value).slop(10).analyzer(DEFAULT_ANALYZER);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -863,7 +723,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         matchPhrasePrefixQuery(emailAttrName, value).slop(10).analyzer(DEFAULT_ANALYZER);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -873,7 +733,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         matchPhrasePrefixQuery(enumAttrName, value).slop(10).analyzer(DEFAULT_ANALYZER);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -892,7 +752,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         matchPhrasePrefixQuery(hyperlinkAttrName, value).slop(10).analyzer(DEFAULT_ANALYZER);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -912,15 +772,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleLikeMref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(mrefAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
   void generateOneQueryRuleLikeScript() {
     String value = "int a = 1;";
     Query<Entity> q = new QueryImpl<>().like(scriptAttrName, value);
@@ -936,7 +787,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         matchPhrasePrefixQuery(stringAttrName, value).slop(10).analyzer(DEFAULT_ANALYZER);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -949,25 +800,14 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void generateOneQueryRuleLikeXref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().like(xrefAttrName, value);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
   void generateOneQueryRuleEqualsBoolNull() {
     Boolean value = null;
     Query<Entity> q = new QueryImpl<>().eq(boolAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(boolAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleEqualsCategoricalNull() {
     String value = null;
@@ -981,7 +821,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                         categoricalAttrName,
                         existsQuery(categoricalAttrName + ".xid"),
                         ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -999,7 +839,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(compoundPart0AttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1008,7 +848,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(dateAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1018,7 +858,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(dateTimeAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1028,7 +868,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(decimalAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1038,7 +878,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(emailAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1047,7 +887,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(enumAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(enumAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1056,7 +896,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(htmlAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(htmlAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1066,7 +906,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(hyperlinkAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1075,7 +915,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(intAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1084,7 +924,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(longAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   // TODO enable when implemented in QueryGenerator (see note in QueryGenerator)
@@ -1100,7 +940,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(scriptAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1110,7 +950,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(boolQuery().mustNot(existsQuery(stringAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1119,11 +959,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(textAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(boolQuery().mustNot(existsQuery(textAttrName)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleEqualsXrefNull() {
     String value = null;
@@ -1134,7 +972,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
             boolQuery()
                 .mustNot(
                     nestedQuery(xrefAttrName, existsQuery(xrefAttrName + ".xid"), ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1144,11 +982,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(boolAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleNotEqualsCategoricalNull() {
     String value = null;
@@ -1164,7 +1000,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                                 categoricalAttrName,
                                 existsQuery(categoricalAttrName + ".xid"),
                                 ScoreMode.Avg))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1183,7 +1019,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         boolQuery()
             .mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(compoundPart0AttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1193,7 +1029,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(dateAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1203,7 +1039,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(dateTimeAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1213,7 +1049,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(decimalAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1223,7 +1059,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(emailAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1233,7 +1069,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(enumAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1243,7 +1079,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(htmlAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1254,7 +1090,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         boolQuery()
             .mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(hyperlinkAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1264,7 +1100,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(intAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1274,7 +1110,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(longAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   // TODO enable when implemented in QueryGenerator (see note in QueryGenerator)
@@ -1290,7 +1126,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(scriptAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1300,7 +1136,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(stringAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1310,11 +1146,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(boolQuery().mustNot(existsQuery(textAttrName))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleNotEqualsXrefNull() {
     String value = null;
@@ -1328,7 +1162,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                         .mustNot(
                             nestedQuery(
                                 xrefAttrName, existsQuery(xrefAttrName + ".xid"), ScoreMode.Avg))));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1337,11 +1171,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(boolAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(boolAttrName, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleEqualsCategorical() {
     String value = "id";
@@ -1353,7 +1185,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                 categoricalAttrName,
                 termQuery(categoricalAttrName + ".xid." + FIELD_NOT_ANALYZED, value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1371,7 +1203,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(compoundPart0AttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1380,7 +1212,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(dateAttrName, "2015-01-15"));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1389,7 +1221,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(dateTimeAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(dateTimeAttrName, value.toString()));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1398,7 +1230,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(decimalAttrName, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1408,7 +1240,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(emailAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1418,7 +1250,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(enumAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1428,7 +1260,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(htmlAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1438,7 +1270,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(hyperlinkAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1447,7 +1279,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(intAttrName, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1456,7 +1288,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().eq(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(termQuery(longAttrName, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   // TODO enable when implemented in QueryGenerator (see note in QueryGenerator)
@@ -1472,7 +1304,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(scriptAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1482,7 +1314,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(stringAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1492,11 +1324,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         constantScoreQuery(termQuery(textAttrName + '.' + FIELD_NOT_ANALYZED, value));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleEqualsXref() {
     String value = "id";
@@ -1508,7 +1338,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                 xrefAttrName,
                 termQuery(xrefAttrName + ".xid." + FIELD_NOT_ANALYZED, value),
                 ScoreMode.Avg));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1518,11 +1348,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(boolAttrName, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleNotEqualsCategorical() {
     String value = "id";
@@ -1536,7 +1364,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                         categoricalAttrName,
                         termQuery(categoricalAttrName + ".xid." + FIELD_NOT_ANALYZED, value),
                         ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1557,7 +1385,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
             .mustNot(
                 constantScoreQuery(
                     termQuery(compoundPart0AttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1567,7 +1395,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(dateAttrName, value.toString())));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1577,7 +1405,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(dateTimeAttrName, value.toString())));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1587,7 +1415,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(decimalAttrName, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1599,7 +1427,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
         boolQuery()
             .mustNot(
                 constantScoreQuery(termQuery(emailAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1610,7 +1438,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         boolQuery()
             .mustNot(constantScoreQuery(termQuery(enumAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1621,7 +1449,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         boolQuery()
             .mustNot(constantScoreQuery(termQuery(htmlAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1633,7 +1461,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
         boolQuery()
             .mustNot(
                 constantScoreQuery(termQuery(hyperlinkAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1643,7 +1471,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(intAttrName, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1653,7 +1481,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery =
         boolQuery().mustNot(constantScoreQuery(termQuery(longAttrName, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   // TODO enable when implemented in QueryGenerator (see note in QueryGenerator)
@@ -1671,7 +1499,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
         boolQuery()
             .mustNot(
                 constantScoreQuery(termQuery(scriptAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1683,7 +1511,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
         boolQuery()
             .mustNot(
                 constantScoreQuery(termQuery(stringAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1694,11 +1522,9 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         boolQuery()
             .mustNot(constantScoreQuery(termQuery(textAttrName + '.' + FIELD_NOT_ANALYZED, value)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
-  // FIXME add test for ref entity where id attribute is int
-  // FIXME add test where value is entity
   @Test
   void generateOneQueryRuleNotEqualsXref() {
     String value = "id";
@@ -1712,7 +1538,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
                         xrefAttrName,
                         termQuery(xrefAttrName + ".xid." + FIELD_NOT_ANALYZED, value),
                         ScoreMode.Avg)));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1722,7 +1548,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().rng(intAttrName, low, high);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(intAttrName).gte(3).lte(9));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1732,7 +1558,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().rng(longAttrName, low, high);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = constantScoreQuery(rangeQuery(longAttrName).gte(3).lte(9));
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1741,7 +1567,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchPhraseQuery("_all", value).slop(10);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1750,17 +1576,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(boolAttrName, value);
     assertThrows(
         MolgenisQueryException.class, () -> queryGenerator.createQueryBuilder(q, entityType));
-  }
-
-  @Test
-  void generateOneQueryRuleSearchOneFieldCategorical() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(categoricalAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(
-            categoricalAttrName, matchQuery(categoricalAttrName + "._all", value), ScoreMode.Avg);
-    assertQueryBuilderEquals(query, expectedQuery);
   }
 
   @Test
@@ -1777,7 +1592,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(compoundPart0AttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(compoundPart0AttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1786,7 +1601,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(dateAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(dateAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1795,7 +1610,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(dateTimeAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(dateTimeAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1804,7 +1619,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(decimalAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(decimalAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1813,7 +1628,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(emailAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(emailAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1822,7 +1637,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(enumAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(enumAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1831,7 +1646,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(htmlAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(htmlAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1840,7 +1655,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(hyperlinkAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(hyperlinkAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1849,7 +1664,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(intAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(intAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1858,17 +1673,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(longAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(longAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleSearchOneFieldMref() {
-    String value = "value";
-    Query<Entity> q = new QueryImpl<>().search(mrefAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(mrefAttrName, matchQuery(mrefAttrName + "._all", value), ScoreMode.Avg);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1877,7 +1682,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(scriptAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(scriptAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1886,7 +1691,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(stringAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(stringAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1895,17 +1700,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     Query<Entity> q = new QueryImpl<>().search(textAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
     QueryBuilder expectedQuery = matchQuery(textAttrName, value);
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  @Test
-  void generateOneQueryRuleSearchOneFieldXref() {
-    String value = "text";
-    Query<Entity> q = new QueryImpl<>().search(xrefAttrName, value);
-    QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        nestedQuery(xrefAttrName, matchQuery(xrefAttrName + "._all", value), ScoreMode.Avg);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   @Test
@@ -1931,7 +1726,7 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     BoolQueryBuilder stringIntQuery = boolQuery().must(stringQuery).must(intQuery);
     QueryBuilder expectedQuery =
         boolQuery().should(booleanQuery).should(stringIntQuery).minimumShouldMatch(1);
-    assertQueryBuilderEquals(query, expectedQuery);
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 
   // regression test for https://github.com/molgenis/molgenis/issues/2326
@@ -1957,12 +1752,6 @@ class QueryGeneratorTest extends AbstractMolgenisSpringTest {
     QueryBuilder intQuery = constantScoreQuery(termQuery(intAttrName, intValue));
     QueryBuilder expectedQuery =
         boolQuery().must(booleanQuery).mustNot(stringQuery).mustNot(intQuery);
-    assertQueryBuilderEquals(query, expectedQuery);
-  }
-
-  private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected) {
-    // QueryBuilder classes do not implement equals
-    assertEquals(
-        expected.toString().replaceAll("\\s", ""), actual.toString().replaceAll("\\s", ""));
+    assertQueryBuilderEquals(expectedQuery, query);
   }
 }

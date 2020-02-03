@@ -522,6 +522,21 @@ public class EntityType extends StaticEntity implements Labeled {
   }
 
   /**
+   * Get attribute by name
+   *
+   * @param attributeName attribute name
+   * @return attribute, never <tt>null</tt>
+   * @throws UnknownAttributeException if no attribute exists for the given name
+   */
+  public Attribute getAttributeByName(String attributeName) {
+    Attribute attribute = getAttribute(attributeName);
+    if (attribute == null) {
+      throw new UnknownAttributeException(this, attributeName);
+    }
+    return attribute;
+  }
+
+  /**
    * Get own attribute by identifier
    *
    * @throws UnknownAttributeException if no attribute exists for the given identifier

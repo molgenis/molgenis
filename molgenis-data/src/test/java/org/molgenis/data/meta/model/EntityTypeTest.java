@@ -269,6 +269,27 @@ class EntityTypeTest extends AbstractSystemEntityTest {
         () -> entityType.getOwnAttributeById("UnknownAttributeIdentifier"));
   }
 
+  @Test
+  void testGetAttributeByName() {
+    String attributeName = "MyAttributeName";
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getName()).thenReturn(attributeName);
+
+    Entity entity = mock(Entity.class);
+    EntityType entityType = new EntityType(entity);
+    when(entity.getEntities(ATTRIBUTES, Attribute.class)).thenReturn(singletonList(attribute));
+
+    assertEquals(attribute, entityType.getAttributeByName(attributeName));
+  }
+
+  @Test
+  void testGetAttributeByNameUnknownAttribute() {
+    EntityType entityType = new EntityType(mock(Entity.class));
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> entityType.getAttributeByName("UnknownAttributeName"));
+  }
+
   private EntityType mockEntityTypeMeta() {
     EntityType entityTypeMeta = mock(EntityType.class);
     Attribute intAttr = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
