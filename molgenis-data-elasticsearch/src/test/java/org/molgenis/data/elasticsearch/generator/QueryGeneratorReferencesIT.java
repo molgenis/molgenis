@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.generator;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
+import static org.elasticsearch.index.query.QueryBuilders.matchPhraseQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
@@ -401,7 +401,7 @@ class QueryGeneratorReferencesIT extends AbstractMolgenisSpringTest {
     QueryBuilder expectedQuery =
         nestedQuery(
             REF_ENTITY_ATT,
-            matchQuery(PREFIX + refCompoundPart0AttributeName, value),
+            matchPhraseQuery(PREFIX + refCompoundPart0AttributeName, value).slop(10),
             ScoreMode.Avg);
     assertQueryBuilderEquals(expectedQuery, query);
   }

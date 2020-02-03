@@ -51,7 +51,7 @@ class QueryClauseSearchGeneratorTest extends AbstractMockitoTest {
     when(entityType.getAttributeByName("attr")).thenReturn(attribute);
 
     QueryBuilder queryBuilder = queryClauseSearchGenerator.mapQueryRule(queryRule, entityType);
-    QueryBuilder expectedQueryBuilder = QueryBuilders.matchQuery("attr", "val");
+    QueryBuilder expectedQueryBuilder = QueryBuilders.matchPhraseQuery("attr", "val").slop(10);
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
   }
 
@@ -78,7 +78,7 @@ class QueryClauseSearchGeneratorTest extends AbstractMockitoTest {
     QueryBuilder queryBuilder = queryClauseSearchGenerator.mapQueryRule(queryRule, entityType);
     QueryBuilder expectedQueryBuilder =
         QueryBuilders.nestedQuery(
-            "attr", QueryBuilders.matchQuery("attr.refAttr", "val"), ScoreMode.Avg);
+            "attr", QueryBuilders.matchPhraseQuery("attr.refAttr", "val").slop(10), ScoreMode.Avg);
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
   }
 }

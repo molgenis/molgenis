@@ -49,15 +49,19 @@ class QueryClauseSearchGenerator extends BaseQueryClauseGenerator {
       case DECIMAL:
       case EMAIL:
       case ENUM:
-      case HTML:
       case HYPERLINK:
       case INT:
       case LONG:
+        return nestedQueryBuilder(
+            entityType, attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
+      case HTML:
       case SCRIPT:
       case STRING:
       case TEXT:
         return nestedQueryBuilder(
-            entityType, attributePath, QueryBuilders.matchQuery(fieldName, queryValue));
+            entityType,
+            attributePath,
+            QueryBuilders.matchPhraseQuery(fieldName, queryValue).slop(10));
       case BOOL:
         throw new MolgenisQueryException(
             "Cannot execute search query on [" + dataType + "] attribute");

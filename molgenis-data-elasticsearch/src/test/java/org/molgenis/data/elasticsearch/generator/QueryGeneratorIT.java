@@ -1591,7 +1591,7 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().search(compoundPart0AttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery = matchQuery(compoundPart0AttrName, value);
+    QueryBuilder expectedQuery = matchPhraseQuery(compoundPart0AttrName, value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
@@ -1645,7 +1645,7 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     String value = "<h1>html</h1>";
     Query<Entity> q = new QueryImpl<>().search(htmlAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery = matchQuery(htmlAttrName, value);
+    QueryBuilder expectedQuery = matchPhraseQuery(htmlAttrName, value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
@@ -1681,7 +1681,7 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     String value = "int a = 1;";
     Query<Entity> q = new QueryImpl<>().search(scriptAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery = matchQuery(scriptAttrName, value);
+    QueryBuilder expectedQuery = matchPhraseQuery(scriptAttrName, value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
@@ -1690,7 +1690,7 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     String value = "value";
     Query<Entity> q = new QueryImpl<>().search(stringAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery = matchQuery(stringAttrName, value);
+    QueryBuilder expectedQuery = matchPhraseQuery(stringAttrName, value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
@@ -1699,7 +1699,7 @@ class QueryGeneratorIT extends AbstractMolgenisSpringTest {
     String value = "some long text";
     Query<Entity> q = new QueryImpl<>().search(textAttrName, value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery = matchQuery(textAttrName, value);
+    QueryBuilder expectedQuery = matchPhraseQuery(textAttrName, value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 
