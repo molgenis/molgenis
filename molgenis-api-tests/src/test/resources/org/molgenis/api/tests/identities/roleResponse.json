@@ -1,0 +1,14 @@
+[
+  {
+    "roleName": "My-Group_MANAGER",
+    "roleLabel": "Manager"
+  },
+  {
+    "roleName": "My-Group_EDITOR",
+    "roleLabel": "Editor"
+  },
+  {
+    "roleName": "My-Group_VIEWER",
+    "roleLabel": "Viewer"
+  }
+]

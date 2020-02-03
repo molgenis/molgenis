@@ -84,6 +84,7 @@ import org.springframework.web.util.NestedServletException;
 
 @ContextConfiguration(classes = {IdentitiesApiControllerTest.Config.class, GsonConfig.class})
 class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
+
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private GroupPermissionService groupPermissionService;
@@ -298,9 +299,7 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(status().isCreated())
         .andExpect(
             header()
-                .string(
-                    "Location",
-                    "http://localhost" + GROUP_END_POINT + "/devs/member/devs/member/henkie"));
+                .string("Location", "http://localhost" + GROUP_END_POINT + "/devs/member/henkie"));
 
     verify(groupService).addMember(group, user, editor);
   }

@@ -1,0 +1,32 @@
+[
+  {
+    "user": {
+      "id": "AUTOID",
+      "username": "admin"
+    },
+    "role": {
+      "roleName": "My-Group_MANAGER",
+      "roleLabel": "Manager"
+    }
+  },
+  {
+    "user": {
+      "id": "AUTOID",
+      "username": "${user2}"
+    },
+    "role": {
+      "roleName": "My-Group_EDITOR",
+      "roleLabel": "Editor"
+    }
+  },
+  {
+    "user": {
+      "id": "AUTOID",
+      "username": "${user3}"
+    },
+    "role": {
+      "roleName": "My-Group_MANAGER",
+      "roleLabel": "Manager"
+    }
+  }
+]
