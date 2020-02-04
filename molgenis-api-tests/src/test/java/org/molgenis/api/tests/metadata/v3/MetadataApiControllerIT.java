@@ -20,16 +20,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.molgenis.api.tests.AbstractApiTest;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.JobUtils;
 import org.molgenis.test.TestResourceUtils;
 import org.springframework.http.HttpStatus;
 
 @TestMethodOrder(OrderAnnotation.class)
-class MetadataApiControllerIT extends AbstractApiTest {
+class MetadataApiControllerIT extends AbstractApiTests {
   @BeforeAll
   protected static void setUpBeforeClass() {
-    AbstractApiTest.setUpBeforeClass();
+    AbstractApiTests.setUpBeforeClass();
 
     createPackage();
   }
@@ -38,7 +38,7 @@ class MetadataApiControllerIT extends AbstractApiTest {
   protected static void tearDownAfterClass() {
     deletePackage();
 
-    AbstractApiTest.tearDownAfterClass();
+    AbstractApiTests.tearDownAfterClass();
   }
 
   @ParameterizedTest

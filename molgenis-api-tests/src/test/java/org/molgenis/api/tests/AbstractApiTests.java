@@ -31,7 +31,9 @@ public abstract class AbstractApiTests {
     }
     RestAssured.baseURI = restTestHost;
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+  }
 
+  private static String adminLogin() {
     String restTestAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
     if (restTestAdminName == null) {
       restTestAdminName = RestTestUtils.DEFAULT_ADMIN_NAME;
@@ -43,6 +45,7 @@ public abstract class AbstractApiTests {
 
     String adminToken = login(restTestAdminName, restTestAdminPw);
     ADMIN_TOKENS.set(adminToken);
+    return adminToken;
   }
 
   /**
@@ -61,7 +64,11 @@ public abstract class AbstractApiTests {
   }
 
   protected static String getAdminToken() {
-    return ADMIN_TOKENS.get();
+    String adminToken = ADMIN_TOKENS.get();
+    if (adminToken == null) {
+      adminToken = adminLogin();
+    }
+    return adminToken;
   }
 
   protected static RequestSpecification given() {

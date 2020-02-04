@@ -27,19 +27,19 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.molgenis.api.tests.AbstractApiTest;
+import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.test.TestResourceUtils;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
 @TestMethodOrder(OrderAnnotation.class)
-class EntityControllerIT extends AbstractApiTest {
+class EntityControllerIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(EntityControllerIT.class);
 
   @BeforeAll
   protected static void setUpBeforeClass() {
-    AbstractApiTest.setUpBeforeClass();
+    AbstractApiTests.setUpBeforeClass();
 
     importData();
   }
@@ -48,7 +48,7 @@ class EntityControllerIT extends AbstractApiTest {
   protected static void tearDownAfterClass() {
     deleteData();
 
-    AbstractApiTest.tearDownAfterClass();
+    AbstractApiTests.tearDownAfterClass();
   }
 
   @Test
