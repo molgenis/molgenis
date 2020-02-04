@@ -1,6 +1,5 @@
 location / {
   proxy_set_header Host $http_host;
-  proxy_pass http://host.docker.internal:8080;
-  # allow large uploads
+  proxy_pass http://${MOLGENIS_HOST}:8080;
   client_max_body_size 0;
 }
