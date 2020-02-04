@@ -26,6 +26,14 @@
           "selected": true
         },
         {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/8.3/",
+          "text": "MOLGENIS 8.3"
+        },
+        {
+          "value": "https://molgenis.gitbooks.io/molgenis/content/v/8.2/",
+          "text": "MOLGENIS 8.2"
+        },
+        {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/8.1/",
           "text": "MOLGENIS 8.1"
         },
