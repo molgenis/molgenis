@@ -3,6 +3,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 import java.io.File;
@@ -36,23 +37,23 @@ import org.springframework.validation.ObjectError;
 
 @Component
 public class OptionsWizardPage extends AbstractWizardPage {
-  private static final long serialVersionUID = -2931051095557369343L;
+  private static final long serialVersionUID = 1L;
   private static final Logger LOG = LoggerFactory.getLogger(OptionsWizardPage.class);
 
-  private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-  private final transient ImportServiceFactory importServiceFactory;
-  private transient DataService dataService;
-  private final transient UserPermissionEvaluator userPermissionEvaluator;
+  private transient FileRepositoryCollectionFactory transientFileRepositoryCollectionFactory;
+  private transient ImportServiceFactory transientImportServiceFactory;
+  private transient DataService transientDataService;
+  private transient UserPermissionEvaluator transientUserPermissionEvaluator;
 
   OptionsWizardPage(
       FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
       ImportServiceFactory importServiceFactory,
       DataService dataService,
       UserPermissionEvaluator userPermissionEvaluator) {
-    this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-    this.importServiceFactory = importServiceFactory;
-    this.dataService = dataService;
-    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+    this.transientFileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
+    this.transientImportServiceFactory = requireNonNull(importServiceFactory);
+    this.transientDataService = requireNonNull(dataService);
+    this.transientUserPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
   @Override
@@ -82,7 +83,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
 
       try {
         NameValidator.validateEntityName(userGivenName);
-        if (dataService.hasRepository(userGivenName)) {
+        if (getDataService().hasRepository(userGivenName)) {
           result.addError(new ObjectError("wizard", "An entity with this name already exists."));
           return null;
         }
@@ -97,7 +98,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
       String extension =
           FileExtensionUtils.findExtensionFromPossibilities(
               tmpFilename,
-              fileRepositoryCollectionFactory
+              getFileRepositoryCollectionFactory()
                   .createFileRepositoryCollection(tmpFile)
                   .getFileNameExtensions());
 
@@ -142,8 +143,8 @@ public class OptionsWizardPage extends AbstractWizardPage {
 
     // decide what importer to use...
     RepositoryCollection source =
-        fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-    ImportService importService = importServiceFactory.getImportService(file, source);
+        getFileRepositoryCollectionFactory().createFileRepositoryCollection(file);
+    ImportService importService = getImportServiceFactory().getImportService(file, source);
     EntitiesValidationReport validationReport = importService.validateImport(source);
 
     wizard.setEntitiesImportable(validationReport.getSheetsImportable());
@@ -153,7 +154,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
 
     Set<String> allPackages = new HashSet<>(validationReport.getPackages());
-    List<Package> packages = dataService.getMeta().getPackages();
+    List<Package> packages = getDataService().getMeta().getPackages();
     for (Package p : packages) {
       allPackages.add(p.getId());
     }
@@ -211,6 +212,36 @@ public class OptionsWizardPage extends AbstractWizardPage {
   }
 
   private boolean isReadablePackage(Package aPackage) {
-    return PackagePermissionUtils.isReadablePackage(aPackage, userPermissionEvaluator);
+    return PackagePermissionUtils.isReadablePackage(aPackage, getUserPermissionEvaluator());
+  }
+
+  private synchronized FileRepositoryCollectionFactory getFileRepositoryCollectionFactory() {
+    if (transientFileRepositoryCollectionFactory == null) {
+      transientFileRepositoryCollectionFactory =
+          getApplicationContext().getBean(FileRepositoryCollectionFactory.class);
+    }
+    return transientFileRepositoryCollectionFactory;
+  }
+
+  private synchronized ImportServiceFactory getImportServiceFactory() {
+    if (transientImportServiceFactory == null) {
+      transientImportServiceFactory = getApplicationContext().getBean(ImportServiceFactory.class);
+    }
+    return transientImportServiceFactory;
+  }
+
+  private synchronized DataService getDataService() {
+    if (transientDataService == null) {
+      transientDataService = getApplicationContext().getBean(DataService.class);
+    }
+    return transientDataService;
+  }
+
+  private synchronized UserPermissionEvaluator getUserPermissionEvaluator() {
+    if (transientUserPermissionEvaluator == null) {
+      transientUserPermissionEvaluator =
+          getApplicationContext().getBean(UserPermissionEvaluator.class);
+    }
+    return transientUserPermissionEvaluator;
   }
 }
