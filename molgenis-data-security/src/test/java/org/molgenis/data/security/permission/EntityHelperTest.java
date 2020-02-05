@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.security.permission.model.LabelledObjectIdentity.create;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.exception.InvalidTypeIdException;
 import org.molgenis.test.AbstractMockitoTest;
@@ -59,6 +62,11 @@ class EntityHelperTest extends AbstractMockitoTest {
     when(entity.getLabelValue()).thenReturn("label");
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
+    EntityType entityType = mock(EntityType.class);
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(dataService.getEntityType("typeId")).thenReturn(entityType);
     assertEquals("label", entityHelper.getLabel("entity-typeId", "identifier"));
   }
 
@@ -67,15 +75,38 @@ class EntityHelperTest extends AbstractMockitoTest {
     Repository repository = mock(Repository.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getLabel()).thenReturn("typeLabel");
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
     when(repository.getEntityType()).thenReturn(entityType);
     Entity entity = mock(Entity.class);
     when(entity.getLabelValue()).thenReturn("label");
     when(repository.findOneById("identifier")).thenReturn(entity);
     when(dataService.getRepository("typeId")).thenReturn(repository);
+    when(dataService.getEntityType("typeId")).thenReturn(entityType);
     assertEquals(
         create("entity-typeId", "typeId", "typeLabel", "identifier", "label"),
         entityHelper.getLabelledObjectIdentity(
             new ObjectIdentityImpl("entity-typeId", "identifier")));
+  }
+
+  @Test
+  void testGetLabelledObjectIdentityIntId() {
+    Repository repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getLabel()).thenReturn("typeLabel");
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getDataType()).thenReturn(INT);
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(repository.getEntityType()).thenReturn(entityType);
+    Entity entity = mock(Entity.class);
+    when(entity.getLabelValue()).thenReturn("label");
+    when(repository.findOneById(1)).thenReturn(entity);
+    when(dataService.getRepository("typeId")).thenReturn(repository);
+    when(dataService.getEntityType("typeId")).thenReturn(entityType);
+    assertEquals(
+        create("entity-typeId", "typeId", "typeLabel", "1", "label"),
+        entityHelper.getLabelledObjectIdentity(new ObjectIdentityImpl("entity-typeId", 1)));
   }
 
   @Test

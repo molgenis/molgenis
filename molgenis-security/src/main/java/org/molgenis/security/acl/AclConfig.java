@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import javax.sql.DataSource;
 import org.molgenis.data.config.DataSourceConfig;
+import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -40,17 +41,20 @@ public class AclConfig {
   private final TransactionManager transactionManager;
   private final RoleHierarchy roleHierarchy;
   private final ConversionService conversionService;
+  private final EntityHelper entityHelper;
   @Autowired JdbcTemplate jdbcTemplate;
 
   public AclConfig(
       DataSource dataSource,
       TransactionManager transactionManager,
       RoleHierarchy roleHierarchy,
-      ConversionService conversionService) {
+      ConversionService conversionService,
+      EntityHelper entityHelper) {
     this.dataSource = requireNonNull(dataSource);
     this.transactionManager = requireNonNull(transactionManager);
     this.roleHierarchy = requireNonNull(roleHierarchy);
     this.conversionService = requireNonNull(conversionService);
+    this.entityHelper = requireNonNull(entityHelper);
   }
 
   @Bean
@@ -104,7 +108,7 @@ public class AclConfig {
 
   @Bean
   public ObjectIdentityService objectIdentityService() {
-    return new ObjectIdentityServiceImpl(jdbcTemplate);
+    return new ObjectIdentityServiceImpl(jdbcTemplate, entityHelper);
   }
 
   @Bean
