@@ -4,10 +4,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.PreDestroy;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,13 @@ public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
   JobExecutionUpdaterImpl(JobExecutionContextFactory jobExecutionContextFactory) {
     this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
     this.executorService = Executors.newSingleThreadExecutor();
+  }
+
+  @PreDestroy
+  void preDestroy() {
+    if (executorService != null) {
+      ExecutorServiceUtils.shutdownAndAwaitTermination(executorService);
+    }
   }
 
   @Override

@@ -3,6 +3,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
@@ -18,6 +19,7 @@ import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
   @Autowired transient UserAccountService userAccountService;
 
   @Autowired transient UserService userService;
+
+  @PreDestroy
+  void preDestroy() {
+    if (asyncImportJobs != null) {
+      ExecutorServiceUtils.shutdownAndAwaitTermination(asyncImportJobs);
+    }
+  }
 
   @Override
   public String getTitle() {
