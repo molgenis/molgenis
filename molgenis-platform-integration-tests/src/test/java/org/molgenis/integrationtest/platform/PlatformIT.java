@@ -1,7 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -18,6 +17,7 @@ import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.integrationtest.utils.AbstractMolgenisIntegrationTests.cleanupUserPermissions;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.util.i18n.LanguageService.getBundle;
@@ -193,7 +193,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
     waitForIndexToBeStable(entityTypeDynamic, indexJobScheduler, LOG);
     waitForIndexToBeStable(refEntityTypeDynamic, indexJobScheduler, LOG);
     waitForIndexToBeStable(selfXrefEntityType, indexJobScheduler, LOG);
-    cleanupUserPermissions(applicationContext);
+    cleanupUserPermissions(applicationContext, getObjectIdentityPermissionSetMap(), USERNAME);
 
     runAsSystem(
         () -> {
@@ -490,23 +490,6 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
           () -> {
             testPermissionService.createPermission(
                 Permission.create(entry.getKey(), sid, entry.getValue()));
-          });
-    }
-  }
-
-  private static void cleanupUserPermissions(ApplicationContext applicationContext) {
-    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
-    Map<ObjectIdentity, PermissionSet> entityTypePermissionMap =
-        getObjectIdentityPermissionSetMap();
-    Sid sid = createUserSid(requireNonNull(USERNAME));
-    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
-      runAsSystem(
-          () -> {
-            if (!permissionService
-                .getPermissionsForObject(entry.getKey(), singleton(sid), false)
-                .isEmpty()) {
-              permissionService.deletePermission(sid, entry.getKey());
-            }
           });
     }
   }

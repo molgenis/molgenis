@@ -35,6 +35,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
+import static org.molgenis.integrationtest.utils.AbstractMolgenisIntegrationTests.cleanupUserPermissions;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import java.util.HashMap;
@@ -95,6 +96,8 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
     DataService dataService = applicationContext.getBean(DataService.class);
     runAsSystem(
         () -> {
+          cleanupUserPermissions(applicationContext, getPermissionMap(), USERNAME);
+
           deleteBooksThenAuthors(dataService, 1);
           deleteBooksThenAuthors(dataService, 2);
           deleteBooksThenAuthors(dataService, 3);
