@@ -1,25 +1,34 @@
 package org.molgenis.integrationtest.utils;
 
+import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.integrationtest.config.SecurityITConfig.SUPERUSER_NAME;
 import static org.molgenis.integrationtest.config.SecurityITConfig.TOKEN_DESCRIPTION;
+import static org.molgenis.security.core.SidUtils.createUserSid;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.postgresql.DatabaseConfig;
+import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.integrationtest.config.BootStrapperTestConfig;
 import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.config.PostgreSqlTestConfig;
 import org.molgenis.integrationtest.config.SecurityITConfig;
 import org.molgenis.integrationtest.config.WebAppITConfig;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -27,6 +36,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -109,6 +120,24 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractMockitoSp
       pspc.setIgnoreResourceNotFound(true);
       pspc.setNullValue("@null");
       return pspc;
+    }
+  }
+
+  public static void cleanupUserPermissions(
+      ApplicationContext applicationContext,
+      Map<ObjectIdentity, PermissionSet> entityTypePermissionMap,
+      String username) {
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
+    Sid sid = createUserSid(requireNonNull(username));
+    for (Entry<ObjectIdentity, PermissionSet> entry : entityTypePermissionMap.entrySet()) {
+      runAsSystem(
+          () -> {
+            if (!permissionService
+                .getPermissionsForObject(entry.getKey(), singleton(sid), false)
+                .isEmpty()) {
+              permissionService.deletePermission(sid, entry.getKey());
+            }
+          });
     }
   }
 }
