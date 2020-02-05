@@ -56,6 +56,23 @@ class EntityHelperTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testGetLabelUnknownEntity() {
+    Repository repository = mock(Repository.class);
+    EntityType entityType = mock(EntityType.class);
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.getDataType()).thenReturn(STRING);
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    when(dataService.getEntityType("typeId")).thenReturn(entityType);
+
+    when(dataService.getRepository("typeId")).thenReturn(repository);
+    assertThrows(
+        UnknownEntityException.class,
+        () -> {
+          entityHelper.getLabel("entity-typeId", "unknown");
+        });
+  }
+
+  @Test
   void testGetRowLabel() {
     Repository repository = mock(Repository.class);
     Entity entity = mock(Entity.class);
