@@ -28,11 +28,11 @@ public class Step41RemoveSecurityUIKeys extends MolgenisUpgrade {
   @Override
   public void upgrade() {
     LOG.debug("Removing unused Security Manager UI l10n keys");
-    addRoleSystem();
+    removeSecurityUIKeys();
     LOG.info("Done removing unused Security Manager UI l10n keys");
   }
 
-  private void addRoleSystem() {
+  private void removeSecurityUIKeys() {
     String sql;
     try {
       sql = ResourceUtils.getString("step41-removeSecurityUIKeys.sql");
