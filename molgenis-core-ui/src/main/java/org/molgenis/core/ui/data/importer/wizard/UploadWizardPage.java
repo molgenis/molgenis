@@ -1,5 +1,8 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.File;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -21,15 +24,15 @@ public class UploadWizardPage extends AbstractWizardPage {
   private static final long serialVersionUID = 1L;
   private static final Logger LOG = LoggerFactory.getLogger(UploadWizardPage.class);
 
-  private final ImportServiceFactory importServiceFactory;
-  private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+  private transient ImportServiceFactory transientImportServiceFactory;
+  private transient FileRepositoryCollectionFactory transientFileRepositoryCollectionFactory;
 
   public UploadWizardPage(
       ImportServiceFactory importServiceFactory,
       FileRepositoryCollectionFactory fileRepositoryCollectionFactory) {
     super();
-    this.importServiceFactory = importServiceFactory;
-    this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+    this.transientImportServiceFactory = requireNonNull(importServiceFactory);
+    this.transientFileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
   }
 
   @Override
@@ -56,9 +59,9 @@ public class UploadWizardPage extends AbstractWizardPage {
         importWizard.setFile(file);
 
         RepositoryCollection repositoryCollection =
-            fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+            getFileRepositoryCollectionFactory().createFileRepositoryCollection(file);
         ImportService importService =
-            importServiceFactory.getImportService(file, repositoryCollection);
+            getImportServiceFactory().getImportService(file, repositoryCollection);
 
         importWizard.setSupportedMetadataActions(importService.getSupportedMetadataActions());
         importWizard.setSupportedDataActions(importService.getSupportedDataActions());
@@ -70,5 +73,20 @@ public class UploadWizardPage extends AbstractWizardPage {
     }
 
     return null;
+  }
+
+  private synchronized ImportServiceFactory getImportServiceFactory() {
+    if (transientImportServiceFactory == null) {
+      transientImportServiceFactory = getApplicationContext().getBean(ImportServiceFactory.class);
+    }
+    return transientImportServiceFactory;
+  }
+
+  private synchronized FileRepositoryCollectionFactory getFileRepositoryCollectionFactory() {
+    if (transientFileRepositoryCollectionFactory == null) {
+      transientFileRepositoryCollectionFactory =
+          getApplicationContext().getBean(FileRepositoryCollectionFactory.class);
+    }
+    return transientFileRepositoryCollectionFactory;
   }
 }

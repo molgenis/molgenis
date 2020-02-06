@@ -3,6 +3,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -27,22 +28,20 @@ import org.springframework.validation.BindingResult;
 
 @Component
 public class PackageWizardPage extends AbstractWizardPage {
+  private static final long serialVersionUID = 1L;
   private static final Logger LOG = LoggerFactory.getLogger(PackageWizardPage.class);
 
-  /** Auto generated */
-  private static final long serialVersionUID = 1L;
-
-  private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-  private ImportServiceFactory importServiceFactory;
-  private MetaDataService metaDataService;
+  private transient FileRepositoryCollectionFactory transientFileRepositoryCollectionFactory;
+  private transient ImportServiceFactory transientImportServiceFactory;
+  private transient MetaDataService transientMetadataService;
 
   public PackageWizardPage(
       FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
       ImportServiceFactory importServiceFactory,
-      MetaDataService metaDataService) {
-    this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
-    this.importServiceFactory = requireNonNull(importServiceFactory);
-    this.metaDataService = requireNonNull(metaDataService);
+      MetaDataService metadataService) {
+    this.transientFileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
+    this.transientImportServiceFactory = requireNonNull(importServiceFactory);
+    this.transientMetadataService = requireNonNull(metadataService);
   }
 
   @Override
@@ -70,10 +69,12 @@ public class PackageWizardPage extends AbstractWizardPage {
         }
 
         RepositoryCollection repositoryCollection =
-            fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
+            getFileRepositoryCollectionFactory()
+                .createFileRepositoryCollection(importWizard.getFile());
 
         ImportService importService =
-            importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
+            getImportServiceFactory()
+                .getImportService(importWizard.getFile(), repositoryCollection);
 
         // Do integration test only if there are no previous errors found
         if (metadataAction != MetadataAction.IGNORE
@@ -84,7 +85,7 @@ public class PackageWizardPage extends AbstractWizardPage {
           // The entities that can be imported
           Map<String, Boolean> entitiesImportable =
               importService.determineImportableEntities(
-                  metaDataService, repositoryCollection, selectedPackage);
+                  getMetadataService(), repositoryCollection, selectedPackage);
 
           // The results of the attribute checks are stored in maps with the entityname as key,
           // those need to be updated with the packagename
@@ -141,5 +142,27 @@ public class PackageWizardPage extends AbstractWizardPage {
               }
             });
     return result;
+  }
+
+  private synchronized FileRepositoryCollectionFactory getFileRepositoryCollectionFactory() {
+    if (transientFileRepositoryCollectionFactory == null) {
+      transientFileRepositoryCollectionFactory =
+          getApplicationContext().getBean(FileRepositoryCollectionFactory.class);
+    }
+    return transientFileRepositoryCollectionFactory;
+  }
+
+  private synchronized ImportServiceFactory getImportServiceFactory() {
+    if (transientImportServiceFactory == null) {
+      transientImportServiceFactory = getApplicationContext().getBean(ImportServiceFactory.class);
+    }
+    return transientImportServiceFactory;
+  }
+
+  private synchronized MetaDataService getMetadataService() {
+    if (transientMetadataService == null) {
+      transientMetadataService = getApplicationContext().getBean(MetaDataService.class);
+    }
+    return transientMetadataService;
   }
 }
