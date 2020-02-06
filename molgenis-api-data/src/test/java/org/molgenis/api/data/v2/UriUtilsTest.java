@@ -10,37 +10,37 @@ import static org.molgenis.api.data.v2.UriUtils.createEntityTypeMetadataUriPath;
 import static org.molgenis.api.data.v2.UriUtils.createEntityUriPath;
 
 import java.util.Collection;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 class UriUtilsTest {
-  @AfterAll
-  static void tearDownAfterAll() {
-    UriUtils.cachedServletUriComponentsBuilder = null;
-  }
+  private ServletUriComponentsBuilder uriBuilder;
 
   @BeforeEach
   void setUpBeforeMethod() {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.setServletPath("/myservlet");
-    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    uriBuilder = ServletUriComponentsBuilder.fromServletMapping(request);
+    uriBuilder.encode();
   }
 
   @Test
   void testCreateEntityCollectionUriPath() {
     String entityTypeId = "MyEntityTypeId";
-    assertEquals("/myservlet/api/v2/MyEntityTypeId", createEntityCollectionUriPath(entityTypeId));
+    assertEquals(
+        "/myservlet/api/v2/MyEntityTypeId",
+        createEntityCollectionUriPath(uriBuilder, entityTypeId));
   }
 
   @Test
   void testCreateEntityTypeMetadataUriPath() {
     String entityTypeId = "MyEntityTypeId";
     // expected: no meta path segment
-    assertEquals("/myservlet/api/v2/MyEntityTypeId", createEntityTypeMetadataUriPath(entityTypeId));
+    assertEquals(
+        "/myservlet/api/v2/MyEntityTypeId",
+        createEntityTypeMetadataUriPath(uriBuilder, entityTypeId));
   }
 
   @Test
@@ -49,7 +49,7 @@ class UriUtilsTest {
     String attributeName = "MyAttribute";
     assertEquals(
         "/myservlet/api/v2/MyEntityTypeId/meta/MyAttribute",
-        createEntityTypeMetadataAttributeUriPath(entityTypeId, attributeName));
+        createEntityTypeMetadataAttributeUriPath(uriBuilder, entityTypeId, attributeName));
   }
 
   @Test
@@ -57,7 +57,8 @@ class UriUtilsTest {
     String entityTypeId = "MyEntityTypeId";
     String entityId = "MyEntityId";
     assertEquals(
-        "/myservlet/api/v2/MyEntityTypeId/MyEntityId", createEntityUriPath(entityTypeId, entityId));
+        "/myservlet/api/v2/MyEntityTypeId/MyEntityId",
+        createEntityUriPath(uriBuilder, entityTypeId, entityId));
   }
 
   @Test
@@ -67,7 +68,7 @@ class UriUtilsTest {
     String entityId = "MyEntityId";
     assertEquals(
         "/myservlet/api/v2/MyEntityTypeId/MyEntityId/MyAttribute",
-        createEntityAttributeUriPath(entityTypeId, entityId, attributeName));
+        createEntityAttributeUriPath(uriBuilder, entityTypeId, entityId, attributeName));
   }
 
   @Test
@@ -77,7 +78,7 @@ class UriUtilsTest {
     String entityId = "/\\?=;*";
     assertEquals(
         "/myservlet/api/v2/%2F%5C%3F=;*/%2F%5C%3F=;*/%2F%5C%3F=;*",
-        createEntityAttributeUriPath(entityTypeId, entityId, attributeName));
+        createEntityAttributeUriPath(uriBuilder, entityTypeId, entityId, attributeName));
   }
 
   @Test
@@ -87,6 +88,6 @@ class UriUtilsTest {
     Collection<String> entityIds = asList("MyEntityId0", "MyEntityId1");
     assertEquals(
         "/myservlet/api/v2/MyEntityTypeId?q=MyIdAttribute=in=(\"MyEntityId0\",\"MyEntityId1\")",
-        createEntitiesUriPath(entityTypeId, idAttributeName, entityIds));
+        createEntitiesUriPath(uriBuilder, entityTypeId, idAttributeName, entityIds));
   }
 }

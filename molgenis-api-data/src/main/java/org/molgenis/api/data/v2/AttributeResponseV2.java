@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 class AttributeResponseV2 {
   private final String href;
@@ -50,6 +51,7 @@ class AttributeResponseV2 {
    *     CATEGORICAL_MREF types in the attribute metadata
    */
   public AttributeResponseV2(
+      ServletUriComponentsBuilder uriBuilder,
       final String entityParentName,
       EntityType entityType,
       Attribute attr,
@@ -58,7 +60,8 @@ class AttributeResponseV2 {
       DataService dataService,
       boolean includeCategories) {
     String attrName = attr.getName();
-    this.href = UriUtils.createEntityTypeMetadataAttributeUriPath(entityParentName, attrName);
+    this.href =
+        UriUtils.createEntityTypeMetadataAttributeUriPath(uriBuilder, entityParentName, attrName);
 
     this.fieldType = attr.getDataType();
     this.name = attrName;
@@ -72,7 +75,7 @@ class AttributeResponseV2 {
       EntityType refEntity = attr.getRefEntity();
       this.refEntity =
           new EntityTypeResponseV2(
-              refEntity, fetch, permissionService, dataService, includeCategories);
+              uriBuilder, refEntity, fetch, permissionService, dataService, includeCategories);
 
       if (includeCategories
           && (this.fieldType == AttributeType.CATEGORICAL
@@ -111,6 +114,7 @@ class AttributeResponseV2 {
                       subAttrFetch = null;
                     }
                     return new AttributeResponseV2(
+                        uriBuilder,
                         entityParentName,
                         entityType,
                         attrPart,
@@ -145,13 +149,22 @@ class AttributeResponseV2 {
    * @param fetch set of lowercase attribute names to include in response
    */
   public AttributeResponseV2(
+      ServletUriComponentsBuilder uriBuilder,
       final String entityParentName,
       EntityType entityType,
       Attribute attr,
       Fetch fetch,
       UserPermissionEvaluator permissionService,
       DataService dataService) {
-    this(entityParentName, entityType, attr, fetch, permissionService, dataService, false);
+    this(
+        uriBuilder,
+        entityParentName,
+        entityType,
+        attr,
+        fetch,
+        permissionService,
+        dataService,
+        false);
   }
 
   public static Iterable<Attribute> filterAttributes(Fetch fetch, Iterable<Attribute> attrs) {

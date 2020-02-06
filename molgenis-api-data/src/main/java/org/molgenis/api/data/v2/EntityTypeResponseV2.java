@@ -20,6 +20,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 class EntityTypeResponseV2 {
   private final String href;
@@ -40,14 +41,15 @@ class EntityTypeResponseV2 {
 
   /** @param fetch set of lowercase attribute names to include in response */
   public EntityTypeResponseV2(
+      ServletUriComponentsBuilder uriBuilder,
       EntityType meta,
       Fetch fetch,
       UserPermissionEvaluator userPermissionEvaluator,
       DataService dataService,
       boolean includeCategories) {
     String name = meta.getId();
-    this.href = UriUtils.createEntityTypeMetadataUriPath(name);
-    this.hrefCollection = UriUtils.createEntityCollectionUriPath(name);
+    this.href = UriUtils.createEntityTypeMetadataUriPath(uriBuilder, name);
+    this.hrefCollection = UriUtils.createEntityCollectionUriPath(uriBuilder, name);
 
     this.name = name;
     this.description = meta.getDescription(getCurrentUserLanguageCode());
@@ -73,6 +75,7 @@ class EntityTypeResponseV2 {
                             attr, languageCode);
                   }
                   return new AttributeResponseV2(
+                      uriBuilder,
                       name,
                       meta,
                       attr,
