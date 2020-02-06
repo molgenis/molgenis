@@ -7,6 +7,7 @@ import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
+import org.molgenis.data.importer.ImportBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -41,6 +42,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
   private final RepositoryPopulator repositoryPopulator;
   private final PermissionPopulator systemPermissionPopulator;
   private final JobBootstrapper jobBootstrapper;
+  private final ImportBootstrapper importBootstrapper;
   private final IndexBootstrapper indexBootstrapper;
   private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
   private final BootstrapThemePopulator bootstrapThemePopulator;
@@ -55,6 +57,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
       RepositoryPopulator repositoryPopulator,
       PermissionPopulator systemPermissionPopulator,
       JobBootstrapper jobBootstrapper,
+      ImportBootstrapper importBootstrapper,
       IndexBootstrapper indexBootstrapper,
       EntityTypeRegistryPopulator entityTypeRegistryPopulator,
       BootstrapThemePopulator bootstrapThemePopulator,
@@ -67,6 +70,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
     this.repositoryPopulator = requireNonNull(repositoryPopulator);
     this.systemPermissionPopulator = requireNonNull(systemPermissionPopulator);
     this.jobBootstrapper = requireNonNull(jobBootstrapper);
+    this.importBootstrapper = requireNonNull(importBootstrapper);
     this.indexBootstrapper = requireNonNull(indexBootstrapper);
     this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
     this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
@@ -117,6 +121,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
     LOG.trace("Bootstrapping jobs ...");
     jobBootstrapper.bootstrap();
     LOG.debug("Bootstrapped jobs");
+
+    LOG.trace("Bootstrapping import ...");
+    importBootstrapper.bootstrap();
+    LOG.debug("Bootstrapped import");
 
     LOG.trace("Bootstrapping index ...");
     indexBootstrapper.bootstrap();
