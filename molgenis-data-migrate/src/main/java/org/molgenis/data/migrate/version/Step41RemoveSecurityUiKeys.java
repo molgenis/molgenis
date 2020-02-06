@@ -11,16 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step41RemoveSecurityUIKeys extends MolgenisUpgrade {
-  private static final Logger LOG = LoggerFactory.getLogger(Step41RemoveSecurityUIKeys.class);
+public class Step41RemoveSecurityUiKeys extends MolgenisUpgrade {
+  private static final Logger LOG = LoggerFactory.getLogger(Step41RemoveSecurityUiKeys.class);
 
   private final JdbcTemplate jdbcTemplate;
 
-  public Step41RemoveSecurityUIKeys(DataSource dataSource) {
+  public Step41RemoveSecurityUiKeys(DataSource dataSource) {
     this(new JdbcTemplate(dataSource));
   }
 
-  Step41RemoveSecurityUIKeys(JdbcTemplate jdbcTemplate) {
+  Step41RemoveSecurityUiKeys(JdbcTemplate jdbcTemplate) {
     super(40, 41);
     this.jdbcTemplate = requireNonNull(jdbcTemplate);
   }
@@ -35,7 +35,7 @@ public class Step41RemoveSecurityUIKeys extends MolgenisUpgrade {
   private void removeSecurityUIKeys() {
     String sql;
     try {
-      sql = ResourceUtils.getString("step41-removeSecurityUIKeys.sql");
+      sql = ResourceUtils.getString("step41-removeSecurityUiKeys.sql");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
