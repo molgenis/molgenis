@@ -14,6 +14,7 @@ import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
+import org.molgenis.data.importer.ImportBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -34,6 +35,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
   @Mock private RepositoryPopulator repositoryPopulator;
   @Mock private PermissionPopulator systemPermissionPopulator;
   @Mock private JobBootstrapper jobBootstrapper;
+  @Mock private ImportBootstrapper importBootstrapper;
   @Mock private IndexBootstrapper indexBootstrapper;
   @Mock private EntityTypeRegistryPopulator entityTypeRegistryPopulator;
   @Mock private BootstrapThemePopulator bootstrapThemePopulator;
@@ -53,6 +55,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
             repositoryPopulator,
             systemPermissionPopulator,
             jobBootstrapper,
+            importBootstrapper,
             indexBootstrapper,
             entityTypeRegistryPopulator,
             bootstrapThemePopulator,
@@ -65,7 +68,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
         NullPointerException.class,
         () ->
             new MolgenisBootstrapper(
-                null, null, null, null, null, null, null, null, null, null, null, null));
+                null, null, null, null, null, null, null, null, null, null, null, null, null));
   }
 
   @Test
@@ -85,6 +88,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
     verify(repositoryPopulator).populate(event);
     verify(systemPermissionPopulator).populate(applicationContext);
     verify(jobBootstrapper).bootstrap();
+    verify(importBootstrapper).bootstrap();
     verify(indexBootstrapper).bootstrap();
     verify(entityTypeRegistryPopulator).populate();
     verify(bootstrapThemePopulator).populate();
