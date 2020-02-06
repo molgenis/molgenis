@@ -1,7 +1,5 @@
 package org.molgenis.bootstrap;
 
-import static java.lang.Integer.MIN_VALUE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,7 +24,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-class MolgenisBootstrapperTest extends AbstractMockitoTest {
+class BootstrapperTest extends AbstractMockitoTest {
   @Mock private MolgenisUpgradeBootstrapper upgradeBootstrapper;
   @Mock private DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
   @Mock private TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar;
@@ -41,12 +39,12 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
   @Mock private BootstrapThemePopulator bootstrapThemePopulator;
   @Mock private BootstrappingEventPublisher bootstrappingEventPublisher;
 
-  private MolgenisBootstrapper molgenisBootstrapper;
+  private Bootstrapper bootstrapper;
 
   @BeforeEach
   void setUpBeforeMethod() {
-    molgenisBootstrapper =
-        new MolgenisBootstrapper(
+    bootstrapper =
+        new Bootstrapper(
             upgradeBootstrapper,
             dataSourceAclTablesPopulator,
             transactionExceptionTranslatorRegistrar,
@@ -67,7 +65,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
     assertThrows(
         NullPointerException.class,
         () ->
-            new MolgenisBootstrapper(
+            new Bootstrapper(
                 null, null, null, null, null, null, null, null, null, null, null, null, null));
   }
 
@@ -77,7 +75,7 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
     ApplicationContext applicationContext = mock(ApplicationContext.class);
     when(event.getApplicationContext()).thenReturn(applicationContext);
 
-    molgenisBootstrapper.onApplicationEvent(event);
+    bootstrapper.bootstrap(event);
 
     verify(bootstrappingEventPublisher).publishBootstrappingStartedEvent();
     verify(upgradeBootstrapper).bootstrap();
@@ -93,10 +91,5 @@ class MolgenisBootstrapperTest extends AbstractMockitoTest {
     verify(entityTypeRegistryPopulator).populate();
     verify(bootstrapThemePopulator).populate();
     verify(bootstrappingEventPublisher).publishBootstrappingFinishedEvent();
-  }
-
-  @Test
-  void testGetOrder() {
-    assertEquals(MIN_VALUE, molgenisBootstrapper.getOrder());
   }
 }
