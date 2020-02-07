@@ -77,6 +77,7 @@
     <fmt.skip>${skipTests}</fmt.skip>
     <reproducible.skip>${skipTests}</reproducible.skip>
     <swagger.skip>${skipTests}</swagger.skip>
+    <maven.javadoc.skip>${skipTests}</maven.javadoc.skip>
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.3</elasticsearch.version>
