@@ -22,7 +22,7 @@ before_install:
   - .ci/services/install-minio-6.sh
   - .ci/services/install-postgres-11.sh
 install:
-  - mvn install -DskipTests -B -V -T4
+  - MAVEN_SKIP_RC=true MAVEN_OPTS="-XX:TieredStopAtLevel=1 -noverify" mvn install -DskipTests -B -V -T1C
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144
