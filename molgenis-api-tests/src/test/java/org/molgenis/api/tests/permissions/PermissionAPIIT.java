@@ -23,10 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.permissions.PermissionsController;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
@@ -36,7 +33,6 @@ import org.molgenis.data.security.auth.RoleMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@TestMethodOrder(OrderAnnotation.class)
 class PermissionAPIIT extends AbstractApiTests {
   private static final Logger LOG = LoggerFactory.getLogger(PermissionAPIIT.class);
   private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
@@ -85,7 +81,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(1)
   void testSetPermissions1() {
     /*
      * Create READ permission for test user
@@ -166,7 +161,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(2)
   void testSetPermissionsInherited() {
     /*
      * Create READ permission for test user
@@ -226,7 +220,6 @@ class PermissionAPIIT extends AbstractApiTests {
 
   // patch for type (multiple at once) - get for type - delete as admin
   @Test
-  @Order(3)
   void testSetPermissions2() {
     String create =
         "{objects:[{objectId:perm1_entity2,permissions:[{user:"
@@ -296,7 +289,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(4)
   void testCreateAcls() {
     given()
         .post(PermissionsController.BASE_URI + "/" + OBJECTS + "/entity-perm2_entity5/1")
@@ -320,7 +312,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(5)
   void testEnableRLS() {
     given()
         .post(PermissionsController.BASE_URI + "/" + TYPES + "/entity-perm2_entity4")
@@ -344,7 +335,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(6)
   void testSuitablePermissions() {
     given()
         .get(PermissionsController.BASE_URI + "/" + TYPES + "/permissions/entity-sys_FileMeta")
@@ -354,7 +344,6 @@ class PermissionAPIIT extends AbstractApiTests {
   }
 
   @Test
-  @Order(7)
   void testGetPermissionsAsUser() {
     /*
      * Create READ permission for test user as admin
