@@ -29,6 +29,10 @@ DO $$
                 SELECT id INTO roleEditorId FROM "sys_sec_Role#b6639604" WHERE name = 'EDITOR';
                 SELECT id INTO roleViewerId FROM "sys_sec_Role#b6639604" WHERE name = 'VIEWER';
                 SELECT id INTO aclClassGroupId FROM "acl_class" WHERE class = 'group';
+                IF aclClassGroupId IS NULL THEN
+                    INSERT INTO acl_class ("class", "class_id_type") VALUES ('group', 'java.lang.String') RETURNING id INTO aclClassGroupId;
+                END IF;
+
                 SELECT id INTO aclSidSystemId FROM "acl_sid" WHERE sid = 'ROLE_SYSTEM';
                 SELECT id INTO aclSidUserId FROM "acl_sid" WHERE sid = 'ROLE_USER';
                 roleGroupManagerId := rec.package_id || 'm';
