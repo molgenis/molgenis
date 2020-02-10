@@ -50,7 +50,8 @@ public class PackageMetadata extends SystemEntityType {
     addAttribute(ID, ROLE_ID)
         .setAuto(true)
         .setLabel("Identifier")
-        .setValidationExpression(format("$('id').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX));
+        .setValidationExpression(
+            format("$('id').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX_JS));
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
     addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
     Attribute parentAttr =

@@ -1,5 +1,7 @@
 package org.molgenis.data.validation.meta;
 
+import static org.molgenis.data.meta.SystemEntityType.UNIFIED_IDENTIFIER_REGEX;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import org.molgenis.data.MolgenisDataException;
@@ -28,7 +30,7 @@ public class NameValidator {
   public static void validateAttributeName(String name) {
     checkForKeyword(name);
 
-    validateName(name);
+    checkForLeadingDigit(name);
 
     if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$")) {
       throw new MolgenisDataException(
@@ -40,11 +42,10 @@ public class NameValidator {
 
   public static void validateEntityName(String name) {
     checkForKeyword(name);
-    validateName(name);
     checkForIllegalCharacters(name);
   }
 
-  private static void validateName(String name) {
+  private static void checkForLeadingDigit(String name) {
     if (Character.isDigit(name.charAt(0))) {
       throw new MolgenisDataException(
           "Invalid name: [" + name + "] Names must start with a letter.");
@@ -52,12 +53,11 @@ public class NameValidator {
   }
 
   private static void checkForIllegalCharacters(String name) {
-    if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$")) // FIXME too restrictive
-    {
+    if (!name.matches(UNIFIED_IDENTIFIER_REGEX)) {
       throw new MolgenisDataException(
           "Invalid characters in: ["
               + name
-              + "] Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed.");
+              + "] Only letters (a-z, A-Z), digits (0-9), underscores(_) and dashes(-) are allowed.");
     }
   }
 }
