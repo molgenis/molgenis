@@ -50,7 +50,8 @@ public class RoleMetadata extends SystemEntityType {
         .setDescription("Name of the Role")
         .setUnique(true)
         .setNillable(false)
-        .setValidationExpression(format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX))
+        .setValidationExpression(
+            format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX_JS))
         .setReadOnly(true);
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
     getLanguageCodes()

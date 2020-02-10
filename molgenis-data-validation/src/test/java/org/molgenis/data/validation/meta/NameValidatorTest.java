@@ -14,7 +14,13 @@ class NameValidatorTest {
 
   @Test
   void testValidateNameStartsWithDigit() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("6invalid"));
+    NameValidator.validateEntityName("6valid");
+  }
+
+  @Test
+  void testValidateAttributeNameStartsWithDigit() {
+    assertThrows(
+        MolgenisDataException.class, () -> NameValidator.validateAttributeName("6invalid"));
   }
 
   @Test
@@ -23,28 +29,55 @@ class NameValidatorTest {
   }
 
   @Test
-  void testI18nNameMilti() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-en-nl"));
+  void testI18nAttributeNameMulti() {
+    assertThrows(
+        MolgenisDataException.class, () -> NameValidator.validateAttributeName("test-en-nl"));
+  }
+
+  @Test
+  void testI18nAttributeNameTooLong() {
+    assertThrows(
+        MolgenisDataException.class, () -> NameValidator.validateAttributeName("test-xxxx"));
+  }
+
+  @Test
+  void testI18nAttributeNameMissing() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateAttributeName("test-"));
+  }
+
+  @Test
+  void testI18nAttributeNameUpperCase() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateAttributeName("test-NL"));
+  }
+
+  @Test
+  void testI18nAttributeNameNumber() {
+    assertThrows(MolgenisDataException.class, () -> NameValidator.validateAttributeName("test-n2"));
+  }
+
+  @Test
+  void testI18nNameMulti() {
+    NameValidator.validateEntityName("test-en-nl");
   }
 
   @Test
   void testI18nTooLong() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-xxxx"));
+    NameValidator.validateEntityName("test-xxxx");
   }
 
   @Test
   void testI18nMissing() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-"));
+    NameValidator.validateEntityName("test-");
   }
 
   @Test
   void testI18nUpperCase() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-NL"));
+    NameValidator.validateEntityName("test-NL");
   }
 
   @Test
   void testI18nNumber() {
-    assertThrows(MolgenisDataException.class, () -> NameValidator.validateEntityName("test-n2"));
+    NameValidator.validateEntityName("test-n2");
   }
 
   @Test
