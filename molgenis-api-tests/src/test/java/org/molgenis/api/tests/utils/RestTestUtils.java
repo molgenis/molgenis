@@ -197,7 +197,7 @@ public class RestTestUtils {
     return monitorImportJob(adminToken, importJobStatusUrl);
   }
 
-  private static String uploadEmxFileWithoutPackage(String adminToken, File file) {
+  public static String uploadEmxFileWithoutPackage(String adminToken, File file) {
     String importJobStatusUrl =
         given()
             .multiPart(file)
