@@ -1,4 +1,4 @@
-package org.molgenis.security.permission;
+package org.molgenis.security.core;
 
 import java.util.List;
 import org.springframework.security.core.Authentication;

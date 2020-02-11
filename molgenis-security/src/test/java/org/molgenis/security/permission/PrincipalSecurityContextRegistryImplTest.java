@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.molgenis.security.core.SecurityContextRegistry;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

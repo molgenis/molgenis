@@ -5,6 +5,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.molgenis.security.core.PrincipalSecurityContextRegistry;
+import org.molgenis.security.core.SecurityContextRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

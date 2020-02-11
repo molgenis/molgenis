@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpSession;
+import org.molgenis.security.core.SecurityContextRegistry;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.session.HttpSessionCreatedEvent;
