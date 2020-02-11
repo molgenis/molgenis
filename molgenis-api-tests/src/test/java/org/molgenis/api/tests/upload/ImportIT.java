@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.molgenis.api.tests.AbstractApiTest;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.test.TestResourceUtils;
@@ -41,7 +40,7 @@ class ImportIT extends AbstractApiTests {
 
   @Test
   void testImportIdFile() throws IOException {
-    RestTestUtils.uploadEmxFileWithoutPackage(adminToken, getFile(ImportIT.class, "123-test-group.xlsx"));
+    RestTestUtils.uploadEmxFile(adminToken, getFile(ImportIT.class, "123-test-group.xlsx"));
 
     String expectedMetaJson =
         TestResourceUtils.getRenderedString(

@@ -16,7 +16,6 @@ import static org.molgenis.api.tests.utils.RestTestUtils.readJsonFile;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeEntities;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
-import static org.molgenis.api.tests.utils.RestTestUtils.uploadEMX;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -77,7 +76,7 @@ class RestControllerV2IT extends AbstractApiTests {
 
     LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
     String fileName = "/RestControllerV2_TestEMX.xlsx";
-    String status = uploadEMX(adminToken, fileName);
+    String status = RestTestUtils.uploadEmxFileToBasePackage(adminToken, fileName);
     if (!status.equals("FINISHED")) {
       throw new RuntimeException(
           format("Import '%s' completed with status '%s'", fileName, status));

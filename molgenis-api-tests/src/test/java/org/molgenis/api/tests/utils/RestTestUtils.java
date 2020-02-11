@@ -124,10 +124,10 @@ public class RestTestUtils {
    * @param fileName the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEMX(String adminToken, String fileName) {
+  public static String uploadEmxFileToBasePackage(String adminToken, String fileName) {
     File file = getResourceFile(fileName);
 
-    return uploadEMXFile(adminToken, file);
+    return uploadEmxFileToBasePackage(adminToken, file);
   }
 
   /**
@@ -139,10 +139,10 @@ public class RestTestUtils {
    * @param fileName the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEmxFileWithoutPackage(String adminToken, String fileName) {
+  public static String uploadEmxFile(String adminToken, String fileName) {
     File file = getResourceFile(fileName);
 
-    return uploadEmxFileWithoutPackage(adminToken, file);
+    return uploadEmxFile(adminToken, file);
   }
 
   /**
@@ -155,10 +155,11 @@ public class RestTestUtils {
    * @param fileName name of the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEMX(String adminToken, String pathToFileFolder, String fileName) {
+  public static String uploadEmxFileToBasePackage(
+      String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 
-    return uploadEMXFile(adminToken, file);
+    return uploadEmxFileToBasePackage(adminToken, file);
   }
 
   /**
@@ -173,14 +174,13 @@ public class RestTestUtils {
    * @param fileName name of the file to upload
    * @return String indicating state of completed job
    */
-  public static String uploadEMXWithoutPackage(
-      String adminToken, String pathToFileFolder, String fileName) {
+  public static String uploadEmxFile(String adminToken, String pathToFileFolder, String fileName) {
     File file = new File(pathToFileFolder + File.separator + fileName);
 
-    return uploadEmxFileWithoutPackage(adminToken, file);
+    return uploadEmxFile(adminToken, file);
   }
 
-  private static String uploadEMXFile(String adminToken, File file) {
+  private static String uploadEmxFileToBasePackage(String adminToken, File file) {
     String importJobStatusUrl =
         given()
             .multiPart(file)
@@ -197,7 +197,16 @@ public class RestTestUtils {
     return monitorImportJob(adminToken, importJobStatusUrl);
   }
 
-  public static String uploadEmxFileWithoutPackage(String adminToken, File file) {
+  /**
+   * Import emx file using add/update.
+   *
+   * <p>Importing is done async in the backend, but this methods waits for importing to be done.
+   *
+   * @param adminToken to use for login
+   * @param file the file to upload
+   * @return String indicating state of completed job
+   */
+  public static String uploadEmxFile(String adminToken, File file) {
     String importJobStatusUrl =
         given()
             .multiPart(file)
