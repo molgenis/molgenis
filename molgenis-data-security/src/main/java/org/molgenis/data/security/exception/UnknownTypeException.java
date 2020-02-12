@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.UnknownDataException;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownTypeException extends UnknownDataException {
   private static final String ERROR_CODE = "DS33";
   private final String type;

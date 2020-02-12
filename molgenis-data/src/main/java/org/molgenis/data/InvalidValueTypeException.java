@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class InvalidValueTypeException extends DataConstraintViolationException {
   private static final String ERROR_CODE = "D20";
   private final String value;

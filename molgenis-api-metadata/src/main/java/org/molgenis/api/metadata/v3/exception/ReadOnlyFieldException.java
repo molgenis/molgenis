@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class ReadOnlyFieldException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI07";
   private final String field;

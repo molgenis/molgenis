@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.PackagePermission;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class ParentPackagePermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS08";
   private final PackagePermission permission;

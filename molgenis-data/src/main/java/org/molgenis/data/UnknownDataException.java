@@ -11,7 +11,7 @@ package org.molgenis.data;
  * @see UnknownPluginException
  * @see UnknownSortAttributeException
  */
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public abstract class UnknownDataException extends ErrorCodedDataAccessException {
   protected UnknownDataException(String errorCode) {
     super(errorCode);

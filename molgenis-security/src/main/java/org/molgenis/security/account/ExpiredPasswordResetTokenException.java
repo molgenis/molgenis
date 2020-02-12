@@ -6,7 +6,7 @@ import java.time.Instant;
 import org.molgenis.data.security.auth.PasswordResetToken;
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings({"java:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:S110"})
 class ExpiredPasswordResetTokenException extends BadRequestException {
   private static final String ERROR_CODE = "SEC02";
   private final String id;

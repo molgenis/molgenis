@@ -3,7 +3,7 @@ package org.molgenis.data;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class ValueLengthExceededException extends DataConstraintViolationException {
   private static final String ERROR_CODE = "D17";
 

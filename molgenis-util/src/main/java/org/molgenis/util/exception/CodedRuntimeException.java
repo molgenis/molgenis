@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 import org.molgenis.util.i18n.MessageSourceHolder;
 
 /** {@link RuntimeException} with error code. */
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public abstract class CodedRuntimeException extends RuntimeException implements ErrorCoded {
   private final String errorCode;
 

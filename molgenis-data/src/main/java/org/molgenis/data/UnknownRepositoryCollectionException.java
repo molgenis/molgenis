@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownRepositoryCollectionException extends UnknownDataException {
   private static final String ERROR_CODE = "D06";
 

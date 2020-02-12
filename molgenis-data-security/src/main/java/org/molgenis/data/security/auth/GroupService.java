@@ -44,7 +44,7 @@ public class GroupService {
 
   public static final Set<String> DEFAULT_ROLES = ImmutableSet.of(MANAGER, EDITOR, VIEWER);
 
-  @SuppressWarnings("java:S00107")
+  @SuppressWarnings("java:S107")
   GroupService(
       PackageFactory packageFactory,
       DataService dataService,

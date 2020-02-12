@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"java:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:S110"})
 public class EntityAlreadyExistsException extends DataAlreadyExistsException {
   private static final String ERROR_CODE = "D09";
 

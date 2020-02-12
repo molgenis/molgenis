@@ -2,7 +2,7 @@ package org.molgenis.security.account;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings({"java:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:S110"})
 class PasswordResetTokenCreationException extends BadRequestException {
   private static final String ERROR_CODE = "SEC01";
 

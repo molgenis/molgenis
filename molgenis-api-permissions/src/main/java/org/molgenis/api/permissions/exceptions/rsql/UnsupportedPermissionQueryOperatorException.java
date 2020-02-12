@@ -2,7 +2,7 @@ package org.molgenis.api.permissions.exceptions.rsql;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnsupportedPermissionQueryOperatorException extends BadRequestException {
   private static final String ERROR_CODE = "PRM02";
 

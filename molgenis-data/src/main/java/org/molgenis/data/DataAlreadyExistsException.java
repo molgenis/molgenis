@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
  *
  * @see EntityAlreadyExistsException
  */
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public abstract class DataAlreadyExistsException extends ErrorCodedDataAccessException {
   public DataAlreadyExistsException(String errorCode) {
     super(errorCode);

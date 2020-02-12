@@ -6,7 +6,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownEnumValueException extends DataConstraintViolationException {
   private static final String UNKNOWN_PLACEHOLDER = "unknown.placeholder";
 

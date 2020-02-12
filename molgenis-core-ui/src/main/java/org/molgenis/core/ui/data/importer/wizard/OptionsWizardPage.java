@@ -60,7 +60,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     return "Options";
   }
 
-  @SuppressWarnings("java:S2083")
+  @SuppressWarnings("javasecurity:S2083")
   @Override
   public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
     ImportWizardUtil.validateImportWizard(wizard);
@@ -73,7 +73,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     if (importWizard.getMustChangeEntityName()) {
       // userGivenName will be validated by the NameValidator and can't contain any
       // characters that have special meaning for the file system
-      @SuppressWarnings("java:S2083")
+      @SuppressWarnings("javasecurity:S2083")
       String userGivenName = request.getParameter("name");
       if (StringUtils.isEmpty(userGivenName)) {
         result.addError(new ObjectError("wizard", "Please enter an entity name"));

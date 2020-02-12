@@ -2,7 +2,7 @@ package org.molgenis.api.metadata.v3.exception;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("java:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class IdModificationException extends BadRequestException {
 
   private static final String ERROR_CODE = "MAPI03";
