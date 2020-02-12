@@ -105,13 +105,18 @@ Packages:
 | root     | my main package                                               |        |
 | hospital | sub package holding entities to describe all kinds of persons | root   |
 
-## Rules for technical names
-For all technical names in the EMX format, the following rules apply:
-- No special characters, except for; '_' and '#', only letters, numbers are allowed.
-- No names starting with digits.
-- The keywords: "login", "logout", "csv", "base", "exist", "meta", are not allowed.
-
-These rules only apply to the technical names, labels are not limited by these rules.
+## Rules for names
+For names in the EMX format, the following rules apply:
+- Name cannot be empty.
+- Only letters (`a-z`, `A-Z`), digits (`0-9`), underscores (`_`) and dashes (`-`) are allowed.
+- The keywords: `login`, `logout`, `csv`, `base`, `exist`, `meta` and `_idValue` are not allowed as
+entity and attribute names.
+### attribute names
+- attribute names also allow the hash character (`#`), e.g. `#CHROM` is a valid attribute name.
+- In attribute names, the dash (`-`) is reserved for localization, e.g. `description-nl` contains the
+Dutch translation of the `description` attribute.
+### labels
+These restrictions only apply to the technical names, labels are not limited by these rules.
 
 ## Packages without a parent
 Creating a package without a parent package (also known as a root package) automatically results in the creation of a group. Initially the group name is set to the package identifier, unless the package identifier is not a valid group name. In this case a unique group name is generated. The initial group label is set to the package label. Otherwise the group creation is the same as when created using the security manager plugin. Both name and label can be modified afterwards.  
