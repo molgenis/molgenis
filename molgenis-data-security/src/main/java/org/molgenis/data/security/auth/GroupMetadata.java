@@ -56,7 +56,8 @@ public class GroupMetadata extends SystemEntityType {
         .setDescription("Name of the group")
         .setNillable(false)
         .setUnique(true)
-        .setValidationExpression(format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX));
+        .setValidationExpression(
+            format("$('name').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX_JS));
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
     getLanguageCodes()
         .map(languageCode -> getI18nAttributeName(LABEL, languageCode))

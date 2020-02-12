@@ -11,6 +11,7 @@ import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DE
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
+import static org.molgenis.integrationtest.utils.AbstractMolgenisIntegrationTests.cleanupUserPermissions;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
@@ -52,6 +53,7 @@ import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -300,8 +302,10 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   @AfterEach
-  void tearDownAfterClass() {
+  void tearDownAfterClass(ApplicationContext applicationContext) {
     waitForWorkToBeFinished(indexService, LOG);
+
+    cleanupUserPermissions(applicationContext, getPermissionMap(), USERNAME);
     runAsSystem(() -> dataService.delete(ENTITY_TYPE_META_DATA, entityTypeA));
     runAsSystem(() -> dataService.delete(ENTITY_TYPE_META_DATA, entityTypeB));
 
@@ -311,14 +315,7 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private void populatePermissions() {
-    Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
-    permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
-    permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
-    permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
-    permissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.READ);
-    permissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.READ);
-    permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), PermissionSet.READ);
-    permissionMap.put(new PackageIdentity(PACKAGE_A), PermissionSet.READ);
+    Map<ObjectIdentity, PermissionSet> permissionMap = getPermissionMap();
 
     Sid sid = SidUtils.createUserSid(requireNonNull(USERNAME));
     for (Entry<ObjectIdentity, PermissionSet> entry : permissionMap.entrySet()) {
@@ -328,5 +325,17 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
                 Permission.create(entry.getKey(), sid, entry.getValue()));
           });
     }
+  }
+
+  private Map<ObjectIdentity, PermissionSet> getPermissionMap() {
+    Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+    permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.READ);
+    permissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.READ);
+    permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), PermissionSet.READ);
+    permissionMap.put(new PackageIdentity(PACKAGE_A), PermissionSet.READ);
+    return permissionMap;
   }
 }

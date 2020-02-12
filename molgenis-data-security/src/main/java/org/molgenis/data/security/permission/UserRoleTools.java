@@ -58,7 +58,7 @@ public class UserRoleTools {
   }
 
   public void checkRoleExists(String role) {
-    if (getRole(role.toUpperCase()) == null) {
+    if (getRole(role) == null) {
       throw new UnknownRoleException(role);
     }
   }

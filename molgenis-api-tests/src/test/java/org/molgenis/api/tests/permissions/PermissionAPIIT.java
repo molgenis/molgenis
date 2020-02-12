@@ -11,7 +11,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
-import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFileWithoutPackage;
+import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFile;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
 
 import com.google.common.collect.ImmutableMap;
@@ -76,7 +76,7 @@ class PermissionAPIIT extends AbstractApiTests {
   @BeforeEach
   void beforeMethod() {
     LOG.info("Importing Test data");
-    uploadEmxFileWithoutPackage(adminToken, "/Permissions_TestEMX.xlsx");
+    uploadEmxFile(adminToken, "/Permissions_TestEMX.xlsx");
     LOG.info("Importing Done");
   }
 

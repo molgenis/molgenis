@@ -29,6 +29,10 @@ DO $$
                 SELECT id INTO roleEditorId FROM "sys_sec_Role#b6639604" WHERE name = 'EDITOR';
                 SELECT id INTO roleViewerId FROM "sys_sec_Role#b6639604" WHERE name = 'VIEWER';
                 SELECT id INTO aclClassGroupId FROM "acl_class" WHERE class = 'group';
+                IF aclClassGroupId IS NULL THEN
+                    INSERT INTO acl_class ("class", "class_id_type") VALUES ('group', 'java.lang.String') RETURNING id INTO aclClassGroupId;
+                END IF;
+
                 SELECT id INTO aclSidSystemId FROM "acl_sid" WHERE sid = 'ROLE_SYSTEM';
                 SELECT id INTO aclSidUserId FROM "acl_sid" WHERE sid = 'ROLE_USER';
                 roleGroupManagerId := rec.package_id || 'm';
@@ -44,18 +48,18 @@ DO $$
 
                 INSERT INTO "sys_sec_Group#d325f6e2" ("id", "name", "label", "public", "rootPackage") VALUES (rec.package_id, groupName, rec.package_label, true, rec.package_id);
 
-                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupManagerId, upper(rec.package_id)  || '_MANAGER', 'Manager', rec.package_label || ' Manager', rec.package_id);
-                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupEditorId, upper(rec.package_id)  || '_EDITOR', 'Editor', rec.package_label || ' Editor', rec.package_id);
-                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupViewerId, upper(rec.package_id)  || '_VIEWER', 'Viewer', rec.package_label || ' Viewer', rec.package_id);
+                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupManagerId, rec.package_id || '_MANAGER', 'Manager', rec.package_label || ' Manager', rec.package_id);
+                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupEditorId, rec.package_id || '_EDITOR', 'Editor', rec.package_label || ' Editor', rec.package_id);
+                INSERT INTO "sys_sec_Role#b6639604" ("id", "name", "label", "description", "group") VALUES (roleGroupViewerId, rec.package_id || '_VIEWER', 'Viewer', rec.package_label || ' Viewer', rec.package_id);
                 INSERT INTO "sys_sec_Role#b6639604_includes" ("order","id","includes") VALUES (0,roleGroupManagerId,roleManagerId);
                 INSERT INTO "sys_sec_Role#b6639604_includes" ("order","id","includes") VALUES (1,roleGroupManagerId,roleGroupEditorId);
                 INSERT INTO "sys_sec_Role#b6639604_includes" ("order","id","includes") VALUES (0,roleGroupEditorId,roleEditorId);
                 INSERT INTO "sys_sec_Role#b6639604_includes" ("order","id","includes") VALUES (1,roleGroupEditorId,roleGroupViewerId);
                 INSERT INTO "sys_sec_Role#b6639604_includes" ("order","id","includes") VALUES (0,roleGroupViewerId,roleViewerId);
 
-                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || upper(rec.package_id) || '_MANAGER') RETURNING id INTO aclSidGroupManagerId;
-                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || upper(rec.package_id) || '_EDITOR') RETURNING id INTO aclSidGroupEditorId;
-                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || upper(rec.package_id) || '_VIEWER') RETURNING id INTO aclSidGroupViewerId;
+                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || rec.package_id || '_MANAGER') RETURNING id INTO aclSidGroupManagerId;
+                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || rec.package_id || '_EDITOR') RETURNING id INTO aclSidGroupEditorId;
+                INSERT INTO acl_sid (principal, sid) values (false, 'ROLE_' || rec.package_id || '_VIEWER') RETURNING id INTO aclSidGroupViewerId;
 
                 INSERT INTO acl_object_identity (object_id_class, object_id_identity, owner_sid, entries_inheriting) values (aclClassGroupId, rec.package_id, aclSidSystemId, true) RETURNING id INTO aclObjectIdentityGroupId;
 

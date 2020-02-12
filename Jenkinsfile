@@ -181,7 +181,7 @@ pipeline {
                             // the rpm:rpm goal is bound to the package phase
                             // which implies that the next snapshot version is installed
                             // the artifact is built and the rpm plugin refers to the artifact build in the release:prepare goal
-                            sh "mvn -q -B install -DskipTests -T4"
+                            sh "mvn -q -B install -DskipTests"
                             dir('molgenis-app') {
                                 script {
                                     sh "mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"

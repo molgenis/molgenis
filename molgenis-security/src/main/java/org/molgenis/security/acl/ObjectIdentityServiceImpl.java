@@ -2,17 +2,16 @@ package org.molgenis.security.acl;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.molgenis.data.security.permission.EntityHelper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
@@ -41,15 +40,18 @@ public class ObjectIdentityServiceImpl implements ObjectIdentityService {
   public static final String SIDS = "sids";
 
   private JdbcTemplate jdbcTemplate;
+  private EntityHelper entityHelper;
   private NamedParameterJdbcTemplate namedJdbcTemplate;
 
-  public ObjectIdentityServiceImpl(JdbcTemplate jdbcTemplate) {
+  public ObjectIdentityServiceImpl(JdbcTemplate jdbcTemplate, EntityHelper entityHelper) {
     this.jdbcTemplate = requireNonNull(jdbcTemplate);
+    this.entityHelper = requireNonNull(entityHelper);
   }
 
   // for tests
-  ObjectIdentityServiceImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+  ObjectIdentityServiceImpl(NamedParameterJdbcTemplate jdbcTemplate, EntityHelper entityHelper) {
     this.namedJdbcTemplate = requireNonNull(jdbcTemplate);
+    this.entityHelper = requireNonNull(entityHelper);
   }
 
   private NamedParameterJdbcTemplate getTemplate() {
@@ -164,8 +166,8 @@ public class ObjectIdentityServiceImpl implements ObjectIdentityService {
   }
 
   private ObjectIdentity parseRow(Map<String, Object> row) {
-    return new ObjectIdentityImpl(
-        row.get(CLASS).toString(), (Serializable) row.get(OBJECT_ID_IDENTITY));
+    return entityHelper.getObjectIdentity(
+        row.get(CLASS).toString(), row.get(OBJECT_ID_IDENTITY).toString());
   }
 
   private String getSidString(Sid sid) {

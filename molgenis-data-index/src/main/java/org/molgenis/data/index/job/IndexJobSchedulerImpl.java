@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
+import javax.annotation.PreDestroy;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexActionGroup;
@@ -25,6 +26,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,6 +48,13 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
     this.dataService = requireNonNull(dataService);
     this.indexJobExecutionFactory = requireNonNull(indexJobExecutionFactory);
     this.jobExecutor = requireNonNull(jobExecutor);
+  }
+
+  @PreDestroy
+  void preDestroy() {
+    if (executorService != null) {
+      ExecutorServiceUtils.shutdownAndAwaitTermination(executorService);
+    }
   }
 
   @Override

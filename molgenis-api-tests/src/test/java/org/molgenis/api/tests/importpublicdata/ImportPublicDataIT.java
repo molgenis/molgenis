@@ -56,7 +56,7 @@ class ImportPublicDataIT extends AbstractApiTests {
 
     String importStatus = "PENDING";
     if (uploadFile.endsWith(".xlsx")) {
-      importStatus = RestTestUtils.uploadEMXWithoutPackage(adminToken, uploadFolder, uploadFile);
+      importStatus = RestTestUtils.uploadEmxFile(adminToken, uploadFolder, uploadFile);
     } else if (uploadFile.endsWith(".vcf")) {
       importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
     } else {

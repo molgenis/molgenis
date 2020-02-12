@@ -685,7 +685,7 @@ $.when($,
                     "<div class=\"small\">Please enter a new entity name." +
                     "<ul>" +
                     "<li>Use max 30 characters." +
-                    "<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li>" +
+                    "<li>Only letters (a-z, A-Z), digits (0-9), underscores(_) and dashes(-) are allowed.</li>" +
                     "</ul>" +
                     "<br/>By pushing the ok button you will create an new entity with copied data.</div>",
                     value: selectedEntityMetaData.label + 'Copy',

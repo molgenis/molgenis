@@ -206,8 +206,8 @@ class UserRoleToolsTest extends AbstractMockitoTest {
 
     Query query = mock(Query.class);
 
-    doReturn(query).when(query).eq(RoleMetadata.NAME, "ROLE1");
-    doReturn(query).when(query).eq(RoleMetadata.NAME, "ROLE2");
+    doReturn(query).when(query).eq(RoleMetadata.NAME, "role1");
+    doReturn(query).when(query).eq(RoleMetadata.NAME, "role2");
     doReturn(mock(Role.class)).when(query).findOne();
 
     doReturn(mock(User.class)).when(userService).getUser("user1");

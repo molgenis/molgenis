@@ -17,6 +17,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentServletMapping;
 
 import io.micrometer.core.annotation.Timed;
 import java.io.IOException;
@@ -95,6 +96,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -183,7 +185,9 @@ public class RestControllerV2 {
       @RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    return getEntityResponse(entityTypeId, untypedId, attributeFilter, includeCategories);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return getEntityResponse(
+        uriBuilder, entityTypeId, untypedId, attributeFilter, includeCategories);
   }
 
   /** Tunnel retrieveEntity through a POST request */
@@ -195,10 +199,13 @@ public class RestControllerV2 {
       @RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    return getEntityResponse(entityTypeId, untypedId, attributeFilter, includeCategories);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return getEntityResponse(
+        uriBuilder, entityTypeId, untypedId, attributeFilter, includeCategories);
   }
 
   private Map<String, Object> getEntityResponse(
+      ServletUriComponentsBuilder uriBuilder,
       String entityTypeId,
       String untypedId,
       AttributeFilter attributeFilter,
@@ -215,7 +222,7 @@ public class RestControllerV2 {
       throw new UnknownEntityException(entityType, id);
     }
 
-    return createEntityResponse(entity, fetch, true, includeCategories);
+    return createEntityResponse(uriBuilder, entity, fetch, true, includeCategories);
   }
 
   @Transactional
@@ -261,7 +268,9 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    return createEntityCollectionResponse(entityTypeId, request, httpRequest, includeCategories);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return createEntityCollectionResponse(
+        uriBuilder, entityTypeId, request, httpRequest, includeCategories);
   }
 
   @Transactional(readOnly = true)
@@ -272,7 +281,9 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    return createEntityCollectionResponse(entityTypeId, request, httpRequest, includeCategories);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return createEntityCollectionResponse(
+        uriBuilder, entityTypeId, request, httpRequest, includeCategories);
   }
 
   /** Retrieve attribute meta data */
@@ -281,7 +292,8 @@ public class RestControllerV2 {
   public AttributeResponseV2 retrieveEntityAttributeMeta(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName) {
-    return createAttributeResponse(entityTypeId, attributeName);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return createAttributeResponse(uriBuilder, entityTypeId, attributeName);
   }
 
   @Transactional(readOnly = true)
@@ -292,7 +304,8 @@ public class RestControllerV2 {
   public AttributeResponseV2 retrieveEntityAttributeMetaPost(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName) {
-    return createAttributeResponse(entityTypeId, attributeName);
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    return createAttributeResponse(uriBuilder, entityTypeId, attributeName);
   }
 
   /**
@@ -310,6 +323,8 @@ public class RestControllerV2 {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
       HttpServletResponse response) {
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
     try {
@@ -340,11 +355,12 @@ public class RestControllerV2 {
                 .getResources()
                 .add(
                     new AutoValue_ResourcesResponseV2(
-                        UriUtils.createEntityUriPath(entityTypeId, id)));
+                        UriUtils.createEntityUriPath(uriBuilder, entityTypeId, id)));
           });
 
       responseBody.setLocation(
-          UriUtils.createEntitiesUriPath(entityTypeId, meta.getIdAttribute().getName(), ids));
+          UriUtils.createEntitiesUriPath(
+              uriBuilder, entityTypeId, meta.getIdAttribute().getName(), ids));
 
       response.setStatus(HttpServletResponse.SC_CREATED);
       return responseBody;
@@ -370,6 +386,8 @@ public class RestControllerV2 {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid CopyEntityRequestV2 request,
       HttpServletResponse response) {
+    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+
     // No repo
     if (!dataService.hasRepository(entityTypeId))
       throw new UnknownEntityTypeException(entityTypeId);
@@ -415,7 +433,8 @@ public class RestControllerV2 {
     // Retrieve new repo
     permissionSystemService.giveUserWriteMetaPermissions(repository.getEntityType());
 
-    response.addHeader("Location", UriUtils.createEntityCollectionUriPath(repository.getName()));
+    response.addHeader(
+        "Location", UriUtils.createEntityCollectionUriPath(uriBuilder, repository.getName()));
     response.setStatus(HttpServletResponse.SC_CREATED);
 
     return repository.getName();
@@ -654,7 +673,8 @@ public class RestControllerV2 {
     return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
   }
 
-  private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName) {
+  private AttributeResponseV2 createAttributeResponse(
+      ServletUriComponentsBuilder uriBuilder, String entityTypeId, String attributeName) {
     EntityType entity = dataService.getEntityType(entityTypeId);
     Attribute attribute = entity.getAttribute(attributeName);
     if (attribute == null) {
@@ -662,10 +682,11 @@ public class RestControllerV2 {
     }
 
     return new AttributeResponseV2(
-        entityTypeId, entity, attribute, null, permissionService, dataService);
+        uriBuilder, entityTypeId, entity, attribute, null, permissionService, dataService);
   }
 
   private EntityCollectionResponseV2 createEntityCollectionResponse(
+      ServletUriComponentsBuilder uriBuilder,
       String entityTypeId,
       EntityCollectionRequestV2 request,
       HttpServletRequest httpRequest,
@@ -695,15 +716,30 @@ public class RestControllerV2 {
       AttributeResponseV2 xAttrResponse =
           xAttr != null
               ? new AttributeResponseV2(
-                  entityTypeId, entityType, xAttr, fetch, permissionService, dataService)
+                  uriBuilder,
+                  entityTypeId,
+                  entityType,
+                  xAttr,
+                  fetch,
+                  permissionService,
+                  dataService)
               : null;
       AttributeResponseV2 yAttrResponse =
           yAttr != null
               ? new AttributeResponseV2(
-                  entityTypeId, entityType, yAttr, fetch, permissionService, dataService)
+                  uriBuilder,
+                  entityTypeId,
+                  entityType,
+                  yAttr,
+                  fetch,
+                  permissionService,
+                  dataService)
               : null;
       return new EntityAggregatesResponse(
-          aggs, xAttrResponse, yAttrResponse, UriUtils.createEntityCollectionUriPath(entityTypeId));
+          aggs,
+          xAttrResponse,
+          yAttrResponse,
+          UriUtils.createEntityCollectionUriPath(uriBuilder, entityTypeId));
     } else {
       Long count = dataService.count(entityTypeId, new QueryImpl<>(q).setOffset(0).setPageSize(0));
       Iterable<Entity> it;
@@ -717,7 +753,7 @@ public class RestControllerV2 {
       List<Map<String, Object>> entities = new ArrayList<>();
       for (Entity entity : it) {
         Map<String, Object> responseData = new LinkedHashMap<>();
-        createEntityValuesResponse(entity, fetch, responseData);
+        createEntityValuesResponse(uriBuilder, entity, fetch, responseData);
         entities.add(responseData);
       }
 
@@ -736,10 +772,11 @@ public class RestControllerV2 {
       }
 
       return new EntityCollectionResponseV2(
+          uriBuilder,
           pager,
           entities,
           fetch,
-          UriUtils.createEntityCollectionUriPath(entityTypeId),
+          UriUtils.createEntityCollectionUriPath(uriBuilder, entityTypeId),
           entityType,
           permissionService,
           dataService,
@@ -761,17 +798,21 @@ public class RestControllerV2 {
   }
 
   private Map<String, Object> createEntityResponse(
-      Entity entity, Fetch fetch, boolean includeMetaData) {
-    return createEntityResponse(entity, fetch, includeMetaData, false);
+      ServletUriComponentsBuilder builder, Entity entity, Fetch fetch, boolean includeMetaData) {
+    return createEntityResponse(builder, entity, fetch, includeMetaData, false);
   }
 
   private Map<String, Object> createEntityResponse(
-      Entity entity, Fetch fetch, boolean includeMetaData, boolean includeCategories) {
+      ServletUriComponentsBuilder builder,
+      Entity entity,
+      Fetch fetch,
+      boolean includeMetaData,
+      boolean includeCategories) {
     Map<String, Object> responseData = new LinkedHashMap<>();
     if (includeMetaData) {
       createEntityTypeResponse(entity.getEntityType(), fetch, responseData, includeCategories);
     }
-    createEntityValuesResponse(entity, fetch, responseData);
+    createEntityValuesResponse(builder, entity, fetch, responseData);
     return responseData;
   }
 
@@ -783,19 +824,33 @@ public class RestControllerV2 {
     responseData.put(
         "_meta",
         new EntityTypeResponseV2(
-            entityType, fetch, permissionService, dataService, includeCategories));
+            createUriBuilder(),
+            entityType,
+            fetch,
+            permissionService,
+            dataService,
+            includeCategories));
   }
 
   private void createEntityValuesResponse(
-      Entity entity, Fetch fetch, Map<String, Object> responseData) {
+      ServletUriComponentsBuilder uriBuilder,
+      Entity entity,
+      Fetch fetch,
+      Map<String, Object> responseData) {
     Iterable<Attribute> attrs = entity.getEntityType().getAtomicAttributes();
-    createEntityValuesResponseRec(entity, attrs, fetch, responseData);
+    createEntityValuesResponseRec(uriBuilder, entity, attrs, fetch, responseData);
   }
 
   private void createEntityValuesResponseRec(
-      Entity entity, Iterable<Attribute> attrs, Fetch fetch, Map<String, Object> responseData) {
+      ServletUriComponentsBuilder uriBuilder,
+      Entity entity,
+      Iterable<Attribute> attrs,
+      Fetch fetch,
+      Map<String, Object> responseData) {
     responseData.put(
-        "_href", UriUtils.createEntityUriPath(entity.getEntityType().getId(), entity.getIdValue()));
+        "_href",
+        UriUtils.createEntityUriPath(
+            uriBuilder, entity.getEntityType().getId(), entity.getIdValue()));
     for (Attribute attr : attrs) // TODO performance use fetch instead of attrs
     {
       String attrName = attr.getName();
@@ -816,7 +871,7 @@ public class RestControllerV2 {
                       ? fetch.getFetch(attr)
                       : createDefaultAttributeFetch(
                           attr, LanguageService.getCurrentUserLanguageCode());
-              refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
+              refEntityResponse = createEntityResponse(uriBuilder, refEntity, refAttrFetch, false);
             } else {
               refEntityResponse = null;
             }
@@ -836,7 +891,7 @@ public class RestControllerV2 {
                           attr, LanguageService.getCurrentUserLanguageCode());
               for (Entity refEntitiesEntity : refEntities) {
                 refEntityResponses.add(
-                    createEntityResponse(refEntitiesEntity, refAttrFetch, false));
+                    createEntityResponse(uriBuilder, refEntitiesEntity, refAttrFetch, false));
               }
             } else {
               refEntityResponses = null;
@@ -876,5 +931,11 @@ public class RestControllerV2 {
         }
       }
     }
+  }
+
+  private ServletUriComponentsBuilder createUriBuilder() {
+    ServletUriComponentsBuilder servletUriComponentsBuilder = fromCurrentServletMapping();
+    servletUriComponentsBuilder.encode();
+    return servletUriComponentsBuilder;
   }
 }
