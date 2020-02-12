@@ -74,12 +74,14 @@ public class EntityHelper {
     }
   }
 
-  public String getLabel(String typeId, String identifier) {
+  public String getLabel(String typeId, String untypedIdentifier) {
     String entityTypeId = getEntityTypeIdFromType(typeId);
+    Object typedIdentifier = getTypedValue(untypedIdentifier, typeId);
+
     Entity[] result = new Entity[1];
-    runAsSystem(() -> result[0] = getEntityByIdentifier(identifier, entityTypeId));
+    runAsSystem(() -> result[0] = getEntityByIdentifier(typedIdentifier, entityTypeId));
     if (result[0] == null) {
-      throw new UnknownEntityException(entityTypeId, identifier);
+      throw new UnknownEntityException(entityTypeId, typedIdentifier);
     }
     return result[0].getLabelValue().toString();
   }

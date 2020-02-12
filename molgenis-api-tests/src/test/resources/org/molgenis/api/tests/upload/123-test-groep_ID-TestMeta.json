@@ -1,0 +1,35 @@
+{
+  "links": {
+    "self": "${baseUri}/api/metadata?q=id==123-test-group_ID-Test"
+  },
+  "items": [
+    {
+      "links": {
+        "self": "${baseUri}/api/metadata/123-test-group_ID-Test"
+      },
+      "data": {
+        "id": "123-test-group_ID-Test",
+        "label": "ID Test",
+        "description": "Used to test identifier edge cases",
+        "package": {
+          "links": {
+            "self": "${baseUri}/api/data/sys_md_Package/123-test-group"
+          }
+        },
+        "attributes": {
+          "links": {
+            "self": "${baseUri}/api/metadata/123-test-group_ID-Test/attributes"
+          }
+        },
+        "abstract": false,
+        "indexingDepth": 1
+      }
+    }
+  ],
+  "page": {
+    "size": 100,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}

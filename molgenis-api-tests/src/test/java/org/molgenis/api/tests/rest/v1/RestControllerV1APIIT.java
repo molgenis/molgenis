@@ -60,9 +60,9 @@ class RestControllerV1APIIT extends AbstractApiTests {
 
     LOG.info("Importing Test data");
     RestTestUtils.createPackage(adminToken, "base");
-    RestTestUtils.uploadEMX(adminToken, V1_TEST_FILE);
-    RestTestUtils.uploadEMX(adminToken, V1_DELETE_TEST_FILE);
-    RestTestUtils.uploadEMX(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);
+    RestTestUtils.uploadEmxFileToBasePackage(adminToken, V1_TEST_FILE);
+    RestTestUtils.uploadEmxFileToBasePackage(adminToken, V1_DELETE_TEST_FILE);
+    RestTestUtils.uploadEmxFileToBasePackage(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);
     LOG.info("Importing Done");
 
     testUserName = "api_v1_test_user" + System.currentTimeMillis();

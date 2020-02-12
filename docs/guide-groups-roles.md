@@ -28,8 +28,9 @@ To understand the security context of MOLGENIS you need to understand the follow
 You can start performing these steps to configure groups in MOLGENIS.
 
 - **Step 1: Add a group**
-  
-  You can add groups to MOLGENIS to structure user groups and data you want to share or manage. Every group gets a folder to put resources in.
+
+  When you create a new root package, e.g. using the importer, a group will automatically be created for the package.
+  You can manually add groups to MOLGENIS to structure user groups and data you want to share or manage. Every group gets a root package to put resources in.
   
 - **Step 2: Add members**
   

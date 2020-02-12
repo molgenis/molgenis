@@ -6,6 +6,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -44,6 +45,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.exception.DuplicatePermissionException;
 import org.molgenis.data.security.permission.inheritance.PermissionInheritanceResolver;
 import org.molgenis.data.security.permission.model.LabelledObject;
 import org.molgenis.data.security.permission.model.LabelledObjectIdentity;
@@ -64,6 +66,7 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 class PermissionServiceImplTest extends AbstractMockitoTest {
+
   @Mock MutableAclService mutableAclService;
   @Mock PermissionInheritanceResolver inheritanceResolver;
   @Mock ObjectIdentityService objectIdentityService;
@@ -514,6 +517,38 @@ class PermissionServiceImplTest extends AbstractMockitoTest {
     verify(acl).deleteAce(0);
     verify(acl).insertAce(1, WRITE, role, true);
     verify(mutableAclService, times(2)).updateAcl(acl);
+  }
+
+  @Test
+  void testCreateDuplicatePermission() {
+    Sid role = new GrantedAuthoritySid("ROLE_role");
+    MutableAcl acl = mock(MutableAcl.class);
+    ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
+    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
+    doReturn(acl)
+        .when(mutableAclService)
+        .readAclById(new ObjectIdentityImpl("entity-typeId", "identifier"));
+    when(acl.getObjectIdentity()).thenReturn(objectIdentity);
+
+    AccessControlEntry ace1 = mock(AccessControlEntry.class);
+    when(ace1.getSid()).thenReturn(role);
+    when(ace1.getPermission()).thenReturn(COUNT);
+    when(acl.getEntries()).thenReturn(singletonList(ace1));
+
+    when(entityHelper.getLabelledObjectIdentity(acl.getObjectIdentity()))
+        .thenReturn(
+            LabelledObjectIdentity.create(
+                "entity-typeId", "typeId", "typeLabel", "identifier", "identifierLabel"));
+
+    when(userRoleTools.sortSids(singleton(role))).thenReturn(new LinkedList(singletonList(role)));
+    when(mutableAclClassService.getAclClassTypes()).thenReturn(singletonList("entity-typeId"));
+
+    assertThrows(
+        DuplicatePermissionException.class,
+        () ->
+            permissionsApiService.createPermission(
+                Permission.create(
+                    new ObjectIdentityImpl("entity-typeId", "identifier"), role, WRITE)));
   }
 
   @Test

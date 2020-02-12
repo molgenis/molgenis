@@ -3,6 +3,7 @@ package org.molgenis.js;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Double.valueOf;
 import static java.lang.Long.MAX_VALUE;
+import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
@@ -20,6 +21,7 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.SystemEntityType.UNIFIED_IDENTIFIER_REGEX_JS;
 
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -186,6 +188,15 @@ class JsMagmaScriptEvaluatorTest {
 
     Object result = jsMagmaScriptEvaluator.eval("$('smoking').value()", person, 1);
     assertEquals(true, result);
+  }
+
+  @Test
+  void testIdentifierRegex() {
+    Entity person = new DynamicEntity(personSmokingEntityType);
+    person.set("id", "0-bbmri-EriC999");
+    String expression = format("$('id').matches(%s).value()", UNIFIED_IDENTIFIER_REGEX_JS);
+
+    assertEquals(true, jsMagmaScriptEvaluator.eval(expression, person, 1));
   }
 
   @SuppressWarnings("UnnecessaryBoxing")

@@ -149,8 +149,8 @@
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <checkstyle.version>8.18</checkstyle.version>
-    <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+    <checkstyle.version>8.29</checkstyle.version>
+    <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     <sentry.version>1.7.5</sentry.version>
     <sentry-logback.version>1.7.14</sentry-logback.version>
   </properties>

@@ -1,5 +1,6 @@
 package org.molgenis.data.security.auth;
 
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
@@ -8,7 +9,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
-import org.molgenis.data.security.exception.UnknownRoleException;
 import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,7 +71,7 @@ public class CachedRoleHierarchyImpl implements TransactionListener, CachedRoleH
     Collection<GrantedAuthority> reachableGrantedAuthorities =
         cachedReachableAuthoritiesMap.get(grantedAuthority);
     if (reachableGrantedAuthorities == null) {
-      throw new UnknownRoleException(grantedAuthority.getAuthority());
+      return singleton(grantedAuthority);
     }
     return reachableGrantedAuthorities;
   }

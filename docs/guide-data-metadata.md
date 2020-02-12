@@ -87,6 +87,7 @@ For more advanced use cases, we explain the every input field below.
 
 __Name__
 : A unique identifier for attributes _within_ this EntityType (You can have multiple 'id' attributes across different EntityTypes).
+Name your attributes wisely, because once they are created they cannot be renamed.
 
 __Label__
 : A label for your attribute. This is meant to be a human readable name, and will be column names people see when they look at your data.

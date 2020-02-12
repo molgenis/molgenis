@@ -2,11 +2,11 @@ package org.molgenis.bootstrap;
 
 import static java.util.Objects.requireNonNull;
 
-import io.micrometer.core.annotation.Timed;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
+import org.molgenis.data.importer.ImportBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -17,21 +17,14 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Application bootstrapper
- *
- * <p>TODO code duplication with org.molgenis.integrationtest.platform.PlatformBootstrapper
- */
-@SuppressWarnings("unused")
+/** Application bootstrapper */
 @Component
-class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>, PriorityOrdered {
-  private static final Logger LOG = LoggerFactory.getLogger(MolgenisBootstrapper.class);
+class Bootstrapper {
+  private static final Logger LOG = LoggerFactory.getLogger(Bootstrapper.class);
 
   private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
   private final DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
@@ -41,12 +34,13 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
   private final RepositoryPopulator repositoryPopulator;
   private final PermissionPopulator systemPermissionPopulator;
   private final JobBootstrapper jobBootstrapper;
+  private final ImportBootstrapper importBootstrapper;
   private final IndexBootstrapper indexBootstrapper;
   private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
   private final BootstrapThemePopulator bootstrapThemePopulator;
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
 
-  MolgenisBootstrapper(
+  Bootstrapper(
       MolgenisUpgradeBootstrapper upgradeBootstrapper,
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
       TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
@@ -55,6 +49,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
       RepositoryPopulator repositoryPopulator,
       PermissionPopulator systemPermissionPopulator,
       JobBootstrapper jobBootstrapper,
+      ImportBootstrapper importBootstrapper,
       IndexBootstrapper indexBootstrapper,
       EntityTypeRegistryPopulator entityTypeRegistryPopulator,
       BootstrapThemePopulator bootstrapThemePopulator,
@@ -67,6 +62,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
     this.repositoryPopulator = requireNonNull(repositoryPopulator);
     this.systemPermissionPopulator = requireNonNull(systemPermissionPopulator);
     this.jobBootstrapper = requireNonNull(jobBootstrapper);
+    this.importBootstrapper = requireNonNull(importBootstrapper);
     this.indexBootstrapper = requireNonNull(indexBootstrapper);
     this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
     this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
@@ -75,14 +71,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
   @Transactional
   @RunAsSystem
-  @Timed(value = "bootstrap", description = "Timing information for the bootstrapping event.")
-  @Override
-  public void onApplicationEvent(ContextRefreshedEvent event) {
-    // bootstrap only for root context, not for child contexts
-    if (event.getApplicationContext().getParent() != null) {
-      return;
-    }
-
+  public void bootstrap(ContextRefreshedEvent event) {
     LOG.info("Bootstrapping application ...");
     bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
@@ -118,6 +107,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
     jobBootstrapper.bootstrap();
     LOG.debug("Bootstrapped jobs");
 
+    LOG.trace("Bootstrapping import ...");
+    importBootstrapper.bootstrap();
+    LOG.debug("Bootstrapped import");
+
     LOG.trace("Bootstrapping index ...");
     indexBootstrapper.bootstrap();
     LOG.debug("Bootstrapped index");
@@ -132,10 +125,5 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
     bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
     LOG.info("Bootstrapping application completed");
-  }
-
-  @Override
-  public int getOrder() {
-    return PriorityOrdered.HIGHEST_PRECEDENCE; // bootstrap application before doing anything else
   }
 }

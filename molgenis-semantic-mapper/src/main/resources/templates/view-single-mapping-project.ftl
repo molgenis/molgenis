@@ -274,8 +274,8 @@
                                 <input type="text" value="" name="targetEntityTypeId" id="targetEntityTypeId"
                                        class="form-control"
                                        required minlength="1" maxlength="150"
-                                       data-rule-regex="^[a-zA-Z][a-zA-Z0-9_#]*$"
-                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and hashes (#) are allowed. Must start with a letter."
+                                       data-rule-regex="^[\w\-]+$"
+                                       data-msg-regex="Only letters (a-z, A-Z), digits (0-9), underscores(_) and dashes(-) are allowed."
                                        data-rule-remote="${context_url}/isNewEntity"
                                        data-msg-remote="This is an existing entity."/>
                                 <p class="help-block">Enter an identifier for the integrated data set.</p>
