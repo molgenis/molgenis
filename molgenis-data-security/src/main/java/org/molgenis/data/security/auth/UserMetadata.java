@@ -25,7 +25,7 @@ public class UserMetadata extends SystemEntityType {
   public static final String USERNAME = "username";
   public static final String SUPERUSER = "superuser";
 
-  @SuppressWarnings("squid:S2068") // this is not a hardcoded password
+  @SuppressWarnings("java:S2068") // this is not a hardcoded password
   public static final String PASSWORD = "password_";
 
   public static final String TWO_FACTOR_AUTHENTICATION = "use2fa";
@@ -34,7 +34,7 @@ public class UserMetadata extends SystemEntityType {
   public static final String ACTIVATIONCODE = "activationCode";
   public static final String ACTIVE = "active";
 
-  @SuppressWarnings("squid:S2068") // this is not a hardcoded password
+  @SuppressWarnings("java:S2068") // this is not a hardcoded password
   public static final String CHANGE_PASSWORD = "changePassword";
 
   public static final String FIRSTNAME = "FirstName";

@@ -6,8 +6,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_DataCollection.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class DataCollection {
   public abstract String getName();
 

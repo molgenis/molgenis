@@ -4,7 +4,7 @@ import org.molgenis.util.exception.CodedRuntimeException;
 
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:MaximumInheritanceDepth", "java:S2166"})
 public abstract class CopyFailedException extends CodedRuntimeException {
 
   public CopyFailedException(String errorCode) {

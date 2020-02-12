@@ -63,7 +63,7 @@ public class ScriptRunnerController {
    * @param parameters parameter values for the script
    * @throws IOException if an input or output exception occurs when redirecting
    */
-  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @SuppressWarnings("java:S3752") // backwards compatability: multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = "/scripts/{name}/start")
@@ -77,7 +77,7 @@ public class ScriptRunnerController {
     response.sendRedirect(jobsController.createJobExecutionViewHref(scriptJobExecutionHref, 1000));
   }
 
-  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @SuppressWarnings("java:S3752") // backwards compatability: multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = "/scripts/{name}/submit",
@@ -107,7 +107,7 @@ public class ScriptRunnerController {
    * @throws ScriptException if the script name is unknown or one of the script parameters is
    *     missing
    */
-  @SuppressWarnings("squid:S3752") // backwards compatability: multiple methods required
+  @SuppressWarnings("java:S3752") // backwards compatability: multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = "/scripts/{name}/run")

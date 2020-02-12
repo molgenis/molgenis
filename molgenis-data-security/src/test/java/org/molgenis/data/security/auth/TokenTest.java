@@ -19,7 +19,7 @@ class TokenTest extends AbstractSystemEntityTest {
   @Autowired TokenMetadata metadata;
   @Autowired TokenFactory factory;
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

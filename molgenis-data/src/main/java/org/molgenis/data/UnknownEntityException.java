@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
-@SuppressWarnings({"squid:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:MaximumInheritanceDepth"})
 public class UnknownEntityException extends UnknownDataException {
   private static final String ERROR_CODE = "D02";
 

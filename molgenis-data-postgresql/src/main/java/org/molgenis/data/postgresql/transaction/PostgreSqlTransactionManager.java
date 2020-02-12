@@ -30,7 +30,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>Each transaction is given a unique transaction id.
  */
-@SuppressWarnings("squid:S1948") // The transactionmanager will never be serialized
+@SuppressWarnings("java:S1948") // The transactionmanager will never be serialized
 public class PostgreSqlTransactionManager extends DataSourceTransactionManager
     implements TransactionManager {
   private static final long serialVersionUID = 1L;

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class PasswordResetTokenMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "PasswordResetToken";
 
-  @SuppressWarnings("squid:S2068") // this is not a hardcoded password
+  @SuppressWarnings("java:S2068") // this is not a hardcoded password
   public static final String PASSWORD_RESET_TOKEN =
       PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 

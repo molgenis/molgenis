@@ -91,7 +91,7 @@ public abstract class AbstractWizardController extends PluginController {
     return VIEW_NAME;
   }
 
-  @SuppressWarnings("squid:S3752") // backward compatibility: multiple methods required
+  @SuppressWarnings("java:S3752") // backward compatibility: multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = "/restart")

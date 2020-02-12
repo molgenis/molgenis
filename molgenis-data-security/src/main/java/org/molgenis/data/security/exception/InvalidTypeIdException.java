@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class InvalidTypeIdException extends BadRequestException {
   private static final String ERROR_CODE = "DS22";
 

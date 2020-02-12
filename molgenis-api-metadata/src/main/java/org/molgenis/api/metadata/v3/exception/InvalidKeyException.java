@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class InvalidKeyException extends BadRequestException {
   private static final String ERROR_CODE = "MAPI04";
   private final String target;

@@ -178,7 +178,7 @@ public class Package extends StaticEntity {
    *
    * @return root package of this package or <tt>null</tt>
    */
-  @SuppressWarnings("squid:S2259") // potential multi-threading NPE
+  @SuppressWarnings("java:S2259") // potential multi-threading NPE
   public Package getRootPackage() {
     Package aPackage = this;
     while (aPackage.getParent() != null) {
@@ -203,7 +203,7 @@ public class Package extends StaticEntity {
    * }
    * </code></pre>
    */
-  @SuppressWarnings("squid:S2259") // potential multi-threading NPEs
+  @SuppressWarnings("java:S2259") // potential multi-threading NPEs
   @Override
   public boolean equals(Object o) {
     if (o == this) {

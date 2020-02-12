@@ -6,7 +6,7 @@ import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class UnknownValueReferenceException extends DataConstraintViolationException {
   private static final String UNKNOWN_PLACEHOLDER = "unknown.placeholder";
 

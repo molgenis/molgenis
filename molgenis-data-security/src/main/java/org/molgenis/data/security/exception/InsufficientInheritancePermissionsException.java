@@ -1,6 +1,6 @@
 package org.molgenis.data.security.exception;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class InsufficientInheritancePermissionsException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS28";
 

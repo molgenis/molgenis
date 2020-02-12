@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.PackagePermission;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class ParentPackagePermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS08";
   private final PackagePermission permission;
@@ -17,7 +17,7 @@ public class ParentPackagePermissionDeniedException extends PermissionDeniedExce
     this.pack = requireNonNull(pack);
   }
 
-  @SuppressWarnings("squid:S2259")
+  @SuppressWarnings("java:S2259")
   @Override
   public String getMessage() {
     return String.format(

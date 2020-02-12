@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.security.core.Permission;
 
 @AutoValue
-@SuppressWarnings("squid:S1610") // Autovalue needs an abstract class
+@SuppressWarnings("java:S1610") // Autovalue needs an abstract class
 public abstract class PermissionResponse {
   public abstract String getType();
 

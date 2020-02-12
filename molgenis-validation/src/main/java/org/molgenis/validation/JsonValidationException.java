@@ -10,7 +10,7 @@ import org.molgenis.util.exception.CodedRuntimeException;
 /** Exception that lists one or more violations in a JSON object or schema. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:MaximumInheritanceDepth", "java:S2166"})
 public class JsonValidationException extends CodedRuntimeException {
   private static final String ERROR_CODE = "V01";
   private final Set<ConstraintViolation> violations;

@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.meta.model.EntityType;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class UnknownSortAttributeException extends UnknownDataException {
   private static final String ERROR_CODE = "D27";
   private final transient EntityType entityType;

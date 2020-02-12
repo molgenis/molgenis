@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.meta.model.EntityType;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class UnknownAttributeException extends UnknownDataException {
   private static final String ERROR_CODE = "D04";
   private final transient EntityType entityType;

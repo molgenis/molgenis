@@ -2,7 +2,7 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class ReadPermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS24";
 

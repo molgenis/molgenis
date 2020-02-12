@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings({"squid:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:MaximumInheritanceDepth"})
 public class UnknownPackageException extends UnknownDataException {
   private static final String ERROR_CODE = "D13";
 

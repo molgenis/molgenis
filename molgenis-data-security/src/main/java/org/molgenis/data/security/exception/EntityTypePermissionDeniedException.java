@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypePermission;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class EntityTypePermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS04";
   private static final String ERROR_CODE_WITHOUT_LABEL = "DS04a";

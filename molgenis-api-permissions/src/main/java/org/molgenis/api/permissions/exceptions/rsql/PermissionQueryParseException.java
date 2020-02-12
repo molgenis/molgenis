@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class PermissionQueryParseException extends BadRequestException {
   private static final String ERROR_CODE = "PRM07";
 

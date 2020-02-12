@@ -6,8 +6,7 @@ import org.springframework.security.acls.model.ObjectIdentity;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_LabelledObjectIdentity.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class LabelledObjectIdentity implements ObjectIdentity {
 
   public abstract String getEntityTypeId();

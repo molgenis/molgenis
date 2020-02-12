@@ -4,8 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.data.security.auth.User;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class UserResponse {
   public abstract String getId();
 

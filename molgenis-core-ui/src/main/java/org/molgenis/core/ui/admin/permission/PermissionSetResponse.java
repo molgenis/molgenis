@@ -10,7 +10,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionSet;
 
 @AutoValue
-@SuppressWarnings("squid:S1610") // Autovalue needs an abstract class
+@SuppressWarnings("java:S1610") // Autovalue needs an abstract class
 public abstract class PermissionSetResponse {
   public abstract String getName();
 

@@ -8,7 +8,7 @@ import org.molgenis.data.security.exception.PermissionDeniedException;
 /** Thrown when user has insufficient PluginPermission. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:MaximumInheritanceDepth", "java:S2166"})
 public class PluginPermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DP01";
 

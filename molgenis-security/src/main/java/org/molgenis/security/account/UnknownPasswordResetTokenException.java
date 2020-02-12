@@ -2,7 +2,7 @@ package org.molgenis.security.account;
 
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings({"squid:MaximumInheritanceDepth"})
+@SuppressWarnings({"java:MaximumInheritanceDepth"})
 class UnknownPasswordResetTokenException extends BadRequestException {
   private static final String ERROR_CODE = "SEC04";
 

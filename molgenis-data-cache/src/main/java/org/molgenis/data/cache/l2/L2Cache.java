@@ -183,7 +183,7 @@ public class L2Cache implements TransactionListener {
    *     id of the repository is used to look up the existing cache
    * @return the LoadingCache for the repository
    */
-  @SuppressWarnings("squid:S2201") // ignore return values
+  @SuppressWarnings("java:S2201") // ignore return values
   private LoadingCache<Object, Optional<Map<String, Object>>> getEntityCache(
       Repository<Entity> repository) {
     String id = repository.getEntityType().getId();

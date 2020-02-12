@@ -3,7 +3,7 @@ package org.molgenis.data;
 import static java.util.Objects.requireNonNull;
 
 /** @see Repository */
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:MaximumInheritanceDepth", "java:S2166"})
 public class UnknownRepositoryException extends UnknownDataException {
   private static final String ERROR_CODE = "D05";
 

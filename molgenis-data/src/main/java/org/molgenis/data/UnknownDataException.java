@@ -11,7 +11,7 @@ package org.molgenis.data;
  * @see UnknownPluginException
  * @see UnknownSortAttributeException
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public abstract class UnknownDataException extends ErrorCodedDataAccessException {
   protected UnknownDataException(String errorCode) {
     super(errorCode);

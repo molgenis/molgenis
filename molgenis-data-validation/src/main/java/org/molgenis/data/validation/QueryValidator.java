@@ -451,7 +451,7 @@ public class QueryValidator {
     return value.toString();
   }
 
-  @SuppressWarnings("squid:S2447") // Null should not be returned from a "Boolean" method
+  @SuppressWarnings("java:S2447") // Null should not be returned from a "Boolean" method
   @Nullable
   @CheckForNull
   private static Boolean convertBool(Attribute attr, Object value) {

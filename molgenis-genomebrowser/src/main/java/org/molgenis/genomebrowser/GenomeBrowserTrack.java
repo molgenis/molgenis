@@ -15,11 +15,10 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GenomeBrowserTrack {
 
-  @SuppressWarnings("squid:S00107") // Methods should not have too many parameters
+  @SuppressWarnings("java:S00107") // Methods should not have too many parameters
   public static GenomeBrowserTrack create(
       String id,
       String label,

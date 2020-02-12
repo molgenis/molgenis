@@ -8,8 +8,7 @@ import org.molgenis.util.AutoGson;
 /** Dataset of a beacon. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconDatasetResponse.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class BeaconDatasetResponse {
   /** Unique identifier of the dataset. */
   public abstract String getId();

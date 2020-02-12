@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 import org.molgenis.util.i18n.MessageSourceHolder;
 
 /** {@link RuntimeException} with error code. */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public abstract class CodedRuntimeException extends RuntimeException implements ErrorCoded {
   private final String errorCode;
 

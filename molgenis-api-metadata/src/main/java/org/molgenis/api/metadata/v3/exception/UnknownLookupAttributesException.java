@@ -8,7 +8,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class UnknownLookupAttributesException extends BadRequestException {
 
   private static final String ERROR_CODE = "MAPI05";

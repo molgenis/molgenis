@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:MaximumInheritanceDepth")
 public class EntityTypeReferencedException extends DataConstraintViolationException {
   private static final String ERROR_CODE = "D19";
 

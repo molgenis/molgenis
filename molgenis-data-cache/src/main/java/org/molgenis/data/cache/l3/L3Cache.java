@@ -64,7 +64,7 @@ public class L3Cache implements TransactionListener {
     return cache.getUnchecked(fetchlessQuery);
   }
 
-  @SuppressWarnings("squid:S2201") // ignore return values
+  @SuppressWarnings("java:S2201") // ignore return values
   private LoadingCache<Query<Entity>, List<Object>> getQueryCache(Repository<Entity> repository) {
     String id = repository.getEntityType().getId();
     if (!caches.containsKey(id)) {
