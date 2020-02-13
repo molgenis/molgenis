@@ -378,7 +378,7 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     for (String field : fields) {
       result =
           result.replaceAll(
-              "\"" + field + "\":\"[a-zA-Z0-9/\\=\\?:\\-_]*\"", "\"" + field + "\":\"AUTOID\"");
+              "\"" + field + "\":\\s?\"[a-zA-Z0-9/\\=\\?:\\-_]*\"", "\"" + field + "\":\"AUTOID\"");
     }
     assertThat(result, isEqualJson(expectedJson, JSONCompareMode.LENIENT));
   }
