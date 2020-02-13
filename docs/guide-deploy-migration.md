@@ -48,9 +48,6 @@ mv data data_backup
 tar -pxvzf molgenis.tar.gz
 ```
 
->note: if you use our [Ansible playbook](https://github.com/molgenis/ansible) to deploy MOLGENIS you have to do the following steps:
-> - execute: ```chmod -R 770 /home/molgenis```
-
 #### Configuration
 Go to a terminal and tar you files into an archive (as root-user):
 
