@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.generator;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.generator.QueryBuilderAssertions.assertQueryBuilderEquals;
@@ -11,6 +12,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -35,6 +37,16 @@ class QueryClauseSearchGeneratorTest extends AbstractMockitoTest {
     QueryBuilder queryBuilder = queryClauseSearchGenerator.mapQueryRule(queryRule, entityType);
     QueryBuilder expectedQueryBuilder = QueryBuilders.matchPhraseQuery("_all", "val").slop(10);
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  void mapQueryRuleAllAttributeSearchNullValue() {
+    QueryRule queryRule = mock(QueryRule.class);
+    EntityType entityType = mock(EntityType.class);
+    assertThrows(
+        MolgenisQueryException.class,
+        () -> queryClauseSearchGenerator.mapQueryRule(queryRule, entityType));
   }
 
   @Test
