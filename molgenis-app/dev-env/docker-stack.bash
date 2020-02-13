@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FRONTEND=molgenis/molgenis-frontend:latest
+export FRONTEND=molgenis/molgenis-frontend:8.3-stable
 export BACKEND=./backend-for-mac.conf
 
 function usage() {
