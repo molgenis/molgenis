@@ -8,12 +8,13 @@ There are a few services you need to migrate data from.
 - [PostgreSQL](#postgresql)
   - for 7.x PostgreSQL 9.6
   - for 8.x PostgreSQL 11.0.1
-- [FileStore](#filestore)
-  - for 7.x /srv/molgenis/data
-  - for 8.x /home/molgenis/data
-- [Configuration](#configuration)
-  - for 7.x /srv/molgenis/molgenis-server.properties
-  - for 8.x /home/molgenis/molgenis-server.properties
+  
+#### MOLGENIS home dir
+The file store and server properties are located in the MOLGENIS home dir.
+The location of this directory is configured as follows:
+- `molgenis.home` runtime property if specified in the tomcat catalina options, otherwise
+- `molgenis.home` environment variable if specified, otherwise
+- `.molgenis` dir in the user's home dir
   
 #### PostgreSQL
 Go to a terminal and dump your database using (as root-user):
