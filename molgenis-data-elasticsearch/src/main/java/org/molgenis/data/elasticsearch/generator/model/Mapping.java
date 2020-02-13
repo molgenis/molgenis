@@ -6,8 +6,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Mapping {
   public abstract String getType();
 

@@ -9,8 +9,7 @@ import org.molgenis.util.AutoGson;
 /** BeaconResponse's response to a query for information about a specific allele. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconAlleleResponse.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class BeaconAlleleResponse {
   /** Identifier of the beacon, as defined in @{@link Beacon}. */
   public abstract String getBeaconId();

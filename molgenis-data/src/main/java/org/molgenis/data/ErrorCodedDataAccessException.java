@@ -10,7 +10,7 @@ import org.molgenis.util.i18n.MessageSourceHolder;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 /** {@link org.springframework.dao.DataAccessException} with error code and without message. */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public abstract class ErrorCodedDataAccessException
     extends org.springframework.dao.DataAccessException implements ErrorCoded {
   private final String errorCode;

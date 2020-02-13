@@ -10,8 +10,7 @@ import org.molgenis.util.AutoGson;
 /** Collection of typed resources. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ResourceCollection.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class ResourceCollection {
 
   @NotNull

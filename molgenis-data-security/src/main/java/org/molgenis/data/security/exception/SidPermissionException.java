@@ -2,7 +2,7 @@ package org.molgenis.data.security.exception;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class SidPermissionException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS25";
   private final String sids;

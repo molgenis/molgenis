@@ -105,7 +105,7 @@ public class FeedbackController extends AbstractStaticContentController {
   }
 
   /** Creates a MimeMessage based on a FeedbackForm. */
-  @SuppressWarnings("squid:S3457") // do not use platform specific line ending
+  @SuppressWarnings("java:S3457") // do not use platform specific line ending
   private SimpleMailMessage createFeedbackMessage(FeedbackForm form) {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setTo(userService.getSuEmailAddresses().toArray(new String[] {}));

@@ -21,7 +21,7 @@ public class OntologyTermSynonymTest extends AbstractSystemEntityTest {
   @Autowired OntologyTermSynonymMetadata metadata;
   @Autowired OntologyTermSynonymFactory factory;
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

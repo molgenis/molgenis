@@ -8,8 +8,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EntityCollectionDeleteRequestV2.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EntityCollectionDeleteRequestV2 {
   @NotEmpty(message = "Please provide at least one entity in the entityIds property.")
   @Size(

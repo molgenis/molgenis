@@ -25,7 +25,7 @@ class Icd10ClassExpanderImplTest {
     icd10ClassExpanderImpl = new Icd10ClassExpanderImpl();
   }
 
-  @SuppressWarnings("squid:S1192") // using literal string multiple times
+  @SuppressWarnings("java:S1192") // using literal string multiple times
   static Iterator<Object[]> testExpandClassesProvider() {
     Entity entityA = createEntity("A");
     Entity entityB = createEntity("B");

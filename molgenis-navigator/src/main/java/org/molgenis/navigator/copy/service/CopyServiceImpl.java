@@ -48,7 +48,7 @@ public class CopyServiceImpl implements CopyService {
 
   @Override
   @SuppressWarnings(
-      "squid:S1193") // Exception types should not be tested using "instanceof" in catch blocks
+      "java:S1193") // Exception types should not be tested using "instanceof" in catch blocks
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Void copy(
       List<ResourceIdentifier> resources,

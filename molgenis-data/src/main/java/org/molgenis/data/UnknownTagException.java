@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 /** Thrown when a Tag is requested that doesn't exist */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownTagException extends UnknownDataException {
   private static final String ERROR_CODE = "D14";
 

@@ -8,7 +8,7 @@ import org.molgenis.util.exception.CodedRuntimeException;
 /** Exception that's thrown when a JSON Schema contains errors. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:S110", "java:S2166"})
 public class InvalidJsonSchemaException extends CodedRuntimeException {
   private static final String ERROR_CODE = "V02";
   private final Throwable cause;

@@ -95,7 +95,7 @@ public class EntityTypeRequestMapperImpl implements EntityTypeRequestMapper {
   }
 
   @SuppressWarnings({
-    "squid:S1192"
+    "java:S1192"
   }) // ATTRIBUTES constant in this class is not related to the one in this switch
   private void updateEntityType(EntityType entityType, Entry<String, Object> entry) {
     switch (entry.getKey()) {

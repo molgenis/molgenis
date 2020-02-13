@@ -8,7 +8,7 @@ import org.molgenis.util.exception.CodedRuntimeException;
 /** Thrown when unzipping a file fails. */
 // S2166 'Classes named like "Exception" should extend "Exception" or a subclass' often gives false
 // positives at dev time
-@SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
+@SuppressWarnings({"java:S110", "java:S2166"})
 public class CodedUnzipException extends CodedRuntimeException {
   private static final String ERROR_CODE = "DF01";
 

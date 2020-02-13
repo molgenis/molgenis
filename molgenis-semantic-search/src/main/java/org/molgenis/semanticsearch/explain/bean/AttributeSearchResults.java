@@ -5,8 +5,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.semanticsearch.semantic.Hits;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class AttributeSearchResults {
   public abstract Attribute getAttribute();
 

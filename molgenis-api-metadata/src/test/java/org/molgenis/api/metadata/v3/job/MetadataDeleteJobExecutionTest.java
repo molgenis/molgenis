@@ -54,7 +54,7 @@ public class MetadataDeleteJobExecutionTest extends AbstractSystemEntityTest {
     return attrs;
   }
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   public void testSystemEntity() {
     internalTestAttributes(

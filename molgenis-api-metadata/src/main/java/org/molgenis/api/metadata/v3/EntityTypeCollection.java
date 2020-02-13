@@ -17,7 +17,7 @@ abstract class EntityTypeCollection {
   abstract @Nullable @CheckForNull String getEntityId();
 
   @SuppressWarnings(
-      "squid:S1610") // Abstract classes without fields should be converted to interfaces
+      "java:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   abstract static class Builder {
 
@@ -59,7 +59,7 @@ abstract class EntityTypeCollection {
     }
 
     @SuppressWarnings(
-        "squid:S1610") // Abstract classes without fields should be converted to interfaces
+        "java:S1610") // Abstract classes without fields should be converted to interfaces
     @AutoValue.Builder
     abstract static class Builder {
 

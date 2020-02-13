@@ -21,7 +21,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.test.AbstractMockitoTest;
 
-@SuppressWarnings("squid:S1192") // string literals should not be duplicated
+@SuppressWarnings("java:S1192") // string literals should not be duplicated
 class MetadataApiJobServiceImplTest extends AbstractMockitoTest {
 
   @Mock MetadataUpsertJobExecutionFactory metadataUpsertJobExecutionFactory;

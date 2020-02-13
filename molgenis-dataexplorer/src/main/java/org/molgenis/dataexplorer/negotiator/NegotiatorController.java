@@ -225,7 +225,7 @@ public class NegotiatorController extends PluginController {
         .collect(Collectors.toList());
   }
 
-  @SuppressWarnings("squid:S1125") // boolean literal isn't redundant here
+  @SuppressWarnings("java:S1125") // boolean literal isn't redundant here
   private boolean evaluateExpressionOnEntity(String expression, Entity entity) {
     return expression == null
         ? true

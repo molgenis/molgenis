@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.UnknownDataException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownRoleException extends UnknownDataException {
   private static final String ERROR_CODE = "DS21";
   private final String name;

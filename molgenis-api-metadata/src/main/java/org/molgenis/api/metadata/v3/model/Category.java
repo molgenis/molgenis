@@ -17,7 +17,7 @@ public abstract class Category {
   }
 
   // Abstract classes without fields should be converted to interfaces
-  @SuppressWarnings("squid:S1610")
+  @SuppressWarnings("java:S1610")
   @AutoValue.Builder
   public abstract static class Builder {
 

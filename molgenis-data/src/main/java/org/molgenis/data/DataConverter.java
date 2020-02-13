@@ -161,7 +161,7 @@ public class DataConverter {
    * @return true, false or null
    * @throws DataConversionException if conversion failed
    */
-  @SuppressWarnings("squid:S2447") // null is a valid return value
+  @SuppressWarnings("java:S2447") // null is a valid return value
   @Nullable
   @CheckForNull
   public static Boolean toBoolean(@Nullable @CheckForNull Object source) {

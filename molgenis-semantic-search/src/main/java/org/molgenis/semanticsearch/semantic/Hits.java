@@ -7,8 +7,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Hits<T> implements Iterable<Hit<T>> {
   public abstract List<Hit<T>> getHits();
 

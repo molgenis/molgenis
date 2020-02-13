@@ -45,7 +45,7 @@ abstract class SerializableEntityType {
   }
 
   @SuppressWarnings(
-      "squid:S1610") // Abstract classes without fields should be converted to interfaces
+      "java:S1610") // Abstract classes without fields should be converted to interfaces
   @AutoValue.Builder
   public abstract static class Builder {
 

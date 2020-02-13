@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  * @see ValueReferencedException
  * @see ValueRequiredException
  */
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public abstract class DataConstraintViolationException extends ErrorCodedDataAccessException {
   protected DataConstraintViolationException(
       String errorCode, @Nullable @CheckForNull Throwable cause) {

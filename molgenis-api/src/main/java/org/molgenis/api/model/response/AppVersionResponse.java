@@ -6,7 +6,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AppVersionResponse.class)
-@SuppressWarnings("squid:S1610")
+@SuppressWarnings("java:S1610")
 public abstract class AppVersionResponse {
   public abstract String getVersion();
 

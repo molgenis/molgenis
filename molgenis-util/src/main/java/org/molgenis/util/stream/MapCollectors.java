@@ -21,7 +21,7 @@ public class MapCollectors {
    * Based on <a
    * href="https://stackoverflow.com/a/29090335/8579801">https://stackoverflow.com/a/29090335/8579801</a>
    */
-  @SuppressWarnings("squid:S1452")
+  @SuppressWarnings("java:S1452")
   public static <T, K, U> Collector<T, ?, Map<K, U>> toLinkedMap(
       Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper) {
     return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), LinkedHashMap::new);

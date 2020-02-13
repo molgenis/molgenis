@@ -11,7 +11,7 @@ import org.molgenis.util.AutoGson;
 /** A menu item. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MenuItem.class)
-@SuppressWarnings("squid:S1610") // Autovalue class cannot be an interface
+@SuppressWarnings("java:S1610") // Autovalue class cannot be an interface
 public abstract class MenuItem implements MenuNode {
 
   /** @return the parameters for this menu item */

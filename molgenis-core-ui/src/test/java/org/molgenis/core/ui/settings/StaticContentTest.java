@@ -13,7 +13,7 @@ public class StaticContentTest extends AbstractSystemEntityTest {
   @Autowired StaticContentMetadata metadata;
   @Autowired StaticContentFactory factory;
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

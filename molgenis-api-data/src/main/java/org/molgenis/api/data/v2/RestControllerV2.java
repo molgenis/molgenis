@@ -316,7 +316,7 @@ public class RestControllerV2 {
    * @param response HttpServletResponse
    * @return EntityCollectionCreateResponseBodyV2
    */
-  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
+  @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
   @PostMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public EntityCollectionBatchCreateResponseBodyV2 createEntities(
@@ -447,7 +447,7 @@ public class RestControllerV2 {
    * @param request EntityCollectionCreateRequestV2
    * @param response HttpServletResponse
    */
-  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
+  @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
   @PutMapping("/{entityTypeId}")
   public synchronized void updateEntities(
@@ -500,7 +500,7 @@ public class RestControllerV2 {
    * @param request EntityCollectionBatchRequestV2
    * @param response HttpServletResponse
    */
-  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
+  @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
   @PutMapping("/{entityTypeId}/{attributeName}")
   @ResponseStatus(OK)

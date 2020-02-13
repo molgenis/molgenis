@@ -75,7 +75,7 @@ public class MolgenisMenuController {
    * provided.
    */
   @Transactional(readOnly = true)
-  @SuppressWarnings("squid:S3752") // multiple methods required
+  @SuppressWarnings("java:S3752") // multiple methods required
   @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST})
   public String forwardDefaultMenuDefaultPlugin(Model model) {
     Menu menu =
@@ -118,7 +118,7 @@ public class MolgenisMenuController {
    *
    * @param menuId ID of the menu or plugin
    */
-  @SuppressWarnings("squid:S3752") // multiple methods required
+  @SuppressWarnings("java:S3752") // multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = "/{menuId}")
@@ -151,7 +151,7 @@ public class MolgenisMenuController {
    * @param menuId ID of the menu parent of the pluginID
    * @param pluginId ID of the plugin
    */
-  @SuppressWarnings("squid:S3752") // multiple methods required
+  @SuppressWarnings("java:S3752") // multiple methods required
   @RequestMapping("/{menuId}/{pluginId}/**")
   public String forwardMenuPlugin(
       HttpServletRequest request,
@@ -216,7 +216,7 @@ public class MolgenisMenuController {
 
   /** Controller used to render an empty page if the user has no permissions to view anything. */
   @Controller
-  @SuppressWarnings("squid:S3752") // multiple methods required
+  @SuppressWarnings("java:S3752") // multiple methods required
   @RequestMapping(
       method = {RequestMethod.GET, RequestMethod.POST},
       value = VoidPluginController.URI)

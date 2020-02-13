@@ -26,8 +26,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 
-// squids: nested code blocks should be extracted & using the same literal string multiple times
-@SuppressWarnings({"squid:S1199", "squid:S1192"})
+// javas: nested code blocks should be extracted & using the same literal string multiple times
+@SuppressWarnings({"java:S1199", "java:S1192"})
 class CollectionsQueryTransformerImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
 
@@ -60,7 +60,7 @@ class CollectionsQueryTransformerImplTest extends AbstractMockitoTest {
   }
 
   @SuppressWarnings("UnnecessaryLocalVariable")
-  // squids: nested code blocks should be extracted & using the same literal string multiple times
+  // javas: nested code blocks should be extracted & using the same literal string multiple times
   static Iterator<Object[]> nonTransformableQueryProvider() {
     setExpandedDiseaseEntities();
 

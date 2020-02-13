@@ -106,7 +106,7 @@ class RelationTransformer {
         .forEach(attr -> transformMappedBy(attr, newAttributes));
   }
 
-  @SuppressWarnings("squid:S2259")
+  @SuppressWarnings("java:S2259")
   private static void transformMappedBy(Attribute attribute, Map<String, Attribute> newAttributes) {
     if (attribute.isMappedBy()) {
       @SuppressWarnings("ConstantConditions")
