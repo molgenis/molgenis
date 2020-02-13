@@ -1,35 +1,29 @@
 package org.molgenis.data;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.STRING;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.molgenis.data.meta.model.Attribute;
+import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.AbstractMockitoTest;
 
-class EntityManagerImplTest {
-  private DataService dataService;
+class EntityManagerImplTest extends AbstractMockitoTest {
+  @Mock private DataService dataService;
+  @Mock private EntityFactoryRegistry entityFactoryRegistry;
+  @Mock private EntityPopulator entityPopulator;
+  @Mock private EntityReferenceCreator entityReferenceCreator;
   private EntityManagerImpl entityManagerImpl;
-  private EntityFactoryRegistry entityFactoryRegistry;
-  private EntityPopulator entityPopulator;
-  private EntityReferenceCreator entityReferenceCreator;
 
   @BeforeEach
   void setUpBeforeMethod() {
-    dataService = mock(DataService.class);
-    entityFactoryRegistry = mock(EntityFactoryRegistry.class);
-    entityPopulator = mock(EntityPopulator.class);
-    entityReferenceCreator = mock(EntityReferenceCreator.class);
     entityManagerImpl =
         new EntityManagerImpl(
             dataService, entityFactoryRegistry, entityPopulator, entityReferenceCreator);
@@ -53,7 +47,7 @@ class EntityManagerImplTest {
 
   @Test
   void resolveReferencesNoFetch() {
-    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+    EntityType entityType = mock(EntityType.class);
 
     Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
     Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
@@ -65,11 +59,7 @@ class EntityManagerImplTest {
 
   @Test
   void resolveReferencesStreamNoFetch() {
-    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
-    Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
-    when(labelAttr.getDataType()).thenReturn(STRING);
-    when(entityType.getLabelAttribute()).thenReturn(labelAttr);
-    when(entityType.getAtomicAttributes()).thenReturn(singletonList(labelAttr));
+    EntityType entityType = mock(EntityType.class);
 
     Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
     Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
