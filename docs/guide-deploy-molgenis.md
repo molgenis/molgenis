@@ -1,5 +1,5 @@
 # Deploy MOLGENIS
-We support three ways in which you can use MOLGENIS.
+We support two ways in which you can use MOLGENIS.
 
 ## Run in development or test
 When you are developing on top of MOLGENIS or testing the platform we recommend using the [docker-compose](https://github.com/molgenis/docker).
