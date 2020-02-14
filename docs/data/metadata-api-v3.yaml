@@ -443,13 +443,21 @@ components:
         indexingDepth:
           type: integer
         attributes:
-          type: array
-          items:
-            $ref: "#/components/schemas/Attribute"
+          type: object
+          $ref: "#/components/schemas/Attributes"
       example:
         id: 0
         parent: https://my.molgenis.org/api/data/Node/1
         children: https://my.molgenis.org/api/data/Node/0/children
+    Attributes:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+        links:
+          $ref: "#/components/schemas/Links"
     Attribute:
       type: object
       properties:
