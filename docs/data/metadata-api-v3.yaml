@@ -86,6 +86,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
         - $ref: '#/components/parameters/flattenAttributes'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           $ref: '#/components/responses/OkEntityTypeResponse'
@@ -366,6 +367,13 @@ components:
     flattenAttributes:
       name: flattenAttributes
       description: Include attributes of parent entity types
+      in: query
+      required: false
+      schema:
+        type: boolean
+    i18n:
+      name: i18n
+      description: Include translations e.g. label/description
       in: query
       required: false
       schema:
