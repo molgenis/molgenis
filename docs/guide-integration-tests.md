@@ -38,18 +38,17 @@ Please boot the backend services with the docker-compose stack in the source-tre
 * Check the option ```--build, force build images```
 * Add the following variables to the environment:
 
-  **For Windows**
+
   ```env
-  BACKEND=./backend-for-windows.conf
-  FRONTEND=molgenis/molgenis-frontend:latest
-  ```
-  
-  **For Mac**
-  ```env
-  BACKEND=./backend-for-mac.conf
-  FRONTEND=molgenis/molgenis-frontend:latest
-  ```
-* Run the 'integ-test-env: Compose...' Run configuration 
+MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
+# MacOS: host.docker.internal
+# Windows: docker.for.win
+# Linux: 172.17.0.1 (bridge) or 127.0.0.1 (host)
+MOLGENIS_HOST=host.docker.internal
+# Window & MacOS: bridge, Linux: host
+NETWORK_MODE=bridge
+```
+* Run the 'integ-test-env: Compose...' Run configuration
 * Then click on the ```molgenis-platform-integration-tests``` module and click *Run --> All Tests (TestNG)*
 
 The code will not make any attempts to delete the integration test database and index.
