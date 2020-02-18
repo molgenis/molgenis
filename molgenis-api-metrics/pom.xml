@@ -18,7 +18,6 @@
         <configuration>
           <apiSources>
             <apiSource>
-              <basePath>/api</basePath>
               <info>
                 <title>${project.name}</title>
                 <version>${project.version}</version>
