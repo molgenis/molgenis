@@ -10,7 +10,7 @@ The currently (molgenis 3.0.0 and higher) supported endpoints are:
 
 ## Metadata: /fdp/
 
-Example: ```http://molgenis.mydomain.example/fdp/ ```
+Example: `http://molgenis.mydomain.example/fdp/`
 This endpoint returns information the following information about the server:
 identifier,title,issued,modified,hasVersion,license,description,APIVersion,publisher,contact,language,rights,contains
 
@@ -18,7 +18,7 @@ For a description of those items check [here](https://dtl-fair.atlassian.net/wik
 
 ## Catalog: /fdp/[catalogID]
 
-Example: ```http://molgenis.mydomain.example/fdp/catalogue/```
+Example: `http://molgenis.mydomain.example/fdp/catalogue/`
 This endpoint returns information the following information about the datasets available on this server:
 title,identifier,issued,modified,hasVersion,publisher,description,language,license,rights,homepage,dataset,themeTaxonomy
 
@@ -26,7 +26,7 @@ For a description of those items check [here](http://www.w3.org/TR/vocab-dcat/#C
 
 ## Dataset: /fdp/[catalogID]/[datasetID]/
 
-Example: ```http://molgenis.mydomain.example/fdp/catalogue/biobanks```
+Example: `http://molgenis.mydomain.example/fdp/catalogue/biobanks`
 This endpoint returns information the following information about the dataset:
 title,identifier,issued,modified,publisher,hasVersion,description,language,license,rights,distribution,theme,contactPoint,keyword,landingPage
 
@@ -34,7 +34,7 @@ For a description of those items check [here](http://www.w3.org/TR/vocab-dcat/#C
 
 ## Distribution: /fdp/[catalogID]}/[datasetID]/[distributionID]
 
-Example: ```http://molgenis.mydomain.example/fdp/catalogue/biobanks/distribution```
+Example: `http://molgenis.mydomain.example/fdp/catalogue/biobanks/distribution`
 This endpoint returns information the following information about the distribution of the dataset:
 title,identifier,issued,modified,license,hasVersion,rights,description,accessURL,downloadURL,mediaType,format,byteSize
 

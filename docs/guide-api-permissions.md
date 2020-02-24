@@ -58,7 +58,7 @@ Query: none
 List of ACL types available in the system.
 ##### Example 
 Response:
-```
+```json
 "data": {
   [
       {
@@ -122,7 +122,9 @@ A list of permissions that can be used for this resource type.
 ##### Example 
 Request:
 
-```https://molgenis.mydomain.example/api/permissions/types/permissions/entityType```
+```
+https://molgenis.mydomain.example/api/permissions/types/permissions/entityType
+```
 
 Response:
 ```
@@ -611,7 +613,9 @@ The endpoint expects a list of permissions, each permission should contain a 'pe
 
 ##### Example request
 URL:
+```
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
+```
 Body:
 ```
 {
@@ -644,9 +648,12 @@ The endpoint expects a list of resources, each of which should contrain the iden
 |409 Conflict | the a permission already exists for this combination of user/role and object |
 
 ##### Example
-URL: https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
-Body:
+URL: 
 ```
+https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
+```
+Body:
+```json
 "data": {
   {
     objects:[{
@@ -698,15 +705,16 @@ URL:
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
 ```
 Body:
-```{
-   	permissions:[{
-   		permission:WRITE,
-   		role:CARDIOLOGY
-   	},{
-   		permission:WRITEMETA,
-   		user:Cardiologist
-   	}]
-   }
+```json
+{
+  permissions:[{
+    permission:WRITE,
+    role:CARDIOLOGY
+  },{
+    permission:WRITEMETA,
+    user:Cardiologist
+  }]
+}
 ```
 
 ### Update permissions for one or more users and/or roles for resources of a certain type
@@ -732,7 +740,7 @@ URL:
 https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_patients
 ```
 Body:
-```
+```json
 {
 	objects:[{
 			id:Patient1,
@@ -782,15 +790,13 @@ The field takes a single user or role.
 |404 Not found | the type, object, user, role or permission does not exist |
 
 ##### Example 
-Request:
-
-URL 
+URL:
 ```
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
 ```
 
 Body 
-```
+```json
 {
   user:Cardiologist
 }

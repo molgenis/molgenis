@@ -7,7 +7,7 @@ but it is also important for security reasons. MOLGENIS has an extensive user ma
 allowing people to register themselves, or be registered by an administrator.  
 You can find the User manager module under the Admin menu:
 
-![Menu manager screen](images/user_manager.png?raw=true, "user manager")
+![Menu manager screen](./images/user_manager.png)
 
 The user management menu allows you to create new users.
 But also lets you edit existing users.
@@ -29,7 +29,7 @@ You can also define more fine grained permissions to each user by setting the pe
 
 ## Try it out
 To let you get a feel of how the user manager works, we will create a new user called molgenis_user.
-First, click the ![New button](images/new.png?raw=true, "new button") button.
+First, click the ![New button](./images/new.png) button.
 This will open up a form for creating a new User.
 Most of the fields are pretty self-explanatory, but there are a few that we will elaborate on.
 

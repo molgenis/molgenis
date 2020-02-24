@@ -25,8 +25,8 @@ than HTML elements.
 
 ### Fonts
 To use different fonts, you need to import them in the less or scss config. For bootstrap 3, you can
-edit the ```theme.less``` by clicking the "Edit theme.less"-button. For bootstrap 4 fonts should be
-imported in the ```custom.scss```.
+edit the `theme.less` by clicking the "Edit theme.less"-button. For bootstrap 4 fonts should be
+imported in the `custom.scss`.
 Here you can import fonts via URL in this way:
 ```css
 @import url("//fonts.googleapis.com/css?family=IBM+Plex+Sans");
@@ -37,8 +37,8 @@ font can be done in the "Typography" tab of your theme builder.
 ### Exporting
 Download at least the unminimized css file. This is the readable version of your css and it can be
 loaded in molgenis using the theme manager. If you created a theme for a specific project, put it in
-the molgenis-projects repository on github. Downloading the ```.less``` files for bootstrap 3 and the
-```.scss``` files for bootstrap 4 and uploading them later again enables for continuing on your
+the molgenis-projects repository on github. Downloading the `.less` files for bootstrap 3 and the
+`.scss` files for bootstrap 4 and uploading them later again enables for continuing on your
 styling in the theme builder in future.
 
 ### Making bootstrap 3 and 4 themes look the same
@@ -48,8 +48,8 @@ this.
 
 #### 1. Determine which font-size you want to use.
 Bootstrap 3 uses 14px as basic font size whereas bootstrap 4 uses 16 px. To change the default of
-bootstrap 3 to 16px, set the ```@font-size-base``` to 16px in the "Typography" section. To change the
-default of bootstrap 4 to 14px, set the ```$font-size-base``` of the "Typography" section to 0.875rem.
+bootstrap 3 to 16px, set the `@font-size-base` to 16px in the "Typography" section. To change the
+default of bootstrap 4 to 14px, set the `$font-size-base` of the "Typography" section to 0.875rem.
 
 #### 2. Set the same colors
 Set your own colors, or copy either the colors of bootstrap 3 of bootstrap 4 to both themes in the
@@ -60,7 +60,7 @@ you can use the info color, or another if you prefer.
 To make the menu look the same, use your browsers debugger to compare the bootstrap 3 and 4 theme
 and copy css styling between the two until they look the same. Do the same alterations in your
 bootstrap css. Some of the alterations you want to do cannot be done in the theme builders. Paste
-this css code well documented on top of you bootstrap theme file. Be carefull with the ```!important```.
+this css code well documented on top of you bootstrap theme file. Be careful with the `!important`.
 
 #### 4. Sign in and sign out button
 These buttons have such different classes between the bootstrap 3 and 4 molgenis menu, that you

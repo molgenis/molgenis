@@ -20,11 +20,11 @@ Creating your first beacon
 --------------------------
 When you have uploaded some genetic data sets in the form of an EMX or VCF, you can go to the Dataexplorer to start creating your first beacon.  
 
-The following examples work with [this data](data/beacon_set.vcf).
+The following examples work with [this data](./data/beacon_set.vcf).
 
 Select the *Beacon* table in the dropdown, and add a new row.
 
-![Creating a Beacon](images/beacon/add-beacon-form.png?raw=true, "beacon/add-beacon-form")
+![Creating a Beacon](./images/beacon/add-beacon-form.png)
 
 The beacon created here has only one data set, namely *beacon_set*.  
 Note that the Organization is still empty, we will come back to that later.
@@ -122,15 +122,15 @@ For your beacon to look nice to the world, we will add it to an organization.
 
 In the dataexplorer, go to the dropdown in the top right, select the *BeaconOrganization* table, and add a new row
 
-![Creating a Beacon Organization](images/beacon/create-organization-form.png?raw=true, "beacon/create-organization-form")
+![Creating a Beacon Organization](./images/beacon/create-organization-form.png)
 
 Configure dataset as Beacon
 
-![Configure dataset as a beacon](images/beacon/configure-beacon-as-dataset-form.png?raw=true, "beacon/configure-beacon-as-dataset-form")
+![Configure dataset as a beacon](./images/beacon/configure-beacon-as-dataset-form.png)
 
 And now we can link to this organization and dataset by editing the Beacon row we created before
 
-![Adding a Beacon](images/beacon/add-beacon-form.png?raw=true, "beacon/add-beacon-form")
+![Adding a Beacon](./images/beacon/add-beacon-form.png)
 
 And by requesting info on our beacon again  
 `http://localhost:8080/beacon/MyFirstBeacon`

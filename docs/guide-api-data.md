@@ -4,7 +4,7 @@ RESTful API to create/read/update/delete data.
 
 ## Data API v3
 Use the following steps to view the documentation:
-- Download [data-api-v3.yaml](data/data-api-v3.yaml) 
+- Download [data-api-v3.yaml](./data/data-api-v3.yaml) 
 - Navigate to http://editor.swagger.io/
 - Select 'File' --> 'Import the file' and point to the downloaded file 
 

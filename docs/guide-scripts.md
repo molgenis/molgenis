@@ -155,7 +155,7 @@ In the popup, specify the value for `snp_id`, for example `rs2287988`.
 
 Click on "Run".
 
-![image](images/rs2287988.png)
+![image](./images/rs2287988.png)
 
 ### Call the script via API
 Scripts can be scheduled by URL (for example using [Postman](https://www.getpostman.com/)).
