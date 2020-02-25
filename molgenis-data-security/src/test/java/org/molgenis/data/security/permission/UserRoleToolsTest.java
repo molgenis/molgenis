@@ -1,8 +1,11 @@
 package org.molgenis.data.security.permission;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +36,8 @@ import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetadata;
+import org.molgenis.data.security.exception.UnknownRoleException;
+import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
@@ -48,8 +53,38 @@ class UserRoleToolsTest extends AbstractMockitoTest {
   private UserRoleTools userRoleTools;
 
   @BeforeEach
-  private void setUpBeforeMethod() {
+  void setUpBeforeMethod() {
     this.userRoleTools = new UserRoleTools(userService, dataService, userPermissionEvaluator);
+  }
+
+  @Test
+  void testCheckRoleExists() {
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    Role role = mock(Role.class);
+    when(query.findOne()).thenReturn(role);
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    assertDoesNotThrow(() -> userRoleTools.checkRoleExists("role"));
+  }
+
+  @Test
+  void testCheckRoleExistsUnknownRoleException() {
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    assertThrows(UnknownRoleException.class, () -> userRoleTools.checkRoleExists("role"));
+  }
+
+  @Test
+  void testCheckUserExists() {
+    User user = mock(User.class);
+    when(userService.getUser("user")).thenReturn(user);
+    assertDoesNotThrow(() -> userRoleTools.checkUserExists("user"));
+  }
+
+  @Test
+  void testCheckUserExistsUnknownUserException() {
+    assertThrows(UnknownUserException.class, () -> userRoleTools.checkUserExists("user"));
   }
 
   @Test
