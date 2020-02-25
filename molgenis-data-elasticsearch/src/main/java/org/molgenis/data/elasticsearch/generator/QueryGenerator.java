@@ -177,4 +177,10 @@ public class QueryGenerator {
     }
     return disMaxQueryBuilder;
   }
+
+  /** testability */
+  void setQueryClauseGeneratorMap(EnumMap<Operator, QueryClauseGenerator> queryClauseGeneratorMap) {
+    this.queryClauseGeneratorMap.clear();
+    this.queryClauseGeneratorMap.putAll(queryClauseGeneratorMap);
+  }
 }
