@@ -64,7 +64,7 @@ public class SessionSecurityContextUpdaterImpl
     actionThreadLocal.remove();
   }
 
-  private void resetAuthorities(String username) {
+  private synchronized void resetAuthorities(String username) {
     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
     Collection<? extends GrantedAuthority> updatedAuthorities = userDetails.getAuthorities();
 
