@@ -1,10 +1,13 @@
 package org.molgenis.data.security.auth;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
+import org.molgenis.data.security.exception.CircularRoleHierarchyException;
 import org.molgenis.test.AbstractMockitoTest;
 
 class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
@@ -33,6 +37,12 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testAddRoleCircularHierarchy() {
+    Role role = mockRoleWithCircularHierarchy();
+    assertThrows(CircularRoleHierarchyException.class, () -> roleRepositoryDecorator.add(role));
+  }
+
+  @Test
   void testAddRoleStream() {
     Role role = mock(Role.class);
     roleRepositoryDecorator.add(Stream.of(role));
@@ -41,6 +51,18 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Role>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).add(roleStreamCaptor.capture());
     assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(role));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testAddRoleStreamCircularHierarchy() {
+    Role role = mockRoleWithCircularHierarchy();
+
+    ArgumentCaptor<Stream<Role>> streamCaptor = ArgumentCaptor.forClass(Stream.class);
+    roleRepositoryDecorator.add(Stream.of(role));
+
+    verify(delegateRepository).add(streamCaptor.capture());
+    assertThrows(CircularRoleHierarchyException.class, () -> consume(streamCaptor.getValue()));
   }
 
   @Test
@@ -52,6 +74,12 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testUpdateRoleCircularHierarchy() {
+    Role role = mockRoleWithCircularHierarchy();
+    assertThrows(CircularRoleHierarchyException.class, () -> roleRepositoryDecorator.update(role));
+  }
+
+  @Test
   void testUpdateRoleStream() {
     Role role = mock(Role.class);
     roleRepositoryDecorator.update(Stream.of(role));
@@ -60,6 +88,18 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Role>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).update(roleStreamCaptor.capture());
     assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(role));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testUpdateRoleStreamCircularHierarchy() {
+    Role role = mockRoleWithCircularHierarchy();
+
+    ArgumentCaptor<Stream<Role>> streamCaptor = ArgumentCaptor.forClass(Stream.class);
+    roleRepositoryDecorator.add(Stream.of(role));
+
+    verify(delegateRepository).add(streamCaptor.capture());
+    assertThrows(CircularRoleHierarchyException.class, () -> consume(streamCaptor.getValue()));
   }
 
   @Test
@@ -105,5 +145,24 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
     ArgumentCaptor<Stream<Role>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(roleStreamCaptor.capture());
     assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(role));
+  }
+
+  private static Role mockRoleWithCircularHierarchy() {
+    Role includedRole1 = mockRole("includedRole1");
+    Role includedRole2 = mockRole("includedRole2");
+    Role role = mockRole("role");
+    when(role.getIncludes()).thenReturn(asList(includedRole1, includedRole2));
+    when(includedRole2.getIncludes()).thenReturn(singletonList(role));
+    return role;
+  }
+
+  private static Role mockRole(String id) {
+    Role role = mock(Role.class);
+    when(role.getId()).thenReturn(id);
+    return role;
+  }
+
+  private static void consume(Stream<Role> stream) {
+    stream.forEach(r -> {});
   }
 }

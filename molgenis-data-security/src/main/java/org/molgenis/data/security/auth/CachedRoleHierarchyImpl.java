@@ -8,6 +8,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
@@ -100,15 +102,29 @@ public class CachedRoleHierarchyImpl implements TransactionListener, CachedRoleH
   private ImmutableSet<GrantedAuthority> getReachableAuthorities(
       GrantedAuthority authority,
       ImmutableMap<GrantedAuthority, ImmutableSet<GrantedAuthority>> authorityInclusions) {
-    ImmutableSet.Builder<GrantedAuthority> builder = ImmutableSet.builder();
+    Set<GrantedAuthority> authorities = new HashSet<>();
+    getReachableAuthoritiesRecursive(authority, authorities, authorityInclusions);
+    return ImmutableSet.copyOf(authorities);
+  }
 
-    Collection<GrantedAuthority> authorityIncludes = authorityInclusions.get(authority);
-    builder.add(authority);
-    builder.addAll(authorityIncludes);
-    authorityIncludes.forEach(
-        authorityInclude ->
-            builder.addAll(getReachableAuthorities(authorityInclude, authorityInclusions)));
-    return builder.build();
+  /**
+   * Recursively adds reachable authorities to a set and returns when an authority has already been
+   * encountered, stopping the iteration over circular hierarchies.
+   */
+  private void getReachableAuthoritiesRecursive(
+      GrantedAuthority currentAuthority,
+      Set<GrantedAuthority> authorities,
+      ImmutableMap<GrantedAuthority, ImmutableSet<GrantedAuthority>> authorityInclusions) {
+    if (!authorities.contains(currentAuthority)) {
+      authorities.add(currentAuthority);
+
+      authorityInclusions
+          .get(currentAuthority)
+          .forEach(
+              authorityInclude ->
+                  getReachableAuthoritiesRecursive(
+                      authorityInclude, authorities, authorityInclusions));
+    }
   }
 
   /** Marks the role hierarchy cache as dirty for the current transaction/thread. */
