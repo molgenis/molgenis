@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,6 +77,10 @@ public class OntologyTermRepository {
    */
   public List<OntologyTerm> findOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize) {
+    if (ontologyIds.isEmpty() || terms.isEmpty()) {
+      return Collections.emptyList();
+    }
+
     List<QueryRule> rules = new ArrayList<>();
     for (String term : terms) {
       if (!rules.isEmpty()) {

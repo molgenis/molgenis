@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.molgenis.ontology.core.model.Ontology;
@@ -54,6 +55,9 @@ public class OntologyServiceImpl implements OntologyService {
   @Override
   public List<OntologyTerm> findExactOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize) {
+    if (ontologyIds.isEmpty()) {
+      return Collections.emptyList();
+    }
     if (null == terms || terms.isEmpty()) {
       return Lists.newArrayList();
     }
@@ -63,6 +67,9 @@ public class OntologyServiceImpl implements OntologyService {
   @Override
   public List<OntologyTerm> findOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize) {
+    if (ontologyIds.isEmpty()) {
+      return Collections.emptyList();
+    }
     if (null == terms || terms.isEmpty()) {
       return Lists.newArrayList();
     }
