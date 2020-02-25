@@ -3,6 +3,7 @@ package org.molgenis.security.permission;
 import static java.lang.String.format;
 
 import java.util.List;
+import org.molgenis.security.core.AuthenticationAuthoritiesUpdater;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.token.RestAuthenticationToken;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationToken;
