@@ -12,4 +12,4 @@ mvn verify -pl molgenis-api-tests --batch-mode --quiet \
   -Dmaven.test.redirectTestOutputToFile=true \
   -Dit_db_user=postgres \
   -Dit_db_password=molgenis \
-  -Dit_db_port=5433
+  -Dit_db_port=5432
