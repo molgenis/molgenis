@@ -4,15 +4,22 @@
   "plugins": [
     "edit-link",
     "prism",
+    "resources",
     "-fontsettings",
     "-highlight",
     "github",
-    "versions"
+    "versions",
+    "sharing"
   ],
   "pluginsConfig": {
     "edit-link": {
       "base": "https://github.com/molgenis/molgenis/tree/master/docs",
       "label": "Edit This Page"
+    },
+    "resources": {
+      "type": "github",
+      "repo": "molgenis/molgenis",
+      "branch": "8.3"
     },
     "github": {
       "url": "https://github.com/molgenis/molgenis/"

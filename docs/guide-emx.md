@@ -5,7 +5,7 @@ Optionally, you can also add metadata on entities (i.e., classes, tables), and p
 It is also possible to provide packages in an emx file via the 'packages' sheet without providing the attributes sheet.
 
 ## Minimal example
-([download](data/simple_data_example_v20180912.xlsx))
+([download](./data/simple_data_example_v20180912.xlsx))
 
 **Note**: In order to upload data, at least one group must be created.
 View the section on [groups and roles](guide-groups-roles.md), for information on creating a group.
@@ -34,7 +34,7 @@ You can first upload the 'model' and then the 'data'.
 Or you can put the both into one file and upload in one go. What you prefer :-) [todo: provide example files for download]
 
 ## Advanced example
-([download](data/advanced_data_example_v20171206.xlsx))
+([download](./data/advanced_data_example_v20171206.xlsx))
 
 Lets assume we want to upload multiple data sheets, with relations between them:
 

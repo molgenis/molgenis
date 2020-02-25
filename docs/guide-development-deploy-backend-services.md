@@ -19,23 +19,23 @@ Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-mac
 **For Windows**
 Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows
 
-> **IMPORTANT**: Go to Windows Docker Desktop App and check if this option is checked: ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
+> **IMPORTANT**: Go to Windows Docker Desktop App and check if this option is checked: `Expose daemon on tcp://localhost:2375 without TLS` to expose the docker deamon to your localhost 
 
 ### Run
 You can create a new run-configuration by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and click on **Create 'dev-env: Compose...'**.
 
-> **IMPORTANT**: When you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
+> **IMPORTANT**: When you use the build configuration in IntelliJ, please check the option `--build, force build images`.
 
 You need to add the following environments variables to the *Run configuration*:
 
 **For Windows**
-```env
+```bash
 BACKEND=./backend-for-windows.conf
 FRONTEND=molgenis/molgenis-frontend:latest
 ```
 
 **For Mac**
-```env
+```bash
 BACKEND=./backend-for-mac.conf
 FRONTEND=molgenis/molgenis-frontend:latest
 ```
@@ -44,7 +44,7 @@ Alternatively you can run the stack by executing on the cli:
 
 **For Windows**
 
-```batch
+```bash
 molgenis-app/dev-env/docker-stack.bat start
 ``` 
 
@@ -57,12 +57,12 @@ molgenis-app/dev-env/docker-stack.bash start
 Test your work at: <http://localhost>.
 
 ### Alternative configuration for testing purposes
-When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the environment variables.
+When you want to test integration with the frontend you can specify another frontend image by overriding `FRONTEND` in the environment variables.
  
 **For IntelliJ** 
 In the *Run configuration* override.
 
-```env
+```bash
 FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
@@ -73,7 +73,7 @@ FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 Override:
 
 *For Windows*
-```batch
+```bash
 @ECHO OFF
 ...
 SET FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
@@ -92,7 +92,7 @@ export FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 
 To debug:
 
-```bash/batch
+```bash
 # show running containers
 docker ps
 # show logging of specific container
@@ -105,7 +105,7 @@ docker exec -it #container id# bash
 Dont forget to stop the running services after use.
 
 **For Windows on cli**
-```batch
+```bash
 docker-stack.bat shutdown
 ```
 
@@ -114,7 +114,7 @@ docker-stack.bat shutdown
 docker-stack.bash shutdown
 ```
 
->note: also when you exited with ```CTRL+C```.
+>note: also when you exited with `CTRL+C`.
 
 **In IntelliJ**
 
@@ -124,7 +124,7 @@ Right-click within the Docker-service tab on *Compose: dev-env* and click on *Do
 When you are not sure that everything went the way it should be, these commands will purge everything on your system:
 
 **For Windows on cli**
-```batch
+```bash
 docker-stack.bat terminate
 ```
 
@@ -137,11 +137,11 @@ docker-stack.bash terminate
 There are a few clients you can use to access the docker services from your local machine.
 
 ### Postgres
-We use ```psql``` to access postgres and do database changes.
+We use `psql` to access postgres and do database changes.
 
-```bash/batch
+```bash
 psql -h localhost -p 5432 -U molgenis -W
-``` 
+```
 
 > **IMPORTANT:** In Docker the postgres user is non-existent. You have 1 superuser which is defined in the docker-compose (username: molgenis, password: molgenis).
 >  
