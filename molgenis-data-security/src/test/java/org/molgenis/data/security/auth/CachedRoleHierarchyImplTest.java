@@ -106,8 +106,7 @@ class CachedRoleHierarchyImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testGetReachableGrantedAuthoritiesWithCircularHierarchy()
-  {
+  void testGetReachableGrantedAuthoritiesWithCircularHierarchy() {
     TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
     GrantedAuthority managerAuthority = new SimpleGrantedAuthority("ROLE_MANAGER");
