@@ -277,6 +277,7 @@ public class RestController {
       params = "_method=GET",
       produces = APPLICATION_JSON_VALUE)
   @ResponseBody
+  @SuppressWarnings("javasecurity:S5131") // untypedId is validated in dataService.findOneById()
   public Map<String, Object> retrieveEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("id") String untypedId,
