@@ -29,6 +29,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User> {
   @Override
   public void update(User entity) {
     updatePassword(entity);
+    updateActivationCode(entity);
     delegate().update(entity);
   }
 
@@ -52,6 +53,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User> {
         entities.filter(
             entity -> {
               updatePassword(entity);
+              updateActivationCode(entity);
               return true;
             });
     delegate().update(entities);
@@ -67,6 +69,12 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User> {
       password = passwordEncoder.encode(user.getPassword());
     }
     user.setPassword(password);
+  }
+
+  private void updateActivationCode(User user) {
+    if (user.isActive()) {
+      user.setActivationCode(null);
+    }
   }
 
   private void encodePassword(User user) {
