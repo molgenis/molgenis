@@ -49,9 +49,9 @@ Regarding CSV: The number of values on a row must match the number of column hea
 # Import overview
 The upload module is the place in MOLGENIS where you can upload your data into the MOLGENIS application. If you have the permissions, you will see the upload menu item.
 
-![Upload menu item](images/upload/upload-menu-item.png?raw=true, "upload menu item")
+![Upload menu item](./images/upload/upload-menu-item.png)
 
-The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)) example file.
+The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](./data/advanced_data_example_v20171206.xlsx)) example file.
 
 The steps are:
 
@@ -73,7 +73,7 @@ Navigation buttons at the bottom of the pages:
 1. Select a file to upload.
 2. Click on the next button.
 
-![Upload file screen](images/upload/upload-file-screen.png?raw=true, "Upload file")
+![Upload file screen](./images/upload/upload-file-screen.png)
 
 ### Choose options
 Select a data upload option. On this page you can select the rules of how to upload your data into MOLGENIS.
@@ -93,12 +93,12 @@ Data options:
 * Add entities / update existing: Importer adds new entities or updates existing entities.
 * Update entities: Importer updates existing entities or fails if entity does not exist.
 
-![Upload file screen](images/upload/options-screen.png?raw=true, "Options")
+![Upload file screen](./images/upload/options-screen.png)
 
 ### Choose packages
 If some Entity types do not yet have a package specified, you must choose where you want to create them.
 
-![Upload file screen](images/upload/packages-screen.png?raw=true, "Packages")
+![Upload file screen](./images/upload/packages-screen.png)
 
 ### Check validation
 
@@ -117,7 +117,7 @@ When you see this page the validation is already done. This page validates the s
 * Available: Are there fields in the meta data that are optionel and were not found in the entity?
 * Unknown: Are there fields defined in the entity that were undefined in the meta data?
 
-![Upload file screen](images/upload/validation-screen.png?raw=true, "Validation")
+![Upload file screen](./images/upload/validation-screen.png)
 
 ### Review results
 
@@ -130,7 +130,7 @@ In the permissions view you can do this repeatedely for multiple groups:
 1. Select a group: which user group will get these permissions.
 2. Select permission for an entity (table). You can choose between: Edit, View, Count and None. For more information about permissions visit the [fine grained permission guide](guide-permissions.md)
 
-![Upload file screen](images/upload/result-screen.png?raw=true, "Result")
+![Upload file screen](./images/upload/result-screen.png)
 
 ## What next?
 

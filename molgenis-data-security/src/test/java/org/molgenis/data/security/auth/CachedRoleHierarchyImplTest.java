@@ -104,4 +104,25 @@ class CachedRoleHierarchyImplTest extends AbstractMockitoTest {
         singleton(unknownAuthority),
         cachedRoleHierarchyImpl.getReachableGrantedAuthorities(singleton(unknownAuthority)));
   }
+
+  @Test
+  void testGetReachableGrantedAuthoritiesWithCircularHierarchy() {
+    TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
+
+    GrantedAuthority managerAuthority = new SimpleGrantedAuthority("ROLE_MANAGER");
+    GrantedAuthority editorAuthority = new SimpleGrantedAuthority("ROLE_EDITOR");
+    GrantedAuthority circularAuthority = new SimpleGrantedAuthority("ROLE_CIRCULAR");
+    ImmutableMap<GrantedAuthority, ImmutableSet<GrantedAuthority>> authorityInclusions =
+        ImmutableMap.<GrantedAuthority, ImmutableSet<GrantedAuthority>>builder()
+            .put(managerAuthority, ImmutableSet.of(editorAuthority))
+            .put(editorAuthority, ImmutableSet.of(circularAuthority))
+            .put(circularAuthority, ImmutableSet.of(managerAuthority))
+            .build();
+    when(dataserviceRoleHierarchy.getAllGrantedAuthorityInclusions())
+        .thenReturn(authorityInclusions);
+    assertEquals(
+        ImmutableSet.of(managerAuthority, editorAuthority, circularAuthority),
+        cachedRoleHierarchyImpl.getReachableGrantedAuthorities(
+            asList(managerAuthority, editorAuthority)));
+  }
 }

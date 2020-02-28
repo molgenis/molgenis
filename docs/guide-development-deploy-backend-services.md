@@ -24,44 +24,44 @@ These services are optional:
 
 ## Environment Variables
 
-You can either create a ```.env``` file to use docker-compose from the
+You can either create a `.env` file to use docker-compose from the
 commandline, or add variables to your system's environment. Read the
 [Docker documentation](https://docs.docker.com/compose/environment-variables/)
 for more information about environment variables.
 
-    ```bash
-    cd molgenis-app/dev-env
-    cp .env.example .env
-    docker-compose start frontend
-    # MOLGENIS_HOST must be the Gateway address (e.g. 172.17.0.1)
-    # when using 'bridge' network mode.
-    docker inspect frontend
-    # On Linux, you can find the right property like this:
-    docker inspect -f '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}' frontend
-    # Stop the service(s)
-    docker-compose stop
-    ```
+```bash
+cd molgenis-app/dev-env
+cp .env.example .env
+docker-compose start frontend
+# MOLGENIS_HOST must be the Gateway address (e.g. 172.17.0.1)
+# when using 'bridge' network mode.
+docker inspect frontend
+# On Linux, you can find the right property like this:
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}' frontend
+# Stop the service(s)
+docker-compose stop
+```
 
 * Verify environment variables
 
-    ```bash
-    vim .env
-    # (!) 127.0.0.1 when using host mode
-    MOLGENIS_HOST=172.17.0.1
-    MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
-    # On Window & MacOS, bridge mode is mandatory.
-    # On Linux, host mode is preferred.
-    NETWORK_MODE=bridge
-    :wq
-    docker-compose up
-    # Open a browser on http://localhost
-    ```
+```bash
+vim .env
+# (!) 127.0.0.1 when using host mode
+MOLGENIS_HOST=172.17.0.1
+MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
+# On Window & MacOS, bridge mode is mandatory.
+# On Linux, host mode is preferred.
+NETWORK_MODE=bridge
+:wq
+docker-compose up
+# Open a browser on http://localhost
+```
 
 ## IntelliJ & Docker
 
 * Create a new run-configuration by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/dev-env/docker-compose.yml) and selecting *Create 'dev-env: Compose Deployment'*.
-* Check the option ```--build, force build images```
-* Copy the environment variables from ```molgenis-app/dev-env/.env.example``` to the system clipboard
+* Check the option `--build, force build images`
+* Copy the environment variables from `molgenis-app/dev-env/.env.example` to the system clipboard
 * Click on the *Browse* icon in the Environment variables input field
 * Click the *Paste* button and verify the [variable configuration](#variables-configuration)
 
@@ -90,9 +90,9 @@ docker volume rm dev-env_es-data
 ## Frontend versioning
 
 Testing different frontend versions can be done using another frontend
-Docker image. Override the ```MOLGENIS_FRONTEND``` [variable](#variables-configuration):
+Docker image. Override the `MOLGENIS_FRONTEND` [variable](#variables-configuration):
 
-```env
+```bash
 MOLGENIS_FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
 ```
 
@@ -103,7 +103,7 @@ Check frontend [pull requests](https://registry.molgenis.org/#browse/browse:dock
 ### Windows
 
 * Go to Windows Docker Desktop App and check if this option is checked:
-```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker
+`Expose daemon on tcp://localhost:2375 without TLS` to expose the docker
 daemon to your localhost
 
 ### Minio

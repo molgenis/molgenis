@@ -44,7 +44,8 @@ Maven will invoke `fmt:check` at build time and fail if the code isn't formatted
 If you miss the reformat checkbox, you can configure a git commit hook in the folder where you checked out the molgenis repository.
 Add a file called `.git/hooks/pre-commit` with the following contents:
 
-```#!/bin/sh
+```
+#!/bin/sh
 mvn fmt:format
 ```
 
@@ -56,11 +57,11 @@ mvn fmt:format
 ### Usage
 Adds two file templates for creating Package and EntityType classes. The templates can be accessed from the 'New' menu, when right-clicking a java package:
 
-![Pick file template](images/intellij/pick-file-template.png?raw=true, "pick-file-template")
+![Pick file template](./images/intellij/pick-file-template.png)
 
 When choosing EntityType and filling out the form...
 
-![Set filename in  template](images/intellij/set-filename-in-template.png?raw=true, "set-file-name-in-template")
+![Set filename in  template](./images/intellij/set-filename-in-template.png)
 
 ... a file is created with the necessary boilerplate:
 
@@ -160,7 +161,7 @@ Check: [deploy backend services](guide-development-deploy-backend-services.md)
 * (Add and) select your Tomcat installation
 * Remove any *JVM options* that are MOLGENIS specific. These will override the environment variables below. 
 * In the "Open browser" change the URL to http://localhost *(this will open a browser and serve the frontend of MOLGENIS)*.
-* The tomcat-port needs to point at 8080. This is also defined in the ```.env```. 
+* The tomcat-port needs to point at 8080. This is also defined in the `.env`. 
 * Select the 'Startup/Connection' tab
   Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
   Fill in your home-directory in the *molgenis.home*-key.

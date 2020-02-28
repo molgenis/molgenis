@@ -9,13 +9,13 @@ At the top right corner, a dropdown (entity select) is shown which can be used t
 For admins, a delete button is shown at the right side of the  select. Clicking it will allow you to choose if you only want
 to delete the data or also want to delete the metadata for the currently selected table.
 
-![Dataexplorer entity select](images/dataexplorer/entitySelect.png?raw=true, "dataexplorer/entitySelect")
+![Dataexplorer entity select](./images/dataexplorer/entitySelect.png)
 
 ## Search, Find and Filter
 In the upper left corner of the data explorer, below the name of the entity, a search box is shown.
 This search box can be used to search all your data for a certain search term.
 
-![Dataexplorer search](images/dataexplorer/searchbox.png?raw=true, "dataexplorer/searchbox")
+![Dataexplorer search](./images/dataexplorer/searchbox.png)
 
 Directly below the search box, the currently active attribute filters are shown.
 They can be edited by clicking on them. The cross trailing can be used to delete the currently used filter(s).
@@ -23,12 +23,12 @@ Filters can be set from the attribute selection tree which is described below.
 Using the checkbox in front of each attribute, the visibility of this attribute in the table can be managed.
 The filter icon can be used to set filters for this specific attribute.
 
-![Dataexplorer active filters](images/dataexplorer/active_filters.png?raw=true, "dataexplorer/active_filters")
+![Dataexplorer active filters](./images/dataexplorer/active_filters.png)
 
 In the area with the active filters, you will also find the button to open the filter wizard.
 This is a popup screen that allows you to add filters for different attributes in one go.
 
-![Dataexplorer filter wizard](images/dataexplorer/filterwizard.png?raw=true, "dataexplorer/filterwizard")
+![Dataexplorer filter wizard](./images/dataexplorer/filterwizard.png)
 
 Any filters you use are stored in the URL as an RSQL query. This allows you to bookmark pages with certain columns and filters selected inside a specific table.
 For more information on RSQL operators, you can take a look at our [RSQL operator](guide-rsql.md) documentation.
@@ -43,7 +43,7 @@ TODO: add figure
 
 ## Switch views
 
-![Dataexplorer tabs](images/dataexplorer/dataexplorer_tabs.png?raw=true, "dataexplorer/dataexplorer_tabs")
+![Dataexplorer tabs](./images/dataexplorer/dataexplorer_tabs.png)
 
 The data explorer consists of multiple modules to view or process the data in different ways. These modules are described below:
 
@@ -53,7 +53,7 @@ If your data contains references to other entities, an icon is shown to expand t
 
 Every line starts, depending on your permissions, with some action icons:
 
-![Dataexplorer action buttons](images/dataexplorer/action_buttons.png?raw=true, "dataexplorer/action_buttons")
+![Dataexplorer action buttons](./images/dataexplorer/action_buttons.png)
 
 - Add row:
 Using this button, a form will open with input for all the attributes in the entity, allowing you to create a new row.
@@ -82,7 +82,7 @@ You will need:
 2. Create a user; e.g. *Manager*
 3. Assign the user to the group with a manager-role
 4. Login as Manager
-5. Import a data set: "Advanced data example" ([download](data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Import guide](guide-data-import.md).
+5. Import a data set: "Advanced data example" ([download](./data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Import guide](guide-data-import.md).
 
 ###### Override the entity view
 
@@ -90,24 +90,24 @@ Steps:
 
 1. Go to the Data Explorer.
 2. Select the "cities" entity via the entity select dropdown.
-3. The entity view modal is opened when you click on the ![View entity report button](images/reports/view-entityreport-button.png?raw=true, "Entity view") button".
-4. The default view will be: ![View entity report default](images/reports/default-entityreport-view.png?raw=true, "Entity view")
+3. The entity view modal is opened when you click on the ![View entity report button](./images/reports/view-entityreport-button.png.
+4. The default view will be: ![View entity report default](./images/reports/default-entityreport-view.png)
 5. Let's upload our own template.
    1. Go to the data explorer and select the FreemarkerTemplate entity.
-   2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
-	   * Name: ```view-entityreport-specific-test_cities.ftl```
-	   * Value: ```<div>City name: ${entity.get('cityName')}\</div>"```
-    ![view-Cities-entitiesreport](images/reports/view-entityreport-specific-test_cities.png?raw=true,"view-Cities-entitiesreport")
+   2. Click on the ![add](./images/add.png) button. In the modal you fill in:
+	   * Name: `view-entityreport-specific-test_cities.ftl`
+	   * Value: `<div>City name: ${entity.get('cityName')}\</div>"`
+    ![view-Cities-entitiesreport](./images/reports/view-entityreport-specific-test_cities.png)
 6. Repeat steps 2 and 3.
-7. The new view will be: ![View entity report custom](images/reports/custom-entityreport-view.png?raw=true, "Entity view")
+7. The new view will be: ![View entity report custom](./images/reports/custom-entityreport-view.png)
 
 ###### Add an instances view tab
 1. Go to the data explorer and select the "cities" entity through the entity select dropdown.
 2. Let's upload our own template.
 	1. Go to the data explorer and select the FreemarkerTemplate entity.
-	2. Click on the ![add](images/add.png?raw=true, "add") button. In the modal you fill in:
+	2. Click on the ![add](./images/add.png) button. In the modal you fill in:
 
-Name: ```view-Cities-entitiesreport.ftl```
+Name: `view-Cities-entitiesreport.ftl`
 
 Value:
 
@@ -138,18 +138,18 @@ Value:
 </script>
 ```
 
-![view-Cities-entitiesreport](images/reports/view-Cities-entitiesreport.png?raw=true, "view-Cities-entitiesreport")
+![view-Cities-entitiesreport](./images/reports/view-Cities-entitiesreport.png)
 
 
-3. Click on the settings icon ![Settings](images/settings.png?raw=true, "Settings")
-	1. Check: Modules -> Data -> Reports -> ```Yes```
-	2. Set: Reports -> Reports -> ```test_cities:Cities```
+3. Click on the settings icon ![Settings](./images/settings.png)
+	1. Check: Modules -> Data -> Reports -> `Yes`
+	2. Set: Reports -> Reports -> `test_cities:Cities`
 	   * test_citites is the entity name.
 	   * Cities is the template name.
 
-	![Entities report settings](images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
+	![Entities report settings](./images/reports/entities-report-correct-settings.png)
 4. Refresh the page and repeat step 1.
-5. The result:![Custom entities report](images/reports/custom-entities-report.png?raw=true, "Custom entities report")
+5. The result:![Custom entities report](./images/reports/custom-entities-report.png)
 
 
 ### Aggregation view
@@ -158,12 +158,12 @@ The aggregation module allows you to produce aggregated counts for queries on th
 
 The screen has 2 areas, the controls and the results. The controls allow you to choose the attributes you wish to use for the aggregation.
 
-![Dataexplorer aggregates](images/dataexplorer/aggregate_controls.png?raw=true, "dataexplorer/aggregates")
+![Dataexplorer aggregates](./images/dataexplorer/aggregate_controls.png)
 
 Youcan select 1 attribute for simple one dimensional counts, represented as a table with one column, or two attributes to get a 2 dimensional aggregate table.
 A third dropdown allows you to select an attribute by which to group the results.
 
-![Dataexplorer aggregate results](images/dataexplorer/aggregate_result_table.png?raw=true, "dataexplorer/aggregateresults")
+![Dataexplorer aggregate results](./images/dataexplorer/aggregate_result_table.png)
 
 These functionalities are best explained by the example in the "try it out section below".
 
@@ -174,7 +174,7 @@ Depending on the purpose of the download, identifiers or labels can be used as c
 
 ## Genome browser
 
-![Dataexplorer first screen](images/dataexplorer/genome_browser.png?raw=true, "dataexplorer/genome_browser")
+![Dataexplorer first screen](./images/dataexplorer/genome_browser.png)
 
 MOLGENIS provides genome browsing using the[Dalliance](https://www.biodalliance.org/)genome browser.
 
@@ -215,7 +215,7 @@ If additional molgenis datasets should be shown in the genome browser when this 
 **Actions**	Javascript functions to be added to the dalliance feature popup. Actions are executed when the link in the feature popup is clicked. Actions should be provided in an javascrip object with 'label' (which will be used as the link) and 'run', example: *[{label:"action1" run:"alert('action1')"},{label:"action2" run:"alert('action2')"}]*.
 
 **feature_info_plugin**	Javascript code that will be added within the function fot the featureInfoPlugin option.  
-The function itself is provided by MOLGENIS: ```function(f, info) {CONFIGURED_CODE_WILL_BE_ADDED_HERE}```
+The function itself is provided by MOLGENIS: `function(f, info) {CONFIGURED_CODE_WILL_BE_ADDED_HERE}`
 
 More information on the "featureInfoPlugin" functionallity can be found [here](http://www.biodalliance.org/plugins.html).
 
@@ -225,7 +225,7 @@ More information on the "featureInfoPlugin" functionallity can be found [here](h
 
 #### Example - data for genome browser
 
-Upload the [vcf_example_file](data/Documentation_VCF.vcf "VCF example file") using the importer.
+Upload the [vcf_example_file](./data/Documentation_VCF.vcf "VCF example file") using the importer.
 Let's select an entity containing genomic variants, by selecting the entity name you just chose for the upload in the entity select.
 Let's assume we have a specific location we are interested in, say position 103214569 at chromosome 7. We'd like to search for that specific line in the entity.
 Let's first use the search box to see if we can find the line that way:
@@ -245,7 +245,7 @@ Click the symbol in front of the "SAMPLES" column header to show the columns bel
 Click the magnifying glass in front of the data line, to show a report for that line. The default report just shows all attribute values in a structured way. However, as stated above, all kinds of reports can be added at runtime.
 
 #### Example - with data from Excel
-Upload [emx_example_file](data/Documentation_EMX.xlsx "EMX example file") through the importer.
+Upload [emx_example_file](./data/Documentation_EMX.xlsx "EMX example file") through the importer.
 Navigate to the data explorer and select the aggregates tab. Select the just uploaded "biobanks" entity.
 
 Now select "patientid" in the entity dropdown.

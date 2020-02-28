@@ -5,7 +5,7 @@ You need to install the prerequisites as well.
 ## Prerequisites for MOLGENIS development
 The components needed to run MOLGENIS locally are:
 
-![MOLGENIS components](images/install/molgenis_architecture.svg?raw=true)
+![MOLGENIS components](./images/install/molgenis_architecture.svg)
 
 Check: [develop locally](guide-development-deploy-backend-services.md)  
 

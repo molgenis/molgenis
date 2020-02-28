@@ -36,7 +36,7 @@ Filemeta as returned by the 'Retrieve file metadata' endpoint.
 ### Examples
 
 #### JavaScript
-```javascript
+```js
 var file = document.getElementById('my-file-input').files[0]
 var request = new XMLHttpRequest()
 request.open('post', '/api/files', true)
