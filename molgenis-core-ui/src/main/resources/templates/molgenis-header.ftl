@@ -122,7 +122,7 @@
                       loginHref: '/login',
                       helpLink: {
                         label: 'Help',
-                        href: 'https://molgenis.gitbooks.io/molgenis/content/'
+                        href: 'https://molgenis.gitbook.io/molgenis/'
                       }
                     }
                   }
