@@ -2,7 +2,7 @@
 
 Via the "Search all data" plugin it is possible to search for all hits in all data rows, and names and labels of metadata.
 
-![Searchall_screen](images/searchall/SearchAll.png?raw=true, "searchall/screen")
+![Searchall_screen](./images/searchall/SearchAll.png)
 
 The results are divided in "packages" and "entityTypes".
 

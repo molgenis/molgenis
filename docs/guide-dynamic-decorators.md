@@ -47,7 +47,7 @@ public class LoggingRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 This class must implement DynamicRepositoryDecoratorFactory
 
 Example:
-```$xslt
+```java
 package org.molgenis.app;
 
 import org.molgenis.data.Repository;

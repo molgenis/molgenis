@@ -42,12 +42,12 @@ So the Molgenis Swagger plugin generates a Molgenis token and fills it in as the
 This token will then be added as an `x-molgenis-token` header by the Swagger UI to each request.
 You can view and edit the token by clicking the dark green `Authorize` button at the top of the page.
 
-![Api key authorization](images/swagger/apikey.png?raw=true, "swagger/apikey")
+![Api key authorization](./images/swagger/apikey.png)
 
 ## Specification of module specific controllers
 When you toggle the listbox in the header of the swagger documentation, you can choose different MOLGENIS-modules.
 
-![Swagger toggle modules](images/swagger/toggle.png?raw=true, "swagger/toggle")
+![Swagger toggle modules](./images/swagger/toggle.png)
 
 The workflow in swagger is pretty much the same as in the REST API documentation. Authentication does not work in this part of the MOLGENIS API documentation.
 

@@ -8,19 +8,19 @@ How to create your own MOLGENIS app is described [here](guide-development-apps.m
 The following paragraphs will give a brief tutorial on the App manager and its functions.
 
 ## Uploading your first app
-We will be using the [example app](data/molgenis-app-example.zip) to go through this tutorial.
+We will be using the [example app](./data/molgenis-app-example.zip) to go through this tutorial.
 
 When you first go to the app manager, you will probably be greeted by an empty screen with the message that no apps were found.
 
-![am01 - empty screen](images/app-manager/am01-empty-screen.png?raw=true, "am01-empty-screen")
+![am01 - empty screen](./images/app-manager/am01-empty-screen.png)
 
 Lets change that now. Click the big green __Upload new app__ button, and select your app archive.
 
-![am02 - upload file](images/app-manager/am02-upload-file.png?raw=true, "am02-upload-file")
+![am02 - upload file](./images/app-manager/am02-upload-file.png)
 
 Your result is an app in the app manager, ready to be managed!
 
-![am03 - after upload](images/app-manager/am03-after-upload.png?raw=true, "am03-after-upload")
+![am03 - after upload](./images/app-manager/am03-after-upload.png)
 
 ##### Note
 If anything is missing inside your archive or important configuration is missing from your config file,
@@ -37,7 +37,7 @@ Apps which are inactive can be deleted. Apps which are active can __not__ be del
 
 Lets use the toggle button now to activate our example app.
 
-![am04 - after activate](images/app-manager/am04-after-activate.png?raw=true, "am04-after-activate")
+![am04 - after activate](./images/app-manager/am04-after-activate.png)
 
 Activating an app does two things:
 * Set the status of an app to active in the database
@@ -46,7 +46,7 @@ Activating an app does two things:
 ### Add app to menu and view
 Lets add it to the menu and open the app
 
-![am05 - open app](images/app-manager/am05-open-app.png?raw=true, "am05-open-app")
+![am05 - open app](./images/app-manager/am05-open-app.png)
 
 The content is a bit minimal but, congratulations! You just added your first app.
 
@@ -56,18 +56,18 @@ Once you get a lot of apps, you can use the search function to quickly find apps
 
 We just imported a lot of them
 
-![am06 - before search](images/app-manager/am06-before-search.png?raw=true, "am06-before-search")
+![am06 - before search](./images/app-manager/am06-before-search.png)
 
 and now we are interested in apps having to with Biobanks or Bio
 
-![am07 - after search](images/app-manager/am07-after-search.png?raw=true, "am07-after-search")
+![am07 - after search](./images/app-manager/am07-after-search.png)
 
 
 ### Deleting an app
 Once we want to update an app, we will have to disable and remove the older one first.
 Toggle our example to inactive, and delete!
 
-![am08 - delete app](images/app-manager/am08-delete-app.png?raw=true, "am07-delete-app")
+![am08 - delete app](./images/app-manager/am08-delete-app.png)
 
 You are now free to make changes to the config, descriptions, name, and resources.
 After making your changes you can upload the archive again and use the app as you see fit!

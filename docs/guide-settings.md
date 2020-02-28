@@ -49,13 +49,13 @@ with the mail server. If you do not want the settings to be tested at all, you c
 
 #### JavaMail properties
 By default, the following low-level JavaMail properties, needed to interact with the Gmail SMTP server, are set:
-```
+```properties
 mail.smtp.starttls.enable=true
 mail.smtp.quitwait=false
 ```
 
 You may override these properties or add additional properties and override these defaults by adding entities to the
-```JavaMailProperty``` repository in the Data Explorer. Each key may be provided at most once.
+`JavaMailProperty` repository in the Data Explorer. Each key may be provided at most once.
 For a list of valid keys, check https://javamail.java.net/nonav/docs/api/ and per protocol:
 
 - **IMAP**
@@ -65,7 +65,7 @@ For a list of valid keys, check https://javamail.java.net/nonav/docs/api/ and pe
 - **SMTP** *this is what we use*
   https://javaee.github.io/javamail/docs/api/com/sun/mail/smtp/package-summary.html
 
-> E.g. Add an entity with key ```mail.debug``` and value ```true``` if you'd like to debug the mail dialog with the server.
+> E.g. Add an entity with key `mail.debug` and value `true` if you'd like to debug the mail dialog with the server.
 
 #### Mail server without authentication
 When you want to setup a mail server without authentication you need to add the following properties:
@@ -91,7 +91,7 @@ mail.smtp.auth=false
 mail.from=noreply@domain.ext
 ```
 
-You need to add the ```mail.from``` property otherwise the server resolves to ```root@localhost```.
+You need to add the `mail.from` property otherwise the server resolves to `root@localhost`.
 
 > note When you start the server clean it will populate the database with the environment variables. After that the database is your configuration truth.
 
