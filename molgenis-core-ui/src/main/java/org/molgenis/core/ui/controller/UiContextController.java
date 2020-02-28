@@ -35,7 +35,7 @@ public class UiContextController {
   public static final String ID = "app-ui-context";
 
   public static final String LOGIN_HREF = "/login";
-  public static final String HELP_HREF = "https://molgenis.gitbooks.io/molgenis/content/";
+  public static final String HELP_HREF = "https://molgenis.gitbook.io/molgenis/";
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
