@@ -147,6 +147,7 @@ class UserRepositoryDecoratorTest extends AbstractMockitoTest {
 
     User user = mock(User.class);
     when(user.getId()).thenReturn("1");
+    when(user.isActive()).thenReturn(true);
     when(user.getPassword()).thenReturn("currentPasswordHash");
 
     Stream<User> entities = Stream.of(user);
@@ -155,5 +156,6 @@ class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     userRepositoryDecorator.update(entities);
     assertEquals(singletonList(user), captor.getValue().collect(toList()));
     verify(user).setPassword("currentPasswordHash");
+    verify(user).setActivationCode(null);
   }
 }
