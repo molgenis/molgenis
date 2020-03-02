@@ -1,8 +1,7 @@
 # Try out MOLGENIS
 
-## Using our demo server
-The first thing you can do is to get some hands-on experience by trying out our [demo server](https://molgenis.org/demo). This server contains several data sets including biobank data and genetic data. If you want to try importing some example files, then the only thing needed from your end is that you create an account. An email will be sent containing your login in credentials.
-But perhaps you want to see how your own data looks like, but not upload it for other people to see, not yet anyway. So let's jump right into that.  
+## Start MOLGENIS
+The easiest way to get MOLGENIS running is [starting it in docker](./guide-docker.md).
 
 ## Getting your first data in
 So you have a MOLGENIS application up and running, and your dataset is sitting nice and cozy on your computer somewhere, now what? We upload the data of course! As mentioned before, MOLGENIS uses an extensible model format allowing you to model your data however you want. This is done via the **EMX** format. Now I know a custom format sounds scary, but if you keep reading for a bit, you will find out it's not scary at all.
@@ -51,12 +50,4 @@ To keep it simple, all you need to do is click the 'select a file' button, selec
 
 Congratulations! You have now deployed MOLGENIS either locally or on a server, and you have made the first steps on getting your data into the MOLGENIS database. Play around a bit with the different data explorer filters to get a feel on how MOLGENIS works.
 
-Of course, simply uploading and showing data is not the only thing you can do with the MOLGENIS software. In the following MOLGENIS step-by-step section, we will take you from being a simple user, and teach you on how to be an expert.    
-
-## Running your own MOLGENIS
-You can run MOLGENIS on you local machine or on your own linux server.
-
-- Run in a local [docker-compose](guide-docker.md) stack
-- Run on a [server](guide-standalone-server.md)
-- Run on a [Kubernetes](guide-kubernetes.md) cluster
-- You [clone the code](guide-local-compile.md) from GitHub and compile it to start developing
+Of course, simply uploading and showing data is not the only thing you can do with the MOLGENIS software. In the following MOLGENIS step-by-step section, we will take you from being a simple user, and teach you on how to be an expert.
