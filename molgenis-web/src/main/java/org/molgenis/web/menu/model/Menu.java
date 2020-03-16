@@ -66,7 +66,7 @@ public abstract class Menu implements MenuNode {
 
   @Override
   public boolean contains(Predicate<MenuNode> predicate) {
-    return predicate.test(this) || getItems().stream().anyMatch(predicate);
+    return predicate.test(this) || getItems().stream().anyMatch(it -> it.contains(predicate));
   }
 
   public Optional<MenuItem> firstItem() {
