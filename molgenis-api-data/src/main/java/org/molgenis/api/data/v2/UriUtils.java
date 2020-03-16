@@ -12,48 +12,55 @@ class UriUtils {
   private UriUtils() {}
 
   /** @return <servletMappingPath>/v2/<entityTypeId> */
-  static String createEntityCollectionUriPath(String entityTypeId) {
-    return createEntityCollectionUriComponents(entityTypeId).getPath();
+  static String createEntityCollectionUriPath(
+      ServletUriComponentsBuilder builder, String entityTypeId) {
+    return createEntityCollectionUriComponents(builder, entityTypeId).getPath();
   }
 
-  private static UriComponents createEntityCollectionUriComponents(String entityTypeId) {
-    ServletUriComponentsBuilder builder = createBuilder();
+  private static UriComponents createEntityCollectionUriComponents(
+      ServletUriComponentsBuilder builder, String entityTypeId) {
+    builder = builder.cloneBuilder();
     builder.path(ApiNamespace.API_PATH);
     builder.pathSegment(RestControllerV2.API_VERSION, entityTypeId);
     return builder.build();
   }
 
   /** @return <servletMappingPath>/v2/<entityTypeId> */
-  static String createEntityTypeMetadataUriPath(String entityTypeId) {
-    return createEntityTypeMetadataUriComponents(entityTypeId).getPath();
+  static String createEntityTypeMetadataUriPath(
+      ServletUriComponentsBuilder builder, String entityTypeId) {
+    return createEntityTypeMetadataUriComponents(builder, entityTypeId).getPath();
   }
 
-  private static UriComponents createEntityTypeMetadataUriComponents(String entityTypeId) {
+  private static UriComponents createEntityTypeMetadataUriComponents(
+      ServletUriComponentsBuilder builder, String entityTypeId) {
     // v2 doesn't have a dedicated metadata endpoint, the metadata is returned with collection
-    return createEntityCollectionUriComponents(entityTypeId);
+    return createEntityCollectionUriComponents(builder, entityTypeId);
   }
 
   /** @return <servletMappingPath>/v2/<entityTypeId>/meta/<attributeName> */
   static String createEntityTypeMetadataAttributeUriPath(
-      String entityTypeId, String attributeName) {
-    return createEntityTypeMetadataAttributeUriComponents(entityTypeId, attributeName).getPath();
+      ServletUriComponentsBuilder builder, String entityTypeId, String attributeName) {
+    return createEntityTypeMetadataAttributeUriComponents(builder, entityTypeId, attributeName)
+        .getPath();
   }
 
   private static UriComponents createEntityTypeMetadataAttributeUriComponents(
-      String entityTypeId, String attributeName) {
-    ServletUriComponentsBuilder builder = createBuilder();
+      ServletUriComponentsBuilder builder, String entityTypeId, String attributeName) {
+    builder = builder.cloneBuilder();
     builder.path(ApiNamespace.API_PATH);
     builder.pathSegment(RestControllerV2.API_VERSION, entityTypeId, "meta", attributeName);
     return builder.build();
   }
 
   /** @return <servletMappingPath>/v2/<entityTypeId>/<entityId> */
-  static String createEntityUriPath(String entityTypeId, Object entityId) {
-    return createEntityUriComponents(entityTypeId, entityId).getPath();
+  static String createEntityUriPath(
+      ServletUriComponentsBuilder builder, String entityTypeId, Object entityId) {
+    return createEntityUriComponents(builder, entityTypeId, entityId).getPath();
   }
 
-  private static UriComponents createEntityUriComponents(String entityTypeId, Object entityId) {
-    ServletUriComponentsBuilder builder = createBuilder();
+  private static UriComponents createEntityUriComponents(
+      ServletUriComponentsBuilder builder, String entityTypeId, Object entityId) {
+    builder = builder.cloneBuilder();
     builder.path(ApiNamespace.API_PATH);
     builder.pathSegment(RestControllerV2.API_VERSION, entityTypeId, entityId.toString());
     return builder.build();
@@ -61,28 +68,24 @@ class UriUtils {
 
   /** @return <servletMappingPath>/v2/<entityTypeId>/<entityId>/<attributeName> */
   static String createEntityAttributeUriPath(
-      String entityTypeId, Object entityId, String attributeName) {
-    return createEntityAttributeUriComponents(entityTypeId, entityId, attributeName).getPath();
+      ServletUriComponentsBuilder builder,
+      String entityTypeId,
+      Object entityId,
+      String attributeName) {
+    return createEntityAttributeUriComponents(builder, entityTypeId, entityId, attributeName)
+        .getPath();
   }
 
   private static UriComponents createEntityAttributeUriComponents(
-      String entityTypeId, Object entityId, String attributeName) {
-    ServletUriComponentsBuilder builder = createBuilder();
+      ServletUriComponentsBuilder builder,
+      String entityTypeId,
+      Object entityId,
+      String attributeName) {
+    builder = builder.cloneBuilder();
     builder.path(ApiNamespace.API_PATH);
     builder.pathSegment(
         RestControllerV2.API_VERSION, entityTypeId, entityId.toString(), attributeName);
     return builder.build();
-  }
-
-  /** package-private for testability */
-  static ServletUriComponentsBuilder cachedServletUriComponentsBuilder;
-
-  private static ServletUriComponentsBuilder createBuilder() {
-    if (cachedServletUriComponentsBuilder == null) {
-      cachedServletUriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-      cachedServletUriComponentsBuilder.encode();
-    }
-    return cachedServletUriComponentsBuilder.cloneBuilder();
   }
 
   /**
@@ -90,15 +93,22 @@ class UriUtils {
    *     <servletMappingPath>/v1/<entityTypeId>?q=<idAttributeName>=in=("<entityId0>","<entityId1>",...)
    */
   static String createEntitiesUriPath(
-      String entityTypeId, String idAttributeName, Collection<String> entityIds) {
-    String path = createEntitiesUriComponents(entityTypeId, idAttributeName, entityIds).getPath();
+      ServletUriComponentsBuilder builder,
+      String entityTypeId,
+      String idAttributeName,
+      Collection<String> entityIds) {
+    String path =
+        createEntitiesUriComponents(builder, entityTypeId, idAttributeName, entityIds).getPath();
     String query = createEntitiesUriQuery(idAttributeName, entityIds);
     return path + '?' + query;
   }
 
   private static UriComponents createEntitiesUriComponents(
-      String entityTypeId, String idAttributeName, Collection<String> entityIds) {
-    ServletUriComponentsBuilder builder = createBuilder();
+      ServletUriComponentsBuilder builder,
+      String entityTypeId,
+      String idAttributeName,
+      Collection<String> entityIds) {
+    builder = builder.cloneBuilder();
     builder.path(ApiNamespace.API_PATH);
     builder.pathSegment(RestControllerV2.API_VERSION, entityTypeId);
     builder.queryParam("q", createEntitiesUriQuery(idAttributeName, entityIds));

@@ -28,8 +28,9 @@ To understand the security context of MOLGENIS you need to understand the follow
 You can start performing these steps to configure groups in MOLGENIS.
 
 - **Step 1: Add a group**
-  
-  You can add groups to MOLGENIS to structure user groups and data you want to share or manage. Every group gets a folder to put resources in.
+
+  When you create a new root package, e.g. using the importer, a group will automatically be created for the package.
+  You can manually add groups to MOLGENIS to structure user groups and data you want to share or manage. Every group gets a root package to put resources in.
   
 - **Step 2: Add members**
   
@@ -58,15 +59,15 @@ When you have setup this basic configuration you can start using MOLGENIS.
 
 You can add groups in MOLGENIS by navigating to **Admin --> Security Manager**. 
 
-![Security Manager menu](images/security/main_menu_security.png?raw=true, "Security Manager menu")
+![Security Manager menu](./images/security/main_menu_security.png)
 
 Click on the **Add group**-button. 
 
-![Groups screen](images/security/group_overview_no_groups.png?raw=true, "Groups")
+![Groups screen](./images/security/group_overview_no_groups.png)
 
 Fill out the necessary field and click on **Create**.
 
-![Create a group](images/security/group_creation.png?raw=true, "Create a group")
+![Create a group](./images/security/group_creation.png)
 
 When you've added the group a folder is created and the default roles are created for that group. The user who creates the group becomes manager of the group.
 
@@ -80,15 +81,15 @@ When deleting a group the package, groups specific roles and group memberships a
 
 You can add members to groups via the security manager. Navigate to **Admin --> Security Manager**. Click on a group
 
-![Group overview](images/security/group_overview.png?raw=true, "Group overview")
+![Group overview](./images/security/group_overview.png)
 
 Click on **Add member**.
 
-![Membership overview](images/security/membership_overview_only_admin.png?raw=true, "Membership overview")
+![Membership overview](./images/security/membership_overview_only_admin.png)
 
 Select a member from the **User-pulldown** and specify the **role**, for example: Editor. Click on **Add member**.
 
-![Add membership](images/security/add_membership.png?raw=true, "Add membership")
+![Add membership](./images/security/add_membership.png)
 
 When a member is added to a group, permissions are set according to the role he/she has been given.
 The default permissions for these roles are as follows:
@@ -125,23 +126,23 @@ The default permissions for these roles are as follows:
   * Plugins
     * Search all
 
-![Membership overview](images/security/membership_overview.png?raw=true, "Membership overview")
+![Membership overview](./images/security/membership_overview.png)
 
 You can switch between roles whenever you want by updating the role of the member. Click on a member ("test" in this example).
 
-![Update membership](images/security/update_membership.png?raw=true, "Update membershio")
+![Update membership](./images/security/update_membership.png)
 
 Click on "Edit" to update the role and click on "Update role".
 
-![Update role membership](images/security/update_membershiprole.png?raw=true, "Update rolemembershio")
+![Update role membership](./images/security/update_membershiprole.png)
 
 You can now view the members of the group and see that the "test" member has a Manager-role.
 
-![Membership overview with role change](images/security/membership_overview_with_rolechange.png?raw=true, "Membership overview with role change")
+![Membership overview with role change](./images/security/membership_overview_with_rolechange.png)
 
 You can also remove a member from a group. Click on a member ("test" in this example) and click on "Remove from group".
 
-![Remove member from group](images/security/remove_member_from_group.png?raw=true, "Remove member from group")
+![Remove member from group](./images/security/remove_member_from_group.png)
 
 ## Roles and inclusion
 MOLGENIS comes with three default roles out of the box: Manager, Editor and Viewer. When you add a Group, the three group roles
@@ -162,7 +163,7 @@ The group roles include each other as well, in the same manner as the default ro
 everything your group's Editor can, etc. See the following schematic for an overview of how all the roles connect for a group 
 that has been aptly named 'test':
 
-![Role inclusions](images/security/role_model.png?raw=true, "Overview of the roles and how they work together")
+![Role inclusions](./images/security/role_model.png)
 
 The group roles do not contain any permissions when you first create them; they only include the default roles. However, 
 just like with any other role, you can still add permissions to them. This setup gives you fine grained control, especially

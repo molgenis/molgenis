@@ -4,13 +4,12 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label class="control-label" for="name">Entity name *</label>
-                <i>(Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.)</i>
+                <i>(Only letters (a-z, A-Z), digits (0-9), underscores(_) and dashes(-) are allowed.)</i>
                 <input type="text" class="form-control" name="name" required placeholder="Enter entity name"
                        value="${wizard.file.name
-                       ?replace("\\.vcf\\.gz|\\.vcf",'','ri') <#-- remove extention -->
+                       ?replace("\\.vcf\\.gz|\\.vcf",'','ri') <#-- remove extension -->
+                       ?replace("[^\\w\\-]",'','r')<#-- remove illegal chars -->
                        ?js_string[0..*21] <#-- maximum length is 30 chars, but we need to take into account that the samples are postfixed "_SAMPLES" -->
-                       ?replace("\\-|\\.|\\*|\\$|\\&|\\%|\\^|\\(|\\)|\\#|\\!|\\@|\\?",'','r')<#-- remove illegal chars -->
-                       ?replace("^[0-9]",'','r') <#-- we don't allow entitynames starting with a number -->
                        }" maxlength="22">
             </div>
         </div>

@@ -96,7 +96,7 @@ public abstract class AttributeResponseData implements MetadataResponseData {
   }
 
   @SuppressWarnings(
-      "squid:S1610") // Abstract classes without fields should be converted to Integererfaces
+      "java:S1610") // Abstract classes without fields should be converted to Integererfaces
   @AutoValue.Builder
   public abstract static class Builder {
 

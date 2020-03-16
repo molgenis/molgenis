@@ -1,28 +1,26 @@
 language: java
+os: linux
 jdk: openjdk11
 # Ubuntu 18.04 LTS
 dist: bionic
 # Caches downloaded libraries between builds
 cache:
-  yarn: true
   directories:
     - '$HOME/.m2/repository'
 env:
-  # Variables shared between builds
-  global:
-    - PGPORT=5433
   # This configures the parallel jobs to run
-  matrix:
+  jobs:
     - COV_FLAG="api"                       SCRIPT=".ci/jobs/api-tests.sh"
     - COV_FLAG="integration"               SCRIPT=".ci/jobs/integration-tests.sh"
+services:
+  - postgresql
 addons:
-  sauce_connect: true
-sudo: required
+  postgresql: "11"
 before_install:
   - .ci/services/install-minio-6.sh
-  - .ci/services/install-postgres-11.sh
+  - sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'molgenis'"
 install:
-  - mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
+  - MAVEN_SKIP_RC=true MAVEN_OPTS="-XX:TieredStopAtLevel=1 -noverify" mvn install -DskipTests -B -V -T1C
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144

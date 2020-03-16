@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.security.acls.model.ObjectIdentity;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class InsufficientPermissionsException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS26";
   private final String identifier;

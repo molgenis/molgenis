@@ -25,32 +25,47 @@ When finished please execute:
 docker-compose down
 ```
 
-> **IMPORTANT:** this is another stack than the one in ```molgenis-app/dev-env```. Do NOT run these at the same time.
+> **IMPORTANT:** this is another stack than the one in `molgenis-app/dev-env`. Do NOT run these at the same time.
 
 ## In IntelliJ
 When developing, you can run the integration tests as usual.
 
-> **IMPORTANT:** make sure you have no MOLGENIS dev-env or other docker-compose stacks running. Check your "docker-tab" in IntelliJ or run ```docker ps``` on the commandline.
+> **IMPORTANT:** make sure you have no MOLGENIS dev-env or other docker-compose stacks running. Check your "docker-tab" in IntelliJ or run `docker ps` on the commandline.
 
 Please boot the backend services with the docker-compose stack in the source-tree.
 * Navigate to molgenis-platform-integration-tests/integ-test-env
-* Right click the ```docker-compose.yaml```, click on *Create 'integ-test-env: Compose...'*
-* Check the option ```--build, force build images```
+* Right click the `docker-compose.yaml`, click on *Create 'integ-test-env: Compose...'*
+* Check the option `--build, force build images`
 * Add the following variables to the environment:
 
-  **For Windows**
+<<<<<<< HEAD
+
   ```env
+MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
+# MacOS: host.docker.internal
+# Windows: docker.for.win
+# Linux: 172.17.0.1 (bridge) or 127.0.0.1 (host)
+MOLGENIS_HOST=host.docker.internal
+# Window & MacOS: bridge, Linux: host
+NETWORK_MODE=bridge
+```
+* Run the 'integ-test-env: Compose...' Run configuration
+* Then click on the ```molgenis-platform-integration-tests``` module and click *Run --> All Tests (TestNG)*
+=======
+  **For Windows**
+  ```bash
   BACKEND=./backend-for-windows.conf
   FRONTEND=molgenis/molgenis-frontend:latest
   ```
   
   **For Mac**
-  ```env
+  ```bash
   BACKEND=./backend-for-mac.conf
   FRONTEND=molgenis/molgenis-frontend:latest
   ```
 * Run the 'integ-test-env: Compose...' Run configuration 
-* Then click on the ```molgenis-platform-integration-tests``` module and click *Run --> All Tests (TestNG)*
+* Then click on the `molgenis-platform-integration-tests` module and click *Run --> All Tests (TestNG)*
+>>>>>>> 8.3
 
 The code will not make any attempts to delete the integration test database and index.
 (But you can easily create and call a cleanup script yourself to use when needed.)

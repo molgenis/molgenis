@@ -14,7 +14,7 @@ class NegotiatorConfigMetadata extends SystemEntityType {
   public static final String NEGOTIATOR_URL = "negotiator_url";
   public static final String USERNAME = "username";
 
-  @java.lang.SuppressWarnings("squid:S2068")
+  @java.lang.SuppressWarnings("java:S2068")
   public static final String PASSWORD = "password";
 
   private static final String ID = "id";

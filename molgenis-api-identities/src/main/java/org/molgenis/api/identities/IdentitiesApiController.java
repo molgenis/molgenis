@@ -50,7 +50,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class IdentitiesApiController {
   public static final String USER = "/user";
 
-  @SuppressWarnings("squid:S1075") // URIs should not be hardcoded
+  @SuppressWarnings("java:S1075") // URIs should not be hardcoded
   private static final String SECURITY_API_PATH = ApiNamespace.API_PATH + "/identities";
 
   static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";

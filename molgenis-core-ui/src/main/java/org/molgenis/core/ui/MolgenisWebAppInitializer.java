@@ -32,6 +32,7 @@ public class MolgenisWebAppInitializer {
   protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize) {
     // Create the 'root' Spring application context
     AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+    rootContext.registerShutdownHook();
     rootContext.setAllowBeanDefinitionOverriding(false);
     rootContext.register(appConfig);
 

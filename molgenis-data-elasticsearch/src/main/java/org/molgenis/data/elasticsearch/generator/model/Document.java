@@ -6,8 +6,7 @@ import javax.annotation.Nullable;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 @AutoValue
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Document {
   public abstract String getId();
 

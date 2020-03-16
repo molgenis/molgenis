@@ -100,6 +100,7 @@ public class QuestionnaireController extends PluginController {
    */
   @ResponseBody
   @GetMapping("/submission-text/{id}")
+  @SuppressWarnings("javasecurity:S5131") // id is validated in questionnaireService
   public String getQuestionnaireSubmissionText(@PathVariable("id") String id) {
     return questionnaireService.getQuestionnaireSubmissionText(id);
   }

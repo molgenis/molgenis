@@ -15,6 +15,7 @@ import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.GroupPackageServiceImpl;
+import org.molgenis.data.security.SessionSecurityContextUpdaterImpl;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.auth.GroupPackageService;
 import org.molgenis.data.security.permission.DataPermissionConfig;
@@ -141,7 +142,8 @@ in org.molgenis.data and subpackages from included modules
   PermissionRegistry.class,
   DataPermissionConfig.class,
   JsonTestConfig.class,
-  GroupValueFactory.class
+  GroupValueFactory.class,
+  SessionSecurityContextUpdaterImpl.class
 })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent> {
 

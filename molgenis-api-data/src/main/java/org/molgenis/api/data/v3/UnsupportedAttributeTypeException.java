@@ -4,7 +4,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.exception.BadRequestException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnsupportedAttributeTypeException extends BadRequestException {
   private static final String ERROR_CODE = "DAPI01";
 

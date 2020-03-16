@@ -1,150 +1,112 @@
-# Developing in IntelliJ with Docker
-We have several backend services which we run to debug and test the MOLGENIS backend webapp.
+# Molgenis development using Docker
+
+## Prerequisites
+
+A functional Docker and Docker-compose setup is needed. Checkout the
+documentation for [Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows),
+[MacOS](https://hub.docker.com/editions/community/docker-ce-desktop-mac) or your
+Linux distribution on how to setup Docker and Docker-compose.
+
+## Services
+
+Molgenis depends on the following services:
+
 * [OpenJDK 11](https://adoptopenjdk.net/)
-* [Apache Tomcat v9.0.x](http://tomcat.apache.org/) 
+* [Apache Tomcat v9.0.x](http://tomcat.apache.org/)
 * [PostgreSQL v11.1](https://www.postgresql.org/)
-* [Elasticsearch v5.5](https://www.elastic.co/)	
-* [Minio v6](https://minio.io/)	
-* Optional: [OpenCPU 2.1](https://www.opencpu.org) and [R 3.5.x](https://www.r-project.org/) (enables R scripting feature)	
-* Optional: [Python 3.6](https://www.python.org) (enables Python scripting feature)
+* [Elasticsearch v5.5](https://www.elastic.co/)
+* [Minio v6](https://minio.io/)
 
-> **IMPORTANT**: To switch from local services installed with executables to this docker deployment you need to turn of the local services to make the ports available again to your host.
+These services are optional:
 
-## Deploy
-You first need to configure the specifics for your OS.
+* [OpenCPU 2.1](https://www.opencpu.org) and [R 3.5.x](https://www.r-project.org/) (R scripting feature)
+* [Python 3.6](https://www.python.org) (Python scripting feature)
 
-**For Mac**
-Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-mac
+## Environment Variables
 
-**For Windows**
-Install Docker: https://hub.docker.com/editions/community/docker-ce-desktop-windows
-
-> **IMPORTANT**: Go to Windows Docker Desktop App and check if this option is checked: ```Expose daemon on tcp://localhost:2375 without TLS``` to expose the docker deamon to your localhost 
-
-### Run
-You can create a new run-configuration by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/development/docker-compose.yml) and click on **Create 'dev-env: Compose...'**.
-
-> **IMPORTANT**: When you use the build configuration in IntelliJ, please check the option ```--build, force build images```.
-
-You need to add the following environments variables to the *Run configuration*:
-
-**For Windows**
-```env
-BACKEND=./backend-for-windows.conf
-FRONTEND=molgenis/molgenis-frontend:latest
-```
-
-**For Mac**
-```env
-BACKEND=./backend-for-mac.conf
-FRONTEND=molgenis/molgenis-frontend:latest
-```
-
-Alternatively you can run the stack by executing on the cli:
-
-**For Windows**
-
-```batch
-molgenis-app/dev-env/docker-stack.bat start
-``` 
-
-**For Mac**
+You can either create a `.env` file to use docker-compose from the
+commandline, or add variables to your system's environment. Read the
+[Docker documentation](https://docs.docker.com/compose/environment-variables/)
+for more information about environment variables.
 
 ```bash
-molgenis-app/dev-env/docker-stack.bash start
-``` 
-
-Test your work at: <http://localhost>.
-
-### Alternative configuration for testing purposes
-When you want to test integration with the frontend you can specify another frontend image by overriding ```FRONTEND``` in the environment variables.
- 
-**For IntelliJ** 
-In the *Run configuration* override.
-
-```env
-FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
+cd molgenis-app/dev-env
+cp .env.example .env
+docker-compose start frontend
+# MOLGENIS_HOST must be the Gateway address (e.g. 172.17.0.1)
+# when using 'bridge' network mode.
+docker inspect frontend
+# On Linux, you can find the right property like this:
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}' frontend
+# Stop the service(s)
+docker-compose stop
 ```
 
-> For tags please check: [pull requests for frontend](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags)
+* Verify environment variables
 
-**For BATCH / BASH startup**
-
-Override:
-
-*For Windows*
-```batch
-@ECHO OFF
-...
-SET FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
-...
-```
-
-*For Mac*
 ```bash
-#!/bin/bash
-...
-export FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
-...
-```
-> **Minio**: when you run Minio in the docker-compose stack it will bind to the localhost on your user-dir/minio. Be sure that the minio directory is present in your user directory.
-> **NGINX**: you can see that the port number is not there. NGINX is resolving the frontend and will always be served on port 80. 
-
-To debug:
-
-```bash/batch
-# show running containers
-docker ps
-# show logging of specific container
-docker logs #container id#1`
-# exec into a running container
-docker exec -it #container id# bash
+vim .env
+# (!) 127.0.0.1 when using host mode
+MOLGENIS_HOST=172.17.0.1
+MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
+# On Window & MacOS, bridge mode is mandatory.
+# On Linux, host mode is preferred.
+NETWORK_MODE=bridge
+:wq
+docker-compose up
+# Open a browser on http://localhost
 ```
 
-## Teardown
-Dont forget to stop the running services after use.
+## IntelliJ & Docker
 
-**For Windows on cli**
-```batch
-docker-stack.bat shutdown
-```
+* Create a new run-configuration by right-clicking the [docker-compose file](https://github.com/molgenis/molgenis/blob/master/molgenis-app/dev-env/docker-compose.yml) and selecting *Create 'dev-env: Compose Deployment'*.
+* Check the option `--build, force build images`
+* Copy the environment variables from `molgenis-app/dev-env/.env.example` to the system clipboard
+* Click on the *Browse* icon in the Environment variables input field
+* Click the *Paste* button and verify the [variable configuration](#variables-configuration)
 
-**For Mac on cli**
+## Data Persistence
+
+The ```psql``` client is used to connect to the PostgreSQL database:
+
 ```bash
-docker-stack.bash shutdown
-```
-
->note: also when you exited with ```CTRL+C```.
-
-**In IntelliJ**
-
-Right-click within the Docker-service tab on *Compose: dev-env* and click on *Down*.
-
-### When all else fails
-When you are not sure that everything went the way it should be, these commands will purge everything on your system:
-
-**For Windows on cli**
-```batch
-docker-stack.bat terminate
-```
-
-**For Mac on cli**
-```bash
-docker-stack.bash terminate
-```
-
-## Accessing services from host machine
-There are a few clients you can use to access the docker services from your local machine.
-
-### Postgres
-We use ```psql``` to access postgres and do database changes.
-
-```bash/batch
 psql -h localhost -p 5432 -U molgenis -W
-``` 
+```
 
-> **IMPORTANT:** In Docker the postgres user is non-existent. You have 1 superuser which is defined in the docker-compose (username: molgenis, password: molgenis).
->  
-> There is only 1 scheme as well. This won't allow you to drop the database on the container. 
->
-> The right way to do this is to shutdown the services and to purge the PostgreSQL docker, image and volume and then restart the services again. 
+Data for PostgreSQL & ElasticSearch is stored in Docker volumes. Cleaning
+persistent data can be done by removing the containers and afterwards
+the volumes:
+
+```bash
+docker-compose stop
+docker-compose rm
+
+# Remove PostgreSQL data volume
+docker volume rm dev-env_db-data
+# Remove ElasticSearch data volume
+docker volume rm dev-env_es-data
+```
+
+## Frontend versioning
+
+Testing different frontend versions can be done using another frontend
+Docker image. Override the `MOLGENIS_FRONTEND` [variable](#variables-configuration):
+
+```bash
+MOLGENIS_FRONTEND=registry.molgenis.org/molgenis/molgenis-frontend:PR-1-1
+```
+
+Check frontend [pull requests](https://registry.molgenis.org/#browse/browse:docker:v2/molgenis/molgenis-frontend/tags) for valid tags.
+
+## Troubleshooting
+
+### Windows
+
+* Go to Windows Docker Desktop App and check if this option is checked:
+`Expose daemon on tcp://localhost:2375 without TLS` to expose the docker
+daemon to your localhost
+
+### Minio
+
+* Be sure that the Minio directory is present in the user directory when running
+Minio in the docker-compose stack.

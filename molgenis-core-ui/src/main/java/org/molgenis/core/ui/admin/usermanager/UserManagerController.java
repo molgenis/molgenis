@@ -49,6 +49,7 @@ public class UserManagerController extends PluginController {
   })
   @PutMapping("/activation")
   @ResponseStatus(HttpStatus.OK)
+  @SuppressWarnings("javasecurity:S5131") // activation is validated in pluginManagerService
   public @ResponseBody ActivationResponse activation(@RequestBody Activation activation) {
     ActivationResponse activationResponse = new ActivationResponse();
     activationResponse.setId(activation.getId());

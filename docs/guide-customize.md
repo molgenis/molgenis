@@ -5,7 +5,7 @@ MOLGENIS allows extensive customization of look & feel to suit your work
 ## Menu
 The menu manager is a module that gives you the ability to arrange your menu to contain the items that you want it to contain. If you only want to show the data explorer and importer, you can do that. If you want to throw away news and background modules because you do not have any need for them, then you can do that as well. Every item is configurable.
 
-![Menu manager screen](images/menu_manager.png?raw=true, "menu manager")
+![Menu manager screen](./images/menu_manager.png)
 
 Just remember that throwing away the menu manager module might not be the best idea! And it's good to always keep the blue Home item at the top, else your homepage will no longer be accessible to anonymous visitors.
 
@@ -59,7 +59,7 @@ Creating your own research database often comes with the desire to add a unique 
 
 Using the Theme manager, you can select between multiple bootstrap styles.
 
-![Theme Manager](images/theme_manager.png?raw=true, "Theme Manager")
+![Theme Manager](./images/theme_manager.png)
 
 To get the feel of how certain styles look, you can select it in the dropdown menu. The style will not be applied to the application unless you press the 'Save current theme' button.
 
@@ -71,7 +71,7 @@ It is possible to submit your own CSS sheets to update the styling. By selecting
 ## Homepage
 The home page is one of the most important part of your MOLGENIS application. It is a doorway to the rest of your application, and as it is such, it should look nice! When you are logged in as administrator, the home page contains an *edit* button. Clicking this button will open up an editor.
 
-![Home page editor](images/home_page_editor.png?raw=true, "home page editor")
+![Home page editor](./images/home_page_editor.png)
 
 Here you can do simple stuff like adding text, images, and table.
 
@@ -137,23 +137,23 @@ Now that you created a freemarker template, you want to associate this template 
 
 # Standalone entity report
 In some cases it would be nice to be able to share a row in your data with someone else. Therefore MOLGENIS contains the “standalone report” functionality. This can be set in the dataexplorer settings. To go there, go to the dataexplorer and click on the gear below the logout button.
-![Setting cog](images/customize/setting_cog.png?raw=true, "setting cog")
+![Setting cog](./images/customize/setting_cog.png)
 
 In section “Modules”, subsection “Data” the setting “Standalone Reports” can be found. By default the “Standalone Reports” are turned off.
-![Dataexplorer settings](images/customize/dataexplorer_settings.png?raw=true, "dataexplorer settings")
+![Dataexplorer settings](./images/customize/dataexplorer_settings.png)
 
 When turning them on, keep in mind that when customizing your entity report in the FreeMarkerTemplate table (see above), you also need to add a customized “view-standalone-report-specific-*Your entity name here*.ftl”. This file should contain what you want to show in your standalone report.
-![Freemarker table](images/customize/freemarker_table.png?raw=true, "freemarker table")
-![Standalone Report form](images/customize/standalone_report_form.png?raw=true, "standalone report form")
+![Freemarker table](./images/customize/freemarker_table.png)
+![Standalone Report form](./images/customize/standalone_report_form.png)
 
 With the configuration being completed, clicking on the magnifying glass button in front of a row in your dataset will result in your specific freemarker template with the addition of a share link in the upper right corner.
-![Share URL](images/customize/share_url.png?raw=true, "share url")
+![Share URL](./images/customize/share_url.png)
 
 When clicking the copy button, the URL is copied to your clipboard. You can paste it in your address bar in the browser to go to the specific entity report of that row. This way you can bookmark it and share it with others. Opening the link shows the content of your entity report on a new page. Clicking the blue button with: “View full dataset” leads back to the specific table in the dataexplorer.
-![Standalone view](images/customize/standalone_view.png?raw=true, "standalone view")
+![Standalone view](./images/customize/standalone_view.png)
 
-[Download the example dataset here](data/standalone_report_data_example.xlsx)
-[Download the freemarker template example here](data/view-standalone-report-specific-root_hospital_patients.ftl)
+[Download the example dataset here](./data/standalone_report_data_example.xlsx)
+[Download the freemarker template example here](./data/view-standalone-report-specific-root_hospital_patients.ftl)
 
 ### Accessing entity details from Freemarker
 The model will contain
@@ -242,4 +242,4 @@ There is an application setting that allows you to set the max height of your im
 This will force an image to have a height according to the set amount of pixel.
 
 An example of a banner:
-![Website banner](images/customize/website_banner.png?raw=true, "website banner")
+![Website banner](./images/customize/website_banner.png)

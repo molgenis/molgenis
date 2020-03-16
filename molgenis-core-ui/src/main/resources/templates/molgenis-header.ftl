@@ -122,7 +122,7 @@
                       loginHref: '/login',
                       helpLink: {
                         label: 'Help',
-                        href: 'https://molgenis.gitbooks.io/molgenis/content/'
+                        href: 'https://molgenis.gitbook.io/molgenis/'
                       }
                     }
                   }
@@ -268,7 +268,7 @@
                         </form>
                     </li>
                     <li>
-                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank">Help</a>
+                        <a id="manual" href="https://molgenis.gitbook.io/molgenis/" target="_blank">Help</a>
                     </li>
                     <li>
                         <form id="logout-form" class="navbar-form" method="post" action="/logout">

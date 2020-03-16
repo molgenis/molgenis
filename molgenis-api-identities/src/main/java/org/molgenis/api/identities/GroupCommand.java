@@ -5,7 +5,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_GroupCommand.class)
-@SuppressWarnings("squid:S1610")
+@SuppressWarnings("java:S1610")
 public abstract class GroupCommand {
   public abstract String getName();
 

@@ -78,6 +78,25 @@ class QueryMapperTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testMapEqualsSubAttributeUnknown() {
+    String value = "value";
+    Query query =
+        Query.builder()
+            .setItem("test.subtestunknown")
+            .setOperator(Operator.EQUALS)
+            .setValue(value)
+            .build();
+
+    EntityType refEntityType = mock(EntityType.class);
+
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getRefEntity()).thenReturn(refEntityType);
+    Repository<Entity> repository = createMockRepository(attribute);
+
+    assertThrows(UnknownAttributeException.class, () -> queryMapper.map(query, repository));
+  }
+
+  @Test
   void testMapEqualsNull() {
     Query query = Query.builder().setItem("test").setOperator(Operator.EQUALS).build();
 
@@ -253,6 +272,18 @@ class QueryMapperTest extends AbstractMockitoTest {
 
     assertEquals(
         new QueryImpl<>(repository).ge("test", parsedValue), queryMapper.map(query, repository));
+  }
+
+  @Test
+  void testMapLessThanUnexpectedEnumException() {
+    String value = "value";
+    Query query =
+        Query.builder().setItem("test").setOperator(Operator.LESS_THAN).setValue(value).build();
+
+    Attribute attribute = mock(Attribute.class);
+    Repository<Entity> repository = createMockRepository(attribute, AttributeType.STRING);
+
+    assertThrows(UnexpectedEnumException.class, () -> queryMapper.map(query, repository));
   }
 
   @Test

@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContextAware;
  * @author erwin
  */
 // Intended static write from instance
-@SuppressWarnings("squid:S2696")
+@SuppressWarnings("java:S2696")
 public class ApplicationContextProvider implements ApplicationContextAware {
   private static ApplicationContext ctx = null;
 

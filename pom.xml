@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>8.3.0-SNAPSHOT</version>
+  <version>8.4.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -77,6 +77,8 @@
     <fmt.skip>${skipTests}</fmt.skip>
     <reproducible.skip>${skipTests}</reproducible.skip>
     <swagger.skip>${skipTests}</swagger.skip>
+    <maven.javadoc.skip>${skipTests}</maven.javadoc.skip>
+    <sonar.skip>${skipTests}</sonar.skip>
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.3</elasticsearch.version>
@@ -147,7 +149,7 @@
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <checkstyle.version>8.18</checkstyle.version>
+    <checkstyle.version>8.29</checkstyle.version>
     <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     <sentry.version>1.7.5</sentry.version>
     <sentry-logback.version>1.7.14</sentry-logback.version>

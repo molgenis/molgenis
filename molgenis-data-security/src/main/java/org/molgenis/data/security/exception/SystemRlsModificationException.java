@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.ForbiddenException;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class SystemRlsModificationException extends ForbiddenException {
   private static final String ERROR_CODE = "DS34";
   private final String entityType;

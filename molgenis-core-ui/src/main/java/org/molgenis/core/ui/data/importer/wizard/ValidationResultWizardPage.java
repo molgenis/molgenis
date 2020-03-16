@@ -1,8 +1,12 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
@@ -15,12 +19,10 @@ import org.molgenis.data.importer.ImportRunService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.UserAccountService;
+import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -30,17 +32,28 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
   private static final long serialVersionUID = 1L;
   private static final Logger LOG = LoggerFactory.getLogger(ValidationResultWizardPage.class);
 
-  private final transient ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
+  private transient ImportServiceFactory transientImportServiceFactory;
+  private transient FileRepositoryCollectionFactory transientFileRepositoryCollectionFactory;
+  private transient ImportRunService transientImportRunService;
+  private transient ExecutorService transientExecutorService;
 
-  @Autowired private transient ImportServiceFactory importServiceFactory;
+  ValidationResultWizardPage(
+      ImportServiceFactory importServiceFactory,
+      FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
+      ImportRunService importRunService) {
+    this.transientImportServiceFactory = requireNonNull(importServiceFactory);
+    this.transientFileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
+    this.transientImportRunService = requireNonNull(importRunService);
 
-  @Autowired private transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+    this.transientExecutorService = createExecutorService();
+  }
 
-  @Autowired private transient ImportRunService importRunService;
-
-  @Autowired transient UserAccountService userAccountService;
-
-  @Autowired transient UserService userService;
+  @PreDestroy
+  void preDestroy() {
+    if (transientExecutorService != null) {
+      ExecutorServiceUtils.shutdownAndAwaitTermination(transientExecutorService);
+    }
+  }
 
   @Override
   public String getTitle() {
@@ -67,28 +80,31 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
         }
 
         RepositoryCollection repositoryCollection =
-            fileRepositoryCollectionFactory.createFileRepositoryCollection(importWizard.getFile());
+            getFileRepositoryCollectionFactory()
+                .createFileRepositoryCollection(importWizard.getFile());
         ImportService importService =
-            importServiceFactory.getImportService(importWizard.getFile(), repositoryCollection);
+            getImportServiceFactory()
+                .getImportService(importWizard.getFile(), repositoryCollection);
 
         synchronized (this) {
           ImportRun importRun =
-              importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false);
+              getImportRunService().addImportRun(SecurityUtils.getCurrentUsername(), false);
           ((ImportWizard) wizard).setImportRunId(importRun.getId());
 
           long callingThreadId = Thread.currentThread().getId();
-          asyncImportJobs.execute(
-              new ImportJob(
-                  importService,
-                  SecurityContextHolder.getContext(),
-                  repositoryCollection,
-                  metadataAction,
-                  dataAction,
-                  importRun.getId(),
-                  importRunService,
-                  request.getSession(),
-                  importWizard.getSelectedPackage(),
-                  callingThreadId));
+          getExecutorService()
+              .execute(
+                  new ImportJob(
+                      importService,
+                      SecurityContextHolder.getContext(),
+                      repositoryCollection,
+                      metadataAction,
+                      dataAction,
+                      importRun.getId(),
+                      getImportRunService(),
+                      request.getSession(),
+                      importWizard.getSelectedPackage(),
+                      callingThreadId));
         }
 
       } catch (RuntimeException | IOException e) {
@@ -97,5 +113,38 @@ public class ValidationResultWizardPage extends AbstractWizardPage {
     }
 
     return null;
+  }
+
+  private synchronized FileRepositoryCollectionFactory getFileRepositoryCollectionFactory() {
+    if (transientFileRepositoryCollectionFactory == null) {
+      transientFileRepositoryCollectionFactory =
+          getApplicationContext().getBean(FileRepositoryCollectionFactory.class);
+    }
+    return transientFileRepositoryCollectionFactory;
+  }
+
+  private synchronized ImportServiceFactory getImportServiceFactory() {
+    if (transientImportServiceFactory == null) {
+      transientImportServiceFactory = getApplicationContext().getBean(ImportServiceFactory.class);
+    }
+    return transientImportServiceFactory;
+  }
+
+  private synchronized ImportRunService getImportRunService() {
+    if (transientImportRunService == null) {
+      transientImportRunService = getApplicationContext().getBean(ImportRunService.class);
+    }
+    return transientImportRunService;
+  }
+
+  private synchronized ExecutorService getExecutorService() {
+    if (transientExecutorService == null) {
+      transientExecutorService = createExecutorService();
+    }
+    return transientExecutorService;
+  }
+
+  private ExecutorService createExecutorService() {
+    return Executors.newCachedThreadPool();
   }
 }

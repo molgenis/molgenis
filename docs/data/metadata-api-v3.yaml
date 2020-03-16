@@ -86,6 +86,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/entityTypeId'
         - $ref: '#/components/parameters/flattenAttributes'
+        - $ref: '#/components/parameters/i18n'
       responses:
         '200':
           $ref: '#/components/responses/OkEntityTypeResponse'
@@ -370,6 +371,13 @@ components:
       required: false
       schema:
         type: boolean
+    i18n:
+      name: i18n
+      description: Include translations e.g. label/description
+      in: query
+      required: false
+      schema:
+        type: boolean
   schemas:
     Links:
       type: object
@@ -418,7 +426,7 @@ components:
       type: object
       properties:
         href:
-          type: string
+          $ref: "#/components/schemas/Links"
         data:
           $ref: "#/components/schemas/EntityTypeData"
     EntityTypeData:
@@ -427,15 +435,7 @@ components:
         id:
           type: string
         package:
-          type: string
-        idAttribute:
-          $ref: "#/components/schemas/Attribute"
-        labelAttribute:
-          $ref: "#/components/schemas/Attribute"
-        lookupAttributes:
-          type: array
-          items:
-            $ref: "#/components/schemas/Attribute"
+          $ref: "#/components/schemas/Package"
         extends:
           $ref: "#/components/schemas/EntityType"
         description:
@@ -451,46 +451,70 @@ components:
         indexingDepth:
           type: integer
         attributes:
-          type: array
-          items:
-            $ref: "#/components/schemas/Attribute"
+          type: object
+          $ref: "#/components/schemas/Attributes"
       example:
         id: 0
         parent: https://my.molgenis.org/api/data/Node/1
         children: https://my.molgenis.org/api/data/Node/0/children
+    Attributes:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+        links:
+          $ref: "#/components/schemas/Links"
     Attribute:
       type: object
       properties:
-        href:
-          type: string
+        links:
+          $ref: "#/components/schemas/Links"
         data:
           $ref: "#/components/schemas/AttributeData"
     AttributeData:
       properties:
         id:
-          type: object
+          type: string
         name:
           type: string
         sequenceNr:
-          type: string
+          type: integer
+          nullable: true
         type:
           type: string
           enum: [bool, categorical, categorical_mref, compound, date, date_time, decimal, email, enum, file, html, hyperlink, int, long, mref, one_to_many, script, string, text, xref]
         mappedBy:
           $ref: "#/components/schemas/Attribute"
-        lookupAttribute:
-          type: boolean
-        refEntityTypeId:
-          type: string
+          # or nullable
+        orderBy:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttributeSort"
           nullable: true
+        idAttribute:
+          type: boolean
+        labelAttribute:
+          type: boolean
+        lookupAttributeIndex:
+          type: integer
+          nullable: true
+        refEntityType:
+          $ref: "#/components/schemas/Links"
+          # or nullable
         description:
           type: string
+          nullable: true
         description_i18n:
           $ref: "#/components/schemas/I18nValue"
+          # or nullable
         label:
           type: string
+          nullable: true
         label_i18n:
           $ref: "#/components/schemas/I18nValue"
+          # or nullable
         nullable:
           type: boolean
         auto:
@@ -503,10 +527,16 @@ components:
           type: boolean
         aggregatable:
           type: boolean
-        options:
+        enumOptions:
           type: array
           items:
-            $ref: "#/components/schemas/Option"
+            type: string
+          nullable: true
+        categoricalOptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoricalOption"
+          nullable: true
         defaultValue:
           type: string
           nullable: true
@@ -515,6 +545,9 @@ components:
           nullable: true
         parentAttribute:
           $ref: "#/components/schemas/Attribute"
+        expression:
+          type: string
+          nullable: true
         nullableExpression:
           type: string
           nullable: true
@@ -524,6 +557,11 @@ components:
         validationExpression:
           type: string
           nullable: true
+    Package:
+      type: object
+      properties:
+        href:
+          $ref: "#/components/schemas/Links"
     EntityTypeCreate:
       type: object
       required: [id, attributes]
@@ -668,14 +706,12 @@ components:
           type: string
         translations:
           type: object
-    Option:
+    CategoricalOption:
       type: object
       properties:
         id:
           type: string
         label:
-          type: string
-        description:
           type: string
     Problem:
       type: object

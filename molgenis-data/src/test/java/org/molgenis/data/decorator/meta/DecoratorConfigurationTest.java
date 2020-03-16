@@ -20,7 +20,7 @@ public class DecoratorConfigurationTest extends AbstractSystemEntityTest {
   @Autowired DecoratorConfigurationMetadata metadata;
   @Autowired DecoratorConfigurationFactory factory;
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(

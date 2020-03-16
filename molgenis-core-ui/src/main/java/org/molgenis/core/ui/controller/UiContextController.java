@@ -39,7 +39,7 @@ public class UiContextController {
   public static final String ID = "app-ui-context";
 
   public static final String LOGIN_HREF = "/login";
-  public static final String HELP_HREF = "https://molgenis.gitbooks.io/molgenis/content/";
+  public static final String HELP_HREF = "https://molgenis.gitbook.io/molgenis/";
   public static final String THEME_CSS_PATH = "/css/bootstrap-4/";
 
   private final AppSettings appSettings;

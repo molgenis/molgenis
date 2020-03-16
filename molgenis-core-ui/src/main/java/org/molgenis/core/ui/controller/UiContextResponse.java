@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import org.molgenis.web.menu.model.Menu;
 
 @AutoValue
-@SuppressWarnings("squid:S1610")
+@SuppressWarnings("java:S1610")
 public abstract class UiContextResponse {
 
   @Nullable

@@ -1,0 +1,9 @@
+{
+  "links": {
+    "self": "${baseUri}/api/data/123-test-group_ID-Test-Ref/ref5"
+  },
+  "data": {
+    "value": "ref5",
+    "label": "label5"
+  }
+}

@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.data.security.auth.RoleMembership;
 
 @AutoValue
-@SuppressWarnings("squid:S1610")
+@SuppressWarnings("java:S1610")
 public abstract class GroupMemberResponse {
   public abstract UserResponse getUser();
 

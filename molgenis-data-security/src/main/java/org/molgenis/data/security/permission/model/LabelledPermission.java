@@ -9,8 +9,7 @@ import org.springframework.security.acls.model.Sid;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_LabelledPermission.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class LabelledPermission {
   @Nullable
   public abstract Sid getSid();

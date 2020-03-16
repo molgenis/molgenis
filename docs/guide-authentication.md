@@ -16,7 +16,7 @@ If you have an existing MOLGENIS-account you can secure it with two-factor authe
 
 When two-factor authentication is enabled and you sign in for the first time, you will be promted to secure your account with an authenticator app. The authentication can be configured by scanning a QR-code.
 
-![two-factor authentication activation](images/molgenis_two-factor-authentication_activation.png?raw=true, "two-factor authentication activation")
+![two-factor authentication activation](./images/molgenis_two-factor-authentication_activation.png)
 
 You have to scan the QR-code with an authenticator-app. Examples of authenticator-apps are:
 
@@ -33,12 +33,12 @@ When the QR-code is scanned, your authenticator-app will create an account for M
 You have to fill in the verification code in de box below the QR-code. If you have entered the verification code you will be redirected to the
 *Account-Security*-tab. This will show the recovery-codes.
 
-![two-factor authentication recoverycodes](images/molgenis_two-factor-authentication_recoverycodes.png?raw=true, "two-factor authentication recoverycodes")
+![two-factor authentication recoverycodes](./images/molgenis_two-factor-authentication_recoverycodes.png)
 
 Make sure you store the recovery codes somewhere (not in MOLGENIS) so you can access them when you for example lose your phone.
 Each time you sign in, you will have to enter the verification code.
 
-![two-factor authentication configured](images/molgenis_two-factor-authentication_configured.png?raw=true, "two-factor authentication configured")
+![two-factor authentication configured](./images/molgenis_two-factor-authentication_configured.png)
 
 Depending on the server's settings, you can enable, disable and reset your two-factor authentication in your account settings (under Security).
 
@@ -53,7 +53,7 @@ such as [Google](https://developers.google.com/identity/protocols/OpenIDConnect)
 
 Once enabled the sign in dialog will display additional sign in options:
 
-![Single sign-on dialog](images/security/authentication/signin_dialog_oidc.png?raw=true, "Single sign-on dialog")
+![Single sign-on dialog](./images/security/authentication/signin_dialog_oidc.png)
 
 Selecting e.g. Google will redirect the browser to their website so the user can authenticate there and return to MOLGENIS once authentication has successfully completed.
 The permissions you have once authenticated are the default user permissions set by an administrator.   
@@ -123,7 +123,7 @@ The OpenID Connect clients you have created in the previous step can now be sele
 
 Activating clients requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
 
-![Single sign-on authentication settings](images/security/authentication/authentication_settings_oidc.png?raw=true, "Single sign-on authentication settings")
+![Single sign-on authentication settings](./images/security/authentication/authentication_settings_oidc.png)
 
 ### Beware of time skew between the servers
 The authentication tokens from the ID provider are signed with a timestamp.
@@ -161,9 +161,9 @@ When you want to manage your tokens manually there are different methods in MOLG
 to create new tokens. You can create manually tokens in the DataExplorer. When you search on "*token*", you can edit the
 existing tokens.
 
-![Token search](images/molgenis_token_search.png?raw=true, "Token search")
+![Token search](./images/molgenis_token_search.png)
 
 When you click on the add-button you can manually assign a token to a user. This token can be used to access the API's
 of MOLGENIS.
 
-![Token creation](images/molgenis_token_creation.png?raw=true, "Token creation")
+![Token creation](./images/molgenis_token_creation.png)

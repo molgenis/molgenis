@@ -32,7 +32,7 @@ public class WebAppSystemEntityRegistry implements SystemEntityRegistry {
             + "  <div class=\"container\">\n"
             + "    <h1 class=\"display-4\">Flexible software for scientific data</h1>\n"
             + "    <p class=\"lead\">Process, manage, query, annotate, integrate, analyse, share</p>\n"
-            + "    <a class=\"btn btn-primary btn-lg\" href=\"https://molgenis.gitbooks.io/molgenis/content/\" "
+            + "    <a class=\"btn btn-primary btn-lg\" href=\"https://molgenis.gitbook.io/molgenis/\" "
             + "role=\"button\" target=\"_blank'\">Learn more</a>\n"
             + "  </div>\n"
             + "</div>");

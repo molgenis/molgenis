@@ -38,6 +38,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.integrationtest.utils.AbstractMolgenisIntegrationTests.cleanupUserPermissions;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import java.time.Instant;
@@ -1040,11 +1041,43 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void populateDataPermissions(ApplicationContext applicationContext) {
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
+
+    Map<ObjectIdentity, PermissionSet> basePermissions = getBasePermissionsMap(applicationContext);
+
+    Map<ObjectIdentity, PermissionSet> readerPermissions =
+        getReadPermissions(permissionService, basePermissions);
+    grant(permissionService, readerPermissions, SidUtils.createUserSid(USERNAME_READ));
+    Map<ObjectIdentity, PermissionSet> editorPermissions =
+        getEditorPermissions(permissionService, basePermissions);
+    grant(permissionService, editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
+  }
+
+  private static Map<ObjectIdentity, PermissionSet> getEditorPermissions(
+      PermissionService permissionService, Map<ObjectIdentity, PermissionSet> basePermissions) {
+    Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
+    editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
+    editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
+
+    return editorPermissions;
+  }
+
+  private static Map<ObjectIdentity, PermissionSet> getReadPermissions(
+      PermissionService permissionService, Map<ObjectIdentity, PermissionSet> basePermissions) {
+    Map<ObjectIdentity, PermissionSet> readerPermissions = new HashMap<>(basePermissions);
+    readerPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.READ);
+    readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
+    readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
+    readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
+    return readerPermissions;
+  }
+
+  private static Map<ObjectIdentity, PermissionSet> getBasePermissionsMap(
+      ApplicationContext applicationContext) {
     TestEntityStaticMetaData entityTypeStatic =
         applicationContext.getBean(TestEntityStaticMetaData.class);
     TestRefEntityStaticMetaData refEntityTypeStatic =
         applicationContext.getBean(TestRefEntityStaticMetaData.class);
-    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
 
     Map<ObjectIdentity, PermissionSet> basePermissions = new HashMap<>();
     basePermissions.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
@@ -1054,18 +1087,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
     basePermissions.put(new EntityTypeIdentity(entityTypeStatic), PermissionSet.READ);
     basePermissions.put(new EntityTypeIdentity(refEntityTypeStatic), PermissionSet.READ);
-
-    Map<ObjectIdentity, PermissionSet> readerPermissions = new HashMap<>(basePermissions);
-    readerPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.READ);
-    readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
-    readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
-    readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
-    grant(permissionService, readerPermissions, SidUtils.createUserSid(USERNAME_READ));
-
-    Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
-    editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
-    editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
-    grant(permissionService, editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
+    return basePermissions;
   }
 
   private static void grant(
@@ -1078,6 +1100,13 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void depopulate(ApplicationContext applicationContext) {
+    Map<ObjectIdentity, PermissionSet> basePermissions = getBasePermissionsMap(applicationContext);
+    PermissionService permissionService = applicationContext.getBean(PermissionService.class);
+
+    cleanupUserPermissions(
+        applicationContext, getReadPermissions(permissionService, basePermissions), USERNAME_READ);
+    cleanupUserPermissions(applicationContext, basePermissions, USERNAME_WRITE);
+
     DataService dataService = applicationContext.getBean(DataService.class);
     TestEntityStaticMetaData entityTypeStatic =
         applicationContext.getBean(TestEntityStaticMetaData.class);

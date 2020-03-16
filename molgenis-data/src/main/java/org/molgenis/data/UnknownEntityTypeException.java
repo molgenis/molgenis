@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class UnknownEntityTypeException extends UnknownDataException {
   private static final String ERROR_CODE = "D01";
 

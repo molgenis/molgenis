@@ -1,14 +1,9 @@
 package org.molgenis.data.security.permission;
 
 import static java.lang.String.format;
-import static org.molgenis.security.core.PermissionSet.COUNT;
 import static org.molgenis.security.core.PermissionSet.COUNT_MASK;
-import static org.molgenis.security.core.PermissionSet.READ;
-import static org.molgenis.security.core.PermissionSet.READMETA;
 import static org.molgenis.security.core.PermissionSet.READ_MASK;
 import static org.molgenis.security.core.PermissionSet.READ_META_MASK;
-import static org.molgenis.security.core.PermissionSet.WRITE;
-import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA_MASK;
 import static org.molgenis.security.core.PermissionSet.WRITE_MASK;
 
@@ -64,24 +59,8 @@ public class PermissionSetUtils {
 
   public static Optional<String> getPermissionStringValue(LabelledPermission labelledPermission) {
     PermissionSet permissionSet = labelledPermission.getPermission();
-    if (permissionSet != null) {
-      int mask = permissionSet.getMask();
-      switch (mask) {
-        case READ_META_MASK:
-          return Optional.of(READMETA);
-        case COUNT_MASK:
-          return Optional.of(COUNT);
-        case READ_MASK:
-          return Optional.of(READ);
-        case WRITE_MASK:
-          return Optional.of(WRITE);
-        case WRITEMETA_MASK:
-          return Optional.of(WRITEMETA);
-        default:
-          throw new IllegalArgumentException(format(UNEXPECTED_MASK_MESSAGE, mask));
-      }
-    }
-    return Optional.empty();
+    String permissionStringValue = getPermissionStringValue(permissionSet);
+    return Optional.ofNullable(permissionStringValue);
   }
 
   public static String getPermissionStringValue(PermissionSet permissionSet) {

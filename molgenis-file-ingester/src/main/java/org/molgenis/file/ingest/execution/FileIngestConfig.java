@@ -60,7 +60,7 @@ public class FileIngestConfig {
     };
   }
 
-  @SuppressWarnings("squid:S1192") // String literals should not be duplicated
+  @SuppressWarnings("java:S1192") // String literals should not be duplicated
   @Lazy
   @Bean
   public ScheduledJobType fileIngestJobType() {

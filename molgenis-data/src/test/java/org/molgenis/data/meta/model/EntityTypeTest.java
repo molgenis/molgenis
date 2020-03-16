@@ -48,7 +48,7 @@ class EntityTypeTest extends AbstractSystemEntityTest {
   @Autowired EntityTypeMetadata metadata;
   @Autowired EntityTypeFactory factory;
 
-  @SuppressWarnings("squid:S2699") // Tests should include assertions
+  @SuppressWarnings("java:S2699") // Tests should include assertions
   @Test
   protected void testSystemEntity() {
     internalTestAttributes(
@@ -267,6 +267,27 @@ class EntityTypeTest extends AbstractSystemEntityTest {
     assertThrows(
         UnknownAttributeException.class,
         () -> entityType.getOwnAttributeById("UnknownAttributeIdentifier"));
+  }
+
+  @Test
+  void testGetAttributeByName() {
+    String attributeName = "MyAttributeName";
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getName()).thenReturn(attributeName);
+
+    Entity entity = mock(Entity.class);
+    EntityType entityType = new EntityType(entity);
+    when(entity.getEntities(ATTRIBUTES, Attribute.class)).thenReturn(singletonList(attribute));
+
+    assertEquals(attribute, entityType.getAttributeByName(attributeName));
+  }
+
+  @Test
+  void testGetAttributeByNameUnknownAttribute() {
+    EntityType entityType = new EntityType(mock(Entity.class));
+    assertThrows(
+        UnknownAttributeException.class,
+        () -> entityType.getAttributeByName("UnknownAttributeName"));
   }
 
   private EntityType mockEntityTypeMeta() {

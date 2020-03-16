@@ -2,7 +2,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI; // NOSONAR
+import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 import java.io.File;
@@ -143,7 +143,7 @@ public class ImportWizardController extends AbstractWizardController {
    *
    * @param url URL from which a file is downloaded
    */
-  @SuppressWarnings("squid:S2083")
+  @SuppressWarnings("javasecurity:S2083")
   @PostMapping("/importByUrl")
   @ResponseBody
   public ResponseEntity<String> importFileByUrl(
@@ -223,12 +223,12 @@ public class ImportWizardController extends AbstractWizardController {
     return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
   }
 
-  @SuppressWarnings({"squid:S2083", "squid:S5144"})
+  @SuppressWarnings({"javasecurity:S2083", "javasecurity:S5144"})
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException, URISyntaxException {
     String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
 
-    // Fix vulnerability reported by sonar: squid:S5144
+    // Fix vulnerability reported by sonar: javasecurity:S5144
     URL url = UriValidator.getSafeUri(fileLocation).toURL();
 
     try (InputStream is = url.openStream()) {

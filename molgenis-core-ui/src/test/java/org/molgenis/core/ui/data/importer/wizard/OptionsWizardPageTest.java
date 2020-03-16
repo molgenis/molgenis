@@ -47,6 +47,11 @@ class OptionsWizardPageTest extends AbstractMockitoTest {
             userPermissionEvaluator);
   }
 
+  @Test
+  void testGetTitle() {
+    assertEquals("Options", optionsWizardPage.getTitle());
+  }
+
   // test for https://github.com/molgenis/molgenis/issues/7448
   @Test
   void testHandleRequestEntitiesInPackages() {

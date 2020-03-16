@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.security.auth.GroupPermission;
 
-@SuppressWarnings("squid:MaximumInheritanceDepth")
+@SuppressWarnings("java:S110")
 public class GroupPermissionDeniedException extends PermissionDeniedException {
   public static final String ERROR_CODE = "DS10";
 

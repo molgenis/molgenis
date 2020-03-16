@@ -20,7 +20,7 @@ public class QueryParseException extends CodedRuntimeException {
     return format("parseException: %s", parseException.getMessage());
   }
 
-  @SuppressWarnings("squid:S1872")
+  @SuppressWarnings("java:S1872")
   @Override
   protected Object[] getLocalizedMessageArguments() {
     Throwable cause = parseException.getCause();

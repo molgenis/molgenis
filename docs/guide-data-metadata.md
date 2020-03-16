@@ -1,7 +1,8 @@
 # Modify metadata
 
 The metadata manager can be used to change the metadata of your tables, i.e., create tables (aka entityTypes), add, remove columns (aka attributes).
-![1](images/metadata-manager/full-edit-overview.png?raw=true)
+
+![Full Edit Overview](./images/metadata-manager/full-edit-overview.png)
 
 This entails changing descriptions, changing the labels, changing the package in which the EntityType lives, but it also
 means you can add and remove attributes (columns), or even change the order in which they are shown in the data explorer.
@@ -13,7 +14,7 @@ from scratch using the metadata manager user interface.
 ## Add table (create)
 To create a new table (EntityType), press the blue 'plus' button next to the EntityType select dropdown.
 
-![2](images/metadata-manager/entity-edit-form-new.png?raw=true)
+![Entity Edit Form New](./images/metadata-manager/entity-edit-form-new.png)
 
 You will get an empty template, allowing you to build your EntityType from scratch.
 If you are familiar with relational database concepts, you will probably recognize most of the inputs.
@@ -66,7 +67,7 @@ __Lookup attributes__
 When talking about ID attributes and lookup attributes, you might wonder: where do I get these attributes?
 The answer is: in the Attribute tree!
 
-![3](images/metadata-manager/attribute-tree-new.png?raw=true)
+![3](./images/metadata-manager/attribute-tree-new.png)
 
 The tree allows you to do three things:
 - Create new attributes
@@ -77,7 +78,7 @@ For tutorials sake, I created three attributes: _id_, _label_, and _country_
 
 Now we will add a new attribute. I click the blue plus button next to attributes.
 
-![4](images/metadata-manager/attribute-edit-form-new.png?raw=true)
+![4](./images/metadata-manager/attribute-edit-form-new.png)
 
 just like with a new EntityType, you get an empty template. This gives you complete control on how you want your attribute to look like.
 
@@ -87,6 +88,7 @@ For more advanced use cases, we explain the every input field below.
 
 __Name__
 : A unique identifier for attributes _within_ this EntityType (You can have multiple 'id' attributes across different EntityTypes).
+Name your attributes wisely, because once they are created they cannot be renamed.
 
 __Label__
 : A label for your attribute. This is meant to be a human readable name, and will be column names people see when they look at your data.
@@ -159,7 +161,7 @@ for it via the importer.
 
 You can select existing table (EntityType) in the dropdown at the top of the screen
 
-![5](images/metadata-manager/header-select-open.png?raw=true)
+![5](./images/metadata-manager/header-select-open.png)
 
 On select, all the fields that were visible for creating a new EntityType are available to you.
 After you are done changing things, you can hit the save all changes button.

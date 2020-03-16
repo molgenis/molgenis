@@ -9,6 +9,7 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
@@ -140,6 +141,13 @@ class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
     assertEquals(
         "rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100",
         queryCaptor.getValue().toString());
+  }
+
+  @Test
+  void testFindOntologyTermsNoOntologies() {
+    assertEquals(
+        emptyList(), ontologyTermRepository.findOntologyTerms(emptyList(), of("term1"), 100));
+    verifyNoInteractions(dataService);
   }
 
   @Test

@@ -57,9 +57,11 @@
   * [Running the integration tests](guide-integration-tests.md)
   * [Jobs](guide-jobs.md)
   * [Security](guide-security.md)
-* [For system administrators](guide-deploy-molgenis.md)
+* [Deploy MOLGENIS](guide-deploy-molgenis.md)
+  * [Using RPM](guide-deploy-rpm.md)
+  * [Technical Migration](guide-deploy-migration.md)
 
-#* User Documentation
+# * User Documentation
 #  * Data
 #    * Modify data      
 #      * [SORTA](user_documentation/modify-data/guide-SORTA.md)

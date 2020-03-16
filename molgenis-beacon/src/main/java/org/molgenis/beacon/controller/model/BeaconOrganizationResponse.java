@@ -8,8 +8,7 @@ import org.molgenis.util.AutoGson;
 /** Organization owning a beacon. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_BeaconOrganizationResponse.class)
-@SuppressWarnings(
-    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class BeaconOrganizationResponse {
   /** Unique identifier of the organization. */
   public abstract String getId();
