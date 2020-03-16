@@ -84,7 +84,8 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
             .build();
 
     when(appSettings.getBootstrapTheme()).thenReturn("selected-theme.css");
-    when(themeFingerprintRegistry.getFingerprint("/css/bootstrap-4/selected-theme.css")).thenReturn("fingerprint");
+    when(themeFingerprintRegistry.getFingerprint("/css/bootstrap-4/selected-theme.css"))
+        .thenReturn("fingerprint");
   }
 
   @AfterEach
@@ -149,6 +150,7 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(jsonPath("$.version", is("mock-version")))
         .andExpect(jsonPath("$.buildDate", is("mock date-time")))
         .andExpect(jsonPath("$.cssHref", is("cssHref")))
-        .andExpect(jsonPath("$.selectedTheme", is("/css/bootstrap-4/selected-theme.css?fingerprint")));
+        .andExpect(
+            jsonPath("$.selectedTheme", is("/css/bootstrap-4/selected-theme.css?fingerprint")));
   }
 }

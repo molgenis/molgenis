@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -51,13 +50,13 @@ public class UiContextController {
   private final ThemeFingerprintRegistry themeFingerprintRegistry;
 
   public UiContextController(
-          AppSettings appSettings,
-          CookieWallService cookieWallService,
-          MenuReaderService menuReaderService,
-          UserAccountService userAccountService,
-          @Value("${molgenis.version}") String molgenisVersion,
-          @Value("${molgenis.build.date}") String molgenisBuildDate,
-          ThemeFingerprintRegistry themeFingerprintRegistry) {
+      AppSettings appSettings,
+      CookieWallService cookieWallService,
+      MenuReaderService menuReaderService,
+      UserAccountService userAccountService,
+      @Value("${molgenis.version}") String molgenisVersion,
+      @Value("${molgenis.build.date}") String molgenisBuildDate,
+      ThemeFingerprintRegistry themeFingerprintRegistry) {
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
     this.menuReaderService = requireNonNull(menuReaderService);
