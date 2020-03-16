@@ -10,9 +10,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
+import org.molgenis.core.ui.style.MolgenisStyleException;
+import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -36,6 +40,7 @@ public class UiContextController {
 
   public static final String LOGIN_HREF = "/login";
   public static final String HELP_HREF = "https://molgenis.gitbooks.io/molgenis/content/";
+  public static final String THEME_CSS_PATH = "/css/bootstrap-4/";
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
@@ -43,20 +48,23 @@ public class UiContextController {
   private final String molgenisVersion;
   private final String molgenisBuildDate;
   private final UserAccountService userAccountService;
+  private final ThemeFingerprintRegistry themeFingerprintRegistry;
 
   public UiContextController(
-      AppSettings appSettings,
-      CookieWallService cookieWallService,
-      MenuReaderService menuReaderService,
-      UserAccountService userAccountService,
-      @Value("${molgenis.version}") String molgenisVersion,
-      @Value("${molgenis.build.date}") String molgenisBuildDate) {
+          AppSettings appSettings,
+          CookieWallService cookieWallService,
+          MenuReaderService menuReaderService,
+          UserAccountService userAccountService,
+          @Value("${molgenis.version}") String molgenisVersion,
+          @Value("${molgenis.build.date}") String molgenisBuildDate,
+          ThemeFingerprintRegistry themeFingerprintRegistry) {
     this.appSettings = requireNonNull(appSettings);
     this.cookieWallService = requireNonNull(cookieWallService);
     this.menuReaderService = requireNonNull(menuReaderService);
     this.molgenisVersion = requireNonNull(molgenisVersion);
     this.molgenisBuildDate = requireNonNull(molgenisBuildDate);
     this.userAccountService = requireNonNull(userAccountService);
+    this.themeFingerprintRegistry = themeFingerprintRegistry;
   }
 
   @ApiOperation(value = "Returns the ui context object", response = ResponseEntity.class)
@@ -77,11 +85,15 @@ public class UiContextController {
 
   @GetMapping("/**")
   @ResponseBody
-  public UiContextResponse getContext() {
+  public UiContextResponse getContext() throws IOException, MolgenisStyleException {
     User user = userAccountService.getCurrentUser();
+    String selectedTheme = THEME_CSS_PATH + appSettings.getBootstrapTheme();
+    String themeFingerPrint = themeFingerprintRegistry.getFingerprint(selectedTheme);
+    String themeUri = selectedTheme + "?" + themeFingerPrint;
 
     return UiContextResponse.builder()
         .setMenu(menuReaderService.getMenu().orElse(null))
+        .setSelectedTheme(themeUri)
         .setCssHref(appSettings.getCssHref())
         .setNavBarLogo(appSettings.getLogoNavBarHref())
         .setLogoTop(appSettings.getLogoTopHref())
