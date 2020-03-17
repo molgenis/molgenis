@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.molgenis.web.menu.model.Menu.create;
 
 import com.google.common.collect.ImmutableList;
@@ -29,8 +29,8 @@ class MenuTest {
 
   @BeforeEach
   void setUp() {
-    MenuItem p30 = MenuItem.create("p3_0", "lbl");
-    MenuItem p31 = MenuItem.create("p3_1", "lbl");
+    MenuItem p30 = MenuItem.create("p3_0", "sub lbl");
+    MenuItem p31 = MenuItem.create("p3_1", "sub lbl");
 
     Menu p20 = Menu.create("p2_0", "lbl", ImmutableList.of(p30, p31));
     MenuItem p21 = MenuItem.create("p2_1", "lbl");
@@ -69,5 +69,11 @@ class MenuTest {
   void toJsonAndBackAgain() {
     String json = gson.toJson(menu);
     assertEquals(menu, gson.fromJson(json, menuAutoValueClass));
+  }
+
+  @Test
+  void contains() {
+    assertTrue(menu.contains((node) -> node.getLabel().equals("lbl")));
+    assertTrue(menu.contains((node) -> node.getLabel().equals("sub lbl")));
   }
 }
