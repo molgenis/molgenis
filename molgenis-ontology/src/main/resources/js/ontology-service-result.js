@@ -183,7 +183,7 @@
                 matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
                     var updatedMappedEntity = {};
                     $.map(responseData.matchedTerm, function (val, key) {
-                        if (key !== 'identifier') updatedMappedEntity[key] = val;
+                        updatedMappedEntity[key] = val;
                         if (key === 'validated') updatedMappedEntity[key] = false;
                         if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
                     });
