@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
-import org.molgenis.core.ui.style.MolgenisStyleException;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
@@ -60,7 +60,7 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
   static class Config {}
 
   @BeforeEach
-  void beforeMethod() throws IOException, MolgenisStyleException {
+  void beforeMethod() throws IOException, GetThemeException {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     Authentication authentication =

@@ -6,7 +6,9 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.validation.Valid;
-import org.molgenis.core.ui.style.MolgenisStyleException;
+
+import org.molgenis.core.ui.style.exception.CreateThemeException;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.core.ui.style.Style;
 import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.web.ErrorMessageResponse;
@@ -65,8 +67,7 @@ public class ThemeManagerController extends PluginController {
   @PostMapping(value = "/add-bootstrap-theme")
   public @ResponseBody Style addBootstrapTheme(
       @RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
-      @RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
-      throws MolgenisStyleException {
+      @RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style) {
     String styleIdentifier = bootstrap3Style.getOriginalFilename();
     try {
       String bs4FileName = null;
@@ -93,13 +94,13 @@ public class ThemeManagerController extends PluginController {
         }
       }
     } catch (IOException e) {
-      throw new MolgenisStyleException("unable to add style: " + styleIdentifier, e);
+      throw new CreateThemeException(styleIdentifier, e);
     }
   }
 
   @ResponseBody
   @ResponseStatus(BAD_REQUEST)
-  @ExceptionHandler({MolgenisStyleException.class})
+  @ExceptionHandler({GetThemeException.class})
   public ErrorMessageResponse handleStyleException(Exception e) {
     return new ErrorMessageResponse(
         singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));

@@ -12,6 +12,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.molgenis.core.ui.file.FileDownloadController;
+import org.molgenis.core.ui.style.exception.CreateThemeException;
+import org.molgenis.core.ui.style.exception.DuplicateThemeIdException;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
@@ -67,11 +70,9 @@ public class StyleServiceImpl implements StyleService {
       String bootstrap3FileName,
       InputStream bootstrap3StyleData,
       String bootstrap4FileName,
-      InputStream bootstrap4StyleData)
-      throws MolgenisStyleException {
+      InputStream bootstrap4StyleData) {
     if (dataService.getRepository(STYLE_SHEET).findOneById(styleId) != null) {
-      throw new MolgenisStyleException(
-          String.format("A style with the same identifier (%s) already exists", styleId));
+      throw new DuplicateThemeIdException(styleId);
     }
 
     StyleSheet styleSheet = styleSheetFactory.create(styleId);
@@ -93,13 +94,12 @@ public class StyleServiceImpl implements StyleService {
     return Style.createLocal(styleSheet.getName());
   }
 
-  private FileMeta createStyleSheetFileMeta(String fileName, InputStream data)
-      throws MolgenisStyleException {
+  private FileMeta createStyleSheetFileMeta(String fileName, InputStream data) {
     String fileId = idGenerator.generateId();
     try {
       fileStore.store(data, fileId);
     } catch (IOException e) {
-      throw new MolgenisStyleException("Unable to save style file with name : " + fileName, e);
+      throw new CreateThemeException(fileName, e);
     }
 
     FileMeta fileMeta = fileMetaFactory.create(fileId);
@@ -148,12 +148,11 @@ public class StyleServiceImpl implements StyleService {
 
   @Override
   @RunAsSystem
-  public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-      throws MolgenisStyleException {
+  public FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion) {
     StyleSheet styleSheet = findThemeByName(styleName);
 
     if (styleSheet == null) {
-      throw new MolgenisStyleException("No theme found for with name: " + styleName);
+      throw new GetThemeException(styleName);
     }
 
     // Fetch the theme file from the store.

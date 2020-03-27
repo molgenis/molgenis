@@ -27,8 +27,7 @@ public interface StyleService {
       String bootstrap3FileName,
       InputStream bootstrap3StyleData,
       String bootstrap4FileName,
-      InputStream bootstrap4StyleData)
-      throws MolgenisStyleException;
+      InputStream bootstrap4StyleData);
 
   /** Set the runtime property that controls the css style with a selected style */
   void setSelectedStyle(String styleName);
@@ -55,8 +54,7 @@ public interface StyleService {
    * @return The theme data, as setting the bootstrap 4 theme is optional the fallback bootstrap 4
    *     theme data is returned in case there is not theme data for the bootstrap 4 version.
    */
-  FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion)
-      throws MolgenisStyleException;
+  FileSystemResource getThemeData(String styleName, BootstrapVersion bootstrapVersion);
 
   /**
    * Find the styleSheet for a given theme name

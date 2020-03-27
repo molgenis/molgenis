@@ -12,6 +12,7 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.springframework.core.io.FileSystemResource;
 
 class ThemeFingerprintRegistryTest {
@@ -25,7 +26,7 @@ class ThemeFingerprintRegistryTest {
   }
 
   @Test
-  void getFingerprint() throws IOException, MolgenisStyleException {
+  void getFingerprint() throws IOException {
     String theme = "bootstrap-theme-name.min.css";
     String version = "bootstrap-3";
     String themeUri = "css/theme/" + version + "/" + theme;

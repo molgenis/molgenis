@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
-import org.molgenis.core.ui.style.MolgenisStyleException;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
@@ -39,7 +38,6 @@ public class UiContextController {
 
   public static final String LOGIN_HREF = "/login";
   public static final String HELP_HREF = "https://molgenis.gitbook.io/molgenis/";
-  public static final String THEME_CSS_PATH = "/css/bootstrap-4/";
 
   private final AppSettings appSettings;
   private final CookieWallService cookieWallService;
@@ -84,9 +82,9 @@ public class UiContextController {
 
   @GetMapping("/**")
   @ResponseBody
-  public UiContextResponse getContext() throws IOException, MolgenisStyleException {
+  public UiContextResponse getContext() throws IOException {
     User user = userAccountService.getCurrentUser();
-    String selectedTheme = THEME_CSS_PATH + appSettings.getBootstrapTheme();
+    String selectedTheme = "/css/bootstrap-4/" + appSettings.getBootstrapTheme();
     String themeFingerPrint = themeFingerprintRegistry.getFingerprint(selectedTheme);
     String themeUri = selectedTheme + "?" + themeFingerPrint;
 

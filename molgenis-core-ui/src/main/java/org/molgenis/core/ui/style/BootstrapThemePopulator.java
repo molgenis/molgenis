@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.DataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +62,7 @@ public class BootstrapThemePopulator {
           nt -> {
             try {
               addNewTheme(nt, bootstrap4Themes);
-            } catch (IOException | MolgenisStyleException e) {
+            } catch (IOException | GetThemeException e) {
               LOG.error("error adding new bootstrap themes", e);
             }
           });
@@ -85,7 +87,7 @@ public class BootstrapThemePopulator {
   }
 
   private void addNewTheme(Resource bootstrap3Resource, Resource[] bootstrap4Themes)
-      throws IOException, MolgenisStyleException {
+      throws IOException {
     String bootstrap3FileName = bootstrap3Resource.getFilename();
 
     LOG.debug("Add theme with name {}", bootstrap3FileName);
