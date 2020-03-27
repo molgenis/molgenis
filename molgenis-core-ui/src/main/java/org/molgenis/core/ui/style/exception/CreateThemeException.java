@@ -17,7 +17,6 @@ public class CreateThemeException extends CodedRuntimeException {
     return String.format("fileName:%s", fileName);
   }
 
-
   @Override
   protected Object[] getLocalizedMessageArguments() {
     return new Object[0];

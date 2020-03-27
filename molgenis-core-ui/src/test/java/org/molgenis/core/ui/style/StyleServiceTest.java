@@ -218,8 +218,7 @@ class StyleServiceTest extends AbstractMockitoTest {
     when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
 
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
-    assertThrows(
-        GetThemeException.class, () -> styleServiceImpl.getThemeData(styleName, version));
+    assertThrows(GetThemeException.class, () -> styleServiceImpl.getThemeData(styleName, version));
   }
 
   @SuppressWarnings("deprecation")

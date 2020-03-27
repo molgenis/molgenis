@@ -12,7 +12,6 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.springframework.core.io.FileSystemResource;
 
 class ThemeFingerprintRegistryTest {

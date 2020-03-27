@@ -16,7 +16,6 @@ public class DuplicateThemeIdException extends CodedRuntimeException {
     return String.format("fileName:%s", themeId);
   }
 
-
   @Override
   protected Object[] getLocalizedMessageArguments() {
     return new Object[0];

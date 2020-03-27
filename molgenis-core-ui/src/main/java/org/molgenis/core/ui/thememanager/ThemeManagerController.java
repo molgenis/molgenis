@@ -6,11 +6,10 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.validation.Valid;
-
-import org.molgenis.core.ui.style.exception.CreateThemeException;
-import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.core.ui.style.Style;
 import org.molgenis.core.ui.style.StyleService;
+import org.molgenis.core.ui.style.exception.CreateThemeException;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.springframework.security.access.prepost.PreAuthorize;

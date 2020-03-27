@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.DataService;
 import org.slf4j.Logger;
