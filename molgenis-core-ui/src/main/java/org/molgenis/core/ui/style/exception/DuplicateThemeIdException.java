@@ -18,6 +18,6 @@ public class DuplicateThemeIdException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[0];
+    return new Object[] {themeId};
   }
 }

@@ -23,6 +23,6 @@ public class GetThemeException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[0];
+    return new Object[] {themeId};
   }
 }

@@ -3,6 +3,7 @@ package org.molgenis.core.ui.style.exception;
 import org.molgenis.util.exception.CodedRuntimeException;
 
 public class CreateThemeException extends CodedRuntimeException {
+
   private static final String ERROR_CODE = "CU02";
   private final String fileName;
 
@@ -19,6 +20,6 @@ public class CreateThemeException extends CodedRuntimeException {
 
   @Override
   protected Object[] getLocalizedMessageArguments() {
-    return new Object[0];
+    return new Object[] {fileName};
   }
 }
