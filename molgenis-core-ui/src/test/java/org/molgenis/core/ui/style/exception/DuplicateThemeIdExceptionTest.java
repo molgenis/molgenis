@@ -23,7 +23,7 @@ class DuplicateThemeIdExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {"en", "A style with the same identifier 'my theme id' already exists."},
-      new Object[] {"nl", "Er bestaat al een slijl met dezelfde indetificatie code: 'my theme id'."}
+      new Object[] {"nl", "Er bestaat al een slijl met dezelfde identificatie code: 'my theme id'."}
     };
   }
 }
