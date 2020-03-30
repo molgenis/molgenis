@@ -13,7 +13,7 @@ public class DuplicateThemeIdException extends CodedRuntimeException {
 
   @Override
   public String getMessage() {
-    return String.format("fileName:%s", themeId);
+    return String.format("themeId:%s", themeId);
   }
 
   @Override
