@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_4;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ public class StyleController {
   }
 
   @GetMapping("/css/bootstrap-{bootstrap-version}/{theme}")
+  @ResponseStatus(OK)
   public ResponseEntity getThemeCss(
       @PathVariable("bootstrap-version") String bootstrapVersion,
       @PathVariable("theme") String theme,
@@ -52,13 +54,5 @@ public class StyleController {
     }
 
     return new ResponseEntity(HttpStatus.OK);
-  }
-
-  @ResponseBody
-  @ResponseStatus(NOT_FOUND)
-  @ExceptionHandler({GetThemeException.class, IOException.class})
-  public ErrorMessageResponse handleStyleException(Exception e) {
-    return new ErrorMessageResponse(
-        singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
   }
 }
