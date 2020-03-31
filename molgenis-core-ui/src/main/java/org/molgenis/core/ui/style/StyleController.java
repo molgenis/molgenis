@@ -1,10 +1,8 @@
 package org.molgenis.core.ui.style;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_4;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
@@ -12,15 +10,12 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.core.ui.style.exception.GetThemeException;
-import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
