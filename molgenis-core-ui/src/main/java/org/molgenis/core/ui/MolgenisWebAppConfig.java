@@ -256,6 +256,11 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   }
 
   @Bean
+  public PropertiesMessageSource coreUiMessageSource() {
+    return new PropertiesMessageSource("core-ui");
+  }
+
+  @Bean
   public PluginInterceptor molgenisPluginInterceptor() {
     return new PluginInterceptor(menuReaderService(), permissionService);
   }
