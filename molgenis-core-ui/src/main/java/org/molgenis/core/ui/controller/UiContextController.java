@@ -19,6 +19,8 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.menu.MenuReaderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(UiContextController.ID)
 public class UiContextController {
+
+  private static final Logger LOG = LoggerFactory.getLogger(UiContextController.class);
 
   public static final String ID = "app-ui-context";
 
@@ -82,15 +86,12 @@ public class UiContextController {
 
   @GetMapping("/**")
   @ResponseBody
-  public UiContextResponse getContext() throws IOException {
+  public UiContextResponse getContext() {
     User user = userAccountService.getCurrentUser();
-    String selectedTheme = "/css/bootstrap-4/" + appSettings.getBootstrapTheme();
-    String themeFingerPrint = themeFingerprintRegistry.getFingerprint(selectedTheme);
-    String themeUri = selectedTheme + "?" + themeFingerPrint;
 
     return UiContextResponse.builder()
         .setMenu(menuReaderService.getMenu().orElse(null))
-        .setSelectedTheme(themeUri)
+        .setSelectedTheme(buildSelectedThemeURL())
         .setCssHref(appSettings.getCssHref())
         .setNavBarLogo(appSettings.getLogoNavBarHref())
         .setLogoTop(appSettings.getLogoTopHref())
@@ -106,5 +107,17 @@ public class UiContextController {
         .setVersion(this.molgenisVersion)
         .setBuildDate(this.molgenisBuildDate)
         .build();
+  }
+
+  private String buildSelectedThemeURL() {
+    final String selectedTheme = "/css/bootstrap-4/" + appSettings.getBootstrapTheme();
+    String themeUri = selectedTheme;
+    try {
+      final String themeFingerPrint = themeFingerprintRegistry.getFingerprint(selectedTheme);
+      themeUri = selectedTheme + "?" + themeFingerPrint;
+    } catch (IOException e) {
+      LOG.error("Error in creating themeFingerPrint for theme {}", selectedTheme, e);
+    }
+    return themeUri;
   }
 }
