@@ -38,7 +38,7 @@ Please boot the backend services with the docker-compose stack in the source-tre
 * Check the option `--build, force build images`
 * Add the following variables to the environment:
 
-  ```env
+```bash
 MOLGENIS_FRONTEND=molgenis/molgenis-frontend:latest
 # MacOS: host.docker.internal
 # Windows: docker.for.win
