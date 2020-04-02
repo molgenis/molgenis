@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.google.gson.Gson;
 import java.io.IOException;
 import org.molgenis.core.ui.jobs.JobsController;
-import org.molgenis.core.ui.style.MolgenisStyleException;
 import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.StyleSheetFactory;
 import org.molgenis.core.ui.style.StyleSheetMetadata;
@@ -39,8 +38,7 @@ public class ViewTestConfig {
   }
 
   @Bean
-  public ThemeFingerprintRegistry themeFingerprintRegistry()
-      throws IOException, MolgenisStyleException {
+  public ThemeFingerprintRegistry themeFingerprintRegistry() throws IOException {
     ThemeFingerprintRegistry themeFingerprintRegistry = mock(ThemeFingerprintRegistry.class);
     when(themeFingerprintRegistry.getFingerprint(anyString())).thenReturn("");
     return themeFingerprintRegistry;

@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.core.ui.style.exception.DuplicateThemeIdException;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -112,7 +114,7 @@ class StyleServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  void addStylesWithExistingId() throws IOException, MolgenisStyleException {
+  void addStylesWithExistingId() throws IOException {
     String styleId = "style";
     String bs3FileName = "any";
     String bs4FileName = "any";
@@ -125,13 +127,13 @@ class StyleServiceTest extends AbstractMockitoTest {
     when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
     when(styleSheetRepository.findOneById(styleId)).thenReturn(styleSheet);
     assertThrows(
-        MolgenisStyleException.class,
+        DuplicateThemeIdException.class,
         () -> styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data));
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  void addBootstrap3And4Styles() throws IOException, MolgenisStyleException {
+  void addBootstrap3And4Styles() throws IOException {
     // setup
     String styleId = "my-style.min.css";
     String bs3FileName = "bs3FileName";
@@ -172,7 +174,7 @@ class StyleServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException {
+  void addBootstrap3StyleOnly() throws IOException {
     // setup
     String styleId = "my-style.min.css";
     String bs3FileName = "bs3FileName";
@@ -216,13 +218,12 @@ class StyleServiceTest extends AbstractMockitoTest {
     when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
 
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
-    assertThrows(
-        MolgenisStyleException.class, () -> styleServiceImpl.getThemeData(styleName, version));
+    assertThrows(GetThemeException.class, () -> styleServiceImpl.getThemeData(styleName, version));
   }
 
   @SuppressWarnings("deprecation")
   @Test
-  void getBootstrap3ThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap3ThemeData() throws IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     FileMeta fileMeta = mock(FileMeta.class);
@@ -245,7 +246,7 @@ class StyleServiceTest extends AbstractMockitoTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  void getBootstrap4ThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap4ThemeData() throws IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     FileMeta fileMeta = mock(FileMeta.class);
@@ -266,9 +267,8 @@ class StyleServiceTest extends AbstractMockitoTest {
     assertEquals(mockFilePath, themeData.getPath());
   }
 
-  @SuppressWarnings("deprecation")
   @Test
-  void getBootstrap4FallBackThemeData() throws MolgenisStyleException, IOException {
+  void getBootstrap4FallBackThemeData() throws IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     StyleSheet fallBackTheme = mock(StyleSheet.class);

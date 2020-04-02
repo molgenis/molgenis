@@ -53,6 +53,8 @@ public abstract class UiContextResponse {
   @CheckForNull
   public abstract String getCssHref();
 
+  public abstract String getSelectedTheme();
+
   public static Builder builder() {
     return new AutoValue_UiContextResponse.Builder();
   }
@@ -89,6 +91,8 @@ public abstract class UiContextResponse {
     public abstract Builder setBuildDate(String buildDate);
 
     public abstract Builder setCssHref(String cssHref);
+
+    public abstract Builder setSelectedTheme(String theme);
 
     public abstract UiContextResponse build();
   }

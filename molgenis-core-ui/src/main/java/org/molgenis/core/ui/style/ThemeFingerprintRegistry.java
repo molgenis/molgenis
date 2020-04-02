@@ -25,7 +25,7 @@ public class ThemeFingerprintRegistry {
     this.styleService = requireNonNull(styleService);
   }
 
-  public String getFingerprint(String themeUri) throws IOException, MolgenisStyleException {
+  public String getFingerprint(String themeUri) throws IOException {
     String fileFingerprint = styleFingerprints.get(themeUri);
     if (fileFingerprint == null) {
       fileFingerprint = createFingerprint(themeUri);
@@ -34,7 +34,7 @@ public class ThemeFingerprintRegistry {
     return fileFingerprint;
   }
 
-  private String createFingerprint(String themeUri) throws IOException, MolgenisStyleException {
+  private String createFingerprint(String themeUri) throws IOException {
     String fileName = extractThemeNameFromThemeUri(themeUri);
     BootstrapVersion version = extractBootstrapVersionFromPath(themeUri);
     FileSystemResource styleData = styleService.getThemeData(fileName, version);

@@ -15,6 +15,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -51,13 +52,13 @@ class BootstrapThemePopulatorTest {
   }
 
   @Test
-  void noNewThemes() throws MolgenisStyleException {
+  void noNewThemes() throws GetThemeException {
     bootstrapThemePopulator.populate();
     verify(styleService, never()).addStyle(any(), any(), any(), any(), any());
   }
 
   @Test
-  void addNewTheme() throws MolgenisStyleException {
+  void addNewTheme() throws GetThemeException {
     when(styleRepository.findOneById(ArgumentMatchers.eq("bootstrap-yeti.min.css")))
         .thenReturn(null);
     bootstrapThemePopulator.populate();

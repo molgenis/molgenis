@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.gson.Gson;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
+import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
+import org.molgenis.core.ui.style.exception.GetThemeException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -50,13 +53,14 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
   @Mock private MenuReaderService menuReaderService;
   @Mock private UserAccountService userAccountService;
   @Mock private User user;
+  @Mock private ThemeFingerprintRegistry themeFingerprintRegistry;
   private SecurityContext previousContext;
 
   @Configuration
   static class Config {}
 
   @BeforeEach
-  void beforeMethod() {
+  void beforeMethod() throws IOException, GetThemeException {
     previousContext = SecurityContextHolder.getContext();
     SecurityContext testContext = SecurityContextHolder.createEmptyContext();
     Authentication authentication =
@@ -71,40 +75,13 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
             menuReaderService,
             userAccountService,
             "mock-version",
-            "mock date-time");
+            "mock date-time",
+            themeFingerprintRegistry);
     mockMvc =
         MockMvcBuilders.standaloneSetup(uiContextController)
             .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
             .setLocaleResolver(localeResolver)
             .build();
-  }
-
-  @AfterEach
-  void tearDownAfterClass() {
-    SecurityContextHolder.setContext(previousContext);
-  }
-
-  @Test
-  void testGetContextEmptyMenu() throws Exception {
-    when(menuReaderService.getMenu()).thenReturn(Optional.empty());
-    when(appSettings.getLogoNavBarHref()).thenReturn("http:://thisissomelogo/");
-    when(appSettings.getLogoTopHref()).thenReturn("http:://thisisotherref/");
-    when(appSettings.getLogoTopMaxHeight()).thenReturn(22);
-    when(appSettings.getFooter()).thenReturn("<a class=\"foo\">message</a>");
-    when(appSettings.getCssHref()).thenReturn("cssHref");
-    when(cookieWallService.showCookieWall()).thenReturn(false);
-    when(userAccountService.getCurrentUser()).thenReturn(user);
-    when(user.getEmail()).thenReturn("henkie@example.org");
-    when(user.getUsername()).thenReturn("henkie");
-
-    mockMvc
-        .perform(get("/app-ui-context"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.menu").doesNotExist());
-  }
-
-  @Test
-  void testGetContext() throws Exception {
 
     File resource = new ClassPathResource("exampleMenu.json").getFile();
     String json = new String(Files.readAllBytes(resource.toPath()));
@@ -120,7 +97,28 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.getEmail()).thenReturn("henkie@example.org");
     when(user.getUsername()).thenReturn("henkie");
+    when(appSettings.getBootstrapTheme()).thenReturn("selected-theme.css");
+    when(themeFingerprintRegistry.getFingerprint("/css/bootstrap-4/selected-theme.css"))
+        .thenReturn("fingerprint");
+  }
 
+  @AfterEach
+  void tearDownAfterClass() {
+    SecurityContextHolder.setContext(previousContext);
+  }
+
+  @Test
+  void testGetContextEmptyMenu() throws Exception {
+    when(menuReaderService.getMenu()).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(get("/app-ui-context"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.menu").doesNotExist());
+  }
+
+  @Test
+  void testGetContext() throws Exception {
     mockMvc
         .perform(get("/app-ui-context"))
         .andExpect(status().isOk())
@@ -140,6 +138,18 @@ class UiContextControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(jsonPath("$.additionalMessage", is("<a class=\"foo\">message</a>")))
         .andExpect(jsonPath("$.version", is("mock-version")))
         .andExpect(jsonPath("$.buildDate", is("mock date-time")))
-        .andExpect(jsonPath("$.cssHref", is("cssHref")));
+        .andExpect(jsonPath("$.cssHref", is("cssHref")))
+        .andExpect(
+            jsonPath("$.selectedTheme", is("/css/bootstrap-4/selected-theme.css?fingerprint")));
+  }
+
+  @Test
+  void testGetContextWithFailedThemeFingerPrint() throws Exception {
+    when(themeFingerprintRegistry.getFingerprint("/css/bootstrap-4/selected-theme.css"))
+        .thenThrow(new IOException("test msg"));
+    mockMvc
+        .perform(get("/app-ui-context"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.selectedTheme", is("/css/bootstrap-4/selected-theme.css")));
   }
 }
