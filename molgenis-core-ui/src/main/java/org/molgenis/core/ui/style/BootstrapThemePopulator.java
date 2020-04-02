@@ -3,7 +3,6 @@ package org.molgenis.core.ui.style;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.style.StyleSheetMetadata.STYLE_SHEET;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +58,7 @@ public class BootstrapThemePopulator {
 
       newThemes.forEach(nt -> addNewTheme(nt, bootstrap4Themes));
 
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOG.error("error populating bootstrap themes", e);
     }
   }
@@ -95,7 +94,7 @@ public class BootstrapThemePopulator {
         styleService.addStyle(bootstrap3FileName, bootstrap3FileName, bootstrap3Data, null, null);
       }
 
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOG.error("error adding new bootstrap themes", e);
     }
   }
@@ -111,7 +110,7 @@ public class BootstrapThemePopulator {
           bootstrap3Data,
           bootstrap4FileName,
           bootstrap4Data);
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOG.error("error adding new bootstrap 4 theme", e);
     }
   }

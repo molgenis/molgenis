@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.molgenis.core.ui.cookiewall.CookieWallService;
@@ -115,7 +114,7 @@ public class UiContextController {
     try {
       final String themeFingerPrint = themeFingerprintRegistry.getFingerprint(selectedTheme);
       themeUri = selectedTheme + "?" + themeFingerPrint;
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOG.error("Error in creating themeFingerPrint for theme {}", selectedTheme, e);
     }
     return themeUri;
