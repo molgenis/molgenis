@@ -148,14 +148,31 @@ public class NegotiatorController extends PluginController {
     NegotiatorConfig config = entityConfig.getNegotiatorConfig();
     String expression = config.getString(ENABLED_EXPRESSION);
 
-    List<Collection> nonDisabledCollectionEntities =
+    List<Collection> collectionEntities =
         getCollectionEntities(request).stream()
             .filter(entity -> expression == null || evaluateExpressionOnEntity(expression, entity))
             .map(entity -> getEntityCollection(entityConfig, entity))
             .collect(toList());
 
+    // Filter biobanks if needed
+    if (request.getBiobankRsql() != null) {
+      requireNonNull(request.getBiobankId(), "Must provide biobankId if biobankRsql is provided");
+      List<Object> biobankIds =
+          getBiobankEntities(request).stream()
+              .map(Entity::getIdValue)
+              .map(Object::toString)
+              .collect(toList());
+      collectionEntities =
+          collectionEntities.stream()
+              .filter(it -> biobankIds.contains(it.getBiobankId()))
+              .collect(toList());
+    } else {
+      requireNonNull(
+          request.getRsql(), "Must provide at least one filter, either rsql or biobankRsql");
+    }
+
     HttpEntity<NegotiatorQuery> queryHttpEntity =
-        getNegotiatorQueryHttpEntity(request, config, nonDisabledCollectionEntities);
+        getNegotiatorQueryHttpEntity(request, config, collectionEntities);
 
     return postQueryToNegotiator(config, queryHttpEntity);
   }
@@ -210,10 +227,20 @@ public class NegotiatorController extends PluginController {
     }
   }
 
+  private List<Entity> getBiobankEntities(NegotiatorRequest request) {
+    Repository<Entity> repository = dataService.getRepository(request.getBiobankId());
+    Query<Entity> molgenisQuery =
+        rsqlQueryConverter.convert(request.getBiobankRsql()).createQuery(repository);
+    return molgenisQuery.findAll().collect(toList());
+  }
+
   private List<Entity> getCollectionEntities(NegotiatorRequest request) {
     Repository<Entity> repository = dataService.getRepository(request.getEntityId());
     Query<Entity> molgenisQuery =
-        rsqlQueryConverter.convert(request.getRsql()).createQuery(repository);
+        Optional.ofNullable(request.getRsql())
+            .map(rsqlQueryConverter::convert)
+            .map(it -> it.createQuery(repository))
+            .orElse(repository.query());
     return molgenisQuery.findAll().collect(toList());
   }
 
