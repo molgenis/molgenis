@@ -11,9 +11,23 @@ import org.molgenis.util.AutoGson;
 public abstract class NegotiatorRequest {
   public abstract String getURL();
 
+  /** Entity type ID for the collections */
   public abstract String getEntityId();
 
+  /** Entity type ID for the biobanks */
+  @Nullable
+  @CheckForNull
+  public abstract String getBiobankId();
+
+  /** RSQL for the collection entity */
+  @Nullable
+  @CheckForNull
   public abstract String getRsql();
+
+  /** RSQL for the biobank entity */
+  @Nullable
+  @CheckForNull
+  public abstract String getBiobankRsql();
 
   public abstract String getHumanReadable();
 
@@ -23,6 +37,18 @@ public abstract class NegotiatorRequest {
 
   public static NegotiatorRequest create(
       String url, String entityId, String rsql, String humanReadable, String nToken) {
-    return new AutoValue_NegotiatorRequest(url, entityId, rsql, humanReadable, nToken);
+    return new AutoValue_NegotiatorRequest(url, entityId, null, rsql, null, humanReadable, nToken);
+  }
+
+  public static NegotiatorRequest create(
+      String url,
+      String entityId,
+      String biobankId,
+      String rsql,
+      String biobankRsql,
+      String humanReadable,
+      String nToken) {
+    return new AutoValue_NegotiatorRequest(
+        url, entityId, biobankId, rsql, biobankRsql, humanReadable, nToken);
   }
 }
