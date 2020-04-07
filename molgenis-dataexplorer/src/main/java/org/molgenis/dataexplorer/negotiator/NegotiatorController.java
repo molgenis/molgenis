@@ -84,9 +84,27 @@ public class NegotiatorController extends PluginController {
         && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.VIEW_PLUGIN);
   }
 
+  /**
+   * Validates a {@link NegotiatorRequest}.
+   *
+   * <p>Used by the data explorer to verify the request. Since the data explorer does not allow
+   * filtering on more than one repository, this endpoint does *NOT* support providing biobankRsql.
+   *
+   * <ul>
+   *   <li>Checks if disabled collections are selected.
+   *   <li>Checks if at least one collection is left after filtering out the disabled ones.
+   * </ul>
+   *
+   * @param request the request to validate
+   * @return ExportValidationResponse
+   * @throws MolgenisDataException if the negotiator is not configured for this entity type
+   */
   @PostMapping("/validate")
   @ResponseBody
   public ExportValidationResponse validateNegotiatorExport(@RequestBody NegotiatorRequest request) {
+    if (request.getBiobankRsql() != null || request.getBiobankId() != null) {
+      throw new IllegalArgumentException("Cannot verify requests with biobank filters.");
+    }
     boolean isValidRequest = true;
     String message = "";
     List<String> enabledCollectionsLabels;
@@ -134,6 +152,22 @@ public class NegotiatorController extends PluginController {
         isValidRequest, message, enabledCollectionsLabels, disabledCollectionLabels);
   }
 
+  /**
+   * Sends a {@link NegotiatorQuery} to the negotiator.
+   *
+   * <p>Filters the repositories using the rsql in the request and sends the matching collections
+   * with their biobanks to the negotiator.
+   *
+   * <p>Allows an extra biobankRsql expression to filter the biobanks as well. This allows you to
+   * filter on xref/mref values in the biobank, which would otherwise be impossible unless you
+   * increase the indexing depth on the collections to 2.
+   *
+   * <p>Determines negotiator information based on {@link NegotiatorEntityConfig} and {@link
+   * NegotiatorConfig} stored in the database.
+   *
+   * @param request {@link NegotiatorRequest}
+   * @return Location on the Negotiator where the negotiation can be started.
+   */
   @PostMapping("/export")
   @ResponseBody
   public String exportToNegotiator(@RequestBody NegotiatorRequest request) {
@@ -148,14 +182,31 @@ public class NegotiatorController extends PluginController {
     NegotiatorConfig config = entityConfig.getNegotiatorConfig();
     String expression = config.getString(ENABLED_EXPRESSION);
 
-    List<Collection> nonDisabledCollectionEntities =
+    List<Collection> collectionEntities =
         getCollectionEntities(request).stream()
             .filter(entity -> expression == null || evaluateExpressionOnEntity(expression, entity))
             .map(entity -> getEntityCollection(entityConfig, entity))
             .collect(toList());
 
+    // Filter biobanks if needed
+    if (request.getBiobankRsql() != null) {
+      requireNonNull(request.getBiobankId(), "Must provide biobankId if biobankRsql is provided");
+      List<Object> biobankIds =
+          getBiobankEntities(request).stream()
+              .map(Entity::getIdValue)
+              .map(Object::toString)
+              .collect(toList());
+      collectionEntities =
+          collectionEntities.stream()
+              .filter(it -> biobankIds.contains(it.getBiobankId()))
+              .collect(toList());
+    } else {
+      requireNonNull(
+          request.getRsql(), "Must provide at least one filter, either rsql or biobankRsql");
+    }
+
     HttpEntity<NegotiatorQuery> queryHttpEntity =
-        getNegotiatorQueryHttpEntity(request, config, nonDisabledCollectionEntities);
+        getNegotiatorQueryHttpEntity(request, config, collectionEntities);
 
     return postQueryToNegotiator(config, queryHttpEntity);
   }
@@ -210,10 +261,20 @@ public class NegotiatorController extends PluginController {
     }
   }
 
+  private List<Entity> getBiobankEntities(NegotiatorRequest request) {
+    Repository<Entity> repository = dataService.getRepository(request.getBiobankId());
+    Query<Entity> molgenisQuery =
+        rsqlQueryConverter.convert(request.getBiobankRsql()).createQuery(repository);
+    return molgenisQuery.findAll().collect(toList());
+  }
+
   private List<Entity> getCollectionEntities(NegotiatorRequest request) {
     Repository<Entity> repository = dataService.getRepository(request.getEntityId());
     Query<Entity> molgenisQuery =
-        rsqlQueryConverter.convert(request.getRsql()).createQuery(repository);
+        Optional.ofNullable(request.getRsql())
+            .map(rsqlQueryConverter::convert)
+            .map(it -> it.createQuery(repository))
+            .orElse(repository.query());
     return molgenisQuery.findAll().collect(toList());
   }
 

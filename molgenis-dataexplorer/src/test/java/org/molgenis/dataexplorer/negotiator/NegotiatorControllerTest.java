@@ -16,6 +16,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.BIOBANK_ID;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.COLLECTION_ID;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.ENABLED_EXPRESSION;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.net.URI;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import org.molgenis.web.rsql.QueryRsql;
 import org.molgenis.web.rsql.QueryRsqlConverter;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,13 +61,20 @@ class NegotiatorControllerTest {
   @Mock private DataService dataService;
   @Mock private QueryRsqlConverter rsqlQueryConverter;
   @Mock private Repository<Entity> repo;
+  @Mock private Repository<Entity> biobankRepo;
   @Mock private NegotiatorEntityConfig negotiatorEntityConfig;
   @Mock private NegotiatorConfig negotiatorConfig;
   @Mock private QueryRsql queryRsql;
+  @Mock private QueryRsql biobankRsql;
   @Mock private Attribute collectionAttr;
   @Mock private Attribute biobackAttr;
   @Mock private Query<Entity> molgenisQuery;
+  @Mock private Query<Entity> biobankQuery;
   @Mock private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+  @Mock private Entity biobank;
+  @Mock private Entity biobank2;
+  @Mock private Entity collection1;
+  @Mock private Entity collection2;
 
   @Captor private ArgumentCaptor<HttpEntity<NegotiatorQuery>> queryCaptor;
 
@@ -282,6 +291,59 @@ class NegotiatorControllerTest {
     String expected = "http://directory.com/request/1280";
 
     assertEquals(expected, actual);
+  }
+
+  @Test
+  void testExportWithBiobankFilter() {
+    NegotiatorRequest request =
+        NegotiatorRequest.create(
+            "http://molgenis.org",
+            "molgenis_id_1",
+            "biobankId",
+            "*=q=MOLGENIS",
+            "standards=in=(iso9000)",
+            "a nice molgenis query",
+            "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+    when(molgenisQuery.findAll()).thenReturn(Stream.of(collection1, collection2));
+    when(collection1.get("biobackAttr")).thenReturn(biobank);
+    when(collection1.get("collectionAttr")).thenReturn("collection1");
+    when(collection1.get("enabled")).thenReturn(true);
+    when(collection2.get("collectionAttr")).thenReturn("collection2");
+    when(collection2.get("biobackAttr")).thenReturn(biobank2);
+    when(collection2.get("enabled")).thenReturn(true);
+
+    when(dataService.getRepository("biobankId")).thenReturn(biobankRepo);
+    when(rsqlQueryConverter.convert("standards=in=(iso9000)")).thenReturn(biobankRsql);
+    when(biobankRsql.createQuery(biobankRepo)).thenReturn(biobankQuery);
+    when(biobankQuery.findAll()).thenReturn(Stream.of(biobank));
+    when(biobackAttr.getDataType()).thenReturn(AttributeType.XREF);
+    when(biobank.getIdValue()).thenReturn("biobank1");
+    when(biobank2.getIdValue()).thenReturn("biobank2");
+
+    when(negotiatorConfig.getUsername()).thenReturn("username");
+    when(negotiatorConfig.getPassword()).thenReturn("password");
+    when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com");
+
+    when(restTemplate.postForLocation(eq("http://directory.com"), queryCaptor.capture()))
+        .thenReturn(URI.create("http://directory.com/request/1280"));
+
+    String actual = negotiatorController.exportToNegotiator(request);
+    String expected = "http://directory.com/request/1280";
+
+    assertEquals(expected, actual);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(APPLICATION_JSON);
+    headers.set("Authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
+    NegotiatorQuery expectedBody =
+        NegotiatorQuery.create(
+            "http://molgenis.org",
+            List.of(Collection.create("collection1", "biobank1")),
+            "a nice molgenis query",
+            "Sjfg03Msmdp92Md82103FNskas9H735F");
+    HttpEntity<NegotiatorQuery> query = new HttpEntity<>(expectedBody, headers);
+    assertEquals(query, queryCaptor.getValue());
   }
 
   @Test

@@ -1,0 +1,12 @@
+environment=development
+opencpu.uri.host=localhost
+elasticsearch.transport.addresses=localhost:9300
+db_uri=jdbc:postgresql://localhost/molgenis
+db_user=molgenis
+db_password=molgenis
+admin.password=admin
+MINIO_BUCKET_NAME=molgenis
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=molgenis
+MINIO_SECRET_KEY=molgenis
+CATALINA_OPTS=-Xmx2g -Xms1g
