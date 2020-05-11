@@ -14,6 +14,10 @@ public abstract class FieldMapping {
 
   @Nullable
   @CheckForNull
+  public abstract String getAnalyzer();
+
+  @Nullable
+  @CheckForNull
   public abstract List<FieldMapping> getNestedFieldMappings();
 
   public static FieldMapping create(
@@ -34,6 +38,8 @@ public abstract class FieldMapping {
     public abstract Builder setName(String newName);
 
     public abstract Builder setType(MappingType newType);
+
+    public abstract Builder setAnalyzer(String analyzer);
 
     public abstract Builder setNestedFieldMappings(List<FieldMapping> newNestedFieldMappings);
 

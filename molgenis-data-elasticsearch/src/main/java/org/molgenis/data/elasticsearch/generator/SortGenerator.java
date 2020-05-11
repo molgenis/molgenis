@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.generator.MappingGenerator.isAToken;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -58,18 +59,22 @@ class SortGenerator {
       case DECIMAL:
       case INT:
       case LONG:
+      case EMAIL:
+      case ENUM:
+      case HYPERLINK:
         // use indexed field for sorting
         sortField = fieldName;
         break;
-      case EMAIL:
-      case ENUM:
       case HTML:
-      case HYPERLINK:
       case SCRIPT:
       case STRING:
       case TEXT:
-        // use raw field for sorting
-        sortField = fieldName + '.' + FIELD_NOT_ANALYZED;
+        if (isAToken(attr)) {
+          sortField = fieldName;
+        } else {
+          // use raw field for sorting
+          sortField = fieldName + '.' + FIELD_NOT_ANALYZED;
+        }
         break;
       case CATEGORICAL:
       case CATEGORICAL_MREF:

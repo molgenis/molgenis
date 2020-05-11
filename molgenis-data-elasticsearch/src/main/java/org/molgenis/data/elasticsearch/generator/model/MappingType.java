@@ -8,5 +8,6 @@ public enum MappingType {
   INTEGER,
   LONG,
   NESTED,
-  TEXT
+  TEXT,
+  KEYWORD
 }

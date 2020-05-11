@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch.generator;
 import static java.lang.String.format;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
-import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
 
 import java.util.List;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -35,10 +34,7 @@ class QueryClauseLikeGenerator extends BaseQueryClauseGenerator {
         return nestedQueryBuilder(
             entityType,
             attributePath,
-            QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue)
-                .maxExpansions(50)
-                .slop(10)
-                .analyzer(DEFAULT_ANALYZER));
+            QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue).maxExpansions(50).slop(10));
       case BOOL:
       case COMPOUND:
       case DATE:

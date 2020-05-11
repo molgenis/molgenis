@@ -72,6 +72,7 @@ class SettingsContentBuilder {
     createFilterSettings(contentBuilder);
     createAnalyzerSettings(contentBuilder);
     createTokenizerSettings(contentBuilder);
+    createNormalizerSettings(contentBuilder);
     contentBuilder.endObject();
   }
 
@@ -113,5 +114,16 @@ class SettingsContentBuilder {
     contentBuilder.startObject(DEFAULT_TOKENIZER);
     contentBuilder.field("type", "whitespace");
     contentBuilder.endObject();
+  }
+
+  private static void createNormalizerSettings(XContentBuilder contentBuilder) throws IOException {
+    contentBuilder
+        .startObject("normalizer")
+        .startObject("lowercase_asciifold")
+        .field("type", "custom")
+        .array("char_filter", new String[] {})
+        .array("filter", new String[] {"lowercase", "asciifolding"})
+        .endObject()
+        .endObject();
   }
 }

@@ -88,6 +88,12 @@ class MappingContentBuilder {
         break;
       case TEXT:
         createFieldMappingText(contentBuilder);
+        if (fieldMapping.getAnalyzer() != null) {
+          contentBuilder.field("analyzer", fieldMapping.getAnalyzer());
+        }
+        break;
+      case KEYWORD:
+        createFieldMappingKeyword(contentBuilder);
         break;
       default:
         throw new UnexpectedEnumException(fieldMapping.getType());
@@ -123,6 +129,11 @@ class MappingContentBuilder {
       List<FieldMapping> nestedFieldMappings, XContentBuilder contentBuilder) throws IOException {
     contentBuilder.field("type", "nested");
     createFieldMappings(nestedFieldMappings, contentBuilder);
+  }
+
+  private void createFieldMappingKeyword(XContentBuilder contentBuilder) throws IOException {
+    contentBuilder.field("type", "keyword");
+    contentBuilder.field("normalizer", "lowercase_asciifold");
   }
 
   private void createFieldMappingText(XContentBuilder contentBuilder) throws IOException {

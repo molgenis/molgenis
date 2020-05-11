@@ -5,6 +5,8 @@ public enum Relation {
   instanceOf("http://molgenis.org/biobankconnect/instanceOf"),
   link("http://molgenis.org/biobankconnect/link"),
   homepage("http://xmlns.com/foaf/0.1/homepage"),
+  isA("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+  language("http://purl.org/dc/terms/language"),
   isDefinedBy("http://www.w3.org/2000/01/rdf-schema#isDefinedBy"),
   seeAlso("http://www.w3.org/2000/01/rdf-schema#seeAlso"),
   hasLowerValue("http://molgenis.org/uml/hasLowerValue"),
