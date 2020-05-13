@@ -1,5 +1,11 @@
 package org.molgenis.core.ui.controller;
 
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+
+import java.io.UnsupportedEncodingException;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,12 +27,20 @@ public class RedirectController extends PluginController {
   public static final String ID = "redirect";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-  public RedirectController() {
+  public final AppSettings appSettings;
+
+  public RedirectController(AppSettings appSettings) {
     super(URI);
+    this.appSettings = requireNonNull(appSettings);
   }
 
   @GetMapping
-  public View redirect(@RequestParam("url") String url) {
+  public View redirect(@RequestParam("url") String url) throws UnsupportedEncodingException {
+
+    if (appSettings.getMenu().contains(encode(url, UTF_8.toString()))) {
+      throw new IllegalArgumentException("Unkown url");
+    }
+
     return new RedirectView(url, false, false, false);
   }
 }
