@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenis'
+            label 'molgenis-jdk8'
         }
     }
     environment {
@@ -13,10 +13,10 @@ pipeline {
             steps {
                 container('vault') {
                     script {
-                        sh "mkdir /home/jenkins/.m2"
-                        sh "mkdir /home/jenkins/.rancher"
-                        sh(script: 'vault read -field=value secret/ops/jenkins/rancher/cli2.json > /home/jenkins/.rancher/cli2.json')
-                        sh(script: 'vault read -field=value secret/ops/jenkins/maven/settings.xml > /home/jenkins/.m2/settings.xml')
+                        sh "mkdir ${JENKINS_AGENT_WORKDIR}/.m2"
+                        sh "mkdir ${JENKINS_AGENT_WORKDIR}/.rancher"
+                        sh(script: "vault read -field=value secret/ops/jenkins/rancher/cli2.json > ${JENKINS_AGENT_WORKDIR}/.rancher/cli2.json")
+                        sh(script: "vault read -field=value secret/ops/jenkins/maven/settings.xml > ${JENKINS_AGENT_WORKDIR}/.m2/settings.xml")
                         env.SONAR_TOKEN = sh(script: 'vault read -field=value secret/ops/token/sonar', returnStdout: true)
                         env.GITHUB_TOKEN = sh(script: 'vault read -field=value secret/ops/token/github', returnStdout: true)
                         env.PGP_PASSPHRASE = 'literal:' + sh(script: 'vault read -field=passphrase secret/ops/certificate/pgp/molgenis-ci', returnStdout: true)
@@ -24,10 +24,10 @@ pipeline {
                         env.GITHUB_USER = sh(script: 'vault read -field=username secret/ops/token/github', returnStdout: true)
                     }
                 }
-                dir('/home/jenkins/.m2') {
+                dir("${JENKINS_AGENT_WORKDIR}/.m2") {
                     stash includes: 'settings.xml', name: 'maven-settings'
                 }
-                dir('/home/jenkins/.rancher') {
+                dir("${JENKINS_AGENT_WORKDIR}/.rancher") {
                     stash includes: 'cli2.json', name: 'rancher-config'
                 }
             }
@@ -113,7 +113,7 @@ pipeline {
             stages {
                 stage('Build [ x.x ]') {
                     steps {
-                        dir('/home/jenkins/.m2') {
+                        dir("${JENKINS_AGENT_WORKDIR}/.m2") {
                             unstash 'maven-settings'
                         }
                         container('maven') {
@@ -133,7 +133,6 @@ pipeline {
                             input(message: 'Prepare to release?')
                         }
                         container('maven') {
-                            sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                             script {
                                 env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
@@ -141,18 +140,6 @@ pipeline {
                             dir('molgenis-app') {
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
                             }
-                        }
-                    }
-                }
-                stage('Deploy to test [ x.x ]') {
-                    steps {
-                        milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
-                        dir('/home/jenkins/.rancher') {
-                            unstash 'rancher-config'
-                        }
-                        container('rancher') {
-                            sh "rancher context switch test-molgenis"
-                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
                 }
@@ -165,8 +152,8 @@ pipeline {
                     steps {
                         container('vault') {
                             script {
-                                env.PGP_SECRETKEY = "keyfile:/home/jenkins/key.asc"
-                                sh(script: 'vault read -field=secret.asc secret/ops/certificate/pgp/molgenis-ci > /home/jenkins/key.asc')
+                                env.PGP_SECRETKEY = "keyfile:${JENKINS_AGENT_WORKDIR}/key.asc"
+                                sh(script: "vault read -field=secret.asc secret/ops/certificate/pgp/molgenis-ci > ${JENKINS_AGENT_WORKDIR}/key.asc")
                             }
                         }
                         container('maven') {
