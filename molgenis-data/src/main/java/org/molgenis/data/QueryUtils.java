@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
+import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -9,6 +11,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.rdf4j.model.IRI;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -206,5 +209,9 @@ public class QueryUtils {
       expandedAttributePath = attributePath;
     }
     return expandedAttributePath;
+  }
+
+  public static boolean isTaggedType(Attribute attribute, IRI typeIRI) {
+    return stream(attribute.getTags()).anyMatch(tag -> tag.equals(TYPE, typeIRI));
   }
 }

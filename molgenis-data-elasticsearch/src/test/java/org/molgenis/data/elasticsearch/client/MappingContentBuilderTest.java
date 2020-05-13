@@ -34,6 +34,7 @@ class MappingContentBuilderTest {
     dataItems.add(new Object[] {MappingType.INTEGER, JSON_INTEGER});
     dataItems.add(new Object[] {MappingType.LONG, JSON_LONG});
     dataItems.add(new Object[] {MappingType.TEXT, JSON_TEXT});
+    dataItems.add(new Object[] {MappingType.KEYWORD, JSON_KEYWORD});
     return dataItems.iterator();
   }
 
@@ -44,6 +45,21 @@ class MappingContentBuilderTest {
         createMapping(FieldMapping.builder().setName("field").setType(mappingType).build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
     assertEquals(expectedJson, xContentBuilder.string());
+  }
+
+  @Test
+  void testCreateMappingKeywordCaseSensitive() throws IOException {
+    Mapping mapping =
+        createMapping(
+            FieldMapping.builder()
+                .setName("field")
+                .setType(MappingType.KEYWORD)
+                .setCaseSensitive(true)
+                .build());
+
+    XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
+
+    assertEquals(JSON_KEYWORD_CASE_SENSITIVE, xContentBuilder.string());
   }
 
   @Test
@@ -79,6 +95,10 @@ class MappingContentBuilderTest {
       "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"long\"}}}";
   private static final String JSON_TEXT =
       "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true,\"ignore_above\":8191}}}}}";
+  private static final String JSON_KEYWORD =
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"normalizer\":\"lowercase_asciifold\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+  private static final String JSON_KEYWORD_CASE_SENSITIVE =
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
   private static final String JSON_NESTED =
       "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"nested\",\"properties\":{\"nestedField\":{\"type\":\"boolean\"}}}}}";
 }

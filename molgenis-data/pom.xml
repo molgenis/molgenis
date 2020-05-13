@@ -98,5 +98,11 @@
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.rdf4j</groupId>
+      <artifactId>rdf4j-model</artifactId>
+      <version>2.0.2</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

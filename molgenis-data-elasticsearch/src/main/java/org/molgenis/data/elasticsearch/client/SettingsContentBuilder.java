@@ -12,8 +12,11 @@ import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 
 /** Creates Elasticsearch transport client content for settings. */
 class SettingsContentBuilder {
+
+  public static final String CI_NORMALIZER = "lowercase_asciifold";
   private static final String DEFAULT_TOKENIZER = "default_tokenizer";
   private static final String DEFAULT_STEMMER = "default_stemmer";
+  public static final String FILTER = "filter";
 
   private final XContentType xContentType;
 
@@ -72,11 +75,12 @@ class SettingsContentBuilder {
     createFilterSettings(contentBuilder);
     createAnalyzerSettings(contentBuilder);
     createTokenizerSettings(contentBuilder);
+    createNormalizerSettings(contentBuilder);
     contentBuilder.endObject();
   }
 
   private void createFilterSettings(XContentBuilder contentBuilder) throws IOException {
-    contentBuilder.startObject("filter");
+    contentBuilder.startObject(FILTER);
     createDefaultStemmerSettings(contentBuilder);
     contentBuilder.endObject();
   }
@@ -97,7 +101,7 @@ class SettingsContentBuilder {
   private void createDefaultAnalyzerSettings(XContentBuilder contentBuilder) throws IOException {
     contentBuilder.startObject(FieldConstants.DEFAULT_ANALYZER);
     contentBuilder.field("type", "custom");
-    contentBuilder.array("filter", "word_delimiter", "lowercase", "asciifolding", DEFAULT_STEMMER);
+    contentBuilder.array(FILTER, "word_delimiter", "lowercase", "asciifolding", DEFAULT_STEMMER);
     contentBuilder.field("tokenizer", DEFAULT_TOKENIZER);
     contentBuilder.field("char_filter", "html_strip");
     contentBuilder.endObject();
@@ -113,5 +117,16 @@ class SettingsContentBuilder {
     contentBuilder.startObject(DEFAULT_TOKENIZER);
     contentBuilder.field("type", "whitespace");
     contentBuilder.endObject();
+  }
+
+  private static void createNormalizerSettings(XContentBuilder contentBuilder) throws IOException {
+    contentBuilder
+        .startObject("normalizer")
+        .startObject(CI_NORMALIZER)
+        .field("type", "custom")
+        .array("char_filter")
+        .array(FILTER, "lowercase", "asciifolding")
+        .endObject()
+        .endObject();
   }
 }
