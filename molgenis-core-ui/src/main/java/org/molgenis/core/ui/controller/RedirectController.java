@@ -37,7 +37,7 @@ public class RedirectController extends PluginController {
   @GetMapping
   public View redirect(@RequestParam("url") String url) throws UnsupportedEncodingException {
 
-    if (appSettings.getMenu().contains(encode(url, UTF_8.toString()))) {
+    if (!appSettings.getMenu().contains(encode(url, UTF_8.toString()))) {
       throw new IllegalArgumentException("Unkown url");
     }
 
