@@ -28,4 +28,15 @@ public class MappedOidcUser extends DefaultOidcUser implements MappedAuthenticat
   public String getMappedName() {
     return username;
   }
+
+  /**
+   * The constructor of PrincipalSid does a toString() when the principal of the Authentication is
+   * not a UserDetails (which it isn't in the case of a MappedOidcUser).
+   *
+   * <p>Fixes: https://github.com/molgenis/molgenis/issues/8978
+   */
+  @Override
+  public String toString() {
+    return username;
+  }
 }
