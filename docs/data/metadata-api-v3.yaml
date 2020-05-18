@@ -537,6 +537,9 @@ components:
           items:
             $ref: "#/components/schemas/CategoricalOption"
           nullable: true
+        range:
+          $ref: "#/components/schemas/Range"
+          # or nullable
         defaultValue:
           type: string
           nullable: true
