@@ -296,6 +296,24 @@ public class RestTestUtils {
     return pollForStatus(adminToken, importJobURL);
   }
 
+  public static void waitForIndexJobs(String adminToken) {
+    await()
+        .pollDelay(500, MILLISECONDS)
+        .atMost(10, MINUTES)
+        .until(() -> getNumberOfIndexJobs(adminToken), equalTo(0));
+  }
+
+  private static int getNumberOfIndexJobs(String adminToken) {
+    return given()
+        .contentType(APPLICATION_JSON)
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .get("/api/data/sys_job_IndexJobExecution?q=status=in=(RUNNING,PENDING)")
+        .then()
+        .statusCode(OKE)
+        .extract()
+        .path("page.totalPages");
+  }
+
   private static String pollForStatus(String adminToken, String importJobURL) {
     return given()
         .contentType(APPLICATION_JSON)
