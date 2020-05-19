@@ -3,7 +3,6 @@ package org.molgenis.ontology.utils;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_TERMS;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
@@ -65,7 +64,6 @@ class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
     term.setOntologyTermName("testTerm");
     term.setOntologyTermIri("iri");
     term.setOntologyTermSynonyms(singletonList(synonym));
-    ontology.set(ONTOLOGY_TERMS, singletonList(term));
   }
 
   @Test
