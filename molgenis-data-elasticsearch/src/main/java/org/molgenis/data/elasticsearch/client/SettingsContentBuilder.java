@@ -14,7 +14,6 @@ import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 class SettingsContentBuilder {
 
   public static final String CI_NORMALIZER = "lowercase_asciifold";
-  private static final String DEFAULT_TOKENIZER = "default_tokenizer";
   private static final String DEFAULT_STEMMER = "default_stemmer";
   public static final String FILTER = "filter";
 
@@ -74,7 +73,6 @@ class SettingsContentBuilder {
     contentBuilder.startObject("analysis");
     createFilterSettings(contentBuilder);
     createAnalyzerSettings(contentBuilder);
-    createTokenizerSettings(contentBuilder);
     createNormalizerSettings(contentBuilder);
     contentBuilder.endObject();
   }
@@ -101,21 +99,9 @@ class SettingsContentBuilder {
   private void createDefaultAnalyzerSettings(XContentBuilder contentBuilder) throws IOException {
     contentBuilder.startObject(FieldConstants.DEFAULT_ANALYZER);
     contentBuilder.field("type", "custom");
-    contentBuilder.array(FILTER, "word_delimiter", "lowercase", "asciifolding", DEFAULT_STEMMER);
-    contentBuilder.field("tokenizer", DEFAULT_TOKENIZER);
+    contentBuilder.array(FILTER, "lowercase", "asciifolding", DEFAULT_STEMMER);
+    contentBuilder.field("tokenizer", "standard");
     contentBuilder.field("char_filter", "html_strip");
-    contentBuilder.endObject();
-  }
-
-  private void createTokenizerSettings(XContentBuilder contentBuilder) throws IOException {
-    contentBuilder.startObject("tokenizer");
-    createDefaultTokenizerSettings(contentBuilder);
-    contentBuilder.endObject();
-  }
-
-  private void createDefaultTokenizerSettings(XContentBuilder contentBuilder) throws IOException {
-    contentBuilder.startObject(DEFAULT_TOKENIZER);
-    contentBuilder.field("type", "whitespace");
     contentBuilder.endObject();
   }
 
