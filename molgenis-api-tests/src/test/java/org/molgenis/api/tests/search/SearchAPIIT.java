@@ -1,6 +1,6 @@
 package org.molgenis.api.tests.search;
 
-import static java.util.Collections.singletonList;
+import static freemarker.template.utility.Collections12.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,6 +15,7 @@ import static org.molgenis.api.tests.utils.RestTestUtils.waitForIndexJobs;
 import static org.molgenis.util.ResourceUtils.getFile;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import io.restassured.response.ValidatableResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -104,17 +105,7 @@ class SearchAPIIT extends AbstractApiTests {
       Integer count,
       List<String> contains,
       String comment) {
-    var response =
-        given()
-            .header(X_MOLGENIS_TOKEN, adminToken)
-            .contentType(APPLICATION_JSON)
-            .get(
-                "api/data/search_mutations?q={attribute}{operator}'{value}'",
-                attribute,
-                operator,
-                value)
-            .then()
-            .statusCode(OKE);
+    ValidatableResponse response = doQuery("search_mutations", attribute, operator, value);
     if (contains.size() > 0) {
       var ids = response.extract().jsonPath().getList("items.data.ID").stream().collect(toSet());
       assertThat(id, ids, hasItems(contains.toArray()));
@@ -122,6 +113,17 @@ class SearchAPIIT extends AbstractApiTests {
     if (count != null) {
       assertEquals(count, response.extract().path("page.totalElements"), id);
     }
+  }
+
+  private ValidatableResponse doQuery(
+      String entity, String attribute, String operator, String value) {
+    return given()
+        .header(X_MOLGENIS_TOKEN, adminToken)
+        .contentType(APPLICATION_JSON)
+        .param("q", String.format("%s%s'%s'", attribute, operator, value))
+        .get("api/data/{entity}", entity)
+        .then()
+        .statusCode(OKE);
   }
 
   private static Stream<Arguments> provideDiseaseTypesCases() {
@@ -138,17 +140,31 @@ class SearchAPIIT extends AbstractApiTests {
       Integer count,
       List<String> contains,
       String comment) {
-    var response =
-        given()
-            .header(X_MOLGENIS_TOKEN, adminToken)
-            .contentType(APPLICATION_JSON)
-            .get(
-                "api/data/search_disease_types?q={attribute}{operator}'{value}'",
-                attribute,
-                operator,
-                value)
-            .then()
-            .statusCode(OKE);
+    var response = doQuery("search_disease_types", attribute, operator, value);
+    if (contains.size() > 0) {
+      var ids = response.extract().jsonPath().getList("items.data.id").stream().collect(toSet());
+      assertThat(id, ids, hasItems(contains.toArray()));
+    }
+    if (count != null) {
+      assertEquals(count, response.extract().path("page.totalElements"), id);
+    }
+  }
+
+  private static Stream<Arguments> provideServersCases() {
+    return getCases("search_servers-cases");
+  }
+
+  @ParameterizedTest()
+  @MethodSource("provideServersCases")
+  void testSearchServers(
+      String id,
+      String attribute,
+      String operator,
+      String value,
+      Integer count,
+      List<String> contains,
+      String comment) {
+    var response = doQuery("search_servers", attribute, operator, value);
     if (contains.size() > 0) {
       var ids = response.extract().jsonPath().getList("items.data.id").stream().collect(toSet());
       assertThat(id, ids, hasItems(contains.toArray()));
