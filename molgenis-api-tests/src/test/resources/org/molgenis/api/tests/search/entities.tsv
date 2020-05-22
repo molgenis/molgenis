@@ -1,0 +1,7 @@
+"name"	"package"	"extends"	"abstract"	"backend"	"tags"	"label"	"description"	"description-de"	"label-de"	"description-en"	"label-en"	"description-es"	"label-es"	"description-fr"	"label-fr"	"description-it"	"label-it"	"description-nl"	"label-nl"	"description-pt"	"label-pt"	"description-xx"	"label-xx"
+"disease_types"	"search"	""	"false"	""	""	"Disease Types"	"BBMRI Eric disease types"																
+"disease_types-cases"	"search"	""	"false"	""	""	"Test Cases - Disease Types"	"Test cases for the Disease Types dataset"																
+"mutations"	"search"	""	"false"	""	""	"Mutations"	"DEB Central mutations"																
+"mutations-cases"	"search"	""	"false"	""	""	"Test Cases - Mutations"	"Test cases for the Mutations dataset"																
+"servers"	"search"	""	"false"	""	""	"Servers"	"MOLGENIS Servers"																
+"servers-cases"	"search"	""	"false"	""	""	"Test Cases - Servers"	"Test cases for the Servers dataset"																
