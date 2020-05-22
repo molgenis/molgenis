@@ -618,7 +618,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
 
   private static Object[][] findQueryOperatorLike() {
     return new Object[][] {
-      {"ring", asList(0, 1, 2)}, {"Ring", emptyList()}, {"nomatch", emptyList()}
+      {"ring", asList(0, 1, 2)}, {"Ring", asList(0, 1, 2)}, {"nomatch", emptyList()}
     };
   }
 
