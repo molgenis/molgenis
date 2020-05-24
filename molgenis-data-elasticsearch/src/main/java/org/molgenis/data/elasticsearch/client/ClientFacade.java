@@ -282,7 +282,7 @@ public class ClientFacade implements Closeable {
           format("Timeout while counting docs in index(es) '%s'.", toString(indexes)));
     }
 
-    long totalHits = searchResponse.getHits().getTotalHits();
+    long totalHits = searchResponse.getHits().getTotalHits().value;
     if (LOG.isDebugEnabled()) {
       if (query != null) {
         LOG.debug(
@@ -426,7 +426,7 @@ public class ClientFacade implements Closeable {
         stream(searchHits.getHits())
             .map(hit -> SearchHit.create(hit.getId(), hit.getIndex()))
             .collect(toList());
-    return SearchHits.create(searchHits.getTotalHits(), searchHitList);
+    return SearchHits.create(searchHits.getTotalHits().value, searchHitList);
   }
 
   public Aggregations aggregate(

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
+import org.elasticsearch.action.OriginalIndices;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
@@ -136,7 +137,8 @@ class ClientFacadeTest {
   private final ShardSearchFailure[] singleShardSearchFailure =
       new ShardSearchFailure[] {
         new ShardSearchFailure(
-            new IOException("reason"), new SearchShardTarget("node", index, 1, "cluster"))
+            new IOException("reason"),
+            new SearchShardTarget("node", new ShardId(index, 1), "cluster", OriginalIndices.NONE))
       };
   private final ShardInfo.Failure[] singleShardIndexResponseFailure =
       new ShardInfo.Failure[] {
@@ -254,7 +256,7 @@ class ClientFacadeTest {
 
     when(createIndexRequestBuilder.get()).thenReturn(createIndexResponse);
     when(createIndexResponse.isAcknowledged()).thenReturn(false);
-    when(createIndexResponse.isShardsAcked()).thenReturn(false);
+    when(createIndexResponse.isShardsAcknowledged()).thenReturn(false);
 
     clientFacade.createIndex(index, indexSettings, mappings);
 

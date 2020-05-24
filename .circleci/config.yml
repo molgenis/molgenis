@@ -11,7 +11,7 @@ executors:
           POSTGRES_USER: molgenis
           POSTGRES_PASSWORD: molgenis
           POSTGRES_DB: molgenis
-      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.19
+      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
         environment:
           cluster.name: molgenis
           bootstrap.memory_lock: true
