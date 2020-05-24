@@ -23,7 +23,6 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -309,11 +308,13 @@ class DocumentContentBuilderTest extends AbstractMockitoTest {
 
   private void assertDocumentEquals(Document document, String expectedContent) {
     assertEquals("id", document.getId());
-    assertNotNull(document.getContent());
+    var content = document.getContent();
+    assertNotNull(content);
     try {
-      assertEquals(expectedContent, document.getContent().string());
+      content.flush();
     } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      e.printStackTrace();
     }
+    assertEquals(expectedContent, content.getOutputStream().toString());
   }
 }

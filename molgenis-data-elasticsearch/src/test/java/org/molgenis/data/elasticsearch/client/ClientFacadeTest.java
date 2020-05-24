@@ -20,6 +20,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import java.util.stream.Stream;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
@@ -27,7 +28,6 @@ import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequestBuilder;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
@@ -41,6 +41,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.action.support.DefaultShardOperationFailedException;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInfo;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
@@ -87,7 +88,7 @@ class ClientFacadeTest {
 
   @Mock private DeleteIndexRequestBuilder deleteIndexRequestBuilder;
 
-  @Mock private DeleteIndexResponse deleteIndexResponse;
+  @Mock private AcknowledgedResponse deleteIndexResponse;
 
   @Mock private RefreshRequestBuilder refreshRequestBuilder;
 
@@ -127,19 +128,20 @@ class ClientFacadeTest {
       (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ClientFacade.class);
   private final DefaultShardOperationFailedException[] singleShardFailure =
       new DefaultShardOperationFailedException[] {
-        new DefaultShardOperationFailedException("index", 0, null)
+        new DefaultShardOperationFailedException("index", 0, new Exception())
       };
 
   private final org.elasticsearch.index.Index index =
       new org.elasticsearch.index.Index("index", "uuid");
   private final ShardSearchFailure[] singleShardSearchFailure =
       new ShardSearchFailure[] {
-        new ShardSearchFailure("reason", new SearchShardTarget("node", index, 1))
+        new ShardSearchFailure(
+            new IOException("reason"), new SearchShardTarget("node", index, 1, "cluster"))
       };
   private final ShardInfo.Failure[] singleShardIndexResponseFailure =
       new ShardInfo.Failure[] {
         new ShardInfo.Failure(
-            new ShardId(index, 0), "node", null, RestStatus.FAILED_DEPENDENCY, true)
+            new ShardId(index, 0), "node", new Exception(), RestStatus.FAILED_DEPENDENCY, true)
       };
 
   private static ILoggingEvent matcher(Level level, String message) {
