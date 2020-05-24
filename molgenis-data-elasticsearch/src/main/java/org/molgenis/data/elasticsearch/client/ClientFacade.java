@@ -25,7 +25,6 @@ import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequestBuilder;
@@ -40,6 +39,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
@@ -113,7 +113,7 @@ public class ClientFacade implements Closeable {
     }
     // 'shards_acknowledged' indicates whether the requisite number of shard copies were started for
     // each shard in the index before timing out
-    if (!createIndexResponse.isShardsAcked()) {
+    if (!createIndexResponse.isShardsAcknowledged()) {
       LOG.warn("Index '{}' creation possibly failed (shards_acknowledged=false)", index.getName());
     }
 
@@ -177,7 +177,7 @@ public class ClientFacade implements Closeable {
     DeleteIndexRequestBuilder deleteIndexRequest =
         client.admin().indices().prepareDelete(indexNames);
 
-    DeleteIndexResponse deleteIndexResponse;
+    AcknowledgedResponse deleteIndexResponse;
     try {
       deleteIndexResponse = deleteIndexRequest.get();
     } catch (ResourceNotFoundException e) {
@@ -290,13 +290,13 @@ public class ClientFacade implements Closeable {
             totalHits,
             toString(indexes),
             query,
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       } else {
         LOG.debug(
             "Counted {} docs in index(es) '{}' in {}ms.",
             totalHits,
             toString(indexes),
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       }
     }
     return totalHits;
@@ -379,14 +379,14 @@ public class ClientFacade implements Closeable {
             toString(indexes),
             query,
             sort,
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       } else {
         LOG.debug(
             "Searched {} docs in index(es) '{}' with query '{}' in {}ms.",
             searchResponse.getHits().getTotalHits(),
             toString(indexes),
             query,
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       }
     }
     return createSearchResponse(searchResponse);
@@ -486,13 +486,13 @@ public class ClientFacade implements Closeable {
             toString(indexes),
             aggregations,
             query,
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       } else {
         LOG.debug(
             "Aggregated docs in index(es) '{}' with aggregations '{}' in {}ms.",
             toString(indexes),
             aggregations,
-            searchResponse.getTookInMillis());
+            searchResponse.getTook().millis());
       }
     }
     return searchResponse.getAggregations();

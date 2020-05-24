@@ -85,7 +85,6 @@
     <sonar.skip>${skipTests}</sonar.skip>
 
     <!-- override dependency versions managed by parent pom -->
-    <elasticsearch.version>5.5.3</elasticsearch.version>
     <guava.version>25.0-jre</guava.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
@@ -140,7 +139,7 @@
     <!-- Integration test properties -->
     <cargo-plugin.version>1.7.7</cargo-plugin.version>
     <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
-    <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
+    <elasticsearch-maven-plugin.version>6.17</elasticsearch-maven-plugin.version>
     <!-- if profiles are inactive, set these props to use local infrastructure -->
     <it_db_name>molgenis_test</it_db_name>
     <it_db_user>postgres</it_db_user>
