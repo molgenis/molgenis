@@ -1045,6 +1045,7 @@ class PostgreSqlQueryGenerator {
         case FUZZY_MATCH:
         case FUZZY_MATCH_NGRAM:
         case SEARCH:
+        case SEARCH_QUERY:
         case SHOULD:
           // PostgreSQL does not support semantic searching and sorting matching rows on relevance.
           throw new UnsupportedOperationException(

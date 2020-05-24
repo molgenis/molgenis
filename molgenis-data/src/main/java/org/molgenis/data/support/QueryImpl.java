@@ -196,6 +196,18 @@ public class QueryImpl<E extends Entity> implements Query<E> {
   }
 
   @Override
+  public Query<E> searchQuery(String query) {
+    rules.get(this.rules.size() - 1).add(new QueryRule(Operator.SEARCH_QUERY, query));
+    return this;
+  }
+
+  @Override
+  public Query<E> searchQuery(String field, String query) {
+    rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.SEARCH_QUERY, query));
+    return this;
+  }
+
+  @Override
   public Query<E> or() {
     rules.get(this.rules.size() - 1).add(new QueryRule(Operator.OR));
     return this;

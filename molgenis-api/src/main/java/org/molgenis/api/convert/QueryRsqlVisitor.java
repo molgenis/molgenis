@@ -13,6 +13,7 @@ import static org.molgenis.api.model.Query.Operator.MATCHES;
 import static org.molgenis.api.model.Query.Operator.NOT_EQUALS;
 import static org.molgenis.api.model.Query.Operator.NOT_IN;
 import static org.molgenis.api.model.Query.Operator.OR;
+import static org.molgenis.api.model.Query.Operator.SEARCH_QUERY;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
@@ -95,6 +96,9 @@ public class QueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Query> {
       case "=q=":
         operator = MATCHES;
         break;
+      case "=sq=":
+        operator = SEARCH_QUERY;
+        break;
       default:
         throw new IllegalArgumentException("Unknown RSQL query operator [" + symbol + "]");
     }
@@ -111,6 +115,7 @@ public class QueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Query> {
         value = arguments.get(0);
         break;
       case MATCHES:
+      case SEARCH_QUERY:
       case CONTAINS:
       case LESS_THAN:
       case LESS_THAN_OR_EQUAL_TO:

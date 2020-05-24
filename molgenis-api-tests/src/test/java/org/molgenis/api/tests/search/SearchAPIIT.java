@@ -94,6 +94,8 @@ class SearchAPIIT extends AbstractApiTests {
         return "=q=";
       case "LIKE":
         return "=like=";
+      case "SEARCH_QUERY":
+        return "=sq=";
       default:
         throw new IllegalArgumentException(name);
     }

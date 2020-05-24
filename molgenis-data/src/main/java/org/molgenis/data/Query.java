@@ -44,6 +44,10 @@ public interface Query<E extends Entity> extends Iterable<E> {
   /** Search field */
   Query<E> search(String field, String searchTerms);
 
+  Query<E> searchQuery(String query);
+
+  Query<E> searchQuery(String field, String query);
+
   /** Occur operator 'or'. Example usage: query.eq("field0", "val0").or().eq("field1", "val1") */
   Query<E> or();
 

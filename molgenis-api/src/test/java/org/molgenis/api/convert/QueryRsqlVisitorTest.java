@@ -16,6 +16,7 @@ import static org.molgenis.api.model.Query.Operator.MATCHES;
 import static org.molgenis.api.model.Query.Operator.NOT_EQUALS;
 import static org.molgenis.api.model.Query.Operator.NOT_IN;
 import static org.molgenis.api.model.Query.Operator.OR;
+import static org.molgenis.api.model.Query.Operator.SEARCH_QUERY;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
@@ -123,6 +124,40 @@ class QueryRsqlVisitorTest extends AbstractMockitoTest {
     ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
 
     Query query = Query.builder().setItem(null).setOperator(MATCHES).setValue(argument).build();
+    assertEquals(query, queryRsqlVisitor.visit(node));
+  }
+
+  @Test
+  void testVisitComparisonNodeSearchQuery() {
+    String selector = "name";
+    String argument = "piet";
+    ComparisonOperator operator = new ComparisonOperator("=sq=");
+    ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
+
+    Query query =
+        Query.builder().setItem(selector).setOperator(SEARCH_QUERY).setValue(argument).build();
+    assertEquals(query, queryRsqlVisitor.visit(node));
+  }
+
+  @Test
+  void testVisitComparisonNodeSearchQueryNull() {
+    String selector = "name";
+    String argument = "";
+    ComparisonOperator operator = new ComparisonOperator("=sq=");
+    ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
+
+    assertThrows(RuntimeException.class, () -> queryRsqlVisitor.visit(node));
+  }
+
+  @Test
+  void testVisitComparisonNodeSearchQueryAllSelector() {
+    String selector = "*";
+    String argument = "piet";
+    ComparisonOperator operator = new ComparisonOperator("=sq=");
+    ComparisonNode node = new ComparisonNode(operator, selector, singletonList(argument));
+
+    Query query =
+        Query.builder().setItem(null).setOperator(SEARCH_QUERY).setValue(argument).build();
     assertEquals(query, queryRsqlVisitor.visit(node));
   }
 
