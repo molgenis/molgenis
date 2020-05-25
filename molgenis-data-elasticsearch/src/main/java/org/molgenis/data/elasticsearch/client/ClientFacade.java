@@ -1,52 +1,56 @@
 package org.molgenis.data.elasticsearch.client;
 
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
+import static org.elasticsearch.client.RequestOptions.DEFAULT;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZE;
-import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
+import com.google.common.base.Stopwatch;
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.ShardOperationFailedException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequestBuilder;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.explain.ExplainRequestBuilder;
+import org.elasticsearch.action.explain.ExplainRequest;
 import org.elasticsearch.action.explain.ExplainResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisQueryException;
@@ -66,25 +70,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Elasticsearch client facade: - Provides simplified interface to Elasticsearch transport client -
- * Reduces Elasticsearch transport client dependencies - Translates Elasticsearch transport client
- * exceptions to MOLGENIS indexing exceptions - Logs requests and responses
+ * Elasticsearch client facade:
+ *
+ * <ul>
+ *   <li>Provides simplified interface to Elasticsearch client
+ *   <li>Reduces Elasticsearch client dependencies
+ *   <li>Translates Elasticsearch client exceptions to MOLGENIS indexing exceptions
+ *   <li>Logs requests and responses
+ * </ul>
  */
 public class ClientFacade implements Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(ClientFacade.class);
 
-  private final Client client;
+  private final RestHighLevelClient client;
   private final SettingsContentBuilder settingsBuilder;
   private final MappingContentBuilder mappingSourceBuilder;
   private final SortContentBuilder sortContentBuilder;
-  private final BulkProcessorFactory bulkProcessorFactory;
 
-  public ClientFacade(Client client) {
+  public ClientFacade(RestHighLevelClient client) {
     this.client = requireNonNull(client);
     this.settingsBuilder = new SettingsContentBuilder();
     this.mappingSourceBuilder = new MappingContentBuilder();
     this.sortContentBuilder = new SortContentBuilder();
-    this.bulkProcessorFactory = new BulkProcessorFactory();
   }
 
   public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream) {
@@ -92,16 +99,15 @@ public class ClientFacade implements Closeable {
       LOG.trace("Creating index '{}' ...", index.getName());
     }
 
-    CreateIndexRequestBuilder createIndexRequest =
-        createIndexRequest(index, indexSettings, mappingStream);
+    CreateIndexRequest createIndexRequest = createIndexRequest(index, indexSettings, mappingStream);
 
     CreateIndexResponse createIndexResponse;
     try {
-      createIndexResponse = createIndexRequest.get();
+      createIndexResponse = client.indices().create(createIndexRequest, DEFAULT);
     } catch (ResourceAlreadyExistsException e) {
       LOG.debug("", e);
       throw new IndexAlreadyExistsException(index.getName());
-    } catch (ElasticsearchException e) {
+    } catch (ElasticsearchException | IOException e) {
       LOG.error("", e);
       throw new IndexException(format("Error creating index '%s'.", index.getName()));
     }
@@ -122,16 +128,11 @@ public class ClientFacade implements Closeable {
     }
   }
 
-  private CreateIndexRequestBuilder createIndexRequest(
+  private CreateIndexRequest createIndexRequest(
       Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream) {
-    XContentBuilder settings = settingsBuilder.createSettings(indexSettings);
-    Map<String, XContentBuilder> mappings =
-        mappingStream.collect(toLinkedMap(Mapping::getType, mappingSourceBuilder::createMapping));
-
-    CreateIndexRequestBuilder createIndexRequest =
-        client.admin().indices().prepareCreate(index.getName());
-    createIndexRequest.setSettings(settings);
-    mappings.forEach(createIndexRequest::addMapping);
+    var createIndexRequest = new CreateIndexRequest(index.getName());
+    createIndexRequest.settings(settingsBuilder.createSettings(indexSettings));
+    mappingStream.map(mappingSourceBuilder::createMapping).forEach(createIndexRequest::mapping);
     return createIndexRequest;
   }
 
@@ -145,19 +146,17 @@ public class ClientFacade implements Closeable {
     }
 
     String[] indexNames = toIndexNames(indexes);
-    IndicesExistsRequestBuilder indicesExistsRequest =
-        client.admin().indices().prepareExists(indexNames);
+    GetIndexRequest indicesExistsRequest = new GetIndexRequest(indexNames);
 
-    IndicesExistsResponse indicesExistsResponse;
+    boolean exists;
     try {
-      indicesExistsResponse = indicesExistsRequest.get();
-    } catch (ElasticsearchException e) {
+      exists = client.indices().exists(indicesExistsRequest, DEFAULT);
+    } catch (ElasticsearchException | IOException e) {
       LOG.error("", e);
       throw new IndexException(
           format("Error determining index(es) '%s' existence.", toString(indexes)));
     }
 
-    boolean exists = indicesExistsResponse.isExists();
     if (LOG.isDebugEnabled()) {
       LOG.debug("Determined index(es) '{}' existence: {}.", toString(indexes), exists);
     }
@@ -174,16 +173,18 @@ public class ClientFacade implements Closeable {
     }
 
     String[] indexNames = toIndexNames(indexes);
-    DeleteIndexRequestBuilder deleteIndexRequest =
-        client.admin().indices().prepareDelete(indexNames);
+    DeleteIndexRequest request = new DeleteIndexRequest(indexNames);
 
     AcknowledgedResponse deleteIndexResponse;
     try {
-      deleteIndexResponse = deleteIndexRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.debug("", e);
-      throw new UnknownIndexException(toString(indexes));
+      deleteIndexResponse = client.indices().delete(request, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.debug("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(toString(indexes));
+      }
+      throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
+    } catch (IOException e) {
       LOG.error("", e);
       throw new IndexException(format("Error deleting index(es) '%s'.", toString(indexes)));
     }
@@ -206,15 +207,18 @@ public class ClientFacade implements Closeable {
     }
 
     String[] indexNames = toIndexNames(indexes);
-    RefreshRequestBuilder refreshRequest = client.admin().indices().prepareRefresh(indexNames);
+    RefreshRequest refreshRequest = new RefreshRequest(indexNames);
 
     RefreshResponse refreshResponse;
     try {
-      refreshResponse = refreshRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.debug("", e);
-      throw new UnknownIndexException(toIndexNames(indexes));
+      refreshResponse = client.indices().refresh(refreshRequest, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.debug("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(toIndexNames(indexes));
+      }
+      throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
+    } catch (IOException e) {
       LOG.error("", e);
       throw new IndexException(format("Error refreshing index(es) '%s'.", toString(indexes)));
     }
@@ -255,34 +259,43 @@ public class ClientFacade implements Closeable {
       }
     }
 
-    SearchRequestBuilder searchRequest = createSearchRequest(query, null, 0, null, null, indexes);
+    CountRequest countRequest = new CountRequest(toIndexNames(indexes));
+    if (query != null) {
+      countRequest.query(query);
+    }
 
-    SearchResponse searchResponse;
+    CountResponse countResponse;
+    Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      searchResponse = searchRequest.get();
-    } catch (ResourceNotFoundException e) {
+      countResponse = client.count(countRequest, DEFAULT);
+    } catch (ElasticsearchStatusException e) {
       LOG.error("", e);
-      throw new UnknownIndexException(toIndexNames(indexes));
-    } catch (ElasticsearchException e) {
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(toIndexNames(indexes));
+      } else {
+        throw new IndexException(
+            format("Error counting docs in index(es) '%s'.", toString(indexes)));
+      }
+    } catch (ElasticsearchException | IOException e) {
       LOG.error("", e);
       throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
     }
-
-    if (searchResponse.getFailedShards() > 0) {
+    stopwatch.stop();
+    if (countResponse.getFailedShards() > 0) {
       if (LOG.isErrorEnabled()) {
         LOG.error(
-            stream(searchResponse.getShardFailures())
+            stream(countResponse.getShardFailures())
                 .map(ShardSearchFailure::toString)
                 .collect(joining("\n")));
       }
       throw new IndexException(format("Error counting docs in index(es) '%s'.", toString(indexes)));
     }
-    if (searchResponse.isTimedOut()) {
+    if (TRUE.equals(countResponse.isTerminatedEarly())) {
       throw new IndexException(
           format("Timeout while counting docs in index(es) '%s'.", toString(indexes)));
     }
 
-    long totalHits = searchResponse.getHits().getTotalHits().value;
+    long totalHits = countResponse.getCount();
     if (LOG.isDebugEnabled()) {
       if (query != null) {
         LOG.debug(
@@ -290,13 +303,13 @@ public class ClientFacade implements Closeable {
             totalHits,
             toString(indexes),
             query,
-            searchResponse.getTook().millis());
+            stopwatch.elapsed(MILLISECONDS));
       } else {
         LOG.debug(
             "Counted {} docs in index(es) '{}' in {}ms.",
             totalHits,
             toString(indexes),
-            searchResponse.getTook().millis());
+            stopwatch.elapsed(MILLISECONDS));
       }
     }
     return totalHits;
@@ -312,7 +325,7 @@ public class ClientFacade implements Closeable {
 
   private SearchHits search(
       QueryBuilder query, int from, int size, Sort sort, List<Index> indexes) {
-    if (size > 10000) {
+    if (size > MAX_BATCH_SIZE) {
       throw new MolgenisQueryException(
           String.format(
               "Batch size of %s exceeds the maximum batch size of %s for search queries",
@@ -338,16 +351,20 @@ public class ClientFacade implements Closeable {
       }
     }
 
-    SearchRequestBuilder searchRequest =
-        createSearchRequest(query, from, size, sort, null, indexes);
+    SearchRequest searchRequest = createSearchRequest(query, from, size, sort, null, indexes);
 
     SearchResponse searchResponse;
     try {
-      searchResponse = searchRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.error("", e);
-      throw new UnknownIndexException(toIndexNames(indexes));
+      searchResponse = client.search(searchRequest, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.error("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(toIndexNames(indexes));
+      }
+      throw new IndexException(
+          format(
+              "Error searching docs in index(es) '%s' with query '%s'.", toString(indexes), query));
+    } catch (IOException e) {
       LOG.error("", e);
       throw new IndexException(
           format(
@@ -392,7 +409,7 @@ public class ClientFacade implements Closeable {
     return createSearchResponse(searchResponse);
   }
 
-  private SearchRequestBuilder createSearchRequest(
+  private SearchRequest createSearchRequest(
       QueryBuilder query,
       Integer from,
       Integer size,
@@ -400,24 +417,37 @@ public class ClientFacade implements Closeable {
       List<AggregationBuilder> aggregations,
       List<Index> indexes) {
     String[] indexNames = toIndexNames(indexes);
-    SearchRequestBuilder searchRequest = client.prepareSearch(indexNames);
+    SearchRequest searchRequest = new SearchRequest(indexNames);
+    SearchSourceBuilder searchSourceBuilder =
+        createSearchSourceBuilder(query, from, size, sort, aggregations);
+    searchRequest.source(searchSourceBuilder);
+    return searchRequest;
+  }
+
+  private SearchSourceBuilder createSearchSourceBuilder(
+      QueryBuilder query,
+      Integer from,
+      Integer size,
+      Sort sort,
+      List<AggregationBuilder> aggregations) {
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     if (query != null) {
-      searchRequest.setQuery(query);
+      searchSourceBuilder.query(query);
     }
     if (from != null) {
-      searchRequest.setFrom(from);
+      searchSourceBuilder.from(from);
     }
     if (size != null) {
-      searchRequest.setSize(size);
+      searchSourceBuilder.size(size);
     }
     if (sort != null) {
       List<SortBuilder> sorts = sortContentBuilder.createSorts(sort);
-      sorts.forEach(searchRequest::addSort);
+      sorts.forEach(searchSourceBuilder::sort);
     }
     if (aggregations != null) {
-      aggregations.forEach(searchRequest::addAggregation);
+      aggregations.forEach(searchSourceBuilder::aggregation);
     }
-    return searchRequest;
+    return searchSourceBuilder;
   }
 
   private SearchHits createSearchResponse(SearchResponse searchResponse) {
@@ -451,15 +481,18 @@ public class ClientFacade implements Closeable {
       }
     }
 
-    SearchRequestBuilder searchRequest =
-        createSearchRequest(query, null, 0, null, aggregations, indexes);
+    SearchRequest searchRequest = createSearchRequest(query, null, 0, null, aggregations, indexes);
     SearchResponse searchResponse;
     try {
-      searchResponse = searchRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.error("", e);
-      throw new UnknownIndexException(toIndexNames(indexes));
+      searchResponse = client.search(searchRequest, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.error("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(toIndexNames(indexes));
+      }
+      throw new IndexException(
+          format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
+    } catch (IOException e) {
       LOG.error("", e);
       throw new IndexException(
           format("Error aggregating docs in index(es) '%s'.", toString(indexes)));
@@ -508,13 +541,11 @@ public class ClientFacade implements Closeable {
     }
 
     String indexName = searchHit.getIndex();
-    // FIXME: ClientFacade shouldn't assume that typename equals typename
-    ExplainRequestBuilder explainRequestBuilder =
-        client.prepareExplain(indexName, indexName, searchHit.getId()).setQuery(query);
+    ExplainRequest explainRequest = new ExplainRequest(indexName, searchHit.getId()).query(query);
     ExplainResponse explainResponse;
     try {
-      explainResponse = explainRequestBuilder.get();
-    } catch (ElasticsearchException e) {
+      explainResponse = client.explain(explainRequest, DEFAULT);
+    } catch (ElasticsearchException | IOException e) {
       LOG.error("", e);
       throw new IndexException(
           format(
@@ -540,21 +571,19 @@ public class ClientFacade implements Closeable {
     String indexName = index.getName();
     String documentId = document.getId();
     XContentBuilder source = document.getContent();
-    IndexRequestBuilder indexRequest =
-        client
-            .prepareIndex()
-            .setIndex(indexName)
-            .setType(indexName)
-            .setId(documentId)
-            .setSource(source);
+    IndexRequest indexRequest = new IndexRequest(indexName).id(documentId).source(source);
 
     IndexResponse indexResponse;
     try {
-      indexResponse = indexRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.error("", e);
-      throw new UnknownIndexException(index.getName());
+      indexResponse = client.index(indexRequest, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.error("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(index.getName());
+      }
+      throw new IndexException(
+          format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
+    } catch (IOException e) {
       LOG.debug("", e);
       throw new IndexException(
           format("Error indexing doc with id '%s' in index '%s'.", documentId, indexName));
@@ -586,16 +615,19 @@ public class ClientFacade implements Closeable {
 
     String indexName = index.getName();
     String documentId = document.getId();
-    DeleteRequestBuilder deleteRequest =
-        client.prepareDelete().setIndex(indexName).setType(indexName).setId(documentId);
+    DeleteRequest deleteRequest = new DeleteRequest(indexName).id(documentId);
 
     DeleteResponse deleteResponse;
     try {
-      deleteResponse = deleteRequest.get();
-    } catch (ResourceNotFoundException e) {
-      LOG.error("", e);
-      throw new UnknownIndexException(index.getName());
+      deleteResponse = client.delete(deleteRequest, DEFAULT);
     } catch (ElasticsearchException e) {
+      LOG.error("", e);
+      if (e.status().getStatus() == 404) {
+        throw new UnknownIndexException(index.getName());
+      }
+      throw new IndexException(
+          format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
+    } catch (IOException e) {
       LOG.debug("", e);
       throw new IndexException(
           format("Error deleting doc with id '%s' in index '%s'.", documentId, indexName));
@@ -614,16 +646,12 @@ public class ClientFacade implements Closeable {
 
   public void processDocumentActions(Stream<DocumentAction> documentActions) {
     LOG.trace("Processing document actions ...");
-    BulkProcessor bulkProcessor = bulkProcessorFactory.create(client);
+    BulkRequest bulkRequest = new BulkRequest();
+    documentActions.map(this::toDocWriteRequest).forEach(bulkRequest::add);
     try {
-      documentActions.forEachOrdered(
-          documentAction -> {
-            DocWriteRequest docWriteRequest = toDocWriteRequest(documentAction);
-            bulkProcessor.add(docWriteRequest);
-          });
-    } finally {
-      waitForCompletion(bulkProcessor);
-      LOG.debug("Processed document actions.");
+      client.bulk(bulkRequest, DEFAULT);
+    } catch (IOException | ElasticsearchException ex) {
+      throw new MolgenisDataException("Failed to complete bulk request within the given time");
     }
   }
 
@@ -640,31 +668,15 @@ public class ClientFacade implements Closeable {
               format("Document action is missing document source '%s'", documentAction));
         }
         docWriteRequest =
-            Requests.indexRequest(indexName)
-                .type(indexName)
-                .id(documentId)
-                .source(source)
-                .opType(INDEX);
+            Requests.indexRequest(indexName).id(documentId).source(source).opType(INDEX);
         break;
       case DELETE:
-        docWriteRequest = Requests.deleteRequest(indexName).type(indexName).id(documentId);
+        docWriteRequest = Requests.deleteRequest(indexName).id(documentId);
         break;
       default:
         throw new UnexpectedEnumException(documentAction.getOperation());
     }
     return docWriteRequest;
-  }
-
-  private void waitForCompletion(BulkProcessor bulkProcessor) {
-    try {
-      boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-      if (!isCompleted) {
-        throw new MolgenisDataException("Failed to complete bulk request within the given time");
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(e);
-    }
   }
 
   private String[] toIndexNames(List<Index> indexes) {
@@ -679,7 +691,7 @@ public class ClientFacade implements Closeable {
   public void close() {
     try {
       client.close();
-    } catch (ElasticsearchException e) {
+    } catch (ElasticsearchException | IOException e) {
       LOG.error("Error closing Elasticsearch client", e);
     }
   }

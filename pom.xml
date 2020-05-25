@@ -142,7 +142,7 @@
     <it_db_user>molgenis</it_db_user>
     <it_db_password>molgenis</it_db_password>
     <it_db_port>5432</it_db_port>
-    <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
+    <elasticsearch.hosts>localhost:9200</elasticsearch.hosts>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
@@ -677,17 +677,6 @@
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value-annotations</artifactId>
         <version>${google.auto-value.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.elasticsearch.client</groupId>
-        <artifactId>transport</artifactId>
-        <version>${elasticsearch.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>
