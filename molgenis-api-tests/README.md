@@ -1,7 +1,4 @@
 # Molgenis Import real data tests
-
-[![Build Status](https://jenkins.dev.molgenis.org/other/live-api-tests)
-
 Collection of integration tests to run against a live server. Tests use a java http client to test the molgenis API.
 
 ##### Maven properties:
