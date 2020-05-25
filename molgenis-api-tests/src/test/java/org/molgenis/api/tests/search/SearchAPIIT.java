@@ -12,13 +12,18 @@ import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFile;
 import static org.molgenis.api.tests.utils.RestTestUtils.waitForIndexJobs;
-import static org.molgenis.util.ResourceUtils.getFile;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import io.restassured.response.ValidatableResponse;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -34,15 +39,45 @@ class SearchAPIIT extends AbstractApiTests {
   private static final Logger LOG = getLogger(SearchAPIIT.class);
   private static String adminToken;
 
+  private static File createEMX() {
+    try {
+      File file = File.createTempFile("search", "csv.zip");
+      var outputstream = new ZipOutputStream(new FileOutputStream(file));
+      var files =
+          List.of(
+              "attributes.tsv",
+              "entities.tsv",
+              "packages.tsv",
+              "tags.tsv",
+              "search_disease_types.tsv",
+              "search_disease_types-cases.tsv",
+              "search_mutations.tsv",
+              "search_mutations-cases.tsv",
+              "search_servers.tsv",
+              "search_servers-cases.tsv");
+      for (String filename : files) {
+        outputstream.putNextEntry(new ZipEntry(filename));
+        IOUtils.copy(SearchAPIIT.class.getResourceAsStream(filename), outputstream);
+        outputstream.closeEntry();
+      }
+      outputstream.close();
+      return file;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   @BeforeAll
   protected static void setUpBeforeClass() {
     AbstractApiTests.setUpBeforeClass();
 
     adminToken = AbstractApiTests.getAdminToken();
 
-    String importStatus =
-        uploadEmxFile(adminToken, getFile(SearchAPIIT.class, "search-cases.xlsx"));
+    var emxFile = createEMX();
+    String importStatus = uploadEmxFile(adminToken, emxFile);
     assertEquals("FINISHED", importStatus);
+    emxFile.delete();
 
     waitForIndexJobs(adminToken);
   }

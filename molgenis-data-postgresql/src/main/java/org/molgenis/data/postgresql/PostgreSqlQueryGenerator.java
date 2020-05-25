@@ -14,6 +14,7 @@ import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
+import static org.molgenis.data.QueryUtils.isTaggedType;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
@@ -61,6 +62,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.semantic.Vocabulary;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.AttributeUtils;
 import org.molgenis.data.util.EntityTypeUtils;
@@ -903,7 +905,7 @@ class PostgreSqlQueryGenerator {
             result.append(" CAST(").append(columnName).append(" as TEXT)");
           }
 
-          result.append(" LIKE ?");
+          result.append(isTaggedType(attr, Vocabulary.CASE_SENSITIVE) ? " LIKE ?" : " ILIKE ?");
           parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + '%');
           break;
         case IN:

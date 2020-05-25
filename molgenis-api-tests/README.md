@@ -1,7 +1,4 @@
-# Molgenis API Test
-
-[![Build Status](https://molgenis50.gcc.rug.nl/jenkins/buildStatus/icon?job=Nightly%20live%20API%20Tests)](http://www.molgenis.org/jenkins/job/Nightly%20live%20API%20Tests/)
-
+# Molgenis Import real data tests
 Collection of integration tests to run against a live server. Tests use a java http client to test the molgenis API.
 
 ##### Maven properties:
@@ -12,7 +9,7 @@ Collection of integration tests to run against a live server. Tests use a java h
 
 ##### Running on local machine:
 
-`mvn test -Dtest=[RestControllerIT,...comma-separated-list-of-test-classes] -DREST_TEST_ADMIN_NAME="[admin_name]" -DREST_TEST_ADMIN_PW="[admin_pw]"` 
+`mvn test -Dtest=[RestControllerIT,...comma-separated-list-of-test-classes] -DREST_TEST_HOST="http://localhost:8080" -DREST_TEST_ADMIN_NAME="[admin_name]" -DREST_TEST_ADMIN_PW="[admin_pw]"` 
 
 
 ### Public data upload test
@@ -43,10 +40,10 @@ All of the above mentioned maven properties + the following environment variable
 
 For Mac and Linux:
 
-- ```molgenis-api-tests/env_export.bash``` 
+- ```molgenis-api-tests/env_import_public_data_tests.bash``` 
 
 For Windows execute:
-- ```molgenis-api-tests/env_api_tests.bat``` 
+- ```molgenis-api-tests/env_import_public_data_tests.bat``` 
 
 >note: make sure you have MAVEN on your PATH for Linux, Mac and Windows
 
@@ -60,11 +57,12 @@ To run the tests in IntelliJ you have to do the following steps:
 ![alt text](images/edit-runtime-configuration.png "Edit runtime configuration")
 3. Open "Environment variables"
 ![alt text](images/runtime-configuration.png "Open 'Environment variables'")
-4. Copy all the variables from this file ```molgenis-api-tests/env_export.bash```. 
+4. Copy all the variables from this file ```molgenis-api-tests/env_import_public_data_tests.bash```. 
 5. Use the "clipboard"-button to paste the environment into the runtime configuration
 ![alt text](images/empty-env-vars.png "Empty clipboard")
 6. Click on "Ok" to save the configuration
 ![alt text](images/populated-env-vars.png "Populated clipboard")
+7. Add to the following MAVEN properties to the "VM options": `-DREST_TEST_HOST="http://localhost:8080" -DREST_TEST_ADMIN_NAME="[admin_name]" -DREST_TEST_ADMIN_PW="[admin_pw]"`
 
 ##### Running on a CI-server
 
