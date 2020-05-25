@@ -215,6 +215,7 @@
             <properties>
               <cargo.start.jvmargs>-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
               </cargo.start.jvmargs>
+              <cargo.tomcat.uriencoding>UTF-8</cargo.tomcat.uriencoding>
               <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
               <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
               <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>

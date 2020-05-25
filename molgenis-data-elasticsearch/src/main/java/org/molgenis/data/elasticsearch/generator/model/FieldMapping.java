@@ -12,6 +12,12 @@ public abstract class FieldMapping {
 
   public abstract MappingType getType();
 
+  /**
+   * For FieldMappings of type {@link MappingType#KEYWORD}, indicates if the keyword is case
+   * sensitive.
+   */
+  public abstract boolean isCaseSensitive();
+
   @Nullable
   @CheckForNull
   public abstract List<FieldMapping> getNestedFieldMappings();
@@ -26,7 +32,7 @@ public abstract class FieldMapping {
   }
 
   public static Builder builder() {
-    return new AutoValue_FieldMapping.Builder();
+    return new AutoValue_FieldMapping.Builder().setCaseSensitive(false);
   }
 
   @AutoValue.Builder
@@ -34,6 +40,8 @@ public abstract class FieldMapping {
     public abstract Builder setName(String newName);
 
     public abstract Builder setType(MappingType newType);
+
+    public abstract Builder setCaseSensitive(boolean caseSensitive);
 
     public abstract Builder setNestedFieldMappings(List<FieldMapping> newNestedFieldMappings);
 
