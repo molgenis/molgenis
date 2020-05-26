@@ -8,7 +8,7 @@
     var NO_MATCH_INFO = 'N/A';
     var itermsPerPage = 5;
 
-    molgenis.OntologyService = function OntologySerivce(container, request) {
+    molgenis.OntologyService = function OntologyService(container, request) {
         if (container) {
             result_container = container;
         }
@@ -36,6 +36,19 @@
         items.push('</div></div>');
         result_container.empty().append(items.join(''));
 
+        function getMatchResultCount(callback) {
+            $.ajax({
+                type: 'GET',
+                url: molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.sortaJobExecutionId,
+                contentType: 'application/json',
+                success: function (data) {
+                    if (callback !== null && typeof callback === 'function') {
+                        callback(data)
+                    }
+                }
+            });
+        }
+
         getMatchResultCount(function (data) {
             var page = {};
             var totalMatched = data.numberOfMatched;
@@ -62,20 +75,15 @@
             ontologyServiceRequest.matched = false;
             molgenis.OntologyService.prototype.renderPage();
         });
-
-        function getMatchResultCount(callback) {
-            $.ajax({
-                type: 'GET',
-                url: molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.sortaJobExecutionId,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (callback !== null && typeof callback === 'function') {
-                        callback(data)
-                    }
-                }
-            });
-        }
     };
+
+
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
 
     function updatePageFunction(page) {
 
@@ -199,12 +207,12 @@
                 });
             });
         } else {
-            var button = $('<button class="btn btn-default" type="button">Match</button>').click(function () {
+            var matchButton = $('<button class="btn btn-default" type="button">Match</button>').click(function () {
                 matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
                     createTableForCandidateMappings(responseData.inputTerm, data, row, page);
                 })
             });
-            $('<td />').append(button).appendTo(row);
+            $('<td />').append(matchButton).appendTo(row);
         }
         return row;
     }
@@ -236,14 +244,21 @@
         }).click(function () {
             getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
                 if (data.items.length > 0) {
+                    var storedTerms = {};
+
+                    $.each(data.items, function( index, item ) {
+                        storedTerms[item.matchTerm] = item;
+                    });
+
                     var mappedEntity = data.items[0];
+
                     var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
+
                     var updatedMappedEntity = {};
                     $.map(mappedEntity, function (val, key) {
                         updatedMappedEntity[key] = val;
                         if (key === 'validated') updatedMappedEntity[key] = true;
                         if (key === 'inputTerm') {
-                            console.log('inputTerm', val)
                             updatedMappedEntity[key] = val.Identifier;
                         }
                         if (key === 'score') updatedMappedEntity[key] = 0;
@@ -255,7 +270,7 @@
         });
 
         // Add Match button for users to use selected terms
-        var matchButton = $('<button type="button" class="btn btn-primary">Match selected</button>').css({
+        var matchConfirmButton = $('<button type="button" class="btn btn-primary">Match selected</button>').css({
             'margin-bottom': '10px',
             'margin-right': '10px',
             'float': 'right'
@@ -271,11 +286,8 @@
                 selectedTerms[ontologyTerm.ontologyTermIRI] = ontologyTerm
             })
 
-            var getMappingEntityDeferred = $.Deferred();
-            getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(res){ getMappingEntityDeferred.resolve(res); });
-
-            getMappingEntityDeferred.then(function (data) {
-
+            getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
+                var promises = []
                 var inputTermId
 
                 // Create map of stored terms
@@ -291,23 +303,15 @@
 
                 // Create toUpdate list (Each stored-term item that is also in the selectedTerms map)
                 var toUpdate = [];
+                var toDelete = [];
+
                 $.each(storedTerms, function (storedKey, storedVal) {
                     if(selectedTerms[storedKey] !== undefined) {
                         toUpdate.push(storedVal)
-                    }
-                });
-                console.log('to update: ')
-                console.log(toUpdate)
-
-                // Create toDelete list (Each stored-term item that is not in the selectedTerms map)
-                var toDelete = [];
-                $.each(storedTerms, function (storedKey, storedVal) {
-                    if(selectedTerms[storedKey] === undefined) {
+                    } else {
                         toDelete.push(storedVal)
                     }
                 });
-                console.log('to delete: ')
-                console.log(toDelete)
 
                 // Create toCreate list (Each selected term item that is not in the storedTerms map)
                 var toCreate = [];
@@ -316,12 +320,11 @@
                         toCreate.push(selectedVal)
                     }
                 });
-                console.log('to update: ')
-                console.log(toCreate)
 
                 // Do Delete's
                 $.each(toDelete, function (toDeleteKey, toDeleteVal) {
                     var deleteHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + toDeleteVal.identifier
+
                     restApi.remove(deleteHref, function () {
                         console.log('delete is done for: (id: ' + toDeleteVal.identifier + ', term: ' + toDeleteKey + ')')
                     })
@@ -339,53 +342,37 @@
                         else if (key === 'score') updatedMappedEntity.score = toUpdateVal.Score;
                         else updatedMappedEntity[key] = val;
                     });
-                    restApi.update(updateHref, updatedMappedEntity, function () {
+                    var result = restApi.update(updateHref, updatedMappedEntity, function () {
                         console.log('update is done for: (id: ' + toUpdateVal.identifier + ', term: ' + toUpdateKey + ')')
                     }, false)
+                    promises.push(result);
                 });
 
                 // Do Creates's
                 $.each(toCreate, function (toCreateKey, toCreateVal) {
                     var createMappedEntity = {
-                        identifier: inputTermId + '-' + toCreateVal.ontologyTermIRI,
+                        identifier: uuidv4(),
                         validated: true,
                         inputTerm: inputTermId,
                         matchTerm: toCreateVal.ontologyTermIRI,
                         score: toCreateVal.Score,
                     };
 
-                    $.ajax({
+                    var result = $.ajax({
                         type: 'POST',
                         url: '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId,
-                        async: false,
+                        async: true,
                         data: JSON.stringify(createMappedEntity),
-                        contentType: 'application/json',
-                        success: function (data) {
-                            console.log('create is done for: (id: ' + toCreateVal.identifier + ', term: ' + toCreateKey + ')')
-                        },
-                        error: function (data) {
-                            console.log('error for create: (id: ' + toCreateVal.identifier + ', term: ' + toCreateKey + ')')
-                        }
+                        contentType: 'application/json'
                     });
 
+                    promises.push(result);
                 });
 
 
-                // if (data.items.length > 0) {
-                //     var mappedEntity = data.items[0];
-                //     var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
-                //     var updatedMappedEntity = {};
-                //
-                //     $.map(mappedEntity, function (val, key) {
-                //         if (key === 'validated') updatedMappedEntity[key] = true;
-                //         else if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
-                //         else if (key === 'matchTerm') updatedMappedEntity.matchTerm = checkedRows[0].data('ontologyTerm').ontologyTermIRI;
-                //         else if (key === 'score') updatedMappedEntity.score = checkedRows[0].data('ontologyTerm').Score;
-                //         else updatedMappedEntity[key] = val;
-                //     });
-                //
-                //     restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
-                // }
+                $.when.apply($, promises).done(function(data) {
+                    molgenis.OntologyService.prototype.renderPage();
+                });
             });
 
         });
@@ -417,25 +404,8 @@
                 row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
                 row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
                 // row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
-                row.append('<td class="checkbox" style="text-align: center;"><input type="checkbox"></td>');
+                row.append('<td class="checkbox" style="text-align: center;"><input id="cb-' + ontologyTerm.id + '" type="checkbox"></td>');
                 row.data('ontologyTerm', ontologyTerm);
-                // row.find('button:eq(0)').click(function () {
-                //     getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
-                //         if (data.items.length > 0) {
-                //             var mappedEntity = data.items[0];
-                //             var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
-                //             var updatedMappedEntity = {};
-                //             $.map(mappedEntity, function (val, key) {
-                //                 if (key === 'validated') updatedMappedEntity[key] = true;
-                //                 else if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
-                //                 else if (key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
-                //                 else if (key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').Score;
-                //                 else updatedMappedEntity[key] = val;
-                //             });
-                //             restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
-                //         }
-                //     });
-                // });
             });
         } else {
             hintInformation = $('<center><p style="font-size:15px;">There are no candidate mappings for this input term!</p></center>');
@@ -445,8 +415,29 @@
             .append(hintInformation)
             .append(backButton)
             .append(unknownButton)
-            .append(matchButton)
+            .append(matchConfirmButton)
             .append(table).appendTo(container);
+
+
+        function findOntology(matchTerm) {
+            var match = null;
+            $.each(data.ontologyTerms, function (index, ontologyTerm) {
+                if (ontologyTerm.ontologyTermIRI === matchTerm) {
+                    match = ontologyTerm;
+                }
+            })
+
+            return match;
+        }
+
+        // Set checkbox state based on currently selected items.
+        getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(res){
+            $.each(res.items, function (index, outMapping) {
+                var ontology = findOntology(outMapping.matchTerm)
+                $('#cb-' + ontology.id).prop('checked', true);
+            })
+        });
+
     }
 
     function createCallBackFunction() {
