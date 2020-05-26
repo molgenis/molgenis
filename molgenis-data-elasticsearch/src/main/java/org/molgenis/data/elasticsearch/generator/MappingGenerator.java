@@ -53,6 +53,9 @@ class MappingGenerator {
     if (mappingType == MappingType.KEYWORD && isTaggedType(attribute, CASE_SENSITIVE)) {
       result.setCaseSensitive(true);
     }
+    if ("ontologyTermSynonym".equals(attribute.getName())) {
+      result.setNeedsNgram(true);
+    }
     return result.build();
   }
 

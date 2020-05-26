@@ -93,6 +93,7 @@ class SettingsContentBuilder {
   private void createAnalyzerSettings(XContentBuilder contentBuilder) throws IOException {
     contentBuilder.startObject("analyzer");
     createDefaultAnalyzerSettings(contentBuilder);
+    createNGramAnalyzerSettings(contentBuilder);
     contentBuilder.endObject();
   }
 
@@ -102,6 +103,14 @@ class SettingsContentBuilder {
     contentBuilder.array(FILTER, "lowercase", "asciifolding", DEFAULT_STEMMER);
     contentBuilder.field("tokenizer", "standard");
     contentBuilder.field("char_filter", "html_strip");
+    contentBuilder.endObject();
+  }
+
+  private void createNGramAnalyzerSettings(XContentBuilder contentBuilder) throws IOException {
+    contentBuilder.startObject(FieldConstants.NGRAM_ANALYZER);
+    contentBuilder.field("type", "custom");
+    contentBuilder.array(FILTER, "lowercase", "asciifolding");
+    contentBuilder.field("tokenizer", "ngram");
     contentBuilder.endObject();
   }
 
