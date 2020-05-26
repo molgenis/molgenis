@@ -18,6 +18,9 @@ public abstract class FieldMapping {
    */
   public abstract boolean isCaseSensitive();
 
+  /** Do want to index as NGRAM as well? */
+  public abstract boolean isNeedsNgram();
+
   @Nullable
   @CheckForNull
   public abstract List<FieldMapping> getNestedFieldMappings();
@@ -32,7 +35,7 @@ public abstract class FieldMapping {
   }
 
   public static Builder builder() {
-    return new AutoValue_FieldMapping.Builder().setCaseSensitive(false);
+    return new AutoValue_FieldMapping.Builder().setCaseSensitive(false).setNeedsNgram(false);
   }
 
   @AutoValue.Builder
@@ -42,6 +45,8 @@ public abstract class FieldMapping {
     public abstract Builder setType(MappingType newType);
 
     public abstract Builder setCaseSensitive(boolean caseSensitive);
+
+    public abstract Builder setNeedsNgram(boolean needsNgram);
 
     public abstract Builder setNestedFieldMappings(List<FieldMapping> newNestedFieldMappings);
 

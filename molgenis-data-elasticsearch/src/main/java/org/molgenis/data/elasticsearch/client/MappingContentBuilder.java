@@ -1,7 +1,9 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
+import static org.molgenis.data.elasticsearch.FieldConstants.NGRAM_ANALYZER;
 import static org.molgenis.data.elasticsearch.client.SettingsContentBuilder.CI_NORMALIZER;
 
 import java.io.IOException;
@@ -94,7 +96,7 @@ class MappingContentBuilder {
         createFieldMappingNested(fieldMapping.getNestedFieldMappings(), contentBuilder);
         break;
       case TEXT:
-        createFieldMappingText(contentBuilder);
+        createFieldMappingText(contentBuilder, fieldMapping.isNeedsNgram());
         break;
       case KEYWORD:
         createFieldMappingKeyword(fieldMapping, contentBuilder);
@@ -151,7 +153,8 @@ class MappingContentBuilder {
     fieldsObject.endObject();
   }
 
-  private void createFieldMappingText(XContentBuilder contentBuilder) throws IOException {
+  private void createFieldMappingText(XContentBuilder contentBuilder, boolean needsNgram)
+      throws IOException {
     // enable/disable norms based on given value
     contentBuilder.field(TYPE, "text");
     contentBuilder.field("norms", true);
@@ -165,6 +168,14 @@ class MappingContentBuilder {
             .field(INDEX, true)
             .field("ignore_above", IGNORE_ABOVE_VALUE)
             .endObject();
+    if (needsNgram) {
+      contentBuilder
+          .startObject(FIELD_NGRAM)
+          .field("analyzer", NGRAM_ANALYZER)
+          .field(TYPE, "text")
+          .field(INDEX, true)
+          .endObject();
+    }
     fieldsObject.endObject();
   }
 }
