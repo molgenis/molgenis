@@ -17,6 +17,11 @@
       <artifactId>molgenis-data</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-data-elasticsearch</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- third party dependencies -->
     <dependency>
       <groupId>org.springframework</groupId>
