@@ -8,6 +8,17 @@
     var NO_MATCH_INFO = 'N/A';
     var itermsPerPage = 5;
 
+    function findOntology(ontologyTerms, matchTerm) {
+        var match = null;
+        $.each(ontologyTerms, function (index, ontologyTerm) {
+            if (ontologyTerm.ontologyTermIRI === matchTerm) {
+                match = ontologyTerm;
+            }
+        })
+
+        return match;
+    }
+
     molgenis.OntologyService = function OntologyService(container, request) {
         if (container) {
             result_container = container;
@@ -180,6 +191,9 @@
     };
 
     function createRowForMatchedTerm(responseData, matched, page) {
+        var inputRowId = responseData.inputTerm.Identifier;
+        var outputRowId = responseData.matchedTerm.identifier;
+
         var row = $('<tr />');
         row.append(gatherInputInfoHelper(responseData.inputTerm));
         row.append(gatherOntologyInfoHelper(responseData.inputTerm, responseData.ontologyTerm));
@@ -188,7 +202,10 @@
             $('<td />').append('<span class="glyphicon ' + (responseData.matchedTerm.validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
             $('<td />').append(responseData.matchedTerm.validated ? '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash"</span></button>' : '').appendTo(row);
             row.find('button:eq(0)').click(function () {
-                matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
+
+
+                matchEntity(inputRowId, ontologyServiceRequest.sortaJobExecutionId, function (data) {
+
                     var updatedMappedEntity = {};
                     $.map(responseData.matchedTerm, function (val, key) {
                         updatedMappedEntity[key] = val;
@@ -203,7 +220,22 @@
                         updatedMappedEntity['score'] = 0;
                         updatedMappedEntity['matchTerm'] = null;
                     }
-                    restApi.update('/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + responseData.matchedTerm.identifier, updatedMappedEntity, createCallBackFunction(), true);
+
+                    restApi.update('/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRowId, updatedMappedEntity, createCallBackFunction(), true);
+
+
+                    getMappingEntity(inputRowId, ontologyServiceRequest.sortaJobExecutionId, function (data) {
+                        var outputRows = data.items
+
+                        $.each(outputRows, function (index, outputRow) {
+                            if (outputRow.identifier !== outputRowId) {
+                                var deleteHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRow.identifier
+                                restApi.remove(deleteHref, function () {
+                                    console.log('delete is done for: (id: ' + toDeleteVal.identifier + ', term: ' + toDeleteKey + ')')
+                                })
+                            }
+                        })
+                    });
                 });
             });
         } else {
@@ -419,21 +451,12 @@
             .append(table).appendTo(container);
 
 
-        function findOntology(matchTerm) {
-            var match = null;
-            $.each(data.ontologyTerms, function (index, ontologyTerm) {
-                if (ontologyTerm.ontologyTermIRI === matchTerm) {
-                    match = ontologyTerm;
-                }
-            })
 
-            return match;
-        }
 
         // Set checkbox state based on currently selected items.
-        getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(res){
+        getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(res) {
             $.each(res.items, function (index, outMapping) {
-                var ontology = findOntology(outMapping.matchTerm)
+                var ontology = findOntology(data.ontologyTerms, outMapping.matchTerm)
                 $('#cb-' + ontology.id).prop('checked', true);
             })
         });
