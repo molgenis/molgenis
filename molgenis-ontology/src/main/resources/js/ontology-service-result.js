@@ -230,6 +230,7 @@
 
             if (index === 0) {
                 var $nameTd = gatherInputInfoHelper(inputTerm);
+                $nameTd.css({'vertical-align': 'top'});
                 $nameTd.attr('rowspan', groupedEntity.length);
                 $nameTd.appendTo(row);
             }
@@ -454,7 +455,6 @@
                     molgenis.OntologyService.prototype.renderPage();
                 });
             });
-
         });
 
         var $hoverover = $('<div>Adjusted score <span class="glyphicon glyphicon-info-sign"></span></div>').css({'cursor': 'pointer'}).popover({
@@ -486,7 +486,15 @@
             $.each(data.ontologyTerms, function (index, ontologyTerm) {
                 if (index >= 20) return;
                 var row = $('<tr class="term-row"/>').appendTo($tbody);
-                row.append(index == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
+
+                if (index == 0) {
+                    var $nameTd = $('<td></td>');
+                    $nameTd.append(gatherInputInfoHelper(inputEntity));
+                    $nameTd.attr('rowspan', data.ontologyTerms.length);
+                    $nameTd.css({'vertical-align': 'top'});
+                    row.append($nameTd);
+                }
+
                 row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
                 row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
                 row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
