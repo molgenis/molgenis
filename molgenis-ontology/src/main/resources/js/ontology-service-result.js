@@ -3,7 +3,7 @@
 
     var restApi = new molgenis.RestClient();
     var ontologyServiceRequest = null;
-    var result_container = null;
+    var $resultContainer = null;
     var reserved_identifier_field = 'identifier';
     var NO_MATCH_INFO = 'N/A';
     var itermsPerPage = 5;
@@ -21,7 +21,7 @@
 
     molgenis.OntologyService = function OntologyService(container, request) {
         if (container) {
-            result_container = container;
+            $resultContainer = container;
         }
         if (request) {
             ontologyServiceRequest = request;
@@ -29,12 +29,6 @@
         }
     };
 
-    /**
-     *
-     * @param {*} sortaJobExecutionId
-     * @param {*} inputRowId
-     * @param {*} usedOutputRowId
-     */
     function deleteUnusedRows (sortaJobExecutionId, inputRowId, usedOutputRowId) {
         var defer = $.Deferred();
         getMappingEntity(inputRowId, sortaJobExecutionId, function (data) {
@@ -51,21 +45,23 @@
 
     molgenis.OntologyService.prototype.renderPage = function () {
 
+        toggleDetailView(false);
+
         var items = [];
         items.push('<div class="row"><div class="col-md-offset-3 col-md-6 well">');
         items.push('<div class="row">');
-        items.push('<div class="col-md-8">The total number of matched items is <strong><span id="matched-item-count"></span></strong></div>');
+        items.push('<div class="col-md-8">Matched input terms: <strong><span id="matched-item-count"></span></strong></div>');
         items.push('<div class="col-md-4"><button id="matched-result-button" type="button" class="btn btn-primary pull-right">Show</button></div>');
         items.push('</div><br>');
         items.push('<div class="row">');
-        items.push('<div class="col-md-8">The total number of unmatched items is <strong><span id="unmatched-item-count"></span></strong></div>');
+        items.push('<div class="col-md-8">Unmatched input terms: <strong><span id="unmatched-item-count"></span></strong></div>');
         items.push('<div class="col-md-4"><button id="unmatched-result-button" type="button" class="btn btn-info pull-right">Show</button></div>');
         items.push('</div><br>');
         items.push('<div class="row">');
         items.push('<div class="col-md-12"><button id="sorta-download-button" class="btn btn-primary" type="button">Download</button></div>');
         items.push('</div>');
         items.push('</div></div>');
-        result_container.empty().append(items.join(''));
+        $resultContainer.empty().append(items.join(''));
 
         function getMatchResultCount(callback) {
             $.ajax({
@@ -117,9 +113,7 @@
     }
 
     function updatePageFunction(page) {
-
         $.extend(ontologyServiceRequest.entityPager, page);
-
         $.ajax({
             type: 'POST',
             url: molgenis.getContextUrl() + '/match/retrieve',
@@ -127,26 +121,25 @@
             data: JSON.stringify(ontologyServiceRequest),
             contentType: 'application/json',
             success: function (data) {
-                var table_container = $('<div />').addClass('col-md-12');
+                var $tableContainer = $('<div />').addClass('col-md-12');
                 if (data.items.length > 0) {
-                    var pagerDiv = $('<div />').addClass('row').appendTo(table_container);
                     var searchItems = [];
-                    searchItems.push('<div class="col-md-3">');
+                    searchItems.push('<div class="col-md-3 filter-box">');
                     searchItems.push('<div class="input-group"><span class="input-group-addon">Filter</span>');
                     searchItems.push('<input type="text" class="form-control" value="' + (ontologyServiceRequest.filterQuery ? ontologyServiceRequest.filterQuery : '') + '" />');
                     searchItems.push('<span class="input-group-btn"><button class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button></span>')
                     searchItems.push('</div></div>')
 
-                    var matchResultHeaderDiv = $('<div />').addClass('row').css({'margin-bottom': '10px'}).appendTo(table_container);
+                    var matchResultHeaderDiv = $('<div />').addClass('row').css({'margin-bottom': '10px'}).appendTo($tableContainer);
+                    matchResultHeaderDiv.append('<div class="col-md-9 table-title">' + (ontologyServiceRequest.matched ? 'Matched Input Terms' : 'Unmatched Input Terms') + '</div>');
                     matchResultHeaderDiv.append(searchItems.join(''));
-                    matchResultHeaderDiv.append('<div class="col-md-6"><center><strong><p style="font-size:20px;">' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</p></strong></center></div>');
 
                     var tableItems = [];
                     tableItems.push('<div class="col-md-12"><table class="table">');
-                    tableItems.push('<tr><th style="width:38%;">Input term</th><th style="width:38%;">' + (ontologyServiceRequest.matched ? 'Matched' : 'Unmatched') + ' Ontology Terms</th><th style="width:10%;">Score</th><th style="width:10%;">' + (ontologyServiceRequest.matched ? 'Manual Match' : '') + '</th><th>Options</th>' + '</tr>');
+                    tableItems.push('<tr><th style="width:38%;">Input Term</th><th style="width:38%;">' + (ontologyServiceRequest.matched ? 'Matched' : 'Unmatched') + ' Ontology Terms</th><th style="width:10%;">Score</th><th style="width:10%;">' + (ontologyServiceRequest.matched ? 'Manual Match' : '') + '</th><th>Options</th>' + '</tr>');
                     tableItems.push('</table></div>');
-                    $('<div />').addClass('row').append(tableItems.join('')).appendTo(table_container);
-                    var table = $(table_container).find('table:eq(0)')
+                    $('<div />').addClass('row').append(tableItems.join('')).appendTo($tableContainer);
+                    var table = $($tableContainer).find('table:eq(0)')
 
                     var groupedEntities = {}
                     $.each(data.items, function (index, entity) {
@@ -178,12 +171,15 @@
                         }
                     });
 
-                    $(pagerDiv).pager({
+                    var $pagerDiv = $('<div />').addClass('row').appendTo($tableContainer);
+                    $pagerDiv.pager({
                         'page': Math.floor(data.start / data.num) + (data.start % data.num == 0 ? 0 : 1) + 1,
                         'nrItems': data.total,
                         'nrItemsPerPage': data.num,
                         'onPageChange': updatePageFunction
                     });
+
+
                 } else {
                     var messageItems = [];
                     messageItems.push('<div class="col-md-offset-3 col-md-6"><p>There are no results!</p>');
@@ -192,16 +188,16 @@
                         messageItems.push('<span class="glyphicon glyphicon-remove"></span>');
                     }
                     messageItems.push('<br><br></div>');
-                    table_container.append(messageItems.join(''));
-                    $(table_container).find('span.glyphicon-remove:eq(0)').click(function () {
+                    $tableContainer.append(messageItems.join(''));
+                    $tableContainer.find('span.glyphicon-remove:eq(0)').click(function () {
                         ontologyServiceRequest.filterQuery = '';
                         updatePageFunction(page);
                     });
                 }
                 //Remove the existing results
-                result_container.children('div.row:gt(0)').empty();
+                $resultContainer.children('div.row:gt(0)').empty();
                 //Add the new results to the page
-                $('<div />').addClass('row').append(table_container).appendTo(result_container);
+                $('<div />').addClass('row').append($tableContainer).appendTo($resultContainer);
             }
         });
     };
@@ -219,21 +215,14 @@
         });
     };
 
-    /**
-     *
-     * @param {Array} groupedEntity - An Array of entities, grouped by input ID.
-     * @param {*} matched
-     * @param {*} page
-     */
     function createRowForMatchedTerm(groupedEntity, matched, page) {
+        var rows = [];
+
         var inputTerm = groupedEntity[0].inputTerm
         var matchedTerm = groupedEntity[0].matchedTerm
 
         var inputRowId = groupedEntity[0].inputTerm.Identifier;
         var firstOutputRowId = groupedEntity[0].matchedTerm.identifier;
-
-
-        var rows = [];
 
         $.each(groupedEntity, function(index, entity) {
             var row = $('<tr />');
@@ -298,27 +287,42 @@
         return rows;
     }
 
+    function toggleDetailView(enabled) {
+        if (enabled) {
+            $('.filter-box').hide();
+            $('.table-title').hide();
+            $('.pagination').hide();
+        } else {
+            $('.filter-box').show();
+            $('.table-title').show();
+            $('.pagination').show();
+        }
+    }
+
     function createTableForCandidateMappings(inputEntity, data, row, page) {
+        toggleDetailView(true);
+
         if (data.message) {
             console.log('Error fetching candidate mappings', data.message);
             throw data.message;
         }
-        var container = $('<div class="row"></div>').css({'margin-bottom': '20px'});
+        var $container = $('<div class="row"></div>').css({'margin-bottom': '20px'});
         //Hide existing table
         row.parents('table:eq(0)').hide();
         //Add table containing candidate matches to the view
-        row.parents('div:eq(0)').append(container);
+        row.parents('div:eq(0)').append($container);
 
-        //Add a backButton for users to go back to previous summary table
-        var backButton = $('<button type="button" class="btn btn-warning">Cancel</button>').css({
+        //Add a cancelButton for users to go back to previous summary table.
+        var $cancelButton = $('<button type="button" class="btn btn-default">Cancel</button>').css({
             'margin-bottom': '10px',
             'float': 'right'
         }).click(function () {
-            container.remove();
+            $container.remove();
             row.parents('table:eq(0)').show();
+            toggleDetailView(false);
         });
         //Add a unknownButton for users to choose 'Unknown' for the input term
-        var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').css({
+        var $unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').css({
             'margin-bottom': '10px',
             'margin-right': '10px',
             'float': 'right'
@@ -349,7 +353,7 @@
         });
 
         // Add Match button for users to use selected terms
-        var matchConfirmButton = $('<button type="button" class="btn btn-primary">Match selected</button>').css({
+        var $matchConfirmButton = $('<button type="button" class="btn btn-primary btn-match-selected">Match selected</button>').css({
             'margin-bottom': '10px',
             'margin-right': '10px',
             'float': 'right'
@@ -369,7 +373,6 @@
                 var promises = []
                 var inputTermId
 
-                // Create map of stored terms
                 if (data.items.length > 0) {
                     inputTermId = data.items[0].inputTerm.Identifier
                     $.each(data.items, function( index, item ) {
@@ -380,7 +383,6 @@
                     return
                 }
 
-                // Create toUpdate list (Each stored-term item that is also in the selectedTerms map)
                 var toUpdate = [];
                 var toDelete = [];
 
@@ -392,7 +394,6 @@
                     }
                 });
 
-                // Create toCreate list (Each selected term item that is not in the storedTerms map)
                 var toCreate = [];
                 $.each(selectedTerms, function (selectedKey, selectedVal) {
                     if(storedTerms[selectedKey] === undefined) {
@@ -400,7 +401,7 @@
                     }
                 });
 
-                // Do Delete's
+                // Do Deletes
                 $.each(toDelete, function (toDeleteKey, toDeleteVal) {
                     var deleteHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + toDeleteVal.identifier
 
@@ -409,7 +410,7 @@
                     })
                 });
 
-                // Do Updates's
+                // Do Updates
                 $.each(toUpdate, function (toUpdateKey, toUpdateVal) {
                     var updateHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + toUpdateVal.identifier
                     var updatedMappedEntity = {};
@@ -427,7 +428,7 @@
                     promises.push(result);
                 });
 
-                // Do Creates's
+                // Do Creates
                 $.each(toCreate, function (toCreateKey, toCreateVal) {
                     var createMappedEntity = {
                         identifier: uuidv4(),
@@ -456,7 +457,7 @@
 
         });
 
-        var hoverover = $('<div>Adjusted score ?</div>').css({'cursor': 'pointer'}).popover({
+        var $hoverover = $('<div>Adjusted score <span class="glyphicon glyphicon-info-sign"></span></div>').css({'cursor': 'pointer'}).popover({
             'title': 'Explanation',
             'content': '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
             'placement': 'auto',
@@ -464,38 +465,45 @@
             'html': true
         });
 
-        var table = $('<table class="table"></table>');
-        var header = $('<tr />').appendTo(table);
-        $('<th />').append('Input term').css({'width': '30%'}).appendTo(header);
-        $('<th />').append('Candidate mapping').css({'width': '40%'}).appendTo(header);
-        $('<th />').append('Score').css({'width': '12%'}).appendTo(header);
-        $('<th />').append(hoverover).css({'width': '12%'}).appendTo(header);
-        $('<th />').append('Select').appendTo(header);
+        var $table = $('<table class="table"></table>');
 
-        var hintInformation;
+        $table.on('click', 'input[type=checkbox]', function() {
+            var checkedRows = $('tr.term-row:has(input[type="checkbox"]:checked)').length;
+            $('.btn-match-selected').attr('disabled', checkedRows === 0);
+        });
+
+        var $tbody = $('<tbody></tbody>').appendTo($table);
+        var $header = $('<tr />').appendTo($tbody);
+        $('<th />').append('Input Term').css({'width': '30%'}).appendTo($header);
+        $('<th />').append('Candidate Ontology Term').css({'width': '40%'}).appendTo($header);
+        $('<th />').append('Score').css({'width': '12%'}).appendTo($header);
+        $('<th />').append($hoverover).css({'width': '12%'}).appendTo($header);
+        $('<th />').append('').appendTo($header);
+
+        var $hintInformation;
         if (data.ontologyTerms && data.ontologyTerms.length > 0) {
-            hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select all relevant terms by clicking marking the checkbox</p></center>');
+            $hintInformation = $('<span class="glyphicon glyphicon-info-sign"></span> <em class="hint-info"> The candidate ontology terms are sorted based on similarity score; please select all relevant terms using the checkboxes.</em>');
             $.each(data.ontologyTerms, function (index, ontologyTerm) {
                 if (index >= 20) return;
-                var row = $('<tr class="term-row"/>').appendTo(table);
+                var row = $('<tr class="term-row"/>').appendTo($tbody);
                 row.append(index == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
                 row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
                 row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
                 row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
-                row.append('<td class="checkbox" style="text-align: center;"><input id="cb-' + ontologyTerm.id + '" type="checkbox"></td>');
+                row.append('<td style="text-align: center;"><input id="cb-' + ontologyTerm.id + '" type="checkbox"></td>');
                 row.data('ontologyTerm', ontologyTerm);
             });
         } else {
-            hintInformation = $('<center><p style="font-size:15px;">There are no candidate mappings for this input term!</p></center>');
-            $('<tr />').append(gatherInputInfoHelper(inputEntity)).append('<td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td>').appendTo(table);
+            $hintInformation = $('<center><p style="font-size:15px;">There are no candidate mappings for this input term!</p></center>');
+            $('<tr />').append(gatherInputInfoHelper(inputEntity)).append('<td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td><td>' + NO_MATCH_INFO + '</td>').appendTo($table);
         }
         $('<div class="col-md-12"></div>')
-            .append(hintInformation)
-            .append(backButton)
-            .append(unknownButton)
-            .append(matchConfirmButton)
-            .append(table).appendTo(container);
-
+        .append($cancelButton)
+        .append($unknownButton)
+        .append($matchConfirmButton)
+        .append($table)
+        .append($hintInformation)
+        .appendTo($container);
 
         // Set checkbox state based on currently selected items.
         getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(res) {
@@ -550,14 +558,14 @@
         var inputTermTd = $('<td />');
         if (inputTerm) {
             $.map(inputTerm ? inputTerm : {}, function (val, key) {
-                if (key.toLowerCase() !== reserved_identifier_field.toLowerCase()) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
+                if (key.toLowerCase() !== reserved_identifier_field.toLowerCase()) inputTermTd.append('<div>' + key + ': ' + val + '</div>');
             });
         }
         return inputTermTd;
     }
 
     function gatherOntologyInfoHelper(inputEntity, ontologyTerm) {
-        var ontologyTermContainer = $('<td />');
+        var $ontologyTermContainer = $('<td />');
         if (inputEntity && ontologyTerm) {
             var synonymDiv = $('<div>Synonym : </div>');
             var synonyms = getOntologyTermSynonyms(ontologyTerm);
@@ -575,9 +583,9 @@
             }
             //check if the ontologyTermIRI is a valid link
             if (ontologyTerm.ontologyTermIRI.startsWith('http')) {
-                ontologyTermContainer.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
+                $ontologyTermContainer.append('<div><a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
             } else {
-                ontologyTermContainer.append('<div>Name : ' + ontologyTerm.ontologyTermName + '</div>').append(synonymDiv);
+                $ontologyTermContainer.append('<div>' + ontologyTerm.ontologyTermName + '</div>').append(synonymDiv);
             }
             var annotationMap = {};
             $.each(ontologyTerm.ontologyTermDynamicAnnotation, function (i, annotation) {
@@ -588,13 +596,13 @@
             });
             $.each(Object.keys(inputEntity), function (index, key) {
                 if (key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()) {
-                    ontologyTermContainer.append('<div>' + key + ' : ' + (annotationMap[key] ? annotationMap[key].join() : 'N/A') + '</div>');
+                    $ontologyTermContainer.append('<div>' + key + ' : ' + (annotationMap[key] ? annotationMap[key].join() : 'N/A') + '</div>');
                 }
             });
         } else {
-            ontologyTermContainer.append(NO_MATCH_INFO);
+            $ontologyTermContainer.append(NO_MATCH_INFO);
         }
-        return ontologyTermContainer;
+        return $ontologyTermContainer;
     }
 
     function getOntologyTermSynonyms(ontologyTerm) {

@@ -7,3 +7,12 @@
 	cursor:pointer;
 	float:right;
 }
+
+.table tbody tr td {
+	vertical-align: middle;
+}
+
+.table-title {
+	font-weight: bold;
+	font-size: 20px;
+}
