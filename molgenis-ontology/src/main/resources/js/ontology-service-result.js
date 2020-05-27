@@ -29,6 +29,26 @@
         }
     };
 
+    /**
+     *
+     * @param {*} sortaJobExecutionId
+     * @param {*} inputRowId
+     * @param {*} usedOutputRowId
+     */
+    function deleteUnusedRows (sortaJobExecutionId, inputRowId, usedOutputRowId) {
+        var defer = $.Deferred();
+        getMappingEntity(inputRowId, sortaJobExecutionId, function (data) {
+            $.each(data.items, function (index, outputRow) {
+                if (outputRow.identifier !== usedOutputRowId) {
+                    restApi.remove('/api/v1/' + sortaJobExecutionId + '/' + outputRow.identifier);
+                }
+            })
+            defer.resolve(data);
+        });
+
+        return defer.promise();
+    }
+
     molgenis.OntologyService.prototype.renderPage = function () {
 
         var items = [];
@@ -221,20 +241,8 @@
                         updatedMappedEntity['matchTerm'] = null;
                     }
 
-                    restApi.update('/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRowId, updatedMappedEntity, createCallBackFunction(), true);
-
-
-                    getMappingEntity(inputRowId, ontologyServiceRequest.sortaJobExecutionId, function (data) {
-                        var outputRows = data.items
-
-                        $.each(outputRows, function (index, outputRow) {
-                            if (outputRow.identifier !== outputRowId) {
-                                var deleteHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRow.identifier
-                                restApi.remove(deleteHref, function () {
-                                    console.log('delete is done for: (id: ' + toDeleteVal.identifier + ', term: ' + toDeleteKey + ')')
-                                })
-                            }
-                        })
+                    deleteUnusedRows(ontologyServiceRequest.sortaJobExecutionId, inputRowId, outputRowId).then(function() {
+                        restApi.update('/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRowId, updatedMappedEntity, createCallBackFunction(), true);
                     });
                 });
             });
@@ -274,20 +282,14 @@
             'margin-right': '10px',
             'float': 'right'
         }).click(function () {
-            getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
+            var inputRowId = inputEntity.Identifier;
+            getMappingEntity(inputRowId, ontologyServiceRequest.sortaJobExecutionId, function (data) {
                 if (data.items.length > 0) {
-                    var storedTerms = {};
-
-                    $.each(data.items, function( index, item ) {
-                        storedTerms[item.matchTerm] = item;
-                    });
-
-                    var mappedEntity = data.items[0];
-
-                    var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
+                    var outputRow = data.items[0];
+                    var outputRowId = outputRow.identifier
 
                     var updatedMappedEntity = {};
-                    $.map(mappedEntity, function (val, key) {
+                    $.map(outputRow, function (val, key) {
                         updatedMappedEntity[key] = val;
                         if (key === 'validated') updatedMappedEntity[key] = true;
                         if (key === 'inputTerm') {
@@ -296,7 +298,11 @@
                         if (key === 'score') updatedMappedEntity[key] = 0;
                         if (key === 'matchTerm') updatedMappedEntity[key] = null;
                     });
-                    restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
+
+                    deleteUnusedRows(ontologyServiceRequest.sortaJobExecutionId, inputRowId, outputRowId).then(function(data) {
+                        var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRowId;
+                        restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
+                    });
                 }
             });
         });
