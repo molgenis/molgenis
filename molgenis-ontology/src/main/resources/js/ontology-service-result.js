@@ -458,8 +458,7 @@
 
 
                 $.when.apply($, promises).done(function(data) {
-                    // It takes longer than resolving all Promises, until the
-                    // aggregate counter updates. The timeout seems to be enough.
+                    // Give the aggregate counter backend some time to update.
                     window.setTimeout(function() {
                         molgenis.OntologyService.prototype.renderPage();
                     }, 500);
@@ -538,7 +537,10 @@
     function createCallBackFunction() {
         return {
             'success': function () {
-                molgenis.OntologyService.prototype.renderPage();
+                // Give the aggregate counter backend some time to update.
+                window.setTimeout(function() {
+                    molgenis.OntologyService.prototype.renderPage();
+                }, 500);
             }, 'error': function () {
                 molgenis.OntologyService.prototype.renderPage();
             }
