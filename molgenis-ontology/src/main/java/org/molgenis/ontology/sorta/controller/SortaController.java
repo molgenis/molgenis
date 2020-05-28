@@ -598,7 +598,8 @@ public class SortaController extends PluginController {
             .setDataType(XREF)
             .setRefEntity(sourceMetaData)
             .setDescription("Reference to the input term")
-            .setNillable(false));
+            .setNillable(false)
+            .setAggregatable(true));
     resultEntityType.setLabel(jobName + " output");
     dataService.getMeta().addEntityType(resultEntityType);
   }

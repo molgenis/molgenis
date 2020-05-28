@@ -19,6 +19,34 @@
         return match;
     }
 
+    function getMatchResultCount() {
+        var defer = $.Deferred();
+        var url = '/api/v2/'+ ontologyServiceRequest.sortaJobExecutionId + '/?q=(score=ge=' + window.sorta.threshold + ';score=le=100),validated==true&aggs=x==inputTerm';
+        $.ajax({
+            type: 'GET',
+            url: url,
+            contentType: 'application/json',
+            success: function (distinctCount) {
+                $.ajax({
+                    type: 'GET',
+                    url: molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.sortaJobExecutionId,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        data.numberOfMatched = distinctCount.aggs.matrix.length
+                        var page = {};
+                        var totalMatched = data.numberOfMatched;
+                        var totalUnMatched = data.numberOfUnmatched;
+                        page.total = ontologyServiceRequest.matched ? totalMatched : totalUnMatched;
+                        updatePageFunction(page);
+                        $('#matched-item-count').html(totalMatched);
+                        $('#unmatched-item-count').html(totalUnMatched);
+                    }
+                });
+            }
+        });
+    }
+
+
     molgenis.OntologyService = function OntologyService(container, request) {
         if (container) {
             $resultContainer = container;
@@ -44,7 +72,6 @@
     }
 
     molgenis.OntologyService.prototype.renderPage = function () {
-
         toggleDetailView(false);
 
         var items = [];
@@ -63,28 +90,7 @@
         items.push('</div></div>');
         $resultContainer.empty().append(items.join(''));
 
-        function getMatchResultCount(callback) {
-            $.ajax({
-                type: 'GET',
-                url: molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.sortaJobExecutionId,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (callback !== null && typeof callback === 'function') {
-                        callback(data)
-                    }
-                }
-            });
-        }
-
-        getMatchResultCount(function (data) {
-            var page = {};
-            var totalMatched = data.numberOfMatched;
-            var totalUnMatched = data.numberOfUnmatched;
-            page.total = ontologyServiceRequest.matched ? totalMatched : totalUnMatched;
-            updatePageFunction(page);
-            $('#matched-item-count').html(totalMatched);
-            $('#unmatched-item-count').html(totalUnMatched);
-        });
+        getMatchResultCount();
 
         $('#sorta-download-button').click(function () {
             $(this).parents('form:eq(0)').attr({
@@ -452,7 +458,10 @@
 
 
                 $.when.apply($, promises).done(function(data) {
-                    molgenis.OntologyService.prototype.renderPage();
+                    // Give the aggregate counter backend some time to update.
+                    window.setTimeout(function() {
+                        molgenis.OntologyService.prototype.renderPage();
+                    }, 500);
                 });
             });
         });
@@ -528,7 +537,10 @@
     function createCallBackFunction() {
         return {
             'success': function () {
-                molgenis.OntologyService.prototype.renderPage();
+                // Give the aggregate counter backend some time to update.
+                window.setTimeout(function() {
+                    molgenis.OntologyService.prototype.renderPage();
+                }, 500);
             }, 'error': function () {
                 molgenis.OntologyService.prototype.renderPage();
             }
@@ -624,5 +636,19 @@
         }
         return synonyms;
     }
+
+    $(document).ready(function () {
+        if (window.sorta) {
+            var ontologyService = new molgenis.OntologyService($('#match-result-container'), sorta.request);
+            ontologyService.renderPage();
+
+            $('#update-threshold-button').click(function () {
+                $(this).parents('form:eq(0)').attr({
+                    'action': molgenis.getContextUrl() + '/threshold/' + ontologyServiceRequest.sortaJobExecutionId,
+                    'method': 'POST'
+                }).submit();
+            });
+        }
+    });
 
 }($, window.top.molgenis = window.top.molgenis || {}));
