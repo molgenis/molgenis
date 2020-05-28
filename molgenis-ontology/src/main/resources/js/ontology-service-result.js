@@ -47,15 +47,6 @@
     }
 
 
-    $('#update-threshold-button').click(function () {
-        console.log( $(this).parents('form:eq(0)'))
-        $(this).parents('form:eq(0)').attr({
-            'action': molgenis.getContextUrl() + '/threshold/' + ontologyServiceRequest.sortaJobExecutionId,
-            'method': 'POST'
-        }).submit();
-    });
-
-
     molgenis.OntologyService = function OntologyService(container, request) {
         if (container) {
             $resultContainer = container;
@@ -645,8 +636,17 @@
     }
 
     $(document).ready(function () {
-        var ontologyService = new molgenis.OntologyService($('#match-result-container'), window.sorta.request);
-        ontologyService.renderPage();
+        if (window.sorta) {
+            var ontologyService = new molgenis.OntologyService($('#match-result-container'), sorta.request);
+            ontologyService.renderPage();
+
+            $('#update-threshold-button').click(function () {
+                $(this).parents('form:eq(0)').attr({
+                    'action': molgenis.getContextUrl() + '/threshold/' + ontologyServiceRequest.sortaJobExecutionId,
+                    'method': 'POST'
+                }).submit();
+            });
+        }
     });
 
 }($, window.top.molgenis = window.top.molgenis || {}));
