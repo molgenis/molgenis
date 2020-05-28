@@ -45,8 +45,6 @@ public class OntologyTermMetadata extends SystemEntityType {
         requireNonNull(ontologyTermDynamicAnnotationMetadata);
     this.ontologyTermNodePathMetadata = requireNonNull(ontologyTermNodePathMetadata);
     this.ontologyMetadata = requireNonNull(ontologyMetadata);
-
-    ontologyMetadata.setOntologyTermMetadata(this);
   }
 
   @Override

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Assign all variables needed for API tests
+export MOLGENIS_TEST_UPLOAD_FOLDER=src/test/resources/public-data
+export MOLGENIS_TEST_UPLOAD_FILE=gonl_chr16_snps_indels_r5.vcf
+export MOLGENIS_TEST_UPLOAD_CHECK_URLS=menu/main/dataexplorer?entity=gonlchr16snps_indelSample
+export MOLGENIS_TEST_UPLOAD_PACKAGE_TO_REMOVE=gonl_chr16_snps_indels_r5,gonl_chr16_snps_indels_r5Sample
+
+# Run the actual tests in MAVEN
+mvn test \
+  -Dtest=ImportPublicDataIT \
+  -DREST_TEST_HOST=http://localhost:8080 \
+  -DREST_TEST_ADMIN_NAME=admin \
+  -DREST_TEST_ADMIN_PW=admin

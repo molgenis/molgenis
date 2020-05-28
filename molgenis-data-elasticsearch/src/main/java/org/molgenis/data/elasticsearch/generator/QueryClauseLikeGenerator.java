@@ -3,9 +3,11 @@ package org.molgenis.data.elasticsearch.generator;
 import static java.lang.String.format;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
+import static org.molgenis.data.QueryUtils.isTaggedType;
 import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
 
 import java.util.List;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.data.MolgenisQueryException;
@@ -33,12 +35,7 @@ class QueryClauseLikeGenerator extends BaseQueryClauseGenerator {
       case HYPERLINK:
       case STRING:
         return nestedQueryBuilder(
-            entityType,
-            attributePath,
-            QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue)
-                .maxExpansions(50)
-                .slop(10)
-                .analyzer(DEFAULT_ANALYZER));
+            entityType, attributePath, getQueryBuilder(attr, fieldName, queryValue));
       case BOOL:
       case COMPOUND:
       case DATE:
@@ -61,6 +58,17 @@ class QueryClauseLikeGenerator extends BaseQueryClauseGenerator {
             format("Unsupported data type [%s] for operator [%s]", attrType, LIKE));
       default:
         throw new UnexpectedEnumException(attrType);
+    }
+  }
+
+  private QueryBuilder getQueryBuilder(Attribute attr, String fieldName, Object queryValue) {
+    if (isTaggedType(attr, XMLSchema.TOKEN)) {
+      return QueryBuilders.wildcardQuery(fieldName, format("*%s*", queryValue));
+    } else {
+      return QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue)
+          .maxExpansions(50)
+          .slop(10)
+          .analyzer(DEFAULT_ANALYZER);
     }
   }
 }
