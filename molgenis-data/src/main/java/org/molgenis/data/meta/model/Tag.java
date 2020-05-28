@@ -2,6 +2,7 @@ package org.molgenis.data.meta.model;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.eclipse.rdf4j.model.IRI;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -32,6 +33,10 @@ public class Tag extends StaticEntity {
     tagCopy.setRelationLabel(tag.getRelationLabel());
     tagCopy.setCodeSystem(tag.getCodeSystem());
     return tagCopy;
+  }
+
+  public boolean equals(IRI relation, IRI object) {
+    return relation.toString().equals(getRelationIri()) && object.toString().equals(getObjectIri());
   }
 
   public String getId() {

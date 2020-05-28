@@ -28,6 +28,7 @@ public class RepositoryPopulator {
   private final ScriptTypePopulator scriptTypePopulator;
   private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
   private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
+  private final TagPopulator tagPopulator;
 
   public RepositoryPopulator(
       DataService dataService,
@@ -38,7 +39,8 @@ public class RepositoryPopulator {
       I18nPopulator i18nPopulator,
       ScriptTypePopulator scriptTypePopulator,
       GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator,
-      DynamicDecoratorPopulator dynamicDecoratorPopulator) {
+      DynamicDecoratorPopulator dynamicDecoratorPopulator,
+      TagPopulator tagPopulator) {
     this.dataService = requireNonNull(dataService);
     this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
     this.systemEntityPopulator = requireNonNull(systemEntityPopulator);
@@ -48,6 +50,7 @@ public class RepositoryPopulator {
     this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
     this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
     this.dynamicDecoratorPopulator = requireNonNull(dynamicDecoratorPopulator);
+    this.tagPopulator = requireNonNull(tagPopulator);
   }
 
   /** Returns whether the database was populated previously. */
@@ -89,6 +92,10 @@ public class RepositoryPopulator {
       systemEntityPopulator.populate(event);
       LOG.trace("Populated database with application entities");
     }
+
+    LOG.trace("Populating tag entities ...");
+    tagPopulator.populate();
+    LOG.trace("Populated tag entities");
 
     LOG.trace("Populating dynamic decorator entities ...");
     dynamicDecoratorPopulator.populate();

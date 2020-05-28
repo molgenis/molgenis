@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch.generator;
 
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM;
+
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -42,7 +44,7 @@ class QueryClauseFuzzyMatchNgramGenerator extends BaseQueryClauseGenerator {
         case SCRIPT:
         case STRING:
         case TEXT:
-          queryField = getQueryFieldName(attr) + ".ngram";
+          queryField = getQueryFieldName(attr) + "." + FIELD_NGRAM;
           queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
           break;
         case MREF:
@@ -51,7 +53,8 @@ class QueryClauseFuzzyMatchNgramGenerator extends BaseQueryClauseGenerator {
               getQueryFieldName(attr)
                   + "."
                   + getQueryFieldName(attr.getRefEntity().getLabelAttribute())
-                  + ".ngram";
+                  + "."
+                  + FIELD_NGRAM;
           queryBuilder =
               QueryBuilders.nestedQuery(
                   getQueryFieldName(attr),

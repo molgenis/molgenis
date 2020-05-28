@@ -1,12 +1,18 @@
 package org.molgenis.data.semantic;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.FOAF;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+
 @SuppressWarnings("java:S115") // Constant names should comply with a naming convention
 public enum Relation {
   instanceOf("http://molgenis.org/biobankconnect/instanceOf"),
   link("http://molgenis.org/biobankconnect/link"),
-  homepage("http://xmlns.com/foaf/0.1/homepage"),
-  isDefinedBy("http://www.w3.org/2000/01/rdf-schema#isDefinedBy"),
-  seeAlso("http://www.w3.org/2000/01/rdf-schema#seeAlso"),
+  homepage(FOAF.HOMEPAGE),
+  type(RDF.TYPE),
+  isDefinedBy(RDFS.ISDEFINEDBY),
+  seeAlso(RDFS.SEEALSO),
   hasLowerValue("http://molgenis.org/uml/hasLowerValue"),
   hasUpperValue("http://molgenis.org/uml/hasUpperValue"),
   isRealizationOf("http://molgenis.org/uml/isRealizationOf"),
@@ -16,6 +22,10 @@ public enum Relation {
   isAssociatedWith("http://molgenis.org#isAssociatedWith");
 
   private String iri;
+
+  Relation(IRI iri) {
+    this.iri = iri.toString();
+  }
 
   Relation(String iri) {
     this.iri = iri;

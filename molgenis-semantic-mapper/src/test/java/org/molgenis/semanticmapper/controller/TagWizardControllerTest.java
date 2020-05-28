@@ -83,6 +83,7 @@ class TagWizardControllerTest extends AbstractMockitoTest {
               Relation.instanceOf,
               Relation.link,
               Relation.homepage,
+              Relation.type,
               Relation.isDefinedBy,
               Relation.seeAlso,
               Relation.hasLowerValue,
