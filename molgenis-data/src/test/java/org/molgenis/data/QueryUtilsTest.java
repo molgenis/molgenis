@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
@@ -22,15 +23,20 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import org.eclipse.rdf4j.model.vocabulary.FOAF;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 
 class QueryUtilsTest extends AbstractMockitoTest {
   @Mock private Query<Entity> query;
+  @Mock private Attribute attribute;
+  @Mock private Tag tag;
 
   @Test
   void containsAnyOperator() {
@@ -412,5 +418,19 @@ class QueryUtilsTest extends AbstractMockitoTest {
     assertEquals(
         ImmutableList.of(grandparentAttribute, parentAttribute, childAttribute),
         QueryUtils.getAttributePathExpanded("grandparent.parent.child", grandparentEntityType));
+  }
+
+  @Test
+  public void testIsTaggedTypeTrue() {
+    when(attribute.getTags()).thenReturn(List.of(tag));
+    when(tag.equals(RDF.TYPE, FOAF.PERSON)).thenReturn(true);
+    assertTrue(QueryUtils.isTaggedType(attribute, FOAF.PERSON));
+  }
+
+  @Test
+  public void testIsTaggedTypeFalse() {
+    when(attribute.getTags()).thenReturn(List.of(tag));
+    assertFalse(QueryUtils.isTaggedType(attribute, FOAF.PERSON));
+    verify(tag).equals(RDF.TYPE, FOAF.PERSON);
   }
 }

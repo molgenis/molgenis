@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService {
   /** package-private for testability */
-  static final int VERSION = 40;
+  static final int VERSION = 41;
 
   private final DataSource dataSource;
 

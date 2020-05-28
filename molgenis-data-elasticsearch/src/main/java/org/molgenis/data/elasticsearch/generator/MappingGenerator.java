@@ -3,6 +3,9 @@ package org.molgenis.data.elasticsearch.generator;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.rdf4j.model.vocabulary.XMLSchema.TOKEN;
+import static org.molgenis.data.QueryUtils.isTaggedType;
+import static org.molgenis.data.semantic.Vocabulary.CASE_SENSITIVE;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,16 +45,31 @@ class MappingGenerator {
   private FieldMapping createFieldMapping(Attribute attribute, int depth, int maxDepth) {
     String fieldName = documentIdGenerator.generateId(attribute);
     MappingType mappingType = toMappingType(attribute, depth, maxDepth);
-    List<FieldMapping> nestedFieldMappings =
-        mappingType == MappingType.NESTED
-            ? createFieldMappings(attribute.getRefEntity(), depth + 1, maxDepth)
-            : null;
-    return FieldMapping.create(fieldName, mappingType, nestedFieldMappings);
+    var result = FieldMapping.builder().setName(fieldName).setType(mappingType);
+    if (mappingType == MappingType.NESTED) {
+      result.setNestedFieldMappings(
+          createFieldMappings(attribute.getRefEntity(), depth + 1, maxDepth));
+    }
+    if (mappingType == MappingType.KEYWORD && isTaggedType(attribute, CASE_SENSITIVE)) {
+      result.setCaseSensitive(true);
+    }
+    if ("ontologyTermSynonym".equals(attribute.getName())) {
+      result.setNeedsNgram(true);
+    }
+    return result.build();
   }
 
   private MappingType toMappingType(Attribute attribute, int depth, int maxDepth) {
+    MappingType result = getMappingType(attribute);
+    if (result == MappingType.NESTED) {
+      return toMappingTypeReferenceAttribute(attribute, depth, maxDepth);
+    }
+    return result;
+  }
+
+  public static MappingType getMappingType(Attribute attribute) {
     AttributeType attributeType = attribute.getDataType();
-    switch (attributeType) {
+    switch (attribute.getDataType()) {
       case BOOL:
         return MappingType.BOOLEAN;
       case CATEGORICAL:
@@ -60,7 +78,7 @@ class MappingGenerator {
       case MREF:
       case ONE_TO_MANY:
       case XREF:
-        return toMappingTypeReferenceAttribute(attribute, depth, maxDepth);
+        return MappingType.NESTED;
       case DATE:
         return MappingType.DATE;
       case DATE_TIME:
@@ -69,10 +87,11 @@ class MappingGenerator {
         return MappingType.DOUBLE;
       case EMAIL:
       case ENUM:
-      case HTML:
       case HYPERLINK:
-      case SCRIPT:
       case STRING:
+        return isTaggedType(attribute, TOKEN) ? MappingType.KEYWORD : MappingType.TEXT;
+      case HTML:
+      case SCRIPT:
       case TEXT:
         return MappingType.TEXT;
       case INT:
