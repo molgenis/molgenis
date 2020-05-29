@@ -390,17 +390,23 @@
                     return
                 }
 
+                // Create toUpdate list (Each stored-term item that is also in the selectedTerms map)
                 var toUpdate = [];
-                var toDelete = [];
-
                 $.each(storedTerms, function (storedKey, storedVal) {
                     if(selectedTerms[storedKey] !== undefined) {
                         toUpdate.push(storedVal)
-                    } else {
+                    }
+                });
+
+                // Create toDelete list (Each stored-term item that is not in the selectedTerms map)
+                var toDelete = [];
+                $.each(storedTerms, function (storedKey, storedVal) {
+                    if(selectedTerms[storedKey] === undefined) {
                         toDelete.push(storedVal)
                     }
                 });
 
+                // Create toCreate list (Each selected term item that is not in the storedTerms map)
                 var toCreate = [];
                 $.each(selectedTerms, function (selectedKey, selectedVal) {
                     if(storedTerms[selectedKey] === undefined) {
@@ -420,15 +426,15 @@
                 // Do Updates
                 $.each(toUpdate, function (toUpdateKey, toUpdateVal) {
                     var updateHref = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + toUpdateVal.identifier
-                    var updatedMappedEntity = {};
 
-                    $.map(toUpdateVal, function (val, key) {
-                        if (key === 'validated') updatedMappedEntity[key] = true;
-                        else if (key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
-                        else if (key === 'matchTerm') updatedMappedEntity.matchTerm = toUpdateVal.ontologyTermIRI;
-                        else if (key === 'score') updatedMappedEntity.score = toUpdateVal.Score;
-                        else updatedMappedEntity[key] = val;
-                    });
+                    var updatedMappedEntity = {
+                        identifier: toUpdateVal.identifier,
+                        validated: true,
+                        inputTerm: inputTermId,
+                        matchTerm: toUpdateVal.matchTerm,
+                        score: toUpdateVal.score,
+                    };
+
                     var result = restApi.update(updateHref, updatedMappedEntity, function () {
                         console.log('update is done for: (id: ' + toUpdateVal.identifier + ', term: ' + toUpdateKey + ')')
                     }, false)
