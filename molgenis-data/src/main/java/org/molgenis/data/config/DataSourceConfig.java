@@ -1,8 +1,6 @@
 package org.molgenis.data.config;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.beans.PropertyVetoException;
-import java.util.Properties;
+import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,26 +39,15 @@ public class DataSourceConfig {
       throw new IllegalArgumentException(
           "please configure the db_password property in your molgenis-server.properties");
 
-    ComboPooledDataSource dataSource = new ComboPooledDataSource();
-    try {
-      dataSource.setDriverClass(dbDriverClass);
-    } catch (PropertyVetoException e) {
-      throw new RuntimeException(e);
-    }
-
+    HikariDataSource dataSource = new HikariDataSource();
+    dataSource.setDriverClassName(dbDriverClass);
     dataSource.setJdbcUrl(dbJdbcUri);
-    dataSource.setUser(dbUser);
+    dataSource.setUsername(dbUser);
     dataSource.setPassword(dbPassword);
-    dataSource.setInitialPoolSize(5);
-    dataSource.setMinPoolSize(5);
-    dataSource.setMaxPoolSize(MAX_POOL_SIZE);
-    dataSource.setTestConnectionOnCheckin(true);
-    dataSource.setIdleConnectionTestPeriod(120);
+    dataSource.setMaximumPoolSize(MAX_POOL_SIZE);
 
-    Properties properties = dataSource.getProperties();
-    properties.setProperty("reWriteBatchedInserts", "true");
-    properties.setProperty("autosave", "CONSERVATIVE");
-    dataSource.setProperties(properties);
+    dataSource.addDataSourceProperty("reWriteBatchedInserts", "true");
+    dataSource.addDataSourceProperty("autosave", "CONSERVATIVE");
 
     return dataSource;
   }
