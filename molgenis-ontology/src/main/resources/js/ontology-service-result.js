@@ -118,6 +118,22 @@
         });
     }
 
+    function orderByMatchScore (a, b) {
+        if(!a.matchedTerm || !b.matchedTerm ) {
+            return 0;
+        } else {
+            return a.matchedTerm.validated < b.matchedTerm.validated;
+        }
+    }
+
+    function orderByValidated (a, b) {
+        if(!a.matchedTerm || !b.matchedTerm  ) {
+            return 0;
+        } else {
+            return (a.matchedTerm.validated === b.matchedTerm.validated) ? 0 : a.matchedTerm.validated ? -1 : 1;
+        }
+    }
+
     function updatePageFunction(page) {
         $.extend(ontologyServiceRequest.entityPager, page);
         $.ajax({
@@ -147,17 +163,34 @@
                     $('<div />').addClass('row').append(tableItems.join('')).appendTo($tableContainer);
                     var table = $($tableContainer).find('table:eq(0)')
 
-                    var groupedEntities = {}
+                    var groupedEntities = {};
                     $.each(data.items, function (index, entity) {
                         if (!groupedEntities[entity.inputTerm.Identifier]) {
-                            groupedEntities[entity.inputTerm.Identifier] = []
+                            groupedEntities[entity.inputTerm.Identifier] = [];
                         }
 
                         groupedEntities[entity.inputTerm.Identifier].push(entity);
                     });
 
-                    $.each(Object.keys(groupedEntities), function(index, entityId) {
-                        table.append(createRowForMatchedTerm(groupedEntities[entityId], ontologyServiceRequest.matched, page));
+                    var groupedEntitiesList = Object.values(groupedEntities);
+
+                    // Sort outputs within input terms
+                    $.each(groupedEntitiesList, function(index, groupedEntity) {
+                        groupedEntity.sort(orderByMatchScore);
+                    });
+
+                    // Sort input terms
+                    groupedEntitiesList.sort(function (a, b) {
+                        return orderByMatchScore(a[0], b[0]);
+                    })
+
+                    // Sort input terms by validation
+                    groupedEntitiesList.sort(function (a, b) {
+                        return orderByValidated(a[0], b[0]);
+                    })
+
+                    $.each(groupedEntitiesList, function(index, groupedEntity) {
+                        table.append(createRowForMatchedTerm(groupedEntity, ontologyServiceRequest.matched, page));
                     });
 
                     var searchButton = matchResultHeaderDiv.find('button:eq(0)');
