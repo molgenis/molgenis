@@ -57,7 +57,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
-public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
+class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   @Captor private ArgumentCaptor<Stream<Entity>> streamCaptor;
 
   @Autowired private Progress progress;
@@ -78,7 +78,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   private Entity toIndexEntity;
 
   @BeforeEach
-  public void beforeMethod() {
+  void beforeMethod() {
     config.resetMocks();
     indexJobService = new IndexJobService(dataService, indexService, entityTypeFactory);
     indexActionGroup = indexActionGroupFactory.create(transactionId).setCount(0);
@@ -96,7 +96,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testNoIndexActionJobForTransaction() {
+  void testNoIndexActionJobForTransaction() {
     when(dataService.findOneById(INDEX_ACTION_GROUP, transactionId)).thenReturn(null);
     mockGetAllIndexActions(empty());
 
@@ -107,7 +107,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testNoIndexActionsForTransaction() {
+  void testNoIndexActionsForTransaction() {
     mockGetAllIndexActions(empty());
 
     indexJobService.executeJob(progress, transactionId);
@@ -122,7 +122,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testCreateQueryGetAllIndexActions() {
+  void testCreateQueryGetAllIndexActions() {
     Query<IndexAction> q = IndexJobService.createQueryGetAllIndexActions("testme");
     assertEquals(
         "rules=['indexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]",
@@ -130,7 +130,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void rebuildIndexDeleteSingleEntityTest() {
+  void rebuildIndexDeleteSingleEntityTest() {
     when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(null);
 
     IndexAction indexAction =
@@ -164,7 +164,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void rebuildIndexCreateSingleEntityTest() {
+  void rebuildIndexCreateSingleEntityTest() {
     IndexAction indexAction =
         indexActionFactory
             .create()
@@ -194,7 +194,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  private void rebuildIndexMetaUpdateDataTest() {
+  void rebuildIndexMetaUpdateDataTest() {
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
     EntityType entityType = dataService.getEntityType("TypeTestRefDynamic");
     when(indexService.hasIndex(entityType)).thenReturn(true);
@@ -230,7 +230,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  private void rebuildIndexMetaCreateDataTest() {
+  void rebuildIndexMetaCreateDataTest() {
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
     IndexAction indexAction =
@@ -266,7 +266,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void rebuildIndexDeleteMetaDataEntityTest() {
+  void rebuildIndexDeleteMetaDataEntityTest() {
     String entityTypeId = "entityTypeId";
     String entityTypeLabel = "entityTypeLabel";
     EntityType entityType = mock(EntityType.class);
@@ -308,7 +308,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void indexSingleEntityindexServiceThrowsExceptionOnSecondEntityId() {
+  void indexSingleEntityindexServiceThrowsExceptionOnSecondEntityId() {
     IndexAction indexAction1 =
         indexActionFactory
             .create()
@@ -366,7 +366,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
 
   @Configuration
   @Import({IndexTestConfig.class, TestHarnessConfig.class})
-  public static class Config {
+  static class Config {
     @Autowired private EntityTypeFactory entityTypeFactory;
 
     @Mock private Progress progress;
