@@ -6,7 +6,7 @@
     var $resultContainer = null;
     var reserved_identifier_field = 'identifier';
     var NO_MATCH_INFO = 'N/A';
-    var itermsPerPage = 5;
+    var itemsPerPage = 5;
 
     function findOntology(ontologyTerms, matchTerm) {
         var match = null;
@@ -37,6 +37,9 @@
                         var totalMatched = data.numberOfMatched;
                         var totalUnMatched = data.numberOfUnmatched;
                         page.total = ontologyServiceRequest.matched ? totalMatched : totalUnMatched;
+                        // Reset pager between rendering pages.
+                        ontologyServiceRequest.entityPager = {start: 0, num: itemsPerPage, total: page.total};
+
                         updatePageFunction(page);
                         $('#matched-item-count').html(totalMatched);
                         $('#unmatched-item-count').html(totalUnMatched);
@@ -53,7 +56,7 @@
         }
         if (request) {
             ontologyServiceRequest = request;
-            ontologyServiceRequest.entityPager = {'start': 0, 'num': itermsPerPage, 'total': 5};
+            ontologyServiceRequest.entityPager = {start: 0, num: itemsPerPage, total: 5};
         }
     };
 
