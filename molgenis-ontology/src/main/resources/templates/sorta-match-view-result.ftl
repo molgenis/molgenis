@@ -5,9 +5,10 @@
             <div class="col-md-offset-3 col-md-6">
                 <div class="row">
                     <div class="col-md-12">
-                        <input name="threshold" value="${threshold?html}" type="text" class="form-control"
-                               style="width:50px;float:right;margin-right:-15px;"/>
-                        <button id="update-threshold-button" class="btn btn-default float-right" type="button">Update Threshold
+                        <div class="form-group threshold-widget">
+                            <input name="threshold" value="${threshold?html}" type="text" class="form-control"/>
+                            <button id="update-threshold-button" class="btn btn-default" type="submit">Set Threshold
+                        </div>
                         </button>
                     </div>
                     <br>

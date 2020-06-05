@@ -22,6 +22,7 @@ public class MatchingTaskContentMetaData extends SystemEntityType {
   public static final String MATCHED_TERM = "matchTerm";
   public static final String SCORE = "score";
   public static final String VALIDATED = "validated";
+  public static final String FLAGGED = "flagged";
 
   private final OntologyPackage ontologyPackage;
 
@@ -42,6 +43,11 @@ public class MatchingTaskContentMetaData extends SystemEntityType {
     addAttribute(VALIDATED)
         .setDataType(BOOL)
         .setDescription("Indication if the match was validated")
+        .setNillable(false);
+    addAttribute(FLAGGED)
+        .setDataType(BOOL)
+        .setDefaultValue(Boolean.FALSE.toString())
+        .setDescription("Indication if the match was flagged")
         .setNillable(false);
   }
 }

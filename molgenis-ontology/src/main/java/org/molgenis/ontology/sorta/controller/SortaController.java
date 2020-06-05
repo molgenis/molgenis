@@ -20,6 +20,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.INPUT
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALIDATED;
+import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.FLAGGED;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -450,6 +451,10 @@ public class SortaController extends PluginController {
     row.set(
         MatchingTaskContentMetaData.VALIDATED,
         resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
+    row.set(
+            MatchingTaskContentMetaData.FLAGGED,
+            resultEntity.getBoolean(MatchingTaskContentMetaData.FLAGGED));
+
     Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
     if (score != null) {
       row.set(MatchingTaskContentMetaData.SCORE, format.format(score));
@@ -483,7 +488,8 @@ public class SortaController extends PluginController {
               OntologyTermMetadata.ONTOLOGY_TERM_NAME,
               OntologyTermMetadata.ONTOLOGY_TERM_IRI,
               MatchingTaskContentMetaData.SCORE,
-              MatchingTaskContentMetaData.VALIDATED));
+              MatchingTaskContentMetaData.VALIDATED,
+              MatchingTaskContentMetaData.FLAGGED));
       targetMetadata.addAttribute(
           ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       targetMetadata.addAttribute(
@@ -496,6 +502,8 @@ public class SortaController extends PluginController {
               .setDataType(AttributeType.STRING));
       targetMetadata.addAttribute(
           matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.VALIDATED));
+      targetMetadata.addAttribute(
+              matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.FLAGGED));
 
       csvWriter.writeAttributeNames(columnHeaders);
 
@@ -601,6 +609,7 @@ public class SortaController extends PluginController {
             .setNillable(false)
             .setAggregatable(true));
     resultEntityType.setLabel(jobName + " output");
+
     dataService.getMeta().addEntityType(resultEntityType);
   }
 

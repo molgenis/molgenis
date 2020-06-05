@@ -84,6 +84,7 @@ public class SortaJobProcessor {
                     resultEntity.set(
                         MatchingTaskContentMetaData.IDENTIFIER, idGenerator.generateId());
                     resultEntity.set(MatchingTaskContentMetaData.VALIDATED, false);
+                    resultEntity.set(MatchingTaskContentMetaData.FLAGGED, false);
                     entitiesToAdd.add(resultEntity);
 
                     Iterable<Entity> ontologyTermEntities =

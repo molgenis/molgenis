@@ -3,8 +3,8 @@
 <#include "sorta-match-view-result.ftl">
 <#include "sorta-match-new-task.ftl">
 <#include "sorta-match-list-tasks.ftl">
-<#assign css=["jasny-bootstrap.min.css", "ui.fancytree.min.css", "ontology-service.css", "biobank-connect.css"]>
-<#assign js=["jasny-bootstrap.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
+<#assign css=["jasny-bootstrap.min.css", "ui.fancytree.min.css", "ontology-service.css", "biobank-connect.css", "select2.min.css"]>
+<#assign js=["jasny-bootstrap.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js", "select2.min.js"]>
 <@header css js/>
 <form id="ontology-match" class="form-horizontal" enctype="multipart/form-data">
     <div class="row">
