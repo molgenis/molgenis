@@ -141,7 +141,7 @@
         if (inputTerm) {
             $.map(inputTerm ? inputTerm : {}, function (val, key) {
                 if (key.toLowerCase() !== 'identifier') {
-                    output.push(val + ' (' + key + ')');
+                    output.push(key + ': ' + val);
                 }
             });
         }
@@ -436,7 +436,7 @@
 
             if (index === 0) {
                 var $nameTd = $('<td rowspan="' + groupedEntity.length + '"></td>');
-                $nameTd.append(gatherInputInfoHelper(inputTerm).join(' '));
+                $nameTd.append(gatherInputInfoHelper(inputTerm).join('<br/>'));
                 // Only matched input terms could have multiple rows for candidates.
                 if (matched) {
                     $nameTd.css({'vertical-align': 'top'});
@@ -446,7 +446,7 @@
 
             var $ontologyTd = gatherOntologyInfoHelper(entity.inputTerm, entity.ontologyTerm).appendTo(row);
             var $scoreTd = $('<td />').appendTo(row);
-            var $matchedTd = $('<td class="td-details"/>').appendTo(row);
+            var $matchedTd = $('<td class="td-manual-match"/>').appendTo(row);
             var $optionsTd = $('<td class="input-term-options"/>').appendTo(row);
 
             var score = entity.matchedTerm.score ? entity.matchedTerm.score.toFixed(2) + '%' : NO_MATCH_INFO;
@@ -464,11 +464,11 @@
                 return;
             }
 
-            if (matchedTerm.review) {
-                $matchedTd.append('<span class="btn-lg glyphicon glyphicon-flag text-danger"></span>');
-            }
+            $matchedTd.append('<span class="glyphicon ' + (matchedTerm.validated ? 'glyphicon-ok-sign text-success' : 'glyphicon-remove-sign text-light') + '"></span>');
 
-            $matchedTd.append('<span class="btn-lg glyphicon ' + (matchedTerm.validated ? 'glyphicon-ok-sign text-success' : 'glyphicon-remove-sign text-light') + '"></span>');
+            if (matchedTerm.review) {
+                $matchedTd.append('<span class="glyphicon glyphicon-flag text-danger"></span>');
+            }
 
             if (matchedTerm.validated) {
                 var $trashButton = $('<button type="button" class="btn btn-danger"><i class="glyphicon glyphicon-trash"</i></button>');
@@ -626,12 +626,12 @@
                     searchItems.push('</div></div>')
 
                     var matchResultHeaderDiv = $('<div class="table-list-header" />').addClass('row').appendTo($tableContainer);
-                    matchResultHeaderDiv.append('<div class="col-md-9 table-list-header-title">' + (ontologyServiceRequest.matched ? 'Matched Input Terms' : 'Unmatched Input Terms') + '</div>');
                     matchResultHeaderDiv.append(searchItems.join(''));
+                    matchResultHeaderDiv.append('<div class="col-md-9 table-list-header-title">' + (ontologyServiceRequest.matched ? 'Matched Input Terms' : 'Unmatched Input Terms') + '</div>');
 
                     var tableItems = [];
                     tableItems.push('<div class="col-md-12"><table class="table">');
-                    tableItems.push('<tr><th>Input Term</th><th>' + (ontologyServiceRequest.matched ? 'Matched Ontology Terms' : 'Best Candidate') + '</th><th>Score</th><th></th><th></th>' + '</tr>');
+                    tableItems.push('<tr><th>Input Term</th><th>' + (ontologyServiceRequest.matched ? 'Matched Ontology Terms' : 'Best Candidate') + '</th><th>Score</th><th>' + (ontologyServiceRequest.matched ? 'Manual match' : '') + '</th><th></th>' + '</tr>');
                     tableItems.push('</table></div>');
                     $('<div />').addClass('row').append(tableItems.join('')).appendTo($tableContainer);
                     var table = $($tableContainer).find('table:eq(0)')

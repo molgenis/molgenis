@@ -37,8 +37,14 @@ button:hover {
 	text-align: right;
 }
 
-table .td-details {
-	text-align: right;
+table tbody td.td-manual-match {
+	font-size: 18px;
+	text-align: left;
+}
+
+table .td-manual-match span {
+	margin-right: 8px;
+	vertical-align: middle;
 }
 
 table .td-checkbox {
