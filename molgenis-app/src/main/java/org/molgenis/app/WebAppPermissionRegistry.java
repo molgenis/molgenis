@@ -113,6 +113,14 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(PLUGIN, MetadataManagerController.METADATA_MANAGER, manager, READ);
     register(ENTITY_TYPE, ResourceCopyJobExecutionMetadata.COPY_JOB_EXECUTION, manager, WRITE);
     register(ENTITY_TYPE, ResourceDeleteJobExecutionMetadata.DELETE_JOB_EXECUTION, manager, WRITE);
+    // When role_ANONYMOUS role includes role_VIEWER, it skips role_USER.
+    // So also add the role_USER permissions to role_VIEWER,
+    // except for the account plugin which makes no sense when the user is not
+    // authenticated.
+    register(PLUGIN, FeedbackController.ID, viewer, READ);
+    register(PACKAGE, PACKAGE_ONTOLOGY, viewer, READ);
+    register(PACKAGE, PACKAGE_META, viewer, READ);
+    register(PACKAGE, PACKAGE_SYSTEM, viewer, READMETA);
   }
 
   @Override
