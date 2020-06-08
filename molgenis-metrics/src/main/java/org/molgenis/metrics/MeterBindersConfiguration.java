@@ -2,6 +2,7 @@ package org.molgenis.metrics;
 
 import static java.util.Objects.requireNonNull;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
@@ -16,10 +17,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MeterBindersConfiguration {
 
+  private final HikariDataSource dataSource;
   private MeterRegistry meterRegistry;
 
-  public MeterBindersConfiguration(MeterRegistry meterRegistry) {
+  public MeterBindersConfiguration(MeterRegistry meterRegistry, HikariDataSource dataSource) {
     this.meterRegistry = requireNonNull(meterRegistry);
+    this.dataSource = requireNonNull(dataSource);
   }
 
   @Bean
@@ -52,6 +55,11 @@ public class MeterBindersConfiguration {
     return new LogbackMetrics();
   }
 
+  @Bean
+  HikariMetrics hikariMetrics() {
+    return new HikariMetrics(dataSource);
+  }
+
   @PostConstruct
   private void registerBeans() {
     classLoaderMetrics().bindTo(meterRegistry);
@@ -60,5 +68,6 @@ public class MeterBindersConfiguration {
     processorMetrics().bindTo(meterRegistry);
     jvmThreadMetrics().bindTo(meterRegistry);
     logbackMetrics().bindTo(meterRegistry);
+    hikariMetrics().bindTo(meterRegistry);
   }
 }
