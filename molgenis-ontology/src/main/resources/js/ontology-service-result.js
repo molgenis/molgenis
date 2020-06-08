@@ -231,7 +231,7 @@
                         if (key === 'matchTerm') updatedMappedEntity[key] = null;
                     });
 
-                    updatedMappedEntity.flagged = $('#cb-review')[0].checked
+                    updatedMappedEntity.review = $('#cb-review')[0].checked
 
                     deleteUnusedRows(ontologyServiceRequest.sortaJobExecutionId, inputRowId, outputRowId).then(function(data) {
                         var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + outputRowId;
@@ -258,7 +258,7 @@
             getOutputRows(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function (data) {
                 var promises = []
                 var inputTermId
-                var isFlagged = $('#cb-review')[0].checked;
+                var needsReview = $('#cb-review')[0].checked;
 
                 if (data.items.length > 0) {
                     inputTermId = data.items[0].inputTerm.Identifier
@@ -309,7 +309,7 @@
 
                     var updatedMappedEntity = {
                         identifier: toUpdateVal.identifier,
-                        flagged: isFlagged,
+                        review: needsReview,
                         validated: true,
                         inputTerm: inputTermId,
                         matchTerm: toUpdateVal.matchTerm,
@@ -326,7 +326,7 @@
                 $.each(toCreate, function (toCreateKey, toCreateVal) {
                     var createMappedEntity = {
                         identifier: uuidv4(),
-                        flagged: isFlagged,
+                        review: needsReview,
                         validated: true,
                         inputTerm: inputTermId,
                         matchTerm: toCreateVal.ontologyTermIRI,
@@ -464,14 +464,14 @@
                 return;
             }
 
-            if (matchedTerm.flagged) {
+            if (matchedTerm.review) {
                 $matchedTd.append('<span class="btn-lg glyphicon glyphicon-flag text-danger"></span>');
             }
 
             $matchedTd.append('<span class="btn-lg glyphicon ' + (matchedTerm.validated ? 'glyphicon-ok-sign text-success' : 'glyphicon-remove-sign text-light') + '"></span>');
 
             if (matchedTerm.validated) {
-                var $trashButton = $('<button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"</span></button>');
+                var $trashButton = $('<button type="button" class="btn btn-danger"><i class="glyphicon glyphicon-trash"</i></button>');
 
                 $trashButton.click(function () {
                     matchEntity(inputRowId, ontologyServiceRequest.sortaJobExecutionId, function (data) {

@@ -20,7 +20,6 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.INPUT
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALIDATED;
-import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.FLAGGED;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -452,8 +451,8 @@ public class SortaController extends PluginController {
         MatchingTaskContentMetaData.VALIDATED,
         resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
     row.set(
-            MatchingTaskContentMetaData.FLAGGED,
-            resultEntity.getBoolean(MatchingTaskContentMetaData.FLAGGED));
+        MatchingTaskContentMetaData.REVIEW,
+        resultEntity.getBoolean(MatchingTaskContentMetaData.REVIEW));
 
     Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
     if (score != null) {
@@ -489,7 +488,7 @@ public class SortaController extends PluginController {
               OntologyTermMetadata.ONTOLOGY_TERM_IRI,
               MatchingTaskContentMetaData.SCORE,
               MatchingTaskContentMetaData.VALIDATED,
-              MatchingTaskContentMetaData.FLAGGED));
+              MatchingTaskContentMetaData.REVIEW));
       targetMetadata.addAttribute(
           ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       targetMetadata.addAttribute(
@@ -503,7 +502,7 @@ public class SortaController extends PluginController {
       targetMetadata.addAttribute(
           matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.VALIDATED));
       targetMetadata.addAttribute(
-              matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.FLAGGED));
+          matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.REVIEW));
 
       csvWriter.writeAttributeNames(columnHeaders);
 
