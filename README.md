@@ -12,9 +12,9 @@ MOLGENIS has a frontend and a backend. You can develop on them separately. When 
 - [Develop backend](https://molgenis.gitbook.io/molgenis/guide-using-an-ide-for-backend.html)
 - [Develop frontend](https://github.com/molgenis/molgenis-frontend/blob/master/README.md)
 
-## Installation
-To install MOLGENIS for production usage click [here](http://docs.gcc.rug.nl/molgenis)
-
 ## Useful links
 - [Documentation](https://molgenis.gitbook.io/molgenis/)
 - [Organisation](https://molgenis.org) 
+
+## Other links
+To install MOLGENIS for production usage click [here](http://docs.gcc.rug.nl/molgenis) (internal use for UMCG only)
