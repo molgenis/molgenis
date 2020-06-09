@@ -450,6 +450,10 @@ public class SortaController extends PluginController {
     row.set(
         MatchingTaskContentMetaData.VALIDATED,
         resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
+    row.set(
+        MatchingTaskContentMetaData.REVIEW,
+        resultEntity.getBoolean(MatchingTaskContentMetaData.REVIEW));
+
     Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
     if (score != null) {
       row.set(MatchingTaskContentMetaData.SCORE, format.format(score));
@@ -483,7 +487,8 @@ public class SortaController extends PluginController {
               OntologyTermMetadata.ONTOLOGY_TERM_NAME,
               OntologyTermMetadata.ONTOLOGY_TERM_IRI,
               MatchingTaskContentMetaData.SCORE,
-              MatchingTaskContentMetaData.VALIDATED));
+              MatchingTaskContentMetaData.VALIDATED,
+              MatchingTaskContentMetaData.REVIEW));
       targetMetadata.addAttribute(
           ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       targetMetadata.addAttribute(
@@ -496,6 +501,8 @@ public class SortaController extends PluginController {
               .setDataType(AttributeType.STRING));
       targetMetadata.addAttribute(
           matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.VALIDATED));
+      targetMetadata.addAttribute(
+          matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.REVIEW));
 
       csvWriter.writeAttributeNames(columnHeaders);
 
@@ -598,8 +605,10 @@ public class SortaController extends PluginController {
             .setDataType(XREF)
             .setRefEntity(sourceMetaData)
             .setDescription("Reference to the input term")
-            .setNillable(false));
+            .setNillable(false)
+            .setAggregatable(true));
     resultEntityType.setLabel(jobName + " output");
+
     dataService.getMeta().addEntityType(resultEntityType);
   }
 
