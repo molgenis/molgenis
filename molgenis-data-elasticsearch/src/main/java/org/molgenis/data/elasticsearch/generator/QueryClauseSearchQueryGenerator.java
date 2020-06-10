@@ -75,8 +75,7 @@ class QueryClauseSearchQueryGenerator extends BaseQueryClauseGenerator {
       case ONE_TO_MANY:
       case COMPOUND:
         throw new MolgenisQueryException(
-            format(
-                "Illegal data type [%s] for operator [%s]", dataType, QueryRule.Operator.SEARCH));
+            format("Illegal data type [%s] for operator [%s]", dataType, Operator.SEARCH_QUERY));
       default:
         throw new UnexpectedEnumException(dataType);
     }
