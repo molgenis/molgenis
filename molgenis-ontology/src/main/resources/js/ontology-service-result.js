@@ -27,6 +27,14 @@
                     'method': 'POST'
                 }).submit();
             });
+
+            $('#threshold-input').keypress(function(e) {
+                //stroke key enter
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    $('#update-threshold-button').click();
+                }
+            });
         }
     });
 
@@ -675,9 +683,10 @@
                         return false;
                     });
 
-                    $(searchBox).keyup(function(e) {
-                        //stroke key enter or backspace
-                        if (e.keyCode === 13 || $(this).val() === '') {
+                    $(searchBox).keypress(function(e) {
+                        //stroke key enter
+                        if (e.keyCode === 13) {
+                            e.preventDefault();
                             $(searchButton).click();
                         }
                     });
