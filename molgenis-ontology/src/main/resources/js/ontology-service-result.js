@@ -160,11 +160,12 @@
             } else if (synonyms.length == 1) {
                 synonymDiv.append(synonyms.join());
             } else {
-                synonymDiv.addClass('show-popover').append('<strong>' + synonyms.length + ' synonyms, see more details</strong>').popover({
-                    'content': synonyms.join('<br><br>'),
-                    'placement': 'auto',
-                    'trigger': 'hover',
-                    'html': true
+                synonymDiv.addClass('show-popover').append('<strong>' + synonyms.length + ' synonyms, see more details</strong>');
+                synonymDiv.popover({
+                    content: synonyms.join('<br><br>'),
+                    placement: 'left',
+                    trigger: 'hover',
+                    html: true
                 });
             }
             //check if the ontologyTermIRI is a valid link
@@ -325,7 +326,6 @@
                 // Do Creates
                 $.each(toCreate, function (toCreateKey, toCreateVal) {
                     var createMappedEntity = {
-                        identifier: uuidv4(),
                         review: needsReview,
                         validated: true,
                         inputTerm: inputTermId,
@@ -354,12 +354,12 @@
             });
         });
 
-        var $hoverover = $('<div>Adjusted score <span class="glyphicon glyphicon-info-sign"></span></div>').css({'cursor': 'pointer'}).popover({
-            'title': 'Explanation',
-            'content': '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
-            'placement': 'auto',
-            'trigger': 'hover',
-            'html': true
+        var $hoverover = $('<div><span class="glyphicon glyphicon-info-sign"></span> Adjusted score</div>').css({'cursor': 'pointer'}).popover({
+            title: 'Explanation',
+            content: '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
+            placement: 'left',
+            trigger: 'hover',
+            html: true
         });
 
         var $table = $('<table class="table"></table>');
@@ -713,12 +713,4 @@
             }
         });
     };
-
-
-    function uuidv4() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
 }($, window.top.molgenis = window.top.molgenis || {}));

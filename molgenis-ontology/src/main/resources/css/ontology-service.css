@@ -23,9 +23,14 @@ button:hover {
 	margin-bottom: 0;
 }
 
+.threshold-widget .threshold-percentage {
+	font-weight: bold;
+	line-height: 34px;
+	margin: 0 4px;
+}
+
 .threshold-widget input {
 	float: left;
-	margin-right: 10px;
 	width: 50px;
 }
 
