@@ -280,7 +280,7 @@ components:
       example: child
     query:
       name: q
-      description: Query. [RSQL expression](https://github.com/jirutka/rsql-parser) where operator is '==' (equal to), '!=' (not equal to), '=lt=' or '<' (less than), '=le=' or '<=' (less than or equal to), '=gt=' or '>' (greater than), '=ge=' or '>=' (greater than or equal to), '=like=' (contains) or '=q=' (matches).
+      description: Query. [RSQL expression](https://github.com/jirutka/rsql-parser) where operator is '==' (equal to), '!=' (not equal to), '=lt=' or '<' (less than), '=le=' or '<=' (less than or equal to), '=gt=' or '>' (greater than), '=ge=' or '>=' (greater than or equal to), '=like=' (contains), '=q=' (matches) or '=sq=' (search query).
       in: query
       required: false
       schema:

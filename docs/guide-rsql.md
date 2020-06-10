@@ -13,6 +13,7 @@ MOLGENIS supports the following operators:
 |----------|---------|-------------|
 | `==`     | `columnA==queryValue` | Performs an **equals** query. Returns all rows from *myTable* where values in *columnA* exactly equal *queryValue* |  
 | `=q=`    | `columnA=q='search string'` | Performs a **search** query. Returns all rows from *myTable* where values in *columnA* match `search string` |
+| `=sq=`    | `columnA=sq='search query'` | Performs a **query string** query. Returns all rows from *myTable* where values in *columnA* match `search query` |
 | `=like=` | `columnA=like=queryValue` | Performs a **like** query. Returns all rows from *myTable* where values in *columnA* contain *queryValue* |
 | `=in=`   | `columnA=in=(valueA, valueB)` | Performs an **in** query. Returns all rows from *myTable* where *columnA* contains *valueA* OR *valueB* |
 | `!=`     | `columnA!=queryValue` | Performs a **not equals** query. Returns all rows from *myTable* where values in *columnA* do not equal *queryValue* |
@@ -44,7 +45,12 @@ Search is case-insensitive. Search uses a tokenizer algorithm to
 split the text block and the search string into tokens and then
 looks for matching token sequences.
 
-## Search across all fields (`*=q=`)
+# Search query (`=sq=`)
+Same as search, except this uses the ElasticSearch [simple query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax).
+`version=sq='1.2.* | 1.3.*'`. The syntax is intended to be 
+simple enough that you can let the user type queries into a search box.
+
+## Search across all fields (`*=q=` and `*=sq=`)
 You can perform a search across all fields of a document by
 specifying `*` as column name: `*=q='search string'`.
 

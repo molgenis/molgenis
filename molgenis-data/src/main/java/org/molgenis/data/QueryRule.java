@@ -44,6 +44,8 @@ public class QueryRule {
     /** 'field' like 'value', searches all fields if field is not defined */
     SEARCH("search"),
 
+    SEARCH_QUERY("search_query"),
+
     /**
      * 'field' equal to 'value'
      *
@@ -159,7 +161,7 @@ public class QueryRule {
   /** Specific constructor for rules that do not apply to a field such as LIMIT and OFFSET. */
   @SuppressWarnings("unchecked")
   public QueryRule(Operator operator, Object value) {
-    if (operator == Operator.SEARCH) {
+    if (operator == Operator.SEARCH || operator == Operator.SEARCH_QUERY) {
       this.operator = operator;
       setValue(value);
     } else if (Operator.NESTED.equals(operator)) {

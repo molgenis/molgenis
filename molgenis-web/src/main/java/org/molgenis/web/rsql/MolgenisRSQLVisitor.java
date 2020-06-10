@@ -26,10 +26,15 @@ import org.molgenis.data.support.QueryImpl;
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> {
   private QueryImpl<Entity> q;
   private final Repository<Entity> repository;
-  private final RSQLValueParser rsqlValueParser = new RSQLValueParser();
+  private final RSQLValueParser rsqlValueParser;
 
   public MolgenisRSQLVisitor(Repository<Entity> repository) {
+    this(repository, new RSQLValueParser());
+  }
+
+  public MolgenisRSQLVisitor(Repository<Entity> repository, RSQLValueParser rsqlValueParser) {
     this.repository = repository;
+    this.rsqlValueParser = rsqlValueParser;
   }
 
   private void initQuery() {
@@ -99,6 +104,14 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
           q.search(searchValue);
         } else {
           q.search(attrName, searchValue);
+        }
+        break;
+      case "=sq=":
+        String query = values.get(0);
+        if (attrName.equals("*")) {
+          q.searchQuery(query);
+        } else {
+          q.searchQuery(attrName, query);
         }
         break;
       case "==":

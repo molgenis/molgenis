@@ -12,6 +12,7 @@ import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
+import static org.molgenis.data.QueryRule.Operator.SEARCH_QUERY;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -51,6 +52,8 @@ public class QueryGenerator {
     queryClauseGeneratorMap.put(LIKE, new QueryClauseLikeGenerator(documentIdGenerator));
     queryClauseGeneratorMap.put(RANGE, new QueryClauseRangeGenerator(documentIdGenerator));
     queryClauseGeneratorMap.put(SEARCH, new QueryClauseSearchGenerator(documentIdGenerator));
+    queryClauseGeneratorMap.put(
+        SEARCH_QUERY, new QueryClauseSearchQueryGenerator(documentIdGenerator));
   }
 
   QueryBuilder createQueryBuilder(Query<Entity> query, EntityType entityType) {

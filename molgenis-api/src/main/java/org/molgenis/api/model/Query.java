@@ -22,6 +22,8 @@ public abstract class Query implements Serializable {
     NOT_IN,
     /** field: null/not-null value: String */
     MATCHES,
+    /** field: null/not-null value: String */
+    SEARCH_QUERY,
     /** field: not-null value: String */
     CONTAINS,
     /** field: not-null value: String */
@@ -97,6 +99,7 @@ public abstract class Query implements Serializable {
           validateItemStringOperator(query);
           break;
         case MATCHES:
+        case SEARCH_QUERY:
           validateStringOperator(query);
           break;
         case IN:

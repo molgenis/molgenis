@@ -85,6 +85,7 @@ public class QueryValidator {
         validateSimpleQueryRule(queryRule, entityType);
         break;
       case SEARCH:
+      case SEARCH_QUERY:
         validateSearchQueryRule(queryRule);
         break;
       case IN:

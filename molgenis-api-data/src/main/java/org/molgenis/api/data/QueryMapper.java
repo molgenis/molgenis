@@ -48,6 +48,9 @@ public class QueryMapper {
       case MATCHES:
         entityQuery.search(query.getItem(), (String) mapValue(query, entityType));
         break;
+      case SEARCH_QUERY:
+        entityQuery.searchQuery(query.getItem(), (String) mapValue(query, entityType));
+        break;
       case CONTAINS:
         entityQuery.like(query.getItem(), (String) mapValue(query, entityType));
         break;
@@ -102,6 +105,7 @@ public class QueryMapper {
                 query.getStringValue(), getAttribute(query.getItem(), entityType));
         break;
       case MATCHES:
+      case SEARCH_QUERY:
       case CONTAINS:
         mappedValue = query.getStringValue();
         break;
