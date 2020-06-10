@@ -7,7 +7,8 @@
                     <div class="col-md-12">
                         <div class="form-group threshold-widget">
                             <input name="threshold" value="${threshold?html}" type="text" class="form-control"/>
-                            <button id="update-threshold-button" class="btn btn-default" type="submit">Set Threshold
+                            <span class="threshold-percentage">%</span>
+                            <button id="update-threshold-button" class="btn btn-default" type="submit">Update Threshold
                         </div>
                         </button>
                     </div>
