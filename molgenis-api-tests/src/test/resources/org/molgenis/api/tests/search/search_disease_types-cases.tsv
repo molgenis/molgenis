@@ -15,3 +15,6 @@
 "DT014"	"code"	"LIKE"	"ORPHA:100"	"45"	"ORPHA:100,ORPHA:1000,ORPHA:100008"	"Finds substrings at the start"
 "DT015"	"label"	"LIKE"	"lvé"	"2"	"ORPHA:2380,urn:miriam:icd:M91.1"	"Finds substrings with accents"
 "DT016"	"label"	"LIKE"	"calve"	"0"		"Postgres ILIKE does not do ascii folding [SHOULD FIND MATCHES]"
+"DT017"	"*"	"SEARCH_QUERY"	"E26* -unspecified"	"4"	"urn:miriam:icd:E26,urn:miriam:icd:E26.0"	"Simple query string search query searches across fields"
+"DT018"	"label"	"SEARCH_QUERY"	"aciduria type 3"	"3"		"without quotes, is independent of order"
+"DT019"	"label"	"SEARCH_QUERY"	"aciduria ""type 3"""	"1"		"with quotes, is phrase query"

@@ -9,3 +9,4 @@
 "SRV008"	"name"	"SEARCH"	"molgenis"	"1"	"molgenis23"	"Finds molgenis in server name"
 "SRV009"	"url"	"SEARCH"	"https://molgenis.org/demo"	"1"	"molgenis09"	"Finds server by exact URL"
 "SRV010"	"version"	"SEARCH"	"SNAPSHOT"	"0"		"Only matches exact strings [SHOULD FIND MATCHES]"
+"SRV011"	"version"	"SEARCH_QUERY"	"8.3.*"	"1"	"molgenis09"	"simple query string with wildcard"

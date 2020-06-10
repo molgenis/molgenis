@@ -37,6 +37,7 @@ public class ApiConfig implements WebMvcConfigurer {
   private RSQLParser rsqlParser() {
     Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
     operators.add(new ComparisonOperator("=q=", false));
+    operators.add(new ComparisonOperator("=sq=", false));
     operators.add(new ComparisonOperator("=like=", false));
     operators.add(new ComparisonOperator("=notlike=", false));
     return new RSQLParser(operators);
