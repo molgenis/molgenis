@@ -37,7 +37,7 @@ public class MatchingTaskContentMetaData extends SystemEntityType {
     setPackage(ontologyPackage);
 
     setAbstract(true);
-    addAttribute(IDENTIFIER, ROLE_ID);
+    addAttribute(IDENTIFIER, ROLE_ID).setAuto(true);
     addAttribute(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true);
     addAttribute(SCORE).setDataType(DECIMAL).setDescription("Score of the match").setNillable(true);
     addAttribute(VALIDATED)
