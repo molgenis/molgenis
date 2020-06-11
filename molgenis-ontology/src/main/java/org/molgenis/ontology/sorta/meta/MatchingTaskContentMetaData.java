@@ -22,6 +22,7 @@ public class MatchingTaskContentMetaData extends SystemEntityType {
   public static final String MATCHED_TERM = "matchTerm";
   public static final String SCORE = "score";
   public static final String VALIDATED = "validated";
+  public static final String REVIEW = "review";
 
   private final OntologyPackage ontologyPackage;
 
@@ -36,12 +37,17 @@ public class MatchingTaskContentMetaData extends SystemEntityType {
     setPackage(ontologyPackage);
 
     setAbstract(true);
-    addAttribute(IDENTIFIER, ROLE_ID);
+    addAttribute(IDENTIFIER, ROLE_ID).setAuto(true);
     addAttribute(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true);
     addAttribute(SCORE).setDataType(DECIMAL).setDescription("Score of the match").setNillable(true);
     addAttribute(VALIDATED)
         .setDataType(BOOL)
         .setDescription("Indication if the match was validated")
+        .setNillable(false);
+    addAttribute(REVIEW)
+        .setDataType(BOOL)
+        .setDefaultValue(Boolean.FALSE.toString())
+        .setDescription("Indication if the match needs later review")
         .setNillable(false);
   }
 }
