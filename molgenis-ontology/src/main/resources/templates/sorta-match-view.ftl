@@ -11,7 +11,7 @@
         <div class="col-md-12">
             <br>
             <div class="row">
-                <div class="col-md-offset-3 col-md-6">
+                <div class="col-md-12">
                     <legend>
                         <center><strong>SORTA</strong> - <strong>S</strong>ystem for <strong>O</strong>ntology-based
                             <strong>R</strong>e-coding and <strong>T</strong>echnical <strong>A</strong>nnotation
@@ -23,8 +23,8 @@
             <@listTasks />
         <#else>
             <div class="row">
-                <div class="col-md-offset-2 col-md-2">
-                    <button id="back-button" type="button" class="btn btn-primary">Restart</button>
+                <div class="col-md-12">
+                    <button id="back-button" type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-chevron-left"></span> Back to Tasks</button>
                 </div>
             </div>
             <script>
@@ -56,4 +56,4 @@
         });
     </script>
 </form>
-<@footer/>	
+<@footer/>
