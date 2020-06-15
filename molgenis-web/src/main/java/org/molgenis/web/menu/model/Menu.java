@@ -37,7 +37,7 @@ public abstract class Menu implements MenuNode {
   }
 
   private boolean containsMenuItem(MenuNode it, String itemId) {
-    if (it instanceof MenuItem) {
+    if (it instanceof MenuItem || it instanceof Link) {
       return it.getId().equals(itemId);
     } else {
       return it.getId().equals(itemId) || !((Menu) it).getItems().isEmpty();

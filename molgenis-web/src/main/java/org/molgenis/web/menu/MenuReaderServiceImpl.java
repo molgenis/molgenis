@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.model.Link;
 import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.molgenis.web.menu.model.MenuNode;
@@ -30,6 +31,8 @@ public class MenuReaderServiceImpl implements MenuReaderService {
   private boolean userHasViewPermission(MenuNode it) {
     if (it instanceof MenuItem) {
       return userPermissionEvaluator.hasPermission(new PluginIdentity(it.getId()), VIEW_PLUGIN);
+    } else if (it instanceof Link) {
+      return true;
     } else {
       return !((Menu) it).getItems().isEmpty();
     }
