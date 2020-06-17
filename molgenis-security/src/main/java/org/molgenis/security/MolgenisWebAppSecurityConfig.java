@@ -175,6 +175,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     expressionInterceptUrlRegistry
         .antMatchers(MolgenisLoginController.URI)
         .permitAll()
+        .antMatchers("/activate")
+        .permitAll()
         .antMatchers(TwoFactorAuthenticationController.URI + "/**")
         .permitAll()
         .antMatchers("/beacon/**")

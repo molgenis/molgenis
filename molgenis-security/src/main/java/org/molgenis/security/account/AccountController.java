@@ -94,6 +94,11 @@ public class AccountController {
     return model;
   }
 
+  @GetMapping("/activate")
+  public String getActivateView() {
+    return "view-activate";
+  }
+
   @GetMapping("/password/reset")
   public String getPasswordResetForm() {
     return "resetpassword-modal";
@@ -164,10 +169,10 @@ public class AccountController {
     }
   }
 
-  @GetMapping("/activate/{activationCode}")
-  public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model) {
+  @PostMapping("/activate")
+  public String activateUser(@ModelAttribute Activation activation, Model model) {
     try {
-      accountService.activateUser(activationCode);
+      accountService.activateUser(activation.getActivationCode());
       model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
     } catch (MolgenisUserException e) {
       model.addAttribute("warningMessage", e.getMessage());
