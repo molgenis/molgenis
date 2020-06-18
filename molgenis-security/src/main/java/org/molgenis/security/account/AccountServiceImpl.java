@@ -98,7 +98,7 @@ public class AccountServiceImpl implements AccountService {
       SimpleMailMessage mailMessage = new SimpleMailMessage();
       mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
       mailMessage.setSubject("User registration for " + appSettings.getTitle());
-      mailMessage.setText(createActivationEmailText(user, activationUri));
+      mailMessage.setText(createActivationEmailTestWithCode(user, URI.create(baseActivationUri), activationCode));
       mailSender.send(mailMessage);
     } catch (MailException mce) {
       LOG.error("Could not send signup mail", mce);
@@ -153,6 +153,28 @@ public class AccountServiceImpl implements AccountService {
         + "In order to activate the user visit the following URL:"
         + '\n'
         + activationUri
+        + '\n'
+        + '\n';
+  }
+
+  private String createActivationEmailTestWithCode(User user, URI activationUri, String activationCode) {
+    return "User registration for "
+        + appSettings.getTitle()
+        + '\n'
+        + "User name: "
+        + user.getUsername()
+        + " Full name: "
+        + user.getFirstName()
+        + ' '
+        + user.getLastName()
+        + '\n'
+        + "In order to activate visit the following link"
+        + '\n'
+        + activationUri
+        + '\n'
+        + "And activate using the following code"
+        + '\n'
+        + activationCode
         + '\n'
         + '\n';
   }
