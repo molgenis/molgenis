@@ -99,6 +99,11 @@ public class AccountController {
     return "view-activate";
   }
 
+  @GetMapping("/activate-success")
+  public String getActivateSuccessView() {
+    return "view-activate-success";
+  }
+
   @GetMapping("/password/reset")
   public String getPasswordResetForm() {
     return "resetpassword-modal";
@@ -170,16 +175,14 @@ public class AccountController {
   }
 
   @PostMapping("/activate")
-  public String activateUser(@ModelAttribute Activation activation, Model model) {
+  public final String activateUser(@ModelAttribute Activation activation, Model model) {
     try {
       accountService.activateUser(activation.getActivationCode());
-      model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
-    } catch (MolgenisUserException e) {
-      model.addAttribute("warningMessage", e.getMessage());
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       model.addAttribute("errorMessage", e.getMessage());
+      return "redirect:/account/activate";
     }
-    return "redirect:/login";
+    return "redirect:/account/activate-success";
   }
 
   // Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
