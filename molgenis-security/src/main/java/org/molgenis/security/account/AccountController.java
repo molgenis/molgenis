@@ -173,7 +173,8 @@ public class AccountController {
   }
 
   @PostMapping("/activate")
-  public final String activateUser(@RequestParam("activationCode") String activationCode, Model model) {
+  public final String activateUser(
+      @RequestParam("activationCode") String activationCode, Model model) {
     try {
       accountService.activateUser(activationCode);
     } catch (Exception e) {
