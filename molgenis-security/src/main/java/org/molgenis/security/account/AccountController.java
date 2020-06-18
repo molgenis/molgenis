@@ -173,9 +173,9 @@ public class AccountController {
   }
 
   @PostMapping("/activate")
-  public final String activateUser(@ModelAttribute Activation activation, Model model) {
+  public final String activateUser(@RequestParam("activationCode") String activationCode, Model model) {
     try {
-      accountService.activateUser(activation.getActivationCode());
+      accountService.activateUser(activationCode);
     } catch (Exception e) {
       model.addAttribute("errorMessage", e.getMessage());
       return "redirect:/account/activate";
