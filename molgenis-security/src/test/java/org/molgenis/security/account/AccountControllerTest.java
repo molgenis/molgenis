@@ -109,11 +109,13 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
   @Test
   void activateUser() throws Exception {
     this.mockMvc
-        .perform(post("/account/activate")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED).content(
-                EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
-                    new BasicNameValuePair("activationCode", "123")
-                )))))
+        .perform(
+            post("/account/activate")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(
+                    EntityUtils.toString(
+                        new UrlEncodedFormEntity(
+                            Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
         .andExpect(view().name("redirect:/account/activate-success"));
     verify(accountService).activateUser("123");
   }
@@ -122,11 +124,13 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
   void activateUserMolgenisUserException() throws Exception {
     doThrow(new MolgenisUserException("message")).when(accountService).activateUser("123");
     this.mockMvc
-        .perform(post("/account/activate")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED).content(
-                EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
-                    new BasicNameValuePair("activationCode", "123")
-                )))))
+        .perform(
+            post("/account/activate")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(
+                    EntityUtils.toString(
+                        new UrlEncodedFormEntity(
+                            Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
         .andExpect(view().name("redirect:/account/activate"))
         .andExpect(model().attribute("errorMessage", "message"));
     verify(accountService).activateUser("123");
