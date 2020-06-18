@@ -179,7 +179,7 @@ public class AccountController {
     } catch (RuntimeException e) {
       model.addAttribute("errorMessage", e.getMessage());
     }
-    return "forward:/";
+    return "redirect:/login";
   }
 
   // Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
