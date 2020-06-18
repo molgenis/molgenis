@@ -91,9 +91,6 @@ public class AccountServiceImpl implements AccountService {
     dataService.add(USER, user);
     LOG.debug("created user {}", user.getUsername());
 
-    // send activation email
-    URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
-
     try {
       SimpleMailMessage mailMessage = new SimpleMailMessage();
       mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
