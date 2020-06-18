@@ -33,8 +33,6 @@ public class Activation {
 
   @Override
   public String toString() {
-    return "Activation{" +
-        "activation='" + activationCode + '\'' +
-        '}';
+    return "Activation{" + "activation='" + activationCode + '\'' + '}';
   }
 }
