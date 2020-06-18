@@ -139,24 +139,6 @@ public class AccountServiceImpl implements AccountService {
     }
   }
 
-  private String createActivationEmailText(User user, URI activationUri) {
-    return "User registration for "
-        + appSettings.getTitle()
-        + '\n'
-        + "User name: "
-        + user.getUsername()
-        + " Full name: "
-        + user.getFirstName()
-        + ' '
-        + user.getLastName()
-        + '\n'
-        + "In order to activate the user visit the following URL:"
-        + '\n'
-        + activationUri
-        + '\n'
-        + '\n';
-  }
-
   private String createActivationEmailTestWithCode(User user, URI activationUri, String activationCode) {
     return "User registration for "
         + appSettings.getTitle()
@@ -168,13 +150,11 @@ public class AccountServiceImpl implements AccountService {
         + ' '
         + user.getLastName()
         + '\n'
-        + "In order to activate visit the following link"
         + '\n'
-        + activationUri
+        + "In order to activate your account go to: " + activationUri
         + '\n'
-        + "And activate using the following code"
         + '\n'
-        + activationCode
+        + "and activate your account using the following code: " + activationCode
         + '\n'
         + '\n';
   }
