@@ -107,6 +107,22 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
+  void getActivateView() throws Exception {
+    this.mockMvc
+        .perform(get("/account/activate"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("view-activate"));
+  }
+
+  @Test
+  void getActivateSuccessView() throws Exception {
+    this.mockMvc
+        .perform(get("/account/activate-success"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("view-activate-success"));
+  }
+
+  @Test
   void activateUser() throws Exception {
     this.mockMvc
         .perform(
