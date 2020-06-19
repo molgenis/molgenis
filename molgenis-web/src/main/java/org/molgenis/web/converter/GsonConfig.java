@@ -11,6 +11,7 @@ import com.google.gson.TypeAdapterFactory;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.util.AutoGson;
+import org.molgenis.web.menu.model.Link;
 import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.molgenis.web.menu.model.MenuNode;
@@ -43,6 +44,7 @@ public class GsonConfig {
         RuntimeTypeAdapterFactory.of(MenuNode.class, "type");
     menuRuntimeTypeAdapterFactory.registerSubtype(getAutoValueClass(MenuItem.class), "plugin");
     menuRuntimeTypeAdapterFactory.registerSubtype(getAutoValueClass(Menu.class), "menu");
+    menuRuntimeTypeAdapterFactory.registerSubtype(getAutoValueClass(Link.class), "link");
     return menuRuntimeTypeAdapterFactory;
   }
 
