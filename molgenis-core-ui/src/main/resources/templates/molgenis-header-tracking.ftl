@@ -1,9 +1,20 @@
 <#-- Google Analytics tracking code -->
 <#if app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??>
 <script>
+        (function(){
+          window.gaOptout = function () {
+            $.cookie('gaOptout', 'true', { expires: 3650 });
+            location.reload();
+          }
         <#if cookieWall>
-        (function(){if('true' === $.cookie('permissionforcookies')){
+          if ($.cookie('permissionforcookies') !== 'true') {
+            return;
+          }
         </#if>
+        if ($.cookie('gaOptout') === 'true') {
+          $(function() {$('body').addClass('ga-opted-out')})
+          return;
+        }
         (function (i, s, o, g, r, a, m) {
             i['GoogleAnalyticsObject'] = r;
             i[r] = i[r] || function () {
@@ -29,8 +40,6 @@
         <#if app_settings.googleAnalyticsTrackingIdMolgenis??>
             ga('molgenisTracker.send', 'pageview');
         </#if>
-        <#if cookieWall>
-        }})();
-        </#if>
+        })();
 </script>
 </#if>

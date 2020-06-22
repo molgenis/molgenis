@@ -1,5 +1,18 @@
 /* Application CSS - start */
 
+/* Google analytics */
+.if-ga-opted-out {
+  display: none
+}
+
+body.ga-opted-out .unless-ga-opted-out {
+  display: none
+}
+
+body.ga-opted-out .if-ga-opted-out {
+  display: block
+}
+
 #spinner img {
   display: block;
   margin: 0 auto;

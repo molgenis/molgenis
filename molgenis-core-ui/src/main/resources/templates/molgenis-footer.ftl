@@ -24,6 +24,16 @@
                         href="http://www.ncbi.nlm.nih.gov/pubmed/17297480">Swertz &amp; Jansen (2007)</a> on use.
                 </em>
             </p>
+
+            <#if app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??>
+                <p class="text-muted text-center small unless-ga-opted-out">
+                    <em>We use Google Analytics to review this site's usage and improve our services.<br/>
+                    Click <a href="javascript:gaOptout()">here</a> to opt-out of Google Analytics.</em>
+                </p>
+                <p class="text-muted text-center small if-ga-opted-out">
+                    <em>You have opted out of Google Analytics.</em>
+                </p>
+            </#if>
         </div>
     </div>
   <#if !(authenticated!false)>
