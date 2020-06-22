@@ -65,6 +65,7 @@
 
         <#-- Include jQuery v3.3.1 to support bootstrap.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/jquery-3.3.1.min.js"/>"></script>
+        <script type="text/javascript" src="<@resource_href "/js/jquery.cookie-1.4.1.min.js"/>"></script>
 
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
