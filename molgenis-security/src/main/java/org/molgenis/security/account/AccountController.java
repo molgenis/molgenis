@@ -179,9 +179,9 @@ public class AccountController {
       accountService.activateUser(activationCode);
     } catch (Exception e) {
       model.addAttribute("errorMessage", e.getMessage());
-      return "redirect:/account/activate";
+      return "view-activate";
     }
-    return "redirect:/account/activate-success";
+    return "view-activate-success";
   }
 
   // Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)

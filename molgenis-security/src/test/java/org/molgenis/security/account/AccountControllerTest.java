@@ -132,7 +132,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
                     EntityUtils.toString(
                         new UrlEncodedFormEntity(
                             Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
-        .andExpect(view().name("redirect:/account/activate-success"));
+        .andExpect(view().name("view-activate-success"));
     verify(accountService).activateUser("123");
   }
 
@@ -147,7 +147,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
                     EntityUtils.toString(
                         new UrlEncodedFormEntity(
                             Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
-        .andExpect(view().name("redirect:/account/activate"))
+        .andExpect(view().name("view-activate"))
         .andExpect(model().attribute("errorMessage", "message"));
     verify(accountService).activateUser("123");
   }

@@ -16,33 +16,18 @@
             <h1>Activate Account</h1>
             <form action="/account/activate" method="post">
                 <div class="form-group">
-                    <label for="exampleInputEmail1">Code</label>
+                    <label for="activation-code">Code</label>
                     <input type="text" class="form-control" id="activation-code" name="activationCode" placeholder="Activation code">
                 </div>
                 <button type="submit" class="btn btn-success">Activate</button>
-                <div id="error-box" class="alert alert-danger" role="alert" style="display: none; margin-top: 1rem;"></div>
+                <#if errorMessage?has_content>
+                    <div id="error-box" class="alert alert-danger" role="alert" style="margin-top: 1rem;">
+                        ${errorMessage}
+                    </div>
+                </#if>
             </form>
         </div>
     </div>
 </div>
-
-<script type="text/javascript">
-    function getParameterByName(name) {
-        name = name.replace(/[\[\]]/g, '\\$&');
-        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-            results = regex.exec(window.location.href);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
-
-    window.onload = function () {
-        var errorMessage = getParameterByName('errorMessage');
-        if(errorMessage) {
-            document.getElementById('error-box').innerHTML = errorMessage;
-            document.getElementById('error-box').style.display = 'block';
-        }
-    }
-</script>
 </body>
 </html>	
