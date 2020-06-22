@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 /** A menu item. */
@@ -15,6 +16,11 @@ public abstract class Link implements MenuNode {
 
   /** @return the parameters for this menu item */
   public abstract String getParams();
+
+  @Override
+  public @NotEmpty String getType() {
+    return "link";
+  }
 
   @Override
   public Optional<MenuNode> filter(Predicate<MenuNode> predicate) {

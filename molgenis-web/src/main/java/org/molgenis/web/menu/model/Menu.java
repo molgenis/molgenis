@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 /** Menu grouping a list of child items. */
@@ -18,6 +19,11 @@ public abstract class Menu implements MenuNode {
 
   /** @return the child items grouped in this menu */
   public abstract List<MenuNode> getItems();
+
+  @Override
+  public @NotEmpty String getType() {
+    return "menu";
+  }
 
   @Override
   public Optional<MenuNode> filter(Predicate<MenuNode> predicate) {

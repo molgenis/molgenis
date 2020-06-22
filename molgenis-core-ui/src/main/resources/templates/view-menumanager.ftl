@@ -190,7 +190,7 @@
     <#if is_root>
     <ol class="vertical root">
     </#if>
-    <li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.label?html}">
+    <li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.label?html}" data-type="${menu.getType()}">
         <#if !is_root>
             <span class="glyphicon glyphicon-move"></span>
         </#if>
@@ -208,10 +208,30 @@
             <#list menu.items as item>
                 <#if item.menu>
                     <@create_menu_list item false/>
+                <#elseif item.getType() == 'link'>
+                    <li class="node"
+                        data-id="${item.id?html}"
+                        data-label="${item.label?html}"
+                        data-type="${item.getType()}"
+                        data-params="${item.url}">
+                        <span class="glyphicon glyphicon-move"></span>
+                        <span>${item.label?html}</span>
+                        <div class="pull-right">
+                            <span class="glyphicon glyphicon-edit edit-item-btn" data-toggle="modal"
+                                  data-target="#edit-item-modal"></span>
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </div>
+                    </li>
                 <#else>
+
                 <#-- extract query string from url -->
-                    <li class="node" data-id="${item.id?html}" data-label="${item.label?html}" <#if item.id != item.url>
-                        data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
+                    <li class="node"
+                        data-id="${item.id?html}"
+                        data-label="${item.label?html}"
+                        data-type="${item.getType()}"
+                        <#if item.id != item.url>
+                          data-params="${item.url?substring(item.id?length + 1)?html}"
+                        </#if>>
                         <span class="glyphicon glyphicon-move"></span>
                         <span>${item.label?html}</span>
                         <div class="pull-right">
@@ -243,7 +263,7 @@
 </#macro>
 
 <script id="menu-template" type="text/x-handlebars-template">
-    <li class="node highlight" data-id="{{id}}" data-label="{{label}}">
+    <li class="node highlight" data-id="{{id}}" data-label="{{label}}" data-type="{{type}}">
         <span class="glyphicon glyphicon-move"></span>
         <span>{{label}}</span>
         <div class="pull-right">
@@ -257,7 +277,7 @@
 </script>
 
 <script id="item-template" type="text/x-handlebars-template">
-    <li class="node" data-id="{{id}}" data-label="{{label}}" data-params="{{params}}">
+    <li class="node" data-id="{{id}}" data-label="{{label}}" data-params="{{params}}" data-type="{{type}}">
         <span class="glyphicon glyphicon-move"></span>
         <span>{{label}}</span>
         <div class="pull-right">

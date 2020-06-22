@@ -6,7 +6,8 @@
             list.children('li').each(function () {
                 var id = $(this).data('id');
                 var label = $(this).data('label');
-                if ($(this).hasClass('highlight')) {
+                var type = $(this).data('type');
+                if (type === 'menu') {
                     var sublist = $(this).children('ol');
                     var submenu = [];
                     menu.push({
@@ -22,7 +23,7 @@
                         'id': id,
                         'label': label,
                         'params': $(this).data('params'),
-                        'type': 'plugin'
+                        'type': type
                     });
                 }
             });
@@ -78,7 +79,8 @@
                 var element = editMenuForm.data('element');
                 element.replaceWith($(menuTemplate({
                     id: $('input[name="menu-id"]', editMenuForm).val(),
-                    label: $('input[name="menu-name"]', editMenuForm).val()
+                    label: $('input[name="menu-name"]', editMenuForm).val(),
+                    type: element.data('type')
                 })).append(element.children('ol')));
                 $('#edit-menu-modal').modal('hide');
             }
@@ -99,7 +101,8 @@
             if ($(this).valid()) {
                 $('li.root>ol', container).prepend(menuTemplate({
                     id: $('input[name="menu-id"]', addGroupForm).val(),
-                    label: $('input[name="menu-name"]', addGroupForm).val()
+                    label: $('input[name="menu-name"]', addGroupForm).val(),
+                    type: 'menu'
                 }));
             }
         });
@@ -117,7 +120,8 @@
                 $('li.root>ol', container).prepend(itemTemplate({
                     id: $('select[name="menu-item-select"]', addItemForm).val(),
                     label: $('input[name="menu-item-name"]', addItemForm).val(),
-                    params: $('input[name="menu-item-params"]', addItemForm).val()
+                    params: $('input[name="menu-item-params"]', addItemForm).val(),
+                    type: 'plugin'
                 }));
             }
         });
@@ -131,7 +135,8 @@
                 editItemForm.data('element').replaceWith(itemTemplate({
                     id: $('select[name="menu-item-select"]', editItemForm).val(),
                     label: $('input[name="menu-item-name"]', editItemForm).val(),
-                    params: $('input[name="menu-item-params"]', editItemForm).val()
+                    params: $('input[name="menu-item-params"]', editItemForm).val(),
+                    type: editItemForm.data().element.data('type')
                 }));
                 $('#edit-item-modal').modal('hide');
             }

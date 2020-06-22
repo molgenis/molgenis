@@ -233,7 +233,7 @@
                     <#list menu.items as item>
 
                     <#-- Single menu items -->
-                        <#if !item.isMenu()>
+                        <#if item.getType() == "plugin">
                             <#if item.label != "Home" || !app_settings.logoNavBarHref?has_content>
                                 <#if item.url == pluginid_with_query_string>
                                     <li class="active"><a href="#">${item.label?html}</a></li>
@@ -242,7 +242,10 @@
                                     </li>
                                 </#if>
                             </#if>
-
+                        <#elseif item.getType() == "link">
+                            <li>
+                                <a class="active" href="${item.url?html}">${item.label?html}</a>
+                            </li>
                         <#-- Dropdown menu items -->
                         <#else>
                             <#assign sub_menu = item>

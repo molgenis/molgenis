@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 /** A menu item. */
@@ -17,6 +18,11 @@ public abstract class MenuItem implements MenuNode {
   /** @return the parameters for this menu item */
   @Nullable
   public abstract String getParams();
+
+  @Override
+  public @NotEmpty String getType() {
+    return "plugin";
+  }
 
   @Override
   public Optional<MenuNode> filter(Predicate<MenuNode> predicate) {
@@ -45,7 +51,7 @@ public abstract class MenuItem implements MenuNode {
 
   /** @return the URL of this menu item, which is the combination of its ID and its parameters. */
   public String getUrl() {
-    return Optional.ofNullable(getParams()).map(params -> getId() + "?" + params).orElse(getId());
+    return Optional.ofNullable(getParams()).map(it -> getId() + "/" + it).orElse(getId());
   }
 
   public static MenuItem create(String id, String label) {

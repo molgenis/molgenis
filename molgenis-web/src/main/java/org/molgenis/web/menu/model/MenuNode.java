@@ -18,6 +18,9 @@ public interface MenuNode {
   @NotEmpty
   String getLabel();
 
+  @NotEmpty
+  String getType();
+
   /** @return true if this is a menu, false if it is a menu item */
   boolean isMenu();
 

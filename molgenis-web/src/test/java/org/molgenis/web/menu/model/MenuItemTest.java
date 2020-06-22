@@ -11,7 +11,7 @@ class MenuItemTest {
   void itemWithParams() {
     MenuItem menuItem = MenuItem.create("id", "label", "params");
     assertEquals("params", menuItem.getParams());
-    assertEquals("id?params", menuItem.getUrl());
+    assertEquals("id/params", menuItem.getUrl());
   }
 
   @Test
