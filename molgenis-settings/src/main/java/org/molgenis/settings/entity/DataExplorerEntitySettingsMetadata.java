@@ -78,7 +78,7 @@ public class DataExplorerEntitySettingsMetadata extends SystemEntityType {
         .setAuto(false)
         .setUnique(false)
         .setReadOnly(false)
-        .setLabel("is shop")
+        .setLabel("Is shop")
         .setDescription("Can users shop items from this table?");
     addAttribute(TEMPLATE_ATTRS)
         .setDataType(STRING)
