@@ -16,7 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.google.gson.Gson;
+import java.util.Arrays;
 import java.util.stream.Stream;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
@@ -103,8 +107,32 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
+  void getActivateView() throws Exception {
+    this.mockMvc
+        .perform(get("/account/activate"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("view-activate"));
+  }
+
+  @Test
+  void getActivateSuccessView() throws Exception {
+    this.mockMvc
+        .perform(get("/account/activate-success"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("view-activate-success"));
+  }
+
+  @Test
   void activateUser() throws Exception {
-    this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
+    this.mockMvc
+        .perform(
+            post("/account/activate")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(
+                    EntityUtils.toString(
+                        new UrlEncodedFormEntity(
+                            Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
+        .andExpect(view().name("view-activate-success"));
     verify(accountService).activateUser("123");
   }
 
@@ -112,9 +140,15 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
   void activateUserMolgenisUserException() throws Exception {
     doThrow(new MolgenisUserException("message")).when(accountService).activateUser("123");
     this.mockMvc
-        .perform(get("/account/activate/123"))
-        .andExpect(view().name("forward:/"))
-        .andExpect(model().attribute("warningMessage", "message"));
+        .perform(
+            post("/account/activate")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content(
+                    EntityUtils.toString(
+                        new UrlEncodedFormEntity(
+                            Arrays.asList(new BasicNameValuePair("activationCode", "123"))))))
+        .andExpect(view().name("view-activate"))
+        .andExpect(model().attribute("errorMessage", "message"));
     verify(accountService).activateUser("123");
   }
 
