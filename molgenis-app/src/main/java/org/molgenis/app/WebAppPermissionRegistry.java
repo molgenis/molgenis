@@ -122,7 +122,11 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(PACKAGE, PACKAGE_ONTOLOGY, viewer, READ);
     register(PACKAGE, PACKAGE_META, viewer, READ);
     register(PACKAGE, PACKAGE_SYSTEM, viewer, READMETA);
-    register(ENTITY_TYPE, DataExplorerEntitySettingsMetadata.DATA_EXPLORER_ENTITY_SETTINGS, anonymousRole, READ);
+    register(
+        ENTITY_TYPE,
+        DataExplorerEntitySettingsMetadata.DATA_EXPLORER_ENTITY_SETTINGS,
+        anonymousRole,
+        READ);
   }
 
   @Override
