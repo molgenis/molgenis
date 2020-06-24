@@ -142,8 +142,12 @@ class AccountServiceImplTest extends AbstractMockitoSpringContextTests {
     expected.setText(
         "User registration for Molgenis title\n"
             + "User name: jansenj Full name: Jan Jansen\n"
-            + "In order to activate the user visit the following URL:\n"
-            + "http://molgenis.org/activate/3541db68-435b-416b-8c2c-cf2edf6ba435\n\n");
+            + "\n"
+            + "In order to activate your account go to: http://molgenis.org/activate\n"
+            + "\n"
+            + "and activate your account using the following code: 3541db68-435b-416b-8c2c-cf2edf6ba435"
+            + "\n"
+            + "\n");
 
     verify(mailSender).send(expected);
   }
