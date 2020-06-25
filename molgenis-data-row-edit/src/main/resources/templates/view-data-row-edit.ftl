@@ -15,7 +15,7 @@
         baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}',
-        dataExplorerBaseUrl: '${dataExplorerBaseUrl}'
+        dataExplorerBaseUrl: <#if dataExplorerBaseUrl??>\'${dataExplorerBaseUrl}\'<#else>null</#if>
     }
 </script>
 
