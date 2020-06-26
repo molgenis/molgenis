@@ -48,7 +48,7 @@ class MappingContentBuilderTest {
   }
 
   @Test
-  void testCreateMappingKeywordCaseSensitive() throws IOException {
+  void testCreateMappingKeywordCaseSensitive() {
     Mapping mapping =
         createMapping(
             FieldMapping.builder()
@@ -59,7 +59,7 @@ class MappingContentBuilderTest {
 
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
 
-    assertEquals(JSON_KEYWORD_CASE_SENSITIVE, xContentBuilder.string());
+    assertEquals(JSON_KEYWORD_CASE_SENSITIVE, xContentBuilder.getOutputStream().toString());
   }
 
   @Test
