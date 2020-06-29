@@ -2,6 +2,7 @@ package org.molgenis.api.metadata.v3;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -101,9 +102,9 @@ class EntityTypeResponseMapperTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("MyEntityTypeId");
     doReturn("My Entity Type").when(entityType).getLabel();
-    doReturn("My Entity Type").when(entityType).getLabel("en");
+    doReturn("My Entity Type").when(entityType).getLabel(any(String.class));
     doReturn("My Entity Type description").when(entityType).getDescription();
-    doReturn("My Entity Type description").when(entityType).getDescription("en");
+    doReturn("My Entity Type description").when(entityType).getDescription(any(String.class));
     when(entityType.getDescription()).thenReturn("My Entity Type description");
     when(entityType.getString("labelEn")).thenReturn("My Entity Type (en)");
 
