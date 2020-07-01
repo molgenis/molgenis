@@ -53,7 +53,7 @@ import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.securityui.controller.SecurityUiController;
-import org.molgenis.settings.entity.DataExplorerEntitySettingsMetadata;
+import org.molgenis.settings.entity.DataExplorerEntitySettings;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -123,10 +123,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(PACKAGE, PACKAGE_META, viewer, READ);
     register(PACKAGE, PACKAGE_SYSTEM, viewer, READMETA);
     register(
-        ENTITY_TYPE,
-        DataExplorerEntitySettingsMetadata.DATA_EXPLORER_ENTITY_SETTINGS,
-        anonymousRole,
-        READ);
+        ENTITY_TYPE, DataExplorerEntitySettings.DATA_EXPLORER_ENTITY_SETTINGS, anonymousRole, READ);
   }
 
   @Override

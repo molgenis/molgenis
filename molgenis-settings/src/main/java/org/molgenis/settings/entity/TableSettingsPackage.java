@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntitySettingsPackage extends SystemPackage {
-  public static final String SIMPLE_NAME = "entity";
+public class TableSettingsPackage extends SystemPackage {
+  public static final String SIMPLE_NAME = "ts";
   public static final String PACKAGE_ENTITY_SETTINGS =
       PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   private RootSystemPackage rootSystemPackage;
 
-  protected EntitySettingsPackage(PackageMetadata packageMetadata) {
+  protected TableSettingsPackage(PackageMetadata packageMetadata) {
     super(PACKAGE_ENTITY_SETTINGS, packageMetadata);
   }
 

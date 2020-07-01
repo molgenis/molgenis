@@ -7,41 +7,40 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.settings.entity.EntitySettingsPackage.PACKAGE_ENTITY_SETTINGS;
+import static org.molgenis.settings.entity.TableSettingsPackage.PACKAGE_ENTITY_SETTINGS;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataExplorerEntitySettingsMetadata extends SystemEntityType {
+public class DataExplorerEntitySettings extends SystemEntityType {
 
   private static final String SIMPLE_NAME = "DataExplorerEntitySettings";
   private static final String TABLE = "table";
-  private static final String TABLE_LABEL = "table_label";
   private static final String CARD_TEMPLATE = "card_template";
   private static final String SHOP = "shop";
   private static final String TEMPLATE_ATTRS = "template_attrs";
   private static final String COLLAPSE_LIMIT = "collapse_limit";
   private static final String DEFAULT_FILTERS = "default_filters";
-  private final EntitySettingsPackage entitySettingsPackage;
+  private final TableSettingsPackage tableSettingsPackage;
   public static final String DATA_EXPLORER_ENTITY_SETTINGS =
       PACKAGE_ENTITY_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";
   private EntityTypeMetadata entityTypeMetaData;
 
-  public DataExplorerEntitySettingsMetadata(
-      EntitySettingsPackage entitySettingsPackage, EntityTypeMetadata entityTypeMetaData) {
+  public DataExplorerEntitySettings(
+      TableSettingsPackage tableSettingsPackage, EntityTypeMetadata entityTypeMetaData) {
     super(SIMPLE_NAME, PACKAGE_ENTITY_SETTINGS);
-    this.entitySettingsPackage = requireNonNull(entitySettingsPackage);
+    this.tableSettingsPackage = requireNonNull(tableSettingsPackage);
     this.entityTypeMetaData = requireNonNull(entityTypeMetaData);
   }
 
   @Override
   protected void init() {
     setLabel(SIMPLE_NAME);
-    setPackage(entitySettingsPackage);
+    setPackage(tableSettingsPackage);
     setDescription("Settings entities for per entity config");
     addAttribute(ID, ROLE_ID)
         .setDataType(STRING)
@@ -59,13 +58,6 @@ public class DataExplorerEntitySettingsMetadata extends SystemEntityType {
         .setReadOnly(false)
         .setLabel("Table")
         .setDescription("The table to apply the settings to");
-    addAttribute(TABLE_LABEL)
-        .setDataType(STRING)
-        .setNillable(false)
-        .setAuto(false)
-        .setUnique(false)
-        .setReadOnly(false)
-        .setLabel("Table label");
     addAttribute(CARD_TEMPLATE)
         .setDataType(SCRIPT)
         .setNillable(true)
