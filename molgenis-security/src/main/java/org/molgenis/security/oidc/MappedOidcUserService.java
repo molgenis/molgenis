@@ -30,22 +30,8 @@ public class MappedOidcUserService extends OidcUserService {
 
   private MappedOidcUser createOidcUser(OidcUser oidcUser, OidcUserRequest userRequest) {
     User user = oidcUserMapper.toUser(oidcUser, userRequest);
-    String userNameAttributeName = getUserNameAttributeName(userRequest);
     Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
     return new MappedOidcUser(
-        authorities,
-        oidcUser.getIdToken(),
-        oidcUser.getUserInfo(),
-        userNameAttributeName,
-        user.getUsername());
-  }
-
-  /** package-private for testability */
-  private String getUserNameAttributeName(OidcUserRequest userRequest) {
-    return userRequest
-        .getClientRegistration()
-        .getProviderDetails()
-        .getUserInfoEndpoint()
-        .getUserNameAttributeName();
+        authorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), user.getUsername());
   }
 }
