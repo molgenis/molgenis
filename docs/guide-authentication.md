@@ -136,6 +136,32 @@ a new MOLGENIS user is created. The mapping from an OpenID client user to MOLGEN
 be modified by an administrator if required. Multiple mappings to the same user are allowed such that when a user signs in with e.g. either a Google
 and SURFconext account will be identified as the same MOLGENIS user.
 
+#### How the OpenID Connect user is mapped to a MOLGENIS User:
+1. The OpenID Connect user's claims are retrieved from the `userInfoUri` endpoint.
+1. Verify that the OpenID Connect user has an `email` claim
+2. If the OpenID Connect user has an `email_verified` claim,
+    verify that, converted to boolean, it equals true
+3. Look for an OidcUserMapping where
+    - the `oidcClient` attribute equals the OidcClient's `registrationId`
+    and
+    - the `oidcUsername` attribute equals the OpenID Connect user's `sub` claim
+4. If such a mapping is found, return the MOLGENIS User that this mapping refers to.
+5. Otherwise: Search the MOLGENIS User table for a user
+    whose `Email` attribute equals the OpenID Connect user's `email` claim.
+6. If no such user exists: Create a new MOLGENIS User:
+    1. username equals `email` claim
+    2. random password
+    3. email address equals the `email` claim
+    4. active is true
+    5. First name equals the `given_name` claim
+    6. Last name equals the `family_name` claim
+7. Add an OidcUserMapping for the MOLGENIS User:
+    1. Label equals <clientRegistration's registrationId>:<`sub` claim>
+    2. OidcClient equals the oidcClient for the UserRequest
+    3. oidcUsername equals the `sub` claim
+    4. user equals the MOLGENIS User
+8. Return the MOLGENIS User
+
 ## Token-authentication
 When you use the REST API you have to authenticate using a token. There are 3 ways you can generate a token.
  * Create a token via the REST API v1 /login route (only available without two-factor authentication)
