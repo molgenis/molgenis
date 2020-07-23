@@ -12,7 +12,11 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
-/** {@link DefaultOidcUser} with a mapped username. */
+/**
+ * {@link DefaultOidcUser} with a mapped username.
+ *
+ * <p><img src="{@docRoot}/doc-files/MappedOidcUser.png" width="640">
+ */
 public class MappedOidcUser extends DefaultOidcUser {
 
   private final String username;
