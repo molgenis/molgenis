@@ -219,7 +219,7 @@ pipeline {
                             }
                         }
                         container('maven') {
-                            sh "mvn -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
+                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                         }
                     }
                 }
