@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.molgenis.security.oidc.MappedOidcUser</OriginalElement>
+  <nodes>
+    <node x="0.0" y="340.0">org.springframework.security.oauth2.core.oidc.user.OidcUser</node>
+    <node x="131.0" y="306.0">org.springframework.security.oauth2.core.user.DefaultOAuth2User</node>
+    <node x="97.25" y="204.0">org.springframework.security.oauth2.core.user.OAuth2User</node>
+    <node x="81.25" y="602.0">org.molgenis.security.oidc.MappedOidcUser</node>
+    <node x="26.75" y="102.0">org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal</node>
+    <node x="50.25" y="0.0">org.springframework.security.core.AuthenticatedPrincipal</node>
+    <node x="66.25" y="476.0">org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.springframework.security.oauth2.core.oidc.user.OidcUser" target="org.springframework.security.oauth2.core.user.OAuth2User">
+      <point x="0.0" y="-26.0" />
+      <point x="55.5" y="281.0" />
+      <point x="128.75" y="281.0" />
+      <point x="-31.5" y="26.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser" target="org.springframework.security.oauth2.core.user.DefaultOAuth2User">
+      <point x="47.0" y="-38.0" />
+      <point x="207.25" y="451.0" />
+      <point x="265.0" y="451.0" />
+      <point x="0.0" y="60.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal" target="org.springframework.security.core.AuthenticatedPrincipal">
+      <point x="0.0" y="-26.0" />
+      <point x="0.0" y="26.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.core.user.DefaultOAuth2User" target="org.springframework.security.oauth2.core.user.OAuth2User">
+      <point x="0.0" y="-60.0" />
+      <point x="265.0" y="281.0" />
+      <point x="191.75" y="281.0" />
+      <point x="31.5" y="26.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser" target="org.springframework.security.oauth2.core.oidc.user.OidcUser">
+      <point x="-47.0" y="-38.0" />
+      <point x="113.25" y="451.0" />
+      <point x="55.5" y="451.0" />
+      <point x="0.0" y="26.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.core.user.OAuth2User" target="org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal">
+      <point x="0.0" y="-26.0" />
+      <point x="0.0" y="26.0" />
+    </edge>
+    <edge source="org.molgenis.security.oidc.MappedOidcUser" target="org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser">
+      <point x="0.0" y="-27.0" />
+      <point x="0.0" y="38.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="199.5" y="328.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

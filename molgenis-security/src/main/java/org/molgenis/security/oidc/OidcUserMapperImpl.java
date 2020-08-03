@@ -21,6 +21,12 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Maps {@link OidcUser} to a Molgenis {@link User}. The mapping is stored as an editable {@link
+ * OidcUserMapping}.
+ *
+ * <p><img src="{@docRoot}/doc-files/OidcUserMapperImpl.png" width="640">
+ */
 public class OidcUserMapperImpl implements OidcUserMapper {
 
   private final DataService dataService;

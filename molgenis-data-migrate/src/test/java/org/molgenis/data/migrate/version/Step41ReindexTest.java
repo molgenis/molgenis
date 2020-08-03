@@ -1,6 +1,7 @@
 package org.molgenis.data.migrate.version;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.molgenis.data.elasticsearch.client.ClientFacade;
 import org.molgenis.data.elasticsearch.generator.model.Index;
+import org.molgenis.data.index.exception.UnknownIndexException;
 
 @ExtendWith(MockitoExtension.class)
 class Step41ReindexTest {
@@ -28,5 +30,12 @@ class Step41ReindexTest {
     step41Reindex.upgrade();
 
     verify(clientFacade).deleteIndex(attributeIndex);
+  }
+
+  @Test
+  void testUpgradeIndexNotFound() {
+    doThrow(new UnknownIndexException("Not found")).when(clientFacade).deleteIndex(attributeIndex);
+
+    step41Reindex.upgrade();
   }
 }

@@ -3,9 +3,9 @@ package org.molgenis.security.core.utils;
 import java.util.Collection;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,8 +47,8 @@ public class SecurityUtils {
       username = null;
     } else if (principal instanceof UserDetails) {
       username = ((UserDetails) principal).getUsername();
-    } else if (principal instanceof MappedAuthenticatedPrincipal) {
-      username = ((MappedAuthenticatedPrincipal) principal).getMappedName();
+    } else if (principal instanceof AuthenticatedPrincipal) {
+      username = ((AuthenticatedPrincipal) principal).getName();
     } else {
       username = principal.toString();
     }
