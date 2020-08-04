@@ -170,7 +170,7 @@ Create the file in ```/etc/httpd/conf.d/```
     RewriteRule ^/@molgenis-ui/app-manager/(.+)         /@molgenis-ui/app-manager@0.1.4/$1 [P]
     RewriteRule ^/@molgenis-ui/core-ui/(.+)             /@molgenis-ui/core-ui@0.3.1/$1 [P]
     RewriteRule ^/@molgenis-ui/legacy-lib/(.+)          /@molgenis-ui/legacy-lib@1.1.2/$1 [P]
-    RewriteRule ^/@molgenis-ui/data-row-edit/(.+)       /@molgenis-ui/data-row-edit@3.0.3/$1 [P]
+    RewriteRule ^/@molgenis-ui/data-row-edit/(.+)       /@molgenis-ui/data-row-edit@3.0.5/$1 [P]
     RewriteRule ^/@molgenis-ui/metadata-manager/(.+)    /@molgenis-ui/metadata-manager@0.1.8/$1 [P]
     RewriteRule ^/@molgenis-ui/navigator/(.+)           /@molgenis-ui/navigator@0.1.3/$1 [P]
     RewriteRule ^/@molgenis-ui/one-click-importer/(.+)  /@molgenis-ui/one-click-importer@0.1.4/$1 [P]
@@ -179,6 +179,7 @@ Create the file in ```/etc/httpd/conf.d/```
     RewriteRule ^/@molgenis-ui/search-all/(.+)          /@molgenis-ui/search-all@0.1.4/$1 [P]
     RewriteRule ^/@molgenis-ui/security/(.+)            /@molgenis-ui/security@0.2.0/$1 [P]
     RewriteRule ^/@molgenis-ui/settings/(.+)            /@molgenis-ui/settings@2.0.2/$1 [P]
+    RewriteRule ^/@molgenis-ui/data-explorer/(.+)       /@molgenis-ui/data-explorer@0.35.0/$1 [P]
    
     ProxyRequests Off
     ProxyPreserveHost On
