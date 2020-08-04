@@ -3,6 +3,7 @@ package org.molgenis.api.tests.identities;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
 import static org.molgenis.test.IsEqualJson.isEqualJson;
+import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.molgenis.api.tests.AbstractApiTests;
 import org.molgenis.test.TestResourceUtils;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.HttpStatus;
 
 @TestMethodOrder(OrderAnnotation.class)
@@ -182,7 +182,7 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
         .get("/api/identities/group/" + GROUP_NAME + "/role")
         .then()
         .statusCode(HttpStatus.OK.value())
-        .body(isEqualJson(expectedRoleJson));
+        .body(isEqualJson(expectedRoleJson, LENIENT));
   }
 
   @Test
@@ -380,6 +380,6 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
           result.replaceAll(
               "\"" + field + "\":\\s?\"[a-zA-Z0-9/\\=\\?:\\-_]*\"", "\"" + field + "\":\"AUTOID\"");
     }
-    assertThat(result, isEqualJson(expectedJson, JSONCompareMode.LENIENT));
+    assertThat(result, isEqualJson(expectedJson, LENIENT));
   }
 }
