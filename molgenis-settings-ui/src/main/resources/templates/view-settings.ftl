@@ -19,10 +19,9 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/settings/dist/css/app.css"/>
+<link rel="stylesheet" href="/@molgenis-ui/settings/dist/css/chunk-vendors.css"/>
 
-<script type=text/javascript src="/@molgenis-ui/settings/dist/js/manifest.js"></script>
-<script type=text/javascript src="/@molgenis-ui/settings/dist/js/vendor.js"></script>
+<script type=text/javascript src="/@molgenis-ui/settings/dist/js/chunk-vendors.js.js"></script>
 <script type=text/javascript src="/@molgenis-ui/settings/dist/js/app.js"></script>
 
 <@footer version/>
