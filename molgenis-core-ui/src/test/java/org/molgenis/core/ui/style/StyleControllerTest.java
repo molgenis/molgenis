@@ -62,4 +62,19 @@ class StyleControllerTest {
         .perform(get("/css/bootstrap-4/bootstrap-molgenis.min.css").with(anonymous()))
         .andExpect(status().isOk());
   }
+
+  @Test
+  void getActiveThemeCss() throws Exception {
+    FileSystemResource themeResource = mock(FileSystemResource.class);
+    InputStream inputStream =
+        new ByteArrayInputStream("selected style ".getBytes(StandardCharsets.UTF_8));
+    when(themeResource.getInputStream()).thenReturn(inputStream);
+    Style selectedStyle = mock(Style.class);
+    when(selectedStyle.getName()).thenReturn("molgenis-blue");
+    when(styleService.getSelectedStyle()).thenReturn(selectedStyle);
+    when(styleService.getThemeData(
+            "bootstrap-molgenis-blue.min.css", BootstrapVersion.BOOTSTRAP_VERSION_4))
+        .thenReturn(themeResource);
+    mockMvc.perform(get("/css/active-theme.css").with(anonymous())).andExpect(status().isOk());
+  }
 }
