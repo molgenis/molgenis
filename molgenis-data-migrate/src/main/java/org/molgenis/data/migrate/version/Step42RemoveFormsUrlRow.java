@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import javax.sql.DataSource;
 import org.molgenis.data.migrate.framework.MolgenisUpgrade;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -13,6 +14,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Step42RemoveFormsUrlRow extends MolgenisUpgrade {
   private static final Logger LOG = LoggerFactory.getLogger(Step42RemoveFormsUrlRow.class);
   private final JdbcTemplate jdbcTemplate;
+
+  public Step42RemoveFormsUrlRow(DataSource dataSource) {
+    this(new JdbcTemplate(dataSource));
+  }
 
   Step42RemoveFormsUrlRow(JdbcTemplate jdbcTemplate) {
     super(41, 42);

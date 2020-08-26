@@ -15,6 +15,7 @@ import org.molgenis.data.migrate.version.Step38AddAnonymouseRoleToDb;
 import org.molgenis.data.migrate.version.Step39CreateRootPackageGroups;
 import org.molgenis.data.migrate.version.Step40AddRoleSystem;
 import org.molgenis.data.migrate.version.Step41Reindex;
+import org.molgenis.data.migrate.version.Step42RemoveFormsUrlRow;
 import org.springframework.stereotype.Component;
 
 /** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
@@ -41,6 +42,7 @@ public class MolgenisUpgradeBootstrapper {
     upgradeService.addUpgrade(new Step39CreateRootPackageGroups(dataSource));
     upgradeService.addUpgrade(new Step40AddRoleSystem(dataSource));
     upgradeService.addUpgrade(new Step41Reindex(clientFacade));
+    upgradeService.addUpgrade(new Step42RemoveFormsUrlRow(dataSource));
     upgradeService.upgrade();
   }
 }
