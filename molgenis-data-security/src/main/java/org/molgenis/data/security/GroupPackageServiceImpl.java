@@ -44,6 +44,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
   private final DataService dataService;
   private final GroupFactory groupFactory;
   private final MutableAclService mutableAclService;
+  private final GroupService groupService;
 
   GroupPackageServiceImpl(
       GroupValueFactory groupValueFactory,
@@ -52,7 +53,8 @@ public class GroupPackageServiceImpl implements GroupPackageService {
       RoleFactory roleFactory,
       DataService dataService,
       GroupFactory groupFactory,
-      MutableAclService mutableAclService) {
+      MutableAclService mutableAclService,
+      GroupService groupService) {
 
     this.groupValueFactory = requireNonNull(groupValueFactory);
     this.roleMembershipService = requireNonNull(roleMembershipService);
@@ -61,6 +63,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
     this.dataService = requireNonNull(dataService);
     this.groupFactory = requireNonNull(groupFactory);
     this.mutableAclService = requireNonNull(mutableAclService);
+    this.groupService = requireNonNull(groupService);
   }
 
   @Override
@@ -119,8 +122,16 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
   private void deleteRoles(Group group) {
     Iterable<Role> roles = group.getRoles();
+    // Check if role is included elsewhere, if it is remove the inclusion
+    stream(roles)
+        .flatMap(this::includesRole)
+        .forEach(role -> groupService.removeExtendsRole(group, role));
     roles.forEach(this::deleteMembers);
     dataService.delete(RoleMetadata.ROLE, stream(roles));
+  }
+
+  private Stream<Role> includesRole(Role role) {
+    return dataService.query(ROLE, Role.class).eq(RoleMetadata.INCLUDES, role.getId()).findAll();
   }
 
   private void deleteMembers(Role role) {

@@ -62,6 +62,7 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private GroupFactory groupFactory;
   @Mock private MutableAclService mutableAclService;
+  @Mock private GroupService groupService;
 
   @Captor private ArgumentCaptor<Stream<Role>> roleCaptor;
   @Captor private ArgumentCaptor<Stream<RoleMembership>> memberCaptor;
@@ -78,7 +79,8 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
             roleFactory,
             dataService,
             groupFactory,
-            mutableAclService);
+            mutableAclService,
+            groupService);
   }
 
   @Test
@@ -227,12 +229,17 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
     Query<RoleMembership> membershipQuery = mock(Query.class, Mockito.RETURNS_SELF);
     when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
         .thenReturn(membershipQuery);
+
     Query<RoleMembership> role1Query = mock(Query.class);
     when(role1Query.findAll()).thenReturn(members.stream());
     doReturn(role1Query).when(membershipQuery).eq(RoleMembershipMetadata.ROLE, "role1");
+
     Query<RoleMembership> role2Query = mock(Query.class);
     when(role2Query.findAll()).thenReturn(Stream.empty());
     doReturn(role2Query).when(membershipQuery).eq(RoleMembershipMetadata.ROLE, "role2");
+
+    Query<Role> includesRoleQuery1 = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ROLE, Role.class)).thenReturn(includesRoleQuery1);
 
     groupPackageService.deleteGroup(pack);
 
