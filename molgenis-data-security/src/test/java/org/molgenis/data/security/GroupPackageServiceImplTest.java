@@ -39,7 +39,6 @@ import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupFactory;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupPackageService;
-import org.molgenis.data.security.auth.GroupPermissionService;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleFactory;
@@ -57,7 +56,6 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
 
   @Mock private GroupValueFactory groupValueFactory;
   @Mock private RoleMembershipService roleMembershipService;
-  @Mock private GroupPermissionService groupPermissionService;
   @Mock private RoleFactory roleFactory;
   @Mock private DataService dataService;
   @Mock private GroupFactory groupFactory;
@@ -75,7 +73,6 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
         new GroupPackageServiceImpl(
             groupValueFactory,
             roleMembershipService,
-            groupPermissionService,
             roleFactory,
             dataService,
             groupFactory,

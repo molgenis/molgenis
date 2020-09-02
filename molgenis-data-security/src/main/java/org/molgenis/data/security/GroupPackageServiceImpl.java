@@ -20,7 +20,6 @@ import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupFactory;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupPackageService;
-import org.molgenis.data.security.auth.GroupPermissionService;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleFactory;
@@ -39,7 +38,6 @@ import org.springframework.stereotype.Component;
 public class GroupPackageServiceImpl implements GroupPackageService {
   private final GroupValueFactory groupValueFactory;
   private final RoleMembershipService roleMembershipService;
-  private final GroupPermissionService groupPermissionService;
   private final RoleFactory roleFactory;
   private final DataService dataService;
   private final GroupFactory groupFactory;
@@ -49,7 +47,6 @@ public class GroupPackageServiceImpl implements GroupPackageService {
   GroupPackageServiceImpl(
       GroupValueFactory groupValueFactory,
       RoleMembershipService roleMembershipService,
-      GroupPermissionService groupPermissionService,
       RoleFactory roleFactory,
       DataService dataService,
       GroupFactory groupFactory,
@@ -58,7 +55,6 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
     this.groupValueFactory = requireNonNull(groupValueFactory);
     this.roleMembershipService = requireNonNull(roleMembershipService);
-    this.groupPermissionService = requireNonNull(groupPermissionService);
     this.roleFactory = requireNonNull(roleFactory);
     this.dataService = requireNonNull(dataService);
     this.groupFactory = requireNonNull(groupFactory);
@@ -93,7 +89,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
     dataService.add(ROLE, roles.values().stream());
 
-    groupPermissionService.grantDefaultPermissions(groupValue);
+    groupService.grantDefaultPermissions(groupValue);
     roleMembershipService.addUserToRole(
         SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
   }

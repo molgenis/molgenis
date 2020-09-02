@@ -48,7 +48,6 @@ import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupPermission;
-import org.molgenis.data.security.auth.GroupPermissionService;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
@@ -87,7 +86,6 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
 
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
-  @Mock private GroupPermissionService groupPermissionService;
   @Mock private RoleMembershipService roleMembershipService;
   @Mock private RoleService roleService;
   @Mock private UserService userService;
@@ -175,7 +173,6 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
           .andExpect(status().isBadRequest());
     } catch (NestedServletException e) {
       verifyNoMoreInteractions(groupService);
-      verifyNoMoreInteractions(groupPermissionService);
       verifyNoMoreInteractions(roleMembershipService);
       Exception exception =
           assertThrows(
