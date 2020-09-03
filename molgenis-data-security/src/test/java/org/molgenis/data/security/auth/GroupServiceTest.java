@@ -15,6 +15,8 @@ import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.GroupService.EDITOR;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
@@ -30,13 +32,19 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.security.GroupIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
+import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.permission.model.Permission;
+import org.molgenis.security.core.GroupValueFactoryTest;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.acls.model.MutableAclService;
 
 class GroupServiceTest extends AbstractMockitoTest {
   @Mock private PackageFactory packageFactory;
@@ -45,6 +53,8 @@ class GroupServiceTest extends AbstractMockitoTest {
 
   @Mock private GroupMetadata groupMetadata;
   @Mock private RoleMembershipService roleMembershipService;
+  @Mock private PermissionService permissionService;
+  @Mock private MutableAclService aclService;
   @Mock private Attribute attribute;
 
   @Mock private Group group;
@@ -87,7 +97,9 @@ class GroupServiceTest extends AbstractMockitoTest {
             dataService,
             groupMetadata,
             roleMembershipService,
-            roleMembershipMetadata);
+            roleMembershipMetadata,
+            aclService,
+            permissionService);
   }
 
   @Test
@@ -315,5 +327,21 @@ class GroupServiceTest extends AbstractMockitoTest {
     groupService.removeExtendsRole(group, anonymousRole);
     verify(anonymousRole).setIncludes(singletonList(includedRole));
     verify(dataService).update(ROLE, anonymousRole);
+  }
+
+  @Test
+  void testGrantPermissions() {
+    groupValue = GroupValueFactoryTest.getTestGroupValue();
+    groupService.grantDefaultPermissions(groupValue);
+
+    verify(permissionService)
+        .createPermission(
+            Permission.create(
+                new PackageIdentity("bbmri_eric"), createRoleSid("bbmri_eric_MANAGER"), WRITEMETA));
+    verify(aclService).createAcl(new GroupIdentity("bbmri_eric"));
+    verify(permissionService)
+        .createPermission(
+            Permission.create(
+                new GroupIdentity("bbmri_eric"), createRoleSid("bbmri_eric_MANAGER"), WRITEMETA));
   }
 }
