@@ -103,6 +103,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping(RestControllerV2.BASE_URI)
 @Timed(value = "rest.v2", description = "Timing information for the REST API v2.", histogram = true)
 public class RestControllerV2 {
+
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
   static final int MAX_ENTITIES = 1000;
@@ -160,8 +161,12 @@ public class RestControllerV2 {
   public Map<String, String> getVersion(
       @Value("${molgenis.version:@null}") String molgenisVersion,
       @Value("${molgenis.build.date:@null}") String molgenisBuildDate) {
-    if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
-    if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
+    if (molgenisVersion == null) {
+      throw new IllegalArgumentException("molgenisVersion is null");
+    }
+    if (molgenisBuildDate == null) {
+      throw new IllegalArgumentException("molgenisBuildDate is null");
+    }
     if (molgenisBuildDate.equals("${maven.build.timestamp}")) {
       molgenisBuildDate =
           DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by IntelliJ";
@@ -389,8 +394,9 @@ public class RestControllerV2 {
     ServletUriComponentsBuilder uriBuilder = createUriBuilder();
 
     // No repo
-    if (!dataService.hasRepository(entityTypeId))
+    if (!dataService.hasRepository(entityTypeId)) {
       throw new UnknownEntityTypeException(entityTypeId);
+    }
 
     Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityTypeId);
 
@@ -409,8 +415,9 @@ public class RestControllerV2 {
     boolean readPermission =
         permissionService.hasPermission(
             new EntityTypeIdentity(repositoryToCopyFrom.getName()), EntityTypePermission.READ_DATA);
-    if (!readPermission)
+    if (!readPermission) {
       throw new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, entityTypeId);
+    }
 
     // Capabilities
     boolean writableCapabilities =
@@ -521,6 +528,7 @@ public class RestControllerV2 {
         throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityTypeId, attributeName);
       }
 
+      // transform request entities to real Entity objects
       final List<Entity> entities =
           request.getEntities().stream()
               .filter(e -> e.size() == 2)
@@ -530,6 +538,7 @@ public class RestControllerV2 {
         throw createMolgenisDataExceptionIdentifierAndValue();
       }
 
+      // update original entities
       final List<Entity> updatedEntities = new ArrayList<>();
       int count = 0;
       for (Entity entity : entities) {
@@ -540,14 +549,13 @@ public class RestControllerV2 {
           throw new UnknownEntityException(meta, id);
         }
 
-        Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
+        Object value = entity.get(attributeName);
         originalEntity.set(attributeName, value);
         updatedEntities.add(originalEntity);
         count++;
       }
-
-      // update all entities
       this.dataService.update(entityTypeId, updatedEntities.stream());
+
       response.setStatus(HttpServletResponse.SC_OK);
     } catch (Exception e) {
       response.setStatus(HttpServletResponse.SC_NO_CONTENT);
