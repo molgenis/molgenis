@@ -144,7 +144,7 @@ pipeline {
                             unstash 'maven-settings'
                         }
                         container('maven') {
-                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.ws.timeout=120"
                             dir('molgenis-app') {
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
@@ -162,52 +162,6 @@ pipeline {
                             sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                         }
-                    }
-                }
-                stage('Push release candidates to registries [ x.x ]') {
-                    steps {
-                        container('maven') {
-                            script {
-                                env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
-                            }
-                            // deploy Docker image
-                            dir('molgenis-app') {
-                                script {
-                                    sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
-                                }
-                            }
-                            // deploy RPM
-                            // need to run install phase first
-                            // the rpm:rpm goal is bound to the package phase
-                            // which implies that the next snapshot version is installed
-                            // the artifact is built and the rpm plugin refers to the artifact build in the release:prepare goal
-                            sh "mvn -q -B install -DskipTests"
-                            dir('molgenis-app') {
-                                script {
-                                    sh "mvn -q -B rpm:rpm -Drpm.release.version=${TAG}"
-                                    // make sure you have no linebreaks in RPM variable
-                                    env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
-                                    sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
-                                }
-                            }
-                        }
-                    }
-                }
-                stage('Deploy to test [ x.x ]') {
-                    steps {
-                        milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
-                        dir("${JENKINS_AGENT_WORKDIR}/.rancher") {
-                            unstash 'rancher-config'
-                        }
-                        container('rancher') {
-                            sh "rancher context switch test-molgenis"
-                            sh "rancher apps upgrade --set image.tag=${TAG} latest ${CHART_VERSION}"
-                        }
-                    }
-                }
-                stage('Manual test [ x.x ]') {
-                    steps {
-                        input(message: 'Ok to release?')
                     }
                 }
                 stage('Perform release [ x.x ]') {
@@ -242,9 +196,16 @@ pipeline {
                         }
                     }
                 }
-                stage('Manually close and release on sonatype [ x.x ]') {
+                stage('Deploy to test [ x.x ]') {
                     steps {
-                        input(message='Log on to https://oss.sonatype.org/ and manually close and release to maven central.')
+                        milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
+                        dir("${JENKINS_AGENT_WORKDIR}/.rancher") {
+                            unstash 'rancher-config'
+                        }
+                        container('rancher') {
+                            sh "rancher context switch test-molgenis"
+                            sh "rancher apps upgrade --set image.tag=${TAG} latest ${CHART_VERSION}"
+                        }
                     }
                 }
             }
