@@ -413,6 +413,9 @@ function hideSpinner() {
     }
 }
 
+molgenis.showSpinner = showSpinner
+molgenis.hideSpinner = hideSpinner
+
 /**
  * Helper block function container
  */
