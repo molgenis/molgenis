@@ -1,7 +1,7 @@
 # Deploy MOLGENIS
 > when you have questions please email us at: [molgenis-operations@umcg.nl](mailto:molgenis-operations@umcg.nl?subject=[Deployment])
 
-We support two three in which you can deploy MOLGENIS.                
+We support three ways in which you can deploy MOLGENIS.                
 
 ## Run in development or test
 When you are developing on top of MOLGENIS or testing the platform we recommend using [docker-compose](https://github.com/molgenis/docker).
