@@ -14,8 +14,8 @@
     window.__INITIAL_STATE__ = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
-        fallbackLng: '${fallbackLng}',
-        dataExplorerBaseUrl: '${dataExplorerBaseUrl}'
+        fallbackLng: '${fallbackLng}'<#if dataExplorerBaseUrl??>,
+        dataExplorerBaseUrl: '${dataExplorerBaseUrl}'</#if>
     }
 </script>
 

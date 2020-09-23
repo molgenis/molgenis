@@ -91,14 +91,12 @@ public class AccountServiceImpl implements AccountService {
     dataService.add(USER, user);
     LOG.debug("created user {}", user.getUsername());
 
-    // send activation email
-    URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
-
     try {
       SimpleMailMessage mailMessage = new SimpleMailMessage();
       mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
       mailMessage.setSubject("User registration for " + appSettings.getTitle());
-      mailMessage.setText(createActivationEmailText(user, activationUri));
+      mailMessage.setText(
+          createActivationEmailTestWithCode(user, URI.create(baseActivationUri), activationCode));
       mailSender.send(mailMessage);
     } catch (MailException mce) {
       LOG.error("Could not send signup mail", mce);
@@ -139,7 +137,8 @@ public class AccountServiceImpl implements AccountService {
     }
   }
 
-  private String createActivationEmailText(User user, URI activationUri) {
+  private String createActivationEmailTestWithCode(
+      User user, URI activationUri, String activationCode) {
     return "User registration for "
         + appSettings.getTitle()
         + '\n'
@@ -150,9 +149,13 @@ public class AccountServiceImpl implements AccountService {
         + ' '
         + user.getLastName()
         + '\n'
-        + "In order to activate the user visit the following URL:"
         + '\n'
+        + "In order to activate your account go to: "
         + activationUri
+        + '\n'
+        + '\n'
+        + "and activate your account using the following code: "
+        + activationCode
         + '\n'
         + '\n';
   }

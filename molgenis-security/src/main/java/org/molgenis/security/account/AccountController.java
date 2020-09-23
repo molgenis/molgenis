@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.naming.NoPermissionException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
@@ -30,7 +29,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -92,6 +90,16 @@ public class AccountController {
     model.addObject("isRecaptchaEnabled", appSettings.getRecaptchaIsEnabled());
     model.addObject("recaptchaPublicKey", appSettings.getRecaptchaPublicKey());
     return model;
+  }
+
+  @GetMapping("/activate")
+  public String getActivateView() {
+    return "view-activate";
+  }
+
+  @GetMapping("/activate-success")
+  public String getActivateSuccessView() {
+    return "view-activate-success";
   }
 
   @GetMapping("/password/reset")
@@ -164,17 +172,16 @@ public class AccountController {
     }
   }
 
-  @GetMapping("/activate/{activationCode}")
-  public String activateUser(@Valid @NotNull @PathVariable String activationCode, Model model) {
+  @PostMapping("/activate")
+  public final String activateUser(
+      @RequestParam("activationCode") String activationCode, Model model) {
     try {
       accountService.activateUser(activationCode);
-      model.addAttribute("successMessage", "Your account has been activated, you can now sign in.");
-    } catch (MolgenisUserException e) {
-      model.addAttribute("warningMessage", e.getMessage());
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       model.addAttribute("errorMessage", e.getMessage());
+      return "view-activate";
     }
-    return "forward:/";
+    return "view-activate-success";
   }
 
   // Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)

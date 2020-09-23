@@ -7,15 +7,8 @@ target/
 *.iws
 *.DS_Store
 git.properties
-compute.properties
-.compute.properties
-molgenis-compute-core/src/main/resources/workflows/*/out/
-molgenis-compute-core/src/main/resources/workflows/*/rundir/
-molgenis-compute-core/test-output
 */data/elasticsearch/
 /data/elasticsearch/
-molgenis-app-omx/data
-molgenis-app-ngs/data
 test-output/
 derby.log
 .metadata/

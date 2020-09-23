@@ -433,16 +433,17 @@ $.when($,
         }
 
         function sendVirtualPageView (ga, location) {
+          var page = location.pathname + (location.search || '') + (location.hash || '')
           /* ga() is the google analytics library operations que function */
           if(window.hasTrackingId) {
             // default tracker
-            ga('set', 'page', location);
+            ga('set', 'page', page);
             ga('send', 'pageview')
           }
 
           if(window.hasMolgenisTrackingId) {
             // molgenis tracker
-            ga('molgenisTracker.set', 'page', location);
+            ga('molgenisTracker.set', 'page', page);
             ga('molgenisTracker.send', 'pageview')
           }
         }
@@ -493,7 +494,7 @@ $.when($,
             $(document).off(self.moduleEvents.DATAEXPLORER_URI_CHANGE)
             if(window.ga && (window.hasTrackingId || window.hasMolgenisTrackingId) ) {
                 $(document).on(self.moduleEvents.DATAEXPLORER_URI_CHANGE, function () {
-                    sendVirtualPageView(ga, $(location).attr('href'))
+                    sendVirtualPageView(ga, location)
                 })
             }
 

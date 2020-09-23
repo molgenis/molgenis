@@ -20,7 +20,6 @@ import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupFactory;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupPackageService;
-import org.molgenis.data.security.auth.GroupPermissionService;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleFactory;
@@ -39,28 +38,28 @@ import org.springframework.stereotype.Component;
 public class GroupPackageServiceImpl implements GroupPackageService {
   private final GroupValueFactory groupValueFactory;
   private final RoleMembershipService roleMembershipService;
-  private final GroupPermissionService groupPermissionService;
   private final RoleFactory roleFactory;
   private final DataService dataService;
   private final GroupFactory groupFactory;
   private final MutableAclService mutableAclService;
+  private final GroupService groupService;
 
   GroupPackageServiceImpl(
       GroupValueFactory groupValueFactory,
       RoleMembershipService roleMembershipService,
-      GroupPermissionService groupPermissionService,
       RoleFactory roleFactory,
       DataService dataService,
       GroupFactory groupFactory,
-      MutableAclService mutableAclService) {
+      MutableAclService mutableAclService,
+      GroupService groupService) {
 
     this.groupValueFactory = requireNonNull(groupValueFactory);
     this.roleMembershipService = requireNonNull(roleMembershipService);
-    this.groupPermissionService = requireNonNull(groupPermissionService);
     this.roleFactory = requireNonNull(roleFactory);
     this.dataService = requireNonNull(dataService);
     this.groupFactory = requireNonNull(groupFactory);
     this.mutableAclService = requireNonNull(mutableAclService);
+    this.groupService = requireNonNull(groupService);
   }
 
   @Override
@@ -90,7 +89,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
     dataService.add(ROLE, roles.values().stream());
 
-    groupPermissionService.grantDefaultPermissions(groupValue);
+    groupService.grantDefaultPermissions(groupValue);
     roleMembershipService.addUserToRole(
         SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
   }
@@ -119,8 +118,16 @@ public class GroupPackageServiceImpl implements GroupPackageService {
 
   private void deleteRoles(Group group) {
     Iterable<Role> roles = group.getRoles();
+    // Check if role is included elsewhere, if it is remove the inclusion
+    stream(roles)
+        .flatMap(this::includesRole)
+        .forEach(role -> groupService.removeExtendsRole(group, role));
     roles.forEach(this::deleteMembers);
     dataService.delete(RoleMetadata.ROLE, stream(roles));
+  }
+
+  private Stream<Role> includesRole(Role role) {
+    return dataService.query(ROLE, Role.class).eq(RoleMetadata.INCLUDES, role.getId()).findAll();
   }
 
   private void deleteMembers(Role role) {
