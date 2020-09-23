@@ -1,31 +1,46 @@
 package org.molgenis.api.fair.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
+import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
+import static org.eclipse.rdf4j.rio.helpers.BasicWriterSettings.INLINE_BLANK_NODES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.api.fair.controller.EntityModelWriter.DCAT_RESOURCE;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Month;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.util.function.Consumer;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
@@ -36,6 +51,7 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.semanticsearch.service.TagService;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.web.util.UriComponentsBuilder;
 
 class EntityModelWriterTest extends AbstractMockitoTest {
   @Mock private TagService<LabeledResource, LabeledResource> tagService;
@@ -45,296 +61,207 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   @Mock private EntityType refEntityType;
   @Mock private Attribute attribute;
   @Mock private Attribute attr1;
-  @Mock private Attribute attr2;
-  @Mock private Attribute attr3;
+  @Mock private SemanticTag<EntityType, LabeledResource, LabeledResource> entityTag;
+  @Mock private LabeledResource labeledResource;
   private EntityModelWriter writer;
   private SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
   @SuppressWarnings("unchecked")
   @BeforeEach
-  void beforeMethod() throws DatatypeConfigurationException {
-    writer = new EntityModelWriter(tagService, valueFactory);
+  void beforeMethod() {
+    writer =
+        new EntityModelWriter(tagService, valueFactory) {
+          @Override
+          UriComponentsBuilder getServletUriComponentsBuilder() {
+            return UriComponentsBuilder.fromUriString("http://example.org/api/fdp");
+          }
+        };
   }
 
   @Test
-  void testCreateRfdModelStringAttribute() {
+  void testCreateRfdModelForEntity() {
     List<Attribute> attributeList = singletonList(attr1);
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("catalogId");
     when(objectEntity.get("attributeName1")).thenReturn("value1");
     when(objectEntity.getString("attributeName1")).thenReturn("value1");
 
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 
     when(attr1.getName()).thenReturn("attributeName1");
-    when(attr1.getDataType()).thenReturn(AttributeType.STRING);
+    when(attr1.getDataType()).thenReturn(STRING);
+
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag));
+    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag.getObject()).thenReturn(labeledResource);
+    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
 
     LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
-    Multimap<Relation, LabeledResource> tags =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag1);
+    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag1);
     when(tagService.getTagsForAttribute(entityType, attr1)).thenReturn(tags);
 
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
+    Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, \"value1\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
-        results.next().toString());
+    assertEquals(5, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://IRI1.nl> \"value1\";")
+        .contains(
+            "fdpo:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
+                + "    ]");
   }
 
-  @Test
-  void testCreateRfdModelIntAttribute() {
-    List<Attribute> attributeList = singletonList(attr2);
+  static Object[][] createStatementForAttributeProvider() {
+    return new Object[][] {
+      new Object[] {
+        STRING,
+        "value",
+        (Consumer<Entity>)
+            objectEntity -> when(objectEntity.getString("attributeName")).thenReturn("value"),
+        "<http://example.org/iri> \"value\""
+      },
+      new Object[] {
+        INT,
+        2,
+        (Consumer<Entity>) objectEntity -> when(objectEntity.getInt("attributeName")).thenReturn(2),
+        "<http://example.org/iri> \"2\"^^xsd:int"
+      },
+      new Object[] {
+        BOOL,
+        false,
+        (Consumer<Entity>)
+            objectEntity -> when(objectEntity.getBoolean("attributeName")).thenReturn(false),
+        "<http://example.org/iri> false"
+      },
+      new Object[] {
+        DATE,
+        LocalDate.parse("2020-05-09"),
+        (Consumer<Entity>)
+            objectEntity ->
+                when(objectEntity.getLocalDate("attributeName"))
+                    .thenReturn(LocalDate.parse("2020-05-09")),
+        "<http://example.org/iri> \"2020-05-09\"^^xsd:date"
+      },
+      new Object[] {
+        DATE_TIME,
+        Instant.parse("2011-12-03T10:15:30Z"),
+        (Consumer<Entity>)
+            objectEntity ->
+                when(objectEntity.getInstant("attributeName"))
+                    .thenReturn(Instant.parse("2011-12-03T10:15:30Z")),
+        "<http://example.org/iri> \"2011-12-03T10:15:30Z\"^^xsd:dateTime"
+      },
+      new Object[] {
+        DECIMAL,
+        2.18,
+        (Consumer<Entity>)
+            objectEntity -> when(objectEntity.getDouble("attributeName")).thenReturn(2.18),
+        "<http://example.org/iri> 2.18E0"
+      },
+      new Object[] {
+        LONG,
+        987654321L,
+        (Consumer<Entity>)
+            objectEntity -> when(objectEntity.getLong("attributeName")).thenReturn(987654321L),
+        "<http://example.org/iri> \"987654321\"^^xsd:long"
+      },
+      new Object[] {
+        HYPERLINK,
+        "http://example.org/",
+        (Consumer<Entity>)
+            objectEntity ->
+                when(objectEntity.getString("attributeName")).thenReturn("http://example.org"),
+        "<http://example.org/iri> <http://example.org>"
+      }
+    };
+  }
 
+  @ParameterizedTest
+  @MethodSource("createStatementForAttributeProvider")
+  void testCreateStatementForAttribute(
+      AttributeType attributeType, Object value, Consumer<Entity> consumer, String fragment) {
     when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(objectEntity.get("attributeName2")).thenReturn(2);
-    when(objectEntity.getInt("attributeName2")).thenReturn(2);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.get("attributeName")).thenReturn(value);
+    consumer.accept(objectEntity);
 
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attr2.getName()).thenReturn("attributeName2");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
 
-    when(attr2.getDataType()).thenReturn(AttributeType.INT);
+    when(attr1.getName()).thenReturn("attributeName");
+    when(attr1.getDataType()).thenReturn(attributeType);
 
-    LabeledResource tag2 = new LabeledResource("http://IRI2.nl", "tag2Label");
-    Multimap<Relation, LabeledResource> tags2 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag2);
-    when(tagService.getTagsForAttribute(entityType, attr2)).thenReturn(tags2);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(isAssociatedWith, labeledResource);
+    when(labeledResource.getIri()).thenReturn("http://example.org/iri");
+    when(tagService.getTagsForAttribute(entityType, attr1)).thenReturn(tags);
 
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
+    Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI2.nl, \"2\"^^<http://www.w3.org/2001/XMLSchema#int>) [null]",
-        results.next().toString());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString()).contains(fragment);
   }
 
   @Test
   void testCreateRfdModelXREF() {
-    List<Attribute> attributeList = singletonList(attr3);
-    List<String> refAttributeList = singletonList("refAttr");
-
     when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(objectEntity.get("attributeName3")).thenReturn(refEntity);
-    when(objectEntity.getEntity("attributeName3")).thenReturn(refEntity);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.get("attributeName")).thenReturn(refEntity);
+    when(objectEntity.getEntity("attributeName")).thenReturn(refEntity);
 
     when(refEntity.getEntityType()).thenReturn(refEntityType);
-    when(refEntityType.getAttributeNames()).thenReturn(refAttributeList);
-    when(refEntity.getIdValue()).thenReturn("refID");
+    when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
+    when(refEntity.getString("IRI")).thenReturn("http://example.org/refEntity");
 
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attr3.getName()).thenReturn("attributeName3");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
+    when(attr1.getName()).thenReturn("attributeName");
 
-    when(attr3.getDataType()).thenReturn(AttributeType.XREF);
+    when(attr1.getDataType()).thenReturn(XREF);
 
-    LabeledResource tag3 = new LabeledResource("http://IRI3.nl", "labelTag3");
-    Multimap<Relation, LabeledResource> tags3 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag3);
-    when(tagService.getTagsForAttribute(entityType, attr3)).thenReturn(tags3);
+    when(tagService.getTagsForAttribute(entityType, attr1))
+        .thenReturn(ImmutableMultimap.of(isAssociatedWith, labeledResource));
+    when(labeledResource.getIri()).thenReturn("http://example.org/relation");
 
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
+    Model result = writer.createRdfModel(objectEntity);
 
     assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI3.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]",
-        results.next().toString());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://example.org/relation> <http://example.org/refEntity>");
   }
 
   @Test
   void testCreateRfdModelMREF() {
-    List<Attribute> attributeList = singletonList(attribute);
-
     when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
     when(objectEntity.get("attributeName")).thenReturn(refEntity);
-    when(objectEntity.getEntities("attributeName")).thenReturn(singletonList(refEntity));
+    when(objectEntity.getEntities("attributeName")).thenReturn(List.of(refEntity));
 
-    when(refEntity.getIdValue()).thenReturn("refID");
+    when(refEntity.getEntityType()).thenReturn(refEntityType);
+    when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
+    when(refEntity.getString("IRI")).thenReturn("http://example.org/refEntity");
 
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
+    when(attr1.getName()).thenReturn("attributeName");
 
-    when(attribute.getDataType()).thenReturn(AttributeType.MREF);
+    when(attr1.getDataType()).thenReturn(MREF);
 
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "labelTag3");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
+    when(tagService.getTagsForAttribute(entityType, attr1))
+        .thenReturn(ImmutableMultimap.of(isAssociatedWith, labeledResource));
+    when(labeledResource.getIri()).thenReturn("http://example.org/relation");
 
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, http://molgenis01.gcc.rug.nl/fdp/catolog/test/this/refID) [null]",
-        results.next().toString());
-  }
-
-  @Test
-  void testCreateRfdModelBOOL() {
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute = mock(Attribute.class);
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(objectEntity.get("attributeName")).thenReturn(true);
-    when(objectEntity.getBoolean("attributeName")).thenReturn(true);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
-
-    when(attribute.getDataType()).thenReturn(AttributeType.BOOL);
-
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
+    Model result = writer.createRdfModel(objectEntity);
 
     assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>) [null]",
-        results.next().toString());
-  }
-
-  @Test
-  void testCreateRfdModelDATE() {
-    // Model createRdfModel(String subjectIRI, Entity objectEntity)
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute = mock(Attribute.class);
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    LocalDate value = LocalDate.of(2013, Month.AUGUST, 12);
-    when(objectEntity.get("attributeName")).thenReturn(value);
-    when(objectEntity.getLocalDate("attributeName")).thenReturn(value);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
-
-    when(attribute.getDataType()).thenReturn(AttributeType.DATE);
-
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2013-08-12\"^^<http://www.w3.org/2001/XMLSchema#date>) [null]",
-        results.next().toString());
-  }
-
-  @Test
-  void testCreateRfdModelDATETIME() {
-    // Model createRdfModel(String subjectIRI, Entity objectEntity)
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute = mock(Attribute.class);
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    Instant value = Instant.parse("2011-12-03T10:15:30Z");
-    when(objectEntity.get("attributeName")).thenReturn(value);
-    when(objectEntity.getInstant("attributeName")).thenReturn(value);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
-
-    when(attribute.getDataType()).thenReturn(AttributeType.DATE_TIME);
-
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"2011-12-03T10:15:30Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) [null]",
-        results.next().toString());
-  }
-
-  @Test
-  void testCreateRfdModelDECIMAL() {
-    // Model createRdfModel(String subjectIRI, Entity objectEntity)
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute = mock(Attribute.class);
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    double value = 10.0;
-    when(objectEntity.get("attributeName")).thenReturn(value);
-    when(objectEntity.getDouble("attributeName")).thenReturn(value);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
-
-    when(attribute.getDataType()).thenReturn(AttributeType.DECIMAL);
-
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"10.0\"^^<http://www.w3.org/2001/XMLSchema#double>) [null]",
-        results.next().toString());
-  }
-
-  @Test
-  void testCreateRfdModelLONG() {
-    // Model createRdfModel(String subjectIRI, Entity objectEntity)
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute = mock(Attribute.class);
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    long value = 987654321L;
-    when(objectEntity.get("attributeName")).thenReturn(value);
-    when(objectEntity.getLong("attributeName")).thenReturn(value);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute.getName()).thenReturn("attributeName");
-
-    when(attribute.getDataType()).thenReturn(AttributeType.LONG);
-
-    LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI.nl, \"987654321\"^^<http://www.w3.org/2001/XMLSchema#long>) [null]",
-        results.next().toString());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://example.org/relation> <http://example.org/refEntity>");
   }
 
   @Test
@@ -353,62 +280,31 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
     when(attribute.getName()).thenReturn("attributeName");
 
-    when(attribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(attribute.getDataType()).thenReturn(STRING);
 
     LabeledResource tag = new LabeledResource("http://www.w3.org/ns/dcat#keyword", "keywords");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
+    Model result = writer.createRdfModel(objectEntity);
 
     assertEquals(3, result.size());
-    List<String> statements = result.stream().map(Statement::toString).collect(toList());
-    assertEquals(
-        asList(
-            "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"molgenis\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
-            "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"genetics\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]",
-            "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://www.w3.org/ns/dcat#keyword, \"fair\"^^<http://www.w3.org/2001/XMLSchema#string>) [null]"),
-        statements);
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+
+    assertThat(writer.toString()).contains("dcat:keyword \"molgenis\", \"genetics\", \"fair\"");
   }
 
   @Test
-  void testCreateRfdModelNullValuePlusHyperlink() {
-    // Model createRdfModel(String subjectIRI, Entity objectEntity)
-    Entity objectEntity = mock(Entity.class);
-    EntityType entityType = mock(EntityType.class);
-
-    Attribute attribute1 = mock(Attribute.class);
-    Attribute attribute2 = mock(Attribute.class);
-    List<Attribute> attributeList = Arrays.asList(attribute1, attribute2);
-
+  void testCreateRfdModelNullValue() {
     when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
+    when(objectEntity.get("attributeName1")).thenReturn(null);
+    when(attr1.getName()).thenReturn("attributeName1");
 
-    when(objectEntity.get("attribute1Name")).thenReturn(null);
+    Model result = writer.createRdfModel(objectEntity);
 
-    String value = "http://molgenis.org/index.html";
-    doReturn(value).when(objectEntity).get("attribute2Name");
-    when(objectEntity.getString("attribute2Name")).thenReturn(value);
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-    when(attribute1.getName()).thenReturn("attribute1Name");
-    when(attribute2.getName()).thenReturn("attribute2Name");
-
-    when(attribute2.getDataType()).thenReturn(AttributeType.HYPERLINK);
-
-    LabeledResource tag2 = new LabeledResource("http://IRI1.nl", "tag1 label");
-    Multimap<Relation, LabeledResource> tags2 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag2);
-    doReturn(tags2).when(tagService).getTagsForAttribute(entityType, attribute2);
-
-    Model result =
-        writer.createRdfModel("http://molgenis01.gcc.rug.nl/fdp/catolog/test/this", objectEntity);
-
-    assertEquals(1, result.size());
-    Iterator results = result.iterator();
-    assertEquals(
-        "(http://molgenis01.gcc.rug.nl/fdp/catolog/test/this, http://IRI1.nl, http://molgenis.org/index.html) [null]",
-        results.next().toString());
+    assertTrue(result.isEmpty());
   }
 
   @Test
@@ -419,11 +315,12 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     LabeledResource codeSystem = new LabeledResource("ex:object");
 
     SemanticTag<EntityType, LabeledResource, LabeledResource> tag =
-        new SemanticTag<>("tagId", entityType, Relation.isAssociatedWith, object, codeSystem);
+        new SemanticTag<>("tagId", entityType, isAssociatedWith, object, codeSystem);
 
-    when(tagService.getTagsForEntity(entityType)).thenReturn(singletonList(tag));
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(tag));
 
-    writer.addStatementsForEntityTags(model, subject, entityType);
+    writer.addStatementsForEntity(model, subject, objectEntity);
 
     Statement statement =
         valueFactory.createStatement(

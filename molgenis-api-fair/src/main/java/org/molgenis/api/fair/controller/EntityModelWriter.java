@@ -3,10 +3,13 @@ package org.molgenis.api.fair.controller;
 import static com.google.common.collect.Iterables.contains;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.api.fair.controller.FairController.BASE_URI;
 
+import com.google.common.collect.Streams;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -22,10 +25,17 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.semanticsearch.service.TagService;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityModelWriter {
   private static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
+  static final String DCAT_RESOURCE = "http://www.w3.org/ns/dcat#Resource";
+  private static final String FDP_METADATA_IDENTIFIER =
+      "http://rdf.biosemantics.org/ontologies/fdp-o#metadataIdentifier";
+  private static final String DATACITE_IDENTIFIER = "http://purl.org/spar/datacite/Identifier";
+  private static final String DCT_IDENTIFIER = "http://purl.org/dc/terms/identifier";
   private final IRI rdfTypePredicate;
 
   private final SimpleValueFactory valueFactory;
@@ -62,11 +72,13 @@ public class EntityModelWriter {
     model.setNamespace("orcid", "http://orcid.org/");
     model.setNamespace("r3d", "http://www.re3data.org/schema/3-0#");
     model.setNamespace("sio", "http://semanticscience.org/resource/");
+    model.setNamespace("datacite", "http://purl.org/spar/datacite/");
   }
 
-  public Model createRdfModel(String subjectIRI, Entity objectEntity) {
+  public Model createRdfModel(Entity objectEntity) {
     Model model = createEmptyModel();
-    addEntityToModel(subjectIRI, objectEntity, model);
+    Resource subject = createResource(objectEntity);
+    addEntityToModel(subject, objectEntity, model);
     return model;
   }
 
@@ -76,11 +88,10 @@ public class EntityModelWriter {
     return model;
   }
 
-  public void addEntityToModel(String subjectIRI, Entity objectEntity, Model model) {
-    Resource subject = valueFactory.createIRI(subjectIRI);
+  public void addEntityToModel(Resource subject, Entity objectEntity, Model model) {
     EntityType entityType = objectEntity.getEntityType();
     addStatementsForAttributeTags(objectEntity, model, subject, entityType);
-    addStatementsForEntityTags(model, subject, entityType);
+    addStatementsForEntity(model, subject, objectEntity);
   }
 
   private void addStatementsForAttributeTags(
@@ -100,14 +111,24 @@ public class EntityModelWriter {
     }
   }
 
-  void addStatementsForEntityTags(Model model, Resource subject, EntityType entityType) {
+  void addStatementsForEntity(Model model, Resource subject, Entity entity) {
     for (SemanticTag<EntityType, LabeledResource, LabeledResource> tag :
-        tagService.getTagsForEntity(entityType)) {
+        tagService.getTagsForEntity(entity.getEntityType())) {
       if (tag.getRelation() == Relation.isAssociatedWith) {
         LabeledResource object = tag.getObject();
         model.add(subject, rdfTypePredicate, valueFactory.createIRI(object.getIri()));
+        if (DCAT_RESOURCE.equals(object.getIri())) {
+          addFdpMetadataIdentifier(model, subject);
+        }
       }
     }
+  }
+
+  private void addFdpMetadataIdentifier(Model model, Resource subject) {
+    BNode resourceIdentifier = valueFactory.createBNode();
+    model.add(subject, valueFactory.createIRI(FDP_METADATA_IDENTIFIER), resourceIdentifier);
+    model.add(resourceIdentifier, rdfTypePredicate, valueFactory.createIRI(DATACITE_IDENTIFIER));
+    model.add(resourceIdentifier, valueFactory.createIRI(DCT_IDENTIFIER), subject);
   }
 
   private void addRelationForAttribute(
@@ -167,18 +188,6 @@ public class EntityModelWriter {
     }
   }
 
-  private void addRelationForXrefTypeAttribute(
-      Model model, Resource subject, IRI predicate, Entity objectEntity) {
-    if (contains(objectEntity.getEntityType().getAttributeNames(), "IRI")) {
-      model.add(subject, predicate, valueFactory.createIRI(objectEntity.getString("IRI")));
-    } else {
-      model.add(
-          subject,
-          predicate,
-          valueFactory.createIRI(subject.stringValue() + '/' + objectEntity.getIdValue()));
-    }
-  }
-
   private void addRelationForStringTypeAttribute(
       Model model, Resource subject, IRI predicate, String value) {
     if (predicate.stringValue().equals(KEYWORD)) {
@@ -193,10 +202,56 @@ public class EntityModelWriter {
   private void addRelationForMrefTypeAttribute(
       Model model, Resource subject, IRI predicate, Iterable<Entity> objectEntities) {
     for (Entity objectEntity : objectEntities) {
-      model.add(
-          subject,
-          predicate,
-          valueFactory.createIRI(subject.stringValue() + '/' + objectEntity.getIdValue()));
+      addRelationForXrefTypeAttribute(model, subject, predicate, objectEntity);
     }
+  }
+
+  private void addRelationForXrefTypeAttribute(
+      Model model, Resource subject, IRI predicate, Entity objectEntity) {
+    var objectIRI = createResource(objectEntity);
+    model.add(subject, predicate, objectIRI);
+    if (objectIRI instanceof BNode) {
+      addEntityToModel(objectIRI, objectEntity, model);
+    }
+  }
+
+  public boolean isADcatResource(EntityType entityType) {
+    var tagsForEntity = tagService.getTagsForEntity(entityType);
+    return Streams.stream(tagsForEntity)
+        .filter(tag -> tag.getRelation() == Relation.isAssociatedWith)
+        .map(SemanticTag::getObject)
+        .map(LabeledResource::getIri)
+        .anyMatch(DCAT_RESOURCE::equals);
+  }
+
+  /**
+   * Create a resource. For the resources served by the Controller, give the controller URI as IRI.
+   * For entities with an IRI attribute, give the value of that attribute. Otherwise, create a blank
+   * node.
+   *
+   * @param entity the entity to create a resource for
+   * @return Resource
+   */
+  private Resource createResource(Entity entity) {
+    var entityType = entity.getEntityType();
+    if ("fdp_Metadata".equals(entityType.getId())) {
+      return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
+    }
+    if (isADcatResource(entityType)) {
+      var iri =
+          getServletUriComponentsBuilder()
+              .pathSegment(entityType.getId(), entity.getIdValue().toString())
+              .build()
+              .toUriString();
+      return valueFactory.createIRI(iri);
+    }
+    if (contains(entity.getEntityType().getAttributeNames(), "IRI")) {
+      return valueFactory.createIRI(entity.getString("IRI"));
+    }
+    return valueFactory.createBNode();
+  }
+
+  UriComponentsBuilder getServletUriComponentsBuilder() {
+    return ServletUriComponentsBuilder.fromCurrentContextPath().path(BASE_URI);
   }
 }
