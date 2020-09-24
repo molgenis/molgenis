@@ -30,16 +30,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class EntityModelWriter {
-  private static final String KEYWORD = "http://www.w3.org/ns/dcat#keyword";
-  static final String DCAT_RESOURCE = "http://www.w3.org/ns/dcat#Resource";
-  private static final String FDP_METADATA_IDENTIFIER =
-      "http://rdf.biosemantics.org/ontologies/fdp-o#metadataIdentifier";
-  private static final String DATACITE_IDENTIFIER = "http://purl.org/spar/datacite/Identifier";
-  private static final String DCT_IDENTIFIER = "http://purl.org/dc/terms/identifier";
-  private final IRI rdfTypePredicate;
 
-  private final SimpleValueFactory valueFactory;
-  private final TagService<LabeledResource, LabeledResource> tagService;
+  public static final String NS_DCAT = "http://www.w3.org/ns/dcat#";
+  public static final String NS_FDP = "http://rdf.biosemantics.org/ontologies/fdp-o#";
+  public static final String NS_R3D = "http://www.re3data.org/schema/3-0#";
+  public static final String NS_DATACITE = "http://purl.org/spar/datacite/";
+  public static final String NS_DCT = "http://purl.org/dc/terms/";
+  public static final String NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+  private static final String KEYWORD = NS_DCAT + "keyword";
+  static final String DCAT_RESOURCE = NS_DCAT + "Resource";
+  static final String R3D_REPOSITORY = NS_R3D + "Repository";
+
   private static final DatatypeFactory DATATYPE_FACTORY;
 
   static {
@@ -50,29 +51,41 @@ public class EntityModelWriter {
     }
   }
 
+  private final IRI rdfTypePredicate;
+  private final IRI r3dRepositoryIdentifier;
+  private final IRI dctIdentifier;
+  private final IRI dataciteIdentifier;
+  private final IRI fdpMetadataIdentifier;
+
+  private final SimpleValueFactory valueFactory;
+  private final TagService<LabeledResource, LabeledResource> tagService;
+
   public EntityModelWriter(
       TagService<LabeledResource, LabeledResource> tagService, SimpleValueFactory valueFactory) {
     this.valueFactory = requireNonNull(valueFactory);
     this.tagService = requireNonNull(tagService);
-    this.rdfTypePredicate =
-        valueFactory.createIRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+    rdfTypePredicate = valueFactory.createIRI(NS_RDF, "type");
+    r3dRepositoryIdentifier = valueFactory.createIRI(NS_R3D, "repositoryIdentifier");
+    dctIdentifier = valueFactory.createIRI(NS_DCT, "identifier");
+    dataciteIdentifier = valueFactory.createIRI(NS_DATACITE, "Identifier");
+    fdpMetadataIdentifier = valueFactory.createIRI(NS_FDP, "metadataIdentifier");
   }
 
   private void setNamespacePrefixes(Model model) {
-    model.setNamespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+    model.setNamespace("rdf", NS_RDF);
     model.setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-    model.setNamespace("dcat", "http://www.w3.org/ns/dcat#");
+    model.setNamespace("dcat", NS_DCAT);
     model.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
     model.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
-    model.setNamespace("dct", "http://purl.org/dc/terms/");
+    model.setNamespace("dct", NS_DCT);
     model.setNamespace("lang", "http://id.loc.gov/vocabulary/iso639-1/");
-    model.setNamespace("fdpo", "http://rdf.biosemantics.org/ontologies/fdp-o#");
+    model.setNamespace("fdp", NS_FDP);
     model.setNamespace("ldp", "http://www.w3.org/ns/ldp#");
     model.setNamespace("foaf", "http://xmlns.com/foaf/0.1/");
     model.setNamespace("orcid", "http://orcid.org/");
-    model.setNamespace("r3d", "http://www.re3data.org/schema/3-0#");
+    model.setNamespace("r3d", NS_R3D);
     model.setNamespace("sio", "http://semanticscience.org/resource/");
-    model.setNamespace("datacite", "http://purl.org/spar/datacite/");
+    model.setNamespace("datacite", NS_DATACITE);
   }
 
   public Model createRdfModel(Entity objectEntity) {
@@ -118,17 +131,20 @@ public class EntityModelWriter {
         LabeledResource object = tag.getObject();
         model.add(subject, rdfTypePredicate, valueFactory.createIRI(object.getIri()));
         if (DCAT_RESOURCE.equals(object.getIri())) {
-          addFdpMetadataIdentifier(model, subject);
+          model.add(subject, fdpMetadataIdentifier, createDataciteIdentifierNode(model, subject));
+        }
+        if (R3D_REPOSITORY.equals(object.getIri())) {
+          model.add(subject, r3dRepositoryIdentifier, createDataciteIdentifierNode(model, subject));
         }
       }
     }
   }
 
-  private void addFdpMetadataIdentifier(Model model, Resource subject) {
-    BNode resourceIdentifier = valueFactory.createBNode();
-    model.add(subject, valueFactory.createIRI(FDP_METADATA_IDENTIFIER), resourceIdentifier);
-    model.add(resourceIdentifier, rdfTypePredicate, valueFactory.createIRI(DATACITE_IDENTIFIER));
-    model.add(resourceIdentifier, valueFactory.createIRI(DCT_IDENTIFIER), subject);
+  private BNode createDataciteIdentifierNode(Model model, Resource identifier) {
+    BNode result = valueFactory.createBNode();
+    model.add(result, rdfTypePredicate, dataciteIdentifier);
+    model.add(result, dctIdentifier, identifier);
+    return result;
   }
 
   private void addRelationForAttribute(

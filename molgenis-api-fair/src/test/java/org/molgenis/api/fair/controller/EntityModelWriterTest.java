@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.fair.controller.EntityModelWriter.DCAT_RESOURCE;
+import static org.molgenis.api.fair.controller.EntityModelWriter.R3D_REPOSITORY;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
@@ -60,9 +61,10 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   @Mock private EntityType entityType;
   @Mock private EntityType refEntityType;
   @Mock private Attribute attribute;
-  @Mock private Attribute attr1;
   @Mock private SemanticTag<EntityType, LabeledResource, LabeledResource> entityTag;
+  @Mock private SemanticTag<EntityType, LabeledResource, LabeledResource> entityTag2;
   @Mock private LabeledResource labeledResource;
+  @Mock private LabeledResource labeledResource2;
   private EntityModelWriter writer;
   private SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
@@ -80,7 +82,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
   @Test
   void testCreateRfdModelForEntity() {
-    List<Attribute> attributeList = singletonList(attr1);
+    List<Attribute> attributeList = singletonList(attribute);
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
     when(entityType.getId()).thenReturn("fdp_Catalog");
@@ -90,27 +92,35 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 
-    when(attr1.getName()).thenReturn("attributeName1");
-    when(attr1.getDataType()).thenReturn(STRING);
+    when(attribute.getName()).thenReturn("attributeName1");
+    when(attribute.getDataType()).thenReturn(STRING);
 
-    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag));
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
     when(entityTag.getRelation()).thenReturn(isAssociatedWith);
     when(entityTag.getObject()).thenReturn(labeledResource);
     when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
 
+    when(entityTag2.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag2.getObject()).thenReturn(labeledResource2);
+    when(labeledResource2.getIri()).thenReturn(R3D_REPOSITORY);
+
     LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
     Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag1);
-    when(tagService.getTagsForAttribute(entityType, attr1)).thenReturn(tags);
+    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(5, result.size());
+    assertEquals(9, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
         .contains("<http://IRI1.nl> \"value1\";")
         .contains(
-            "fdpo:metadataIdentifier [ a datacite:Identifier;\n"
+            "fdp:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
+                + "    ]")
+        .contains(
+            "r3d:repositoryIdentifier [ a datacite:Identifier;\n"
                 + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
                 + "    ]");
   }
@@ -189,15 +199,15 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.get("attributeName")).thenReturn(value);
     consumer.accept(objectEntity);
 
-    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
 
-    when(attr1.getName()).thenReturn("attributeName");
-    when(attr1.getDataType()).thenReturn(attributeType);
+    when(attribute.getName()).thenReturn("attributeName");
+    when(attribute.getDataType()).thenReturn(attributeType);
 
     Multimap<Relation, LabeledResource> tags =
         ImmutableMultimap.of(isAssociatedWith, labeledResource);
     when(labeledResource.getIri()).thenReturn("http://example.org/iri");
-    when(tagService.getTagsForAttribute(entityType, attr1)).thenReturn(tags);
+    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result = writer.createRdfModel(objectEntity);
 
@@ -217,12 +227,12 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
     when(refEntity.getString("IRI")).thenReturn("http://example.org/refEntity");
 
-    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
-    when(attr1.getName()).thenReturn("attributeName");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
+    when(attribute.getName()).thenReturn("attributeName");
 
-    when(attr1.getDataType()).thenReturn(XREF);
+    when(attribute.getDataType()).thenReturn(XREF);
 
-    when(tagService.getTagsForAttribute(entityType, attr1))
+    when(tagService.getTagsForAttribute(entityType, attribute))
         .thenReturn(ImmutableMultimap.of(isAssociatedWith, labeledResource));
     when(labeledResource.getIri()).thenReturn("http://example.org/relation");
 
@@ -246,12 +256,12 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
     when(refEntity.getString("IRI")).thenReturn("http://example.org/refEntity");
 
-    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
-    when(attr1.getName()).thenReturn("attributeName");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
+    when(attribute.getName()).thenReturn("attributeName");
 
-    when(attr1.getDataType()).thenReturn(MREF);
+    when(attribute.getDataType()).thenReturn(MREF);
 
-    when(tagService.getTagsForAttribute(entityType, attr1))
+    when(tagService.getTagsForAttribute(entityType, attribute))
         .thenReturn(ImmutableMultimap.of(isAssociatedWith, labeledResource));
     when(labeledResource.getIri()).thenReturn("http://example.org/relation");
 
@@ -298,9 +308,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   @Test
   void testCreateRfdModelNullValue() {
     when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(entityType.getAtomicAttributes()).thenReturn(List.of(attr1));
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
     when(objectEntity.get("attributeName1")).thenReturn(null);
-    when(attr1.getName()).thenReturn("attributeName1");
+    when(attribute.getName()).thenReturn("attributeName1");
 
     Model result = writer.createRdfModel(objectEntity);
 
