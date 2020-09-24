@@ -18,6 +18,7 @@
     <!-- -Ddockerfile.skip=true: do not build and deploy dockerfile -->
     <!-- -Dwar.deploy.skip=false: also deploy war -->
     <war.deploy.skip>true</war.deploy.skip>
+    <maven.deploy.skip>${war.deploy.skip}</maven.deploy.skip>
     <owasp-check-format>HTML</owasp-check-format>
 
     <dockerfile.tag>${project.version}</dockerfile.tag>
@@ -60,14 +61,6 @@
             <WAR_FILE>${dockerfile.warfile}</WAR_FILE>
           </buildArgs>
           <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-        </configuration>
-      </plugin>
-      <plugin>
-        <!-- Deploys war to nexus -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>${war.deploy.skip}</skip>
         </configuration>
       </plugin>
     </plugins>

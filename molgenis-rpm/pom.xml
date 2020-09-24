@@ -30,6 +30,7 @@
     <rpm.deploy.skip>true</rpm.deploy.skip>
     <!-- -Drpm.disabled=false: Build rpm, no deploy -->
     <rpm.disabled>${rpm.deploy.skip}</rpm.disabled>
+    <maven.deploy.skip>${rpm.deploy.skip}</maven.deploy.skip>
     <rpm.name>molgenis</rpm.name>
     <rpm-maven-plugin.version>2.2.0</rpm-maven-plugin.version>
   </properties>
@@ -105,14 +106,6 @@
             <scriptFile>rpm/postinstall.bash</scriptFile>
             <fileEncoding>utf-8</fileEncoding>
           </postinstallScriptlet>
-        </configuration>
-      </plugin>
-      <plugin>
-        <!-- By default, do not deploy rpm to nexus -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>${rpm.deploy.skip}</skip>
         </configuration>
       </plugin>
     </plugins>

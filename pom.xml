@@ -57,6 +57,8 @@
 
     <!-- artifact publish properties -->
     <registry.id>registry.molgenis.org</registry.id>
+    <!-- don't publish module jars -->
+    <maven.deploy.skip>true</maven.deploy.skip>
 
     <!-- code quality monitoring properties -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -524,14 +526,6 @@
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <scmCommentPrefix>[ci skip] [maven-release-plugin]${line.separator}</scmCommentPrefix>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <configuration>
-            <!-- Do not deploy the jarfiles, only the warfile -->
-            <skip>true</skip>
           </configuration>
         </plugin>
         <plugin>
