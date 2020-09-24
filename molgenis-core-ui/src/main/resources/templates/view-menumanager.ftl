@@ -43,10 +43,27 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
-                <hr/>
-                <form name="save-menu-form" action="${context_url?html}/save" method="POST">
-                    <button type="submit" class="btn btn-info pull-right">Save the new menu layout</button>
+            <div class="col-md-6">
+                <legend>Create Menu Link</legend>
+                <form name="add-link-item-form" class="form-horizontal" role="form">
+                    <@create_link_item_inputs false/>
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-3">
+                            <button type="submit" class="btn btn-default pull-right">Create</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <legend>Upload logo</legend>
+                <form name="upload-new-logo" class="form-horizontal" role="form"
+                      action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
+                    <@upload_new_logo />
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-3">
+                            <input type="submit" value="Upload logo" class="btn btn-secondary pull-right"/>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -58,16 +75,9 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
-                <legend>Upload logo</legend>
-                <form name="upload-new-logo" class="form-horizontal" role="form"
-                      action="${context_url?html}/upload-logo" method="POST" enctype="multipart/form-data">
-                <@upload_new_logo />
-                    <div class="form-group">
-                        <div class="col-md-9 col-md-offset-3">
-                            <input type="submit" value="Upload logo" class="btn btn-primary pull-right"/>
-                        </div>
-                    </div>
+            <div class="col-md-12">
+                <form name="save-menu-form" action="${context_url?html}/save" method="POST">
+                    <button type="submit" class="btn btn-lg     btn-primary pull-right">Save the new menu layout</button>
                 </form>
             </div>
         </div>
@@ -186,6 +196,38 @@
 </div>
 </#macro>
 
+<#macro create_link_item_inputs is_edit>
+    <div class="form-group">
+        <div class="col-md-3">
+            <label class="control-label pull-right" for="link-item-id">Id *</label>
+        </div>
+
+        <div class="col-md-9">
+            <input type="text" class="form-control" name="link-item-id" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <label class="control-label pull-right" for="link-item-name">Name *</label>
+        </div>
+
+        <div class="col-md-9">
+            <input type="text" class="form-control" name="link-item-name" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <label class="control-label pull-right" for="link-item-url">Url *</label>
+        </div>
+
+        <div class="col-md-9">
+            <input type="text" class="form-control" name="link-item-url">
+        </div>
+    </div>
+</#macro>
+
 <#macro create_menu_list menu is_root>
     <#if is_root>
     <ol class="vertical root">
@@ -252,11 +294,7 @@
 
 <#macro upload_new_logo>
 <div class="form-group">
-    <div class="col-md-3">
-        <label class="control-label pull-right" for="menu-id">Choose file</label>
-    </div>
-
-    <div class="col-md-9">
+    <div class="col-md-12">
         <input type="file" name="logo" data-filename-placement="inside" title="Select a file...">
     </div>
 </div>

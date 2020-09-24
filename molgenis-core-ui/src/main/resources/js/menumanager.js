@@ -126,6 +126,21 @@
             }
         });
 
+        // add menu link item
+        var addLinkItemForm = $('form[name="add-link-item-form"]');
+        addLinkItemForm.validate();
+        addLinkItemForm.submit(function (e) {
+            e.preventDefault();
+            if ($(this).valid()) {
+                $('li.root>ol', container).prepend(itemTemplate({
+                    id: $('select[name="link-item-id"]', addLinkItemForm).val(),
+                    label: $('input[name="link-item-name"]', addLinkItemForm).val(),
+                    params: $('input[name="link-item-url"]', addLinkItemForm).val(),
+                    type: 'link'
+                }));
+            }
+        });
+
         // edit menu item
         var editItemForm = $('form[name="edit-item-form"]');
         editItemForm.validate();
