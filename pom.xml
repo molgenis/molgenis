@@ -25,7 +25,7 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/molgenis/molgenis.git</connection>
+    <developerConnection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/molgenis/molgenis.git</developerConnection>
     <url>https://github.com/molgenis/molgenis</url>
     <tag>HEAD</tag>
   </scm>
@@ -156,11 +156,11 @@
   <distributionManagement>
     <snapshotRepository>
       <id>${registry.id}</id>
-      <url>https://registry.molgenis.org/content/repositories/maven-snapshots</url>
+      <url>https://registry.molgenis.org/repository/maven-snapshots</url>
     </snapshotRepository>
     <repository>
       <id>${registry.id}</id>
-      <url>https://registry.molgenis.org/content/repositories/maven-releases</url>
+      <url>https://registry.molgenis.org/repository/maven-releases</url>
     </repository>
   </distributionManagement>
 
@@ -527,6 +527,13 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>${sonar-maven-plugin.version}</version>
@@ -678,24 +685,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <!-- sign in a non-interactive way -->
-        <groupId>org.kohsuke</groupId>
-        <artifactId>pgp-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

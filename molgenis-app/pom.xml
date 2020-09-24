@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.molgenis</groupId>
@@ -17,7 +19,8 @@
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
-    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
+    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war
+    </dockerfile.warfile>
 
     <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
@@ -38,6 +41,25 @@
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
         <version>${dockerfile-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+              <goal>push</goal>
+            </goals>
+          </execution>
+<!--          <execution>-->
+<!--            <id>tag-latest</id>-->
+<!--            <goals>-->
+<!--              <goal>build</goal>-->
+<!--              <goal>push</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <tag>latest</tag>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+        </executions>
         <configuration>
           <repository>${dockerfile.repository}</repository>
           <tag>${dockerfile.tag}</tag>
@@ -52,7 +74,17 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>rpm-maven-plugin</artifactId>
         <version>${rpm-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <phase>package</phase>
+            <goals>
+              <goal>rpm</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
+          <disabled>true</disabled>
           <license>Apache License 2.0</license>
           <group>Application/Collectors</group>
           <packager>MOLGENIS</packager>
@@ -102,6 +134,13 @@
             <scriptFile>rpm/postinstall.bash</scriptFile>
             <fileEncoding>utf-8</fileEncoding>
           </postinstallScriptlet>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
         </configuration>
       </plugin>
     </plugins>
