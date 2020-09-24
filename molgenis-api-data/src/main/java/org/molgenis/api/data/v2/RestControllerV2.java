@@ -549,8 +549,7 @@ public class RestControllerV2 {
           throw new UnknownEntityException(meta, id);
         }
 
-        Object value = entity.get(attributeName);
-        originalEntity.set(attributeName, value);
+        originalEntity.set(attributeName, entity.get(attributeName));
         updatedEntities.add(originalEntity);
         count++;
       }

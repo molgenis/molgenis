@@ -140,6 +140,7 @@ import org.springframework.web.util.NestedServletException;
 @WebAppConfiguration
 @ContextConfiguration(classes = {RestControllerV2Config.class, GsonConfig.class})
 class RestControllerV2Test extends AbstractMolgenisSpringTest {
+
   private static final String SELF_REF_ENTITY_NAME = "selfRefEntity";
   private static final String ENTITY_NAME = "entity";
   private static final String REF_ENTITY_NAME = "refEntity";
@@ -1115,6 +1116,22 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
     assertEquals(parseInstant("1985-08-12T08:12:13+0200"), entity.get("date_time"));
   }
 
+  @SuppressWarnings({"unchecked", "ConstantConditions"})
+  @Test
+  void testUpdateEntitiesSpecificAttributeRef() throws Exception {
+    mockMvc
+        .perform(
+            put(HREF_ENTITY_COLLECTION + "/xref")
+                .content("{entities:[{id:'0', xref:'ref0'}]}")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
+
+    Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
+    assertEquals("test", entity.get("xref"));
+  }
+
   @Test
   void testUpdateEntitiesSpecificAttributeNoExceptions() throws Exception {
     mockMvc
@@ -1357,6 +1374,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   @Configuration
   static class RestControllerV2Config extends WebMvcConfigurerAdapter {
+
     @Bean
     FormattingConversionService conversionService() {
       FormattingConversionServiceFactoryBean conversionServiceFactoryBean =
