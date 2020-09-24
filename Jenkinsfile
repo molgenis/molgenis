@@ -6,8 +6,6 @@ pipeline {
     }
     environment {
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
-        YUM_REPOSITORY_SNAPSHOTS = "https://${env.LOCAL_REGISTRY}/repository/yum-snapshots/"
-        YUM_REPOSITORY_RELEASES = "https://${env.LOCAL_REGISTRY}/repository/yum-releases/"
         CHART_VERSION = '1.11.0'
         TIMESTAMP = sh(returnStdout: true, script: "date -u +'%F_%H-%M-%S'").trim()
     }
@@ -42,7 +40,7 @@ pipeline {
                 TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
             }
             stages {
-                stage('Build [ PR ]') {
+                stage('Build, Test, Push to Registries [ PR ]') {
                     steps {
                         container('maven') {
                             script {
@@ -50,7 +48,7 @@ pipeline {
                                 env.PREVIEW_VERSION = sh(script: "grep version pom.xml | grep SNAPSHOT | cut -d'>' -f2 | cut -d'<' -f1", returnStdout: true).trim() + "-${env.TAG}"
                             }
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false -T1C"
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Dmaven.deploy.skip=true -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -T1C -DargLine='-XX:TieredStopAtLevel=1 -noverify'"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -T1C -DargLine='-XX:TieredStopAtLevel=1 -noverify'"
                             // Fetch the target branch, sonar likes to take a look at it
                             sh "git fetch --no-tags origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120 -T1C"
@@ -72,33 +70,17 @@ pipeline {
                 TAG = "dev-${TIMESTAMP}"
             }
             stages {
-                stage('Build [ master ]') {
+                stage('Build, Test, Push to Registries [ master ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Dwar.deploy.skip=true -Drpm.deploy.skip=false -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=dev -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                         }
                     }
                     post {
                         always {
                             junit '**/target/surefire-reports/**.xml'
-                        }
-                    }
-                }
-                stage('Push to registries [ master ]') {
-                    steps {
-                        container('maven') {
-                            dir('molgenis-app') {
-                                script {
-                                    sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                                    sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=dev -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                                    env.RPM_TAG = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true)
-                                    sh "mvn -q -B rpm:rpm -Drpm.release.version=${RPM_TAG}"
-                                    // make sure you have no linebreaks in RPM variable
-                                    env.RPM = sh(script: 'ls -1 target/rpm/molgenis/RPMS/noarch', returnStdout: true).trim()
-                                    sh "mvn deploy:deploy-file -DartifactId=molgenis -DgroupId=org.molgenis -Dversion=${env.TAG} -DrepositoryId=${env.LOCAL_REGISTRY} -Durl=${YUM_REPOSITORY_SNAPSHOTS} -Dfile=target/rpm/molgenis/RPMS/noarch/${env.RPM}"
-                                }
-                            }
                         }
                     }
                 }

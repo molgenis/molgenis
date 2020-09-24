@@ -14,14 +14,16 @@
   <description>Default MOLGENIS application module containing all default plugins.</description>
 
   <properties>
-    <maven.deploy.skip>false</maven.deploy.skip>
+    <!-- Default: build and deploy dockerfile -->
+    <!-- -Ddockerfile.skip=true: do not build and deploy dockerfile -->
+    <!-- -Dwar.deploy.skip=false: also deploy war -->
+    <war.deploy.skip>true</war.deploy.skip>
     <owasp-check-format>HTML</owasp-check-format>
 
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
     <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
-    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war
-    </dockerfile.warfile>
+    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
 
     <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
@@ -65,7 +67,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <skip>${maven.deploy.skip}</skip>
+          <skip>${war.deploy.skip}</skip>
         </configuration>
       </plugin>
     </plugins>

@@ -14,6 +14,10 @@
   <description>Module used to produce the MOLGENIS RPM artifact</description>
 
   <distributionManagement>
+    <snapshotRepository>
+      <id>${registry.id}</id>
+      <url>https://registry.molgenis.org/repository/yum-snapshots</url>
+    </snapshotRepository>
     <repository>
       <id>${registry.id}</id>
       <url>https://registry.molgenis.org/repository/yum-releases</url>
@@ -21,8 +25,11 @@
   </distributionManagement>
 
   <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
-    <rpm.disabled>true</rpm.disabled>
+    <!-- Default: no build, no deploy -->
+    <!-- -Drpm.deploy.skip=false: Build and deploy -->
+    <rpm.deploy.skip>true</rpm.deploy.skip>
+    <!-- -Drpm.disabled=false: Build rpm, no deploy -->
+    <rpm.disabled>${rpm.deploy.skip}</rpm.disabled>
     <rpm.name>molgenis</rpm.name>
     <rpm-maven-plugin.version>2.2.0</rpm-maven-plugin.version>
   </properties>
@@ -47,14 +54,6 @@
         <artifactId>rpm-maven-plugin</artifactId>
         <version>${rpm-maven-plugin.version}</version>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>default</id>
-            <goals>
-              <goal>rpm</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <disabled>${rpm.disabled}</disabled>
           <license>Apache License 2.0</license>
@@ -113,7 +112,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <skip>${maven.deploy.skip}</skip>
+          <skip>${rpm.deploy.skip}</skip>
         </configuration>
       </plugin>
     </plugins>
