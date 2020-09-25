@@ -7,6 +7,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
@@ -1119,6 +1120,10 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
   @SuppressWarnings({"unchecked", "ConstantConditions"})
   @Test
   void testUpdateEntitiesSpecificAttributeRef() throws Exception {
+    Entity ref0 = mock(Entity.class);
+    EntityType refEntity = dataService.getEntityType(REF_ENTITY_NAME);
+    when(entityManager.getReference(refEntity, "ref0")).thenReturn(ref0);
+
     mockMvc
         .perform(
             put(HREF_ENTITY_COLLECTION + "/xref")
@@ -1127,9 +1132,8 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
         .andExpect(status().isOk());
 
     verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
-
     Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
-    assertEquals("test", entity.get("xref"));
+    assertSame(ref0, entity.get("xref"));
   }
 
   @Test
