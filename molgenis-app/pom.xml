@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.molgenis</groupId>
@@ -12,6 +14,11 @@
   <description>Default MOLGENIS application module containing all default plugins.</description>
 
   <properties>
+    <!-- Default: build and deploy dockerfile -->
+    <!-- -Ddockerfile.skip=true: do not build and deploy dockerfile -->
+    <!-- -Dwar.deploy.skip=false: also deploy war -->
+    <war.deploy.skip>true</war.deploy.skip>
+    <maven.deploy.skip>${war.deploy.skip}</maven.deploy.skip>
     <owasp-check-format>HTML</owasp-check-format>
 
     <dockerfile.tag>${project.version}</dockerfile.tag>
@@ -21,7 +28,6 @@
 
     <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
-    <rpm-maven-plugin.version>2.2.0</rpm-maven-plugin.version>
   </properties>
 
   <build>
@@ -32,12 +38,22 @@
       </resource>
     </resources>
     <plugins>
-      <!-- Docker image containing the warfile -->
-      <!-- Does not run by default but you can explicitly call dockerfile:build dockerfile:tag dockerfile:push -->
+      <!-- Docker image containing the warfile.
+        Runs by default in the deploy phase,
+        if you need more tags you can run the goals manually -->
       <plugin>
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
         <version>${dockerfile-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <repository>${dockerfile.repository}</repository>
           <tag>${dockerfile.tag}</tag>
@@ -45,63 +61,6 @@
             <WAR_FILE>${dockerfile.warfile}</WAR_FILE>
           </buildArgs>
           <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-        </configuration>
-      </plugin>
-      <!-- create an RPM artifact of MOLGENIS -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rpm-maven-plugin</artifactId>
-        <version>${rpm-maven-plugin.version}</version>
-        <configuration>
-          <license>Apache License 2.0</license>
-          <group>Application/Collectors</group>
-          <packager>MOLGENIS</packager>
-          <name>molgenis</name>
-          <prefix>/usr/local</prefix>
-          <changelogFile>CHANGELOG.md</changelogFile>
-          <defineStatements>
-            <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
-          </defineStatements>
-          <needarch>false</needarch>
-          <targetOS>linux</targetOS>
-          <mappings>
-            <mapping>
-              <directory>/usr/local/share/molgenis</directory>
-              <filemode>770</filemode>
-              <username>molgenis</username>
-              <groupname>molgenis</groupname>
-            </mapping>
-            <mapping>
-              <directory>/usr/local/share/molgenis/war</directory>
-              <filemode>755</filemode>
-              <username>molgenis</username>
-              <groupname>molgenis</groupname>
-              <sources>
-                <source>
-                  <location>target/${project.artifactId}-${project.version}.war</location>
-                </source>
-              </sources>
-            </mapping>
-            <mapping>
-              <directory>/usr/local/share/molgenis/templates</directory>
-              <filemode>700</filemode>
-              <username>molgenis</username>
-              <groupname>molgenis</groupname>
-              <sources>
-                <source>
-                  <location>rpm/templates/molgenis-server.properties</location>
-                </source>
-              </sources>
-            </mapping>
-          </mappings>
-          <preinstallScriptlet>
-            <scriptFile>rpm/preinstall.bash</scriptFile>
-            <fileEncoding>utf-8</fileEncoding>
-          </preinstallScriptlet>
-          <postinstallScriptlet>
-            <scriptFile>rpm/postinstall.bash</scriptFile>
-            <fileEncoding>utf-8</fileEncoding>
-          </postinstallScriptlet>
         </configuration>
       </plugin>
     </plugins>
