@@ -986,7 +986,6 @@
     <module>molgenis-api-metrics</module>
     <module>molgenis-api-tests</module>
     <module>molgenis-app</module>
-    <module>molgenis-rpm</module>
     <module>molgenis-app-manager</module>
     <module>molgenis-bootstrap</module>
     <module>molgenis-core-ui</module>

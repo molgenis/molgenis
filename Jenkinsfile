@@ -74,7 +74,7 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                            sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=dev -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                         }
                     }
@@ -105,7 +105,7 @@ pipeline {
                 }
             }
             stages {
-                stage('Build [ x.x ]') {
+                stage('Build test and publish [ x.x ]') {
                     steps {
                         dir("${JENKINS_AGENT_WORKDIR}/.m2") {
                             unstash 'maven-settings'
@@ -124,26 +124,16 @@ pipeline {
                         container('maven') {
                             sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
+                            script {
+                                env.TAG = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true)
+                            }
                         }
                     }
                 }
                 stage('Perform release [ x.x ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B release:perform -Darguments=\"-q -B -Drpm.deploy.skip=false -Dwar.deploy.skip=false -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
-                        }
-                    }
-                }
-                stage('Push to registries [ x.x ]') {
-                    steps {
-                        container('maven') {
-                            script {
-                                // Can not use DSL here because of bug in Jenkins
-                                // The build wants to create a tmp directory in the target/checkout/molgenis-app
-                                // This is not permitted
-                                sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-stable"
-                                sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=stable"
-                            }
+                            sh "mvn -q -B release:perform -Darguments=\"-q -B -Dwar.deploy.skip=false -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                         }
                     }
                 }
@@ -169,7 +159,7 @@ pipeline {
                 TAG = "$BRANCH_NAME-$BUILD_NUMBER".replaceAll(~/[^\w.-]/, '-').toLowerCase()
             }
             stages {
-                stage('Build, test and deploy [ feature ]') {
+                stage('Build, test and publish [ feature ]') {
                     steps {
                         container('maven') {
                             sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
