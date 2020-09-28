@@ -24,7 +24,6 @@ import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.integrationtest.utils.TestProgress;
-import org.molgenis.integrationtest.utils.TestTimeZoneProvider;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
       FileTestConfig.class,
       EmxExportServiceImpl.class,
       ImportI18nConfig.class,
-      TestTimeZoneProvider.class
     })
 @Transactional
 public class EmxExportServiceIT extends AbstractMockitoSpringContextTests {

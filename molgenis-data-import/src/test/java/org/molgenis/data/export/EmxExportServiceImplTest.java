@@ -39,13 +39,11 @@ class EmxExportServiceImplTest extends AbstractMockitoTest {
 
   @Mock ContextMessageSource contextMessageSource;
 
-  @Mock TimeZoneProvider timeZoneProvider;
-
   private EmxExportServiceImpl service;
 
   @BeforeEach
   void setUp() {
-    service = new EmxExportServiceImpl(dataService, contextMessageSource, timeZoneProvider);
+    service = new EmxExportServiceImpl(dataService, contextMessageSource);
   }
 
   @Test
