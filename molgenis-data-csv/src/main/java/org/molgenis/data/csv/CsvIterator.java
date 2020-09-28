@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.csv.CsvRepositoryCollection.MAC_ZIP;
+import static org.springframework.util.StringUtils.getFilenameExtension;
 
 import au.com.bytecode.opencsv.CSVReader;
 import java.io.File;
@@ -32,7 +33,6 @@ import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.util.CloseableIterator;
-import org.springframework.util.StringUtils;
 
 public class CsvIterator implements CloseableIterator<Entity> {
   private final String repositoryName;
@@ -62,7 +62,7 @@ public class CsvIterator implements CloseableIterator<Entity> {
     this.entityType = entityType;
 
     try {
-      if (StringUtils.getFilenameExtension(file.getName()).equalsIgnoreCase("zip")) {
+      if ("zip".equalsIgnoreCase(getFilenameExtension(file.getName()))) {
         zipFile = new ZipFile(file.getAbsolutePath());
         for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); ) {
           ZipEntry entry = e.nextElement();

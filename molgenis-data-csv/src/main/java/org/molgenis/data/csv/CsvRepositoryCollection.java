@@ -68,7 +68,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection {
     entityTypeIds = Lists.newArrayList();
     entityTypeIdsLowerCase = Lists.newArrayList();
 
-    if (extension.equalsIgnoreCase("zip")) {
+    if ("zip".equalsIgnoreCase(extension)) {
       try (ZipFile zipFile = new ZipFile(file)) {
         for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); ) {
           ZipEntry entry = e.nextElement();

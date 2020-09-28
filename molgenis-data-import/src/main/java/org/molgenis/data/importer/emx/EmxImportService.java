@@ -25,6 +25,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.importer.MetadataParser;
 import org.molgenis.data.importer.ParsedMetaData;
+import org.molgenis.data.importer.emx.exception.NoFilenameExtensionException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -48,6 +49,9 @@ public class EmxImportService implements ImportService {
   @Override
   public boolean canImport(File file, RepositoryCollection source) {
     String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
+    if (fileNameExtension == null) {
+      throw new NoFilenameExtensionException(file.getName());
+    }
     if (getSupportedFileExtensions().contains(fileNameExtension.toLowerCase())) {
       for (String entityTypeId : source.getEntityTypeIds()) {
         if (isMetadataSheet(entityTypeId) || isI18nSheet(entityTypeId)) {
