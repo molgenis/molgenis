@@ -49,6 +49,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.postgresql.PostgreSqlEntityFactory.EntityMapper;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.validation.ConstraintViolation;
@@ -64,7 +65,7 @@ class PostgreSqlRepositoryTest {
   @Mock private DataSource dataSource;
   @Mock private EntityType entityType;
   @Mock private Query<Entity> query;
-  @Mock private RowMapper<Entity> rowMapper;
+  @Mock private EntityMapper rowMapper;
 
   private MockitoSession mockitoSession;
 

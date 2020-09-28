@@ -76,6 +76,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.postgresql.PostgreSqlEntityFactory.EntityMapper;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
@@ -295,7 +296,7 @@ class PostgreSqlRepository extends AbstractRepository {
     final String allRowsSelect = getSqlSelect(entityType, query, emptyList(), false);
     LOG.debug("Fetching [{}] data...", getName());
     LOG.trace("SQL: {}", allRowsSelect);
-    RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
+    EntityMapper rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
     template.query(
         allRowsSelect,
         (ResultSetExtractor<Object>)
@@ -307,7 +308,7 @@ class PostgreSqlRepository extends AbstractRepository {
       Consumer<List<Entity>> consumer,
       int batchSize,
       EntityType entityType,
-      RowMapper<Entity> rowMapper,
+      EntityMapper rowMapper,
       ResultSet resultSet)
       throws SQLException {
     int rowNum = 0;
