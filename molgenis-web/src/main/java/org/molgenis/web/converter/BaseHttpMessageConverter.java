@@ -22,6 +22,7 @@ public abstract class BaseHttpMessageConverter<T> extends AbstractHttpMessageCon
     super(supportedMediaType);
   }
 
+  @SuppressWarnings("java:S2259") // the parameters are checked to not be null
   protected Charset getCharset(HttpHeaders headers) {
     if (headers != null
         && headers.getContentType() != null
