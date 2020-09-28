@@ -115,7 +115,7 @@ public class AppController extends PluginController {
       HttpServletResponse response, String wildCardPath, AppResponse appResponse)
       throws IOException {
     File requestedResource =
-        fileStore.getFileUnchecked(appResponse.getResourceFolder() + wildCardPath);
+        fileStore.inSubdir(appResponse.getResourceFolder()).getFileUnchecked(wildCardPath);
     response.setContentType(guessMimeType(requestedResource.getName()));
     response.setContentLength((int) requestedResource.length());
     response.setHeader(

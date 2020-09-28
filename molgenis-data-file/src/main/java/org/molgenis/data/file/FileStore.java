@@ -27,6 +27,17 @@ public class FileStore {
     this.storageDir = storageDir;
   }
 
+  /**
+   * Create a new file store that only reads and writes in a given subdir of the storageDir.
+   *
+   * @param subdir the subdir to read and write in
+   * @return the new {@link FileStore}
+   */
+  public FileStore inSubdir(String subdir) {
+    validatePathname(subdir);
+    return new FileStore(storageDir + separator + subdir);
+  }
+
   public boolean createDirectory(String dirName) {
     validatePathname(dirName);
 
