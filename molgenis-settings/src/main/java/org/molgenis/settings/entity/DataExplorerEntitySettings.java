@@ -28,7 +28,7 @@ public class DataExplorerEntitySettings extends SystemEntityType {
       PACKAGE_ENTITY_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";
-  private EntityTypeMetadata entityTypeMetaData;
+  private final EntityTypeMetadata entityTypeMetaData;
 
   public DataExplorerEntitySettings(
       TableSettingsPackage tableSettingsPackage, EntityTypeMetadata entityTypeMetaData) {
@@ -39,7 +39,7 @@ public class DataExplorerEntitySettings extends SystemEntityType {
 
   @Override
   protected void init() {
-    setLabel(SIMPLE_NAME);
+    setLabel("Data Explorer Settings");
     setPackage(tableSettingsPackage);
     setDescription("Settings entities for per entity config");
     addAttribute(ID, ROLE_ID)
@@ -66,7 +66,7 @@ public class DataExplorerEntitySettings extends SystemEntityType {
         .setReadOnly(false)
         .setLabel("Card template")
         .setDescription(
-            "Specify a Vue template that should be rendered in the card layout of dataexplorer v2");
+            "Specify a Vue template that should be rendered in the card layout of data explorer v2");
     addAttribute(SHOP)
         .setDataType(BOOL)
         .setNillable(true)
