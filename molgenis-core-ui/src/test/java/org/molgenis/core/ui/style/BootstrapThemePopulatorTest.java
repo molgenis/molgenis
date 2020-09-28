@@ -59,7 +59,7 @@ class BootstrapThemePopulatorTest {
 
   @Test
   void addNewTheme() throws GetThemeException {
-    when(styleRepository.findOneById(ArgumentMatchers.eq("bootstrap-yeti.min.css")))
+    when(styleRepository.findOneById(ArgumentMatchers.eq("bootstrap-molgenis-blue.min.css")))
         .thenReturn(null);
     bootstrapThemePopulator.populate();
     verify(styleService, times(1)).addStyle(any(), any(), any(), any(), any());

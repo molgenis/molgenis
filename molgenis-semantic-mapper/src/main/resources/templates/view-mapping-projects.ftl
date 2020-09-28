@@ -1,7 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-
-<#assign css=['mapping-service.css']>
+<#assign css=[]>
 <#assign js=['mapping-projects.js', 'bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js']>
 
 <@header css js/>
@@ -151,4 +150,4 @@
         </div>
     </div>
 </div>
-</#macro>	
+</#macro>
