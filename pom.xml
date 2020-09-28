@@ -92,7 +92,7 @@
 
     <!-- dependency versions not managed by parent pom -->
     <google.auto-value.version>1.7</google.auto-value.version>
-    <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
+    <apache.rdf4j.version>3.4.1</apache.rdf4j.version>
     <google-api-client.version>1.21.0</google-api-client.version>
     <aerogear-otp-java.version>1.0.0</aerogear-otp-java.version>
     <aws-java-sdk-s3.version>1.11.86</aws-java-sdk-s3.version>
@@ -837,6 +837,17 @@
       <dependency>
         <groupId>org.eclipse.rdf4j</groupId>
         <artifactId>rdf4j-rio-turtle</artifactId>
+        <version>${apache.rdf4j.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.rdf4j</groupId>
+        <artifactId>rdf4j-model</artifactId>
         <version>${apache.rdf4j.version}</version>
       </dependency>
       <dependency>

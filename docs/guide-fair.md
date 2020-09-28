@@ -1,44 +1,39 @@
-# FAIR api
+# FAIR Data Point
 
-MOLGENIS partly supports the FAIR(Findable, Accessible, Interoperable, and Re-usable) [data principles](https://www.force11.org/group/fairgroup/fairprinciples).
+MOLGENIS partly supports the FAIR(Findable, Accessible, Interoperable, and Re-usable)
+[principles](https://www.force11.org/group/fairgroup/fairprinciples).
 
-The actual data used in the responses of the FAIR data endpoint are specified in the entities in the "fdp" package. The entities are named the same as the endpoints shown below. (Metadata, Catalog, Dataset, Distribution)
+## Model
+The actual data used in the responses of the FAIR data endpoint
+are specified in the entities in the "fdp" model package defined in
+[FDP.xlsx](https://github.com/molgenis/molgenis/blob/master/molgenis-api-fair/src/main/resources/FDP.xlsx).
+This model emx contains an implementation of the https://github.com/FAIRDataTeam/FAIRDataPoint-Spec/.
+The entities and attributes in the model are tagged using ontology terms
+to generate RDF statements based on the values in the rows. 
 
-The examples in the documentation below work on servers where this [demodata](https://github.com/bartcharbon/molgenis/raw/32f760792c13d48ba05e2be7ba1a9fefb53d175f/molgenis-fair/src/test/resources/FDP.xlsx) is loaded
+## Test data
+To test it out you can import the demo data in
+[FDP_test_data.xlsx](https://github.com/molgenis/molgenis/blob/master/molgenis-api-fair/src/test/resources/FDP_test_data.xlsx).
 
-The currently (molgenis 3.0.0 and higher) supported endpoints are:
+## Endpoints
 
-## Metadata: /fdp/
+### Metadata entrypoint: `/api/fdp/`
+Example: `http://molgenis.mydomain.example/api/fdp/`
+This endpoint transforms the first row of the `fdp_Metadata` entity type to RDF statements.
 
-Example: `http://molgenis.mydomain.example/fdp/`
-This endpoint returns information the following information about the server:
-identifier,title,issued,modified,hasVersion,license,description,APIVersion,publisher,contact,language,rights,contains
+### Any DCAT Resource: `/api/fdp/{type}/{id}`
+Example: `http://molgenis.mydomain.example/api/fdp/fdp_Catalog/catalogue`.
+This endpoint transforms any row of any entity type to RDF statements,
+as long as the entity type is tagged as a
+`http://www.w3.org/ns/dcat#Resource`. 
 
-For a description of those items check [here](https://dtl-fair.atlassian.net/wiki/display/FDP/FAIR+Data+Point+Software+Specification)
+### Preview
+You can preview the RDF generated for `fdp_Metadata`, or an `fdp_Catalog`, `fdp_Dataset`
+or `fdp_Distribution` in the Data Explorer by clicking view-row button.
 
-## Catalog: /fdp/[catalogID]
+### Ping home
+You can "Ping home" to add your FAIR Data Point to the `https://home.fairdatapoint.org` index by
+clicking the ping button in the `fdp_Metadata` preview.
 
-Example: `http://molgenis.mydomain.example/fdp/catalogue/`
-This endpoint returns information the following information about the datasets available on this server:
-title,identifier,issued,modified,hasVersion,publisher,description,language,license,rights,homepage,dataset,themeTaxonomy
-
-For a description of those items check [here](http://www.w3.org/TR/vocab-dcat/#Class:_Catalog)
-
-## Dataset: /fdp/[catalogID]/[datasetID]/
-
-Example: `http://molgenis.mydomain.example/fdp/catalogue/biobanks`
-This endpoint returns information the following information about the dataset:
-title,identifier,issued,modified,publisher,hasVersion,description,language,license,rights,distribution,theme,contactPoint,keyword,landingPage
-
-For a description of those items check [here](http://www.w3.org/TR/vocab-dcat/#Class:_Dataset)
-
-## Distribution: /fdp/[catalogID]}/[datasetID]/[distributionID]
-
-Example: `http://molgenis.mydomain.example/fdp/catalogue/biobanks/distribution`
-This endpoint returns information the following information about the distribution of the dataset:
-title,identifier,issued,modified,license,hasVersion,rights,description,accessURL,downloadURL,mediaType,format,byteSize
-
-For a description of those items check [here](http://www.w3.org/TR/vocab-dcat/#Class:_Distribution)
-
-## Response
+### Format
 All the endpoints respond in [turtle format](http://www.w3.org/TR/turtle/)

@@ -1,18 +1,21 @@
 package org.molgenis.api.fair.controller;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +32,10 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 @ContextConfiguration(classes = {GsonConfig.class})
 class FairControllerTest extends AbstractMockitoSpringContextTests {
 
-  private DataService dataService;
-  private EntityModelWriter entityModelWriter;
+  @Mock private DataService dataService;
+  @Mock private MetaDataService metaDataService;
+  @Mock private EntityModelWriter entityModelWriter;
+  @Mock private EntityType catalogMeta;
 
   private MockMvc mockMvc;
 
@@ -38,9 +43,7 @@ class FairControllerTest extends AbstractMockitoSpringContextTests {
 
   @BeforeEach
   void beforeTest() {
-    dataService = mock(DataService.class);
-    entityModelWriter = mock(EntityModelWriter.class);
-    FairController controller = new FairController(dataService, entityModelWriter);
+    FairController controller = new FairController(dataService, metaDataService, entityModelWriter);
 
     mockMvc =
         MockMvcBuilders.standaloneSetup(controller)
@@ -52,29 +55,31 @@ class FairControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void getCatalogTest() throws Exception {
-    reset(dataService);
-
     Entity answer = mock(Entity.class);
 
+    when(metaDataService.getEntityType("fdp_Catalog")).thenReturn(Optional.of(catalogMeta));
+    when(entityModelWriter.isADcatResource(catalogMeta)).thenReturn(true);
     when(dataService.findOneById("fdp_Catalog", "catalogID")).thenReturn(answer);
 
     this.mockMvc
         .perform(
-            get(URI.create("http://molgenis01.gcc.rug.nl:8080/api/fdp/catalogID?blah=value"))
+            get(URI.create(
+                    "http://molgenis01.gcc.rug.nl:8080/api/fdp/fdp_Catalog/catalogID?blah=value"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isOk());
 
-    Mockito.verify(entityModelWriter)
-        .createRdfModel("http://molgenis01.gcc.rug.nl:8080/api/fdp/catalogID", answer);
+    Mockito.verify(entityModelWriter).createRdfModel(answer);
   }
 
   @Test
   void getCatalogTestUnknownCatalog() throws Exception {
-    reset(dataService);
+    when(metaDataService.getEntityType("fdp_Catalog")).thenReturn(Optional.of(catalogMeta));
+    when(entityModelWriter.isADcatResource(catalogMeta)).thenReturn(true);
 
     this.mockMvc
         .perform(
-            get(URI.create("http://molgenis01.gcc.rug.nl:8080/api/fdp/catalogID?blah=value"))
+            get(URI.create(
+                    "http://molgenis01.gcc.rug.nl:8080/api/fdp/fdp_Catalog/catalogID?blah=value"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isBadRequest());
   }
