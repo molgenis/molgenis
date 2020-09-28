@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["permissionmanager.css"]>
+<#assign css=[]>
 <#assign js=["permissionmanager.js"]>
 <@header css js/>
 <div class="row">

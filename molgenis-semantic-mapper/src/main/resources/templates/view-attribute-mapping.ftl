@@ -1,6 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=['mapping-service.css']>
+
+<#assign css=[]>
 <#assign js=[
 'attribute-mapping.js',
 'd3.min.js',

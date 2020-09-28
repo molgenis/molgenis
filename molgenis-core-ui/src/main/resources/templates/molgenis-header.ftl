@@ -19,9 +19,7 @@
     <#-- Include browser polyfills before any script tags are inserted -->
     <@polyfill/>
     <#if !version?? || version == 1>
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
@@ -58,21 +56,15 @@
         </#list>
     <#else>
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
-        <#-- Make footer sticky -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
 
-        <#-- Include jQuery v3.3.1 to support bootstrap.js -->
+    <#-- Include jQuery v3.3.1 to support bootstrap.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/jquery-3.3.1.min.js"/>"></script>
         <script type="text/javascript" src="<@resource_href "/js/jquery.cookie-1.4.1.min.js"/>"></script>
 
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
-
-        <#-- Include context css -->
-        <link rel="stylesheet" href="/@molgenis-ui/legacy-lib/dist/context.css" type="text/css">
-
         <script type="text/javascript" src="/@molgenis-ui/legacy-lib/dist/require.js"></script>
     </#if>
 
@@ -188,7 +180,7 @@
     </#if>
 <div class="row">
     <div class="col-md-12">
-        <div id="plugin-container">
+        <div id="plugin-container" class="mod-${plugin_id}">
             <#assign plugin_description_key = plugin_id + '_description_text'>
             <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
                 ${i18n[plugin_description_key]}

@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['scheduled-jobs.css']>
+<#assign css=[]>
 <#assign js=['scheduled-jobs.js']>
 
 <@header css js/>

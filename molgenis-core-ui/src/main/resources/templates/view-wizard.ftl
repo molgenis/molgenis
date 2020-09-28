@@ -1,7 +1,7 @@
 <#import "spring.ftl" as spring />
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=['bwizard.min.css', 'molgenis-wizard.css'] + stylesheets>
+<#assign css=[]>
 <#assign js=['molgenis-wizard.js', 'bootstrap.file-input.js'] + javascripts>
 
 <@header css js/>
