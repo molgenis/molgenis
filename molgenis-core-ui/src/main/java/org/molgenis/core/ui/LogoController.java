@@ -17,7 +17,7 @@ public class LogoController {
   private final FileStore fileStore;
 
   public LogoController(FileStore fileStore) {
-    this.fileStore = fileStore;
+    this.fileStore = fileStore.inSubdir("logo");
   }
 
   /** Get a file from the logo subdirectory of the filestore */
@@ -28,7 +28,7 @@ public class LogoController {
       @PathVariable("extension") String extension,
       HttpServletResponse response)
       throws IOException {
-    File f = fileStore.getFileUnchecked("/logo/" + name + "." + extension);
+    File f = fileStore.getFileUnchecked(name + "." + extension);
     if (!f.exists()) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;

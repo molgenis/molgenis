@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
@@ -69,6 +70,8 @@ public class AppControllerTest extends AbstractMockitoSpringContextTests {
 
   @Autowired private FileStore fileStore;
 
+  @Mock private FileStore fakeAppFileStore;
+
   @BeforeAll
   static void beforeClass() {
     TestAllPropertiesMessageSource messageSource =
@@ -100,10 +103,8 @@ public class AppControllerTest extends AbstractMockitoSpringContextTests {
     when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
     when(app.getAppConfig()).thenReturn("{'config': 'test'}");
     when(app.getResourceFolder()).thenReturn("fake-app");
-    URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
-    File testJs = new File(new URI(resourceUrl.toString()).getPath());
 
-    when(fileStore.getFileUnchecked("fake-app/js/test.js")).thenReturn(testJs);
+    when(fileStore.inSubdir("fake-app")).thenReturn(fakeAppFileStore);
 
     appResponse = AppResponse.create(app);
     when(appManagerService.getAppByName(appName)).thenReturn(appResponse);
@@ -187,6 +188,10 @@ public class AppControllerTest extends AbstractMockitoSpringContextTests {
   void testServeResource() throws Exception {
     PluginIdentity pluginIdentity = new PluginIdentity("app/app1/");
     when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
+    URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
+    File testJs = new File(new URI(resourceUrl.toString()).getPath());
+    when(fakeAppFileStore.getFileUnchecked("/js/test.js")).thenReturn(testJs);
+
     mockMvc
         .perform(get(AppController.URI + "/app1/js/test.js"))
         .andExpect(status().isOk())
