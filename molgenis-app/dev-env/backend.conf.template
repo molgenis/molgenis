@@ -2,4 +2,5 @@ location / {
   proxy_set_header Host $http_host;
   proxy_pass http://${MOLGENIS_HOST}:8080;
   client_max_body_size 0;
+  proxy_read_timeout 600s;
 }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.molgenis.security.oidc.MappedOidcUserService</OriginalElement>
+  <nodes>
+    <node x="1689.0" y="136.0">org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationProvider</node>
+    <node x="0.0" y="346.0">org.molgenis.security.oidc.OidcUserMapperImpl</node>
+    <node x="436.00000000000006" y="157.0">org.molgenis.security.user.UserDetailsServiceImpl</node>
+    <node x="1386.2964285714286" y="0.0">org.springframework.security.oauth2.client.userinfo.OAuth2UserService</node>
+    <node x="915.0" y="114.0">org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService</node>
+    <node x="104.0" y="168.0">org.molgenis.security.oidc.OidcUserMapper</node>
+    <node x="374.75" y="346.0">org.molgenis.security.oidc.MappedOidcUserService</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationProvider" target="org.springframework.security.oauth2.client.userinfo.OAuth2UserService">
+      <point x="-82.0" y="-59.0" />
+      <point x="1771.0" y="84.0" />
+      <point x="1512.9964285714286" y="84.0" />
+      <point x="36.200000000000045" y="27.0" />
+    </edge>
+    <edge source="org.molgenis.security.oidc.MappedOidcUserService" target="org.molgenis.security.user.UserDetailsServiceImpl">
+      <point x="0.0" y="-27.0" />
+      <point x="-109.75" y="38.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService" target="org.springframework.security.oauth2.client.userinfo.OAuth2UserService">
+      <point x="-251.33333333333337" y="-81.0" />
+      <point x="1040.6666666666665" y="84.0" />
+      <point x="1404.3964285714287" y="84.0" />
+      <point x="-72.39999999999998" y="27.0" />
+    </edge>
+    <edge source="org.molgenis.security.oidc.OidcUserMapperImpl" target="org.molgenis.security.oidc.OidcUserMapper">
+      <point x="0.0" y="-27.0" />
+      <point x="-104.0" y="27.0" />
+    </edge>
+    <edge source="org.molgenis.security.oidc.MappedOidcUserService" target="org.molgenis.security.oidc.OidcUserMapper">
+      <point x="-68.40000000000009" y="-27.0" />
+      <point x="477.3499999999999" y="316.0" />
+      <point x="364.0" y="316.0" />
+      <point x="104.0" y="27.0" />
+    </edge>
+    <edge source="org.molgenis.security.oidc.MappedOidcUserService" target="org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService">
+      <point x="136.79999999999995" y="-27.0" />
+      <point x="682.55" y="326.0" />
+      <point x="1480.5" y="326.0" />
+      <point x="188.5" y="81.0" />
+    </edge>
+    <edge source="org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService" target="org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService">
+      <point x="-188.5" y="81.0" />
+      <point x="1103.5" y="296.0" />
+      <point x="895.0" y="296.0" />
+      <point x="895.0" y="195.0" />
+      <point x="-377.0" y="-0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.602847324496809" x="1008.5" y="200.0" />
+  <SelectedNodes>
+    <node>org.molgenis.security.oidc.MappedOidcUserService</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

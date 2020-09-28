@@ -25,7 +25,7 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/molgenis/molgenis.git</connection>
+    <developerConnection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/molgenis/molgenis.git</developerConnection>
     <url>https://github.com/molgenis/molgenis</url>
     <tag>HEAD</tag>
   </scm>
@@ -56,7 +56,9 @@
     <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 
     <!-- artifact publish properties -->
-    <sonatype.id>sonatype-nexus-staging</sonatype.id>
+    <registry.id>registry.molgenis.org</registry.id>
+    <!-- don't publish module jars -->
+    <maven.deploy.skip>true</maven.deploy.skip>
 
     <!-- code quality monitoring properties -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -122,8 +124,6 @@
     <greenmail-webapp.version>1.5.5</greenmail-webapp.version>
 
     <!-- plugin versions not managed by parent pom -->
-    <pgp-maven-plugin.version>1.1</pgp-maven-plugin.version>
-    <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <swagger-maven-plugin.version>3.1.5</swagger-maven-plugin.version>
     <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
     <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
@@ -157,12 +157,12 @@
 
   <distributionManagement>
     <snapshotRepository>
-      <id>${sonatype.id}</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>${registry.id}</id>
+      <url>https://registry.molgenis.org/repository/maven-snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>${sonatype.id}</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>${registry.id}</id>
+      <url>https://registry.molgenis.org/repository/maven-releases</url>
     </repository>
   </distributionManagement>
 
@@ -519,25 +519,6 @@
             </execution>
           </executions>
         </plugin>
-        <!-- sign artifacts -->
-        <plugin>
-          <groupId>org.kohsuke</groupId>
-          <artifactId>pgp-maven-plugin</artifactId>
-          <version>${pgp-maven-plugin.version}</version>
-        </plugin>
-        <!-- deploy to sonatype nexus -->
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>${nexus-staging-maven-plugin.version}</version>
-          <extensions>true</extensions>
-          <configuration>
-            <serverId>${sonatype.id}</serverId>
-            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <!-- closing the repo in the build fails miserably with a connection reset error -->
-            <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
-          </configuration>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
@@ -699,24 +680,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <!-- sign in a non-interactive way -->
-        <groupId>org.kohsuke</groupId>
-        <artifactId>pgp-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
