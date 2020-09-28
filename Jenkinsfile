@@ -74,7 +74,9 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                            sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            dir('molgenis-app') {
+                                sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            }
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                         }
                     }
