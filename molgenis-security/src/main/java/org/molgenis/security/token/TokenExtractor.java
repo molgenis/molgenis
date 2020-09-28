@@ -22,6 +22,7 @@ public class TokenExtractor implements HandlerMethodArgumentResolver {
     return getTokenInternal(request.getHeader(TOKEN_HEADER), request.getParameter(TOKEN_PARAMETER));
   }
 
+  @SuppressWarnings("java:S2259") // we use supportsParameter to check if the parameter is available
   @Override
   public @Nullable @CheckForNull Object resolveArgument(
       MethodParameter parameter,
