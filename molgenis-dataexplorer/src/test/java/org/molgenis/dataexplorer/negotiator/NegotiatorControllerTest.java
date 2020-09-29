@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -41,6 +42,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
+import org.molgenis.dataexplorer.negotiator.exception.MissingLocationException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.i18n.AllPropertiesMessageSource;
@@ -294,6 +296,28 @@ class NegotiatorControllerTest {
   }
 
   @Test
+  void testExportToNegotiatorNoLocationReturned() {
+    NegotiatorRequest request =
+        NegotiatorRequest.create(
+            "http://molgenis.org",
+            "molgenis_id_1",
+            "*=q=MOLGENIS",
+            "a nice molgenis query",
+            "Sjfg03Msmdp92Md82103FNskas9H735F");
+
+    when(negotiatorConfig.getUsername()).thenReturn("username");
+    when(negotiatorConfig.getPassword()).thenReturn("password");
+    when(negotiatorConfig.getNegotiatorURL()).thenReturn("http://directory.com");
+
+    when(restTemplate.postForLocation(eq("http://directory.com"), any())).thenReturn(null);
+
+    MissingLocationException thrown =
+        assertThrows(
+            MissingLocationException.class, () -> negotiatorController.exportToNegotiator(request));
+    assertEquals("negotiatorURL: http://directory.com", thrown.getMessage());
+  }
+
+  @Test
   void testExportWithBiobankFilter() {
     NegotiatorRequest request =
         NegotiatorRequest.create(
@@ -344,28 +368,6 @@ class NegotiatorControllerTest {
             "Sjfg03Msmdp92Md82103FNskas9H735F");
     HttpEntity<NegotiatorQuery> query = new HttpEntity<>(expectedBody, headers);
     assertEquals(query, queryCaptor.getValue());
-  }
-
-  @Test
-  void testExportToNegotiatorMissingNegotiatorURL() {
-    NegotiatorRequest request =
-        NegotiatorRequest.create(
-            "http://molgenis.org",
-            "molgenis_id_1",
-            "*=q=MOLGENIS",
-            "a nice molgenis query",
-            "Sjfg03Msmdp92Md82103FNskas9H735F");
-
-    when(negotiatorConfig.getUsername()).thenReturn("username");
-    when(negotiatorConfig.getPassword()).thenReturn("password");
-
-    when(restTemplate.postForLocation(eq("http://directory.com"), queryCaptor.capture()))
-        .thenReturn(URI.create("http://directory.com/request/1280"));
-
-    Exception exception =
-        assertThrows(
-            IllegalStateException.class, () -> negotiatorController.exportToNegotiator(request));
-    assertThat(exception.getMessage()).containsPattern("Negotiator config URL can't be null");
   }
 
   @Test

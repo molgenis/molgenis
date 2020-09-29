@@ -7,6 +7,7 @@ import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+import java.net.URI;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
+import org.molgenis.dataexplorer.negotiator.exception.MissingLocationException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -245,14 +247,12 @@ public class NegotiatorController extends PluginController {
   private String postQueryToNegotiator(
       NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity) {
     String negotiatorURL = config.getNegotiatorURL();
-    if (negotiatorURL == null) {
-      throw new IllegalStateException("Negotiator config URL can't be null");
-    }
-
     try {
       LOG.trace("NEGOTIATOR_URL: [{}]", negotiatorURL);
       String redirectURL =
-          restTemplate.postForLocation(negotiatorURL, queryHttpEntity).toASCIIString();
+          Optional.ofNullable(restTemplate.postForLocation(negotiatorURL, queryHttpEntity))
+              .map(java.net.URI::toString)
+              .orElseThrow(() -> new MissingLocationException(negotiatorURL));
       LOG.trace("Redirecting to {}", redirectURL);
       return redirectURL;
     } catch (RestClientException e) {
