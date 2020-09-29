@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import javax.annotation.Nonnull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
@@ -39,7 +40,7 @@ class PostgreSqlEntityFactory {
     this.entityManager = requireNonNull(entityManager);
   }
 
-  RowMapper<Entity> createRowMapper(EntityType entityType, Fetch fetch) {
+  EntityMapper createRowMapper(EntityType entityType, Fetch fetch) {
     return new EntityMapper(entityManager, entityType, fetch);
   }
 
@@ -47,7 +48,7 @@ class PostgreSqlEntityFactory {
     return entityManager.getReferences(refEntityType, ids);
   }
 
-  private static class EntityMapper implements RowMapper<Entity> {
+  static class EntityMapper implements RowMapper<Entity> {
     private final EntityManager entityManager;
     private final EntityType entityType;
     private final Fetch fetch;
@@ -59,7 +60,7 @@ class PostgreSqlEntityFactory {
     }
 
     @Override
-    public Entity mapRow(ResultSet resultSet, int i) throws SQLException {
+    public @Nonnull Entity mapRow(ResultSet resultSet, int i) throws SQLException {
       Entity e = entityManager.createFetch(entityType, fetch);
 
       // TODO performance, iterate over fetch if available
