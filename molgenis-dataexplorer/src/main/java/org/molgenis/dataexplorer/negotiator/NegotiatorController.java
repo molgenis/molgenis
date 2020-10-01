@@ -7,6 +7,7 @@ import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+import java.net.URI;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -25,10 +26,10 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
+import org.molgenis.dataexplorer.negotiator.exception.MissingLocationException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.rsql.QueryRsqlConverter;
 import org.slf4j.Logger;
@@ -36,14 +37,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -245,14 +243,12 @@ public class NegotiatorController extends PluginController {
   private String postQueryToNegotiator(
       NegotiatorConfig config, HttpEntity<NegotiatorQuery> queryHttpEntity) {
     String negotiatorURL = config.getNegotiatorURL();
-    if (negotiatorURL == null) {
-      throw new IllegalStateException("Negotiator config URL can't be null");
-    }
-
     try {
       LOG.trace("NEGOTIATOR_URL: [{}]", negotiatorURL);
       String redirectURL =
-          restTemplate.postForLocation(negotiatorURL, queryHttpEntity).toASCIIString();
+          Optional.ofNullable(restTemplate.postForLocation(negotiatorURL, queryHttpEntity))
+              .map(java.net.URI::toString)
+              .orElseThrow(() -> new MissingLocationException(negotiatorURL));
       LOG.trace("Redirecting to {}", redirectURL);
       return redirectURL;
     } catch (RestClientException e) {
@@ -329,15 +325,5 @@ public class NegotiatorController extends PluginController {
     String userPass = username + ":" + password;
     String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(UTF_8));
     return "Basic " + userPassBase64;
-  }
-
-  @ExceptionHandler(RuntimeException.class)
-  @ResponseBody
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ErrorMessageResponse handleRuntimeException(RuntimeException e) {
-    LOG.error(e.getMessage(), e);
-    return new ErrorMessageResponse(
-        new ErrorMessageResponse.ErrorMessage(
-            "An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
   }
 }
