@@ -30,7 +30,6 @@ import org.molgenis.dataexplorer.negotiator.exception.MissingLocationException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.rsql.QueryRsqlConverter;
 import org.slf4j.Logger;
@@ -38,14 +37,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -329,15 +325,5 @@ public class NegotiatorController extends PluginController {
     String userPass = username + ":" + password;
     String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(UTF_8));
     return "Basic " + userPassBase64;
-  }
-
-  @ExceptionHandler(RuntimeException.class)
-  @ResponseBody
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ErrorMessageResponse handleRuntimeException(RuntimeException e) {
-    LOG.error(e.getMessage(), e);
-    return new ErrorMessageResponse(
-        new ErrorMessageResponse.ErrorMessage(
-            "An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
   }
 }
