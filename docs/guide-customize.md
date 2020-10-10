@@ -64,10 +64,14 @@ Using the Theme manager, you can select between multiple bootstrap styles.
 ![Theme Manager](./images/theme_manager.png)
 
 To get the feel of how certain styles look, you can select it in the dropdown menu.
-The style will not be applied to the application unless you press the 'Save current theme' button.
+The style will not be applied to the application unless you press the 'Save' button.
 
 ### Creating a new theme
-TODO..
+You can create new themes using the https://github.com/molgenis/molgenis-theme/ repository.
+If they get published there, they'll appear in the pulldown.
+
+Or, if you are hosting a custom theme somewhere, you can open the Application Settings in the
+Settings Manager and fill in the `themeURL` and `legacyThemeURL` there.
 
 ## Homepage
 The home page is one of the most important part of your MOLGENIS application. It is a doorway to the rest of your application, and as it is such, it should look nice! When you are logged in as administrator, the home page contains an *edit* button. Clicking this button will open up an editor.
