@@ -64,12 +64,22 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public String getBootstrapTheme() {
+  public String getLegacyThemeURL() {
     return null;
   }
 
   @Override
-  public void setBootstrapTheme(String bootstrapTheme) {
+  public void setLegacyThemeURL(String bootstrapTheme) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String getThemeURL() {
+    return null;
+  }
+
+  @Override
+  public void setThemeURL(String bootstrapTheme) {
     throw new UnsupportedOperationException();
   }
 

@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.transaction.TransactionManager;
@@ -41,7 +40,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 class MolgenisInterceptorTest extends AbstractMockitoTest {
   @Mock private ResourceFingerprintRegistry resourceFingerprintRegistry;
-  @Mock private ThemeFingerprintRegistry themeFingerprintRegistry;
   @Mock private AppSettings appSettings;
   @Mock private AuthenticationSettings authenticationSettings;
   @Mock private MessageSource messageSource;
@@ -59,7 +57,6 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
     molgenisInterceptor =
         new MolgenisInterceptor(
             resourceFingerprintRegistry,
-            themeFingerprintRegistry,
             appSettings,
             authenticationSettings,
             environment,
@@ -73,7 +70,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   void MolgenisInterceptor() {
     assertThrows(
         NullPointerException.class,
-        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null, null));
+        () -> new MolgenisInterceptor(null, null, null, null, null, null, null, null));
   }
 
   @Test

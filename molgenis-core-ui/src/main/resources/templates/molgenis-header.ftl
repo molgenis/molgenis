@@ -2,7 +2,6 @@
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
-<#include "theme-macros.ftl">
 <#include "polyfill-macros.ftl">
 <#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
@@ -19,7 +18,7 @@
     <#-- Include browser polyfills before any script tags are inserted -->
     <@polyfill/>
     <#if !version?? || version == 1>
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+        <link rel="stylesheet" href="${app_settings.legacyThemeURL?html}" type="text/css" id="bootstrap-theme"/>
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
@@ -56,7 +55,7 @@
         </#list>
     <#else>
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+        <link rel="stylesheet" href="${app_settings.themeURL?html}" type="text/css" id="bootstrap-theme">
 
 
     <#-- Include jQuery v3.3.1 to support bootstrap.js -->
