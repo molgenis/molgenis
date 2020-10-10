@@ -11,7 +11,6 @@ public class PluginAttributes {
   public static final String KEY_ENVIRONMENT = "environment";
 
   public static final String KEY_RESOURCE_FINGERPRINT_REGISTRY = "resource_fingerprint_registry";
-  public static final String KEY_THEME_FINGERPRINT_REGISTRY = "theme_fingerprint_registry";
   public static final String KEY_APP_SETTINGS = "app_settings";
   public static final String KEY_AUTHENTICATION_OIDC_CLIENTS = "authentication_oidc_clients";
   public static final String KEY_AUTHENTICATION_SIGN_UP = "authentication_sign_up";

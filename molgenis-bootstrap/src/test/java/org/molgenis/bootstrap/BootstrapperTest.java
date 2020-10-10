@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
-import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
 import org.molgenis.data.importer.ImportBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
@@ -36,7 +35,6 @@ class BootstrapperTest extends AbstractMockitoTest {
   @Mock private ImportBootstrapper importBootstrapper;
   @Mock private IndexBootstrapper indexBootstrapper;
   @Mock private EntityTypeRegistryPopulator entityTypeRegistryPopulator;
-  @Mock private BootstrapThemePopulator bootstrapThemePopulator;
   @Mock private BootstrappingEventPublisher bootstrappingEventPublisher;
 
   private Bootstrapper bootstrapper;
@@ -56,7 +54,6 @@ class BootstrapperTest extends AbstractMockitoTest {
             importBootstrapper,
             indexBootstrapper,
             entityTypeRegistryPopulator,
-            bootstrapThemePopulator,
             bootstrappingEventPublisher);
   }
 
@@ -66,7 +63,7 @@ class BootstrapperTest extends AbstractMockitoTest {
         NullPointerException.class,
         () ->
             new Bootstrapper(
-                null, null, null, null, null, null, null, null, null, null, null, null, null));
+                null, null, null, null, null, null, null, null, null, null, null, null));
   }
 
   @Test
@@ -89,7 +86,6 @@ class BootstrapperTest extends AbstractMockitoTest {
     verify(importBootstrapper).bootstrap();
     verify(indexBootstrapper).bootstrap();
     verify(entityTypeRegistryPopulator).populate();
-    verify(bootstrapThemePopulator).populate();
     verify(bootstrappingEventPublisher).publishBootstrappingFinishedEvent();
   }
 }

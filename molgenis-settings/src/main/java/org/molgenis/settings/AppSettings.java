@@ -47,11 +47,17 @@ public interface AppSettings {
   /** @param languageCode application ISO 639 alpha-2 or alpha-3 language code */
   void setLanguageCode(String languageCode);
 
-  /** @return application bootstrap theme file name without path */
-  String getBootstrapTheme();
+  /** @return legacy bootstrap 3 theme URL */
+  String getLegacyThemeURL();
 
-  /** @param bootstrapTheme application bootstrap theme file name without path */
-  void setBootstrapTheme(String bootstrapTheme);
+  /** @param url legacy bootstrap 3 theme URL */
+  void setLegacyThemeURL(String url);
+
+  /** @return theme URL */
+  String getThemeURL();
+
+  /** @param url theme URL */
+  void setThemeURL(String url);
 
   /** @return file name containing custom CSS without path */
   @Nullable
