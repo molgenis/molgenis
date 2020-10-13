@@ -36,8 +36,6 @@ public class NegotiatorConfig extends StaticEntity {
     return getString(PASSWORD);
   }
 
-  @Nullable
-  @CheckForNull
   public String getNegotiatorURL() {
     return getString(NEGOTIATOR_URL);
   }

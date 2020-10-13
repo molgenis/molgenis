@@ -28,7 +28,9 @@ public class Step37AddSettingsPluginToMenu extends MolgenisUpgrade {
   private void addSettingsPluginToMenu() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     String menuString = getMenuString(jdbcTemplate);
-
+    if (menuString == null) {
+      throw new IllegalStateException("Dude, where is my menu?!");
+    }
     if (hasSettingsPlugin(menuString)) {
       LOG.info("Settings plugin already in the menu. No further action required.");
     } else {

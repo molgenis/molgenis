@@ -11,9 +11,9 @@ import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,18 +32,15 @@ public class QuestionnaireController extends PluginController {
 
   private final QuestionnaireService questionnaireService;
   private final MenuReaderService menuReaderService;
-  private final AppSettings appSettings;
   private final UserAccountService userAccountService;
 
   public QuestionnaireController(
       QuestionnaireService questionnaireService,
       MenuReaderService menuReaderService,
-      AppSettings appSettings,
       UserAccountService userAccountService) {
     super(URI);
     this.questionnaireService = requireNonNull(questionnaireService);
     this.menuReaderService = requireNonNull(menuReaderService);
-    this.appSettings = requireNonNull(appSettings);
     this.userAccountService = requireNonNull(userAccountService);
   }
 
@@ -121,7 +118,7 @@ public class QuestionnaireController extends PluginController {
       status = questionnaireEntity.getStatus();
     }
 
-    String lng = appSettings.getLanguageCode();
+    String lng = LocaleContextHolder.getLocale().getLanguage();
 
     return QuestionnaireResponse.create(
         entityTypeId, entityType.getLabel(lng), entityType.getDescription(lng), status);

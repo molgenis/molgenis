@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -27,7 +27,6 @@ import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.MenuReaderService;
@@ -55,8 +54,6 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
 
   @Mock private Menu menu;
 
-  @Mock private AppSettings appSettings;
-
   @Mock private UserAccountService userAccountService;
 
   @Mock private LocaleResolver localeResolver;
@@ -71,12 +68,10 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
     when(user.isSuperuser()).thenReturn(false);
 
     when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
-    when(appSettings.getLanguageCode()).thenReturn("en");
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     QuestionnaireController questionnaireController =
-        new QuestionnaireController(
-            questionnaireService, menuReaderService, appSettings, userAccountService);
+        new QuestionnaireController(questionnaireService, menuReaderService, userAccountService);
     Model model = mock(Model.class);
     questionnaireController.initView(model);
 
@@ -102,7 +97,7 @@ class QuestionnaireControllerTest extends AbstractMockitoSpringContextTests {
     when(questionnaire.getId()).thenReturn("test_quest");
     when(questionnaire.getLabel("en")).thenReturn("label");
     when(questionnaire.getDescription("en")).thenReturn("description");
-    List<EntityType> questionnaires = Arrays.asList(questionnaire);
+    List<EntityType> questionnaires = Collections.singletonList(questionnaire);
     when(questionnaireService.getQuestionnaires()).thenReturn(questionnaires.stream());
 
     MvcResult result =
