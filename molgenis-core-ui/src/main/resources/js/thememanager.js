@@ -1,5 +1,5 @@
 //TODO: https://unpkg.com/@molgenis/molgenis-theme/css/
-let themeRepository = "https://zen-chandrasekhar-e7bd44.netlify.app"
+let themeRepository = "/themes"
 
 requirejs(["vue.min"], function(Vue) {
   new Vue({
@@ -10,8 +10,14 @@ requirejs(["vue.min"], function(Vue) {
     },
     created() {
       let self = this
-      $.get(`${themeRepository}/theme.json`).then(
+      $.get(`${themeRepository}/index.json`).then(
         function (themes) {
+          // self.themes = themes.filter((t) => t.share)
+          themes.forEach(function(theme) {
+            if (__STATE__.theme.includes(theme.id)) {
+              self.selectedTheme = theme.id
+            }
+          })
           self.themes = themes
         });
     },

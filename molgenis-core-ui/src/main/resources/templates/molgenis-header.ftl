@@ -76,6 +76,31 @@
     </#list>
 
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
+    <script>
+        window.__STATE__ = {
+            cookies: ${cookieWall?string('true', 'false')},
+            language: {
+              default: '${lng}',
+              fallback: '${fallbackLng}'
+            },
+            paths: {
+                help: 'https://molgenis.gitbook.io/molgenis/',
+                login: '/login',
+                logo: <#if app_settings.logoTopHref??>'${app_settings.logoTopHref}'<#else>false</#if>,
+            },
+            menu: ${gson.toJson(menu)},
+            theme: "${app_settings.themeURL}",
+            page: {
+              <#if plugin_id??>plugin: '${plugin_id}',</#if>
+              title: "${app_settings.title}",
+              version: "${version}"
+            },
+            user: {
+               authenticated: ${authenticated?c},
+               superuser: ${isSuperUser?c}
+            }
+        }
+    </script>
 </head>
 
 <body class="mg-page">
