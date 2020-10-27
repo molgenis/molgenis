@@ -6,7 +6,7 @@
 
 <@header css js/>
 <div class="row">
-    <div class="col-md-offset-2 col-md-8">
+    <div class="col-md-12">
         <p>Runtime create loggers and change the level of existing loggers, changes are not persisted after server
             restart.</p>
         <div class="row">

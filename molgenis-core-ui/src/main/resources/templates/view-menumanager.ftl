@@ -5,7 +5,7 @@
 <@header css js/>
 
 <div class="row" id="menu-editor-container">
-    <div class="col-md-5">
+    <div class="col-md-6">
         <p>
             Drag and drop menu items to update menu, press Save to store the menu.
             Each menu should contain at least one item.

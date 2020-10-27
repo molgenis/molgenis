@@ -89,7 +89,10 @@
                 logo: <#if app_settings.logoTopHref??>'${app_settings.logoTopHref}'<#else>false</#if>,
             },
             menu: ${gson.toJson(menu)},
-            theme: "${app_settings.themeURL}",
+            theme: {
+                url: "${app_settings.themeURL}",
+                urlLegacy: "${app_settings.legacyThemeURL}"
+            },
             page: {
               <#if plugin_id??>plugin: '${plugin_id}',</#if>
               title: "${app_settings.title}",
@@ -103,7 +106,7 @@
     </script>
 </head>
 
-<body class="mg-page">
+<body class="mg-page<#if (!version?? ||version == 1)> legacy</#if><#if (plugin_id??)> mod-${plugin_id}"</#if>>
     <#if !(version??) || version == 1>
         <#-- Navbar menu -->
         <#if menu_id??>
@@ -160,8 +163,7 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid mg-page-content"
-     style="padding-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 60}<#else>60</#if>px;">
+<div class="container-fluid mg-page-content">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -194,17 +196,14 @@
         </div>
     </div>
     <#if plugin_show_settings_cog>
-        <div class="row">
-            <div class="col-md-12">
-                <span class="glyphicon glyphicon-cog pull-right plugin-settings-btn" aria-hidden="true"
-                      style="cursor: pointer; margin-bottom: 5px;"></span>
-                <div id="plugin-settings-container"></div>
-            </div>
+        <div class="edit-settings">
+            <span class="glyphicon glyphicon-cog plugin-settings-btn" aria-hidden="true"></span>
+            <div id="plugin-settings-container"></div>
         </div>
     </#if>
 <div class="row">
     <div class="col-md-12">
-        <div id="plugin-container" class="mod-${plugin_id}">
+        <div id="plugin-container">
             <#assign plugin_description_key = plugin_id + '_description_text'>
             <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
                 ${i18n[plugin_description_key]}
@@ -215,7 +214,7 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string>
-    <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
             <#if app_settings.logoTopHref?has_content>
             <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
