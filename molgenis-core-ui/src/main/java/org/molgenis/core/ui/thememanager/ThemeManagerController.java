@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.thememanager;
 
-
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
