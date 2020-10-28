@@ -55,9 +55,9 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final Integer DEFAULT_LOGO_TOP_MAX_HEIGHT = 150;
     private static final String DEFAULT_LANGUAGE_CODE = "en";
     private static final String DEFAULT_THEME_URL =
-        "https://unpkg.com/@molgenis/molgenis-theme/css/mg-molgenis-blue-4.css";
+        "/@molgenis-ui/molgenis-theme/dist/themes/mg-molgenis-blue-4.css";
     private static final String DEFAULT_LEGACY_THEME_URL =
-        "https://unpkg.com/@molgenis/molgenis-theme/css/mg-molgenis-blue-3.css";
+        "/@molgenis-ui/molgenis-theme/dist/themes/mg-molgenis-blue-3.css";
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
     private static final boolean
