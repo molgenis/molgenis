@@ -76,34 +76,6 @@
     </#list>
 
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
-    <script>
-        window.__STATE__ = {
-            cookies: ${cookieWall?string('true', 'false')},
-            language: {
-              default: '${lng}',
-              fallback: '${fallbackLng}'
-            },
-            paths: {
-                help: 'https://molgenis.gitbook.io/molgenis/',
-                login: '/login',
-                logo: <#if app_settings.logoTopHref??>'${app_settings.logoTopHref}'<#else>false</#if>,
-            },
-            menu: ${gson.toJson(menu)},
-            theme: {
-                url: "${app_settings.themeURL}",
-                urlLegacy: "${app_settings.legacyThemeURL}"
-            },
-            page: {
-              <#if plugin_id??>plugin: '${plugin_id}',</#if>
-              title: "${app_settings.title}",
-              version: "${version}"
-            },
-            user: {
-               authenticated: ${authenticated?c},
-               superuser: ${isSuperUser?c}
-            }
-        }
-    </script>
 </head>
 
 <body class="mg-page<#if (!version?? ||version == 1)> legacy</#if><#if (plugin_id??)> mod-${plugin_id}"</#if>>

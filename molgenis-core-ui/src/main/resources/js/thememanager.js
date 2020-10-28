@@ -1,5 +1,4 @@
-//TODO: https://unpkg.com/@molgenis/molgenis-theme/css/
-let themeRepository = "/themes"
+var themeRepository = "/@molgenis-ui/molgenis-theme/dist/themes"
 
 requirejs(["vue.min"], function(Vue) {
   new Vue({
@@ -12,24 +11,24 @@ requirejs(["vue.min"], function(Vue) {
       themeUrlLegacy: ''
     },
     created() {
-      let self = this
-      $.get(`${themeRepository}/index.json`).then(
-        function (allThemes) {
-          // Only show themes that are meant to be public.
-          self.themes = allThemes.filter((t) => t.share)
-          var matchedTheme = self.themes.find(t => __STATE__.theme.url.includes(t.id))
-          if (matchedTheme) {
-            self.selectedTheme = matchedTheme.id
+      var self = this
+      $.get('/api/data/sys_set_app/app').then(function(settings) {
+          self.themeUrl = settings.data.theme_url
+          self.themeUrlLegacy = settings.data.legacy_theme_url
 
-            self.themeUrl = `${themeRepository}/mg-${matchedTheme.id}-4.css`
-            self.themeUrlLegacy = `${themeRepository}/mg-${matchedTheme.id}-3.css`
-
-          } else {
-            self.themeUrl = __STATE__.theme.url
-            self.themeUrlLegacy = __STATE__.theme.urlLegacy
-            self.selectionMethod = 'url'
-          }
-        });
+          $.get(`${themeRepository}/index.json`).then(function (allThemes) {
+              // Only show themes that are meant to be public.
+              self.themes = allThemes.filter((t) => t.share)
+              var matchedTheme = self.themes.find(t => self.themeUrl.includes(t.id))
+              // Theme repository should be part of the expected path; otherwise it is a custom url.
+              if (matchedTheme && self.themeUrl.includes(themeRepository)) {
+                self.selectedTheme = matchedTheme.id
+                self.selectionMethod = 'listed'
+              } else {
+                self.selectionMethod = 'url'
+              }
+          });
+      })
     },
     methods: {
       save() {

@@ -6,6 +6,7 @@
 <#assign version = 2>
 
 <@header css js version/>
+<!-- This is a Vue template for the theme manager -->
 <div class="row" id="thememanager">
     <div class="col-md-12">
         <legend>Theme Manager</legend>
