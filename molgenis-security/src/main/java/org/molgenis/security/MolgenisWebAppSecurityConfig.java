@@ -61,6 +61,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -136,6 +138,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
     requestCache.setRequestMatcher(createWebRequestMatcher());
     http.requestCache().requestCache(requestCache);
+
+    http.sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistry());
 
     // add default header options but use custom cache control header writer
     http.cors()
@@ -458,5 +462,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         new AntPathRequestMatcher("/"),
         new AntPathRequestMatcher("/plugin/**"),
         new AntPathRequestMatcher("/menu/**"));
+  }
+
+  @Bean
+  public SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
   }
 }

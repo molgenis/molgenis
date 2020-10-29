@@ -10,15 +10,18 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserManagerServiceImpl implements UserManagerService {
   private final DataService dataService;
+  private final SessionRegistry sessionRegistry;
 
-  UserManagerServiceImpl(DataService dataService) {
+  UserManagerServiceImpl(DataService dataService, SessionRegistry sessionRegistry) {
     this.dataService = requireNonNull(dataService);
+    this.sessionRegistry = requireNonNull(sessionRegistry);
   }
 
   @Override
@@ -39,6 +42,15 @@ public class UserManagerServiceImpl implements UserManagerService {
     }
     user.setActive(active);
     this.dataService.update(USER, user);
+  }
+
+  @Override
+  @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
+  public long getActiveSessionsCount() {
+    return sessionRegistry.getAllPrincipals().stream()
+        .map(p -> sessionRegistry.getAllSessions(p, false))
+        .filter(userSessions -> !userSessions.isEmpty())
+        .count();
   }
 
   private List<UserViewData> parseToMolgenisUserViewData(Stream<User> users) {

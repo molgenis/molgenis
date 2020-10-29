@@ -34,6 +34,8 @@ public class UserManagerController extends PluginController {
   @ApiResponses({@ApiResponse(code = 200, message = "Return the user manager view")})
   @GetMapping
   public String init(Model model) {
+    model.addAttribute(
+        "activeSessionCount", this.pluginUserManagerService.getActiveSessionsCount());
     model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
 
     return "view-usermanager";

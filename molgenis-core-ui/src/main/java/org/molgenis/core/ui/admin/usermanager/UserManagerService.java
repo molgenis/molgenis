@@ -6,4 +6,6 @@ public interface UserManagerService {
   List<UserViewData> getAllUsers();
 
   void setActivationUser(String userId, Boolean active);
+
+  long getActiveSessionsCount();
 }
