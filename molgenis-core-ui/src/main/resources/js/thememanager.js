@@ -49,6 +49,9 @@ requirejs(["vue.min"], function(Vue) {
       selectedTheme: function(newVal) {
         this.themeUrl = `${themeRepository}/mg-${newVal}-4.css`
         this.themeUrlLegacy = `${themeRepository}/mg-${newVal}-3.css`
+        // Changing the theme from the theme-manager will always use
+        // the current Bootstrap 4 url.
+        document.querySelector('#bootstrap-theme').setAttribute('href', this.themeUrl)
       }
     }
   })
