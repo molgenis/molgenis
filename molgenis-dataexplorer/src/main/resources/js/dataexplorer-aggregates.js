@@ -69,7 +69,7 @@
             updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
         } else {
             $('#feature-select-container').hide();
-            $('#aggregate-table-container').html('<p>No aggregable items</p>');
+            $('#aggregate-table-container').html('<p class="mg-table-no-items">No aggregable items</p>');
         }
     }
 

@@ -13,6 +13,7 @@ test-output/
 derby.log
 .metadata/
 .RData
+data
 .RHistory
 
 .idea/*

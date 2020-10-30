@@ -1,7 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-
-<#assign css=['mapping-service.css']>
+<#assign css=[]>
 <#assign js=['bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'tag-wizard.js']>
 
 <@header css js/>

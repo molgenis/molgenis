@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
-import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
 import org.molgenis.data.importer.ImportBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
@@ -37,7 +36,6 @@ class Bootstrapper {
   private final ImportBootstrapper importBootstrapper;
   private final IndexBootstrapper indexBootstrapper;
   private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
-  private final BootstrapThemePopulator bootstrapThemePopulator;
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
 
   Bootstrapper(
@@ -52,7 +50,6 @@ class Bootstrapper {
       ImportBootstrapper importBootstrapper,
       IndexBootstrapper indexBootstrapper,
       EntityTypeRegistryPopulator entityTypeRegistryPopulator,
-      BootstrapThemePopulator bootstrapThemePopulator,
       BootstrappingEventPublisher bootstrappingEventPublisher) {
     this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
     this.dataSourceAclTablesPopulator = requireNonNull(dataSourceAclTablesPopulator);
@@ -65,7 +62,6 @@ class Bootstrapper {
     this.importBootstrapper = requireNonNull(importBootstrapper);
     this.indexBootstrapper = requireNonNull(indexBootstrapper);
     this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
-    this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
     this.bootstrappingEventPublisher = requireNonNull(bootstrappingEventPublisher);
   }
 
@@ -118,10 +114,6 @@ class Bootstrapper {
     LOG.trace("Populating entity type registry ...");
     entityTypeRegistryPopulator.populate();
     LOG.debug("Populated entity type registry");
-
-    LOG.trace("Populating bootstrap themes ...");
-    bootstrapThemePopulator.populate();
-    LOG.debug("Populated bootstrap themes");
 
     bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
     LOG.info("Bootstrapping application completed");

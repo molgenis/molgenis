@@ -1,11 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=[
-"jquery.molgenis.tree.css",
-"ui.fancytree.min.css",
-"dataexplorer.css",
-"dataexplorer-filter.css"]>
+<#assign css=[]>
 <#assign js=[
 "jquery.bootstrap.wizard.min.js",
 "dataexplorer-filter.js",

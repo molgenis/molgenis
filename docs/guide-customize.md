@@ -55,18 +55,23 @@ Second, move the new link below the Home item. Then press the 'Save the new menu
 A new menu item will appear which will take you to the bioinformatics Wikipedia page.
 
 ## Style/theme
-Creating your own research database often comes with the desire to add a unique styling to it. We wanted to give users a way to change the standard [Bootstrap](http://getbootstrap.com/) style that is shipped with MOLGENIS.
+Creating your own research database often comes with the desire to add a unique styling to it.
+We wanted to give users a way to change the standard [Bootstrap](http://getbootstrap.com/) style
+that is shipped with MOLGENIS.
 
 Using the Theme manager, you can select between multiple bootstrap styles.
 
 ![Theme Manager](./images/theme_manager.png)
 
-To get the feel of how certain styles look, you can select it in the dropdown menu. The style will not be applied to the application unless you press the 'Save current theme' button.
+To get the feel of how certain styles look, you can select it in the dropdown menu.
+The style will not be applied to the application unless you press the 'Save' button.
 
-For an overview of all the different themes offered, visit the [Bootswatch](https://bootswatch.com/) website.
+### Creating a new theme
+You can create new themes using the https://github.com/molgenis/molgenis-theme/ repository.
+If they get published there, they'll appear in the pulldown.
 
-### Adding a new theme
-It is possible to submit your own CSS sheets to update the styling. By selecting the 'Add theme' option a new theme file may be added. As molgenis currently uses both bootstrap version 3 and bootstrap version 4 (alpha) classes for styling the interface, theme's for both versions may be added. It is mandatory to add a bootstrap version 3 theme file. Adding a bootstrap version 4 theme file is optional (but recommended). If a theme is selected for which no bootstrap 4 theme file was set, the 'default' bootstrap 4 theme will be used.
+Or, if you are hosting a custom theme somewhere, you can open the Application Settings in the
+Settings Manager and fill in the `themeURL` and `legacyThemeURL` there.
 
 ## Homepage
 The home page is one of the most important part of your MOLGENIS application. It is a doorway to the rest of your application, and as it is such, it should look nice! When you are logged in as administrator, the home page contains an *edit* button. Clicking this button will open up an editor.

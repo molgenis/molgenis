@@ -6,8 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
-    <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-    <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+    <link rel="stylesheet" href="${app_settings.legacyThemeURL?html}" type="text/css" id="bootstrap-theme">
 </head>
 <body class="mg-page">
 <div class="container-fluid mg-page-content">

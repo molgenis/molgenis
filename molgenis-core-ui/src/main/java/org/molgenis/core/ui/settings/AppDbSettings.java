@@ -35,7 +35,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final String FOOTER = "footer";
     public static final String MENU = "molgenis_menu";
     private static final String LANGUAGE_CODE = "language_code";
-    private static final String BOOTSTRAP_THEME = "bootstrap_theme";
+    private static final String LEGACY_THEME_URL = "legacy_theme_url";
+    private static final String THEME_URL = "theme_url";
     private static final String CSS_HREF = "css_href";
 
     private static final String TRACKING = "tracking";
@@ -53,7 +54,10 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/Logo_Blue_Small.png";
     private static final Integer DEFAULT_LOGO_TOP_MAX_HEIGHT = 150;
     private static final String DEFAULT_LANGUAGE_CODE = "en";
-    private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis-blue.min.css";
+    private static final String DEFAULT_THEME_URL =
+        "/@molgenis-ui/molgenis-theme/dist/themes/mg-molgenis-blue-4.css";
+    private static final String DEFAULT_LEGACY_THEME_URL =
+        "/@molgenis-ui/molgenis-theme/dist/themes/mg-molgenis-blue-3.css";
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
     private static final boolean
@@ -115,13 +119,18 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
           .setDefaultValue(DEFAULT_LANGUAGE_CODE)
           .setLabel("Language code")
           .setDescription("ISO 639 alpha-2 or alpha-3 language code.");
-      addAttribute(BOOTSTRAP_THEME)
-          .setDataType(STRING)
+      addAttribute(LEGACY_THEME_URL)
+          .setDataType(HYPERLINK)
           .setNillable(false)
-          .setDefaultValue(DEFAULT_BOOTSTRAP_THEME)
-          .setLabel("Bootstrap theme")
-          .setDescription(
-              "CSS file name of theme (see molgenis-core-ui/src/main/resources/css/themes).");
+          .setDefaultValue(DEFAULT_LEGACY_THEME_URL)
+          .setLabel("Legacy theme URL")
+          .setDescription("URL of legacy bootstrap 3 theme css.");
+      addAttribute(THEME_URL)
+          .setDataType(HYPERLINK)
+          .setNillable(false)
+          .setDefaultValue(DEFAULT_THEME_URL)
+          .setLabel("Theme URL")
+          .setDescription("URL of bootstrap 4 theme css.");
       addAttribute(CSS_HREF)
           .setDataType(STRING)
           .setNillable(true)
@@ -296,13 +305,23 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
   }
 
   @Override
-  public String getBootstrapTheme() {
-    return getString(Meta.BOOTSTRAP_THEME);
+  public String getLegacyThemeURL() {
+    return getString(Meta.LEGACY_THEME_URL);
   }
 
   @Override
-  public void setBootstrapTheme(String bootstrapTheme) {
-    set(Meta.BOOTSTRAP_THEME, bootstrapTheme);
+  public void setLegacyThemeURL(String url) {
+    set(Meta.LEGACY_THEME_URL, url);
+  }
+
+  @Override
+  public String getThemeURL() {
+    return getString(Meta.THEME_URL);
+  }
+
+  @Override
+  public void setThemeURL(String url) {
+    set(Meta.THEME_URL, url);
   }
 
   @Override

@@ -11,7 +11,6 @@ import static org.molgenis.web.PluginAttributes.KEY_ENVIRONMENT;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
 import static org.molgenis.web.PluginAttributes.KEY_I18N;
 import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
-import static org.molgenis.web.PluginAttributes.KEY_THEME_FINGERPRINT_REGISTRY;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -43,7 +41,6 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
   public static final String KEY_FALLBACK_LANGUAGE = "fallbackLng";
   public static final String KEY_SUPER_USER = "isSuperUser";
   private final ResourceFingerprintRegistry resourceFingerprintRegistry;
-  private final ThemeFingerprintRegistry themeFingerprintRegistry;
   private final AuthenticationSettings authenticationSettings;
   private final AppSettings appSettings;
   private final String environment;
@@ -56,7 +53,6 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
 
   public MolgenisInterceptor(
       ResourceFingerprintRegistry resourceFingerprintRegistry,
-      ThemeFingerprintRegistry themeFingerprintRegistry,
       AppSettings appSettings,
       AuthenticationSettings authenticationSettings,
       @Value("${environment}") String environment,
@@ -65,7 +61,6 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       PlatformTransactionManager transactionManager,
       UserAccountService userAccountService) {
     this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
-    this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
     this.appSettings = requireNonNull(appSettings);
     this.authenticationSettings = requireNonNull(authenticationSettings);
     this.environment = requireNonNull(environment);
@@ -92,7 +87,6 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
             status -> {
               modelAndView.addObject(
                   KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
-              modelAndView.addObject(KEY_THEME_FINGERPRINT_REGISTRY, themeFingerprintRegistry);
               modelAndView.addObject(KEY_APP_SETTINGS, createAppSettings());
               modelAndView.addObject(
                   KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
@@ -115,7 +109,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
 
   private Map<String, Object> createAppSettings() {
     Map<String, Object> modelValue = new HashMap<>();
-    modelValue.put("bootstrapTheme", appSettings.getBootstrapTheme());
+    modelValue.put("themeURL", appSettings.getThemeURL());
+    modelValue.put("legacyThemeURL", appSettings.getLegacyThemeURL());
     modelValue.put("cssHref", appSettings.getCssHref());
     modelValue.put("customJavascript", appSettings.getCustomJavascript());
     modelValue.put("footer", appSettings.getFooter());

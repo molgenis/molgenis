@@ -3,60 +3,57 @@
 
 <#assign css=[]>
 <#assign js=["thememanager.js"]>
+<#assign version = 2>
 
-<@header css js/>
+<@header css js version/>
+<!-- This is a Vue template for the theme manager -->
+<div class="row" id="thememanager">
+    <div class="col-md-12">
+        <legend>Theme Manager</legend>
 
-<div class="row">
-    <div class="col-md-12" style="margin-bottom: 1rem">
-        <legend>Select a bootstrap theme</legend>
-        <form class="form-inline" role="form">
-            <div class="form-group">
-                <div class="col-md-4">
-                    <select class="form-control" id="bootstrap-theme-select">
-                    <#list availableStyles as style>
-                        <option value="${style.location}"
-                                <#if selectedStyle?? && style.name == selectedStyle>selected</#if>>${style.name}</option>
-                    </#list>
+        <form role="form">
+            <div class="custom-control custom-radio">
+                <input type="radio" class="custom-control-input" id="theme-selection-method-predefined" v-model="selectionMethod" name="radio-stacked" value="listed">
+                <label class="custom-control-label" for="theme-selection-method-predefined">Select a public theme</label>
+            </div>
+
+            <div class="custom-control custom-radio mb-3">
+                <input type="radio" class="custom-control-input" id="theme-selection-method-url" v-model="selectionMethod" name="radio-stacked" value="url">
+                <label class="custom-control-label" for="theme-selection-method-url">Use a custom theme</label>
+                <div class="invalid-feedback">More example invalid feedback text</div>
+            </div>
+
+            <div class="theme-select-listed" v-if="selectionMethod === 'listed'">
+                <div class="form-group">
+                    <label for="bootstrap-theme-select">Available Themes</label>
+                    <select class="form-control"
+                            id="bootstrap-theme-select"
+                            v-model="selectedTheme"/>
+                        <option v-for="theme in themes" :value="theme.id">{{theme.name || theme.id}}</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-md-4">
-                    <button id="save-selected-bootstrap-theme" type="btn" class="btn btn-primary">Save current theme
-                    </button>
+            <div class="theme-select-url" v-else>
+                <div class="form-group">
+                    <label for="theme-url">Theme url</label>
+                    <input type="text" class="form-control" id="theme-url" autocomplete="off" v-model="themeUrl">
+                    <small id="emailHelp" class="form-text text-muted">Url to a customized <a href="https://github.com/molgenis/molgenis-theme">molgenis-theme</a> Bootstrap 4 file.</small>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-4">
-                    <button id="show-add-theme-btn" type="button" class="btn btn-primary">Add theme
-                    </button>
+                <div class="form-group">
+                    <label for="theme-url-legacy">Theme url (legacy)</label>
+                    <input type="text" class="form-control" id="theme-url-legacy" autocomplete="off" v-model="themeUrlLegacy">
+                    <small id="emailHelp" class="form-text text-muted">Url to a customized <a href="https://github.com/molgenis/molgenis-theme">molgenis-theme</a> Bootstrap 3 file.</small>
                 </div>
             </div>
         </form>
-    </div>
-</div>
-
-<div id="add-theme-container" class="row" style="display: none; margin: 1rem">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <form>
-                    <div class="form-group">
-                        <label for="bootstrap3-file">Bootstrap 3 file<span style="color: red"> *</span></label>
-                        <input id="bootstrap3-file" type="file" accept=".css, .min.css">
-                    </div>
-                    <div class="form-group">
-                        <label for="bootstrap4-file">Bootstrap 4 file</label>
-                        <input type="file" id="bootstrap4-file" accept=".css, .min.css">
-                        <p class="help-block">If you do not include a bootstrap 4 variant the 'default' bootstrap theme
-                            will be used.</p>
-                    </div>
-                    <button id="cancel-add-themes-btn" type="button" class="btn btn-default">Cancel</button>
-                    <button id="add-themes-btn" type="button" class="btn btn-success">Add theme</button>
-                </form>
-            </div>
+        <div class="btn-group mt-1" role="group">
+            <button id="save-selected-bootstrap-theme"
+                    type="button"
+                    @click="save"
+                    class="btn btn-primary">Save
+            </button>
         </div>
     </div>
 </div>
-
+<script src="/js/thememanager.js"></script>
 <@footer/>

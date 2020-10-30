@@ -2,7 +2,6 @@
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
-<#include "theme-macros.ftl">
 <#include "polyfill-macros.ftl">
 <#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
@@ -19,11 +18,7 @@
     <#-- Include browser polyfills before any script tags are inserted -->
     <@polyfill/>
     <#if !version?? || version == 1>
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-        <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
-
+        <link rel="stylesheet" href="${app_settings.legacyThemeURL?html}" type="text/css" id="bootstrap-theme"/>
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"></script>
         <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"></script>
@@ -58,21 +53,15 @@
         </#list>
     <#else>
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+        <link rel="stylesheet" href="${app_settings.themeURL?html}" type="text/css" id="bootstrap-theme">
 
-        <#-- Make footer sticky -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
 
-        <#-- Include jQuery v3.3.1 to support bootstrap.js -->
+    <#-- Include jQuery v3.3.1 to support bootstrap.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/jquery-3.3.1.min.js"/>"></script>
         <script type="text/javascript" src="<@resource_href "/js/jquery.cookie-1.4.1.min.js"/>"></script>
 
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
-
-        <#-- Include context css -->
-        <link rel="stylesheet" href="/@molgenis-ui/legacy-lib/dist/context.css" type="text/css">
-
         <script type="text/javascript" src="/@molgenis-ui/legacy-lib/dist/require.js"></script>
     </#if>
 
@@ -87,7 +76,7 @@
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
 
-<body class="mg-page">
+<body class="mg-page<#if (!version?? ||version == 1)> legacy</#if><#if (plugin_id??)> mod-${plugin_id}"</#if>>
     <#if !(version??) || version == 1>
         <#-- Navbar menu -->
         <#if menu_id??>
@@ -145,7 +134,7 @@
 
 <#-- Start application content -->
 <div class="container-fluid mg-page-content"
-     style="padding-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 60}<#else>60</#if>px;">
+     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight} + 50</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -178,12 +167,9 @@
         </div>
     </div>
     <#if plugin_show_settings_cog>
-        <div class="row">
-            <div class="col-md-12">
-                <span class="glyphicon glyphicon-cog pull-right plugin-settings-btn" aria-hidden="true"
-                      style="cursor: pointer; margin-bottom: 5px;"></span>
-                <div id="plugin-settings-container"></div>
-            </div>
+        <div class="edit-settings">
+            <span class="glyphicon glyphicon-cog plugin-settings-btn" aria-hidden="true"></span>
+            <div id="plugin-settings-container"></div>
         </div>
     </#if>
 <div class="row">
@@ -199,15 +185,13 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string>
-    <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <#if app_settings.logoTopHref?has_content>
+        <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
+            <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" style="max-height: ${app_settings.logoTopMaxHeight}px;"></a>
+        </header>
+        </#if>
         <div class="container-fluid">
-            <#if app_settings.logoTopHref?has_content>
-            <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
-                <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
-                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
-                                 style="max-height: ${app_settings.logoTopMaxHeight}px;max-width: 90%;"></a>
-            </header>
-            </#if>
             <div class="navbar-header">
                 <#list menu.items as item>
                     <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
