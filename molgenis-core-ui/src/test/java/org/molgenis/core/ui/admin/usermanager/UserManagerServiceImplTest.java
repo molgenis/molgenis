@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +19,7 @@ import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.core.SecurityContextRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
@@ -38,8 +37,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {Config.class})
@@ -57,13 +54,13 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     }
 
     @Bean
-    SessionRegistry sessionRegistry() {
-      return mock(SessionRegistry.class);
+    SecurityContextRegistry securityContextRegistry() {
+      return mock(SecurityContextRegistry.class);
     }
 
     @Bean
     UserManagerService userManagerService() {
-      return new UserManagerServiceImpl(dataService(), sessionRegistry());
+      return new UserManagerServiceImpl(dataService(), securityContextRegistry());
     }
 
     @Override
@@ -96,7 +93,7 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
 
   @Autowired private DataService dataService;
 
-  @Autowired private SessionRegistry sessionRegistry;
+  @Autowired private SecurityContextRegistry securityContextRegistry;
 
   @BeforeEach
   void setUpBeforeEach() {
@@ -163,19 +160,12 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
   @Test
   void testGetActiveSessionsCount() {
 
-    User user1 = mock(User.class);
-    User user2 = mock(User.class);
-
-    List<Object> principles = asList(user1, user2);
-    when(sessionRegistry.getAllPrincipals()).thenReturn(principles);
-
-    when(sessionRegistry.getAllSessions(user1, false))
-        .thenReturn(singletonList(mock(SessionInformation.class)));
-
-    when(sessionRegistry.getAllSessions(user2, false)).thenReturn(Collections.emptyList());
+    Stream mockStream = mock(Stream.class);
+    when(mockStream.count()).thenReturn(14L);
+    when(securityContextRegistry.getSecurityContexts()).thenReturn(mockStream);
 
     setSecurityContextSuperUser();
-    assertEquals(1L, userManagerService.getActiveSessionsCount());
+    assertEquals(14L, userManagerService.getActiveSessionsCount());
   }
 
   private void setSecurityContextSuperUser() {
