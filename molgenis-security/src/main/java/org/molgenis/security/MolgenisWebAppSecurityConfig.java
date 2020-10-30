@@ -95,6 +95,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
   private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
+  public static final int MAXIMUM_CONCURRENT_USER_SESSIONS = 10;
 
   @Autowired private DataService dataService;
 
@@ -139,7 +140,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
     requestCache.setRequestMatcher(createWebRequestMatcher());
     http.requestCache().requestCache(requestCache);
 
-    http.sessionManagement().maximumSessions(1).sessionRegistry(sessionRegistry());
+    http.sessionManagement()
+        .maximumSessions(MAXIMUM_CONCURRENT_USER_SESSIONS)
+        .sessionRegistry(sessionRegistry());
 
     // add default header options but use custom cache control header writer
     http.cors()

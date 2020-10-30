@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -171,11 +172,10 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     when(sessionRegistry.getAllSessions(user1, false))
         .thenReturn(singletonList(mock(SessionInformation.class)));
 
-    when(sessionRegistry.getAllSessions(user2, false))
-        .thenReturn(singletonList(mock(SessionInformation.class)));
+    when(sessionRegistry.getAllSessions(user2, false)).thenReturn(Collections.emptyList());
 
     setSecurityContextSuperUser();
-    assertEquals(2L, userManagerService.getActiveSessionsCount());
+    assertEquals(1L, userManagerService.getActiveSessionsCount());
   }
 
   private void setSecurityContextSuperUser() {
