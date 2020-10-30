@@ -19,8 +19,6 @@
     <@polyfill/>
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="${app_settings.legacyThemeURL?html}" type="text/css" id="bootstrap-theme"/>
-        <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
-
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-vendor-bundle.js"></script>
         <script src="/@molgenis-ui/core-ui/dist/js/dist/molgenis-global.js"></script>
@@ -135,7 +133,8 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid mg-page-content">
+<div class="container-fluid mg-page-content"
+     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight} + 50</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -187,14 +186,12 @@
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string>
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <#if app_settings.logoTopHref?has_content>
+        <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
+            <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" style="max-height: ${app_settings.logoTopMaxHeight}px;"></a>
+        </header>
+        </#if>
         <div class="container-fluid">
-            <#if app_settings.logoTopHref?has_content>
-            <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
-                <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
-                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
-                                 style="max-height: ${app_settings.logoTopMaxHeight}px;max-width: 90%;"></a>
-            </header>
-            </#if>
             <div class="navbar-header">
                 <#list menu.items as item>
                     <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
