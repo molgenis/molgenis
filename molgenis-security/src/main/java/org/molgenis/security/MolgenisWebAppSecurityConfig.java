@@ -95,7 +95,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
   private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER = "continueWithUnsupportedBrowser";
-  public static final int MAXIMUM_CONCURRENT_USER_SESSIONS = 10;
+  public static final int MAXIMUM_CONCURRENT_USER_SESSIONS = Integer.MAX_VALUE;
 
   @Autowired private DataService dataService;
 
