@@ -19,6 +19,7 @@ import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.core.SecurityContextRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
@@ -53,8 +54,13 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     }
 
     @Bean
+    SecurityContextRegistry securityContextRegistry() {
+      return mock(SecurityContextRegistry.class);
+    }
+
+    @Bean
     UserManagerService userManagerService() {
-      return new UserManagerServiceImpl(dataService());
+      return new UserManagerServiceImpl(dataService(), securityContextRegistry());
     }
 
     @Override
@@ -87,6 +93,8 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
 
   @Autowired private DataService dataService;
 
+  @Autowired private SecurityContextRegistry securityContextRegistry;
+
   @BeforeEach
   void setUpBeforeEach() {
     previousContext = SecurityContextHolder.getContext();
@@ -101,7 +109,7 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void userManagerServiceImpl() {
-    assertThrows(NullPointerException.class, () -> new UserManagerServiceImpl(null));
+    assertThrows(NullPointerException.class, () -> new UserManagerServiceImpl(null, null));
   }
 
   @Test
@@ -147,6 +155,17 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     assertThrows(
         UnknownEntityException.class,
         () -> userManagerService.setActivationUser("unknownUserId", true));
+  }
+
+  @Test
+  void testGetActiveSessionsCount() {
+
+    Stream mockStream = mock(Stream.class);
+    when(mockStream.count()).thenReturn(14L);
+    when(securityContextRegistry.getSecurityContexts()).thenReturn(mockStream);
+
+    setSecurityContextSuperUser();
+    assertEquals(14L, userManagerService.getActiveSessionsCount());
   }
 
   private void setSecurityContextSuperUser() {

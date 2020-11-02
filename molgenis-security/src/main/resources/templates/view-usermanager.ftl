@@ -8,6 +8,9 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
+
+            <h5>Number of active user sessions: ${activeSessionCount}</h5>
+
             <legend>
                 User management
                 <a id="create-user-btn" href="#" style="margin:30px 10px">
