@@ -1,0 +1,34 @@
+#title: MappedOidcUser
+
+// the trees
+[AbstractAuthenticationToken]<:-[OAuth2AuthenticationToken]
+[Authentication]<:-[AbstractAuthenticationToken]
+[Principal]<:-[Authentication]
+
+[DefaultOidcUser]<:-[MappedOidcUser]
+[DefaultOauth2User]<:-[DefaultOidcUser]
+[OidcUser]<:-[DefaultOidcUser]
+[OAuth2User]<:-[DefaultOauth2User]
+[OAuth2User]<:-[OidcUser]
+[Oauth2AuthenticatedPrincipal]<:-[OAuth2User]
+[AuthenticatedPrincipal]<:-[Oauth2AuthenticatedPrincipal]
+
+// the attributes
+[OAuth2AuthenticationToken|
+principal:OAuth2User;
+authorizedClientRegistrationId:String]
+[Authentication|
+getAuthorities();
+getCredentials();
+getDetails();
+getPrincipal();
+isAuthenticated();
+setAuthenticated()]
+
+[DefaultOauth2User|nameAttributeKey;attributes;authorities]
+[Oauth2AuthenticatedPrincipal|getAttributes();getAuthorities()]
+[AuthenticatedPrincipal|getName()]
+[DefaultOidcUser|idToken;userInfo]
+[MappedOidcUser|usernameOverride;emailAttributeName]
+
+[Principal|getName()]

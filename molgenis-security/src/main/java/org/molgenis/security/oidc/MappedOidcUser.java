@@ -2,32 +2,63 @@ package org.molgenis.security.oidc;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
- * {@link DefaultOidcUser} with a mapped username.
+ * {@link DefaultOidcUser} with overrides.
  *
  * <p><img src="{@docRoot}/doc-files/MappedOidcUser.png" width="640">
  */
-public class MappedOidcUser extends DefaultOidcUser {
+class MappedOidcUser extends DefaultOidcUser {
 
-  private final String username;
+  /** If present, this is the value for getName() */
+  @Nullable private final String usernameOverride;
+  /** The name of the key used to retrieve getEmail() */
+  private final String emailAttributeKey;
 
+  /**
+   * Creates an OidcUser with override for the email and username attribute names.
+   *
+   * @param original the {@link OidcUser} to copy
+   * @param emailAttributeKey the claim key to look up in {@link #getEmail()}
+   * @param usernameAttributeKey the claim key to look up in {@link #getName()}
+   */
+  MappedOidcUser(OidcUser original, String emailAttributeKey, String usernameAttributeKey) {
+    super(
+        original.getAuthorities(),
+        original.getIdToken(),
+        original.getUserInfo(),
+        usernameAttributeKey);
+    this.usernameOverride = null;
+    this.emailAttributeKey = requireNonNull(emailAttributeKey);
+  }
+
+  /**
+   * Creates an OidcUser that's a copy of an existing OidcUser but with overrides for {@link
+   * #getAuthorities()} and {@link #getName()} and a custom attribute to use in {@link #getEmail()}.
+   *
+   * @param original the {@link OidcUser} to copy
+   * @param authoritiesOverride overrides {@link #getAuthorities()}
+   * @param usernameOverride overrides {@link #getName()}
+   * @param emailAttributeKey name of the attribute to look up in {@link #getEmail()}
+   */
   MappedOidcUser(
-      Set<GrantedAuthority> authorities,
-      OidcIdToken idToken,
-      OidcUserInfo userInfo,
-      String username) {
-    super(authorities, idToken, userInfo);
-    this.username = requireNonNull(username);
+      OidcUser original,
+      Collection<? extends GrantedAuthority> authoritiesOverride,
+      String emailAttributeKey,
+      String usernameOverride) {
+    super(authoritiesOverride, original.getIdToken(), original.getUserInfo());
+    this.usernameOverride = usernameOverride;
+    this.emailAttributeKey = requireNonNull(emailAttributeKey);
   }
 
   /**
@@ -45,7 +76,12 @@ public class MappedOidcUser extends DefaultOidcUser {
    */
   @Override
   public String getName() {
-    return username;
+    return Optional.ofNullable(usernameOverride).orElse(super.getName());
+  }
+
+  @Override
+  public String getEmail() {
+    return getClaimAsString(emailAttributeKey);
   }
 
   @Override
@@ -60,11 +96,12 @@ public class MappedOidcUser extends DefaultOidcUser {
       return false;
     }
     MappedOidcUser that = (MappedOidcUser) o;
-    return username.equals(that.username);
+    return Objects.equals(usernameOverride, that.usernameOverride)
+        && emailAttributeKey.equals(that.emailAttributeKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), username);
+    return Objects.hash(super.hashCode(), usernameOverride, emailAttributeKey);
   }
 }

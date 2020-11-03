@@ -64,7 +64,6 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -435,8 +434,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Bean
-  public OidcUserService oidcUserService() {
-    return new MappedOidcUserService(oidcUserMapper(), userDetailsService());
+  public MappedOidcUserService oidcUserService() {
+    return new MappedOidcUserService(oidcUserMapper(), userDetailsService(), dataService);
   }
 
   @Autowired private OidcUserMappingFactory oidcUserMappingFactory;

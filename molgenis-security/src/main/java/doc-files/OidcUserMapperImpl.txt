@@ -1,0 +1,42 @@
+// the trees
+[OAuth2LoginAuthenticationProvider]->[MappedOidcUserService]
+[MappedOidcUserService]->[OidcUserMapper]
+[MappedOidcUserService]->[UserDetailsService]
+
+[OidcUserMapper]<:-[OidcUserMapperImpl]
+[MappedOidcUserService]->[OidcUserService]
+[OidcUserService]->[OAuth2UserService]
+
+[UserDetailsService]<:-[UserDetailsServiceImpl]
+
+// attributes
+[UserDetailsServiceImpl|
+dataService;
+grantedAuthoritiesMapper]
+
+[UserDetailsService|
+loadUserByUsername(String):UserDetails]
+
+[UserDetails|
+getAuthorities();
+getPassword();
+getUsername();
+isAccountNonExpired();
+isAccountNonLocked();
+isCredentialsNonExpired();
+isEnabled()]
+
+[OidcUserMapperImpl|
+dataService;
+oidcUserMappingFactory;
+userFactory]
+
+[OidcUserMapper|
+toUser(OidcUser, OidcClient): User]
+
+[MappedOidcUserService|
+dataService|
+loadUser(OidcUserRequest):MappedOidcUser]
+
+[OidcUserService|loadUser(OidcUserRequest):OidcUser]
+[OAuth2UserService|loadUser(OAuth2User]

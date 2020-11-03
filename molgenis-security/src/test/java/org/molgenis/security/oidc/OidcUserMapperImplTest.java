@@ -20,20 +20,17 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.oidc.model.OidcClient;
-import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.oidc.model.OidcUserMapping;
 import org.molgenis.security.oidc.model.OidcUserMappingFactory;
 import org.molgenis.security.oidc.model.OidcUserMappingMetadata;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 class OidcUserMapperImplTest extends AbstractMockitoTest {
   @Mock private DataService dataService;
   @Mock private OidcUserMappingFactory oidcUserMappingFactory;
   @Mock private UserFactory userFactory;
+  @Mock private OidcClient oidcClient;
   private OidcUserMapperImpl oidcUserMapperImpl;
 
   @BeforeEach
@@ -56,21 +53,13 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(oidcUser.getEmailVerified()).thenReturn(true);
     when(oidcUser.getSubject()).thenReturn(username);
 
-    String registrationId = "google";
-    ClientRegistration clientRegistration =
-        CommonOAuth2Provider.GOOGLE
-            .getBuilder(registrationId)
-            .clientId("clientId")
-            .clientSecret("clientSecret")
-            .build();
-
-    OidcUserRequest oidcUserRequest = mock(OidcUserRequest.class);
-    when(oidcUserRequest.getClientRegistration()).thenReturn(clientRegistration);
-
     User user = mock(User.class);
 
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
     when(oidcUserMapping.getUser()).thenReturn(user);
+
+    String registrationId = "google";
+    when(oidcClient.getRegistrationId()).thenReturn(registrationId);
 
     @SuppressWarnings("unchecked")
     Query<OidcUserMapping> query = mock(Query.class, RETURNS_SELF);
@@ -78,7 +67,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(query.eq(OIDC_CLIENT, registrationId).and().eq(OIDC_USERNAME, username).findOne())
         .thenReturn(oidcUserMapping);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
   }
 
   @Test
@@ -92,19 +81,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(oidcUser.getSubject()).thenReturn(username);
 
     String registrationId = "google";
-    ClientRegistration clientRegistration =
-        CommonOAuth2Provider.GOOGLE
-            .getBuilder(registrationId)
-            .clientId("clientId")
-            .clientSecret("clientSecret")
-            .build();
-
-    OidcUserRequest oidcUserRequest = mock(OidcUserRequest.class);
-    when(oidcUserRequest.getClientRegistration()).thenReturn(clientRegistration);
-
-    OidcClient oidcClient = mock(OidcClient.class);
-    when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, registrationId, OidcClient.class))
-        .thenReturn(oidcClient);
+    when(oidcClient.getRegistrationId()).thenReturn(registrationId);
 
     User user = mock(User.class);
     @SuppressWarnings("unchecked")
@@ -128,7 +105,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
 
     when(oidcUserMappingFactory.create()).thenReturn(oidcUserMapping);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:username");
     verify(oidcUserMapping).setOidcClient(oidcClient);
@@ -150,19 +127,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(oidcUser.getGivenName()).thenReturn(givenName);
     when(oidcUser.getFamilyName()).thenReturn(familyName);
     String registrationId = "google";
-    ClientRegistration clientRegistration =
-        CommonOAuth2Provider.GOOGLE
-            .getBuilder(registrationId)
-            .clientId("clientId")
-            .clientSecret("clientSecret")
-            .build();
-
-    OidcUserRequest oidcUserRequest = mock(OidcUserRequest.class);
-    when(oidcUserRequest.getClientRegistration()).thenReturn(clientRegistration);
-
-    OidcClient oidcClient = mock(OidcClient.class);
-    when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, registrationId, OidcClient.class))
-        .thenReturn(oidcClient);
+    when(oidcClient.getRegistrationId()).thenReturn(registrationId);
 
     @SuppressWarnings("unchecked")
     Query<User> userQuery = mock(Query.class, RETURNS_SELF);
@@ -188,7 +153,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     User user = mock(User.class);
     when(userFactory.create()).thenReturn(user);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
+    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:username");
     verify(oidcUserMapping).setOidcClient(oidcClient);
@@ -205,10 +170,8 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
   @Test
   void testToUserEmailMissing() {
     OidcUser oidcUser = mock(OidcUser.class);
-    OidcUserRequest oidcUserRequest = mock(OidcUserRequest.class);
     assertThrows(
-        OidcUserMissingEmailException.class,
-        () -> oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
+        OidcUserMissingEmailException.class, () -> oidcUserMapperImpl.toUser(oidcUser, oidcClient));
   }
 
   @Test
@@ -216,9 +179,8 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getEmail()).thenReturn("e@mail.com");
     when(oidcUser.getEmailVerified()).thenReturn(false);
-    OidcUserRequest oidcUserRequest = mock(OidcUserRequest.class);
     assertThrows(
         OidcUserEmailVerificationException.class,
-        () -> oidcUserMapperImpl.toUser(oidcUser, oidcUserRequest));
+        () -> oidcUserMapperImpl.toUser(oidcUser, oidcClient));
   }
 }
