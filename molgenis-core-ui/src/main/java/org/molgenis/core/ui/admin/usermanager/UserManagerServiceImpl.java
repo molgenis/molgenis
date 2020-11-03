@@ -5,12 +5,16 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.SecurityContextRegistry;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +52,20 @@ public class UserManagerServiceImpl implements UserManagerService {
   @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
   public long getActiveSessionsCount() {
     return securityContextRegistry.getSecurityContexts().count();
+  }
+
+  @Override
+  @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
+  public List<String> getActiveSessionUserNames() {
+    return securityContextRegistry
+        .getSecurityContexts()
+        .map(SecurityContext::getAuthentication)
+        .filter(Objects::nonNull)
+        .map(Authentication::getPrincipal)
+        .filter(
+            principal -> principal instanceof org.springframework.security.core.userdetails.User)
+        .map(user -> ((org.springframework.security.core.userdetails.User) user).getUsername())
+        .collect(Collectors.toList());
   }
 
   private List<UserViewData> parseToMolgenisUserViewData(Stream<User> users) {

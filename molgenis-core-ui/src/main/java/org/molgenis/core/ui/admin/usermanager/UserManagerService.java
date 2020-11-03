@@ -8,4 +8,6 @@ public interface UserManagerService {
   void setActivationUser(String userId, Boolean active);
 
   long getActiveSessionsCount();
+
+  List<String> getActiveSessionUserNames();
 }
