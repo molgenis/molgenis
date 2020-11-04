@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +34,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -166,6 +168,38 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
 
     setSecurityContextSuperUser();
     assertEquals(14L, userManagerService.getActiveSessionsCount());
+  }
+
+  @Test
+  void testGetActiveSessionUserName() {
+    SecurityContext securityContext = mockContextForUser("user");
+    SecurityContext securityContext1 = mockContextForUser("user1");
+    SecurityContext securityContextNoAuth = mock(SecurityContext.class);
+    SecurityContext securityContextOtherPrinciple = mock(SecurityContext.class);
+    Authentication authenticationOtherPrinciple = mock(Authentication.class);
+    when(authenticationOtherPrinciple.getPrincipal()).thenReturn(new Object());
+    when(securityContextOtherPrinciple.getAuthentication())
+        .thenReturn(authenticationOtherPrinciple);
+    when(securityContextRegistry.getSecurityContexts())
+        .thenReturn(
+            Stream.of(
+                securityContext,
+                securityContext1,
+                securityContextNoAuth,
+                securityContextOtherPrinciple));
+    setSecurityContextSuperUser();
+    assertEquals(Arrays.asList("user", "user1"), userManagerService.getActiveSessionUserNames());
+  }
+
+  private SecurityContext mockContextForUser(String userName) {
+    SecurityContext securityContext = mock(SecurityContext.class);
+    Authentication authentication = mock(Authentication.class);
+    org.springframework.security.core.userdetails.User user =
+        mock(org.springframework.security.core.userdetails.User.class);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getPrincipal()).thenReturn(user);
+    when(user.getUsername()).thenReturn(userName);
+    return securityContext;
   }
 
   private void setSecurityContextSuperUser() {
