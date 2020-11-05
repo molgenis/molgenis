@@ -109,9 +109,9 @@ public class OidcClientMetadata extends SystemEntityType {
     addAttribute(USERNAME_ATTRIBUTE_NAME)
         .setParent(providerDetailsAttribute)
         .setLabel("Username attribute")
-        .setDescription("Username attribute name")
+        .setDescription("Name of the attribute used as username when registering a new user.")
         .setNillable(false)
-        .setDefaultValue(StandardClaimNames.SUB);
+        .setDefaultValue(StandardClaimNames.EMAIL);
     addAttribute(EMAIL_ATTRIBUTE_NAME)
         .setParent(providerDetailsAttribute)
         .setLabel("Email attribute")

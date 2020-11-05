@@ -1,7 +1,8 @@
 package org.molgenis.security.oidc;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 import static org.molgenis.security.oidc.model.OidcUserMappingMetadata.OIDC_CLIENT;
 import static org.molgenis.security.oidc.model.OidcUserMappingMetadata.OIDC_USERNAME;
 import static org.molgenis.security.oidc.model.OidcUserMappingMetadata.OIDC_USER_MAPPING;
@@ -12,6 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.auth.UserMetadata;
+import org.molgenis.security.exception.UserHasDifferentEmailAddressException;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcUserMapping;
 import org.molgenis.security.oidc.model.OidcUserMappingFactory;
@@ -43,9 +45,7 @@ public class OidcUserMapperImpl implements OidcUserMapper {
   @Override
   public User toUser(OidcUser oidcUser, OidcClient oidcClient) {
     verifyOidcUser(oidcUser);
-    return runAsSystem(
-        () ->
-            getUser(oidcUser, oidcClient).orElseGet(() -> createUserMapping(oidcUser, oidcClient)));
+    return getUser(oidcUser, oidcClient).orElseGet(() -> createUserMapping(oidcUser, oidcClient));
   }
 
   private void verifyOidcUser(OidcUser oidcUser) {
@@ -66,15 +66,12 @@ public class OidcUserMapperImpl implements OidcUserMapper {
             .and()
             .eq(OIDC_USERNAME, oidcUser.getSubject())
             .findOne();
-    return oidcUserMapping != null ? Optional.of(oidcUserMapping.getUser()) : Optional.empty();
+    return Optional.ofNullable(oidcUserMapping).map(OidcUserMapping::getUser);
   }
 
   private User createUserMapping(OidcUser oidcUser, OidcClient oidcClient) {
     User user =
-        dataService
-            .query(UserMetadata.USER, User.class)
-            .eq(UserMetadata.EMAIL, oidcUser.getEmail())
-            .findOne();
+        dataService.query(USER, User.class).eq(UserMetadata.EMAIL, oidcUser.getEmail()).findOne();
     if (user == null) {
       user = createUser(oidcUser);
     }
@@ -90,16 +87,26 @@ public class OidcUserMapperImpl implements OidcUserMapper {
   }
 
   private User createUser(OidcUser oidcUser) {
+    var username = oidcUser.getName();
+    if (!isUsernameAvailable(username)) {
+      throw new UserHasDifferentEmailAddressException(oidcUser.getName(), oidcUser.getEmail());
+    }
+
     User user = userFactory.create();
-    user.setUsername(oidcUser.getEmail());
+    user.setUsername(username);
     user.setPassword(UUID.randomUUID().toString());
     user.setEmail(oidcUser.getEmail());
     user.setActive(true);
     user.setFirstName(oidcUser.getGivenName());
+    user.setMiddleNames(oidcUser.getMiddleName());
     user.setLastName(oidcUser.getFamilyName());
 
-    dataService.add(UserMetadata.USER, user);
+    dataService.add(USER, user);
 
     return user;
+  }
+
+  private boolean isUsernameAvailable(String username) {
+    return dataService.query(USER, User.class).eq(USERNAME, username).count() == 0;
   }
 }

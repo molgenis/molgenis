@@ -152,11 +152,14 @@ and SURFconext account will be identified as the same MOLGENIS user.
 5. Otherwise: Search the MOLGENIS User table for a user
     whose `Email` attribute equals the OpenID Connect user's `<emailAttributeName>` claim.
 6. If no such user exists: Create a new MOLGENIS User:
-    1. username equals `<emailAttributeName>` claim
+    1. username equals `<usernameAttributeName>` claim
+        > The name of this claim is also configurable in the 'OIDC client' entity. The default
+        is 'email'.
     2. random password
     3. email address equals the `<emailAttributeName>` claim
     4. active is true
     5. First name equals the `given_name` claim
+    6. Middle names equals the `middle_name` claim
     6. Last name equals the `family_name` claim
 7. Add an OidcUserMapping for the MOLGENIS User:
     1. Label equals <clientRegistration's registrationId>:<`sub` claim>
