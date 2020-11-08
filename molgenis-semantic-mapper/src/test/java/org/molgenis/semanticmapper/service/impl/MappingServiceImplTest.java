@@ -780,24 +780,19 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
       geneEntity.set("length", i * 2d);
       sourceGeneEntities.add(geneEntity);
 
-      when(algorithmService.apply(
-              argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()")),
-              eq(geneEntity),
-              eq(3)))
-          .thenReturn(geneEntity.getString("id"));
-
-      when(algorithmService.apply(
-              argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()")),
-              eq(geneEntity),
-              eq(3)))
-          .thenReturn(geneEntity.getDouble("length"));
-
       Entity expectedEntity = new DynamicEntity(targetMeta);
       expectedEntity.set("identifier", String.valueOf(i));
       expectedEntity.set("height", i * 2d);
       expectedEntity.set("source", geneMetaData.getId());
       expectedEntities.add(expectedEntity);
     }
+    when(algorithmService.apply(
+            argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()"))))
+        .thenReturn("0", "1", "2", "3");
+
+    when(algorithmService.apply(
+            argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()"))))
+        .thenReturn(0d, 2d, 4d, 6d);
   }
 
   private MappingTarget getManualMappingTarget(
@@ -828,7 +823,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  @Import(UserTestConfig.class)
+  @Import({UserTestConfig.class})
   static class Config {
 
     @Bean

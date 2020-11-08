@@ -57,6 +57,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.jobs.JobExecutionUriUtils;
 import org.molgenis.jobs.JobExecutor;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.semanticmapper.data.request.GenerateAlgorithmRequest;
@@ -706,6 +707,7 @@ public class MappingServiceController extends PluginController {
     return VIEW_ATTRIBUTE_MAPPING;
   }
 
+  @WithJsMagmaScriptContext
   @PostMapping("/attributemappingfeedback")
   public String attributeMappingFeedback(
       @RequestParam() String mappingProjectId,
@@ -762,9 +764,9 @@ public class MappingServiceController extends PluginController {
             .map(
                 sourceEntity -> {
                   try {
+                    algorithmService.bind(sourceEntity, project.getDepth());
                     return AlgorithmResult.createSuccess(
-                        algorithmService.apply(algorithmTest, sourceEntity, project.getDepth()),
-                        sourceEntity);
+                        algorithmService.apply(algorithmTest), sourceEntity);
                   } catch (Exception e) {
                     return AlgorithmResult.createFailure(e, sourceEntity);
                   }

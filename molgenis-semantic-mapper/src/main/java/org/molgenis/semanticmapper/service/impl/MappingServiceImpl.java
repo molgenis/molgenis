@@ -33,6 +33,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
@@ -153,6 +154,7 @@ public class MappingServiceImpl implements MappingService {
 
   @Override
   @Transactional
+  @WithJsMagmaScriptContext
   public long applyMappings(
       String mappingProjectId,
       String entityTypeId,
@@ -386,18 +388,17 @@ public class MappingServiceImpl implements MappingService {
       target.set(SOURCE, sourceMapping.getName());
     }
 
+    algorithmService.bind(sourceEntity, depth);
+
     sourceMapping
         .getAttributeMappings()
-        .forEach(
-            attributeMapping ->
-                applyMappingToAttribute(attributeMapping, sourceEntity, target, depth));
+        .forEach(attributeMapping -> applyMappingToAttribute(attributeMapping, target));
     return target;
   }
 
-  private void applyMappingToAttribute(
-      AttributeMapping attributeMapping, Entity sourceEntity, Entity target, int depth) {
+  private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity target) {
     String targetAttributeName = attributeMapping.getTargetAttribute().getName();
-    Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, depth);
+    Object typedValue = algorithmService.apply(attributeMapping);
     target.set(targetAttributeName, typedValue);
   }
 

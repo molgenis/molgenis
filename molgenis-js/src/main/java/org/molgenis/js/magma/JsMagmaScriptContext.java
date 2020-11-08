@@ -1,17 +1,15 @@
 package org.molgenis.js.magma;
 
-import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static com.google.common.base.Throwables.getRootCause;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.util.ResourceUtils.getString;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,11 +24,12 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.js.graal.GraalScriptEngine;
+import org.molgenis.script.core.ScriptException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsMagmaScriptContext implements AutoCloseable {
+public class JsMagmaScriptContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(JsMagmaScriptContext.class);
   public static final int ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH = 1;
   private static final String KEY_IS_NULL = "_isNull";
@@ -59,17 +58,9 @@ public class JsMagmaScriptContext implements AutoCloseable {
     }
   }
 
-  public JsMagmaScriptContext(Context context) {
+  JsMagmaScriptContext(Context context) {
     this.context = Objects.requireNonNull(context);
     prepare(context);
-  }
-
-  public void enter() {
-    context.enter();
-  }
-
-  public void leave() {
-    context.leave();
   }
 
   private void prepare(Context context) {
@@ -80,34 +71,20 @@ public class JsMagmaScriptContext implements AutoCloseable {
     bindings.putMember(KEY_IS_NULL, magmaScript.getMember(KEY_IS_NULL));
   }
 
-  /**
-   * Evaluates multiple expressions for a single entity instance.
-   *
-   * @param expressions {@link Collection} containing the expression {@link String}s
-   * @param entity the entity to bind the magmascript $ function to
-   * @return Collection containing the expression result {@link Object}s
-   */
-  public List<Object> eval(List<String> expressions, Entity entity, int depth) {
+  public Object tryEval(String expression) {
     try {
-      context.enter();
-      Stopwatch stopwatch = null;
-      if (LOGGER.isTraceEnabled()) {
-        stopwatch = Stopwatch.createStarted();
-      }
-      bind(entity, depth);
-      List<Object> result = expressions.stream().map(this::eval).collect(toList());
-      if (stopwatch != null) {
-        stopwatch.stop();
-        LOGGER.trace("Script evaluation took {} µs", stopwatch.elapsed(MICROSECONDS));
-      }
-      return result;
-    } finally {
-      context.leave();
+      return eval(expression);
+    } catch (Exception t) {
+      return new ScriptException(getRootCause(t).getMessage());
     }
   }
 
   public Object eval(String expression) {
     return GraalScriptEngine.convertGraalValue(context.eval("js", expression));
+  }
+
+  public void bind(Entity entity) {
+    bind(entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
   }
 
   /**
@@ -216,8 +193,15 @@ public class JsMagmaScriptContext implements AutoCloseable {
     return value;
   }
 
-  @Override
-  public void close() {
+  void enter() {
+    context.enter();
+  }
+
+  void leave() {
+    context.leave();
+  }
+
+  void close() {
     context.close();
   }
 }

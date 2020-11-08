@@ -19,13 +19,21 @@ public interface AlgorithmService {
       Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth);
 
   /**
-   * Applies an {@link AttributeMapping} to a source {@link Entity}
+   * Bind the current context to a source entity
+   *
+   * @param sourceEntity the entity to bind to
+   * @param depth the depth of the binding
+   */
+  void bind(Entity sourceEntity, int depth);
+
+  /**
+   * Applies an {@link AttributeMapping} to the source {@link Entity} currently bound to the
+   * context.
    *
    * @param attributeMapping {@link AttributeMapping} to apply
-   * @param sourceEntity {@link Entity} to apply the mapping to
    * @return Object containing the mapped value
    */
-  Object apply(AttributeMapping attributeMapping, Entity sourceEntity, int depth);
+  Object apply(AttributeMapping attributeMapping);
 
   /**
    * Retrieves the names of the source attributes in an algorithm
