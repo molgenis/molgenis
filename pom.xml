@@ -44,6 +44,7 @@
 
   <properties>
     <java.version>11</java.version>
+    <graalvm.version>20.2.0</graalvm.version>
 
     <!-- authentication for release scm plugin -->
     <project.scm.id>github</project.scm.id>

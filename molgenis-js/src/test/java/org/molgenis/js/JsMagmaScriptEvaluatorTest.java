@@ -22,9 +22,9 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.SystemEntityType.UNIFIED_IDENTIFIER_REGEX_JS;
+import static org.molgenis.js.magma.JsMagmaScriptContext.ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH;
 
 import com.google.common.base.Stopwatch;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
@@ -32,9 +32,9 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import javax.script.ScriptException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -42,8 +42,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.js.graal.GraalScriptEngine;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.js.nashorn.NashornScriptEngine;
 
 class JsMagmaScriptEvaluatorTest {
   private static EntityType personWeightEntityType;
@@ -64,7 +64,7 @@ class JsMagmaScriptEvaluatorTest {
   private static JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
   @BeforeAll
-  static void beforeClass() throws ScriptException, IOException {
+  static void beforeClass() {
     Attribute idAttribute = mock(Attribute.class);
     when(idAttribute.getName()).thenReturn("id");
     when(idAttribute.getDataType()).thenReturn(STRING);
@@ -167,7 +167,7 @@ class JsMagmaScriptEvaluatorTest {
     when(personLongEntityType.getAtomicAttributes())
         .thenReturn(newArrayList(idAttribute, longAttr));
 
-    jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new NashornScriptEngine());
+    jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new GraalScriptEngine());
   }
 
   @SuppressWarnings("UnnecessaryBoxing")
@@ -676,12 +676,19 @@ class JsMagmaScriptEvaluatorTest {
 
     sw.reset().start();
 
-    for (int i = 0; i < 10000; i++) {
-      jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
-    }
-    System.out.println(
-        sw.elapsed(TimeUnit.MILLISECONDS)
-            + " millis passed recreating bindings for each evaluation");
+    jsMagmaScriptEvaluator.withinMagmaScriptContext(
+        context -> {
+          for (int i = 0; i < 10000; i++) {
+            context.eval(
+                List.of("$('birthdate').age().value()"),
+                person,
+                ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
+          }
+          System.out.println(
+              sw.elapsed(TimeUnit.MILLISECONDS)
+                  + " millis passed recreating bindings for each evaluation");
+          return (Void) null;
+        });
   }
 
   @Test
