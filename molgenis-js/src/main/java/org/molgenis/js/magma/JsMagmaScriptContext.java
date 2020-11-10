@@ -44,7 +44,7 @@ public class JsMagmaScriptContext {
 
   static {
     SOURCES =
-        Stream.of("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js")
+        Stream.of("/js/math.min.js", "/js/script-evaluator.js")
             .map(JsMagmaScriptContext::getSource)
             .collect(toList());
   }
@@ -64,6 +64,7 @@ public class JsMagmaScriptContext {
   }
 
   private void prepare(Context context) {
+    LOGGER.debug("preparing context");
     SOURCES.forEach(context::eval);
     Value bindings = context.getBindings("js");
     Value magmaScript = bindings.getMember(KEY_MAGMA_SCRIPT);

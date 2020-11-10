@@ -169,7 +169,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
           .map(context::eval)
           .map(value -> convert(value, attributeMapping.getTargetAttribute()))
           .orElse(null);
-    } catch (Throwable thrown) {
+    } catch (Exception thrown) {
       throw new AlgorithmException(Throwables.getRootCause(thrown));
     }
   }

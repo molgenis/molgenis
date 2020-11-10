@@ -823,7 +823,7 @@ class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  @Import({UserTestConfig.class})
+  @Import(UserTestConfig.class)
   static class Config {
 
     @Bean

@@ -3,14 +3,11 @@ package org.molgenis.js.magma;
 import static org.molgenis.js.magma.JsMagmaScriptContext.ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH;
 
 import org.molgenis.data.Entity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /** JavaScript script evaluator using the Graal script engine. */
 @Component
 public class JsMagmaScriptEvaluator {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
 
   @WithJsMagmaScriptContext
   public Object eval(String expression, Entity entity) {

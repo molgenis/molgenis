@@ -17,6 +17,10 @@ public class JsMagmaScriptContextHolder {
     return contextHolder.get();
   }
 
+  private JsMagmaScriptContextHolder() {
+    throw new IllegalStateException("Do not instantiate");
+  }
+
   static void clearContext() {
     contextHolder.remove();
   }

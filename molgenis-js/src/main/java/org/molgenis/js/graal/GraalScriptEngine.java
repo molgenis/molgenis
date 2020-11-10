@@ -64,7 +64,7 @@ public class GraalScriptEngine {
     }
     if (graalValue.hasArrayElements()) {
       return graalValue.as(List.class).stream()
-          .map(element -> convertGraalValue(element))
+          .map(GraalScriptEngine::convertGraalValue)
           .collect(toList());
     }
     if (graalValue.hasMembers() && graalValue.hasMember(KEY_ID_VALUE)) {
