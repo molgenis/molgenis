@@ -1,6 +1,7 @@
 package org.molgenis.data.validation;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collections;
@@ -8,8 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.js.magma.JsMagmaScriptContext;
-import org.molgenis.js.magma.JsMagmaScriptContextHolder;
+import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,12 @@ public class ExpressionValidator {
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(ExpressionValidator.class);
 
+  private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+
+  public ExpressionValidator(JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
+    this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
+  }
+
   /**
    * Resolves a boolean expression (validation or visible expression)
    *
@@ -29,6 +35,7 @@ public class ExpressionValidator {
    * @return <code>true</code> or <code>false</code>
    * @throws MolgenisDataException if the script resolves to null or to a non boolean
    */
+  @WithJsMagmaScriptContext
   boolean resolveBooleanExpression(String expression, Entity entity) {
     return resolveBooleanExpressions(singletonList(expression), entity).get(0);
   }
@@ -45,9 +52,10 @@ public class ExpressionValidator {
     if (expressions.isEmpty()) {
       return Collections.emptyList();
     }
-    JsMagmaScriptContext context = JsMagmaScriptContextHolder.getContext();
-    context.bind(entity);
-    return expressions.stream().map(context::eval).map(this::convertToBoolean).collect(toList());
+    return expressions.stream()
+        .map(expression -> jsMagmaScriptEvaluator.eval(expression, entity))
+        .map(this::convertToBoolean)
+        .collect(toList());
   }
 
   private Boolean convertToBoolean(Object value) {
