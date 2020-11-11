@@ -7,7 +7,6 @@ import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import java.net.URI;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +27,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
 import org.molgenis.dataexplorer.negotiator.exception.MissingLocationException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.web.PluginController;
@@ -99,6 +99,7 @@ public class NegotiatorController extends PluginController {
    */
   @PostMapping("/validate")
   @ResponseBody
+  @WithJsMagmaScriptContext
   public ExportValidationResponse validateNegotiatorExport(@RequestBody NegotiatorRequest request) {
     if (request.getBiobankRsql() != null || request.getBiobankId() != null) {
       throw new IllegalArgumentException("Cannot verify requests with biobank filters.");
