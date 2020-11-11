@@ -1,3 +1,6 @@
+// import convert from 'convert-units'
+import Qty from 'js-quantities';
+
 /**
  * Evaluates a script.
  *
@@ -409,8 +412,7 @@ MagmaScript.prototype.unit = function (newUnit) {
  * @method toUnit
  */
 MagmaScript.prototype.toUnit = function (targetUnit) {
-  var unit = math.unit(this.val, this.unit)
-  this.val = unit.toNumber(targetUnit)
+  this.val = new Qty(this.val, this.unit).to(targetUnit).scalar
   return this
 }
 
@@ -451,3 +453,5 @@ MagmaScript.toIdValue = function (value) {
   if (typeof value === 'object' && value['_idValue'] !== undefined) return value._idValue
   return JSON.parse(JSON.stringify(value))
 }
+
+export default MagmaScript

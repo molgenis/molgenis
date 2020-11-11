@@ -1,0 +1,21 @@
+{
+  "name": "magma",
+  "version": "1.0.0",
+  "description": "MagmaScript",
+  "main": "script-evaluator.js",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "author": "Fleur Kelpin",
+  "license": "LGPL-3.0",
+  "dependencies": {
+    "js-quantities": "^1.7.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "rollup": "^2.33.1",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-uglify": "^6.0.4"
+  }
+}

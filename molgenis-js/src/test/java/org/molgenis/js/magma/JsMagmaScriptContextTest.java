@@ -323,7 +323,7 @@ class JsMagmaScriptContextTest {
     person.set("weight", 82);
     magmaContext.bind(person, 3);
 
-    Object weight = magmaContext.eval("$('weight').unit('kg').toUnit('poundmass').value()");
+    Object weight = magmaContext.eval("$('weight').unit('kg').toUnit('lb').value()");
     assertEquals(180.7790549915996, weight);
   }
 

@@ -43,10 +43,7 @@ public class JsMagmaScriptContext {
   private final Context context;
 
   static {
-    SOURCES =
-        Stream.of("/js/math.min.js", "/js/script-evaluator.js")
-            .map(JsMagmaScriptContext::getSource)
-            .collect(toList());
+    SOURCES = Stream.of("/js/magma.js").map(JsMagmaScriptContext::getSource).collect(toList());
   }
 
   private static Source getSource(String resourceName) {
