@@ -11,16 +11,6 @@
   <description>JavaScript script evaluation with or without the Magma API on the Nashorn engine.
   </description>
 
-  <build>
-    <plugins>
-      <!-- minify css/js -->
-      <plugin>
-        <groupId>com.samaxes.maven</groupId>
-        <artifactId>minify-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
@@ -52,11 +42,6 @@
       <artifactId>js</artifactId>
       <version>${graalvm.version}</version>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.graalvm.js</groupId>
-      <artifactId>js-scriptengine</artifactId>
-      <version>${graalvm.version}</version>
     </dependency>
   </dependencies>
 </project>
