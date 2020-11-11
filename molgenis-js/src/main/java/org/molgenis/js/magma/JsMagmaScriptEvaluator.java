@@ -1,18 +1,11 @@
 package org.molgenis.js.magma;
 
-import static org.molgenis.js.magma.JsMagmaScriptContext.ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH;
-
 import org.molgenis.data.Entity;
 import org.springframework.stereotype.Component;
 
 /** JavaScript script evaluator using the Graal script engine. */
 @Component
 public class JsMagmaScriptEvaluator {
-
-  @WithJsMagmaScriptContext
-  public Object eval(String expression, Entity entity) {
-    return eval(expression, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
-  }
 
   /**
    * Evaluate a single expression for a given entity.
@@ -22,9 +15,9 @@ public class JsMagmaScriptEvaluator {
    * @return evaluated expression result, return type depends on the expression.
    */
   @WithJsMagmaScriptContext
-  public Object eval(String expression, Entity entity, int depth) {
+  public Object eval(String expression, Entity entity) {
     JsMagmaScriptContext context = JsMagmaScriptContextHolder.getContext();
-    context.bind(entity, depth);
+    context.bind(entity);
     return context.eval(expression);
   }
 }

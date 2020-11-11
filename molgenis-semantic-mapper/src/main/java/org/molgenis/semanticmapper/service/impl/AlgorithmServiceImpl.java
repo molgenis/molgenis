@@ -131,7 +131,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   @Override
   @WithJsMagmaScriptContext
   public Iterable<AlgorithmEvaluation> applyAlgorithm(
-      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth) {
+      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities) {
     var context = JsMagmaScriptContextHolder.getContext();
     return stream(sourceEntities)
         .map(
@@ -139,7 +139,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
               AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
               Object derivedValue;
               try {
-                context.bind(entity, depth);
+                context.bind(entity);
                 Object result = context.eval(algorithm);
                 derivedValue = convert(result, targetAttribute);
               } catch (RuntimeException e) {
@@ -155,9 +155,9 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   }
 
   @Override
-  public void bind(Entity sourceEntity, int depth) {
+  public void bind(Entity sourceEntity) {
     JsMagmaScriptContext context = JsMagmaScriptContextHolder.getContext();
-    context.bind(sourceEntity, depth);
+    context.bind(sourceEntity);
   }
 
   @Override

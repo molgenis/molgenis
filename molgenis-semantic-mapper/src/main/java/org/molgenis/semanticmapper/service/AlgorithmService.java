@@ -16,15 +16,14 @@ public interface AlgorithmService {
    * @return algorithm evaluation for each source entity
    */
   Iterable<AlgorithmEvaluation> applyAlgorithm(
-      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth);
+      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities);
 
   /**
    * Bind the current context to a source entity
    *
    * @param sourceEntity the entity to bind to
-   * @param depth the depth of the binding
    */
-  void bind(Entity sourceEntity, int depth);
+  void bind(Entity sourceEntity);
 
   /**
    * Applies an {@link AttributeMapping} to the source {@link Entity} currently bound to the

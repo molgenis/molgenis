@@ -224,7 +224,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(source, 3);
+              algorithmService.bind(source);
               return algorithmService.apply(attributeMapping);
             });
     assertEquals(result, expected, message);
@@ -249,7 +249,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(source, 3);
+              algorithmService.bind(source);
               return algorithmService.apply(attributeMapping);
             });
     assertEquals(41, result);
@@ -293,7 +293,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(source, 3);
+              algorithmService.bind(source);
               return (Entity) algorithmService.apply(attributeMapping);
             });
     assertEquals(xref2a.get("field2"), result.get("field1"));
@@ -326,7 +326,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(sourceEntity, 3);
+              algorithmService.bind(sourceEntity);
               return algorithmService.apply(attributeMapping);
             });
     assertEquals("label 1", result);
@@ -364,7 +364,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(sourceEntity, 3);
+              algorithmService.bind(sourceEntity);
               return algorithmService.apply(attributeMapping);
             });
     assertEquals("[label 1, label 2]", result);
@@ -425,7 +425,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(source, 3);
+              algorithmService.bind(source);
               return algorithmService.apply(attributeMapping);
             });
     assertEquals(asList(refEntity0, refEntity1), result);
@@ -473,7 +473,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
         withJsMagmaScriptContext(
             engine,
             () -> {
-              algorithmService.bind(source, 3);
+              algorithmService.bind(source);
               return algorithmService.apply(attributeMapping);
             });
 
@@ -492,7 +492,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("height");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -535,7 +535,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("weight");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -566,7 +566,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     sourceEntityType.addAttributes(asList(sourceAttribute1, sourceAttribute2));
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);

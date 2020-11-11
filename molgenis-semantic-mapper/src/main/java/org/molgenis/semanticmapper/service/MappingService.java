@@ -16,7 +16,7 @@ public interface MappingService {
    *
    * @param target name of the first target entity
    */
-  MappingProject addMappingProject(String name, String target, int depth);
+  MappingProject addMappingProject(String name, String target);
 
   /**
    * Retrieves all {@link MappingProject}s.

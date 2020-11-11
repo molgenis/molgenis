@@ -120,14 +120,14 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
     when(context.eval(algorithm)).thenThrow(new NullPointerException());
 
     Iterable<AlgorithmEvaluation> result =
-        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity), 3);
+        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
     AlgorithmEvaluation eval = result.iterator().next();
 
     assertEquals(
         "Applying an algorithm on a null source value caused an exception. Is the target attribute required?",
         eval.getErrorMessage());
 
-    verify(context).bind(entity, 3);
+    verify(context).bind(entity);
   }
 
   @Test
@@ -138,10 +138,10 @@ class AlgorithmServiceImplTest extends AbstractMockitoTest {
 
     when(context.eval(algorithm)).thenThrow(new ScriptException("algorithm is not defined"));
     Iterable<AlgorithmEvaluation> result =
-        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity), 3);
+        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
     AlgorithmEvaluation eval = result.iterator().next();
     assertEquals("algorithm is not defined", eval.getErrorMessage());
-    verify(context).bind(entity, 3);
+    verify(context).bind(entity);
   }
 
   @Test

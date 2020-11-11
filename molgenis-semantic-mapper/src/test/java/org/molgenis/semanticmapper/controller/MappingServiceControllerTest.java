@@ -156,7 +156,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
     lifeLines = entityTypeFactory.create("LifeLines");
 
-    mappingProject = new MappingProject("hop hop hop", 3);
+    mappingProject = new MappingProject("hop hop hop");
     mappingProject.setIdentifier("asdf");
     MappingTarget mappingTarget = mappingProject.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -198,7 +198,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithm", "$('length').value()")
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
-    MappingProject expected = new MappingProject("hop hop hop", 3);
+    MappingProject expected = new MappingProject("hop hop hop");
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -228,7 +228,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
-    MappingProject expected = new MappingProject("hop hop hop", 3);
+    MappingProject expected = new MappingProject("hop hop hop");
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -257,7 +257,7 @@ class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
-    MappingProject expected = new MappingProject("hop hop hop", 3);
+    MappingProject expected = new MappingProject("hop hop hop");
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     mappingTarget.addSource(lifeLines);
