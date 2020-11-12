@@ -37,8 +37,8 @@ public class EntityProxy implements ProxyObject {
   public Object getMemberKeys() {
     List<Object> result =
         concat(
-                Stream.of(KEY_ID_VALUE),
-                stream(entity.getEntityType().getAtomicAttributes()).map(Attribute::getName))
+                stream(entity.getEntityType().getAtomicAttributes()).map(Attribute::getName),
+                Stream.of(KEY_ID_VALUE))
             .collect(toList());
     return ProxyArray.fromList(result);
   }
@@ -59,7 +59,7 @@ public class EntityProxy implements ProxyObject {
     throw new UnsupportedOperationException("Entity proxies are read-only");
   }
 
-  private static Object toGraalValue(Object o) {
+  static Object toGraalValue(Object o) {
     if (o instanceof Entity) return new EntityProxy((Entity) o);
     if (o instanceof Iterable) {
       List<Object> proxies = stream((Iterable<Entity>) o).map(EntityProxy::new).collect(toList());

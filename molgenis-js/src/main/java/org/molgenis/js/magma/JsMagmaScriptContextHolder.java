@@ -3,7 +3,7 @@ package org.molgenis.js.magma;
 import static java.util.Objects.requireNonNull;
 
 /**
- * The JsMagmaScriptContext is expensive to create.
+ * The {@link JsMagmaScriptContext} is expensive to create.
  *
  * <p>This thread-local cache allows high-level calls to reuse a single instance for a series of
  * calls without passing it as a parameter all the way down the call chain into the

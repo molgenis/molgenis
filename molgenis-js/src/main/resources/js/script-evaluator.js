@@ -1,4 +1,3 @@
-// import convert from 'convert-units'
 import Qty from 'js-quantities';
 
 /**

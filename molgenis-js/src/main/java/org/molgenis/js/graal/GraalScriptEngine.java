@@ -1,7 +1,6 @@
 package org.molgenis.js.graal;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.js.magma.JsMagmaScriptContext.KEY_ID_VALUE;
 
 import java.util.List;
 import java.util.function.Function;
@@ -18,10 +17,11 @@ public class GraalScriptEngine {
   Context.Builder contextBuilder;
 
   public GraalScriptEngine() {
-    engine = Engine.newBuilder().build(); // TODO: look at the options
+    engine = Engine.newBuilder().build();
     contextBuilder =
         Context.newBuilder("js")
             .engine(engine)
+            // needed to run .map on ProxyArrays
             .allowExperimentalOptions(true)
             .option("js.experimental-foreign-object-prototype", "true")
             .allowAllAccess(false);
@@ -66,9 +66,6 @@ public class GraalScriptEngine {
       return graalValue.as(List.class).stream()
           .map(GraalScriptEngine::convertGraalValue)
           .collect(toList());
-    }
-    if (graalValue.hasMembers() && graalValue.hasMember(KEY_ID_VALUE)) {
-      return convertGraalValue(graalValue.getMember(KEY_ID_VALUE));
     }
     return graalValue.as(Object.class);
   }

@@ -17,6 +17,7 @@ import org.molgenis.script.core.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** An initialized, reusable, context to evaluate MagmaScript expressions. */
 public class JsMagmaScriptContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(JsMagmaScriptContext.class);
   private static final String KEY_IS_NULL = "_isNull";

@@ -3,7 +3,7 @@ package org.molgenis.js.magma;
 import org.molgenis.data.Entity;
 import org.springframework.stereotype.Component;
 
-/** JavaScript script evaluator using the Graal script engine. */
+/** MagmaScript evaluator using the Graal script engine. */
 @Component
 public class JsMagmaScriptEvaluator {
 
