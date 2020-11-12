@@ -9,10 +9,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.molgenis.js.graal.GraalScriptEngine;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
 /** Proxy that keeps a {@link JsMagmaScriptContext} around for the duration of the call. */
 @Aspect
+@EnableAspectJAutoProxy
 @Component
 public class WithJsMagmaScriptAspect {
 
