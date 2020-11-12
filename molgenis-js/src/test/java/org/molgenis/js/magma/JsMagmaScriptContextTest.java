@@ -40,6 +40,8 @@ import org.graalvm.polyglot.PolyglotException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -232,23 +234,23 @@ class JsMagmaScriptContextTest {
         scriptExceptionObj.toString());
   }
 
-  @Test
-  void testValueForMref() {
-    Entity trait = new DynamicEntity(traitEntityType);
-    trait.set("id", "1");
-    trait.set("name", "Hello");
-
-    Entity person = new DynamicEntity(personTraitEntityType);
-    person.set("id", "1");
-    person.set("trait", singletonList(trait));
-    magmaContext.bind(person);
-
-    Object result = magmaContext.eval("$('trait').value()");
-    assertEquals(singletonList("1"), result);
+  private static Object[][] testValueForMref() {
+    return new Object[][] {
+      new Object[] {"$('trait').value()", List.of("1")},
+      new Object[] {
+        "var result = [];$('trait').map(function (entity) {result.push(entity.attr('name').value())});result",
+        List.of("Hello")
+      },
+      new Object[] {
+        "$('trait').map(function (entity) {return entity.attr('name').value()}).value()",
+        List.of("Hello")
+      }
+    };
   }
 
-  @Test
-  void testValueForMrefWithComplexAlgorithm() {
+  @ParameterizedTest
+  @MethodSource
+  void testValueForMref(String expression, Object expected) {
     Entity trait = new DynamicEntity(traitEntityType);
     trait.set("id", "1");
     trait.set("name", "Hello");
@@ -258,28 +260,8 @@ class JsMagmaScriptContextTest {
     person.set("trait", singletonList(trait));
     magmaContext.bind(person);
 
-    Object result =
-        magmaContext.eval(
-            "var result = [];$('trait').map(function (entity) {result.push(entity.attr('name').value())});result");
-    assertEquals(singletonList("Hello"), result);
-  }
-
-  @Test
-  void testValueForMrefWithSimplifiedAlgorithm() {
-    Entity trait = new DynamicEntity(traitEntityType);
-    trait.set("id", "1");
-    trait.set("name", "Hello");
-
-    Entity person = new DynamicEntity(personTraitEntityType);
-    person.set("id", "1");
-    person.set("trait", singletonList(trait));
-
-    magmaContext.bind(person);
-
-    Object result =
-        magmaContext.eval(
-            "$('trait').map(function (entity) {return entity.attr('name').value()}).value()");
-    assertEquals(singletonList("Hello"), result);
+    Object result = magmaContext.eval(expression);
+    assertEquals(expected, result);
   }
 
   @Test
@@ -552,58 +534,24 @@ class JsMagmaScriptContextTest {
     assertEquals("1", result1);
   }
 
-  @Test
-  void testPlusValue() {
-    Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 180);
-    magmaContext.bind(entity0);
-    Object result = magmaContext.eval("$('height').plus(100).value()");
-    assertEquals(280, result);
+  private static Object[][] testIntegerExpressions() {
+    return new Object[][] {
+      new Object[] {180, "$('height').plus(100).value()", 280},
+      new Object[] {180, "$('height').plus(null).value()", 180},
+      new Object[] {2, "$('height').times(100).value()", 200},
+      new Object[] {200, "$('height').div(100).value()", 2},
+      new Object[] {20, "$('height').pow(2).value()", 400}
+    };
   }
 
-  @Test
-  void testPlusObject() {
+  @MethodSource
+  @ParameterizedTest
+  void testIntegerExpressions(int height, String expression, int expected) {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 180);
+    entity0.set("height", height);
     magmaContext.bind(entity0);
-    Object result1 = magmaContext.eval("$('height').plus(new newValue(100)).value()");
-    assertEquals(280, result1);
-  }
-
-  @Test
-  void testPlusNullValue() {
-    Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 180);
-    magmaContext.bind(entity0);
-    Object result1 = magmaContext.eval("$('height').plus(null).value()");
-    assertEquals(180, result1);
-  }
-
-  @Test
-  void testTimes() {
-    Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 2);
-    magmaContext.bind(entity0);
-    Object result = magmaContext.eval("$('height').times(100).value()");
-    assertEquals(200, result);
-  }
-
-  @Test
-  void div() {
-    Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 200);
-    magmaContext.bind(entity0);
-    Object result = magmaContext.eval("$('height').div(100).value()");
-    assertEquals(2, result);
-  }
-
-  @Test
-  void pow() {
-    Entity entity0 = new DynamicEntity(personHeightEntityType);
-    entity0.set("height", 20);
-    magmaContext.bind(entity0);
-    Object result = magmaContext.eval("$('height').pow(2).value()");
-    assertEquals(400, result);
+    Object result = magmaContext.eval(expression);
+    assertEquals(expected, result);
   }
 
   @Test
