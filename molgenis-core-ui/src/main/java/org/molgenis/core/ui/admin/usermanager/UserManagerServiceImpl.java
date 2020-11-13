@@ -61,10 +61,7 @@ public class UserManagerServiceImpl implements UserManagerService {
         .getSecurityContexts()
         .map(SecurityContext::getAuthentication)
         .filter(Objects::nonNull)
-        .map(Authentication::getPrincipal)
-        .filter(
-            principal -> principal instanceof org.springframework.security.core.userdetails.User)
-        .map(user -> ((org.springframework.security.core.userdetails.User) user).getUsername())
+        .map(Authentication::getName)
         .collect(Collectors.toList());
   }
 

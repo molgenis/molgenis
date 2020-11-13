@@ -175,18 +175,8 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
     SecurityContext securityContext = mockContextForUser("user");
     SecurityContext securityContext1 = mockContextForUser("user1");
     SecurityContext securityContextNoAuth = mock(SecurityContext.class);
-    SecurityContext securityContextOtherPrinciple = mock(SecurityContext.class);
-    Authentication authenticationOtherPrinciple = mock(Authentication.class);
-    when(authenticationOtherPrinciple.getPrincipal()).thenReturn(new Object());
-    when(securityContextOtherPrinciple.getAuthentication())
-        .thenReturn(authenticationOtherPrinciple);
     when(securityContextRegistry.getSecurityContexts())
-        .thenReturn(
-            Stream.of(
-                securityContext,
-                securityContext1,
-                securityContextNoAuth,
-                securityContextOtherPrinciple));
+        .thenReturn(Stream.of(securityContext, securityContext1, securityContextNoAuth));
     setSecurityContextSuperUser();
     assertEquals(Arrays.asList("user", "user1"), userManagerService.getActiveSessionUserNames());
   }
@@ -194,11 +184,8 @@ class UserManagerServiceImplTest extends AbstractMockitoSpringContextTests {
   private SecurityContext mockContextForUser(String userName) {
     SecurityContext securityContext = mock(SecurityContext.class);
     Authentication authentication = mock(Authentication.class);
-    org.springframework.security.core.userdetails.User user =
-        mock(org.springframework.security.core.userdetails.User.class);
     when(securityContext.getAuthentication()).thenReturn(authentication);
-    when(authentication.getPrincipal()).thenReturn(user);
-    when(user.getUsername()).thenReturn(userName);
+    when(authentication.getName()).thenReturn(userName);
     return securityContext;
   }
 
