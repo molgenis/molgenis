@@ -1,7 +1,6 @@
 package org.molgenis.security.oidc;
 
 import static java.util.Objects.requireNonNull;
-import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +62,10 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   private MappedOidcUser createOidcUser(OidcUser oidcUserFromParent, OidcUserRequest userRequest) {
     OidcClient oidcClient = getOidcClient(userRequest);
     OidcUser oidcUser =
-        new MappedOidcUser(oidcUserFromParent, oidcClient.getEmailAttributeName(), SUB);
+        new MappedOidcUser(
+            oidcUserFromParent,
+            oidcClient.getEmailAttributeName(),
+            oidcClient.getUsernameAttributeName());
     User user = oidcUserMapper.toUser(oidcUser, oidcClient);
     Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
     return new MappedOidcUser(

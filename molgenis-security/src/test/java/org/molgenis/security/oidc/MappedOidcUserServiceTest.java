@@ -72,6 +72,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, "google", OidcClient.class))
         .thenReturn(oidcClient);
     when(oidcClient.getEmailAttributeName()).thenReturn(EMAIL);
+    when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
     when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
@@ -102,6 +103,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, "google", OidcClient.class))
         .thenReturn(oidcClient);
     when(oidcClient.getEmailAttributeName()).thenReturn("emailAddress");
+    when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
     when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
