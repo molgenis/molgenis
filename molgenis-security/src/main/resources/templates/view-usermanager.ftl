@@ -25,6 +25,7 @@
                     <th>Active</th>
                     <th>Username</th>
                     <th>Full name</th>
+                    <th>Has active session</th>
                 </tr>
                 </thead>
 
@@ -39,6 +40,7 @@
                                 </td>
                                 <td>${user.getUsername()!?html}</td>
                                 <td>${user.getFullName()!?html}</td>
+                                <td>${activeUsers?seq_contains(user.getUsername())?string("yes", "no")}</td>
                             </tr>
                             </#list>
                         </#if>

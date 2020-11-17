@@ -37,6 +37,7 @@ public class UserManagerController extends PluginController {
     model.addAttribute(
         "activeSessionCount", this.pluginUserManagerService.getActiveSessionsCount());
     model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
+    model.addAttribute("activeUsers", this.pluginUserManagerService.getActiveSessionUserNames());
 
     return "view-usermanager";
   }
