@@ -137,8 +137,11 @@ be modified by an administrator if required. Multiple mappings to the same user 
 and SURFconext account will be identified as the same MOLGENIS user.
 
 #### How the OpenID Connect user is mapped to a MOLGENIS User:
+> NOTE: The name of the claim used in this mapping to look up the email address is configurable in the
+`<emailAttributeName>` attribute of the 'OIDC client' entity. By default it is the `email` claim.
+
 1. The OpenID Connect user's claims are retrieved from the `userInfoUri` endpoint.
-1. Verify that the OpenID Connect user has an `email` claim
+1. Verify that the OpenID Connect user has an `<emailAttributeName>` claim
 2. If the OpenID Connect user has an `email_verified` claim,
     verify that, converted to boolean, it equals true
 3. Look for an OidcUserMapping where
@@ -147,13 +150,16 @@ and SURFconext account will be identified as the same MOLGENIS user.
     - the `oidcUsername` attribute equals the OpenID Connect user's `sub` claim
 4. If such a mapping is found, return the MOLGENIS User that this mapping refers to.
 5. Otherwise: Search the MOLGENIS User table for a user
-    whose `Email` attribute equals the OpenID Connect user's `email` claim.
+    whose `Email` attribute equals the OpenID Connect user's `<emailAttributeName>` claim.
 6. If no such user exists: Create a new MOLGENIS User:
-    1. username equals `email` claim
+    1. username equals `<usernameAttributeName>` claim
+        > The name of this claim is also configurable in the 'OIDC client' entity. The default
+        is 'email'.
     2. random password
-    3. email address equals the `email` claim
+    3. email address equals the `<emailAttributeName>` claim
     4. active is true
     5. First name equals the `given_name` claim
+    6. Middle names equals the `middle_name` claim
     6. Last name equals the `family_name` claim
 7. Add an OidcUserMapping for the MOLGENIS User:
     1. Label equals <clientRegistration's registrationId>:<`sub` claim>

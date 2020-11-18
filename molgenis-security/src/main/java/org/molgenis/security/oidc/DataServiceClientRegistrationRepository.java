@@ -3,6 +3,7 @@ package org.molgenis.security.oidc;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -54,7 +55,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
         .scope(oidcClient.getScopes())
         .tokenUri(oidcClient.getTokenUri())
         .userInfoUri(oidcClient.getUserInfoUri())
-        .userNameAttributeName(oidcClient.getUsernameAttributeName())
+        .userNameAttributeName(SUB)
         .build();
   }
 

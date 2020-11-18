@@ -13,6 +13,7 @@ import static org.molgenis.security.oidc.model.OidcPackage.PACKAGE_OIDC;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
+import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,6 +35,7 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String JWK_SET_URI = "jwkSetUri";
   static final String USER_INFO_URI = "userInfoUri";
   static final String USERNAME_ATTRIBUTE_NAME = "userNameAttributeName";
+  static final String EMAIL_ATTRIBUTE_NAME = "emailAttributeName";
 
   private final OidcPackage oidcPackage;
 
@@ -107,8 +109,14 @@ public class OidcClientMetadata extends SystemEntityType {
     addAttribute(USERNAME_ATTRIBUTE_NAME)
         .setParent(providerDetailsAttribute)
         .setLabel("Username attribute")
-        .setDescription("Username attribute name")
+        .setDescription("Name of the attribute used as username when registering a new user.")
         .setNillable(false)
-        .setDefaultValue("sub");
+        .setDefaultValue(StandardClaimNames.EMAIL);
+    addAttribute(EMAIL_ATTRIBUTE_NAME)
+        .setParent(providerDetailsAttribute)
+        .setLabel("Email attribute")
+        .setDescription("Email attribute name")
+        .setNillable(false)
+        .setDefaultValue(StandardClaimNames.EMAIL);
   }
 }

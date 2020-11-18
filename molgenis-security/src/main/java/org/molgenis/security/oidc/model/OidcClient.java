@@ -6,6 +6,7 @@ import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_AUTHENT
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_ID;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_NAME;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_SECRET;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.EMAIL_ATTRIBUTE_NAME;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.JWK_SET_URI;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.REGISTRATION_ID;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.SCOPES;
@@ -128,5 +129,13 @@ public class OidcClient extends StaticEntity {
 
   public String getUsernameAttributeName() {
     return getString(USERNAME_ATTRIBUTE_NAME);
+  }
+
+  public void setEmailAttributeName(String emailAttributeName) {
+    set(EMAIL_ATTRIBUTE_NAME, emailAttributeName);
+  }
+
+  public String getEmailAttributeName() {
+    return getString(EMAIL_ATTRIBUTE_NAME);
   }
 }

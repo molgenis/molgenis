@@ -54,8 +54,8 @@ public class OidcUserMappingMetadata extends SystemEntityType {
         .setRefEntity(oidcClientMetadata)
         .setNillable(false);
     addAttribute(OIDC_USERNAME)
-        .setLabel("OIDC username")
-        .setDescription("OpenID Connect username")
+        .setLabel("OIDC subject")
+        .setDescription("The value of the 'sub' claim in the user info")
         .setNillable(false);
     addAttribute(USER)
         .setLabel("User")
