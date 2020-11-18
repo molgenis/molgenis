@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC;
+import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,6 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     String jwkSetUri = "jwkSetUri";
     String[] scopes = new String[] {"openid", "profile", "email"};
     String userInfoUri = "userInfoUri";
-    String usernameAttributeName = "usernameAttributeName";
 
     OidcClient oidcClient = mock(OidcClient.class);
     when(oidcClient.getRegistrationId()).thenReturn(registrationId);
@@ -65,7 +65,6 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     when(oidcClient.getJwkSetUri()).thenReturn(jwkSetUri);
     when(oidcClient.getScopes()).thenReturn(scopes);
     when(oidcClient.getUserInfoUri()).thenReturn(userInfoUri);
-    when(oidcClient.getUsernameAttributeName()).thenReturn(usernameAttributeName);
 
     when(authenticationSettings.getOidcClients()).thenReturn(singleton(oidcClient));
     ClientRegistration clientRegistration =
@@ -85,7 +84,7 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     assertEquals(jwkSetUri, providerDetails.getJwkSetUri());
     UserInfoEndpoint userInfoEndpoint = providerDetails.getUserInfoEndpoint();
     assertEquals(userInfoUri, userInfoEndpoint.getUri());
-    assertEquals(usernameAttributeName, userInfoEndpoint.getUserNameAttributeName());
+    assertEquals(SUB, userInfoEndpoint.getUserNameAttributeName());
     assertEquals(
         "{baseUrl}/login/oauth2/code/{registrationId}",
         clientRegistration.getRedirectUriTemplate());
