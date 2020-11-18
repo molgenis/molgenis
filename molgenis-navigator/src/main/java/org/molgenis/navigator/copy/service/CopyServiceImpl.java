@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.navigator.copy.exception.UnknownCopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
@@ -50,6 +51,7 @@ public class CopyServiceImpl implements CopyService {
   @SuppressWarnings(
       "java:S1193") // Exception types should not be tested using "instanceof" in catch blocks
   @Transactional(isolation = Isolation.SERIALIZABLE)
+  @WithJsMagmaScriptContext
   public Void copy(
       List<ResourceIdentifier> resources,
       @Nullable @CheckForNull String targetPackageId,
