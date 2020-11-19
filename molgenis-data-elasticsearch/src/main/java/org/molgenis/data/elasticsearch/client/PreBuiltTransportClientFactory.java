@@ -17,7 +17,7 @@ public class PreBuiltTransportClientFactory {
     Settings.Builder builder = Settings.builder();
     builder.put("cluster.name", clusterName);
     if (settings != null) {
-      builder.put(settings);
+      settings.forEach(builder::put);
     }
     return builder.build();
   }

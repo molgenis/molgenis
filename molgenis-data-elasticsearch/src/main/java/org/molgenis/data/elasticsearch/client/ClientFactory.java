@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.molgenis.data.MolgenisDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,9 +81,7 @@ class ClientFactory {
     return result;
   }
 
-  private InetSocketTransportAddress[] createInetTransportAddresses() {
-    return inetAddresses.stream()
-        .map(InetSocketTransportAddress::new)
-        .toArray(InetSocketTransportAddress[]::new);
+  private TransportAddress[] createInetTransportAddresses() {
+    return inetAddresses.stream().map(TransportAddress::new).toArray(TransportAddress[]::new);
   }
 }
