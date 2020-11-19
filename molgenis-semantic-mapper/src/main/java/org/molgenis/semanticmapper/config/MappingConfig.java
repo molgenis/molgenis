@@ -7,7 +7,6 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.permission.PermissionSystemService;
-import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -43,7 +42,6 @@ public class MappingConfig {
   private final AttributeFactory attrMetaFactory;
   private final MappingProjectMetadata mappingProjectMeta;
   private final EntityManager entityManager;
-  private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
   public MappingConfig(
       PermissionSystemService permissionSystemService,
@@ -54,8 +52,7 @@ public class MappingConfig {
       AttributeMappingMetadata attributeMappingMetaData,
       AttributeFactory attrMetaFactory,
       MappingProjectMetadata mappingProjectMeta,
-      EntityManager entityManager,
-      JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
+      EntityManager entityManager) {
     this.permissionSystemService = requireNonNull(permissionSystemService);
     this.dataService = requireNonNull(dataService);
     this.semanticSearchService = requireNonNull(semanticSearchService);
@@ -65,7 +62,6 @@ public class MappingConfig {
     this.attrMetaFactory = requireNonNull(attrMetaFactory);
     this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
     this.entityManager = requireNonNull(entityManager);
-    this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
   }
 
   @Bean
@@ -88,7 +84,7 @@ public class MappingConfig {
   @Bean
   public AlgorithmService algorithmServiceImpl() {
     return new AlgorithmServiceImpl(
-        semanticSearchService, algorithmGeneratorService(), entityManager, jsMagmaScriptEvaluator);
+        semanticSearchService, algorithmGeneratorService(), entityManager);
   }
 
   @Bean

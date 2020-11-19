@@ -28,6 +28,7 @@ import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.importer.emx.exception.NoFilenameExtensionException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -75,6 +76,7 @@ public class EmxImportService implements ImportService {
   }
 
   @Override
+  @WithJsMagmaScriptContext
   public EntityImportReport doImport(
       final RepositoryCollection source,
       MetadataAction metadataAction,

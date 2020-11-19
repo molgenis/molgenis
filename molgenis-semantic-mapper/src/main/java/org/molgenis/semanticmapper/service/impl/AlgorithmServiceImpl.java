@@ -8,6 +8,7 @@ import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.data.DataConverter.toBoolean;
@@ -17,12 +18,14 @@ import static org.molgenis.data.meta.AttributeType.DECIMAL;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.LONG;
 
+import com.google.common.base.Throwables;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +35,9 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.script.core.ScriptException;
+import org.molgenis.js.magma.JsMagmaScriptContext;
+import org.molgenis.js.magma.JsMagmaScriptContextHolder;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -54,18 +58,15 @@ public class AlgorithmServiceImpl implements AlgorithmService {
 
   private final SemanticSearchService semanticSearchService;
   private final AlgorithmGeneratorService algorithmGeneratorService;
-  private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
   private final EntityManager entityManager;
 
   public AlgorithmServiceImpl(
       SemanticSearchService semanticSearchService,
       AlgorithmGeneratorService algorithmGeneratorService,
-      EntityManager entityManager,
-      JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
+      EntityManager entityManager) {
     this.semanticSearchService = requireNonNull(semanticSearchService);
     this.algorithmGeneratorService = requireNonNull(algorithmGeneratorService);
     this.entityManager = requireNonNull(entityManager);
-    this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
   }
 
   @Override
@@ -128,24 +129,18 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   }
 
   @Override
+  @WithJsMagmaScriptContext
   public Iterable<AlgorithmEvaluation> applyAlgorithm(
-      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth) {
+      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities) {
+    var context = JsMagmaScriptContextHolder.getContext();
     return stream(sourceEntities)
         .map(
             entity -> {
               AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
               Object derivedValue;
-
               try {
-                Object result = jsMagmaScriptEvaluator.eval(algorithm, entity, depth);
-
-                // jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing
-                // it
-                // so check instance of result object here
-                if (result instanceof ScriptException) {
-                  return algorithmResult.errorMessage(((ScriptException) result).getMessage());
-                }
-
+                context.bind(entity);
+                Object result = context.eval(algorithm);
                 derivedValue = convert(result, targetAttribute);
               } catch (RuntimeException e) {
                 if (e.getMessage() == null) {
@@ -160,20 +155,23 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   }
 
   @Override
-  public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, int depth) {
-    String algorithm = attributeMapping.getAlgorithm();
-    if (isEmpty(algorithm)) {
-      return null;
-    }
-    Object result = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, depth);
+  public void bind(Entity sourceEntity) {
+    JsMagmaScriptContext context = JsMagmaScriptContextHolder.getContext();
+    context.bind(sourceEntity);
+  }
 
-    // jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
-    // so check instance of result object here
-    if (result instanceof Throwable) {
-      throw new AlgorithmException((Throwable) result);
+  @Override
+  public Object apply(AttributeMapping attributeMapping) {
+    var context = JsMagmaScriptContextHolder.getContext();
+    try {
+      return Optional.ofNullable(attributeMapping.getAlgorithm())
+          .filter(not(StringUtils::isEmpty))
+          .map(context::eval)
+          .map(value -> convert(value, attributeMapping.getTargetAttribute()))
+          .orElse(null);
+    } catch (Exception thrown) {
+      throw new AlgorithmException(Throwables.getRootCause(thrown));
     }
-
-    return convert(result, attributeMapping.getTargetAttribute());
   }
 
   @Override

@@ -20,7 +20,6 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-        <input id="depth" type="hidden" name="depth" value="${mappingProject.depth}"/>
         <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.id?html}"/>
         <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.id?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
@@ -296,20 +295,20 @@
 
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-2"
+                    <div class="col-md-2">
                     <strong>.map()</strong>
                 </div>
-                <div class="col-md-10"
+                <div class="col-md-10">
                 <p>can be used to map multiple values to eachother. Example: <b>$('GENDER').map({"0":"0","1":"1",}).value()</b>
                 </p>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-2"
+            <div class="col-md-2">
             <strong>.date()</strong>
         </div>
-        <div class="col-md-10"
+        <div class="col-md-10">
         <p>Can be used to calculate the date. Example: <b>$('DATE').date().value()</b></p>
     </div>
 </div>

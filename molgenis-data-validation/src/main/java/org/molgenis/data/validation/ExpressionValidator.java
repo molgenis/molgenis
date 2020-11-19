@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ public class ExpressionValidator {
    * @return <code>true</code> or <code>false</code>
    * @throws MolgenisDataException if the script resolves to null or to a non boolean
    */
+  @WithJsMagmaScriptContext
   boolean resolveBooleanExpression(String expression, Entity entity) {
     return resolveBooleanExpressions(singletonList(expression), entity).get(0);
   }
@@ -45,12 +47,13 @@ public class ExpressionValidator {
    * @param entity entity used during expression evaluations
    * @return for each expression: <code>true</code> or <code>false</code>
    */
+  @WithJsMagmaScriptContext
   List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity) {
     if (expressions.isEmpty()) {
       return Collections.emptyList();
     }
-
-    return jsMagmaScriptEvaluator.eval(expressions, entity).stream()
+    return expressions.stream()
+        .map(expression -> jsMagmaScriptEvaluator.eval(expression, entity))
         .map(this::convertToBoolean)
         .collect(toList());
   }

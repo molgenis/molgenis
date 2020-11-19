@@ -70,6 +70,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.validation.meta.NameValidator;
+import org.molgenis.js.magma.WithJsMagmaScriptContext;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.util.i18n.LanguageService;
@@ -323,6 +324,7 @@ public class RestControllerV2 {
    */
   @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
+  @WithJsMagmaScriptContext
   @PostMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public EntityCollectionBatchCreateResponseBodyV2 createEntities(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -386,6 +388,7 @@ public class RestControllerV2 {
    */
   @Deprecated
   @Transactional
+  @WithJsMagmaScriptContext
   @PostMapping(value = "copy/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public String copyEntity(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -456,6 +459,7 @@ public class RestControllerV2 {
    */
   @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
+  @WithJsMagmaScriptContext
   @PutMapping("/{entityTypeId}")
   public synchronized void updateEntities(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -509,6 +513,7 @@ public class RestControllerV2 {
    */
   @SuppressWarnings("java:S2259") // getEntities is guaranteed to be not empty
   @Transactional
+  @WithJsMagmaScriptContext
   @PutMapping("/{entityTypeId}/{attributeName}")
   @ResponseStatus(OK)
   public synchronized void updateAttribute(

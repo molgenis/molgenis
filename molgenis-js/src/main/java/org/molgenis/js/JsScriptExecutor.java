@@ -2,16 +2,16 @@ package org.molgenis.js;
 
 import static java.util.Objects.requireNonNull;
 
-import javax.script.ScriptException;
-import org.molgenis.js.nashorn.NashornScriptEngine;
+import org.graalvm.polyglot.PolyglotException;
+import org.molgenis.js.graal.GraalScriptEngine;
 import org.springframework.stereotype.Service;
 
 /** Executes a JavaScript */
 @Service
 class JsScriptExecutor {
-  private final NashornScriptEngine jsScriptEngine;
+  private final GraalScriptEngine jsScriptEngine;
 
-  public JsScriptExecutor(NashornScriptEngine jsScriptEngine) {
+  public JsScriptExecutor(GraalScriptEngine jsScriptEngine) {
     this.jsScriptEngine = requireNonNull(jsScriptEngine);
   }
 
@@ -25,7 +25,7 @@ class JsScriptExecutor {
     String jsScriptWithFunction = "(function (){" + jsScript + "})();";
     try {
       return jsScriptEngine.eval(jsScriptWithFunction);
-    } catch (ScriptException e) {
+    } catch (PolyglotException e) {
       throw new org.molgenis.script.core.ScriptException(e);
     }
   }

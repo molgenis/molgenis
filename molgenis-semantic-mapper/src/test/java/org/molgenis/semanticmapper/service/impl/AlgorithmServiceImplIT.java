@@ -22,15 +22,14 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.js.magma.WithJsMagmaScriptAspect.withJsMagmaScriptContext;
 
 import com.google.common.collect.LinkedHashMultimap;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.stream.Stream;
-import javax.script.ScriptException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,8 +47,8 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.js.nashorn.NashornScriptEngine;
+import org.molgenis.js.graal.GraalScriptEngine;
+import org.molgenis.js.magma.WithJsMagmaScriptAspect;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -90,6 +89,8 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
   @Autowired private AlgorithmTemplateService algorithmTemplateService;
 
+  @Autowired private GraalScriptEngine engine;
+
   @BeforeEach
   void setUpBeforeMethod() {
     when(algorithmTemplateService.find(any())).thenReturn(Stream.empty());
@@ -97,18 +98,17 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
   @Test
   void testGetSourceAttributeNames() {
-    assertEquals(singletonList("id"), algorithmService.getSourceAttributeNames("$('id')"));
+    assertEquals(singleton("id"), algorithmService.getSourceAttributeNames("$('id')"));
   }
 
   @Test
   void testGetSourceAttributeNamesNoQuotes() {
-    assertEquals(singletonList("id"), algorithmService.getSourceAttributeNames("$(id)"));
+    assertEquals(singleton("id"), algorithmService.getSourceAttributeNames("$(id)"));
   }
 
   @Test
   void testDeepReference() {
-    assertEquals(
-        singletonList("gender"), algorithmService.getSourceAttributeNames("$(gender.label)"));
+    assertEquals(singleton("gender"), algorithmService.getSourceAttributeNames("$(gender.label)"));
   }
 
   static Object[][] testApplyProvider() {
@@ -205,7 +205,8 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
       String algorithm,
       AttributeType targetAttributeType,
       Object expected,
-      String message) {
+      String message)
+      throws Throwable {
     String idAttrName = "id";
     EntityType entityType = entityTypeFactory.create("LL");
     entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
@@ -219,12 +220,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     targetAttribute.setDataType(targetAttributeType);
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm(algorithm);
-    Object result = algorithmService.apply(attributeMapping, source, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(source);
+              return algorithmService.apply(attributeMapping);
+            });
     assertEquals(result, expected, message);
   }
 
   @Test
-  void testGetAgeScript() {
+  void testGetAgeScript() throws Throwable {
     String idAttrName = "id";
     EntityType entityType = entityTypeFactory.create("LL");
     entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
@@ -238,12 +245,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm(
         "Math.floor((new Date(2015, 2, 12) - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
-    Object result = algorithmService.apply(attributeMapping, source, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(source);
+              return algorithmService.apply(attributeMapping);
+            });
     assertEquals(41, result);
   }
 
   @Test
-  void testGetXrefScript() {
+  void testGetXrefScript() throws Throwable {
     // xref entities
     EntityType entityTypeXref = entityTypeFactory.create("xrefEntity1");
     entityTypeXref.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
@@ -276,12 +289,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     when(entityManager.getReference(entityTypeXref, 1)).thenReturn(xref1a);
 
-    Entity result = (Entity) algorithmService.apply(attributeMapping, source, 3);
+    Entity result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(source);
+              return (Entity) algorithmService.apply(attributeMapping);
+            });
     assertEquals(xref2a.get("field2"), result.get("field1"));
   }
 
   @Test
-  void testAttrXref() {
+  void testAttrXref() throws Throwable {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -303,12 +322,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm("$('source_xref').attr('label').value()");
 
-    Object result = algorithmService.apply(attributeMapping, sourceEntity, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(sourceEntity);
+              return algorithmService.apply(attributeMapping);
+            });
     assertEquals("label 1", result);
   }
 
   @Test
-  void testAttrMref() {
+  void testAttrMref() throws Throwable {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -335,12 +360,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     attributeMapping.setAlgorithm(
         "$('source_mref').map(function(mref){ return mref.attr('label').value()}).value()");
 
-    Object result = algorithmService.apply(attributeMapping, sourceEntity, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(sourceEntity);
+              return algorithmService.apply(attributeMapping);
+            });
     assertEquals("[label 1, label 2]", result);
   }
 
   @Test
-  void testApplyMref() {
+  void testApplyMref() throws Throwable {
     String refEntityName = "refEntity";
     String refEntityIdAttrName = "id";
     String refEntityLabelAttrName = "label";
@@ -390,12 +421,18 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     Entity source = new DynamicEntity(entityTypeSource);
     source.set(sourceEntityAttrName, asList(refEntity0, refEntity1));
 
-    Object result = algorithmService.apply(attributeMapping, source, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(source);
+              return algorithmService.apply(attributeMapping);
+            });
     assertEquals(asList(refEntity0, refEntity1), result);
   }
 
   @Test
-  void testApplyMrefNillable() {
+  void testApplyMrefNillable() throws Throwable {
     String refEntityName = "refEntity";
     String refEntityIdAttrName = "id";
     String refEntityLabelAttrName = "label";
@@ -432,7 +469,14 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     Entity source = new DynamicEntity(entityTypeSource);
     source.set(sourceEntityAttrName, emptyList());
 
-    Object result = algorithmService.apply(attributeMapping, source, 3);
+    Object result =
+        withJsMagmaScriptContext(
+            engine,
+            () -> {
+              algorithmService.bind(source);
+              return algorithmService.apply(attributeMapping);
+            });
+
     assertEquals(emptyList(), result);
   }
 
@@ -448,7 +492,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("height");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -491,7 +535,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("weight");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -522,7 +566,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     sourceEntityType.addAttributes(asList(sourceAttribute1, sourceAttribute2));
 
-    MappingProject project = new MappingProject("project", 3);
+    MappingProject project = new MappingProject("project");
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -550,7 +594,7 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
   }
 
   @Configuration
-  @Import(UserTestConfig.class)
+  @Import({UserTestConfig.class, WithJsMagmaScriptAspect.class, GraalScriptEngine.class})
   static class Config {
     @Autowired private DataService dataService;
 
@@ -570,17 +614,9 @@ class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     }
 
     @Bean
-    JsMagmaScriptEvaluator jsScriptEvaluator() throws ScriptException, IOException {
-      return new JsMagmaScriptEvaluator(new NashornScriptEngine());
-    }
-
-    @Bean
-    AlgorithmService algorithmService() throws ScriptException, IOException {
+    AlgorithmService algorithmService() {
       return new AlgorithmServiceImpl(
-          semanticSearchService(),
-          algorithmGeneratorService(),
-          entityManager(),
-          jsScriptEvaluator());
+          semanticSearchService(), algorithmGeneratorService(), entityManager());
     }
 
     @Bean
