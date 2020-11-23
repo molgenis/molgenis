@@ -1,6 +1,7 @@
 package org.molgenis.security.oidc;
 
 import static java.util.Objects.requireNonNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.user.UserDetailsServiceImpl;
+import org.slf4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -22,6 +24,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final DataService dataService;
   private final OidcUserService delegate;
+
+  private static final Logger LOGGER = getLogger(MappedOidcUserService.class);
 
   public MappedOidcUserService(
       OidcUserMapper oidcUserMapper,
@@ -61,14 +65,20 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
 
   private MappedOidcUser createOidcUser(OidcUser oidcUserFromParent, OidcUserRequest userRequest) {
     OidcClient oidcClient = getOidcClient(userRequest);
+    String emailAttributeName = oidcClient.getEmailAttributeName();
+    String usernameAttributeName = oidcClient.getUsernameAttributeName();
+    LOGGER.debug(
+        "Mapping OidcUser {} with email attribute '{}' and username attribute '{}'...",
+        oidcUserFromParent,
+        emailAttributeName,
+        usernameAttributeName);
     OidcUser oidcUser =
-        new MappedOidcUser(
-            oidcUserFromParent,
-            oidcClient.getEmailAttributeName(),
-            oidcClient.getUsernameAttributeName());
+        new MappedOidcUser(oidcUserFromParent, emailAttributeName, usernameAttributeName);
     User user = oidcUserMapper.toUser(oidcUser, oidcClient);
     Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
-    return new MappedOidcUser(
-        oidcUserFromParent, authorities, oidcClient.getEmailAttributeName(), user.getUsername());
+    var result =
+        new MappedOidcUser(oidcUserFromParent, authorities, emailAttributeName, user.getUsername());
+    LOGGER.debug("Mapped to {}.", result);
+    return result;
   }
 }

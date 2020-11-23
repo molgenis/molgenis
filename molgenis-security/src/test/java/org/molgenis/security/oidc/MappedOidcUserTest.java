@@ -45,6 +45,7 @@ class MappedOidcUserTest extends AbstractMockitoTest {
 
     when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
     when(oidcUser.getUserInfo()).thenReturn(userInfo);
+    when(oidcUser.getAttributes()).thenReturn(userInfoClaims);
 
     withNameOverride = new MappedOidcUser(oidcUser, molgenisRoles, "emailAddress", "molgenis");
     keyOverrides = new MappedOidcUser(oidcUser, "emailAddress", "preferredUsername");

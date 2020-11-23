@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.util.Assert;
 
 /**
  * {@link DefaultOidcUser} with overrides.
@@ -40,6 +41,11 @@ class MappedOidcUser extends DefaultOidcUser {
         usernameAttributeKey);
     this.usernameOverride = null;
     this.emailAttributeKey = requireNonNull(emailAttributeKey);
+    Assert.hasText(emailAttributeKey, "emailAttributeKey cannot be empty");
+    if (!original.getAttributes().containsKey(emailAttributeKey)) {
+      throw new IllegalArgumentException(
+          "Missing email attribute '" + emailAttributeKey + "' in attributes");
+    }
   }
 
   /**
@@ -103,5 +109,20 @@ class MappedOidcUser extends DefaultOidcUser {
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), usernameOverride, emailAttributeKey);
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Name: [");
+    sb.append(getName());
+    sb.append("], Email: [");
+    sb.append(getEmail());
+    sb.append("], Granted Authorities: [");
+    sb.append(getAuthorities());
+    sb.append("], User Attributes: [");
+    sb.append(getAttributes());
+    sb.append("]");
+    return sb.toString();
   }
 }
