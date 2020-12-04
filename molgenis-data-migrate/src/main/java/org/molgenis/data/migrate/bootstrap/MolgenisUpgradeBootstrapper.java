@@ -17,11 +17,13 @@ import org.molgenis.data.migrate.version.Step40AddRoleSystem;
 import org.molgenis.data.migrate.version.Step41Reindex;
 import org.molgenis.data.migrate.version.Step42RemoveFormsUrlRow;
 import org.molgenis.data.migrate.version.Step43SetUsernameAttributeName;
+import org.molgenis.data.migrate.version.Step44CascadeDeleteSids;
 import org.springframework.stereotype.Component;
 
 /** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
 @Component
 public class MolgenisUpgradeBootstrapper {
+
   private final MolgenisUpgradeService upgradeService;
   private final DataSource dataSource;
   private final ClientFacade clientFacade;
@@ -45,6 +47,7 @@ public class MolgenisUpgradeBootstrapper {
     upgradeService.addUpgrade(new Step41Reindex(clientFacade));
     upgradeService.addUpgrade(new Step42RemoveFormsUrlRow(dataSource));
     upgradeService.addUpgrade(new Step43SetUsernameAttributeName(dataSource));
+    upgradeService.addUpgrade(new Step44CascadeDeleteSids(dataSource));
     upgradeService.upgrade();
   }
 }

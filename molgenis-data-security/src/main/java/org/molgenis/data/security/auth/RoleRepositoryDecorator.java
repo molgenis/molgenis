@@ -7,15 +7,21 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.exception.CircularRoleHierarchyException;
+import org.molgenis.security.acl.MutableSidService;
+import org.molgenis.security.core.SidUtils;
 
 public class RoleRepositoryDecorator extends AbstractRepositoryDecorator<Role> {
 
   private final CachedRoleHierarchy cachedRoleHierarchy;
+  private final MutableSidService mutableSidService;
 
   RoleRepositoryDecorator(
-      Repository<Role> delegateRepository, CachedRoleHierarchy cachedRoleHierarchy) {
+      Repository<Role> delegateRepository,
+      CachedRoleHierarchy cachedRoleHierarchy,
+      MutableSidService mutableSidService) {
     super(delegateRepository);
     this.cachedRoleHierarchy = requireNonNull(cachedRoleHierarchy);
+    this.mutableSidService = requireNonNull(mutableSidService);
   }
 
   @Override
@@ -48,32 +54,40 @@ public class RoleRepositoryDecorator extends AbstractRepositoryDecorator<Role> {
 
   @Override
   public void deleteAll() {
-    clearRoleHierarchyCache();
-    super.deleteAll();
+    throw new UnsupportedOperationException("Deleting all roles is not supported");
   }
 
   @Override
   public void deleteById(Object id) {
-    clearRoleHierarchyCache();
-    super.deleteById(id);
+    delete(findOneById(id));
   }
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    clearRoleHierarchyCache();
-    super.deleteAll(ids);
+    delete(findAll(ids));
   }
 
   @Override
   public void delete(Role role) {
     clearRoleHierarchyCache();
+    deleteRoleSid(role);
     super.delete(role);
   }
 
   @Override
   public void delete(Stream<Role> roleStream) {
     clearRoleHierarchyCache();
+    roleStream =
+        roleStream.filter(
+            role -> {
+              deleteRoleSid(role);
+              return true;
+            });
     super.delete(roleStream);
+  }
+
+  private void deleteRoleSid(Role role) {
+    mutableSidService.deleteSid(SidUtils.createRoleSid(role.getName()));
   }
 
   private void clearRoleHierarchyCache() {

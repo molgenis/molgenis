@@ -37,6 +37,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @Configuration
 @Import(DataSourceConfig.class)
 public class AclConfig {
+
   private final DataSource dataSource;
   private final TransactionManager transactionManager;
   private final RoleHierarchy roleHierarchy;
@@ -109,6 +110,11 @@ public class AclConfig {
   @Bean
   public ObjectIdentityService objectIdentityService() {
     return new ObjectIdentityServiceImpl(jdbcTemplate, entityHelper);
+  }
+
+  @Bean
+  public MutableSidService mutableSidService() {
+    return new MutableSidServiceImpl(jdbcTemplate);
   }
 
   @Bean

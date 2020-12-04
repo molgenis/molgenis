@@ -16,16 +16,21 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.exception.CircularRoleHierarchyException;
+import org.molgenis.security.acl.MutableSidService;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
 
 class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
+
   @Mock private Repository<Role> delegateRepository;
   @Mock private CachedRoleHierarchy cachedRoleHierarchy;
+  @Mock private MutableSidService mutableSidService;
   private RoleRepositoryDecorator roleRepositoryDecorator;
 
   @BeforeEach
   void setUpBeforeEach() {
-    roleRepositoryDecorator = new RoleRepositoryDecorator(delegateRepository, cachedRoleHierarchy);
+    roleRepositoryDecorator =
+        new RoleRepositoryDecorator(delegateRepository, cachedRoleHierarchy, mutableSidService);
   }
 
   @Test
@@ -104,47 +109,66 @@ class RoleRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void testDeleteAllStream() {
-    Object roleId = mock(Role.class);
-    roleRepositoryDecorator.deleteAll(Stream.of(roleId));
-    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<Object>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(delegateRepository).deleteAll(roleStreamCaptor.capture());
-    assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(roleId));
-  }
-
-  @Test
-  void testDeleteById() {
-    Object roleId = mock(Role.class);
-    roleRepositoryDecorator.deleteById(roleId);
-    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
-    verify(delegateRepository).deleteById(roleId);
-  }
-
-  @Test
-  void testDeleteAll() {
-    roleRepositoryDecorator.deleteAll();
-    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
-    verify(delegateRepository).deleteAll();
-  }
-
-  @Test
-  void testDeleteRole() {
     Role role = mock(Role.class);
-    roleRepositoryDecorator.delete(role);
-    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
-    verify(delegateRepository).delete(role);
-  }
+    Object roleId = mock(Role.class);
+    when(role.getName()).thenReturn("test");
+    Stream<Object> roleIds = Stream.of(roleId);
+    when(delegateRepository.findAll(roleIds)).thenReturn(Stream.of(role));
 
-  @Test
-  void testDeleteRoleStream() {
-    Role role = mock(Role.class);
-    roleRepositoryDecorator.delete(Stream.of(role));
+    roleRepositoryDecorator.deleteAll(roleIds);
+
     verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Role>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
     verify(delegateRepository).delete(roleStreamCaptor.capture());
     assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(role));
+    verify(mutableSidService).deleteSid(new GrantedAuthoritySid("ROLE_test"));
+  }
+
+  @Test
+  void testDeleteById() {
+    Role role = mock(Role.class);
+    Object roleId = mock(Role.class);
+    when(role.getName()).thenReturn("test");
+    when(delegateRepository.findOneById(roleId)).thenReturn(role);
+
+    roleRepositoryDecorator.deleteById(roleId);
+
+    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
+    verify(delegateRepository).delete(role);
+    verify(mutableSidService).deleteSid(new GrantedAuthoritySid("ROLE_test"));
+  }
+
+  @Test
+  void testDeleteAll() {
+    assertThrows(UnsupportedOperationException.class, () -> roleRepositoryDecorator.deleteAll());
+  }
+
+  @Test
+  void testDeleteRole() {
+    Role role = mock(Role.class);
+    when(role.getName()).thenReturn("test");
+
+    roleRepositoryDecorator.delete(role);
+
+    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
+    verify(delegateRepository).delete(role);
+    verify(mutableSidService).deleteSid(new GrantedAuthoritySid("ROLE_test"));
+  }
+
+  @Test
+  void testDeleteRoleStream() {
+    Role role = mock(Role.class);
+    when(role.getName()).thenReturn("test");
+
+    roleRepositoryDecorator.delete(Stream.of(role));
+
+    verify(cachedRoleHierarchy).markRoleHierarchyCacheDirty();
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Role>> roleStreamCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(delegateRepository).delete(roleStreamCaptor.capture());
+    assertEquals(roleStreamCaptor.getValue().collect(toList()), singletonList(role));
+    verify(mutableSidService).deleteSid(new GrantedAuthoritySid("ROLE_test"));
   }
 
   private static Role mockRoleWithCircularHierarchy() {
