@@ -54,6 +54,16 @@ public class SidUtils {
     return ROLE_PREFIX + roleName;
   }
 
+  public static String getStringValue(Sid sid) {
+    if (sid instanceof PrincipalSid) {
+      return ((PrincipalSid) sid).getPrincipal();
+    } else if (sid instanceof GrantedAuthoritySid) {
+      return ((GrantedAuthoritySid) sid).getGrantedAuthority();
+    } else {
+      throw new IllegalStateException("Unknown Sid type");
+    }
+  }
+
   public static String getRoleName(String authority) {
     if (!authority.startsWith(ROLE_PREFIX)) {
       throw new IllegalArgumentException("Not an authority: " + authority);

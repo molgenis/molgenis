@@ -9,17 +9,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.acl.MutableSidService;
 import org.molgenis.test.AbstractMockitoTest;
 
 class RoleRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
+
   @Mock private RoleMetadata roleMetadata;
   @Mock private CachedRoleHierarchy cachedRoleHierarchy;
+  @Mock private MutableSidService mutableSidService;
   private RoleRepositoryDecoratorFactory roleRepositoryDecoratorFactory;
 
   @BeforeEach
   void setUpBeforeEach() {
     roleRepositoryDecoratorFactory =
-        new RoleRepositoryDecoratorFactory(roleMetadata, cachedRoleHierarchy);
+        new RoleRepositoryDecoratorFactory(roleMetadata, cachedRoleHierarchy, mutableSidService);
   }
 
   @Test

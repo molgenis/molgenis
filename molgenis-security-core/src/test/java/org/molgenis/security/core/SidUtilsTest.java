@@ -82,4 +82,23 @@ class SidUtilsTest {
   void testCreateRoleAuthority() {
     assertEquals("ROLE_NAME", createRoleAuthority("NAME"));
   }
+
+  @Test
+  void testGetStringValuePrincipalSid() {
+    Sid sid = new PrincipalSid("test");
+    assertEquals("test", SidUtils.getStringValue(sid));
+  }
+
+  @Test
+  void testGetStringValueGrantedAuthoritySid() {
+    Sid sid = new GrantedAuthoritySid("test");
+    assertEquals("test", SidUtils.getStringValue(sid));
+  }
+
+  @Test
+  void testGetStringValueUnknownSidType() {
+    class UnknownSid implements Sid {}
+    Sid sid = new UnknownSid();
+    assertThrows(IllegalStateException.class, () -> SidUtils.getStringValue(sid));
+  }
 }
