@@ -154,8 +154,8 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void registerUser_activationModeUser() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
-    when(authenticationSettings.getSignUpModeration()).thenReturn(false);
+    when(authenticationSettings.getSignUpForm()).thenReturn(true);
+    when(authenticationSettings.getSignUpFormModeration()).thenReturn(false);
     when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
 
@@ -182,8 +182,8 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void registerUser_activationModeAdmin() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
-    when(authenticationSettings.getSignUpModeration()).thenReturn(true);
+    when(authenticationSettings.getSignUpForm()).thenReturn(true);
+    when(authenticationSettings.getSignUpFormModeration()).thenReturn(true);
     when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
 
@@ -210,7 +210,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void registerUser_passwordNotEqualsConfirmPassword() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
+    when(authenticationSettings.getSignUpForm()).thenReturn(true);
     this.mockMvc
         .perform(
             post("/account/register")
@@ -228,7 +228,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void registerUser_invalidCaptcha() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
+    when(authenticationSettings.getSignUpForm()).thenReturn(true);
     when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
     this.mockMvc
         .perform(
@@ -257,7 +257,7 @@ class AccountControllerTest extends AbstractMockitoSpringContextTests {
 
   @Test
   void registerUser_invalidUserField() throws Exception {
-    when(authenticationSettings.getSignUp()).thenReturn(true);
+    when(authenticationSettings.getSignUpForm()).thenReturn(true);
     this.mockMvc
         .perform(
             post("/account/register")

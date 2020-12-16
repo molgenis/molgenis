@@ -19,6 +19,7 @@ import org.molgenis.data.migrate.version.Step42RemoveFormsUrlRow;
 import org.molgenis.data.migrate.version.Step43SetUsernameAttributeName;
 import org.molgenis.data.migrate.version.Step44CascadeDeleteSids;
 import org.molgenis.data.migrate.version.Step45RemoveDanglingSids;
+import org.molgenis.data.migrate.version.Step46DisableInactiveOidcClients;
 import org.springframework.stereotype.Component;
 
 /** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
@@ -50,6 +51,7 @@ public class MolgenisUpgradeBootstrapper {
     upgradeService.addUpgrade(new Step43SetUsernameAttributeName(dataSource));
     upgradeService.addUpgrade(new Step44CascadeDeleteSids(dataSource));
     upgradeService.addUpgrade(new Step45RemoveDanglingSids(dataSource));
+    upgradeService.addUpgrade(new Step46DisableInactiveOidcClients(dataSource));
     upgradeService.upgrade();
   }
 }
