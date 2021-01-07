@@ -10,9 +10,6 @@
 <div id="app-manager"></div>
 
 <link rel="stylesheet" href="/@molgenis-ui/app-manager/dist/css/app.css"/>
-
-<script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/manifest.js"></script>
-<script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/vendor.js"></script>
 <script type=text/javascript src="/@molgenis-ui/app-manager/dist/js/app.js"></script>
 
 <@footer version/>
