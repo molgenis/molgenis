@@ -3,9 +3,9 @@ import commonjs from 'rollup-plugin-commonjs';
 import { uglify } from "rollup-plugin-uglify";
 
 export default {
-  input: 'script-evaluator.js',
+  input: 'magma.js',
   output: {
-    file: 'magma.js',
+    file: 'script-evaluator.js',
     format: 'iife',
     compact: true,
     name: "MagmaScript"
