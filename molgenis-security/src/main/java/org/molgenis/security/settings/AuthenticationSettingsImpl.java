@@ -77,7 +77,9 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
                   TwoFactorAuthenticationSetting.ENABLED.getLabel(),
                   TwoFactorAuthenticationSetting.ENFORCED.getLabel()))
           .setLabel("Two Factor Authentication")
-          .setDescription("Enable or enforce users to sign in with Google Authenticator.")
+          .setDescription(
+              "Enable or enforce users to sign in with Google Authenticator. "
+                  + "Must be disabled if you specify OpenID Connect authentication servers")
           .setValidationExpression(getSignIn2FAValidationExpression());
     }
 
