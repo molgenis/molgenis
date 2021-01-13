@@ -32,7 +32,7 @@ class Step46DisableInactiveOidcClientsTest extends AbstractMockitoTest {
                 + "    SELECT *\n"
                 + "    INTO settings\n"
                 + "    FROM \"sys_set_auth#98c4c015\"\n"
-                + "    WHERE signup IS TRUE;\n"
+                + "    WHERE signup IS FALSE;\n"
                 + "\n"
                 + "    IF FOUND THEN\n"
                 + "        TRUNCATE public.\"sys_set_auth#98c4c015_oidcClients\";\n"
