@@ -5,22 +5,23 @@ import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 
 public interface AuthenticationSettings {
-  /** @return whether sign up is enabled */
-  boolean getSignUp();
 
-  /** @param signUp <code>true</code> if sign up is enabled */
-  void setSignUp(boolean signUp);
+  /** @return whether the sign-up form is enabled */
+  boolean getSignUpForm();
 
-  /** @return whether sign up is moderated */
-  boolean getSignUpModeration();
+  /** @param signUp <code>true</code> if the sign-up form is enabled */
+  void setSignUpForm(boolean signUp);
+
+  /** @return whether signing up via the form is moderated */
+  boolean getSignUpFormModeration();
+
+  /** @param signUpModeration <code>true</code> if sign-up via the form is moderated */
+  void setSignUpFormModeration(boolean signUpModeration);
 
   @SuppressWarnings("unused")
   void setOidcClients(List<OidcClient> oidcClients);
 
   Iterable<OidcClient> getOidcClients();
-
-  /** @param signUpModeration <code>true</code> if sign up is moderated */
-  void setSignUpModeration(boolean signUpModeration);
 
   /**
    * @param twoFactorAuthentication whether two factor authentication is disabled, enabled or

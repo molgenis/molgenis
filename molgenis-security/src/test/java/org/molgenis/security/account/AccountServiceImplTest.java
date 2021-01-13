@@ -58,7 +58,7 @@ class AccountServiceImplTest extends AbstractMockitoSpringContextTests {
   @BeforeEach
   void setUp() {
     when(appSettings.getTitle()).thenReturn("Molgenis title");
-    when(authenticationSettings.getSignUpModeration()).thenReturn(false);
+    when(authenticationSettings.getSignUpFormModeration()).thenReturn(false);
 
     when(user.getUsername()).thenReturn("jansenj");
     when(user.getFirstName()).thenReturn("Jan");
