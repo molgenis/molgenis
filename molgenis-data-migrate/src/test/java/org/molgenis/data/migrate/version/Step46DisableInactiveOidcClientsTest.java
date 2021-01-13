@@ -22,19 +22,21 @@ class Step46DisableInactiveOidcClientsTest extends AbstractMockitoTest {
   void upgrade() {
     step46.upgrade();
     verify(jdbcTemplate)
-        .execute("DO $$\n"
-            + "DECLARE\n"
-            + "    settings public.\"sys_set_auth#98c4c015\"%ROWTYPE;\n"
-            + "\n"
-            + "BEGIN\n"
-            + "    SELECT *\n"
-            + "    INTO settings\n"
-            + "    FROM \"sys_set_auth#98c4c015\"\n"
-            + "    WHERE signup IS TRUE;\n"
-            + "\n"
-            + "    IF FOUND THEN\n"
-            + "        TRUNCATE public.\"sys_set_auth#98c4c015_oidcClients\";\n"
-            + "    END IF;\n"
-            + "END $$");
+        .execute(
+            "DO $$\n"
+                + "DECLARE\n"
+                + "--     declare a variable of type 'row' so we can select into it and see if it exists\n"
+                + "    settings public.\"sys_set_auth#98c4c015\"%ROWTYPE;\n"
+                + "\n"
+                + "BEGIN\n"
+                + "    SELECT *\n"
+                + "    INTO settings\n"
+                + "    FROM \"sys_set_auth#98c4c015\"\n"
+                + "    WHERE signup IS TRUE;\n"
+                + "\n"
+                + "    IF FOUND THEN\n"
+                + "        TRUNCATE public.\"sys_set_auth#98c4c015_oidcClients\";\n"
+                + "    END IF;\n"
+                + "END $$");
   }
 }

@@ -1,5 +1,6 @@
 DO $$
 DECLARE
+--     declare a variable of type 'row' so we can select into it and see if it exists
     settings public."sys_set_auth#98c4c015"%ROWTYPE;
 
 BEGIN
