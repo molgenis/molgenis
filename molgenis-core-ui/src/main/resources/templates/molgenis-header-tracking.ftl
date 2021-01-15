@@ -16,10 +16,10 @@
             m.parentNode.insertBefore(a, m)
         })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
         <#if app_settings.googleAnalyticsTrackingId??>
-            ga('create', '${app_settings.googleAnalyticsTrackingId?html}', 'auto');
+            ga('create', '${app_settings.googleAnalyticsTrackingId?html}', 'auto', {'cookieFlags': 'SameSite=None; Secure'});
         </#if>
         <#if app_settings.googleAnalyticsTrackingIdMolgenis??>
-            ga('create', '${app_settings.googleAnalyticsTrackingIdMolgenis?html}', 'auto', {'name': 'molgenisTracker'});
+            ga('create', '${app_settings.googleAnalyticsTrackingIdMolgenis?html}', 'auto', {'name': 'molgenisTracker', 'cookieFlags': 'SameSite=None; Secure'});
         </#if>
         ga('set', 'forceSSL', true);
         ga('set', 'anonymizeIp', ${app_settings.googleAnalyticsIpAnonymization?string('true', 'false')});
