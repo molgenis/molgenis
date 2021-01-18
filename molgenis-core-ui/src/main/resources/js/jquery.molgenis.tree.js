@@ -31,7 +31,7 @@
                     'title': this.label,
                     'tooltip': this.description,
                     'folder': isFolder,
-                    'hideCheckbox': refEntityDepth > 0,
+                    'checkbox': refEntityDepth <= 0,
                     'lazy': isFolder,
                     'expanded': !isFolder,
                     'selected': doSelect(this),
