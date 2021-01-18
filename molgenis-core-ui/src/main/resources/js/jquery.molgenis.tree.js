@@ -125,6 +125,14 @@
         });
 
         var treeConfig = {
+            extensions: ["glyph"],
+            'glyph': {
+                preset: "bootstrap3",
+                map: {
+                    doc: "glyphicon-filter",
+                    docOpen: "glyphicon-filter"
+                }
+            },
             'selectMode': 3,
             'minExpandLevel': 1,
             'debugLevel': 0,
