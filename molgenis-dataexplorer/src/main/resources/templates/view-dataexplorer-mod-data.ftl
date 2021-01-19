@@ -13,8 +13,11 @@
                     <div class="panel-body">
                     <#-- dalliance default id to print browser -->
                         <div id="svgHolder"></div>
-                        <div class="pull-right"><a id="genomebrowser-filter-button" class="btn btn-default btn-sm"><img
-                                src="/img/filter-bw.png"> Apply filter</a></div>
+                        <div class="pull-right">
+                            <a id="genomebrowser-filter-button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-filter"></span> Apply filter
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
