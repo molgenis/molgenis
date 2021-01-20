@@ -24,7 +24,7 @@
         <#else>
             <div class="row">
                 <div class="col-md-12">
-                    <button id="back-button" type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-chevron-left"></span> Back to Tasks</button>
+                    <button id="back-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to Tasks</button>
                 </div>
             </div>
             <script>
