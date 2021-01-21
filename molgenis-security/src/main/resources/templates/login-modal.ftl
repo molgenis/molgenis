@@ -61,7 +61,7 @@
                             </div>
                         </div>
                     </form>
-                    <#if authentication_sign_up>
+                    <#if authentication_sign_up_form>
                     <div class="row" style="margin-top: 20px;">
                       <div class="col-md-12 text-center">
                         <small>Don't have an account? <a class="modal-href" href="/account/register"

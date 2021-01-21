@@ -73,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
     // collect activation info
     String activationCode = idGenerator.generateId(SECURE_RANDOM);
     List<String> activationEmailAddresses;
-    if (authenticationSettings.getSignUpModeration()) {
+    if (authenticationSettings.getSignUpFormModeration()) {
       activationEmailAddresses = userService.getSuEmailAddresses();
       if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())
         throw new MolgenisDataException("Administrator account is missing required email address");
