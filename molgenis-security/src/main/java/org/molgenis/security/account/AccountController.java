@@ -147,7 +147,7 @@ public class AccountController {
   public Map<String, String> registerUser(
       @Valid @ModelAttribute RegisterRequest registerRequest, HttpServletRequest request)
       throws Exception {
-    if (authenticationSettings.getSignUp()) {
+    if (authenticationSettings.getSignUpForm()) {
       if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
         throw new BindException(RegisterRequest.class, "password does not match confirm password");
       }
@@ -163,7 +163,7 @@ public class AccountController {
       accountService.createUser(user, activationUri);
 
       String successMessage =
-          authenticationSettings.getSignUpModeration()
+          authenticationSettings.getSignUpFormModeration()
               ? REGISTRATION_SUCCESS_MESSAGE_ADMIN
               : REGISTRATION_SUCCESS_MESSAGE_USER;
       return Collections.singletonMap("message", successMessage);

@@ -31,7 +31,7 @@
                     'title': this.label,
                     'tooltip': this.description,
                     'folder': isFolder,
-                    'hideCheckbox': refEntityDepth > 0,
+                    'checkbox': refEntityDepth <= 0,
                     'lazy': isFolder,
                     'expanded': !isFolder,
                     'selected': doSelect(this),
@@ -125,6 +125,14 @@
         });
 
         var treeConfig = {
+            extensions: ["glyph"],
+            'glyph': {
+                preset: "bootstrap3",
+                map: {
+                    doc: "glyphicon-filter",
+                    docOpen: "glyphicon-filter"
+                }
+            },
             'selectMode': 3,
             'minExpandLevel': 1,
             'debugLevel': 0,

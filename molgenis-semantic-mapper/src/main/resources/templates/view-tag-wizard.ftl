@@ -81,7 +81,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <table class="table table-bordered" id="tag-mapping-table">
             <thead>
             <th>Target Attribute</th>
@@ -133,7 +133,6 @@
             </tbody>
         </table>
     </div>
-    <div id="edit-ontology-container" class="col-md-6"></div>
 </div>
 
 <div class="modal fade" id="edit-ontology-modal">

@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
-import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_SIGN_UP;
+import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_SIGN_UP_FORM;
 import static org.molgenis.web.PluginAttributes.KEY_ENVIRONMENT;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
 import static org.molgenis.web.PluginAttributes.KEY_I18N;
@@ -91,7 +91,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
               modelAndView.addObject(
                   KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
               modelAndView.addObject(
-                  KEY_AUTHENTICATION_SIGN_UP, authenticationSettings.getSignUp());
+                  KEY_AUTHENTICATION_SIGN_UP_FORM, authenticationSettings.getSignUpForm());
               modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
               modelAndView.addObject(
                   KEY_I18N,

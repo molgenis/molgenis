@@ -257,19 +257,19 @@ public class DataExplorerController extends PluginController {
             case DATA:
               id = MOD_DATA;
               label = "Data";
-              icon = "grid-icon.png";
+              icon = "list";
               break;
             case AGGREGATION:
               id = "aggregates";
               label =
                   messageSource.getMessage(
                       "dataexplorer_aggregates_title", new Object[] {}, getLocale());
-              icon = "aggregate-icon.png";
+              icon = "equalizer";
               break;
             case REPORT:
               id = MOD_ENTITIESREPORT;
               label = dataExplorerSettings.getEntityReport(entityTypeId);
-              icon = "report-icon.png";
+              icon = "list-alt";
               break;
             default:
               throw new UnexpectedEnumException(module);
