@@ -29,7 +29,10 @@
                 children.push({
                     'key': this.href,
                     'title': this.label,
-                    'tooltip': this.description,
+                    'popover': this.description,
+                    'toggle': 'popover',
+                    'trigger': 'hover',
+                    'placement': 'auto bottom',
                     'folder': isFolder,
                     'checkbox': refEntityDepth <= 0,
                     'lazy': isFolder,
@@ -125,7 +128,7 @@
         });
 
         var treeConfig = {
-            extensions: ["glyph"],
+            extensions: ["glyph", "bspopover"],
             'glyph': {
                 preset: "bootstrap3",
                 map: {

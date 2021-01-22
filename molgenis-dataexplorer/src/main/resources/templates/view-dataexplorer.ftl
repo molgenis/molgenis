@@ -8,6 +8,7 @@
 "dataexplorer-filter-dialog.js",
 "dataexplorer-filter-wizard.js",
 "jquery.fancytree.min.js",
+"jquery.fancytree.bspopover.min.js",
 "jquery.molgenis.tree.js",
 "jquery.molgenis.xrefmrefsearch.js",
 "dataexplorer.js",
