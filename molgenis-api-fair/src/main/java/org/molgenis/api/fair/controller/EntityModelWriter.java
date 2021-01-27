@@ -253,6 +253,9 @@ public class EntityModelWriter {
     if ("fdp_Metadata".equals(entityType.getId())) {
       return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
     }
+    if (contains(entity.getEntityType().getAttributeNames(), "IRI")) {
+      return valueFactory.createIRI(entity.getString("IRI"));
+    }
     if (isADcatResource(entityType)) {
       var iri =
           getServletUriComponentsBuilder()
@@ -260,9 +263,6 @@ public class EntityModelWriter {
               .build()
               .toUriString();
       return valueFactory.createIRI(iri);
-    }
-    if (contains(entity.getEntityType().getAttributeNames(), "IRI")) {
-      return valueFactory.createIRI(entity.getString("IRI"));
     }
     return valueFactory.createBNode();
   }
