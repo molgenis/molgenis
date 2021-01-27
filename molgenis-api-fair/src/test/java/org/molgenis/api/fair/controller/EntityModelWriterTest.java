@@ -125,6 +125,37 @@ class EntityModelWriterTest extends AbstractMockitoTest {
                 + "    ]");
   }
 
+  @Test
+  void testCreateRfdModelWithCustomIRI() {
+
+    List<Attribute> attributeList = singletonList(attribute);
+
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getString("IRI")).thenReturn("http://purl.org/example/catalog_id");
+    when(entityType.getAttributeNames()).thenReturn(singletonList("IRI"));
+    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
+
+    when(attribute.getName()).thenReturn("IRI");
+
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
+    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag.getObject()).thenReturn(labeledResource);
+    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
+
+    Model result = writer.createRdfModel(objectEntity);
+
+    assertEquals(4, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://purl.org/example/catalog_id> a dcat:Resource")
+        .contains(
+            "fdp:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://purl.org/example/catalog_id>\n"
+                + "    ]");
+  }
+
   static Object[][] createStatementForAttributeProvider() {
     return new Object[][] {
       new Object[] {
