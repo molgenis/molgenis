@@ -21,6 +21,7 @@ ENV db_password=molgenis
 # MOLGENIS specific configuration
 ENV admin.password=admin
 ENV molgenis.home=/home/molgenis
+ENV python_script_executable=/usr/bin/python3
 
 # --no-cache allows users to install packages with an index that is updated and used on-the-fly and not cached locally
 # This avoids the need to use --update and remove /var/cache/apk/* when done installing packages.
