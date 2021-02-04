@@ -15,7 +15,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.molgenis.audit.AuditLogger" level="info">
+  <logger name="org.molgenis.audit.AuditEventLogger" level="info" additivity="false">
     <appender-ref ref="FILE-AUDIT"/>
   </logger>
 
