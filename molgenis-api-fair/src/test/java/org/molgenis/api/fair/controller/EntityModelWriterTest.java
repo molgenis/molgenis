@@ -227,6 +227,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
       AttributeType attributeType, Object value, Consumer<Entity> consumer, String fragment) {
     when(objectEntity.getEntityType()).thenReturn(entityType);
     when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(value);
     consumer.accept(objectEntity);
 
@@ -251,6 +252,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   void testCreateRfdModelXREF() {
     when(objectEntity.getEntityType()).thenReturn(entityType);
     when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(refEntity);
     when(objectEntity.getEntity("attributeName")).thenReturn(refEntity);
 
@@ -280,6 +282,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   void testCreateRfdModelMREF() {
     when(objectEntity.getEntityType()).thenReturn(entityType);
     when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(refEntity);
     when(objectEntity.getEntities("attributeName")).thenReturn(List.of(refEntity));
 
@@ -315,6 +318,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     when(objectEntity.getEntityType()).thenReturn(entityType);
     String value = "molgenis,genetics,fair";
+    when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(value);
     when(objectEntity.getString("attributeName")).thenReturn(value);
 
@@ -340,6 +344,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   void testCreateRfdModelNullValue() {
     when(objectEntity.getEntityType()).thenReturn(entityType);
     when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
+    when(objectEntity.getIdValue()).thenReturn("attributeName1");
     when(objectEntity.get("attributeName1")).thenReturn(null);
     when(attribute.getName()).thenReturn("attributeName1");
 
