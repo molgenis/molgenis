@@ -264,7 +264,8 @@ public class EntityModelWriter {
               .toUriString();
       return valueFactory.createIRI(iri);
     }
-    return valueFactory.createBNode(entity.getIdValue().toString());
+    return valueFactory.createBNode(
+        String.format("%s_%s", entity.getEntityType().getId(), entity.getIdValue().toString()));
   }
 
   UriComponentsBuilder getServletUriComponentsBuilder() {

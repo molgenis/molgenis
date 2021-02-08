@@ -29,6 +29,7 @@ import com.google.common.collect.Multimap;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.rdf4j.model.Model;
@@ -276,6 +277,41 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
         .contains("<http://example.org/relation> <http://example.org/refEntity>");
+  }
+
+  @Test
+  void testCreateRfdModelXREFMultipleTags() {
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("attributeName");
+    when(objectEntity.get("attributeName")).thenReturn(refEntity);
+    when(objectEntity.getEntity("attributeName")).thenReturn(refEntity);
+
+    when(refEntity.getEntityType()).thenReturn(refEntityType);
+    when(refEntity.getIdValue()).thenReturn("refEntityId");
+    when(refEntityType.getId()).thenReturn("refEntityType");
+    when(refEntityType.getAttributeNames()).thenReturn(new ArrayList<>());
+
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
+    when(attribute.getName()).thenReturn("attributeName");
+
+    when(attribute.getDataType()).thenReturn(XREF);
+
+    when(tagService.getTagsForAttribute(entityType, attribute))
+        .thenReturn(
+            ImmutableMultimap.of(
+                isAssociatedWith, labeledResource, isAssociatedWith, labeledResource2));
+    when(labeledResource.getIri()).thenReturn("http://example.org/relation");
+    when(labeledResource2.getIri()).thenReturn("http://example.org/relation2");
+
+    Model result = writer.createRdfModel(objectEntity);
+
+    assertEquals(2, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://example.org/relation> _:refEntityType_refEntityId")
+        .contains("<http://example.org/relation2> _:refEntityType_refEntityId");
   }
 
   @Test
