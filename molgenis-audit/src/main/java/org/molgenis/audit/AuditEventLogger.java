@@ -27,5 +27,4 @@ public class AuditEventLogger implements ApplicationListener<AuditApplicationEve
           event.toString());
     }
   }
-
 }

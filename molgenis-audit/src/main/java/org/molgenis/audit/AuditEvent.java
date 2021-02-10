@@ -11,11 +11,11 @@ public abstract class AuditEvent {
 
   public abstract String getPrincipal();
 
-  public abstract String getType();
+  public abstract AuditEventType getType();
 
   public abstract Map<String, Object> getData();
 
-  public static AuditEvent create(Instant timestamp, String principal, String type,
+  public static AuditEvent create(Instant timestamp, String principal, AuditEventType type,
       Map<String, Object> data) {
     return new AutoValue_AuditEvent(timestamp, principal, type, data);
   }
