@@ -30,5 +30,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
