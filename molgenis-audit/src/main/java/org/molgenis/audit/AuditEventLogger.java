@@ -6,17 +6,17 @@ import static net.logstash.logback.marker.Markers.appendEntries;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuditEventLogger implements ApplicationListener<AuditApplicationEvent> {
+public class AuditEventLogger {
 
   private static final Logger logger = LoggerFactory.getLogger(AuditEventLogger.class);
 
-  @Override
-  public void onApplicationEvent(@NonNull AuditApplicationEvent auditApplicationEvent) {
+  @EventListener
+  public void onAuditApplicationEvent(@NonNull AuditApplicationEvent auditApplicationEvent) {
     AuditEvent event = auditApplicationEvent.getAuditEvent();
     if (logger.isInfoEnabled()) {
       logger.info(
