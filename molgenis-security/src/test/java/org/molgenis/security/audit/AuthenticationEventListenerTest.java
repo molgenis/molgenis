@@ -36,52 +36,46 @@ class AuthenticationEventListenerTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void testOnAuthenticationFailureEvent() {
-    AbstractAuthenticationFailureEvent event = mock(
-        AbstractAuthenticationFailureEvent.class, RETURNS_DEEP_STUBS);
+    AbstractAuthenticationFailureEvent event =
+        mock(AbstractAuthenticationFailureEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
 
     authenticationEventListener.onAuthenticationFailureEvent(event);
 
-    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_FAILURE),
-        any(Map.class));
+    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_FAILURE), any(Map.class));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testOnAuthenticationSuccessEvent() {
-    AuthenticationSuccessEvent event = mock(
-        AuthenticationSuccessEvent.class, RETURNS_DEEP_STUBS);
+    AuthenticationSuccessEvent event = mock(AuthenticationSuccessEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
 
     authenticationEventListener.onAuthenticationSuccessEvent(event);
 
-    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_SUCCESS),
-        any(Map.class));
+    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_SUCCESS), any(Map.class));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testOnAuthenticationSwitchUserEvent() {
-    AuthenticationSwitchUserEvent event = mock(
-        AuthenticationSwitchUserEvent.class, RETURNS_DEEP_STUBS);
+    AuthenticationSwitchUserEvent event =
+        mock(AuthenticationSwitchUserEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
 
     authenticationEventListener.onAuthenticationSwitchUserEvent(event);
 
-    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_SWITCH),
-        any(Map.class));
+    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHENTICATION_SWITCH), any(Map.class));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void testLogoutSuccessEvent() {
-    LogoutSuccessEvent event = mock(
-        LogoutSuccessEvent.class, RETURNS_DEEP_STUBS);
+    LogoutSuccessEvent event = mock(LogoutSuccessEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
 
     authenticationEventListener.onLogoutSuccessEvent(event);
 
-    verify(auditEventPublisher).publish(eq("henk"), eq(LOGOUT_SUCCESS),
-        any(Map.class));
+    verify(auditEventPublisher).publish(eq("henk"), eq(LOGOUT_SUCCESS), any(Map.class));
   }
 }

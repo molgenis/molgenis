@@ -17,8 +17,7 @@ class AuditEventPublisherTest extends AbstractMockitoTest {
 
   @Mock private ApplicationEventPublisher applicationEventPublisher;
 
-  @Captor
-  ArgumentCaptor<AuditApplicationEvent> eventCaptor;
+  @Captor ArgumentCaptor<AuditApplicationEvent> eventCaptor;
 
   private AuditEventPublisher auditEventPublisher;
 

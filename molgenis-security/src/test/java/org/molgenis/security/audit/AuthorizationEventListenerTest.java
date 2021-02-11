@@ -32,25 +32,23 @@ class AuthorizationEventListenerTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void onAuthenticationCredentialsNotFoundEvent() {
-    AuthenticationCredentialsNotFoundEvent event = mock(
-        AuthenticationCredentialsNotFoundEvent.class, RETURNS_DEEP_STUBS);
+    AuthenticationCredentialsNotFoundEvent event =
+        mock(AuthenticationCredentialsNotFoundEvent.class, RETURNS_DEEP_STUBS);
 
     authorizationEventListener.onAuthenticationCredentialsNotFoundEvent(event);
 
-    verify(auditEventPublisher).publish(eq("<unknown>"), eq(AUTHENTICATION_FAILURE),
-        any(Map.class));
+    verify(auditEventPublisher)
+        .publish(eq("<unknown>"), eq(AUTHENTICATION_FAILURE), any(Map.class));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void onAuthorizationFailureEvent() {
-    AuthorizationFailureEvent event = mock(
-        AuthorizationFailureEvent.class, RETURNS_DEEP_STUBS);
+    AuthorizationFailureEvent event = mock(AuthorizationFailureEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
 
     authorizationEventListener.onAuthorizationFailureEvent(event);
 
-    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHORIZATION_FAILURE),
-        any(Map.class));
+    verify(auditEventPublisher).publish(eq("henk"), eq(AUTHORIZATION_FAILURE), any(Map.class));
   }
 }

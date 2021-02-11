@@ -18,14 +18,13 @@ class AuditEventLoggerTest {
 
   @Test
   void testLogAuditEvent() {
-    AuditEvent auditEvent = AuditEvent.create(Instant.EPOCH, "henk",
-        AuditEventType.AUTHENTICATION_FAILURE, emptyMap());
+    AuditEvent auditEvent =
+        AuditEvent.create(Instant.EPOCH, "henk", AuditEventType.AUTHENTICATION_FAILURE, emptyMap());
     AuditApplicationEvent auditApplicationEvent = new AuditApplicationEvent(auditEvent);
 
     auditEventLogger.onAuditApplicationEvent(auditApplicationEvent);
 
     assertEquals(1, TestAppender.events.size());
-    //TODO check formatted message
+    // TODO check formatted message
   }
-
 }

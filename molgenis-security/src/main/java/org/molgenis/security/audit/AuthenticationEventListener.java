@@ -58,7 +58,7 @@ public class AuthenticationEventListener {
   }
 
   @EventListener
-  public void onLogoutSuccessEvent(LogoutSuccessEvent event){
+  public void onLogoutSuccessEvent(LogoutSuccessEvent event) {
     Map<String, Object> data = new HashMap<>();
     if (event.getAuthentication().getDetails() != null) {
       data.put("details", event.getAuthentication().getDetails());
