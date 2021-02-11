@@ -10,6 +10,7 @@ import static org.molgenis.audit.AuditEventType.AUTHENTICATION_FAILURE;
 import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SUCCESS;
 import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SWITCH;
 import static org.molgenis.audit.AuditEventType.LOGOUT_SUCCESS;
+import static org.molgenis.audit.AuditEventType.SESSION_ID_CHANGE;
 
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.authentication.event.LogoutSuccessEvent;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionEvent;
 import org.springframework.security.web.authentication.switchuser.AuthenticationSwitchUserEvent;
 
 class AuthenticationEventListenerTest extends AbstractMockitoTest {
@@ -77,5 +79,17 @@ class AuthenticationEventListenerTest extends AbstractMockitoTest {
     authenticationEventListener.onLogoutSuccessEvent(event);
 
     verify(auditEventPublisher).publish(eq("henk"), eq(LOGOUT_SUCCESS), any(Map.class));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void testOnSessionFixationProtectionEvent() {
+    SessionFixationProtectionEvent event =
+        mock(SessionFixationProtectionEvent.class, RETURNS_DEEP_STUBS);
+    when(event.getAuthentication().getName()).thenReturn("henk");
+
+    authenticationEventListener.onSessionFixationProtectionEvent(event);
+
+    verify(auditEventPublisher).publish(eq("henk"), eq(SESSION_ID_CHANGE), any(Map.class));
   }
 }
