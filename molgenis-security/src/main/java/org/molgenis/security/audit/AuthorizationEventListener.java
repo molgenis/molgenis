@@ -10,6 +10,7 @@ import org.molgenis.audit.AuditEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.access.event.AuthenticationCredentialsNotFoundEvent;
 import org.springframework.security.access.event.AuthorizationFailureEvent;
+import org.springframework.security.access.event.AuthorizedEvent;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,6 +34,7 @@ public class AuthorizationEventListener {
   @EventListener
   public void onAuthorizationFailureEvent(AuthorizationFailureEvent event) {
     Map<String, Object> data = new HashMap<>();
+    data.put("object", event.getSource().toString());
     data.put("type", event.getAccessDeniedException().getClass().getName());
     data.put("message", event.getAccessDeniedException().getMessage());
     if (event.getAuthentication().getDetails() != null) {
