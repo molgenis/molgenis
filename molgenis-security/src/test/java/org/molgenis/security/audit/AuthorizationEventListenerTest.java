@@ -46,6 +46,7 @@ class AuthorizationEventListenerTest extends AbstractMockitoTest {
   void onAuthorizationFailureEvent() {
     AuthorizationFailureEvent event = mock(AuthorizationFailureEvent.class, RETURNS_DEEP_STUBS);
     when(event.getAuthentication().getName()).thenReturn("henk");
+    when(event.getSource()).thenReturn(new Object());
 
     authorizationEventListener.onAuthorizationFailureEvent(event);
 
