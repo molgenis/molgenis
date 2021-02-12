@@ -20,7 +20,7 @@ public class AuditEventLogger {
     AuditEvent event = auditApplicationEvent.getAuditEvent();
     if (logger.isInfoEnabled()) {
       logger.info(
-          append("timestamp", event.getTimestamp())
+          append("timestamp", event.getTimestamp().toString())
               .and(append("principal", event.getPrincipal()))
               .and(append("type", event.getType()))
               .and(appendEntries(Map.of("data", event.getData()))),
