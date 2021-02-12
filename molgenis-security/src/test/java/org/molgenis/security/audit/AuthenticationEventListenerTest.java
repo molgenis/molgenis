@@ -6,11 +6,11 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_FAILURE;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SUCCESS;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SWITCH;
-import static org.molgenis.audit.AuditEventType.LOGOUT_SUCCESS;
-import static org.molgenis.audit.AuditEventType.SESSION_ID_CHANGE;
+import static org.molgenis.security.audit.AuthenticationEventListener.AUTHENTICATION_FAILURE;
+import static org.molgenis.security.audit.AuthenticationEventListener.AUTHENTICATION_SUCCESS;
+import static org.molgenis.security.audit.AuthenticationEventListener.AUTHENTICATION_SWITCH;
+import static org.molgenis.security.audit.AuthenticationEventListener.LOGOUT_SUCCESS;
+import static org.molgenis.security.audit.AuthenticationEventListener.SESSION_ID_CHANGE;
 
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

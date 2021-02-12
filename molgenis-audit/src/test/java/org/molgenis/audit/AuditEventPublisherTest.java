@@ -29,12 +29,12 @@ class AuditEventPublisherTest extends AbstractMockitoTest {
 
   @Test
   void testPublish() {
-    auditEventPublisher.publish("henk", AuditEventType.AUTHENTICATION_SUCCESS, emptyMap());
+    auditEventPublisher.publish("henk", "AUTHENTICATION_SUCCESS", emptyMap());
 
     verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture());
     AuditEvent auditEvent = eventCaptor.getValue().getAuditEvent();
     assertEquals("henk", auditEvent.getPrincipal());
-    assertEquals(AuditEventType.AUTHENTICATION_SUCCESS, auditEvent.getType());
+    assertEquals("AUTHENTICATION_SUCCESS", auditEvent.getType());
     assertEquals(emptyMap(), auditEvent.getData());
   }
 }

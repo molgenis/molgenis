@@ -18,7 +18,7 @@ public class AuditEventPublisher implements ApplicationEventPublisherAware {
     this.applicationEventPublisher = publisher;
   }
 
-  public void publish(String principal, AuditEventType type, Map<String, Object> data) {
+  public void publish(String principal, String type, Map<String, Object> data) {
     applicationEventPublisher.publishEvent(
         new AuditApplicationEvent(AuditEvent.create(clock.instant(), principal, type, data)));
   }

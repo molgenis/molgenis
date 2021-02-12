@@ -1,8 +1,7 @@
 package org.molgenis.security.audit;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_FAILURE;
-import static org.molgenis.audit.AuditEventType.AUTHORIZATION_FAILURE;
+import static org.molgenis.security.audit.AuthenticationEventListener.AUTHENTICATION_FAILURE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthorizationEventListener {
+
+  public static final String AUTHORIZATION_FAILURE = "AUTHORIZATION_FAILURE";
 
   private final AuditEventPublisher auditEventPublisher;
 

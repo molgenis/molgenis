@@ -1,11 +1,6 @@
 package org.molgenis.security.audit;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_FAILURE;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SUCCESS;
-import static org.molgenis.audit.AuditEventType.AUTHENTICATION_SWITCH;
-import static org.molgenis.audit.AuditEventType.LOGOUT_SUCCESS;
-import static org.molgenis.audit.AuditEventType.SESSION_ID_CHANGE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +15,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationEventListener {
+
+  public static final String AUTHENTICATION_FAILURE = "AUTHENTICATION_FAILURE";
+  public static final String AUTHENTICATION_SUCCESS = "AUTHENTICATION_SUCCESS";
+  public static final String AUTHENTICATION_SWITCH = "AUTHENTICATION_SWITCH";
+  public static final String LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
+  public static final String SESSION_ID_CHANGE = "SESSION_ID_CHANGE";
 
   private final AuditEventPublisher auditEventPublisher;
 

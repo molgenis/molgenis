@@ -34,12 +34,13 @@ class AuditEventLoggerTest {
     appender.start();
     logger.addAppender(appender);
 
-    AuditApplicationEvent event = new AuditApplicationEvent(
-        AuditEvent.create(
-            Instant.parse("2021-01-06T11:35:02.781470Z"),
-            "principal",
-            AuditEventType.AUTHENTICATION_FAILURE,
-            Map.of("detail", Map.of("foo", "bar"))));
+    AuditApplicationEvent event =
+        new AuditApplicationEvent(
+            AuditEvent.create(
+                Instant.parse("2021-01-06T11:35:02.781470Z"),
+                "principal",
+                "TYPE",
+                Map.of("detail", Map.of("foo", "bar"))));
     auditEventLogger.onAuditApplicationEvent(event);
 
     appender.stop();
@@ -47,7 +48,7 @@ class AuditEventLoggerTest {
     assertEquals(1, appender.list.size());
     var loggingEvent = appender.list.get(0);
     assertEquals(
-        "{\"timestamp\":\"2021-01-06T11:35:02.781470Z\",\"principal\":\"principal\",\"type\":\"AUTHENTICATION_FAILURE\",\"data\":{\"detail\":{\"foo\":\"bar\"}}",
+        "{\"timestamp\":\"2021-01-06T11:35:02.781470Z\",\"principal\":\"principal\",\"type\":\"TYPE\",\"data\":{\"detail\":{\"foo\":\"bar\"}}",
         writeMarkersToString(loggingEvent.getMarker()));
   }
 
