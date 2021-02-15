@@ -171,6 +171,7 @@ Check: [deploy backend services](guide-development-deploy-backend-services.md)
 ```properties
 molgenis.home=**your own version of the data dir**
 admin.email=**your own email address**
+audit.log.path=**path to where you want to store the audit log file**
 ```
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`

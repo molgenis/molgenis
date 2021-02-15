@@ -37,8 +37,7 @@ class AuthorizationEventListenerTest extends AbstractMockitoTest {
 
     authorizationEventListener.onAuthenticationCredentialsNotFoundEvent(event);
 
-    verify(auditEventPublisher)
-        .publish(eq("<unknown>"), eq(AUTHENTICATION_FAILURE), any(Map.class));
+    verify(auditEventPublisher).publish(eq(null), eq(AUTHENTICATION_FAILURE), any(Map.class));
   }
 
   @SuppressWarnings("unchecked")

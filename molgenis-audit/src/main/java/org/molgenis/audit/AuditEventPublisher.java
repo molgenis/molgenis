@@ -1,24 +1,35 @@
 package org.molgenis.audit;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Clock;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuditEventPublisher implements ApplicationEventPublisherAware {
+public class AuditEventPublisher {
 
-  private ApplicationEventPublisher applicationEventPublisher;
+  private final ApplicationEventPublisher applicationEventPublisher;
   private final Clock clock = Clock.systemUTC();
 
-  @Override
-  public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher publisher) {
-    this.applicationEventPublisher = publisher;
+  public AuditEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    this.applicationEventPublisher = requireNonNull(applicationEventPublisher);
   }
 
-  public void publish(String principal, String type, Map<String, Object> data) {
+  /**
+   * Publish an audit event.
+   *
+   * @param principal the principal's name
+   * @param type the audit event type
+   * @param data additional information pertaining to the event
+   */
+  public void publish(@Nullable String principal, String type, Map<String, Object> data) {
+    if (principal == null) {
+      principal = "<unknown>";
+    }
+
     applicationEventPublisher.publishEvent(
         new AuditApplicationEvent(AuditEvent.create(clock.instant(), principal, type, data)));
   }

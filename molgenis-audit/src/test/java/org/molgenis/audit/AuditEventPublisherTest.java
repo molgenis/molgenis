@@ -23,8 +23,7 @@ class AuditEventPublisherTest extends AbstractMockitoTest {
 
   @BeforeEach
   void beforeEach() {
-    auditEventPublisher = new AuditEventPublisher();
-    auditEventPublisher.setApplicationEventPublisher(applicationEventPublisher);
+    auditEventPublisher = new AuditEventPublisher(applicationEventPublisher);
   }
 
   @Test
@@ -34,6 +33,17 @@ class AuditEventPublisherTest extends AbstractMockitoTest {
     verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture());
     AuditEvent auditEvent = eventCaptor.getValue().getAuditEvent();
     assertEquals("henk", auditEvent.getPrincipal());
+    assertEquals("AUTHENTICATION_SUCCESS", auditEvent.getType());
+    assertEquals(emptyMap(), auditEvent.getData());
+  }
+
+  @Test
+  void testPublishNullPrincipal() {
+    auditEventPublisher.publish(null, "AUTHENTICATION_SUCCESS", emptyMap());
+
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture());
+    AuditEvent auditEvent = eventCaptor.getValue().getAuditEvent();
+    assertEquals("<unknown>", auditEvent.getPrincipal());
     assertEquals("AUTHENTICATION_SUCCESS", auditEvent.getType());
     assertEquals(emptyMap(), auditEvent.getData());
   }

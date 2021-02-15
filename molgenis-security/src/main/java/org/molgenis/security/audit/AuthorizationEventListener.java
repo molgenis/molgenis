@@ -7,10 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.molgenis.audit.AuditEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.access.event.AbstractAuthorizationEvent;
 import org.springframework.security.access.event.AuthenticationCredentialsNotFoundEvent;
 import org.springframework.security.access.event.AuthorizationFailureEvent;
 import org.springframework.stereotype.Component;
 
+/**
+ * Catches some of Spring's {@link AbstractAuthorizationEvent}s and publishes them as audit events.
+ */
 @Component
 public class AuthorizationEventListener {
 
@@ -28,7 +32,7 @@ public class AuthorizationEventListener {
     Map<String, Object> data = new HashMap<>();
     data.put("type", event.getCredentialsNotFoundException().getClass().getName());
     data.put("message", event.getCredentialsNotFoundException().getMessage());
-    auditEventPublisher.publish("<unknown>", AUTHENTICATION_FAILURE, data);
+    auditEventPublisher.publish(null, AUTHENTICATION_FAILURE, data);
   }
 
   @EventListener

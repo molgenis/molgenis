@@ -15,7 +15,7 @@ public abstract class AuditEvent {
 
   public abstract Map<String, Object> getData();
 
-  public static AuditEvent create(
+  static AuditEvent create(
       Instant timestamp, String principal, String type, Map<String, Object> data) {
     return new AutoValue_AuditEvent(timestamp, principal, type, data);
   }

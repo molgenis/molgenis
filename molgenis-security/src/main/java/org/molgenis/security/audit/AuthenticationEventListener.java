@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.molgenis.audit.AuditEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.event.AbstractAuthenticationEvent;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.authentication.event.LogoutSuccessEvent;
@@ -13,6 +14,9 @@ import org.springframework.security.web.authentication.session.SessionFixationPr
 import org.springframework.security.web.authentication.switchuser.AuthenticationSwitchUserEvent;
 import org.springframework.stereotype.Component;
 
+/**
+ * Catches some of Spring's {@link AbstractAuthenticationEvent}s and publishes them as audit events.
+ */
 @Component
 public class AuthenticationEventListener {
 
