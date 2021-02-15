@@ -85,6 +85,11 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-audit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api</artifactId>
       <version>${project.version}</version>
     </dependency>

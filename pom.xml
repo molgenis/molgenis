@@ -1000,6 +1000,7 @@
     <module>molgenis-api-tests</module>
     <module>molgenis-app</module>
     <module>molgenis-app-manager</module>
+    <module>molgenis-audit</module>
     <module>molgenis-bootstrap</module>
     <module>molgenis-core-ui</module>
     <module>molgenis-core</module>
