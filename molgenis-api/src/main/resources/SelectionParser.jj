@@ -22,11 +22,12 @@ TOKEN: {
 	| <#LETTER: ["a"-"z","A"-"Z"]>
   |	<#DIGIT: ["0"-"9"]>
   |	<UNDERSCORE: "_">
+  | <DASH: "-">
   |	<HASH: "#">
 }
 
 TOKEN: {
-		<IDENTIFIER: (<LETTER> | <DIGIT> | <UNDERSCORE> | <HASH>)+>
+		<IDENTIFIER: (<LETTER> | <DIGIT> | <UNDERSCORE> | <DASH> | <HASH>)+>
 }
 
 Selection parse() : {
