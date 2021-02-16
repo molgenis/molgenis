@@ -2,6 +2,7 @@ package org.molgenis.data.platform.decorators;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.CascadeDeleteRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -26,6 +27,7 @@ import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
+import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.data.security.owned.RowLevelSecurityRepositoryDecoratorFactory;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
@@ -64,6 +66,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
   private final RowLevelSecurityRepositoryDecoratorFactory
       rowLevelSecurityRepositoryDecoratorFactory;
   private final L1CacheJanitor l1CacheJanitor;
+  private final AuditEventPublisher auditEventPublisher;
 
   public MolgenisRepositoryDecoratorFactory(
       EntityManager entityManager,
@@ -86,7 +89,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       DefaultValueReferenceValidator defaultValueReferenceValidator,
       UserPermissionEvaluator permissionService,
       RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory,
-      L1CacheJanitor l1CacheJanitor) {
+      L1CacheJanitor l1CacheJanitor,
+      AuditEventPublisher auditEventPublisher) {
 
     this.entityManager = requireNonNull(entityManager);
     this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -110,49 +114,50 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     this.rowLevelSecurityRepositoryDecoratorFactory =
         requireNonNull(rowLevelSecurityRepositoryDecoratorFactory);
     this.l1CacheJanitor = requireNonNull(l1CacheJanitor);
+    this.auditEventPublisher = requireNonNull(auditEventPublisher);
   }
 
   @Override
   public Repository<Entity> createDecoratedRepository(Repository<Entity> repository) {
     Repository<Entity> decoratedRepository = repository;
 
-    // 15. Query the L2 cache before querying the database
+    // 16. Query the L2 cache before querying the database
     decoratedRepository =
         new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-    // 14. Query the L1 cache before querying the database
+    // 15. Query the L1 cache before querying the database
     decoratedRepository =
         new L1CacheRepositoryDecorator(decoratedRepository, l1Cache, l1CacheJanitor);
 
-    // 13. Route specific queries to the index
+    // 14. Route specific queries to the index
     decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
 
-    // 12. Query the L3 cache before querying the index
+    // 13. Query the L3 cache before querying the index
     decoratedRepository =
         new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-    // 11. Register the cud action needed to index indexed repositories
+    // 12. Register the cud action needed to index indexed repositories
     decoratedRepository =
         new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
 
-    // 10. Custom decorators for system entity types
+    // 11. Custom decorators for system entity types
     decoratedRepository = systemRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
-    // 9. Perform cascading deletes
+    // 10. Perform cascading deletes
     decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
 
-    // 8. Row level security decorator
+    // 9. Row level security decorator
     decoratedRepository =
         rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(decoratedRepository);
 
-    // 7. Entity reference resolver decorator
+    // 8. Entity reference resolver decorator
     decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
-    // 6. Entity listener
+    // 7. Entity listener
     decoratedRepository =
         new EntityListenerRepositoryDecorator(decoratedRepository, entityListenersService);
 
-    // 5. validation decorator
+    // 6. validation decorator
     decoratedRepository =
         new RepositoryValidationDecorator(
             dataService,
@@ -160,22 +165,25 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
             entityAttributesValidator,
             defaultValueReferenceValidator);
 
-    // 4. aggregate anonymization decorator
+    // 5. aggregate anonymization decorator
     decoratedRepository =
         new AggregateAnonymizerRepositoryDecorator<>(
             decoratedRepository, aggregateAnonymizer, appSettings);
 
-    // 3. security decorator
+    // 4. security decorator
     decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, permissionService);
 
-    // 2. transaction decorator
+    // 3. transaction decorator
     decoratedRepository =
         new TransactionalRepositoryDecorator<>(decoratedRepository, transactionManager);
 
-    // 1. query validation decorator
+    // 2. query validation decorator
     decoratedRepository =
         new QueryValidationRepositoryDecorator<>(
             decoratedRepository, queryValidator, fetchValidator);
+
+    // 1. Data auditing decorator
+    decoratedRepository = new AuditingRepositoryDecorator(decoratedRepository, auditEventPublisher);
 
     // 0. Dynamic decorators
     decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
