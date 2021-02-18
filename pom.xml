@@ -86,7 +86,7 @@
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.3</elasticsearch.version>
-    <guava.version>25.0-jre</guava.version>
+    <guava.version>30.1-jre</guava.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
     <!-- Java 11 support -->
