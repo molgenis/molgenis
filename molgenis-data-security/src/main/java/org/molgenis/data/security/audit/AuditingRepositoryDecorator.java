@@ -34,7 +34,6 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   private static final String ENTITIES_AGGREGATED = "ENTITIES_AGGREGATED";
   private static final String ALL_ENTITIES_DELETED = "ALL_ENTITIES_DELETED";
 
-
   private final AuditEventPublisher auditEventPublisher;
 
   public AuditingRepositoryDecorator(
@@ -44,8 +43,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   }
 
   @Override
-  public @Nonnull
-  Iterator<Entity> iterator() {
+  public @Nonnull Iterator<Entity> iterator() {
     if (isUser()) {
       return new AuditingIterator(delegate().iterator());
     } else {
@@ -56,15 +54,18 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize) {
     if (isUser()) {
-      delegate().forEachBatched(fetch, entities -> {
-        consumer.accept(entities);
-        var ids = entities.stream().map(Entity::getIdValue).collect(toList());
-        audit(ENTITIES_READ, "entities", ids);
-      }, batchSize);
-    }else {
+      delegate()
+          .forEachBatched(
+              fetch,
+              entities -> {
+                consumer.accept(entities);
+                var ids = entities.stream().map(Entity::getIdValue).collect(toList());
+                audit(ENTITIES_READ, "entities", ids);
+              },
+              batchSize);
+    } else {
       delegate().forEachBatched(fetch, consumer, batchSize);
     }
-
   }
 
   @Override
@@ -90,10 +91,13 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Stream<Entity> findAll(Query<Entity> q) {
     if (isUser() && isNonSystemEntityType()) {
-      return delegate().findAll(q).filter(entity -> {
-        audit(ENTITY_READ, "entity", entity.getIdValue());
-        return true;
-      });
+      return delegate()
+          .findAll(q)
+          .filter(
+              entity -> {
+                audit(ENTITY_READ, "entity", entity.getIdValue());
+                return true;
+              });
     } else {
       return delegate().findAll(q);
     }
@@ -138,10 +142,13 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
     if (isUser() && isNonSystemEntityType()) {
-      return delegate().findAll(ids).filter(entity -> {
-        audit(ENTITY_READ, "entity", entity.getIdValue());
-        return true;
-      });
+      return delegate()
+          .findAll(ids)
+          .filter(
+              entity -> {
+                audit(ENTITY_READ, "entity", entity.getIdValue());
+                return true;
+              });
     } else {
       return delegate().findAll(ids);
     }
@@ -150,10 +157,13 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
     if (isUser() && isNonSystemEntityType()) {
-      return delegate().findAll(ids, fetch).filter(entity -> {
-        audit(ENTITY_READ, "entity", entity.getIdValue());
-        return true;
-      });
+      return delegate()
+          .findAll(ids, fetch)
+          .filter(
+              entity -> {
+                audit(ENTITY_READ, "entity", entity.getIdValue());
+                return true;
+              });
     } else {
       return delegate().findAll(ids, fetch);
     }
@@ -180,12 +190,14 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Integer add(Stream<Entity> entities) {
     if (isUser()) {
-      var entityStream = entities.filter(entity -> {
-        audit(ENTITY_CREATED, "entity", entity.getIdValue());
-        return true;
-      });
+      var entityStream =
+          entities.filter(
+              entity -> {
+                audit(ENTITY_CREATED, "entity", entity.getIdValue());
+                return true;
+              });
       return delegate().add(entityStream);
-    }else {
+    } else {
       return delegate().add(entities);
     }
   }
@@ -202,10 +214,12 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public void update(Stream<Entity> entities) {
     if (isUser()) {
-      var entityStream = entities.filter(entity -> {
-        audit(ENTITY_UPDATED, "entity", entity.getIdValue());
-        return true;
-      });
+      var entityStream =
+          entities.filter(
+              entity -> {
+                audit(ENTITY_UPDATED, "entity", entity.getIdValue());
+                return true;
+              });
 
       delegate().update(entityStream);
     } else {
@@ -225,10 +239,12 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public void delete(Stream<Entity> entities) {
     if (isUser()) {
-      var entityStream = entities.filter(entity -> {
-        audit(ENTITY_DELETED, "entity", entity.getIdValue());
-        return true;
-      });
+      var entityStream =
+          entities.filter(
+              entity -> {
+                audit(ENTITY_DELETED, "entity", entity.getIdValue());
+                return true;
+              });
 
       delegate().delete(entityStream);
     } else {
@@ -275,8 +291,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     return SecurityContextHolder.getContext().getAuthentication().getName();
   }
 
-  private boolean isNonSystemEntityType()
-  {
+  private boolean isNonSystemEntityType() {
     return !EntityTypeUtils.isSystemEntity(delegate().getEntityType());
   }
 
