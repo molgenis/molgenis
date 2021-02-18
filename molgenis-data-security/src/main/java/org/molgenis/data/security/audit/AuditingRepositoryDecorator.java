@@ -37,6 +37,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   static final String ENTITIES_COUNTED = "ENTITIES_COUNTED";
   static final String ENTITIES_AGGREGATED = "ENTITIES_AGGREGATED";
   static final String ALL_ENTITIES_DELETED = "ALL_ENTITIES_DELETED";
+  private static final String ENTITY_TYPE_ID = "entityTypeId";
   private static final String ENTITY_ID = "entityId";
   private static final String ENTITY_IDS = "entityIds";
 
@@ -289,7 +290,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   private Map<String, Object> createDataMap() {
     var data = new HashMap<String, Object>();
-    data.put("entityTypeId", delegate().getEntityType().getId());
+    data.put(ENTITY_TYPE_ID, delegate().getEntityType().getId());
     getTransactionId().ifPresent(transactionId -> data.put(TRANSACTION_ID, transactionId));
     return data;
   }
