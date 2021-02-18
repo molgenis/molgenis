@@ -37,6 +37,8 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   static final String ENTITIES_COUNTED = "ENTITIES_COUNTED";
   static final String ENTITIES_AGGREGATED = "ENTITIES_AGGREGATED";
   static final String ALL_ENTITIES_DELETED = "ALL_ENTITIES_DELETED";
+  private static final String ENTITY_ID = "entityId";
+  private static final String ENTITY_IDS = "entityIds";
 
   private final AuditEventPublisher auditEventPublisher;
 
@@ -64,7 +66,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
               entities -> {
                 consumer.accept(entities);
                 var ids = entities.stream().map(Entity::getIdValue).collect(toList());
-                audit(ENTITIES_READ, "entities", ids);
+                audit(ENTITIES_READ, ENTITY_IDS, ids);
               },
               batchSize);
     } else {
@@ -99,7 +101,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
           .findAll(q)
           .filter(
               entity -> {
-                audit(ENTITY_READ, "entity", entity.getIdValue());
+                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
                 return true;
               });
     } else {
@@ -111,7 +113,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public Entity findOne(Query<Entity> q) {
     Entity entity = delegate().findOne(q);
     if (entity != null && isUser() && isNonSystemEntityType()) {
-      audit(ENTITY_READ, "entity", entity.getIdValue());
+      audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
   }
@@ -129,7 +131,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public Entity findOneById(Object id) {
     Entity entity = delegate().findOneById(id);
     if (entity != null && isUser() && isNonSystemEntityType()) {
-      audit(ENTITY_READ, "entity", entity.getIdValue());
+      audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
   }
@@ -138,7 +140,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public Entity findOneById(Object id, Fetch fetch) {
     Entity entity = delegate().findOneById(id, fetch);
     if (entity != null && isUser() && isNonSystemEntityType()) {
-      audit(ENTITY_READ, "entity", entity.getIdValue());
+      audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
   }
@@ -150,7 +152,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
           .findAll(ids)
           .filter(
               entity -> {
-                audit(ENTITY_READ, "entity", entity.getIdValue());
+                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
                 return true;
               });
     } else {
@@ -165,7 +167,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
           .findAll(ids, fetch)
           .filter(
               entity -> {
-                audit(ENTITY_READ, "entity", entity.getIdValue());
+                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
                 return true;
               });
     } else {
@@ -187,7 +189,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     delegate().add(entity);
 
     if (isUser()) {
-      audit(ENTITY_CREATED, "entity", entity.getIdValue());
+      audit(ENTITY_CREATED, ENTITY_ID, entity.getIdValue());
     }
   }
 
@@ -197,7 +199,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
       var entityStream =
           entities.filter(
               entity -> {
-                audit(ENTITY_CREATED, "entity", entity.getIdValue());
+                audit(ENTITY_CREATED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
       return delegate().add(entityStream);
@@ -211,7 +213,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     delegate().update(entity);
 
     if (isUser()) {
-      audit(ENTITY_UPDATED, "entity", entity.getIdValue());
+      audit(ENTITY_UPDATED, ENTITY_ID, entity.getIdValue());
     }
   }
 
@@ -221,7 +223,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
       var entityStream =
           entities.filter(
               entity -> {
-                audit(ENTITY_UPDATED, "entity", entity.getIdValue());
+                audit(ENTITY_UPDATED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
 
@@ -236,7 +238,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     delegate().delete(entity);
 
     if (isUser()) {
-      audit(ENTITY_DELETED, "entity", entity.getIdValue());
+      audit(ENTITY_DELETED, ENTITY_ID, entity.getIdValue());
     }
   }
 
@@ -246,7 +248,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
       var entityStream =
           entities.filter(
               entity -> {
-                audit(ENTITY_DELETED, "entity", entity.getIdValue());
+                audit(ENTITY_DELETED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
 
@@ -270,7 +272,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     delegate().deleteById(id);
 
     if (isUser()) {
-      audit(ENTITY_DELETED, "entity", id);
+      audit(ENTITY_DELETED, ENTITY_ID, id);
     }
   }
 
@@ -317,7 +319,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     @Override
     public Entity next() {
       var entity = super.next();
-      audit(ENTITY_READ, "entity", entity.getIdValue());
+      audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
       return entity;
     }
   }
