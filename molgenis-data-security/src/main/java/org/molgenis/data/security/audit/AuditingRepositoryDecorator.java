@@ -2,6 +2,9 @@ package org.molgenis.data.security.audit;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.security.audit.AuditTransactionListener.TRANSACTION_ID;
+import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
+import static org.molgenis.data.security.audit.AuthenticationUtils.isUser;
 import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 
 import com.google.common.collect.ForwardingIterator;
@@ -22,8 +25,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
@@ -287,7 +288,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   private Map<String, Object> createDataMap() {
     var data = new HashMap<String, Object>();
     data.put("entityTypeId", delegate().getEntityType().getId());
-    getTransactionId().ifPresent(transactionId -> data.put("transactionId", transactionId));
+    getTransactionId().ifPresent(transactionId -> data.put(TRANSACTION_ID, transactionId));
     return data;
   }
 
@@ -296,17 +297,8 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
         (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME));
   }
 
-  private static String getUsername() {
-    return SecurityContextHolder.getContext().getAuthentication().getName();
-  }
-
   private boolean isNonSystemEntityType() {
     return !EntityTypeUtils.isSystemEntity(delegate().getEntityType());
-  }
-
-  private static boolean isUser() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    return principal instanceof UserDetails;
   }
 
   class AuditingIterator extends ForwardingIterator<Entity> {
