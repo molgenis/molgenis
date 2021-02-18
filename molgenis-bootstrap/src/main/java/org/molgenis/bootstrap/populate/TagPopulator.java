@@ -43,6 +43,8 @@ public class TagPopulator {
     audited.setRelationIri(isAssociatedWith.getIRI());
     audited.setRelationLabel(isAssociatedWith.getIRI());
 
-    dataService.getRepository(TAG, Tag.class).upsertBatch(List.of(isAToken, isCaseSensitive));
+    dataService
+        .getRepository(TAG, Tag.class)
+        .upsertBatch(List.of(isAToken, isCaseSensitive, audited));
   }
 }

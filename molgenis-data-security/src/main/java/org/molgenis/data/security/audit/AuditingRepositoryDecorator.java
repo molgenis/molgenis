@@ -25,14 +25,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
-  private static final String ENTITY_READ = "ENTITY_READ";
-  private static final String ENTITY_CREATED = "ENTITY_CREATED";
-  private static final String ENTITY_UPDATED = "ENTITY_UPDATED";
-  private static final String ENTITY_DELETED = "ENTITY_DELETED";
-  private static final String ENTITIES_READ = "ENTITIES_READ";
-  private static final String ENTITIES_COUNTED = "ENTITIES_COUNTED";
-  private static final String ENTITIES_AGGREGATED = "ENTITIES_AGGREGATED";
-  private static final String ALL_ENTITIES_DELETED = "ALL_ENTITIES_DELETED";
+  static final String ENTITY_READ = "ENTITY_READ";
+  static final String ENTITY_CREATED = "ENTITY_CREATED";
+  static final String ENTITY_UPDATED = "ENTITY_UPDATED";
+  static final String ENTITY_DELETED = "ENTITY_DELETED";
+  static final String ENTITIES_READ = "ENTITIES_READ";
+  static final String ENTITIES_COUNTED = "ENTITIES_COUNTED";
+  static final String ENTITIES_AGGREGATED = "ENTITIES_AGGREGATED";
+  static final String ALL_ENTITIES_DELETED = "ALL_ENTITIES_DELETED";
 
   private final AuditEventPublisher auditEventPublisher;
 

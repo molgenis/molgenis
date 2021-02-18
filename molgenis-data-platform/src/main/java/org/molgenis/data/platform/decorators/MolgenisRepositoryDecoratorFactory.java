@@ -189,8 +189,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
     // 1. Data auditing decorator
     if (isAuditedEntityType(decoratedRepository.getEntityType())) {
-      decoratedRepository = new AuditingRepositoryDecorator(decoratedRepository,
-          auditEventPublisher);
+      decoratedRepository =
+          new AuditingRepositoryDecorator(decoratedRepository, auditEventPublisher);
     }
 
     // 0. Dynamic decorators
@@ -199,9 +199,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     return decoratedRepository;
   }
 
-  private boolean isAuditedEntityType(EntityType entityType) {
+  private static boolean isAuditedEntityType(EntityType entityType) {
     return isSystemEntity(entityType)
         || stream(entityType.getTags())
-        .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
+            .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
   }
 }
