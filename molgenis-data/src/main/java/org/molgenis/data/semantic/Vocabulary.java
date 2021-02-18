@@ -9,4 +9,7 @@ public class Vocabulary {
   /** http://purl.obolibrary.org/obo/NCIT_C71490 */
   public static final IRI CASE_SENSITIVE =
       SimpleValueFactory.getInstance().createIRI("http://purl.obolibrary.org/obo/NCIT_C71490");
+
+  public static final IRI AUDITED =
+      SimpleValueFactory.getInstance().createIRI("http://molgenis.org/vocab/audit/audited");
 }

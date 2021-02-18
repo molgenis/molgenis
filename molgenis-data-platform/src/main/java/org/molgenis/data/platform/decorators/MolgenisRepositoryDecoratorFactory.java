@@ -1,6 +1,9 @@
 package org.molgenis.data.platform.decorators;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.semantic.Vocabulary.AUDITED;
+import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
 
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.CascadeDeleteRepositoryDecorator;
@@ -24,6 +27,7 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
@@ -44,6 +48,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory {
+
   private final EntityManager entityManager;
   private final EntityAttributesValidator entityAttributesValidator;
   private final AggregateAnonymizer aggregateAnonymizer;
@@ -183,11 +188,20 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
             decoratedRepository, queryValidator, fetchValidator);
 
     // 1. Data auditing decorator
-    decoratedRepository = new AuditingRepositoryDecorator(decoratedRepository, auditEventPublisher);
+    if (isAuditedEntityType(decoratedRepository.getEntityType())) {
+      decoratedRepository = new AuditingRepositoryDecorator(decoratedRepository,
+          auditEventPublisher);
+    }
 
     // 0. Dynamic decorators
     decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
     return decoratedRepository;
+  }
+
+  private boolean isAuditedEntityType(EntityType entityType) {
+    return isSystemEntity(entityType)
+        || stream(entityType.getTags())
+        .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
   }
 }
