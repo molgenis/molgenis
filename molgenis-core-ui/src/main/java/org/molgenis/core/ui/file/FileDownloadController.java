@@ -60,7 +60,8 @@ public class FileDownloadController {
       }
 
       response.setHeader(
-          "Content-Disposition", "attachment; filename=" + outputFilename.replace(" ", "_"));
+          "Content-Disposition",
+          "attachment; filename=\"" + outputFilename.replace(" ", "_") + "\"");
 
       try (InputStream is = new FileInputStream(fileStoreFile)) {
         FileCopyUtils.copy(is, response.getOutputStream());
