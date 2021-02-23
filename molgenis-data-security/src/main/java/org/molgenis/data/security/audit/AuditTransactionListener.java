@@ -2,7 +2,7 @@ package org.molgenis.data.security.audit;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
-import static org.molgenis.data.security.audit.AuthenticationUtils.isUser;
+import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
 
 import java.util.Map;
 import org.molgenis.audit.AuditEventPublisher;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 public class AuditTransactionListener implements TransactionListener {
 
   static final String TRANSACTION_FAILURE = "TRANSACTION_FAILURE";
-  static final String TRANSACTION_SUCCESS = "TRANSACTION_SUCCESS";
   static final String TRANSACTION_ID = "transactionId";
 
   private final AuditEventPublisher auditEventPublisher;
@@ -27,17 +26,9 @@ public class AuditTransactionListener implements TransactionListener {
 
   @Override
   public void rollbackTransaction(String transactionId) {
-    if (isUser()) {
+    if (isRunByUser()) {
       auditEventPublisher.publish(
           getUsername(), TRANSACTION_FAILURE, Map.of(TRANSACTION_ID, transactionId));
-    }
-  }
-
-  @Override
-  public void afterCommitTransaction(String transactionId) {
-    if (isUser()) {
-      auditEventPublisher.publish(
-          getUsername(), TRANSACTION_SUCCESS, Map.of(TRANSACTION_ID, transactionId));
     }
   }
 }

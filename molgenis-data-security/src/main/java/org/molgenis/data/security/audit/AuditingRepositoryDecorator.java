@@ -4,7 +4,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.audit.AuditTransactionListener.TRANSACTION_ID;
 import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
-import static org.molgenis.data.security.audit.AuthenticationUtils.isUser;
+import static org.molgenis.data.security.audit.AuthenticationUtils.isRunAsSystem;
+import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
 import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 
 import com.google.common.collect.ForwardingIterator;
@@ -40,6 +41,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   private static final String ENTITY_TYPE_ID = "entityTypeId";
   private static final String ENTITY_ID = "entityId";
   private static final String ENTITY_IDS = "entityIds";
+  private static final String RUN_AS = "runAs";
 
   private final AuditEventPublisher auditEventPublisher;
 
@@ -51,7 +53,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public @Nonnull Iterator<Entity> iterator() {
-    if (isUser()) {
+    if (isRunByUser()) {
       return new AuditingIterator(delegate().iterator());
     } else {
       return delegate().iterator();
@@ -60,7 +62,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize) {
-    if (isUser()) {
+    if (isRunByUser()) {
       delegate()
           .forEachBatched(
               fetch,
@@ -79,7 +81,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public long count() {
     long count = delegate().count();
 
-    if (isUser() && isNonSystemEntityType()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITIES_COUNTED);
     }
     return count;
@@ -89,7 +91,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public long count(Query<Entity> q) {
     long count = delegate().count(q);
 
-    if (isUser() && isNonSystemEntityType()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITIES_COUNTED);
     }
     return count;
@@ -97,7 +99,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public Stream<Entity> findAll(Query<Entity> q) {
-    if (isUser() && isNonSystemEntityType()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       return delegate()
           .findAll(q)
           .filter(
@@ -113,7 +115,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Entity findOne(Query<Entity> q) {
     Entity entity = delegate().findOne(q);
-    if (entity != null && isUser() && isNonSystemEntityType()) {
+    if (entity != null && isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
@@ -122,7 +124,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public AggregateResult aggregate(AggregateQuery aggregateQuery) {
     var aggregate = delegate().aggregate(aggregateQuery);
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ENTITIES_AGGREGATED);
     }
     return aggregate;
@@ -131,7 +133,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Entity findOneById(Object id) {
     Entity entity = delegate().findOneById(id);
-    if (entity != null && isUser() && isNonSystemEntityType()) {
+    if (entity != null && isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
@@ -140,7 +142,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Entity findOneById(Object id, Fetch fetch) {
     Entity entity = delegate().findOneById(id, fetch);
-    if (entity != null && isUser() && isNonSystemEntityType()) {
+    if (entity != null && isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
     }
     return entity;
@@ -148,7 +150,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
-    if (isUser() && isNonSystemEntityType()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       return delegate()
           .findAll(ids)
           .filter(
@@ -163,7 +165,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
-    if (isUser() && isNonSystemEntityType()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       return delegate()
           .findAll(ids, fetch)
           .filter(
@@ -180,7 +182,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void deleteAll() {
     delegate().deleteAll();
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ALL_ENTITIES_DELETED);
     }
   }
@@ -189,14 +191,14 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void add(Entity entity) {
     delegate().add(entity);
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ENTITY_CREATED, ENTITY_ID, entity.getIdValue());
     }
   }
 
   @Override
   public Integer add(Stream<Entity> entities) {
-    if (isUser()) {
+    if (isRunByUser()) {
       var entityStream =
           entities.filter(
               entity -> {
@@ -213,14 +215,14 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void update(Entity entity) {
     delegate().update(entity);
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ENTITY_UPDATED, ENTITY_ID, entity.getIdValue());
     }
   }
 
   @Override
   public void update(Stream<Entity> entities) {
-    if (isUser()) {
+    if (isRunByUser()) {
       var entityStream =
           entities.filter(
               entity -> {
@@ -238,14 +240,14 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void delete(Entity entity) {
     delegate().delete(entity);
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ENTITY_DELETED, ENTITY_ID, entity.getIdValue());
     }
   }
 
   @Override
   public void delete(Stream<Entity> entities) {
-    if (isUser()) {
+    if (isRunByUser()) {
       var entityStream =
           entities.filter(
               entity -> {
@@ -263,7 +265,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void deleteAll(Stream<Object> ids) {
     delegate().deleteAll(ids);
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ALL_ENTITIES_DELETED);
     }
   }
@@ -272,7 +274,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   public void deleteById(Object id) {
     delegate().deleteById(id);
 
-    if (isUser()) {
+    if (isRunByUser()) {
       audit(ENTITY_DELETED, ENTITY_ID, id);
     }
   }
@@ -290,8 +292,13 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   private Map<String, Object> createDataMap() {
     var data = new HashMap<String, Object>();
+
     data.put(ENTITY_TYPE_ID, delegate().getEntityType().getId());
+    if (isRunAsSystem()) {
+      data.put(RUN_AS, "SYSTEM");
+    }
     getTransactionId().ifPresent(transactionId -> data.put(TRANSACTION_ID, transactionId));
+
     return data;
   }
 
