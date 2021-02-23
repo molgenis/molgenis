@@ -2,9 +2,13 @@ package org.molgenis.data.platform.decorators;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.semantic.Vocabulary.AUDITED;
 import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
 
+import com.google.common.collect.ImmutableSet;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.CascadeDeleteRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -200,8 +204,15 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
   }
 
   private static boolean isAuditedEntityType(EntityType entityType) {
-    return isSystemEntity(entityType)
+    return isAuditedSystemEntityType(entityType)
         || stream(entityType.getTags())
             .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
+  }
+
+  private static final ImmutableSet<String> auditExclusions =
+      ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP);
+
+  private static boolean isAuditedSystemEntityType(EntityType entityType) {
+    return isSystemEntity(entityType) && !auditExclusions.contains(entityType.getId());
   }
 }
