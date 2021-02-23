@@ -20,7 +20,7 @@
                 </div>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="entity-class-role-permission-table">
+                        <table class="table table-bordered" id="entity-class-role-permission-table">
                             <thead>
                             <tr>
                                 <th>Entity Class</th>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="entity-class-user-permission-table">
+                        <table class="table table-bordered" id="entity-class-user-permission-table">
                             <thead>
                             <tr>
                                 <th>Entity Class</th>

@@ -20,7 +20,7 @@
                 </div>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="plugin-role-permission-table">
+                        <table class="table table-bordered" id="plugin-role-permission-table">
                             <thead>
                             <tr>
                                 <th>Plugin</th>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="plugin-user-permission-table">
+                        <table class="table table-bordered" id="plugin-user-permission-table">
                             <thead>
                             <tr>
                                 <th>Plugin</th>

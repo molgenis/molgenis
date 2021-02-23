@@ -23,7 +23,7 @@
                 They do <b>not</b> effect permissions on the package metadata itself.<br/>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="package-role-permission-table">
+                        <table class="table table-bordered" id="package-role-permission-table">
                             <thead>
                             <tr>
                                 <th>Package</th>
@@ -63,7 +63,7 @@
                 They do <b>not</b> effect permissions on the package metadata itself.<br/></span>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="package-user-permission-table">
+                        <table class="table table-bordered" id="package-user-permission-table">
                             <thead>
                             <tr>
                                 <th>Package</th>

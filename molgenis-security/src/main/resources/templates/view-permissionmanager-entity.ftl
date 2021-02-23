@@ -1,6 +1,6 @@
 <div class="well">
     <div class="permission-table-container">
-        <table class="table table-condensed table-borderless" id="entity-type-rls-table">
+        <table class="table table-bordered" id="entity-type-rls-table">
             <thead>
             <tr>
                 <th>Entity Class</th>
