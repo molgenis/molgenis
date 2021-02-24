@@ -45,8 +45,10 @@ import org.molgenis.data.validation.FetchValidator;
 import org.molgenis.data.validation.QueryValidationRepositoryDecorator;
 import org.molgenis.data.validation.QueryValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.security.audit.AuditSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -76,6 +78,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       rowLevelSecurityRepositoryDecoratorFactory;
   private final L1CacheJanitor l1CacheJanitor;
   private final AuditEventPublisher auditEventPublisher;
+  private final AuditSettings auditSettings;
 
   public MolgenisRepositoryDecoratorFactory(
       EntityManager entityManager,
@@ -99,7 +102,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       UserPermissionEvaluator permissionService,
       RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory,
       L1CacheJanitor l1CacheJanitor,
-      AuditEventPublisher auditEventPublisher) {
+      AuditEventPublisher auditEventPublisher,
+      AuditSettings auditSettings) {
 
     this.entityManager = requireNonNull(entityManager);
     this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -124,6 +128,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
         requireNonNull(rowLevelSecurityRepositoryDecoratorFactory);
     this.l1CacheJanitor = requireNonNull(l1CacheJanitor);
     this.auditEventPublisher = requireNonNull(auditEventPublisher);
+    this.auditSettings = requireNonNull(auditSettings);
   }
 
   @Override
@@ -203,16 +208,31 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     return decoratedRepository;
   }
 
-  private static boolean isAuditedEntityType(EntityType entityType) {
+  private boolean isAuditedEntityType(EntityType entityType) {
     return isAuditedSystemEntityType(entityType)
-        || stream(entityType.getTags())
-            .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
+        || isAuditedDataEntityType(entityType);
   }
 
   private static final ImmutableSet<String> auditExclusions =
       ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP);
 
-  private static boolean isAuditedSystemEntityType(EntityType entityType) {
-    return isSystemEntity(entityType) && !auditExclusions.contains(entityType.getId());
+  private boolean isAuditedDataEntityType(EntityType entityType) {
+    switch (auditSettings.getDataAuditSetting()) {
+      case NONE:
+        return false;
+      case SOME:
+        return stream(entityType.getTags())
+            .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
+      case ALL:
+        return true;
+      default:
+        throw new UnexpectedEnumException(auditSettings.getDataAuditSetting());
+    }
+  }
+
+  private boolean isAuditedSystemEntityType(EntityType entityType) {
+    return auditSettings.getSystemAuditEnabled()
+        && isSystemEntity(entityType)
+        && !auditExclusions.contains(entityType.getId());
   }
 }
