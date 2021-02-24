@@ -2,13 +2,7 @@ package org.molgenis.data.platform.decorators;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
-import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
-import static org.molgenis.data.semantic.Vocabulary.AUDITED;
-import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
 
-import com.google.common.collect.ImmutableSet;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.CascadeDeleteRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -31,11 +25,9 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
-import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.data.security.owned.RowLevelSecurityRepositoryDecoratorFactory;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
@@ -48,7 +40,6 @@ import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.audit.AuditSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -77,8 +68,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
   private final RowLevelSecurityRepositoryDecoratorFactory
       rowLevelSecurityRepositoryDecoratorFactory;
   private final L1CacheJanitor l1CacheJanitor;
-  private final AuditEventPublisher auditEventPublisher;
-  private final AuditSettings auditSettings;
+  private final AuditingRepositoryDecoratorFactory auditingRepositoryDecoratorFactory;
 
   public MolgenisRepositoryDecoratorFactory(
       EntityManager entityManager,
@@ -102,8 +92,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       UserPermissionEvaluator permissionService,
       RowLevelSecurityRepositoryDecoratorFactory rowLevelSecurityRepositoryDecoratorFactory,
       L1CacheJanitor l1CacheJanitor,
-      AuditEventPublisher auditEventPublisher,
-      AuditSettings auditSettings) {
+      AuditingRepositoryDecoratorFactory auditingRepositoryDecoratorFactory) {
 
     this.entityManager = requireNonNull(entityManager);
     this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -127,8 +116,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
     this.rowLevelSecurityRepositoryDecoratorFactory =
         requireNonNull(rowLevelSecurityRepositoryDecoratorFactory);
     this.l1CacheJanitor = requireNonNull(l1CacheJanitor);
-    this.auditEventPublisher = requireNonNull(auditEventPublisher);
-    this.auditSettings = requireNonNull(auditSettings);
+    this.auditingRepositoryDecoratorFactory = requireNonNull(auditingRepositoryDecoratorFactory);
   }
 
   @Override
@@ -197,42 +185,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
             decoratedRepository, queryValidator, fetchValidator);
 
     // 1. Data auditing decorator
-    if (isAuditedEntityType(decoratedRepository.getEntityType())) {
-      decoratedRepository =
-          new AuditingRepositoryDecorator(decoratedRepository, auditEventPublisher);
-    }
+    decoratedRepository = auditingRepositoryDecoratorFactory.create(decoratedRepository);
 
     // 0. Dynamic decorators
     decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
     return decoratedRepository;
-  }
-
-  private boolean isAuditedEntityType(EntityType entityType) {
-    return isAuditedSystemEntityType(entityType)
-        || isAuditedDataEntityType(entityType);
-  }
-
-  private static final ImmutableSet<String> auditExclusions =
-      ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP);
-
-  private boolean isAuditedDataEntityType(EntityType entityType) {
-    switch (auditSettings.getDataAuditSetting()) {
-      case NONE:
-        return false;
-      case SOME:
-        return stream(entityType.getTags())
-            .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
-      case ALL:
-        return true;
-      default:
-        throw new UnexpectedEnumException(auditSettings.getDataAuditSetting());
-    }
-  }
-
-  private boolean isAuditedSystemEntityType(EntityType entityType) {
-    return auditSettings.getSystemAuditEnabled()
-        && isSystemEntity(entityType)
-        && !auditExclusions.contains(entityType.getId());
   }
 }
