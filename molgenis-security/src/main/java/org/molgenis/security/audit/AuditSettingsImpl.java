@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class AuditSettingsImpl extends DefaultSettingsEntity
     implements AuditSettings {
 
-  private static final String ID = "aud";
+  public static final String ID = "aud";
 
   public AuditSettingsImpl() {
     super(ID);
