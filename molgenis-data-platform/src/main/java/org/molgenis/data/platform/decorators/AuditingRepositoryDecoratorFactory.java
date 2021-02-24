@@ -5,10 +5,9 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.semantic.Vocabulary.AUDITED;
 import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
-import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.security.audit.AuditSettingsImpl.AUDIT_SETTINGS;
 
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.audit.AuditEventPublisher;
@@ -17,23 +16,20 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.security.audit.AuditSettings;
-import org.molgenis.security.audit.AuditSettingsImpl;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AuditingRepositoryDecoratorFactory {
 
-  private static final String AUDIT_SETTINGS =
-      PACKAGE_SETTINGS + PACKAGE_SEPARATOR + AuditSettingsImpl.ID;
   private static final ImmutableSet<String> SYSTEM_AUDIT_EXCLUSIONS =
-      ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP);
+      ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP, AUDIT_SETTINGS);
 
   private final AuditEventPublisher auditEventPublisher;
   private final AuditSettings auditSettings;
 
-  AuditingRepositoryDecoratorFactory(AuditEventPublisher auditEventPublisher,
-      AuditSettings auditSettings) {
+  AuditingRepositoryDecoratorFactory(
+      AuditEventPublisher auditEventPublisher, AuditSettings auditSettings) {
     this.auditEventPublisher = requireNonNull(auditEventPublisher);
     this.auditSettings = requireNonNull(auditSettings);
   }
@@ -41,12 +37,7 @@ public class AuditingRepositoryDecoratorFactory {
   public Repository<Entity> create(Repository<Entity> repository) {
     var entityType = repository.getEntityType();
 
-    if (entityType.getId().equals(AUDIT_SETTINGS)) {
-      return repository;
-    }
-
-    if (isAuditedSystemEntityType(entityType)
-        || isAuditedDataEntityType(entityType)) {
+    if (isAuditedSystemEntityType(entityType) || isAuditedDataEntityType(entityType)) {
       return new AuditingRepositoryDecorator(repository, auditEventPublisher);
     } else {
       return repository;

@@ -1,9 +1,10 @@
 package org.molgenis.data.platform.decorators;
 
-import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
+import static org.molgenis.security.audit.AuditSettingsImpl.AUDIT_SETTINGS;
 
-import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.CascadeDeleteRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -20,6 +21,7 @@ import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
 import org.molgenis.data.cache.l3.L3Cache;
 import org.molgenis.data.cache.l3.L3CacheRepositoryDecorator;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
+import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
@@ -37,9 +39,10 @@ import org.molgenis.data.validation.FetchValidator;
 import org.molgenis.data.validation.QueryValidationRepositoryDecorator;
 import org.molgenis.data.validation.QueryValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.security.audit.AuditSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
+import org.springframework.context.event.EventListener;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -69,6 +72,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
       rowLevelSecurityRepositoryDecoratorFactory;
   private final L1CacheJanitor l1CacheJanitor;
   private final AuditingRepositoryDecoratorFactory auditingRepositoryDecoratorFactory;
+
+  private boolean bootstrappingDone = true;
 
   public MolgenisRepositoryDecoratorFactory(
       EntityManager entityManager,
@@ -184,12 +189,21 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
         new QueryValidationRepositoryDecorator<>(
             decoratedRepository, queryValidator, fetchValidator);
 
-    // 1. Data auditing decorator
-    decoratedRepository = auditingRepositoryDecoratorFactory.create(decoratedRepository);
+    if (bootstrappingDone && !repository.getEntityType().getId().equals(AUDIT_SETTINGS)) {
+      // 1. Data auditing decorator
+      decoratedRepository = auditingRepositoryDecoratorFactory.create(decoratedRepository);
 
-    // 0. Dynamic decorators
-    decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
+      // 0. Dynamic decorators
+      if (!repository.getEntityType().getId().equals(DECORATOR_CONFIGURATION)) {
+        decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
+      }
+    }
 
     return decoratedRepository;
+  }
+
+  @EventListener
+  public void onBootstrappingEvent(@NonNull BootstrappingEvent event) {
+    this.bootstrappingDone = event.getStatus() == FINISHED;
   }
 }
