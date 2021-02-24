@@ -2,7 +2,7 @@ package org.molgenis.security.audit;
 
 public enum DataAuditSetting {
   NONE("None"),
-  SOME("Only tagged"),
+  TAGGED("Tagged"),
   ALL("All");
 
   private final String label;

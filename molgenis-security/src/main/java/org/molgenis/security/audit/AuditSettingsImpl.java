@@ -47,12 +47,12 @@ public class AuditSettingsImpl extends DefaultSettingsEntity
           .setEnumOptions(
               asList(
                   DataAuditSetting.NONE.getLabel(),
-                  DataAuditSetting.SOME.getLabel(),
+                  DataAuditSetting.TAGGED.getLabel(),
                   DataAuditSetting.ALL.getLabel()))
           .setDefaultValue(DataAuditSetting.NONE.getLabel())
           .setLabel("Audit non-system entity types")
           .setDescription("If enabled, users' interactions with non-system entity types will be "
-              + "logged. If 'Only tagged' is chosen, only entity types tagged with 'audit-audited' "
+              + "logged. If 'Tagged' is chosen, only entity types tagged with 'audit-audited' "
               + "will be audited.");
     }
   }

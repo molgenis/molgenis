@@ -63,7 +63,7 @@ public class AuditingRepositoryDecoratorFactory {
     switch (auditSettings.getDataAuditSetting()) {
       case NONE:
         return false;
-      case SOME:
+      case TAGGED:
         return stream(entityType.getTags())
             .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
       case ALL:
