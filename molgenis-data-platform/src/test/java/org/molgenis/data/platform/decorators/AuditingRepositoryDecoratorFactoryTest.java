@@ -1,6 +1,5 @@
 package org.molgenis.data.platform.decorators;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,12 +30,12 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   private AuditingRepositoryDecoratorFactory factory;
 
   @BeforeEach
-  void beforeEach(){
+  void beforeEach() {
     factory = new AuditingRepositoryDecoratorFactory(auditEventPublisher, auditSettings);
   }
 
   @Test
-  void decorateSystemEntityTypeTurnedOn(){
+  void decorateSystemEntityTypeTurnedOn() {
     onSystemEntityType();
     when(auditSettings.getSystemAuditEnabled()).thenReturn(true);
 
@@ -46,7 +45,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateSystemEntityTypeTurnedOff(){
+  void decorateSystemEntityTypeTurnedOff() {
     onSystemEntityType();
     when(auditSettings.getSystemAuditEnabled()).thenReturn(false);
 
@@ -56,7 +55,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateSystemEntityTypeExcluded(){
+  void decorateSystemEntityTypeExcluded() {
     var entityType = onSystemEntityType();
     when(entityType.getId()).thenReturn("sys_idx_IndexAction");
     when(auditSettings.getSystemAuditEnabled()).thenReturn(true);
@@ -67,7 +66,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateDataEntityTypeTurnedOnForAll(){
+  void decorateDataEntityTypeTurnedOnForAll() {
     onDataEntityType();
     when(auditSettings.getDataAuditSetting()).thenReturn(DataAuditSetting.ALL);
 
@@ -77,7 +76,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateDataEntityTypeTurnedOff(){
+  void decorateDataEntityTypeTurnedOff() {
     onDataEntityType();
     when(auditSettings.getDataAuditSetting()).thenReturn(DataAuditSetting.NONE);
 
@@ -87,7 +86,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateDataEntityTypeTurnedOnForTaggedWithTag(){
+  void decorateDataEntityTypeTurnedOnForTaggedWithTag() {
     var entityType = onDataEntityType();
     when(auditSettings.getDataAuditSetting()).thenReturn(DataAuditSetting.TAGGED);
     var tag = mock(Tag.class);
@@ -100,7 +99,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   }
 
   @Test
-  void decorateDataEntityTypeTurnedOnForTaggedWithoutTag(){
+  void decorateDataEntityTypeTurnedOnForTaggedWithoutTag() {
     var entityType = onDataEntityType();
     when(auditSettings.getDataAuditSetting()).thenReturn(DataAuditSetting.TAGGED);
     var tag = mock(Tag.class);

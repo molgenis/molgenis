@@ -1,7 +1,6 @@
 package org.molgenis.data.security.audit;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +19,9 @@ import static org.molgenis.data.security.audit.AuditingRepositoryDecorator.ENTIT
 import static org.molgenis.data.security.audit.AuditingRepositoryDecorator.ENTITY_DELETED;
 import static org.molgenis.data.security.audit.AuditingRepositoryDecorator.ENTITY_READ;
 import static org.molgenis.data.security.audit.AuditingRepositoryDecorator.ENTITY_UPDATED;
+import static org.molgenis.data.security.audit.SecurityContextTestUtils.withElevatedUser;
+import static org.molgenis.data.security.audit.SecurityContextTestUtils.withSystemToken;
+import static org.molgenis.data.security.audit.SecurityContextTestUtils.withUser;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.List;
@@ -40,12 +42,9 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator.AuditingIterator;
-import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 
 class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
@@ -70,7 +69,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void iterator() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var list = mockTwoEntities();
@@ -93,7 +92,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void iteratorSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var iterator = decorator.iterator();
@@ -115,7 +114,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void forEachBatched() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var fetch = mock(Fetch.class);
@@ -143,7 +142,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void forEachBatchedSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var fetch = mock(Fetch.class);
@@ -171,7 +170,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void count() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     when(repository.count()).thenReturn(1L);
@@ -185,7 +184,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void countSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     when(repository.count()).thenReturn(1L);
@@ -213,7 +212,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void countQuery() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var query = mock(Query.class);
@@ -229,7 +228,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void countQuerySystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var query = mock(Query.class);
@@ -260,7 +259,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void findAllQuery() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entities = mockTwoEntities();
@@ -283,7 +282,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void findAllQuerySystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var query = mock(Query.class);
@@ -310,7 +309,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings({"unchecked"})
   @Test
   void findOne() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var query = mock(Query.class);
@@ -328,7 +327,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void findOneSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var query = mock(Query.class);
@@ -354,7 +353,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void aggregate() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var aggregateQuery = mock(AggregateQuery.class);
@@ -367,7 +366,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void aggregateSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var aggregateQuery = mock(AggregateQuery.class);
@@ -392,7 +391,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findOneById() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entity = mock(Entity.class);
@@ -408,7 +407,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findOneByIdSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     decorator.findOneById("id");
@@ -429,7 +428,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findOneByIdFetch() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entity = mock(Entity.class);
@@ -446,7 +445,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findOneByIdFetchSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var fetch = mock(Fetch.class);
@@ -471,7 +470,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findAllStream() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entities = mockTwoEntities();
@@ -493,7 +492,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findAllStreamSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     Stream<Object> entityIds = Stream.of("id1", "id2");
@@ -518,7 +517,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findAllStreamFetch() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var fetch = mock(Fetch.class);
@@ -541,7 +540,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void findAllStreamFetchSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var fetch = mock(Fetch.class);
@@ -569,7 +568,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void deleteAllStream() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     Stream<Object> entityIds = Stream.of("id1", "id2");
@@ -593,7 +592,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void deleteAllStreamSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     Stream<Object> entityIds = Stream.of("id1", "id2");
@@ -628,7 +627,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void add() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entity = mock(Entity.class);
@@ -643,7 +642,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void addSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entity = mock(Entity.class);
@@ -671,7 +670,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void addStream() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entities = mockTwoEntities();
@@ -695,7 +694,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void addStreamSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entities = mockTwoEntities();
@@ -730,7 +729,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void update() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entity = mock(Entity.class);
@@ -745,7 +744,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void updateSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entity = mock(Entity.class);
@@ -773,7 +772,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void updateStream() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entities = mockTwoEntities();
@@ -797,7 +796,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void updateStreamSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entities = mockTwoEntities();
@@ -832,7 +831,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void delete() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entity = mock(Entity.class);
@@ -847,7 +846,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void deleteSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entity = mock(Entity.class);
@@ -875,7 +874,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void deleteStream() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     var entities = mockTwoEntities().stream();
@@ -899,7 +898,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
   @SuppressWarnings("unchecked")
   @Test
   void deleteStreamSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     var entities = mockTwoEntities().stream();
@@ -934,7 +933,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void deleteAll() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     decorator.deleteAll();
@@ -945,7 +944,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void deleteAllSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     decorator.deleteAll();
@@ -966,7 +965,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void deleteById() {
-    withUser();
+    withUser("henk");
     onDataEntityType();
 
     decorator.deleteById("id");
@@ -978,7 +977,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   void deleteByIdSystem() {
-    withUser();
+    withUser("henk");
     onSystemEntityType();
 
     decorator.deleteById("id");
@@ -1000,7 +999,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @Test
   public void auditWithElevatedUser() {
-    withElevatedUser();
+    withElevatedUser("henk");
     onDataEntityType();
 
     decorator.deleteById("id");
@@ -1010,23 +1009,6 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
             "henk",
             ENTITY_DELETED,
             Map.of("entityTypeId", "patients", "entityId", "id", "runAs", "SYSTEM"));
-  }
-
-  private void withUser() {
-    var user = new User("henk", "henk", emptySet());
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken(user, "henk", emptySet()));
-  }
-
-  private void withSystemToken() {
-    SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.create());
-  }
-
-  private void withElevatedUser() {
-    var user = new User("henk", "henk", emptySet());
-    var auth = new UsernamePasswordAuthenticationToken(user, "henk", emptySet());
-    SecurityContextHolder.getContext()
-        .setAuthentication(SystemSecurityToken.createFromElevated(auth));
   }
 
   private void onSystemEntityType() {
