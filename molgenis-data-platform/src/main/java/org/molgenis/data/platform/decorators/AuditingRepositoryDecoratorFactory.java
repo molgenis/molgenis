@@ -37,7 +37,14 @@ public class AuditingRepositoryDecoratorFactory {
   public Repository<Entity> create(Repository<Entity> repository) {
     var entityType = repository.getEntityType();
 
-    if (isAuditedSystemEntityType(entityType) || isAuditedDataEntityType(entityType)) {
+    var decorate = false;
+    if (isSystemEntity(entityType)) {
+      decorate = isAuditedSystemEntityType(entityType);
+    } else {
+      decorate = isAuditedDataEntityType(entityType);
+    }
+
+    if (decorate) {
       return new AuditingRepositoryDecorator(repository, auditEventPublisher);
     } else {
       return repository;
@@ -46,7 +53,6 @@ public class AuditingRepositoryDecoratorFactory {
 
   private boolean isAuditedSystemEntityType(EntityType entityType) {
     return auditSettings.getSystemAuditEnabled()
-        && isSystemEntity(entityType)
         && !SYSTEM_AUDIT_EXCLUSIONS.contains(entityType.getId());
   }
 
