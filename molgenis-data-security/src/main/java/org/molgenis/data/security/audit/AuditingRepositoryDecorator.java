@@ -53,7 +53,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public @Nonnull Iterator<Entity> iterator() {
-    if (isRunByUser()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       return new AuditingIterator(delegate().iterator());
     } else {
       return delegate().iterator();
@@ -124,7 +124,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public AggregateResult aggregate(AggregateQuery aggregateQuery) {
     var aggregate = delegate().aggregate(aggregateQuery);
-    if (isRunByUser()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       audit(ENTITIES_AGGREGATED);
     }
     return aggregate;
@@ -199,16 +199,15 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Integer add(Stream<Entity> entities) {
     if (isRunByUser()) {
-      var entityStream =
+      entities =
           entities.filter(
               entity -> {
                 audit(ENTITY_CREATED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
-      return delegate().add(entityStream);
-    } else {
-      return delegate().add(entities);
     }
+
+    return delegate().add(entities);
   }
 
   @Override
@@ -223,17 +222,15 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public void update(Stream<Entity> entities) {
     if (isRunByUser()) {
-      var entityStream =
+      entities =
           entities.filter(
               entity -> {
                 audit(ENTITY_UPDATED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
-
-      delegate().update(entityStream);
-    } else {
-      delegate().update(entities);
     }
+
+    delegate().update(entities);
   }
 
   @Override
@@ -248,26 +245,29 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public void delete(Stream<Entity> entities) {
     if (isRunByUser()) {
-      var entityStream =
+      entities =
           entities.filter(
               entity -> {
                 audit(ENTITY_DELETED, ENTITY_ID, entity.getIdValue());
                 return true;
               });
-
-      delegate().delete(entityStream);
-    } else {
-      delegate().update(entities);
     }
+
+    delegate().delete(entities);
   }
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    delegate().deleteAll(ids);
-
     if (isRunByUser()) {
-      audit(ALL_ENTITIES_DELETED);
+      ids =
+          ids.filter(
+              id -> {
+                audit(ENTITY_DELETED, ENTITY_ID, id);
+                return true;
+              });
     }
+
+    delegate().deleteAll(ids);
   }
 
   @Override
