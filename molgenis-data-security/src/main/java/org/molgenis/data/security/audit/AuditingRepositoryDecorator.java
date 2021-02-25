@@ -62,7 +62,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
 
   @Override
   public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize) {
-    if (isRunByUser()) {
+    if (isRunByUser() && isNonSystemEntityType()) {
       delegate()
           .forEachBatched(
               fetch,

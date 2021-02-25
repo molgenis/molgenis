@@ -140,6 +140,35 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
             Map.of("entityTypeId", "patients", "entityIds", asList("id1", "id2")));
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  void forEachBatchedSystem() {
+    withUser();
+    onSystemEntityType();
+
+    var fetch = mock(Fetch.class);
+    var consumer = mock(Consumer.class);
+
+    decorator.forEachBatched(fetch, consumer, 10);
+
+    verifyNoInteractions(publisher);
+    verify(repository).forEachBatched(fetch, consumer, 10);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void forEachBatchedWithSystemToken() {
+    withSystemToken();
+
+    var fetch = mock(Fetch.class);
+    var consumer = mock(Consumer.class);
+
+    decorator.forEachBatched(fetch, consumer, 10);
+
+    verifyNoInteractions(publisher);
+    verify(repository).forEachBatched(fetch, consumer, 10);
+  }
+
   @Test
   void count() {
     withUser();
@@ -178,6 +207,53 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoTest {
 
     verifyNoInteractions(publisher);
     verify(repository).count();
+    assertEquals(1L, result);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void countQuery() {
+    withUser();
+    onDataEntityType();
+
+    var query = mock(Query.class);
+    when(repository.count(query)).thenReturn(1L);
+
+    long result = decorator.count(query);
+
+    verify(publisher).publish("henk", ENTITIES_COUNTED, Map.of("entityTypeId", "patients"));
+    verify(repository).count(query);
+    assertEquals(1L, result);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void countQuerySystem() {
+    withUser();
+    onSystemEntityType();
+
+    var query = mock(Query.class);
+    when(repository.count(query)).thenReturn(1L);
+
+    long result = decorator.count(query);
+
+    verifyNoInteractions(publisher);
+    verify(repository).count(query);
+    assertEquals(1L, result);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void countQueryWithSystemToken() {
+    withSystemToken();
+
+    var query = mock(Query.class);
+    when(repository.count(query)).thenReturn(1L);
+
+    long result = decorator.count(query);
+
+    verifyNoInteractions(publisher);
+    verify(repository).count(query);
     assertEquals(1L, result);
   }
 
