@@ -10,6 +10,7 @@ import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.molgenis.security.core.WithMockSystemUser;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContext;

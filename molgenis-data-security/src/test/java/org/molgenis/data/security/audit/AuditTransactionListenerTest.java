@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.transaction.TransactionManager;
+import org.molgenis.security.core.WithMockSystemUser;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContext;

@@ -39,6 +39,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator.AuditingIterator;
+import org.molgenis.security.core.WithMockSystemUser;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContext;
