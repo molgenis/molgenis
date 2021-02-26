@@ -2,11 +2,11 @@ package org.molgenis.security.audit;
 
 public interface AuditSettings {
 
-  /** @return whether system entity types should be audited */
+  /** @return <code>true</code> if system entity types are audited */
   boolean getSystemAuditEnabled();
 
-  /** @param signUp <code>true</code> if system entity types are audited */
-  void setSystemAuditEnabled(boolean signUp);
+  /** @param enabled whether system entity types should be audited */
+  void setSystemAuditEnabled(boolean enabled);
 
   /** @return DataAuditSetting telling which non-system entity types are audited */
   DataAuditSetting getDataAuditSetting();
