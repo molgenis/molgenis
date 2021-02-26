@@ -137,7 +137,7 @@ class SecurityUtilsTest {
   @Test
   void getCurrentUsernameSystemPrincipal() {
     try {
-      SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
+      SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.create());
       assertNull(SecurityUtils.getCurrentUsername());
     } finally {
       SecurityContextHolder.getContext().setAuthentication(authentication);

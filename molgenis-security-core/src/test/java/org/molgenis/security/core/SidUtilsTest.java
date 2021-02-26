@@ -43,7 +43,7 @@ class SidUtilsTest {
 
   @Test
   void createSecurityContextSidSystem() {
-    SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
+    SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.create());
     assertEquals(new GrantedAuthoritySid("ROLE_SYSTEM"), createSecurityContextSid());
   }
 
