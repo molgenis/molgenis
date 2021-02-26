@@ -6,25 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
 import static org.molgenis.data.security.audit.AuthenticationUtils.isRunAsSystem;
 import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
-import static org.molgenis.data.security.audit.SecurityContextTestUtils.withElevatedUser;
-import static org.molgenis.data.security.audit.SecurityContextTestUtils.withSystemToken;
-import static org.molgenis.data.security.audit.SecurityContextTestUtils.withUser;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 
-class AuthenticationUtilsTest {
+@ContextConfiguration(classes = AuthenticationUtilsTest.Config.class)
+class AuthenticationUtilsTest extends AbstractMockitoSpringContextTests {
+
+  @Configuration
+  static class Config {}
 
   private SecurityContext previousContext;
 
   @BeforeEach
   void beforeEach() {
     previousContext = SecurityContextHolder.getContext();
-    SecurityContext testContext = SecurityContextHolder.createEmptyContext();
-    SecurityContextHolder.setContext(testContext);
   }
 
   @AfterEach
@@ -33,56 +36,56 @@ class AuthenticationUtilsTest {
   }
 
   @Test
+  @WithMockUser("bofke")
   void testIsRunByUser() {
-    withUser("bofke");
     assertTrue(isRunByUser());
   }
 
   @Test
+  @WithMockSystemUser(originalUsername = "henk")
   void testIsRunByUserElevated() {
-    withElevatedUser("henk");
     assertTrue(isRunByUser());
   }
 
   @Test
+  @WithMockSystemUser
   void testIsRunByUserSystem() {
-    withSystemToken();
     assertFalse(isRunByUser());
   }
 
   @Test
+  @WithMockUser("bofke")
   void testIsRunAsSystemUser() {
-    withUser("bofke");
     assertFalse(isRunAsSystem());
   }
 
   @Test
+  @WithMockSystemUser(originalUsername = "henk")
   void testIsRunAsSystemElevated() {
-    withElevatedUser("henk");
     assertTrue(isRunAsSystem());
   }
 
   @Test
+  @WithMockSystemUser
   void testIsRunAsSystemSystem() {
-    withSystemToken();
     assertFalse(isRunAsSystem());
   }
 
   @Test
+  @WithMockUser("henk")
   void testGetUsername() {
-    withUser("henk");
     assertEquals("henk", getUsername());
   }
 
   @Test
+  @WithMockSystemUser(originalUsername = "henk")
   void testGetUsernameElevated() {
-    withElevatedUser("henk");
     assertEquals("henk", getUsername());
   }
 
   @Test
+  @WithMockSystemUser
   void testGetUsernameSystem() {
-    withSystemToken();
     assertEquals("SYSTEM", getUsername());
   }
 }
