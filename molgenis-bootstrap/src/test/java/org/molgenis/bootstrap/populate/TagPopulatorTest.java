@@ -2,7 +2,7 @@ package org.molgenis.bootstrap.populate;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.semantic.Relation.isAssociatedWith;
+import static org.molgenis.data.semantic.Relation.isAudited;
 
 import java.util.List;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -39,7 +39,7 @@ class TagPopulatorTest {
   public void testPopulate() {
     when(tagFactory.create("token")).thenReturn(token);
     when(tagFactory.create("case-sensitive")).thenReturn(caseSensitive);
-    when(tagFactory.create("audit-audited")).thenReturn(audited);
+    when(tagFactory.create("audit-usage")).thenReturn(audited);
 
     when(dataService.getRepository(TagMetadata.TAG, Tag.class)).thenReturn(tagRepository);
 
@@ -52,7 +52,7 @@ class TagPopulatorTest {
     verify(caseSensitive).setRelationIri(RDF.TYPE.toString());
     verify(caseSensitive).setObjectIri(Vocabulary.CASE_SENSITIVE.toString());
 
-    verify(audited).setRelationIri(isAssociatedWith.getIRI());
+    verify(audited).setRelationIri(isAudited.getIRI());
     verify(audited).setObjectIri(Vocabulary.AUDIT_USAGE.toString());
   }
 }
