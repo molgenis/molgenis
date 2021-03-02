@@ -11,11 +11,10 @@ class AuthenticationUtils {
     var auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (auth instanceof SystemSecurityToken) {
-      Optional<Authentication> originalAuth =
-          ((SystemSecurityToken) auth).getOriginalAuthentication();
-      return originalAuth.isPresent() && !(originalAuth.get() instanceof SystemSecurityToken);
+      return ((SystemSecurityToken) auth).getOriginalAuthentication().isPresent();
+    } else {
+      return true;
     }
-    return true;
   }
 
   static boolean isRunAsSystem() {
@@ -29,13 +28,9 @@ class AuthenticationUtils {
     var auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (auth instanceof SystemSecurityToken) {
-      Optional<Authentication> originalAuth =
-          ((SystemSecurityToken) auth).getOriginalAuthentication();
-      if (originalAuth.isPresent()) {
-        return originalAuth.get().getName();
-      } else {
-        return "SYSTEM";
-      }
+      return ((SystemSecurityToken) auth).getOriginalAuthentication()
+          .map(Authentication::getName)
+          .orElse("SYSTEM");
     } else {
       return auth.getName();
     }
