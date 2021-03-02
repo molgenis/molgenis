@@ -1,6 +1,8 @@
 package org.molgenis.security.core.runas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -39,11 +41,10 @@ class RunAsSystemAspectTest extends AbstractMockitoSpringContextTests {
   @WithMockUser
   void testRunAsSystemRunnableAsSystem() {
     var originalAuth = getAuthentication();
-    var auth = (SystemSecurityToken) runAsSystem(this::getAuthentication);
+    var auth = (RunAsSystemToken) runAsSystem(this::getAuthentication);
 
     assertTrue(originalAuth instanceof UsernamePasswordAuthenticationToken);
-    assertTrue(auth.getOriginalAuthentication().isPresent());
-    assertEquals(originalAuth, auth.getOriginalAuthentication().get());
+    assertSame(originalAuth, auth.getOriginalAuthentication());
     assertTrue(getAuthentication() instanceof UsernamePasswordAuthenticationToken);
   }
 
@@ -65,6 +66,15 @@ class RunAsSystemAspectTest extends AbstractMockitoSpringContextTests {
     assertTrue(originalAuth instanceof SystemSecurityToken);
     assertSame(originalAuth, runAsSystem(this::getAuthentication));
     assertSame(originalAuth, getAuthentication());
+  }
+
+  @Test
+  void testRunAsSystemWithoutAuthentication() {
+    var auth = runAsSystem(this::getAuthentication);
+
+    assertTrue(auth instanceof SystemSecurityToken);
+    assertFalse(auth instanceof RunAsSystemToken);
+    assertNull(getAuthentication());
   }
 
   private Authentication getAuthentication() {

@@ -13,9 +13,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Proxy that sets a SystemSecurityToken in the security context for the duration of a method. The
- * original authentication is stored in the SystemSecurityToken. If the current authentication is
- * already a SystemSecurityToken, this authentication is used instead of setting a new one.
+ * Proxy that sets a RunAsSystemToken in the security context for the duration of a method. The
+ * original authentication is stored in the RunAsSystemToken. If the current authentication is
+ * already a SystemSecurityToken, this authentication is used instead of setting a new one. If there
+ * is no original authentication, a normal SystemSecurityToken is used.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 @Aspect
@@ -41,11 +42,19 @@ public class RunAsSystemAspect {
     SecurityContext origCtx = getContext();
     try {
       var auth = origCtx.getAuthentication();
-      if (!(auth instanceof SystemSecurityToken)) {
-        // Set a SystemSecurityToken
+
+      if (auth != null) {
+        if (!(auth instanceof SystemSecurityToken)) {
+          // Elevate this non-system token to RunAsSystem
+          setContext(createEmptyContext());
+          getContext().setAuthentication(new RunAsSystemToken(auth));
+        }
+      } else {
+        // Set a normal SystemSecurityToken because there is no original authentication to elevate
         setContext(createEmptyContext());
-        getContext().setAuthentication(SystemSecurityToken.createElevated(auth));
+        getContext().setAuthentication(new SystemSecurityToken());
       }
+
       return runnable.run();
     } finally {
       // Set the original context back when method is finished

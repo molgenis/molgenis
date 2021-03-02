@@ -2,6 +2,7 @@ package org.molgenis.security.core;
 
 import static java.util.Collections.emptySet;
 
+import org.molgenis.security.core.runas.RunAsSystemToken;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -21,9 +22,9 @@ class WithMockSystemUserSecurityContextFactory
     if (!name.isEmpty()) {
       var user = new User(name, name, emptySet());
       var auth = new UsernamePasswordAuthenticationToken(user, name, emptySet());
-      context.setAuthentication(SystemSecurityToken.createElevated(auth));
+      context.setAuthentication(new RunAsSystemToken(auth));
     } else {
-      context.setAuthentication(SystemSecurityToken.create());
+      context.setAuthentication(new SystemSecurityToken());
     }
 
     return context;

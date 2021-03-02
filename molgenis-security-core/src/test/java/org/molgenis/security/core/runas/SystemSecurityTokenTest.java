@@ -23,38 +23,21 @@ class SystemSecurityTokenTest {
             new SimpleGrantedAuthority("ROLE_ACL_TAKE_OWNERSHIP"),
             new SimpleGrantedAuthority("ROLE_ACL_MODIFY_AUDITING"),
             new SimpleGrantedAuthority("ROLE_ACL_GENERAL_CHANGES"));
-    assertEquals(expectedAuthorities, SystemSecurityToken.create().getAuthorities());
+    assertEquals(expectedAuthorities, new SystemSecurityToken().getAuthorities());
   }
 
   @Test
   void testGetCredentials() {
-    assertNull(SystemSecurityToken.create().getCredentials());
+    assertNull(new SystemSecurityToken().getCredentials());
   }
 
   @Test
   void testGetPrincipal() {
-    assertTrue(SystemSecurityToken.create().getPrincipal() instanceof SystemPrincipal);
+    assertTrue(new SystemSecurityToken().getPrincipal() instanceof SystemPrincipal);
   }
 
   @Test
   void testIsAuthenticated() {
-    assertTrue(SystemSecurityToken.create().isAuthenticated());
-  }
-
-  @Test
-  void testGetOriginalAuthenticationWithElevatedUser() {
-    var user = new User("name", "password", emptySet());
-    var auth = new UsernamePasswordAuthenticationToken(user, "password", emptySet());
-
-    var originalAuth = SystemSecurityToken.createElevated(auth).getOriginalAuthentication();
-
-    assertTrue(originalAuth.isPresent());
-    assertEquals(auth, originalAuth.get());
-  }
-
-  @Test
-  void testGetOriginalAuthenticationWithoutElevatedUser() {
-    var originalAuth = SystemSecurityToken.create().getOriginalAuthentication();
-    assertFalse(originalAuth.isPresent());
+    assertTrue(new SystemSecurityToken().isAuthenticated());
   }
 }
