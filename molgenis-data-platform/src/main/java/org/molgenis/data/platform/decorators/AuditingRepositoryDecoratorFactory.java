@@ -5,7 +5,8 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
-import static org.molgenis.data.semantic.Vocabulary.AUDITED;
+import static org.molgenis.data.semantic.Relation.isAudited;
+import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
 import static org.molgenis.security.audit.AuditSettingsImpl.AUDIT_SETTINGS;
 
@@ -14,6 +15,7 @@ import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.security.audit.AuditSettings;
 import org.molgenis.util.UnexpectedEnumException;
@@ -61,12 +63,16 @@ public class AuditingRepositoryDecoratorFactory {
       case NONE:
         return false;
       case TAGGED:
-        return stream(entityType.getTags())
-            .anyMatch(tag -> AUDITED.toString().equals(tag.getObjectIri()));
+        return stream(entityType.getTags()).anyMatch(this::isAuditUsage);
       case ALL:
         return true;
       default:
         throw new UnexpectedEnumException(auditSettings.getDataAuditSetting());
     }
+  }
+
+  private boolean isAuditUsage(Tag tag) {
+    return AUDIT_USAGE.toString().equals(tag.getObjectIri())
+        && isAudited.getIRI().equals(tag.getRelationIri());
   }
 }

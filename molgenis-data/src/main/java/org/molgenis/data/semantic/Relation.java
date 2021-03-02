@@ -19,7 +19,8 @@ public enum Relation {
   isGeneralizationOf("http://molgenis.org/uml/isGeneralizationOf"),
   hasSourceId("http://molgenis.org/uml/hasSourceId"),
   hasSourceName("http://molgenis.org/uml/hasSourceName"),
-  isAssociatedWith("http://molgenis.org#isAssociatedWith");
+  isAssociatedWith("http://molgenis.org#isAssociatedWith"),
+  isAudited("http://molgenis.org/audit#isAudited");
 
   private String iri;
 

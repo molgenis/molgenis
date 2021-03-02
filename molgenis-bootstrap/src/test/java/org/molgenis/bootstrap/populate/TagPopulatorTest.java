@@ -53,6 +53,6 @@ class TagPopulatorTest {
     verify(caseSensitive).setObjectIri(Vocabulary.CASE_SENSITIVE.toString());
 
     verify(audited).setRelationIri(isAssociatedWith.getIRI());
-    verify(audited).setObjectIri(Vocabulary.AUDITED.toString());
+    verify(audited).setObjectIri(Vocabulary.AUDIT_USAGE.toString());
   }
 }

@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.semantic.Vocabulary.AUDITED;
+import static org.molgenis.data.semantic.Relation.isAudited;
+import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +91,8 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
     var entityType = onDataEntityType();
     when(auditSettings.getDataAuditSetting()).thenReturn(DataAuditSetting.TAGGED);
     var tag = mock(Tag.class);
-    when(tag.getObjectIri()).thenReturn(AUDITED.toString());
+    when(tag.getObjectIri()).thenReturn(AUDIT_USAGE.toString());
+    when(tag.getRelationIri()).thenReturn(isAudited.getIRI());
     when(entityType.getTags()).thenReturn(singletonList(tag));
 
     var decoratedRepo = factory.create(repository);
