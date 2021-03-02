@@ -66,17 +66,7 @@ public class AuditSettingsImpl extends DefaultSettingsEntity implements AuditSet
   }
 
   @Override
-  public void setSystemAuditEnabled(boolean auditSystem) {
-    set(Meta.AUDIT_SYSTEM, auditSystem);
-  }
-
-  @Override
   public DataAuditSetting getDataAuditSetting() {
     return DataAuditSetting.fromLabel(getString(Meta.AUDIT_DATA));
-  }
-
-  @Override
-  public void setDataAuditSetting(DataAuditSetting setting) {
-    set(Meta.AUDIT_DATA, setting.getLabel());
   }
 }
