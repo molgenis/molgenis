@@ -4,6 +4,7 @@ import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -39,6 +40,17 @@ class SystemSecurityTokenTest {
   @Test
   void testIsAuthenticated() {
     assertTrue(SystemSecurityToken.create().isAuthenticated());
+  }
+
+  @Test
+  void testCreateElevatedUserFromSystem() {
+    var originalAuth = SystemSecurityToken.create();
+
+    assertThrows(
+        IllegalStateException.class,
+        () -> {
+          SystemSecurityToken.createElevated(originalAuth);
+        });
   }
 
   @Test

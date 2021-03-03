@@ -26,6 +26,11 @@ public class SystemSecurityToken extends AbstractAuthenticationToken {
 
   private SystemSecurityToken(@Nullable Authentication originalAuthentication) {
     super(AUTHORITIES);
+
+    if (originalAuthentication instanceof SystemSecurityToken) {
+      throw new IllegalStateException("Can't \"run as system\" as system");
+    }
+
     this.originalAuthentication = originalAuthentication;
   }
 
@@ -41,7 +46,8 @@ public class SystemSecurityToken extends AbstractAuthenticationToken {
   /**
    * Factory method to elevate an existing authentication to SYSTEM, a.k.a. "run as system".
    *
-   * @param originalAuthentication the authentication to elevate
+   * @param originalAuthentication the (non-system) authentication to elevate
+   * @throws IllegalStateException if the authentication is already a SystemSecurityToken
    * @return a SystemSecurityToken with an original authentication
    */
   public static SystemSecurityToken createElevated(Authentication originalAuthentication) {
