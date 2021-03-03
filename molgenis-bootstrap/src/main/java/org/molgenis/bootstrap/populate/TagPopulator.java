@@ -41,7 +41,7 @@ public class TagPopulator {
     audited.setLabel("Audit Usage");
     audited.setObjectIri(AUDIT_USAGE.toString());
     audited.setRelationIri(isAudited.getIRI());
-    audited.setRelationLabel(isAudited.getIRI());
+    audited.setRelationLabel(isAudited.getLabel());
 
     dataService
         .getRepository(TAG, Tag.class)
