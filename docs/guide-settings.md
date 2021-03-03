@@ -1,6 +1,7 @@
 # Settings
 There are different items where you can configure settings in MOLGENIS:
 - [Application settings](#application-settings)
+- [Audit settings](guide-auditing.md)
 - [Authentication settings](#authentication-settings)
 - [Mail settings](#mail-settings)
 - [DataExplorer settings](guide-explore.md)
