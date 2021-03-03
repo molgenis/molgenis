@@ -28,6 +28,11 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+/**
+ * Publishes audit events for CRUD actions. In the case of system entity types, does not publish
+ * events for read actions. If the current user is SYSTEM (excluding elevated users running as
+ * system), does not publish anything.
+ */
 public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
   static final String ENTITY_READ = "ENTITY_READ";
@@ -52,7 +57,8 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   }
 
   @Override
-  public @Nonnull Iterator<Entity> iterator() {
+  public @Nonnull
+  Iterator<Entity> iterator() {
     if (isRunByUser() && isNonSystemEntityType()) {
       return new AuditingIterator(delegate().iterator());
     } else {

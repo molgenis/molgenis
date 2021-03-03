@@ -10,6 +10,10 @@ import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.stereotype.Component;
 
+/**
+ * Publishes audit events with transaction ids so that they can be correlated to other audit events
+ * that were published during that transaction.
+ */
 @Component
 public class AuditTransactionListener implements TransactionListener {
 

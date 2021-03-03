@@ -18,9 +18,27 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.security.audit.AuditSettings;
+import org.molgenis.security.audit.AuditSettingsImpl;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
+/**
+ * Decorates a {@link Repository} with an {@link AuditingRepositoryDecorator} if the Repository
+ * meets the following criteria:
+ *
+ * For system entity types:
+ * <ul>
+ *   <li>Auditing of system entity types is enabled in the {@link AuditSettings}</li>
+ *   <li>The repository is not excluded from auditing</li>
+ * </ul>
+ *
+ * For data entity types:
+ * <ul>
+ *   <li>Auditing of data entity types is set to ALL in the {@link AuditSettings}, OR</li>
+ *   <li>Auditing of data entity types is set to TAGGED in the {@link AuditSettings} and the
+ *   entity type is tagged with the 'audit-usage' tag.</li>
+ * </ul>
+ */
 @Component
 public class AuditingRepositoryDecoratorFactory {
 
