@@ -57,8 +57,7 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   }
 
   @Override
-  public @Nonnull
-  Iterator<Entity> iterator() {
+  public @Nonnull Iterator<Entity> iterator() {
     if (isRunByUser() && isNonSystemEntityType()) {
       return new AuditingIterator(delegate().iterator());
     } else {
@@ -290,9 +289,9 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     auditEventPublisher.publish(getUsername(), type, data);
   }
 
-  private void audit(String type, String k1, Object v1) {
+  private void audit(String type, String key, Object value) {
     var data = createDataMap();
-    data.put(k1, v1);
+    data.put(key, value);
     auditEventPublisher.publish(getUsername(), type, data);
   }
 
