@@ -257,3 +257,48 @@ You now get a table representing the amount of samples in both biobanks per type
 Finally, select "patientid" in the third dropdown, the distinct attribute.
 The table will update to show you how many patients with at least one sample of a specific type are available in a biobank.
 
+## Data Explorer v2 (Experimental)
+
+The data explorer allow explore your data 
+
+#### Enabling the data explore v2 
+De data explorer v2 can be set as the default dataexplorer by removing the data-explorer (v1) plugin from the menu. Selecting a item in the navigator will then open the item in the data explorer v2
+
+The data explorer v2 can be added to the (main)menu via a redirect plugin 
+- Open the menu-manager
+- In de section 'Create a new menu item'
+  - Select ```redirect``` as plugin type
+  - Choose a name ( for example: 'Dataexplorer')
+  - Paste a link to app as the queryString
+```url=%2F@molgenis-ui%2Fdata-explorer%2Fdist%2Findex.html```
+  - Add the item to the menu 
+	
+### Data explore v2 features
+
+Differences with data explorer v2 will be listed 
+
+- Table actions are accessible using the toolbar (hover over the buttons to view actions).
+  - Add button: The add button allows uses the add a new row to the table ( only visible if user has 'ADD_DATA' rights).
+  - Search input:  Allows user to search the entire table.
+  - Orderby dropdown: Allows user to oder data by given field ( clicking the button reverses the order)
+  - Show/Hide columns: Can be used to hide ( and unhide) columns ( or card fields)
+  - Download button: Downloads table as exel file
+  - View selector: Toggle between card or grid view
+  - Settings: (only visible as admin) opens up table settings form
+
+#### Card view and custom cards
+Data explorer v2 has the ability to show data as a grid of data cards or as data table ( similar to data explorer v1)
+
+
+##### Default card
+By default each card shows a list show as a list of label / value pairs. Each item in the list is a column in the data table.
+
+-- add img with default card view
+
+The number of items show can be configured using the table settings
+
+
+#### Custom card layout
+
+The card display can customised by adding a template to the table settings.
+
