@@ -1,18 +1,16 @@
 package org.molgenis.security.user;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetadata;
+import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -24,23 +22,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class UserDetailsServiceImpl implements UserDetailsService {
-  private final DataService dataService;
   private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+  private final UserService userService;
+  private final RoleMembershipService roleMembershipService;
 
   public UserDetailsServiceImpl(
-      DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper) {
-    this.dataService = requireNonNull(dataService);
+      GrantedAuthoritiesMapper grantedAuthoritiesMapper,
+      UserService userService,
+      RoleMembershipService roleMembershipService) {
     this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);
+    this.userService = requireNonNull(userService);
+    this.roleMembershipService = requireNonNull(roleMembershipService);
   }
 
   @Override
   @RunAsSystem
   public UserDetails loadUserByUsername(String username) {
-    User user =
-        dataService
-            .query(UserMetadata.USER, User.class)
-            .eq(UserMetadata.USERNAME, username)
-            .findOne();
+    User user = userService.getUser(username);
     if (user == null) {
       throw new UsernameNotFoundException("unknown user '" + username + "'");
     }
@@ -63,11 +61,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
       authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
     }
 
-    dataService
-        .query(ROLE_MEMBERSHIP, RoleMembership.class)
-        .eq(USER, user)
-        .findAll()
-        .filter(RoleMembership::isCurrent)
+    roleMembershipService.getCurrentMemberships(user).stream()
         .map(RoleMembership::getRole)
         .map(Role::getName)
         .map(SidUtils::createRoleAuthority)

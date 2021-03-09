@@ -188,4 +188,30 @@ class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     assertEquals(
         singletonList(roleMembership), roleMembershipService.getMemberships(of(editor, viewer)));
   }
+
+  @Test
+  void testGetCurrentMemberships() {
+    User user = mock(User.class);
+
+    Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+    Fetch userFetch = new Fetch().field(UserMetadata.USERNAME).field(UserMetadata.ID);
+    Fetch fetch =
+        new Fetch()
+            .field(RoleMembershipMetadata.ROLE, roleFetch)
+            .field(RoleMembershipMetadata.USER, userFetch)
+            .field(RoleMembershipMetadata.FROM)
+            .field(RoleMembershipMetadata.TO)
+            .field(RoleMembershipMetadata.ID);
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+    when(query.eq(RoleMembershipMetadata.USER, user).fetch(fetch).findAll())
+        .thenReturn(Stream.of(oldRoleMembership, roleMembership));
+
+    when(roleMembership.isCurrent()).thenReturn(true);
+
+    assertEquals(singletonList(roleMembership), roleMembershipService.getCurrentMemberships(user));
+  }
 }

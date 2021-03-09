@@ -1,13 +1,14 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
@@ -108,6 +109,16 @@ public class RoleMembershipServiceImpl implements RoleMembershipService {
         .fetch(fetch)
         .findAll()
         .filter(RoleMembership::isCurrent)
-        .collect(Collectors.toList());
+        .collect(toList());
+  }
+
+  @Override
+  public Collection<RoleMembership> getCurrentMemberships(User user) {
+    return dataService
+        .query(ROLE_MEMBERSHIP, RoleMembership.class)
+        .eq(USER, user)
+        .findAll()
+        .filter(RoleMembership::isCurrent)
+        .collect(toList());
   }
 }

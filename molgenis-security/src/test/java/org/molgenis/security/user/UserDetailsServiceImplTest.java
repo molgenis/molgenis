@@ -4,27 +4,21 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.RETURNS_SELF;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.UserMetadata.USER;
-import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
-import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,22 +28,23 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 class UserDetailsServiceImplTest extends AbstractMockitoTest {
   @Mock private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-  @Mock private DataService dataService;
   @Mock private User user;
-  @Mock private RoleMembership currentMembership;
-  @Mock private RoleMembership pastMembership;
+  @Mock private RoleMembership membership;
   @Mock private Role role;
+  @Mock private UserService userService;
+  @Mock private RoleMembershipService roleMembershipService;
 
   private UserDetailsServiceImpl userDetailsServiceImpl;
 
   @BeforeEach
   void setUp() {
-    userDetailsServiceImpl = new UserDetailsServiceImpl(dataService, grantedAuthoritiesMapper);
+    userDetailsServiceImpl =
+        new UserDetailsServiceImpl(grantedAuthoritiesMapper, userService, roleMembershipService);
   }
 
   @Test
   void testUserDetailsService() {
-    assertThrows(NullPointerException.class, () -> new UserDetailsServiceImpl(null, null));
+    assertThrows(NullPointerException.class, () -> new UserDetailsServiceImpl(null, null, null));
   }
 
   @SuppressWarnings("unchecked")
@@ -60,17 +55,11 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(true);
-    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(userQuery).when(dataService).query(USER, User.class);
-    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
+    when(userService.getUser(username)).thenReturn(user);
 
-    when(currentMembership.isCurrent()).thenReturn(true);
-    when(currentMembership.getRole()).thenReturn(role);
+    when(membership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
-    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
-        .thenReturn(Stream.of(currentMembership, pastMembership));
+    when(roleMembershipService.getCurrentMemberships(user)).thenReturn(List.of(membership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
@@ -94,17 +83,11 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
     when(user.getUsername()).thenReturn(username);
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
-    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(userQuery).when(dataService).query(USER, User.class);
-    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
+    when(userService.getUser(username)).thenReturn(user);
 
-    when(currentMembership.isCurrent()).thenReturn(true);
-    when(currentMembership.getRole()).thenReturn(role);
+    when(membership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
-    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
-        .thenReturn(Stream.of(currentMembership, pastMembership));
+    when(roleMembershipService.getCurrentMemberships(user)).thenReturn(List.of(membership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
@@ -127,17 +110,11 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
     when(user.getPassword()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(false);
-    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(userQuery).when(dataService).query(USER, User.class);
-    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(user);
+    when(userService.getUser(username)).thenReturn(user);
 
-    when(currentMembership.isCurrent()).thenReturn(true);
-    when(currentMembership.getRole()).thenReturn(role);
+    when(membership.getRole()).thenReturn(role);
     when(role.getName()).thenReturn("MY_ROLE");
-    Query<RoleMembership> roleMembershipQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(roleMembershipQuery).when(dataService).query(ROLE_MEMBERSHIP, RoleMembership.class);
-    when(roleMembershipQuery.eq(RoleMembershipMetadata.USER, user).findAll())
-        .thenReturn(Stream.of(currentMembership, pastMembership));
+    when(roleMembershipService.getCurrentMemberships(user)).thenReturn(List.of(membership));
 
     Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
     userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
@@ -154,16 +131,10 @@ class UserDetailsServiceImplTest extends AbstractMockitoTest {
 
   @Test
   void testLoadUserByUsernameUnknownUser() {
-    String username = "unknownUser";
-    @SuppressWarnings("unchecked")
-    Query<User> userQuery = mock(Query.class, RETURNS_SELF);
-    doReturn(userQuery).when(dataService).query(USER, User.class);
-    when(userQuery.eq(USERNAME, username).findOne()).thenReturn(null);
-
     Exception exception =
         assertThrows(
             UsernameNotFoundException.class,
-            () -> userDetailsServiceImpl.loadUserByUsername(username));
+            () -> userDetailsServiceImpl.loadUserByUsername("unknownUser"));
     assertThat(exception.getMessage()).containsPattern("unknown user 'unknownUser'");
   }
 }

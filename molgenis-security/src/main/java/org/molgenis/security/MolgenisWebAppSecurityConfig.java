@@ -12,20 +12,15 @@ import java.util.LinkedHashMap;
 import javax.servlet.Filter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.TokenFactory;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.account.AccountController;
-import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.exception.WebAppSecurityConfigException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.oidc.DataServiceClientRegistrationRepository;
 import org.molgenis.security.oidc.MappedOidcUserService;
-import org.molgenis.security.oidc.OidcUserMapper;
-import org.molgenis.security.oidc.OidcUserMapperImpl;
 import org.molgenis.security.oidc.ResettableOAuth2AuthorizedClientService;
-import org.molgenis.security.oidc.model.OidcUserMappingFactory;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
@@ -62,7 +57,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -87,7 +81,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
 
-@Import(DataServiceClientRegistrationRepository.class)
+@Import({DataServiceClientRegistrationRepository.class, SecurityConfig.class})
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
 
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
@@ -101,8 +95,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
   @Autowired private TokenFactory tokenFactory;
 
-  @Autowired private UserFactory userFactory;
-
   @Autowired private OtpService otpService;
 
   @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
@@ -112,6 +104,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Autowired private UserAccountService userAccountService;
 
   @Autowired private ClientRegistrationRepository clientRegistrationRepository;
+
+  @Autowired private UserDetailsServiceImpl userDetailsService;
+
+  @Autowired private MappedOidcUserService oidcUserService;
+
+  @Autowired private PasswordEncoder passwordEncoder;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -246,7 +244,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .loginPage(MolgenisLoginController.URI)
         .failureUrl(MolgenisLoginController.URI)
         .userInfoEndpoint()
-        .oidcUserService(oidcUserService())
+        .oidcUserService(oidcUserService)
         .and()
         .and()
         .logout()
@@ -310,12 +308,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
       ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
           expressionInterceptUrlRegistry);
 
-  protected abstract RoleHierarchy roleHierarchy();
-
   @Bean
   public TokenService tokenService() {
     return new DataServiceTokenService(
-        new TokenGenerator(), dataService, userDetailsService(), tokenFactory);
+        new TokenGenerator(), dataService, userDetailsService, tokenFactory);
   }
 
   @Bean
@@ -365,35 +361,13 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Bean
-  public RoleHierarchy roleHierarchyBean() {
-    return roleHierarchy();
+  public RoleVoter roleVoter(RoleHierarchy roleHierarchy) {
+    return new RoleHierarchyVoter(roleHierarchy);
   }
 
   @Bean
-  public RoleVoter roleVoter() {
-    return new RoleHierarchyVoter(roleHierarchyBean());
-  }
-
-  @Bean
-  public GrantedAuthoritiesMapper roleHierarchyAuthoritiesMapper() {
-    return new RoleHierarchyAuthoritiesMapper(roleHierarchyBean());
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
-  }
-
-  @Bean
-  @Override
-  protected UserDetailsServiceImpl userDetailsService() {
-    return new UserDetailsServiceImpl(dataService, roleHierarchyAuthoritiesMapper());
-  }
-
-  @Override
-  @Bean
-  public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean() {
-    return userDetailsService();
+  public GrantedAuthoritiesMapper roleHierarchyAuthoritiesMapper(RoleHierarchy roleHierarchy) {
+    return new RoleHierarchyAuthoritiesMapper(roleHierarchy);
   }
 
   @Bean
@@ -405,8 +379,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   protected void configure(AuthenticationManagerBuilder auth) {
     try {
       DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-      authenticationProvider.setPasswordEncoder(passwordEncoder());
-      authenticationProvider.setUserDetailsService(userDetailsServiceBean());
+      authenticationProvider.setPasswordEncoder(passwordEncoder);
+      authenticationProvider.setUserDetailsService(userDetailsService);
       authenticationProvider.setPreAuthenticationChecks(userDetailsChecker());
       auth.authenticationProvider(authenticationProvider);
     } catch (Exception e) {
@@ -433,18 +407,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public ResettableOAuth2AuthorizedClientService authorizedClientService() {
     return new ResettableOAuth2AuthorizedClientService(clientRegistrationRepository);
-  }
-
-  @Bean
-  public MappedOidcUserService oidcUserService() {
-    return new MappedOidcUserService(oidcUserMapper(), userDetailsService(), dataService);
-  }
-
-  @Autowired private OidcUserMappingFactory oidcUserMappingFactory;
-
-  @Bean
-  public OidcUserMapper oidcUserMapper() {
-    return new OidcUserMapperImpl(dataService, oidcUserMappingFactory, userFactory);
   }
 
   @Autowired private HttpLocaleResolver httpLocaleResolver;
