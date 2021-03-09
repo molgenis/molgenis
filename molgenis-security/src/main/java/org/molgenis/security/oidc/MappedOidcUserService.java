@@ -1,9 +1,15 @@
 package org.molgenis.security.oidc;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.jayway.jsonpath.JsonPath;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
@@ -14,9 +20,12 @@ import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
@@ -76,9 +85,31 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
         new MappedOidcUser(oidcUserFromParent, emailAttributeName, usernameAttributeName);
     User user = oidcUserMapper.toUser(oidcUser, oidcClient);
     Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
+    authorities.addAll(
+        getAuthoritiesFromClaims(oidcUser.getClaims(), userRequest.getClientRegistration()));
     var result =
         new MappedOidcUser(oidcUserFromParent, authorities, emailAttributeName, user.getUsername());
     LOGGER.debug("Mapped to {}.", result);
     return result;
+  }
+
+  /**
+   * Retrieves authorities from claims.
+   *
+   * @param claims the {@link OidcIdToken} to retrieve the roles from
+   * @param clientRegistration the {@link ClientRegistration} for the OIDC client.
+   * @return Set of {@link GrantedAuthority}s retrieved from the ID token's claims
+   */
+  private static Set<GrantedAuthority> getAuthoritiesFromClaims(
+      Map<String, Object> claims, ClientRegistration clientRegistration) {
+    Object jsonPath =
+        clientRegistration.getProviderDetails().getConfigurationMetadata().get(CLAIMS_ROLE_PATH);
+    if (jsonPath instanceof String) {
+      return JsonPath.<List<String>>read(claims, (String) jsonPath).stream()
+          .map(role -> "ROLE_" + role)
+          .map(SimpleGrantedAuthority::new)
+          .collect(toSet());
+    }
+    return Collections.emptySet();
   }
 }
