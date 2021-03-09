@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenis-jdk11'
+            inheritFrom 'molgenis-jdk11'
         }
     }
     environment {
