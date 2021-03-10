@@ -257,3 +257,86 @@ You now get a table representing the amount of samples in both biobanks per type
 Finally, select "patientid" in the third dropdown, the distinct attribute.
 The table will update to show you how many patients with at least one sample of a specific type are available in a biobank.
 
+## Data Explorer v2 (Experimental)
+
+The data explorer can be used to explorer the data.
+
+#### Enabling the data explore v2 
+The data explorer v2 can be set as the default data explorer by removing the data-explorer (v1) plugin from the menu.
+Selecting an item in the navigator will then open the item in the data explorer v2.
+
+The data explorer v2 can be added to the (main)menu via a redirect plugin: 
+- Open the menu-manager
+- In de section 'Create a new menu item'
+  - Select ```redirect``` as plugin type
+  - Choose a name ( for example: 'Dataexplorer')
+  - Paste a link to app as the queryString
+```url=%2F@molgenis-ui%2Fdata-explorer%2Fdist%2Findex.html```
+  - Add the item to the menu 
+	
+### Data explorer v2 features
+
+#### Table actions are accessible using the toolbar
+(hover over the buttons to view action labels).
+- Add button: The add button allows the user to add a new row to the table (only visible if user has 'ADD_DATA' rights).
+- Search input:  Allows the user to search the entire table.
+- Order by dropdown: Allows user to oder the data by a given field ( clicking the button reverses the order)
+  - for quick access clicking on the column header labels sort the table by that column.
+  - a second click reverses the sort order
+- Show/Hide columns: Can be used to hide (and unhide) columns (or card fields)
+- Download button: Downloads the table as an exel file
+- View selector: Toggle between card or grid view
+- Settings: (only visible as admin) opens up table settings form
+
+#### Card view and custom cards
+Data explorer v2 has the ability to show data as a grid of cards or as a data table ( similar to data explorer v1).
+
+
+##### Card view with default card
+By default each card shows a list show as a list of label / value pairs. Each item in the list is a column in the data table.
+The number of items show can be configured using the table settings.
+
+
+#### Custom card layout
+
+The card display can be customised by adding a template to the table settings.
+
+Take for example the table describing a list of books, the default card looks like this:
+
+Default card:
+
+![Dataexplorer default_card_example](./images/dataexplorer/de-2-docs-default-card-book.png)
+
+By adding a template its display can be customised.
+
+
+Template:
+```
+<h1>{{record.label}}</h1>
+<p>by {{record.author.label }}</p>
+```
+
+Customised card:
+
+![Dataexplorer default_card_example](./images/dataexplorer/de-2-docs-custom-card-book.png)
+
+
+A template can contain any valid vue template code, this includes valid html and styling.
+
+### Per Table Data Explorer Settings
+
+Each data table can be associated with a settings item.
+A settings item configures the way the data explorer behaves for a given table.
+
+Settings a stores in the system table: ``sys_ts_DataExplorerEntitySettings``
+
+Each row in this table contains the settings for a single data table. If no settigns a given the default settings are used. The table contains the following settings fields:
+
+- Table - (required) a reverence to the table that uses these settings
+- Card template - a custom template used to render the card 
+- Is shop - indicates if a card/row can be select ( added to a selection)
+- Template attributes - list of comma separated table fields to be used in the template
+- Collapse limit - number of fields that a initialy show on the default cards
+- Default filters - list of comma separated table fields that a show a filters 
+
+The settings table can be readed from the dataexplorer by selection the setting action in the toolbar (or via the navigator or using emx).
