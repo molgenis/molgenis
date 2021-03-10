@@ -278,12 +278,12 @@ The data explorer v2 can be added to the (main)menu via a redirect plugin
 
 #### Table actions are accessible using the toolbar
 (hover over the buttons to view action labels).
-- Add button: The add button allows the user to add a new row to the table ( only visible if user has 'ADD_DATA' rights).
+- Add button: The add button allows the user to add a new row to the table (only visible if user has 'ADD_DATA' rights).
 - Search input:  Allows the user to search the entire table.
 - Order by dropdown: Allows user to oder the data by a given field ( clicking the button reverses the order)
   - for quick access clicking on the column header labels sort the table by that column.
   - a second click reverses the sort order
-- Show/Hide columns: Can be used to hide ( and unhide) columns ( or card fields)
+- Show/Hide columns: Can be used to hide (and unhide) columns (or card fields)
 - Download button: Downloads the table as an exel file
 - View selector: Toggle between card or grid view
 - Settings: (only visible as admin) opens up table settings form
@@ -340,4 +340,4 @@ Each row in this table contains the settings for a single data table. If no sett
 - Collapse limit - number of fields that a initialy show on the default cards
 - Default filters - list of comma separated table fields that a show a filters 
 
-The settings table can be readed from the dataexplorer by selection the setting action in the toolbar ( or via the navigator or using emx)
+The settings table can be readed from the dataexplorer by selection the setting action in the toolbar (or via the navigator or using emx)
