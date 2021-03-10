@@ -321,8 +321,7 @@ Customised card:
 ![Dataexplorer default_card_example](./images/dataexplorer/de-2-docs-custom-card-book.png)
 
 
-A template can contain any valid vue template code, this includes any valid html ( 
-including inline styles or scripts).
+A template can contain any valid vue template code, this includes valid html and styling.
 
 ### Per Table Data Explorer Settings
 
