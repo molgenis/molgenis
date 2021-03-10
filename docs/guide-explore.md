@@ -259,13 +259,13 @@ The table will update to show you how many patients with at least one sample of 
 
 ## Data Explorer v2 (Experimental)
 
-The data explorer can be used to explorer the data
+The data explorer can be used to explorer the data.
 
 #### Enabling the data explore v2 
 The data explorer v2 can be set as the default data explorer by removing the data-explorer (v1) plugin from the menu.
-Selecting an item in the navigator will then open the item in the data explorer v2
+Selecting an item in the navigator will then open the item in the data explorer v2.
 
-The data explorer v2 can be added to the (main)menu via a redirect plugin 
+The data explorer v2 can be added to the (main)menu via a redirect plugin: 
 - Open the menu-manager
 - In de section 'Create a new menu item'
   - Select ```redirect``` as plugin type
@@ -289,12 +289,12 @@ The data explorer v2 can be added to the (main)menu via a redirect plugin
 - Settings: (only visible as admin) opens up table settings form
 
 #### Card view and custom cards
-Data explorer v2 has the ability to show data as a grid of cards or as a data table ( similar to data explorer v1)
+Data explorer v2 has the ability to show data as a grid of cards or as a data table ( similar to data explorer v1).
 
 
 ##### Card view with default card
 By default each card shows a list show as a list of label / value pairs. Each item in the list is a column in the data table.
-The number of items show can be configured using the table settings
+The number of items show can be configured using the table settings.
 
 
 #### Custom card layout
@@ -307,7 +307,7 @@ Default card:
 
 ![Dataexplorer default_card_example](./images/dataexplorer/de-2-docs-default-card-book.png)
 
-By adding a template its display can be customised
+By adding a template its display can be customised.
 
 
 Template:
@@ -340,4 +340,4 @@ Each row in this table contains the settings for a single data table. If no sett
 - Collapse limit - number of fields that a initialy show on the default cards
 - Default filters - list of comma separated table fields that a show a filters 
 
-The settings table can be readed from the dataexplorer by selection the setting action in the toolbar (or via the navigator or using emx)
+The settings table can be readed from the dataexplorer by selection the setting action in the toolbar (or via the navigator or using emx).
