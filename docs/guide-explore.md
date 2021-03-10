@@ -274,7 +274,7 @@ The data explorer v2 can be added to the (main)menu via a redirect plugin
 ```url=%2F@molgenis-ui%2Fdata-explorer%2Fdist%2Findex.html```
   - Add the item to the menu 
 	
-### Data explore v2 features
+### Data explorer v2 features
 
 Differences with data explorer v2 will be listed 
 
