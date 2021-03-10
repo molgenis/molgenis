@@ -276,8 +276,6 @@ The data explorer v2 can be added to the (main)menu via a redirect plugin
 	
 ### Data explorer v2 features
 
-Differences with data explorer v2 will be listed 
-
 #### Table actions are accessible using the toolbar
 (hover over the buttons to view action labels).
 - Add button: The add button allows the user to add a new row to the table ( only visible if user has 'ADD_DATA' rights).
