@@ -4,7 +4,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.auth.CachedRoleHierarchyImpl;
 import org.molgenis.data.security.auth.UserFactory;
+import org.molgenis.data.security.auth.VOGroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.permission.VOGroupRoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
@@ -52,8 +54,15 @@ public class SecurityConfig {
   public MappedOidcUserService oidcUserService(
       OidcUserMapper oidcUserMapper,
       UserDetailsServiceImpl userDetailsService,
-      DataService dataService) {
-    return new MappedOidcUserService(oidcUserMapper, userDetailsService, dataService);
+      DataService dataService,
+      VOGroupService voGroupService,
+      VOGroupRoleMembershipService voGroupRoleMembershipService) {
+    return new MappedOidcUserService(
+        oidcUserMapper,
+        userDetailsService,
+        dataService,
+        voGroupService,
+        voGroupRoleMembershipService);
   }
 
   @Bean

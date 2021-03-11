@@ -20,6 +20,7 @@ import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.GroupService.EDITOR;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata.VOGROUP_ROLE_MEMBERSHIP;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
+import org.molgenis.data.security.auth.VOGroupRoleMembership;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
@@ -190,11 +192,11 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
     when(dataService.query(ROLE, Role.class)).thenReturn(query);
 
     Query<Role> managerQuery = mock(Query.class);
-    when(query.eq(eq(RoleMetadata.NAME), eq("MANAGER"))).thenReturn(managerQuery);
+    when(query.eq(RoleMetadata.NAME, "MANAGER")).thenReturn(managerQuery);
     when(managerQuery.findOne()).thenReturn(defaultManagerRole);
 
     Query<Role> editorQuery = mock(Query.class);
-    when(query.eq(eq(RoleMetadata.NAME), eq("EDITOR"))).thenReturn(editorQuery);
+    when(query.eq(RoleMetadata.NAME, "EDITOR")).thenReturn(editorQuery);
     when(editorQuery.findOne()).thenReturn(defaultEditorRole);
   }
 
@@ -237,6 +239,12 @@ class GroupPackageServiceImplTest extends AbstractMockitoTest {
 
     Query<Role> includesRoleQuery1 = mock(Query.class, RETURNS_SELF);
     when(dataService.query(ROLE, Role.class)).thenReturn(includesRoleQuery1);
+
+    Query<VOGroupRoleMembership> voMembershipQuery = mock(Query.class, Mockito.RETURNS_SELF);
+    when(dataService.query(VOGROUP_ROLE_MEMBERSHIP, VOGroupRoleMembership.class))
+        .thenReturn(voMembershipQuery);
+    doReturn(role1Query).when(voMembershipQuery).eq(RoleMembershipMetadata.ROLE, "role1");
+    doReturn(role2Query).when(voMembershipQuery).eq(RoleMembershipMetadata.ROLE, "role2");
 
     groupPackageService.deleteGroup(pack);
 

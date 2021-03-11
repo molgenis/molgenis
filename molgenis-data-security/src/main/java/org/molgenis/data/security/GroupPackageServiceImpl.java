@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata.VOGROUP_ROLE_MEMBERSHIP;
 import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 
 import java.util.List;
@@ -26,6 +27,8 @@ import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
+import org.molgenis.data.security.auth.VOGroupRoleMembership;
+import org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
@@ -123,6 +126,7 @@ public class GroupPackageServiceImpl implements GroupPackageService {
         .flatMap(this::includesRole)
         .forEach(role -> groupService.removeExtendsRole(group, role));
     roles.forEach(this::deleteMembers);
+    roles.forEach(this::deleteVOGroupMembers);
     dataService.delete(RoleMetadata.ROLE, stream(roles));
   }
 
@@ -137,6 +141,15 @@ public class GroupPackageServiceImpl implements GroupPackageService {
             .eq(RoleMembershipMetadata.ROLE, role.getId())
             .findAll();
     dataService.delete(RoleMembershipMetadata.ROLE_MEMBERSHIP, memberships);
+  }
+
+  private void deleteVOGroupMembers(Role role) {
+    Stream<VOGroupRoleMembership> memberships =
+        dataService
+            .query(VOGROUP_ROLE_MEMBERSHIP, VOGroupRoleMembership.class)
+            .eq(VOGroupRoleMembershipMetadata.ROLE, role.getId())
+            .findAll();
+    dataService.delete(VOGROUP_ROLE_MEMBERSHIP, memberships);
   }
 
   private String getManagerRoleName(GroupValue groupValue) {

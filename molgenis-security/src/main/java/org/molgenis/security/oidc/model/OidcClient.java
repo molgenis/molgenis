@@ -3,6 +3,7 @@ package org.molgenis.security.oidc.model;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_GRANT_TYPE;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_URI;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_AUTHENTICATION_METHOD;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_ID;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLIENT_NAME;
@@ -15,6 +16,7 @@ import static org.molgenis.security.oidc.model.OidcClientMetadata.TOKEN_URI;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.USERNAME_ATTRIBUTE_NAME;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.USER_INFO_URI;
 
+import java.util.Optional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -140,7 +142,11 @@ public class OidcClient extends StaticEntity {
     return getString(EMAIL_ATTRIBUTE_NAME);
   }
 
-  public String getClaimsRolePath() {
-    return getString(CLAIMS_ROLE_PATH);
+  public Optional<String> getClaimsRolePath() {
+    return Optional.ofNullable(getString(CLAIMS_ROLE_PATH));
+  }
+
+  public Optional<String> getClaimsVOGroupPath() {
+    return Optional.ofNullable(getString(CLAIMS_VOGROUP_PATH));
   }
 }
