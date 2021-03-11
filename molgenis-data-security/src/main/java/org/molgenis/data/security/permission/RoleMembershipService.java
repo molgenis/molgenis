@@ -12,6 +12,8 @@ public interface RoleMembershipService {
 
   Collection<RoleMembership> getMemberships(Collection<Role> roles);
 
+  Collection<RoleMembership> getCurrentMemberships(User user);
+
   void removeMembership(final RoleMembership roleMembership);
 
   void updateMembership(RoleMembership roleMembership, Role newRole);
