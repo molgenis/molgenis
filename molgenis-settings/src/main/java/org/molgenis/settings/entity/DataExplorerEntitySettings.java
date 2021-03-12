@@ -19,6 +19,7 @@ public class DataExplorerEntitySettings extends SystemEntityType {
   private static final String SIMPLE_NAME = "DataExplorerEntitySettings";
   private static final String TABLE = "table";
   private static final String CARD_TEMPLATE = "card_template";
+  private static final String DETAIL_TEMPLATE = "detail_template";
   private static final String SHOP = "shop";
   private static final String TEMPLATE_ATTRS = "template_attrs";
   private static final String COLLAPSE_LIMIT = "collapse_limit";
@@ -67,6 +68,15 @@ public class DataExplorerEntitySettings extends SystemEntityType {
         .setLabel("Card template")
         .setDescription(
             "Specify a Vue template that should be rendered in the card layout of data explorer v2");
+    addAttribute(DETAIL_TEMPLATE)
+        .setDataType(SCRIPT)
+        .setNillable(true)
+        .setAuto(false)
+        .setUnique(false)
+        .setReadOnly(false)
+        .setLabel("Detail template")
+        .setDescription(
+            "Specify a Vue template that should be rendered as the entity detail layout of data explorer v2");
     addAttribute(SHOP)
         .setDataType(BOOL)
         .setNillable(true)
