@@ -98,7 +98,7 @@ public class VOGroupService {
     var newlyCreated =
         groupNames.stream()
             .filter(name -> !foundNames.contains(name))
-            .map(voGroupFactory::create)
+            .map(voGroupFactory::withName)
             .collect(toList());
     dataService.add(VO_GROUP, newlyCreated.stream());
     result.addAll(newlyCreated);

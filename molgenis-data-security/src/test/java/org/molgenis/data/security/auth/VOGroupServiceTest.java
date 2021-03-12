@@ -61,7 +61,7 @@ class VOGroupServiceTest extends AbstractMockitoTest {
 
     when(dataService.query(VO_GROUP, VOGroup.class)).thenReturn(query);
     when(query.in(NAME, groupNames).findAll()).thenReturn(Stream.empty());
-    when(voGroupFactory.create(groupName)).thenReturn(voGroup);
+    when(voGroupFactory.withName(groupName)).thenReturn(voGroup);
 
     assertEquals(List.of(voGroup), voGroupService.getGroups(groupNames));
 
