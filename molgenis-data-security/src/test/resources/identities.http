@@ -1,0 +1,38 @@
+### Logout
+POST http://localhost/logout
+
+### Login
+POST http://localhost/login?username=admin&password=admin
+
+### Delete group
+DELETE http://localhost/api/identities/group/test
+
+### Create group
+POST http://localhost/api/identities/group
+Content-Type: application/json
+
+{
+  "label": "My test group",
+  "name": "test"
+}
+
+### Get VO groups (temp endpoint)
+GET http://localhost/api/identities/vo-group
+
+### Add group VO member
+POST http://localhost/api/identities/group/test/vo-group
+Content-Type: application/json
+
+{
+  "VOGroupID": "aaaac6bcdqfeivt6j7andqyaai",
+  "roleName": "test_EDITOR"
+}
+
+### Get group VO members
+GET http://localhost/api/identities/group/test/vo-group
+Accept: application/json
+
+### Remove group VO member
+DELETE http://localhost/api/identities/group/test/vo-group/aaaac6bcdqfeivt6j7andqyaai
+
+

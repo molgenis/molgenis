@@ -13,15 +13,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.identities.AddGroupMemberCommand.addGroupMember;
+import static org.molgenis.api.identities.AddVOGroupMemberCommand.addVOGroupMember;
 import static org.molgenis.api.identities.GroupCommand.createGroup;
 import static org.molgenis.api.identities.IdentitiesApiController.GROUP_END_POINT;
 import static org.molgenis.api.identities.IdentitiesApiController.TEMP_USER_END_POINT;
+import static org.molgenis.api.identities.IdentitiesApiController.TEMP_VO_GROUP_END_POINT;
 import static org.molgenis.api.identities.UpdateGroupMemberCommand.updateGroupMember;
 import static org.molgenis.data.security.auth.GroupPermission.ADD_MEMBERSHIP;
 import static org.molgenis.data.security.auth.GroupPermission.REMOVE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.GroupPermission.UPDATE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.GroupPermission.VIEW;
 import static org.molgenis.data.security.auth.GroupPermission.VIEW_MEMBERSHIP;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,10 +59,14 @@ import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.RoleService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetadata;
+import org.molgenis.data.security.auth.VOGroup;
+import org.molgenis.data.security.auth.VOGroupRoleMembership;
+import org.molgenis.data.security.auth.VOGroupService;
 import org.molgenis.data.security.exception.GroupNameNotAvailableException;
 import org.molgenis.data.security.exception.GroupPermissionDeniedException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.permission.VOGroupRoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.Permission;
@@ -87,6 +94,7 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();
   @Mock private GroupService groupService;
   @Mock private RoleMembershipService roleMembershipService;
+  @Mock private VOGroupRoleMembershipService voGroupRoleMembershipService;
   @Mock private RoleService roleService;
   @Mock private UserService userService;
 
@@ -100,12 +108,15 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
 
   @Mock private User user;
   @Mock private Group group;
+  @Mock private VOGroup voGroup;
   @Mock private Role viewer;
   @Mock private Role editor;
   @Mock private Role manager;
   @Mock private Role anonymous;
   @Mock private LocaleResolver localeResolver;
   @Mock private RoleMembership memberShip;
+  @Mock private VOGroupRoleMembership voGroupRoleMembership;
+  @Mock private VOGroupService voGroupService;
 
   private MockMvc mockMvc;
 
@@ -128,8 +139,10 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
             groupValueFactory,
             groupService,
             roleMembershipService,
+            voGroupRoleMembershipService,
             roleService,
             userService,
+            voGroupService,
             userPermissionEvaluator);
     mockMvc =
         MockMvcBuilders.standaloneSetup(groupRestController)
@@ -241,6 +254,35 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
+  void testGetVOGroupMembers() throws Exception {
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP))
+        .thenReturn(true);
+    when(groupService.getGroup("devs")).thenReturn(group);
+    when(group.getRoles()).thenReturn(ImmutableList.of(viewer, editor, manager));
+
+    when(voGroupRoleMembershipService.getMemberships(ImmutableList.of(viewer, editor, manager)))
+        .thenReturn(singletonList(voGroupRoleMembership));
+
+    when(voGroupRoleMembership.getVOGroup()).thenReturn(voGroup);
+    when(voGroupRoleMembership.getRole()).thenReturn(editor);
+
+    when(voGroup.getId()).thenReturn("aaaac6ayifdmzjxpwu7mrziaae");
+    when(voGroup.getName()).thenReturn("urn:mace:surf.nl:sram:group:molgenis:dev");
+
+    when(editor.getName()).thenReturn("DEVS_EDITOR");
+    when(editor.getLabel()).thenReturn("Developers Editor");
+
+    mockMvc
+        .perform(get(GROUP_END_POINT + "/devs/vo-group"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].VOGroup.id", is("aaaac6ayifdmzjxpwu7mrziaae")))
+        .andExpect(jsonPath("$[0].VOGroup.name", is("urn:mace:surf.nl:sram:group:molgenis:dev")))
+        .andExpect(jsonPath("$[0].role.roleName", is("DEVS_EDITOR")))
+        .andExpect(jsonPath("$[0].role.roleLabel", is("Developers Editor")));
+  }
+
+  @Test
   void testGetMembersPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP))
         .thenReturn(false);
@@ -299,6 +341,32 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
                 .string("Location", "http://localhost" + GROUP_END_POINT + "/devs/member/henkie"));
 
     verify(groupService).addMember(group, user, editor);
+  }
+
+  @Test
+  void testAddVOGroupMembership() throws Exception {
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP))
+        .thenReturn(true);
+    when(groupService.getGroup("devs")).thenReturn(group);
+    when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+    when(voGroupService.getGroupByID("aaaac6ayifdmzjxpwu7mrziaae")).thenReturn(voGroup);
+
+    mockMvc
+        .perform(
+            post(GROUP_END_POINT + "/devs/vo-group")
+                .contentType(APPLICATION_JSON)
+                .content(
+                    gson.toJson(addVOGroupMember("aaaac6ayifdmzjxpwu7mrziaae", "DEVS_EDITOR"))))
+        .andExpect(status().isCreated())
+        .andExpect(
+            header()
+                .string(
+                    "Location",
+                    "http://localhost"
+                        + GROUP_END_POINT
+                        + "/devs/vo-group/aaaac6ayifdmzjxpwu7mrziaae"));
+
+    verify(groupService).addVOGroupMembership(group, voGroup, editor);
   }
 
   @Test
@@ -416,6 +484,19 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
   }
 
   @Test
+  void testRemoveVOGroupMembership() throws Exception {
+    when(groupService.getGroup("devs")).thenReturn(group);
+    when(voGroupService.getGroupByID("aaaac6ayifdmzjxpwu7mrziaae")).thenReturn(voGroup);
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
+        .thenReturn(true);
+    mockMvc
+        .perform(
+            delete("/api/identities/group/devs/vo-group/{voGroupID}", "aaaac6ayifdmzjxpwu7mrziaae"))
+        .andExpect(status().isNoContent());
+    verify(groupService).removeMember(group, voGroup);
+  }
+
+  @Test
   void testRemoveMembershipPermissionDenied() throws Throwable {
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(false);
@@ -519,6 +600,25 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(header().doesNotExist("Location"));
 
     verify(groupService).updateMemberRole(group, user, editor);
+  }
+
+  @Test
+  void testUpdateVOGroupMembership() throws Exception {
+    when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP))
+        .thenReturn(true);
+    when(groupService.getGroup("devs")).thenReturn(group);
+    when(voGroupService.getGroupByID("aaaac6ayifdmzjxpwu7mrziaae")).thenReturn(voGroup);
+    when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+
+    mockMvc
+        .perform(
+            put(GROUP_END_POINT + "/devs/vo-group/{groupID}", "aaaac6ayifdmzjxpwu7mrziaae")
+                .content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(header().doesNotExist("Location"));
+
+    verify(groupService).updateMemberRole(group, voGroup, editor);
   }
 
   @Test
@@ -739,6 +839,22 @@ class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].id", is("id")))
         .andExpect(jsonPath("$[0].username", is("name")));
+  }
+
+  @Test
+  @WithMockUser(roles = {"MANAGER"})
+  void testGetVOGroups() throws Exception {
+    when(voGroup.getId()).thenReturn("id");
+    when(voGroup.getName()).thenReturn("name");
+
+    when(voGroupService.getGroups()).thenReturn(Arrays.asList(voGroup));
+
+    mockMvc
+        .perform(get(TEMP_VO_GROUP_END_POINT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].id", is("id")))
+        .andExpect(jsonPath("$[0].name", is("name")));
   }
 
   @Test
