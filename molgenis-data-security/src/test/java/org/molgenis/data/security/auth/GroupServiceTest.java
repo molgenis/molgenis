@@ -15,11 +15,13 @@ import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.GroupService.EDITOR;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata.VO_GROUP;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +38,10 @@ import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
+import org.molgenis.data.security.exception.VOGroupIsAlreadyMemberException;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.permission.VOGroupRoleMembershipService;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.GroupValueFactoryTest;
 import org.molgenis.security.core.model.GroupValue;
@@ -61,9 +65,13 @@ class GroupServiceTest extends AbstractMockitoTest {
   @Mock private Role managerRole;
   @Mock private Role editorRole;
   @Mock private User user;
+  @Mock private VOGroup voGroup;
   @Mock private Package aPackage;
   @Mock private RoleMembershipMetadata roleMembershipMetadata;
   @Mock private RoleMembership membership;
+  @Mock private VOGroupRoleMembership voGroupRoleMembership;
+  @Mock private VOGroupRoleMembershipService voGroupRoleMembershipService;
+  @Mock private VOGroupRoleMembershipMetadata voGroupRoleMembershipMetadata;
 
   private GroupService groupService;
 
@@ -97,7 +105,9 @@ class GroupServiceTest extends AbstractMockitoTest {
             dataService,
             groupMetadata,
             roleMembershipService,
+            voGroupRoleMembershipService,
             roleMembershipMetadata,
+            voGroupRoleMembershipMetadata,
             aclService,
             permissionService);
   }
@@ -176,6 +186,46 @@ class GroupServiceTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testAddVOGroupMemberHappyPath() {
+    when(group.getRoles()).thenReturn(singletonList(managerRole));
+    when(managerRole.getName()).thenReturn("dev");
+
+    when(voGroupRoleMembershipService.getMemberships(singletonList(managerRole)))
+        .thenReturn(emptyList());
+    when(voGroup.getName()).thenReturn("voName");
+
+    groupService.addVOGroupMembership(group, voGroup, managerRole);
+
+    verify(voGroupRoleMembershipService).add(voGroup, managerRole);
+  }
+
+  @Test
+  void testAddVOGroupMemberNotAGroupRole() {
+    when(group.getRoles()).thenReturn(singletonList(editorRole));
+    when(editorRole.getName()).thenReturn("editor");
+    when(managerRole.getName()).thenReturn("manager");
+
+    assertThrows(
+        NotAValidGroupRoleException.class,
+        () -> groupService.addVOGroupMembership(group, voGroup, managerRole));
+  }
+
+  @Test
+  void testAddVOGroupMemberAlreadyAMember() {
+    when(group.getRoles()).thenReturn(singletonList(managerRole));
+    when(managerRole.getName()).thenReturn("dev");
+
+    when(voGroupRoleMembershipService.getMemberships(singletonList(managerRole)))
+        .thenReturn(List.of(voGroupRoleMembership));
+    when(voGroupRoleMembership.getVOGroup()).thenReturn(voGroup);
+    when(voGroup.getName()).thenReturn("voName");
+
+    assertThrows(
+        VOGroupIsAlreadyMemberException.class,
+        () -> groupService.addVOGroupMembership(group, voGroup, managerRole));
+  }
+
+  @Test
   void testAddMemberNotAValidGroupRole() {
     when(group.getRoles()).thenReturn(emptyList());
 
@@ -194,6 +244,20 @@ class GroupServiceTest extends AbstractMockitoTest {
     groupService.removeMember(group, user);
 
     verify(roleMembershipService).removeMembership(membership);
+  }
+
+  @Test
+  void testRemoveVOGroupMember() {
+    when(group.getRoles()).thenReturn(singletonList(managerRole));
+    when(voGroupRoleMembershipService.getMemberships(singletonList(managerRole)))
+        .thenReturn(singletonList(voGroupRoleMembership));
+    when(voGroupRoleMembership.getId()).thenReturn("membershipID");
+    when(voGroupRoleMembership.getVOGroup()).thenReturn(voGroup);
+    when(voGroup.getId()).thenReturn("voID");
+
+    groupService.removeMember(group, voGroup);
+
+    verify(voGroupRoleMembershipService).removeMembership("membershipID");
   }
 
   @Test
@@ -219,6 +283,36 @@ class GroupServiceTest extends AbstractMockitoTest {
     groupService.updateMemberRole(group, user, editorRole);
 
     verify(roleMembershipService).updateMembership(membership, editorRole);
+  }
+
+  @Test
+  void testUpdateVOMemberRole() {
+    when(managerRole.getName()).thenReturn(MANAGER_NAME);
+    when(editorRole.getName()).thenReturn(EDITOR_NAME);
+    when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
+    when(voGroupRoleMembershipService.getMemberships(ImmutableList.of(managerRole, editorRole)))
+        .thenReturn(singletonList(voGroupRoleMembership));
+    when(voGroupRoleMembership.getVOGroup()).thenReturn(voGroup);
+    when(voGroupRoleMembership.getId()).thenReturn("membershipId");
+    when(voGroup.getId()).thenReturn("voID");
+
+    groupService.updateMemberRole(group, voGroup, editorRole);
+
+    verify(voGroupRoleMembershipService).updateMembership("membershipId", editorRole);
+  }
+
+  @Test
+  void testUpdateVOMemberUnknownMembership() {
+    when(managerRole.getName()).thenReturn(MANAGER_NAME);
+    when(editorRole.getName()).thenReturn(EDITOR_NAME);
+    when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
+    when(voGroupRoleMembershipService.getMemberships(ImmutableList.of(managerRole, editorRole)))
+        .thenReturn(emptyList());
+    when(voGroupRoleMembershipMetadata.getAttribute(VO_GROUP)).thenReturn(attribute);
+
+    assertThrows(
+        UnknownEntityException.class,
+        () -> groupService.updateMemberRole(group, voGroup, editorRole));
   }
 
   @Test

@@ -14,6 +14,7 @@ import static org.springframework.security.oauth2.core.ClientAuthenticationMetho
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.HashSet;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -66,7 +67,7 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     when(oidcClient.getJwkSetUri()).thenReturn(jwkSetUri);
     when(oidcClient.getScopes()).thenReturn(scopes);
     when(oidcClient.getUserInfoUri()).thenReturn(userInfoUri);
-    when(oidcClient.getClaimsRolePath()).thenReturn("roles");
+    when(oidcClient.getClaimsRolePath()).thenReturn(Optional.of("roles"));
 
     when(authenticationSettings.getOidcClients()).thenReturn(singleton(oidcClient));
     ClientRegistration clientRegistration =

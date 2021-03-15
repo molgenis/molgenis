@@ -30,8 +30,10 @@ import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
+import org.molgenis.data.security.exception.VOGroupIsAlreadyMemberException;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.permission.VOGroupRoleMembershipService;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
@@ -47,7 +49,9 @@ public class GroupService {
   private final PackageFactory packageFactory;
   private final GroupMetadata groupMetadata;
   private final RoleMembershipService roleMembershipService;
+  private final VOGroupRoleMembershipService voGroupRoleMembershipService;
   private final RoleMembershipMetadata roleMembershipMetadata;
+  private final VOGroupRoleMembershipMetadata voGroupRoleMembershipMetadata;
   private final MutableAclService aclService;
   private final PermissionService permissionService;
 
@@ -69,14 +73,18 @@ public class GroupService {
       DataService dataService,
       GroupMetadata groupMetadata,
       RoleMembershipService roleMembershipService,
+      VOGroupRoleMembershipService voGroupRoleMembershipService,
       RoleMembershipMetadata roleMembershipMetadata,
+      VOGroupRoleMembershipMetadata voGroupRoleMembershipMetadata,
       MutableAclService aclService,
       PermissionService permissionService) {
     this.packageFactory = requireNonNull(packageFactory);
     this.dataService = requireNonNull(dataService);
     this.groupMetadata = requireNonNull(groupMetadata);
     this.roleMembershipService = requireNonNull(roleMembershipService);
+    this.voGroupRoleMembershipService = requireNonNull(voGroupRoleMembershipService);
     this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
+    this.voGroupRoleMembershipMetadata = requireNonNull(voGroupRoleMembershipMetadata);
     this.aclService = requireNonNull(aclService);
     this.permissionService = requireNonNull(permissionService);
   }
@@ -158,6 +166,36 @@ public class GroupService {
     roleMembershipService.addUserToRole(user, role);
   }
 
+  /**
+   * Add a VO group to group. VO group can only be added to a role that belongs to the group. The VO
+   * group can only have a single role within the group
+   *
+   * @param group group to add the user to in the given role
+   * @param voGroup the VO Group to be added in the given role to the given group
+   * @param role role in which the given user is to be added to given group
+   */
+  @RunAsSystem
+  public void addVOGroupMembership(final Group group, final VOGroup voGroup, final Role role) {
+    ArrayList<Role> groupRoles = newArrayList(group.getRoles());
+    if (!isGroupRole(role, groupRoles)) {
+      throw new NotAValidGroupRoleException(role, group);
+    }
+    Collection<VOGroupRoleMembership> memberships =
+        voGroupRoleMembershipService.getMemberships(groupRoles);
+
+    boolean isMember =
+        memberships.stream()
+            .map(VOGroupRoleMembership::getVOGroup)
+            .map(VOGroup::getName)
+            .anyMatch(voGroup.getName()::equals);
+
+    if (isMember) {
+      throw new VOGroupIsAlreadyMemberException(voGroup, group);
+    }
+
+    voGroupRoleMembershipService.add(voGroup, role);
+  }
+
   private boolean isGroupRole(Role role, ArrayList<Role> groupRoles) {
     return groupRoles.stream().anyMatch(groupRole -> groupRole.getName().equals(role.getName()));
   }
@@ -167,6 +205,13 @@ public class GroupService {
     ArrayList<Role> groupRoles = newArrayList(group.getRoles());
     final RoleMembership membership = findRoleMembership(user, groupRoles);
     roleMembershipService.removeMembership(membership);
+  }
+
+  @RunAsSystem
+  public void removeMember(final Group group, final VOGroup voGroup) {
+    ArrayList<Role> groupRoles = newArrayList(group.getRoles());
+    final VOGroupRoleMembership membership = findVORoleMembership(voGroup, groupRoles);
+    voGroupRoleMembershipService.removeMembership(membership.getId());
   }
 
   @RunAsSystem
@@ -180,6 +225,19 @@ public class GroupService {
 
     final RoleMembership roleMembership = findRoleMembership(member, groupRoles);
     roleMembershipService.updateMembership(roleMembership, newRole);
+  }
+
+  @RunAsSystem
+  public void updateMemberRole(final Group group, final VOGroup voGroup, final Role newRole) {
+    ArrayList<Role> groupRoles = newArrayList(group.getRoles());
+    boolean isGroupRole = isGroupRole(newRole, groupRoles);
+
+    if (!isGroupRole) {
+      throw new NotAValidGroupRoleException(newRole, group);
+    }
+
+    final VOGroupRoleMembership roleMembership = findVORoleMembership(voGroup, groupRoles);
+    voGroupRoleMembershipService.updateMembership(roleMembership.getId(), newRole);
   }
 
   @RunAsSystem
@@ -197,12 +255,28 @@ public class GroupService {
         user.getUsername());
   }
 
+  private UnknownEntityException unknownMembershipForVOGroup(VOGroup group) {
+    return new UnknownEntityException(
+        voGroupRoleMembershipMetadata,
+        voGroupRoleMembershipMetadata.getAttribute(VOGroupRoleMembershipMetadata.VO_GROUP),
+        group);
+  }
+
   private RoleMembership findRoleMembership(User member, List<Role> groupRoles) {
     Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
     return memberships.stream()
         .filter(m -> m.getUser().getId().equals(member.getId()))
         .findFirst()
         .orElseThrow(() -> unknownMembershipForUser(member));
+  }
+
+  private VOGroupRoleMembership findVORoleMembership(VOGroup voGroup, List<Role> groupRoles) {
+    Collection<VOGroupRoleMembership> memberships =
+        voGroupRoleMembershipService.getMemberships(groupRoles);
+    return memberships.stream()
+        .filter(m -> m.getVOGroup().getId().equals(voGroup.getId()))
+        .findFirst()
+        .orElseThrow(() -> unknownMembershipForVOGroup(voGroup));
   }
 
   public void deleteGroup(String groupName) {

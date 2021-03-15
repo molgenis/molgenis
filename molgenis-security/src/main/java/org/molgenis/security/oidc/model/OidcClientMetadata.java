@@ -37,6 +37,7 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String USERNAME_ATTRIBUTE_NAME = "userNameAttributeName";
   static final String EMAIL_ATTRIBUTE_NAME = "emailAttributeName";
   public static final String CLAIMS_ROLE_PATH = "claimsRolePath";
+  public static final String CLAIMS_VOGROUP_PATH = "claimsVOGroupPath";
 
   private final OidcPackage oidcPackage;
 
@@ -87,6 +88,11 @@ public class OidcClientMetadata extends SystemEntityType {
         .setLabel("Claims role path")
         .setDescription(
             "JSON path expression to evaluate on the joined ID token and user info claims to retrieve user roles")
+        .setNillable(true);
+    addAttribute(CLAIMS_VOGROUP_PATH)
+        .setLabel("Claims VO Group path")
+        .setDescription(
+            "JSON path expression to evaluate on the joined ID token and user info claims to retrieve VO Groups")
         .setNillable(true);
 
     Attribute providerDetailsAttribute =

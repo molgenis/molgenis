@@ -1,9 +1,11 @@
 package org.molgenis.security.oidc;
 
+import static com.google.api.client.util.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.Map;
@@ -45,6 +47,11 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
   }
 
   private ClientRegistration toClientRegistration(OidcClient oidcClient) {
+    Map<String, Object> configMetadata = newHashMap();
+    oidcClient.getClaimsRolePath().ifPresent(path -> configMetadata.put(CLAIMS_ROLE_PATH, path));
+    oidcClient
+        .getClaimsVOGroupPath()
+        .ifPresent(path -> configMetadata.put(CLAIMS_VOGROUP_PATH, path));
     return ClientRegistration.withRegistrationId(oidcClient.getRegistrationId())
         .authorizationGrantType(toAuthorizationGrantType(oidcClient))
         .authorizationUri(oidcClient.getAuthorizationUri())
@@ -58,7 +65,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
         .tokenUri(oidcClient.getTokenUri())
         .userInfoUri(oidcClient.getUserInfoUri())
         .userNameAttributeName(SUB)
-        .providerConfigurationMetadata(Map.of(CLAIMS_ROLE_PATH, oidcClient.getClaimsRolePath()))
+        .providerConfigurationMetadata(configMetadata)
         .build();
   }
 
