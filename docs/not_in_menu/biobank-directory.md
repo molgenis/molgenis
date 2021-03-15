@@ -67,11 +67,11 @@ Sample NegotiatorQuery:
   "humanReadable" : "materials is Plasma and Cryo tissue or materials is Not available
 sample access fee is required",
   "collections"   : [{
-    "collectionID" : "bbmri-eric:collectionID:BE_B0383_LTC",
-    "biobankID"    : "bbmri-eric:biobankID:BE_B0383"
+    "collectionId" : "bbmri-eric:collectionID:BE_B0383_LTC",
+    "biobankId"    : "bbmri-eric:biobankID:BE_B0383"
   }, {
-    "collectionID" : "bbmri-eric:collectionID:BE_B03843_LTCD",
-    "biobankID"    : "bbmri-eric:biobankID:BE_B0383"
+    "collectionId" : "bbmri-eric:collectionID:BE_B03843_LTCD",
+    "biobankId"    : "bbmri-eric:biobankID:BE_B0383"
   }]
 }
 ```
