@@ -105,16 +105,9 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Stream<Entity> findAll(Query<Entity> q) {
     if (isRunByUser() && isNonSystemEntityType()) {
-      return delegate()
-          .findAll(q)
-          .filter(
-              entity -> {
-                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
-                return true;
-              });
-    } else {
-      return delegate().findAll(q);
+      audit(ENTITIES_READ);
     }
+    return delegate().findAll(q);
   }
 
   @Override
@@ -156,31 +149,17 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
   @Override
   public Stream<Entity> findAll(Stream<Object> ids) {
     if (isRunByUser() && isNonSystemEntityType()) {
-      return delegate()
-          .findAll(ids)
-          .filter(
-              entity -> {
-                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
-                return true;
-              });
-    } else {
-      return delegate().findAll(ids);
+      audit(ENTITIES_READ);
     }
+    return delegate().findAll(ids);
   }
 
   @Override
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
     if (isRunByUser() && isNonSystemEntityType()) {
-      return delegate()
-          .findAll(ids, fetch)
-          .filter(
-              entity -> {
-                audit(ENTITY_READ, ENTITY_ID, entity.getIdValue());
-                return true;
-              });
-    } else {
-      return delegate().findAll(ids, fetch);
+      audit(ENTITIES_READ);
     }
+    return delegate().findAll(ids, fetch);
   }
 
   @Override

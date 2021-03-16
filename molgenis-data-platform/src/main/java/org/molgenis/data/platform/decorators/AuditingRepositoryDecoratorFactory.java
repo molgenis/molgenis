@@ -2,52 +2,34 @@ package org.molgenis.data.platform.decorators;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
-import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.util.EntityTypeUtils.isSystemEntity;
 import static org.molgenis.security.audit.AuditSettingsImpl.AUDIT_SETTINGS;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.audit.AuditingRepositoryDecorator;
 import org.molgenis.security.audit.AuditSettings;
 import org.molgenis.util.UnexpectedEnumException;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Decorates a {@link Repository} with an {@link AuditingRepositoryDecorator} if the Repository
- * meets the following criteria:
- *
- * <p>For system entity types:
- *
- * <ul>
- *   <li>Auditing of system entity types is enabled in the {@link AuditSettings}
- *   <li>The repository is not excluded from auditing
- * </ul>
- *
- * For data entity types:
- *
- * <ul>
- *   <li>Auditing of data entity types is set to ALL in the {@link AuditSettings}, OR
- *   <li>Auditing of data entity types is set to TAGGED in the {@link AuditSettings} and the entity
- *       type is tagged with the 'audit-usage' tag.
- * </ul>
- */
 @Component
 public class AuditingRepositoryDecoratorFactory {
 
-  private static final ImmutableSet<String> SYSTEM_AUDIT_EXCLUSIONS =
-      ImmutableSet.of(INDEX_JOB_EXECUTION, INDEX_ACTION, INDEX_ACTION_GROUP, AUDIT_SETTINGS);
+  private static final Set<String> EXCLUDED = Sets.newHashSet(AUDIT_SETTINGS);
 
   private final AuditEventPublisher auditEventPublisher;
   private final AuditSettings auditSettings;
+  private boolean bootstrappingDone = false;
 
   AuditingRepositoryDecoratorFactory(
       AuditEventPublisher auditEventPublisher, AuditSettings auditSettings) {
@@ -59,10 +41,12 @@ public class AuditingRepositoryDecoratorFactory {
     var entityType = repository.getEntityType();
 
     var decorate = false;
-    if (isSystemEntity(entityType)) {
-      decorate = isAuditedSystemEntityType(entityType);
-    } else {
-      decorate = isAuditedDataEntityType(entityType);
+    if (!EXCLUDED.contains(entityType.getId()) && bootstrappingDone) {
+      if (isSystemEntity(entityType)) {
+        decorate = auditSettings.getSystemAuditEnabled();
+      } else {
+        decorate = isAuditedDataEntityType(entityType);
+      }
     }
 
     if (decorate) {
@@ -72,9 +56,8 @@ public class AuditingRepositoryDecoratorFactory {
     }
   }
 
-  private boolean isAuditedSystemEntityType(EntityType entityType) {
-    return auditSettings.getSystemAuditEnabled()
-        && !SYSTEM_AUDIT_EXCLUSIONS.contains(entityType.getId());
+  public void excludeEntityType(String entityTypeId) {
+    EXCLUDED.add(entityTypeId);
   }
 
   private boolean isAuditedDataEntityType(EntityType entityType) {
@@ -93,5 +76,10 @@ public class AuditingRepositoryDecoratorFactory {
   private boolean isAuditUsage(Tag tag) {
     return AUDIT_USAGE.toString().equals(tag.getObjectIri())
         && isAudited.getIRI().equals(tag.getRelationIri());
+  }
+
+  @EventListener
+  public void onBootstrappingEvent(BootstrappingEvent event) {
+    this.bootstrappingDone = event.getStatus() == FINISHED;
   }
 }

@@ -12,4 +12,6 @@ public interface DynamicRepositoryDecoratorRegistry {
   DynamicRepositoryDecoratorFactory getFactory(String id);
 
   Repository<Entity> decorate(Repository<Entity> repository);
+
+  void excludeEntityType(String entityTypeId);
 }

@@ -6,6 +6,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.any;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 
 import com.google.gson.Gson;
 import java.util.Map;
@@ -35,6 +37,7 @@ import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.data.decorator.meta.DecoratorParametersMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.decorator.meta.DynamicDecoratorMetadata;
+import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,7 +50,6 @@ import org.springframework.test.context.ContextConfiguration;
       DecoratorParametersMetadata.class
     })
 class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringTest {
-
   @Autowired DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
   @Autowired DecoratorParametersMetadata decoratorParametersMetadata;
@@ -65,6 +67,9 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
   @BeforeEach
   void beforeMethod() {
     registry = new DynamicRepositoryDecoratorRegistryImpl(dataService, new Gson());
+
+    // fake the bootstrapping event to tell the registry that bootstrapping is finished.
+    registry.onBootstrappingEvent(new BootstrappingEvent(FINISHED));
   }
 
   @Test
@@ -153,6 +158,17 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
     when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(null);
 
     assertEquals("repositoryName", registry.decorate(repository).getName());
+  }
+
+  @Test
+  void testDecorateExcluded() {
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("excludeMe");
+    registry.excludeEntityType("excludeMe");
+
+    var repo = registry.decorate(repository);
+
+    assertFalse(repo instanceof DynamicDecorator);
   }
 
   @Test

@@ -3,8 +3,10 @@ package org.molgenis.data.platform.decorators;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -15,6 +17,7 @@ import org.mockito.Mock;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
@@ -33,6 +36,9 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   @BeforeEach
   void beforeEach() {
     factory = new AuditingRepositoryDecoratorFactory(auditEventPublisher, auditSettings);
+
+    // fake the bootstrapping event to tell the factory that bootstrapping is finished.
+    factory.onBootstrappingEvent(new BootstrappingEvent(FINISHED));
   }
 
   @Test
@@ -59,7 +65,7 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
   void decorateSystemEntityTypeExcluded() {
     var entityType = onSystemEntityType();
     when(entityType.getId()).thenReturn("sys_idx_IndexAction");
-    when(auditSettings.getSystemAuditEnabled()).thenReturn(true);
+    factory.excludeEntityType("sys_idx_IndexAction");
 
     var decoratedRepo = factory.create(repository);
 
@@ -117,8 +123,8 @@ class AuditingRepositoryDecoratorFactoryTest extends AbstractMockitoTest {
     var entityType = mock(EntityType.class);
     var pack = mock(Package.class);
     when(repository.getEntityType()).thenReturn(entityType);
-    when(entityType.getPackage()).thenReturn(pack);
-    when(pack.getId()).thenReturn(PACKAGE_SYSTEM);
+    lenient().when(entityType.getPackage()).thenReturn(pack);
+    lenient().when(pack.getId()).thenReturn(PACKAGE_SYSTEM);
     return entityType;
   }
 

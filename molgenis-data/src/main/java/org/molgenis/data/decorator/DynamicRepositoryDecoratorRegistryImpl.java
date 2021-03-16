@@ -7,13 +7,16 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -21,13 +24,19 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
 import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
+import org.molgenis.data.event.BootstrappingEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepositoryDecoratorRegistry {
+
+  private static final Set<String> EXCLUDED = Sets.newHashSet(DECORATOR_CONFIGURATION);
   private final Map<String, DynamicRepositoryDecoratorFactory> factories = new HashMap<>();
   private final DataService dataService;
   private final Gson gson;
+  private boolean bootstrappingDone = false;
+
   private static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>() {}.getType();
 
   DynamicRepositoryDecoratorRegistryImpl(DataService dataService, Gson gson) {
@@ -65,17 +74,23 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
   public synchronized Repository<Entity> decorate(Repository<Entity> repository) {
     String entityTypeId = repository.getEntityType().getId();
 
-    DecoratorConfiguration config =
-        dataService
-            .query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
-            .eq(ENTITY_TYPE_ID, entityTypeId)
-            .findOne();
+    if (!EXCLUDED.contains(entityTypeId) && bootstrappingDone) {
+      DecoratorConfiguration config =
+          dataService
+              .query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
+              .eq(ENTITY_TYPE_ID, entityTypeId)
+              .findOne();
 
-    if (config != null) {
-      repository = decorateRepository(repository, config);
+      if (config != null) {
+        repository = decorateRepository(repository, config);
+      }
     }
 
     return repository;
+  }
+
+  public void excludeEntityType(String entityTypeId) {
+    EXCLUDED.add(entityTypeId);
   }
 
   /**
@@ -117,5 +132,10 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
     } else {
       return emptyMap();
     }
+  }
+
+  @EventListener
+  public void onBootstrappingEvent(BootstrappingEvent bootstrappingEvent) {
+    this.bootstrappingDone = bootstrappingEvent.getStatus() == FINISHED;
   }
 }

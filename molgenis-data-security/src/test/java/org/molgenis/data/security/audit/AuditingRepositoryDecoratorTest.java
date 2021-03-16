@@ -271,10 +271,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoSpringContextTests 
               // om nom nom
             });
 
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id1"));
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id2"));
+    verify(publisher).publish("henk", ENTITIES_READ, Map.of("entityTypeId", "patients"));
   }
 
   @SuppressWarnings("unchecked")
@@ -477,10 +474,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoSpringContextTests 
               // om nom nom
             });
 
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id1"));
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id2"));
+    verify(publisher).publish("henk", ENTITIES_READ, Map.of("entityTypeId", "patients"));
   }
 
   @Test
@@ -524,10 +518,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoSpringContextTests 
               // om nom nom
             });
 
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id1"));
-    verify(publisher)
-        .publish("henk", ENTITY_READ, Map.of("entityTypeId", "patients", "entityId", "id2"));
+    verify(publisher).publish("henk", ENTITIES_READ, Map.of("entityTypeId", "patients"));
   }
 
   @Test
