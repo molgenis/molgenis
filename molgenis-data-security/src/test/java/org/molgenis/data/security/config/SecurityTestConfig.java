@@ -16,6 +16,10 @@ import org.molgenis.data.security.auth.TokenFactory;
 import org.molgenis.data.security.auth.TokenMetadata;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.auth.UserMetadata;
+import org.molgenis.data.security.auth.VOGroupFactory;
+import org.molgenis.data.security.auth.VOGroupMetadata;
+import org.molgenis.data.security.auth.VOGroupRoleMembershipFactory;
+import org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -30,6 +34,11 @@ import org.springframework.context.annotation.Import;
   RoleFactory.class,
   RoleMembershipMetadata.class,
   RoleMembershipFactory.class,
+  VOGroupFactory.class,
+  VOGroupMetadata.class,
+  VOGroupRoleMembershipMetadata.class,
+  VOGroupRoleMembershipMetadata.class,
+  VOGroupRoleMembershipFactory.class,
   TokenMetadata.class,
   TokenFactory.class,
   UserMetadata.class,
