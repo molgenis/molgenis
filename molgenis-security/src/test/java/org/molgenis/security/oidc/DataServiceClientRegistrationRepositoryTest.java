@@ -8,11 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.HashSet;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -65,6 +67,7 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     when(oidcClient.getJwkSetUri()).thenReturn(jwkSetUri);
     when(oidcClient.getScopes()).thenReturn(scopes);
     when(oidcClient.getUserInfoUri()).thenReturn(userInfoUri);
+    when(oidcClient.getClaimsRolePath()).thenReturn(Optional.of("roles"));
 
     when(authenticationSettings.getOidcClients()).thenReturn(singleton(oidcClient));
     ClientRegistration clientRegistration =
@@ -88,6 +91,9 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     assertEquals(
         "{baseUrl}/login/oauth2/code/{registrationId}",
         clientRegistration.getRedirectUriTemplate());
+    assertEquals(
+        "roles",
+        clientRegistration.getProviderDetails().getConfigurationMetadata().get(CLAIMS_ROLE_PATH));
   }
 
   @Test
