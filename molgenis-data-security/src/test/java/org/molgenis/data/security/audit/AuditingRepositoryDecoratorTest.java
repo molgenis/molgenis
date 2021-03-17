@@ -1005,8 +1005,8 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoSpringContextTests 
   private List<Entity> mockTwoEntities() {
     var entity1 = mock(Entity.class);
     var entity2 = mock(Entity.class);
-    when(entity1.getIdValue()).thenReturn("id1");
-    when(entity2.getIdValue()).thenReturn("id2");
+    lenient().when(entity1.getIdValue()).thenReturn("id1");
+    lenient().when(entity2.getIdValue()).thenReturn("id2");
     return asList(entity1, entity2);
   }
 }
