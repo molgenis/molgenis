@@ -17,11 +17,6 @@
       <version>${micrometer.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-spring-legacy</artifactId>
-      <version>${micrometer.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
     </dependency>
