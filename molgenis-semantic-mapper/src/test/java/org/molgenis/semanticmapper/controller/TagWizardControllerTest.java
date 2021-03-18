@@ -28,6 +28,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.ui.Model;
 
 class TagWizardControllerTest extends AbstractMockitoTest {
+
   @Mock private DataService dataService;
   @Mock private OntologyService ontologyService;
   @Mock private OntologyTagService ontologyTagService;
@@ -92,7 +93,8 @@ class TagWizardControllerTest extends AbstractMockitoTest {
               Relation.isGeneralizationOf,
               Relation.hasSourceId,
               Relation.hasSourceName,
-              Relation.isAssociatedWith
+              Relation.isAssociatedWith,
+              Relation.isAudited
             });
   }
 }

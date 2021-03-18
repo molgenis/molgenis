@@ -33,6 +33,7 @@
   * [Apps in MOLGENIS](guide-app-manager.md)
   * [Creating themes](guide-creating-themes.md)
   * [Migration](guide-migration.md)
+  * [Auditing](guide-auditing.md)
 * Interoperability
   * [Swagger specification](guide-swagger.md)
   * [Data API](guide-api-data.md)

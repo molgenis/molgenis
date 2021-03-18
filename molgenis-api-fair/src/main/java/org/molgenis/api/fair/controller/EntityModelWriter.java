@@ -86,6 +86,7 @@ public class EntityModelWriter {
     model.setNamespace("r3d", NS_R3D);
     model.setNamespace("sio", "http://semanticscience.org/resource/");
     model.setNamespace("datacite", NS_DATACITE);
+    model.setNamespace("mlga", "http://molgenis.org/audit/");
   }
 
   public Model createRdfModel(Entity objectEntity) {

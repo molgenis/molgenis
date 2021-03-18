@@ -20,6 +20,7 @@ import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.auth.GroupPackageService;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
+import org.molgenis.integrationtest.config.AuditTestConfig;
 import org.molgenis.integrationtest.config.JsonTestConfig;
 import org.molgenis.integrationtest.config.RoleHierarchyTestConfig;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
@@ -98,6 +99,7 @@ in org.molgenis.data and subpackages from included modules
 })
 @Import({
   PlatformITBaseConfig.class,
+  AuditTestConfig.class,
   SecurityCoreITConfig.class,
   PlatformBootstrapper.class,
   TestAppSettings.class,

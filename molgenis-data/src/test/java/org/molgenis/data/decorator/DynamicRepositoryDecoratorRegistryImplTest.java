@@ -6,6 +6,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.any;
@@ -68,7 +69,7 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
     registry = new DynamicRepositoryDecoratorRegistryImpl(dataService, new Gson());
 
     // fake the bootstrapping event to tell the registry that bootstrapping is finished.
-    registry.onApplicationEvent(new BootstrappingEvent(FINISHED));
+    registry.onBootstrappingEvent(new BootstrappingEvent(FINISHED));
   }
 
   @Test
@@ -157,6 +158,17 @@ class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenisSpringT
     when(query.eq(ENTITY_TYPE_ID, "entityTypeId").findOne()).thenReturn(null);
 
     assertEquals("repositoryName", registry.decorate(repository).getName());
+  }
+
+  @Test
+  void testDecorateExcluded() {
+    when(repository.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("excludeMe");
+    registry.excludeEntityType("excludeMe");
+
+    var repo = registry.decorate(repository);
+
+    assertFalse(repo instanceof DynamicDecorator);
   }
 
   @Test

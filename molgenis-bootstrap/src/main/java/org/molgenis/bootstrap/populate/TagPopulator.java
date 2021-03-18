@@ -2,7 +2,9 @@ package org.molgenis.bootstrap.populate;
 
 import static org.eclipse.rdf4j.model.vocabulary.XMLSchema.TOKEN;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Relation.type;
+import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.semantic.Vocabulary.CASE_SENSITIVE;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TagPopulator {
+
   private final TagFactory tagFactory;
   private final DataService dataService;
 
@@ -34,6 +37,14 @@ public class TagPopulator {
     isCaseSensitive.setRelationIri(type.getIRI());
     isCaseSensitive.setRelationLabel(type.getLabel());
 
-    dataService.getRepository(TAG, Tag.class).upsertBatch(List.of(isAToken, isCaseSensitive));
+    Tag audited = tagFactory.create("audit-usage");
+    audited.setLabel("Audit Usage");
+    audited.setObjectIri(AUDIT_USAGE.toString());
+    audited.setRelationIri(isAudited.getIRI());
+    audited.setRelationLabel(isAudited.getLabel());
+
+    dataService
+        .getRepository(TAG, Tag.class)
+        .upsertBatch(List.of(isAToken, isCaseSensitive, audited));
   }
 }
