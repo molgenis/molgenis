@@ -36,7 +36,6 @@ import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsServiceImpl;
-import org.molgenis.web.i18n.HttpLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -78,7 +77,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.servlet.LocaleResolver;
 
 @Import({DataServiceClientRegistrationRepository.class, SecurityConfig.class})
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -401,13 +399,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public HttpSessionEventPublisher httpSessionEventPublisher() {
     return new HttpSessionEventPublisher();
-  }
-
-  @Autowired private HttpLocaleResolver httpLocaleResolver;
-
-  @Bean
-  public LocaleResolver localeResolver() {
-    return httpLocaleResolver;
   }
 
   private RequestMatcher createWebRequestMatcher() {
