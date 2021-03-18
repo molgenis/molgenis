@@ -3,7 +3,6 @@ package org.molgenis.web.exception;
 import java.util.Optional;
 import org.molgenis.util.exception.ErrorCoded;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class ExceptionUtils {
   private ExceptionUtils() {}
@@ -20,7 +19,7 @@ class ExceptionUtils {
 
   /** @return whether the throwable given contains {@link Errors}. */
   static boolean hasErrors(Throwable throwable) {
-    return throwable instanceof Errors || throwable instanceof MethodArgumentNotValidException;
+    return throwable instanceof Errors;
   }
 
   /** @return {@link Errors} of the given throwable */
@@ -28,8 +27,6 @@ class ExceptionUtils {
     Optional<Errors> errors;
     if (throwable instanceof Errors) {
       errors = Optional.of((Errors) throwable);
-    } else if (throwable instanceof MethodArgumentNotValidException) {
-      errors = Optional.of(((MethodArgumentNotValidException) throwable).getBindingResult());
     } else {
       errors = Optional.empty();
     }
