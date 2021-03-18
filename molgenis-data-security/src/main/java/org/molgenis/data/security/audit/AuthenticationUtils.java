@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 class AuthenticationUtils {
 
-  private AuthenticationUtils() { }
+  private AuthenticationUtils() {}
 
   static boolean isRunByUser() {
     var auth = SecurityContextHolder.getContext().getAuthentication();
