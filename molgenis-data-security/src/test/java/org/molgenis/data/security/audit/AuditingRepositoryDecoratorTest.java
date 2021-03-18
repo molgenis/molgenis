@@ -972,7 +972,7 @@ class AuditingRepositoryDecoratorTest extends AbstractMockitoSpringContextTests 
 
   @Test
   @WithMockSystemUser(originalUsername = "henk")
-  public void auditWithElevatedUser() {
+  void auditWithElevatedUser() {
     onDataEntityType();
 
     decorator.deleteById("id");
