@@ -10,7 +10,7 @@ import org.molgenis.data.security.audit.AuthenticationUtils;
 
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
-  private static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
+  static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
   private final AuditEventPublisher auditEventPublisher;
 
   public AuditSettingsRepositoryDecorator(
