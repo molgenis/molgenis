@@ -8,12 +8,16 @@ import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
+import org.molgenis.audit.AuditEvent;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 
+/**
+ * Publishes {@link AuditEvent}s when an {@link EntityType}'s auditing is enabled or disabled.
+ */
 public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecorator<EntityType> {
 
   static final String AUDIT_ENABLED = "AUDIT_ENABLED";
@@ -62,14 +66,6 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
       auditEventPublisher.publish(getUsername(), AUDIT_ENABLED, createDataMap(entityType));
     }
 
-    return true;
-  }
-
-  private boolean auditAuditTag(EntityType entityType) {
-    var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
-    if (isAudit) {
-      auditEventPublisher.publish(getUsername(), AUDIT_ENABLED, createDataMap(entityType));
-    }
     return true;
   }
 

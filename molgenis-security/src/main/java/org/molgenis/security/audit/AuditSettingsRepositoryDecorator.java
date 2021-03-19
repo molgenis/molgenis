@@ -2,12 +2,16 @@ package org.molgenis.security.audit;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
+import org.molgenis.audit.AuditEvent;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.audit.AuthenticationUtils;
 
+/**
+ * Publishes {@link AuditEvent}s when changes are made to {@link AuditSettings}.
+ */
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
   static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
