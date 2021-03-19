@@ -1,0 +1,78 @@
+package org.molgenis.data.security.audit;
+
+import static com.google.common.collect.Streams.stream;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
+import static org.molgenis.data.semantic.Relation.isAudited;
+import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
+
+import java.util.HashMap;
+import java.util.stream.Stream;
+import org.molgenis.audit.AuditEventPublisher;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Tag;
+
+public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecorator<EntityType> {
+
+  private static final String AUDIT_ENABLED = "AUDIT_ENABLED";
+  private static final String AUDIT_DISABLED = "AUDIT_DISABLED";
+
+  private final AuditEventPublisher auditEventPublisher;
+
+  public EntityTypeRepositoryAuditDecorator(
+      Repository<EntityType> delegateRepository, AuditEventPublisher auditEventPublisher) {
+    super(delegateRepository);
+    this.auditEventPublisher = requireNonNull(auditEventPublisher);
+  }
+
+  @Override
+  public void update(EntityType entityType) {
+    auditTagChanges(entityType);
+    delegate().update(entityType);
+  }
+
+  @Override
+  public void update(Stream<EntityType> entities) {
+    delegate().update(entities.filter(this::auditTagChanges));
+  }
+
+  @Override
+  public void add(EntityType entityType) {
+    auditTagChanges(entityType);
+    delegate().add(entityType);
+  }
+
+  @Override
+  public Integer add(Stream<EntityType> entities) {
+    return delegate().add(entities.filter(this::auditTagChanges));
+  }
+
+  private boolean auditTagChanges(EntityType entityType) {
+    var oldEntityType = delegate().findOneById(entityType);
+
+    var wasAudit = oldEntityType != null
+        && stream(oldEntityType.getTags()).anyMatch(this::isAuditUsage);
+    var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
+
+    if (wasAudit && !isAudit) {
+      auditEventPublisher.publish(getUsername(), AUDIT_DISABLED, createDataMap(entityType));
+    } else if (!wasAudit && isAudit) {
+      auditEventPublisher.publish(getUsername(), AUDIT_ENABLED, createDataMap(entityType));
+    }
+
+    return true;
+  }
+
+  private boolean isAuditUsage(Tag tag) {
+    return AUDIT_USAGE.toString().equals(tag.getObjectIri())
+        && isAudited.getIRI().equals(tag.getRelationIri());
+  }
+
+  private static HashMap<String, Object> createDataMap(EntityType entityType) {
+    var data = new HashMap<String, Object>();
+    data.put("entityTypeId", entityType.getId());
+    return data;
+  }
+}
