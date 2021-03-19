@@ -4,7 +4,7 @@ import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-class AuthenticationUtils {
+public class AuthenticationUtils {
 
   private AuthenticationUtils() {}
 
@@ -25,7 +25,7 @@ class AuthenticationUtils {
         && ((SystemSecurityToken) auth).getOriginalAuthentication().isPresent();
   }
 
-  static String getUsername() {
+  public static String getUsername() {
     var auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (auth instanceof SystemSecurityToken) {
