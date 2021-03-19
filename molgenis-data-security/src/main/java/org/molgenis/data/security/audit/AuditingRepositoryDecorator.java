@@ -2,18 +2,15 @@ package org.molgenis.data.security.audit;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.audit.AuditTransactionListener.TRANSACTION_ID;
 import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
 import static org.molgenis.data.security.audit.AuthenticationUtils.isRunAsSystem;
 import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
-import static org.molgenis.data.transaction.TransactionConstants.TRANSACTION_ID_RESOURCE_NAME;
 
 import com.google.common.collect.ForwardingIterator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -26,7 +23,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Publishes audit events for CRUD actions. In the case of system entity types, does not publish
@@ -281,14 +277,8 @@ public class AuditingRepositoryDecorator extends AbstractRepositoryDecorator<Ent
     if (isRunAsSystem()) {
       data.put(RUN_AS, "SYSTEM");
     }
-    getTransactionId().ifPresent(transactionId -> data.put(TRANSACTION_ID, transactionId));
 
     return data;
-  }
-
-  private static Optional<String> getTransactionId() {
-    return Optional.ofNullable(
-        (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME));
   }
 
   private boolean isNonSystemEntityType() {
