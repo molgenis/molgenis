@@ -9,23 +9,18 @@ root package to put resources in.
 
 You can view and manage groups and group membership in MOLGENIS
 by navigating to **Admin --> Security Manager**.
-![Security Manager menu](./images/security/main_menu_security.png)
 
 ### Creating a group
-> you need to be superuser to add groups
+> you need to be superuser to create a group
 
-Click on the **Add group**-button.
-
-![Groups screen](./images/security/group_overview_no_groups.png)
-
-Fill out the necessary field and click on **Create**.
-
-![Create a group](./images/security/group_creation.png)
+1. Click on the **Add group**-button.
+2. Fill out the necessary field and click on **Create**.
 
 ### Deleting groups
 
-You can delete a group by clicking it on the detail screen to see the details,
-and then use the delete button (recycle bin icon) to delete the group.
+1. Clicking the group on the overview screen to see the details.
+2. Click the delete button (recycle bin icon) to delete the group.
+
 When deleting a group the package, groups specific roles and group memberships
 are deleted as well.
 
@@ -82,40 +77,21 @@ the role Manager.
 ## Add a user to a group
 Superusers and group Managers can add local users to a group by making them
 a member of a group role.
-In the groups overview, click on a group to select it:
 
-![Group overview](./images/security/group_overview.png)
-
-Click on **Add member**:
-
-![Membership overview](./images/security/membership_overview_only_admin.png)
-
-Select a member from the **User-pulldown** and select the **role** that the member
-should get in the group. Click on **Add member**:
-
-![Add membership](./images/security/add_membership.png)
-
-
-![Membership overview](./images/security/membership_overview.png)
+1. In the groups overview, click on a group to select it
+2. Click on **Add member**
+3. Select a member from the **User-pulldown** and select the **role** that the member
+should get in the group. Click on **Add member**
 
 ## Update a group member's role
 
 You can update the role of a group member.
-Click on a member ("test" in this example).
+1. Click on a member to go to the member details view.
+2. Click on "Edit" to update the role and click on "Update role".
 
-![Update membership](./images/security/update_membership.png)
-
-Click on "Edit" to update the role and click on "Update role".
-
-![Update role membership](./images/security/update_membershiprole.png)
-
-You can now view the members of the group and see that the "test" member has a Manager-role.
-
-![Membership overview with role change](./images/security/membership_overview_with_rolechange.png)
-
-You can also remove a member from a group. Click on a member ("test" in this example) and click on "Remove from group".
-
-![Remove member from group](./images/security/remove_member_from_group.png)
+## Remove a member from a group
+1. Click on a member to go to the member details view.  
+2. Click on "Remove from group".
 
 # Remotely managed VO groups
 
