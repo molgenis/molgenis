@@ -1,5 +1,6 @@
 package org.molgenis.security;
 
+import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.auth.CachedRoleHierarchyImpl;
@@ -56,13 +57,15 @@ public class SecurityConfig {
       UserDetailsServiceImpl userDetailsService,
       DataService dataService,
       VOGroupService voGroupService,
-      VOGroupRoleMembershipService voGroupRoleMembershipService) {
+      VOGroupRoleMembershipService voGroupRoleMembershipService,
+      AuditEventPublisher auditEventPublisher) {
     return new MappedOidcUserService(
         oidcUserMapper,
         userDetailsService,
         dataService,
         voGroupService,
-        voGroupRoleMembershipService);
+        voGroupRoleMembershipService,
+        auditEventPublisher);
   }
 
   @Bean

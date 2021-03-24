@@ -1,10 +1,13 @@
 package org.molgenis.data.security.auth;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.VOGroupMetadata.NAME;
 import static org.molgenis.data.security.auth.VOGroupMetadata.VO_GROUP;
@@ -40,6 +43,12 @@ class VOGroupServiceTest extends AbstractMockitoTest {
   @BeforeEach
   void beforeMethod() {
     voGroupService = new VOGroupService(dataService, voGroupFactory);
+  }
+
+  @Test
+  void getGroupsEmptySet() {
+    assertEquals(emptyList(), voGroupService.getGroups(emptySet()));
+    verifyNoInteractions(dataService, voGroupFactory);
   }
 
   @Test
