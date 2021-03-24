@@ -15,6 +15,7 @@ import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ClientRegistrations;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.stereotype.Component;
@@ -52,18 +53,27 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
     oidcClient
         .getClaimsVOGroupPath()
         .ifPresent(path -> configMetadata.put(CLAIMS_VOGROUP_PATH, path));
-    return ClientRegistration.withRegistrationId(oidcClient.getRegistrationId())
-        .authorizationGrantType(toAuthorizationGrantType(oidcClient))
-        .authorizationUri(oidcClient.getAuthorizationUri())
-        .clientAuthenticationMethod(toClientAuthenticationMethod(oidcClient))
+    ClientRegistration.Builder result;
+    if (oidcClient.getIssuerUri() != null) {
+      result =
+          ClientRegistrations.fromOidcIssuerLocation(oidcClient.getIssuerUri())
+              .registrationId(oidcClient.getRegistrationId());
+    } else {
+      result =
+          ClientRegistration.withRegistrationId(oidcClient.getRegistrationId())
+              .authorizationUri(oidcClient.getAuthorizationUri())
+              .tokenUri(oidcClient.getTokenUri())
+              .jwkSetUri(oidcClient.getJwkSetUri())
+              .userInfoUri(oidcClient.getUserInfoUri())
+              .redirectUriTemplate(DEFAULT_REDIRECT_URI_TEMPLATE)
+              .clientAuthenticationMethod(toClientAuthenticationMethod(oidcClient))
+              .authorizationGrantType(toAuthorizationGrantType(oidcClient))
+              .scope(oidcClient.getScopes());
+    }
+    return result
         .clientId(oidcClient.getClientId())
         .clientName(oidcClient.getClientName())
         .clientSecret(oidcClient.getClientSecret())
-        .jwkSetUri(oidcClient.getJwkSetUri())
-        .redirectUriTemplate(DEFAULT_REDIRECT_URI_TEMPLATE)
-        .scope(oidcClient.getScopes())
-        .tokenUri(oidcClient.getTokenUri())
-        .userInfoUri(oidcClient.getUserInfoUri())
         .userNameAttributeName(SUB)
         .providerConfigurationMetadata(configMetadata)
         .build();
