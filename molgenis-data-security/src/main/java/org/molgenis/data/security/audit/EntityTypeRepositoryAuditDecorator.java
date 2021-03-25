@@ -15,9 +15,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 
-/**
- * Publishes {@link AuditEvent}s when an {@link EntityType}'s auditing is enabled or disabled.
- */
+/** Publishes {@link AuditEvent}s when an {@link EntityType}'s auditing is enabled or disabled. */
 public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecorator<EntityType> {
 
   static final String AUDIT_ENABLED = "AUDIT_ENABLED";

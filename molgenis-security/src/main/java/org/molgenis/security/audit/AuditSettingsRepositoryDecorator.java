@@ -9,9 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.audit.AuthenticationUtils;
 
-/**
- * Publishes {@link AuditEvent}s when changes are made to {@link AuditSettings}.
- */
+/** Publishes {@link AuditEvent}s when changes are made to {@link AuditSettings}. */
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
   static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
