@@ -27,9 +27,14 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String CLIENT_NAME = "clientName";
   static final String CLIENT_AUTHENTICATION_METHOD = "clientAuthenticationMethod";
   static final String AUTHORIZATION_GRANT_TYPE = "authorizationGrantType";
+  static final String ISSUER_URI = "issuerUri";
   static final String SCOPES = "scopes";
 
   private static final String PROVIDER_DETAILS = "providerDetails";
+  public static final String DETAILS_NULLABLE_EXPRESSION =
+      "$('" + ISSUER_URI + "').isNull().not().value()";
+  public static final String DETAILS_VISIBLE_EXPRESSION =
+      "$('" + ISSUER_URI + "').isNull().value()";
   static final String AUTHORIZATION_URI = "authorizationUri";
   static final String TOKEN_URI = "tokenUri";
   static final String JWK_SET_URI = "jwkSetUri";
@@ -67,23 +72,60 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDescription("Client name to be presented to the end user")
         .setNillable(false)
         .setUnique(true);
+    addAttribute(ISSUER_URI)
+        .setLabel("Issuer URI")
+        .setDescription(
+            "If the provider supports OpenID Provider Configuration, specify the issuer URI here. "
+                + "The details will be retrieved from <Issuer URI>/.well-known/openid-configuration")
+        .setDataType(HYPERLINK)
+        .setNillable(true);
     addAttribute(CLIENT_AUTHENTICATION_METHOD)
         .setLabel("Authentication")
         .setDescription("Client authentication method")
-        .setNillable(false)
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
         .setDefaultValue("basic");
     addAttribute(AUTHORIZATION_GRANT_TYPE)
         .setLabel("Grant type")
         .setDescription("Authorization grant type")
         .setDataType(ENUM)
         .setEnumOptions(asList("authorization_code", "implicit", "refresh_token"))
-        .setNillable(false)
-        .setDefaultValue("authorization_code");
+        .setDefaultValue("authorization_code")
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION);
     addAttribute(SCOPES)
         .setLabel("Scopes")
         .setDescription("Comma-separated set of scopes")
-        .setNillable(false)
-        .setDefaultValue("openid,email,profile");
+        .setDefaultValue("openid,email,profile")
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION);
+    Attribute providerDetailsAttribute =
+        addAttribute(PROVIDER_DETAILS).setDataType(COMPOUND).setLabel("Provider details");
+    addAttribute(AUTHORIZATION_URI)
+        .setParent(providerDetailsAttribute)
+        .setLabel("Authorization URI")
+        .setDataType(HYPERLINK)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+    addAttribute(TOKEN_URI)
+        .setParent(providerDetailsAttribute)
+        .setLabel("Token URI")
+        .setDataType(HYPERLINK)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+    addAttribute(JWK_SET_URI)
+        .setParent(providerDetailsAttribute)
+        .setLabel("JWKS URI")
+        .setDescription("JSON Web Key Set URI")
+        .setDataType(HYPERLINK)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+    addAttribute(USER_INFO_URI)
+        .setParent(providerDetailsAttribute)
+        .setLabel("User info URI")
+        .setDataType(HYPERLINK)
+        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
+        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
     addAttribute(CLAIMS_ROLE_PATH)
         .setLabel("Claims role path")
         .setDescription(
@@ -94,30 +136,6 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDescription(
             "JSON path expression to evaluate on the joined ID token and user info claims to retrieve VO Groups")
         .setNillable(true);
-
-    Attribute providerDetailsAttribute =
-        addAttribute(PROVIDER_DETAILS).setDataType(COMPOUND).setLabel("Provider details");
-    addAttribute(AUTHORIZATION_URI)
-        .setParent(providerDetailsAttribute)
-        .setLabel("Authorization URI")
-        .setDataType(HYPERLINK)
-        .setNillable(false);
-    addAttribute(TOKEN_URI)
-        .setParent(providerDetailsAttribute)
-        .setLabel("Token URI")
-        .setDataType(HYPERLINK)
-        .setNillable(false);
-    addAttribute(JWK_SET_URI)
-        .setParent(providerDetailsAttribute)
-        .setLabel("JWKS URI")
-        .setDescription("JSON Web Key Set URI")
-        .setDataType(HYPERLINK)
-        .setNillable(false);
-    addAttribute(USER_INFO_URI)
-        .setParent(providerDetailsAttribute)
-        .setLabel("User info URI")
-        .setDataType(HYPERLINK)
-        .setNillable(false);
     addAttribute(USERNAME_ATTRIBUTE_NAME)
         .setParent(providerDetailsAttribute)
         .setLabel("Username attribute")
