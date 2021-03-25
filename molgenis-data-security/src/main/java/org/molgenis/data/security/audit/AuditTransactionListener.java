@@ -1,6 +1,5 @@
 package org.molgenis.data.security.audit;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
 import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;

@@ -3,7 +3,6 @@ package org.molgenis.audit;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Clock;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
