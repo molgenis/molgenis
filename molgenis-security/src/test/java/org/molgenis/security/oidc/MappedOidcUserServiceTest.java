@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
@@ -52,6 +54,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
   @Mock private VOGroup voGroup;
   @Mock private VOGroupRoleMembership voGroupRoleMembership;
   @Mock private Role role;
+  @Mock private AuditEventPublisher auditEventPublisher;
 
   private MappedOidcUserService mappedOidcUserService;
   private ClientRegistration registration;
@@ -67,7 +70,8 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
             userDetailsService,
             dataService,
             voGroupService,
-            voGroupMembershipService);
+            voGroupMembershipService,
+            auditEventPublisher);
     registration =
         GOOGLE.getBuilder("google").clientId("clientId").clientSecret("clientSecret").build();
     registrationWithRolesPath =
@@ -89,7 +93,8 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
   @Test
   void testMappedOidcUserService() {
     assertThrows(
-        NullPointerException.class, () -> new MappedOidcUserService(null, null, null, null, null));
+        NullPointerException.class,
+        () -> new MappedOidcUserService(null, null, null, null, null, null));
   }
 
   @Test
@@ -165,6 +170,17 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     assertEquals("molgenis", result.getName());
     assertEquals(molgenisRoles, result.getAuthorities());
     assertEquals("user@example.org", result.getEmail());
+    verify(auditEventPublisher)
+        .publish(
+            "molgenis",
+            "GRANT_ROLES_FROM_CLAIMS",
+            Map.of(
+                "rolesFromRolesClaim",
+                Set.of("ROLE_A", "ROLE_B"),
+                "voGroups",
+                Set.of(),
+                "rolesFromVoGroupsClaim",
+                Set.of()));
   }
 
   @Test
@@ -215,6 +231,17 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     assertEquals("molgenis", result.getName());
     assertEquals(molgenisRoles, result.getAuthorities());
     assertEquals("user@example.org", result.getEmail());
+    verify(auditEventPublisher)
+        .publish(
+            "molgenis",
+            "GRANT_ROLES_FROM_CLAIMS",
+            Map.of(
+                "rolesFromRolesClaim",
+                Set.of(),
+                "voGroups",
+                Set.of("urn:mace:surf.nl:sram:group:molgenis:dev"),
+                "rolesFromVoGroupsClaim",
+                Set.of("ROLE_A")));
   }
 
   @Test

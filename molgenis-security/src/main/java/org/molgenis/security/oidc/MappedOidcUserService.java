@@ -1,17 +1,21 @@
 package org.molgenis.security.oidc;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.Role;
@@ -42,6 +46,7 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   private final OidcUserService delegate;
   private final VOGroupService voGroupService;
   private final VOGroupRoleMembershipService voGroupRoleMembershipService;
+  private final AuditEventPublisher auditEventPublisher;
 
   private static final Logger LOGGER = getLogger(MappedOidcUserService.class);
 
@@ -50,14 +55,16 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
       UserDetailsServiceImpl userDetailsServiceImpl,
       DataService dataService,
       VOGroupService voGroupService,
-      VOGroupRoleMembershipService voGroupRoleMembershipService) {
+      VOGroupRoleMembershipService voGroupRoleMembershipService,
+      AuditEventPublisher auditEventPublisher) {
     this(
         new OidcUserService(),
         oidcUserMapper,
         userDetailsServiceImpl,
         dataService,
         voGroupService,
-        voGroupRoleMembershipService);
+        voGroupRoleMembershipService,
+        auditEventPublisher);
   }
 
   MappedOidcUserService(
@@ -66,13 +73,15 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
       UserDetailsServiceImpl userDetailsServiceImpl,
       DataService dataService,
       VOGroupService voGroupService,
-      VOGroupRoleMembershipService voGroupRoleMembershipService) {
+      VOGroupRoleMembershipService voGroupRoleMembershipService,
+      AuditEventPublisher auditEventPublisher) {
     this.delegate = requireNonNull(delegate);
     this.oidcUserMapper = requireNonNull(oidcUserMapper);
     this.userDetailsServiceImpl = requireNonNull(userDetailsServiceImpl);
     this.dataService = requireNonNull(dataService);
     this.voGroupService = requireNonNull(voGroupService);
     this.voGroupRoleMembershipService = requireNonNull(voGroupRoleMembershipService);
+    this.auditEventPublisher = requireNonNull(auditEventPublisher);
   }
 
   private OidcClient getOidcClient(OidcUserRequest userRequest) {
@@ -107,7 +116,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
     User user = oidcUserMapper.toUser(oidcUser, oidcClient);
     Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
     authorities.addAll(
-        getAuthoritiesFromClaims(oidcUser.getClaims(), userRequest.getClientRegistration()));
+        getAuthoritiesFromClaims(
+            user.getUsername(), oidcUser.getClaims(), userRequest.getClientRegistration()));
     var result =
         new MappedOidcUser(oidcUserFromParent, authorities, emailAttributeName, user.getUsername());
     LOGGER.debug("Mapped to {}.", result);
@@ -122,28 +132,47 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
    * @return Set of {@link GrantedAuthority}s retrieved from the ID token's claims
    */
   private Set<GrantedAuthority> getAuthoritiesFromClaims(
-      Map<String, Object> claims, ClientRegistration clientRegistration) {
-    Set<GrantedAuthority> result = new HashSet<>();
-    var rolesClaimValues =
-        clientRegistration.getProviderDetails().getConfigurationMetadata().get(CLAIMS_ROLE_PATH);
-    if (rolesClaimValues instanceof String) {
-      JsonPath.<List<String>>read(claims, (String) rolesClaimValues).stream()
-          .map(SidUtils::createRoleAuthority)
-          .map(SimpleGrantedAuthority::new)
-          .forEach(result::add);
+      String principal, Map<String, Object> claims, ClientRegistration clientRegistration) {
+    final var configurationMetadata =
+        clientRegistration.getProviderDetails().getConfigurationMetadata();
+    Set<String> rolesFromClaim = getRolesFromClaim(claims, configurationMetadata);
+    Set<String> voGroupsFromClaim = getVoGroupsFromClaim(claims, configurationMetadata);
+    Collection<VOGroup> voGroups = voGroupService.getGroups(voGroupsFromClaim);
+    Set<String> rolesFromVoGroups =
+        voGroupRoleMembershipService.getCurrentMemberships(voGroups).stream()
+            .map(VOGroupRoleMembership::getRole)
+            .map(Role::getName)
+            .map(SidUtils::createRoleAuthority)
+            .collect(Collectors.toSet());
+    final var allRoles = Sets.union(rolesFromClaim, rolesFromVoGroups);
+    if (!allRoles.isEmpty()) {
+      auditEventPublisher.publish(
+          principal,
+          "GRANT_ROLES_FROM_CLAIMS",
+          Map.of(
+              "rolesFromRolesClaim", rolesFromClaim,
+              "voGroups", voGroupsFromClaim,
+              "rolesFromVoGroupsClaim", rolesFromVoGroups));
     }
-    var voGroupMembershipClaimValues =
-        clientRegistration.getProviderDetails().getConfigurationMetadata().get(CLAIMS_VOGROUP_PATH);
-    if (voGroupMembershipClaimValues instanceof String) {
-      final List<String> groups = JsonPath.read(claims, (String) voGroupMembershipClaimValues);
-      Collection<VOGroup> voGroups = voGroupService.getGroups(newHashSet(groups));
-      voGroupRoleMembershipService.getCurrentMemberships(voGroups).stream()
-          .map(VOGroupRoleMembership::getRole)
-          .map(Role::getName)
-          .map(SidUtils::createRoleAuthority)
-          .map(SimpleGrantedAuthority::new)
-          .forEach(result::add);
-    }
-    return result;
+    return allRoles.stream().map(SimpleGrantedAuthority::new).collect(toSet());
+  }
+
+  private static Set<String> getVoGroupsFromClaim(
+      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
+    return Optional.ofNullable(configurationMetadata.get(CLAIMS_VOGROUP_PATH))
+        .filter(String.class::isInstance).map(String.class::cast)
+        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
+        .flatMap(List::stream)
+        .collect(toSet());
+  }
+
+  private static Set<String> getRolesFromClaim(
+      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
+    return Optional.ofNullable(configurationMetadata.get(CLAIMS_ROLE_PATH))
+        .filter(String.class::isInstance).map(String.class::cast)
+        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
+        .flatMap(List::stream)
+        .map(SidUtils::createRoleAuthority)
+        .collect(toSet());
   }
 }

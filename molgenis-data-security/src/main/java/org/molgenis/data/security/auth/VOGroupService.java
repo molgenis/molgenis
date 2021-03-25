@@ -9,6 +9,7 @@ import static org.molgenis.data.security.auth.VOGroupMetadata.VO_GROUP;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
@@ -88,6 +89,9 @@ public class VOGroupService {
    */
   @RunAsSystem
   public Collection<VOGroup> getGroups(Set<String> groupNames) {
+    if (groupNames.isEmpty()) {
+      return Collections.emptyList();
+    }
     Collection<VOGroup> result =
         dataService
             .query(VO_GROUP, VOGroup.class)

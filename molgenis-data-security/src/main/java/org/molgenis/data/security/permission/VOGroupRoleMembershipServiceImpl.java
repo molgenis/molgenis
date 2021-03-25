@@ -1,5 +1,6 @@
 package org.molgenis.data.security.permission;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata.FROM;
 import static org.molgenis.data.security.auth.VOGroupRoleMembershipMetadata.ID;
@@ -48,6 +49,9 @@ public class VOGroupRoleMembershipServiceImpl implements VOGroupRoleMembershipSe
   @RunAsSystem
   @Override
   public Collection<VOGroupRoleMembership> getCurrentMemberships(Collection<VOGroup> groups) {
+    if (groups.isEmpty()) {
+      return emptyList();
+    }
     return dataService
         .query(VOGROUP_ROLE_MEMBERSHIP, VOGroupRoleMembership.class)
         .fetch(fetch)
@@ -60,6 +64,9 @@ public class VOGroupRoleMembershipServiceImpl implements VOGroupRoleMembershipSe
   @RunAsSystem
   @Override
   public Collection<VOGroupRoleMembership> getMemberships(Collection<Role> roles) {
+    if (roles.isEmpty()) {
+      return emptyList();
+    }
     return dataService
         .query(VOGROUP_ROLE_MEMBERSHIP, VOGroupRoleMembership.class)
         .fetch(fetch)
