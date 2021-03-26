@@ -100,6 +100,22 @@ MOLGENIS requires at least the `sub` and `email` claims and ideally the `given_n
 and `family_name` claims as well.
 These claims are requested by specifying the scopes `openid,email,profile`.
 
+#### Roles claim
+You can provide a json path that will be evaluated on the combined claims
+of the id token and the response of the user info endpoint.
+The roles in this claim, prefixed with `ROLE_` will be added to the user's roles
+when they log in.
+
+#### VO groups claim
+Users can be managed remotely by the ID provider in a virtual organisation (VO).
+
+You can provide a json path (typically `eduperson_entitlement`), that will be evaluated on the combined claims
+of the id token and the response of the user info endpoint.
+The values in this claim will be added to the VO group table.
+In the Security Manager, group managers can grant roles on their group to
+VO group members. VO Group members will be granted these group roles when
+they log in.
+
 #### Endpoints
 The identity provider specifies a set of endpoints where the user and MOLGENIS
 can interact with the provider. These are provided by the ID provider but may
