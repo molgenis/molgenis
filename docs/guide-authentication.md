@@ -95,10 +95,25 @@ provider.
 How the end user sees the identity provider.
 This becomes the label on the button on the login page.
 
-#### Scopes and claims
-MOLGENIS requires at least the `sub` and `email` claims and ideally the `given_name`
-and `family_name` claims as well.
-These claims are requested by specifying the scopes `openid,email,profile`.
+#### Issuer URI
+The identity provider specifies a set of endpoints where the user and MOLGENIS
+can interact with the provider.
+If you configure the Issuer URI, MOLGENIS will use it to
+[discovery](https://openid.net/specs/openid-connect-discovery-1_0.html) most of the
+OpenID Connect configuration for you.
+If your provider does not provide a discovery URL, or if you want to provide different
+values, leave the issuerURI empty.
+
+Here's the issuerUri for some providers you could connect to:
+
+| provider | issuerUri |
+| --- | --- |
+| Auth0         | `https://<realm>.auth0.com/`            |
+| Google        | `https://accounts.google.com`           |
+| Keycloak      | `https://<server>/auth/realms/<realm>`  |
+| MITRE (perun) | `https://<server>/oidc/`                |
+| MOLGENIS Auth | `https://auth.molgenis.org`             |
+| SURFConext    | `https://connect.surfconext.nl/`        |
 
 #### Roles claim
 You can provide a json path that will be evaluated on the combined claims
@@ -116,26 +131,26 @@ In the Security Manager, group managers can grant roles on their group to
 VO group members. VO Group members will be granted these group roles when
 they log in.
 
+#### Scopes and claims
+By default, MOLGENIS will request all scopes found in discovery.
+If you want to request fewer scopes, leave the Issuer URI empty.
+
+MOLGENIS requires at least the `sub` and `email` claims and ideally the `given_name`
+and `family_name` claims as well.
+These claims are requested by specifying the scopes `openid,email,profile`.
+
 #### Endpoints
-The identity provider specifies a set of endpoints where the user and MOLGENIS
-can interact with the provider. These are provided by the ID provider but may
-be nontrivial to find. Here are suggested values for a couple of common OpenID providers:
-
-Many providers have a discovery endpoint where they present these endpoints.
-Here's the discovery endpoints for some common providers:
-
-| provider | discovery endpoint |
-| --- | --- |
-| Google        | `https://accounts.google.com/.well-known/openid-configuration`          |
-| Auth0         | `https://<realm>.auth0.com/.well-known/openid-configuration`            |
-| Keycloak      | `https://<server>/auth/realms/<realm>/.well-known/openid-configuration` |
-| MITRE (perun) | `https://<server>/oidc/.well-known/openid-configuration`                |
+By default, MOLGENIS will use the endpoints found in discovery.
+If you want to finetune the endpoints, or if your identity provider does not support
+discovery, leave the Issuer URI empty and fill in the endpoints by hand.
+They can often be found in the documentation or provided by the administrator of the
+identity provider.
 
 ### Activating OpenID Connect clients
 The OpenID Connect clients you have created in the previous step can now be selected in the
 'Authentication settings' part of the 'Settings manager' plugin.
 
-> N.B. Only the clients that are created in entity 'OIDC client' can be selected.
+> N.B. Only the clients that have been created in entity 'OIDC client' can be selected.
 
 Activating clients requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
 
