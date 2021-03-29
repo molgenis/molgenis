@@ -57,6 +57,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
     if (oidcClient.getIssuerUri() != null) {
       result =
           ClientRegistrations.fromOidcIssuerLocation(oidcClient.getIssuerUri())
+              .scope(oidcClient.getScopes())
               .registrationId(oidcClient.getRegistrationId());
     } else {
       result =
