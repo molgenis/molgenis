@@ -12,19 +12,17 @@
   <description>Default MOLGENIS application module containing all default plugins.</description>
 
   <properties>
-    <!-- Default: build and deploy dockerfile -->
-    <!-- -Ddockerfile.skip=true: do not build and deploy dockerfile -->
+    <!-- Default: build and deploy container -->
+    <!-- -Djib.skip=true: do not build and deploy container -->
     <!-- -Dwar.deploy.skip=false: also deploy war -->
     <war.deploy.skip>true</war.deploy.skip>
     <maven.deploy.skip>${war.deploy.skip}</maven.deploy.skip>
     <owasp-check-format>HTML</owasp-check-format>
+    <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
+    <jib.tag>${project.version}</jib.tag>
+    <jib.repository>docker.io/molgenis/molgenis-app</jib.repository>
+    <jib.to.image>${jib.repository}:${jib.tag}</jib.to.image>
 
-    <dockerfile.tag>${project.version}</dockerfile.tag>
-    <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
-    <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
-    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
-
-    <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
     <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
   </properties>
 
@@ -40,25 +38,39 @@
         Runs by default in the deploy phase,
         if you need more tags you can run the goals manually -->
       <plugin>
-        <groupId>com.spotify</groupId>
-        <artifactId>dockerfile-maven-plugin</artifactId>
-        <version>${dockerfile-maven-plugin.version}</version>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>${jib-maven-plugin.version}</version>
         <executions>
           <execution>
-            <id>default</id>
+            <phase>deploy</phase>
             <goals>
               <goal>build</goal>
-              <goal>push</goal>
             </goals>
           </execution>
         </executions>
         <configuration>
-          <repository>${dockerfile.repository}</repository>
-          <tag>${dockerfile.tag}</tag>
-          <buildArgs>
-            <WAR_FILE>${dockerfile.warfile}</WAR_FILE>
-          </buildArgs>
-          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+          <from>
+            <image>registry://registry.molgenis.org/molgenis/molgenis-base:PR-74</image>
+          </from>
+          <container>
+            <appRoot>/usr/local/tomcat/webapps/ROOT</appRoot>
+            <environment>
+              <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
+              <elasticsearch.transport.addresses>127.0.0.1:9300</elasticsearch.transport.addresses>
+              <opencpu.uri.scheme>http</opencpu.uri.scheme>
+              <opencpu.uri.host>127.0.0.1</opencpu.uri.host>
+              <opencpu.uri.port>8004</opencpu.uri.port>
+              <opencpu.uri.path>/ocpu/</opencpu.uri.path>
+              <db_uri>jdbc:postgresql://127.0.0.1/molgenis</db_uri>
+              <db_user>molgenis</db_user>
+              <db_password>molgenis</db_password>
+              <admin.password>admin</admin.password>
+              <molgenis.home>/home/molgenis</molgenis.home>
+              <audit.log.path>/home/molgenis/audit.log</audit.log.path>
+              <python_script_executable>/usr/bin/python3</python_script_executable>
+            </environment>
+          </container>
         </configuration>
       </plugin>
     </plugins>
