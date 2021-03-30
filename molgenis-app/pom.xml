@@ -51,7 +51,7 @@
         </executions>
         <configuration>
           <from>
-            <image>registry://registry.molgenis.org/molgenis/molgenis-base:PR-74</image>
+            <image>registry://docker.io/molgenis/molgenis-base:1.1.0</image>
           </from>
           <container>
             <appRoot>/usr/local/tomcat/webapps/ROOT</appRoot>
