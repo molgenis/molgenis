@@ -3,9 +3,6 @@
 # Welcome to MOLGENIS
 MOLGENIS is a collaborative open source project on a mission to generate great software infrastructure for life science research. 
 
-## Demo
-For a live demo click [here](https://molgenis.org/demo)
-
 ## Develop
 MOLGENIS has a frontend and a backend. You can develop on them separately. When you want to develop an API and and App simultaneously you need to checkout both.
 
