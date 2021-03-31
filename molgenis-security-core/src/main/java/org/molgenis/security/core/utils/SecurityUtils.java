@@ -121,9 +121,7 @@ public class SecurityUtils {
     }
   }
 
-  /**
-   * Returns whether the current user is running with an elevated SystemSecurityToken.
-   */
+  /** Returns whether the current user is running with an elevated SystemSecurityToken. */
   public static boolean currentUserIsRunningAsSystem() {
     var auth = SecurityContextHolder.getContext().getAuthentication();
     return auth instanceof SystemSecurityToken

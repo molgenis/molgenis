@@ -69,7 +69,15 @@ class AuditSettingsRepositoryDecoratorTest extends AbstractMockitoSpringContextT
         .publish(
             "henk",
             AUDIT_SETTING_CHANGED,
-            Map.of("setting", "attr1", "oldValue", true, "newValue", false));
+            Map.of(
+                "setting",
+                "attr1",
+                "oldValue",
+                true,
+                "newValue",
+                false,
+                "entityTypeId",
+                "entityTypeId"));
   }
 
   @SuppressWarnings("unchecked")
@@ -101,17 +109,34 @@ class AuditSettingsRepositoryDecoratorTest extends AbstractMockitoSpringContextT
         .publish(
             "henk",
             AUDIT_SETTING_CHANGED,
-            Map.of("setting", "attr1", "oldValue", true, "newValue", false));
+            Map.of(
+                "setting",
+                "attr1",
+                "oldValue",
+                true,
+                "newValue",
+                false,
+                "entityTypeId",
+                "entityTypeId"));
     verify(auditEventPublisher)
         .publish(
             "henk",
             AUDIT_SETTING_CHANGED,
-            Map.of("setting", "attr2", "oldValue", false, "newValue", true));
+            Map.of(
+                "setting",
+                "attr2",
+                "oldValue",
+                false,
+                "newValue",
+                true,
+                "entityTypeId",
+                "entityTypeId"));
   }
 
   private void setupEntityType() {
     var entityType = mock(EntityType.class);
     when(repository.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("entityTypeId");
     var attribute1 = mock(Attribute.class);
     when(attribute1.getName()).thenReturn("attr1");
     var attribute2 = mock(Attribute.class);

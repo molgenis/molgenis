@@ -2,9 +2,9 @@ package org.molgenis.data.security.audit;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsRunningAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsUser;
+import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
 
 import com.google.common.collect.ForwardingIterator;
 import java.util.HashMap;

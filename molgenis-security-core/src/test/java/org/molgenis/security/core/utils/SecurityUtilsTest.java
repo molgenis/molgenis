@@ -2,7 +2,6 @@ package org.molgenis.security.core.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -35,9 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 class SecurityUtilsTest extends AbstractMockitoSpringContextTests {
 
   @Configuration
-  static class Config {
-
-  }
+  static class Config {}
 
   private static SecurityContext previousContext;
 

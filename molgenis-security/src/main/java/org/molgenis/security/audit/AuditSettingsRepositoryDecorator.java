@@ -10,7 +10,11 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 
-/** Publishes {@link AuditEvent}s when changes are made to {@link AuditSettings}. */
+/**
+ * Publishes {@link AuditEvent}s when changes are made to any {@link
+ * org.molgenis.settings.DefaultSettingsEntityType}. Audits every single change for each attribute
+ * separately.
+ */
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
   static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
@@ -50,6 +54,7 @@ public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorato
                 data.put("setting", attr.getName());
                 data.put("oldValue", oldValue);
                 data.put("newValue", newValue);
+                data.put("entityTypeId", delegate().getEntityType().getId());
                 auditEventPublisher.publish(getActualUsername(), AUDIT_SETTING_CHANGED, data);
               }
             });

@@ -2,8 +2,8 @@ package org.molgenis.data.security.audit;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsUser;
+import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
 
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.transaction.TransactionListener;

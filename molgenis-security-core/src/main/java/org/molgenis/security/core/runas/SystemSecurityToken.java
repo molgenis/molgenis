@@ -85,8 +85,7 @@ public class SystemSecurityToken extends AbstractAuthenticationToken {
     private static final SystemPrincipal INSTANCE = new SystemPrincipal();
     private static final String SYSTEM = "SYSTEM";
 
-    private SystemPrincipal() {
-    }
+    private SystemPrincipal() {}
 
     public static SystemPrincipal getInstance() {
       return SystemPrincipal.INSTANCE;
