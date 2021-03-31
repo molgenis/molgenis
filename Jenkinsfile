@@ -48,7 +48,7 @@ pipeline {
                                 env.PREVIEW_VERSION = sh(script: "grep version pom.xml | grep SNAPSHOT | cut -d'>' -f2 | cut -d'<' -f1", returnStdout: true).trim() + "-${env.TAG}"
                             }
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false -T1C"
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -T1C -DargLine='-XX:TieredStopAtLevel=1 -noverify'"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Djib.tag=${TAG} -Djib.repository=${LOCAL_REPOSITORY} -T1C -DargLine='-XX:TieredStopAtLevel=1 -noverify'"
                             // Fetch the target branch, sonar likes to take a look at it
                             sh "git fetch --no-tags origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120 -T1C"
@@ -73,10 +73,7 @@ pipeline {
                 stage('Build, Test, Push to Registries [ master ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                            dir('molgenis-app') {
-                                sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest -Ddockerfile.repository=${LOCAL_REPOSITORY}"
-                            }
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Djib.tag=${TAG} -Djib.repository=${LOCAL_REPOSITORY} -Djib.to.tags=latest"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                         }
                     }
@@ -113,7 +110,7 @@ pipeline {
                             unstash 'maven-settings'
                         }
                         container('maven') {
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-latest"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Djib.tag=${BRANCH_NAME}-latest"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.ws.timeout=120"
                         }
                     }
@@ -164,7 +161,7 @@ pipeline {
                 stage('Build, test and publish [ feature ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -jib.tag=${TAG} -Djib.repository=${LOCAL_REPOSITORY}"
                             sh "mvn -q -B sonar:sonar -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                         }
                     }
