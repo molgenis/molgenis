@@ -89,8 +89,7 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
   private boolean auditAuditTagChanges(EntityType entityType) {
     var oldEntityType = delegate().findOneById(entityType.getId());
 
-    var wasAudit =
-        oldEntityType != null && hasAuditTag(oldEntityType);
+    var wasAudit = oldEntityType != null && hasAuditTag(oldEntityType);
     var isAudit = hasAuditTag(entityType);
 
     if (wasAudit && !isAudit) {
@@ -123,8 +122,8 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
   }
 
   private static boolean hasAuditTag(EntityType oldEntityType) {
-    return stream(oldEntityType.getTags()).anyMatch(
-        EntityTypeRepositoryAuditDecorator::isAuditUsage);
+    return stream(oldEntityType.getTags())
+        .anyMatch(EntityTypeRepositoryAuditDecorator::isAuditUsage);
   }
 
   private static boolean isAuditUsage(Tag tag) {
