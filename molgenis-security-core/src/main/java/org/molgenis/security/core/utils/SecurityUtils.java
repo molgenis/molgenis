@@ -3,15 +3,14 @@ package org.molgenis.security.core.utils;
 import java.util.Collection;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public class SecurityUtils {
+
   public static final String ANONYMOUS_USERNAME = "anonymous";
 
   public static final String AUTHORITY_SU = "ROLE_SU";
@@ -28,46 +27,55 @@ public class SecurityUtils {
   /**
    * Returns the username of the current authentication.
    *
-   * @return username or <tt>null</tt> if 1) the current authentication is null or 2) the currently
-   *     authenticated principal is the system.
+   * @return a username, null if the current authentication is null
    */
   public static @Nullable @CheckForNull String getCurrentUsername() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null) {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || authentication.getPrincipal() == null) {
       return null;
+    } else {
+      return authentication.getName();
     }
-    return getUsername(authentication);
   }
 
-  private static @Nullable @CheckForNull String getUsername(Authentication authentication) {
-    String username;
-
-    Object principal = authentication.getPrincipal();
-    if (principal == null || principal instanceof SystemPrincipal) {
-      username = null;
-    } else if (principal instanceof UserDetails) {
-      username = ((UserDetails) principal).getUsername();
-    } else if (principal instanceof AuthenticatedPrincipal) {
-      username = ((AuthenticatedPrincipal) principal).getName();
+  /**
+   * Returns the actual username of the current authentication: in case of an elevated
+   * authentication will return the original username.
+   *
+   * @return a username, null if the current authentication is null
+   */
+  public static @Nullable @CheckForNull String getActualUsername() {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || authentication.getPrincipal() == null) {
+      return null;
+    } else if (authentication instanceof SystemSecurityToken) {
+      return ((SystemSecurityToken) authentication)
+          .getOriginalAuthentication()
+          .map(Authentication::getName)
+          .orElse(authentication.getName());
     } else {
-      username = principal.toString();
+      return authentication.getName();
     }
-
-    return username;
   }
 
   /** Returns whether the current user has at least one of the given roles */
   public static boolean currentUserHasRole(String... roles) {
-    if (roles == null || roles.length == 0) return false;
+    if (roles == null || roles.length == 0) {
+      return false;
+    }
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null) {
       Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-      if (authorities == null) throw new IllegalStateException("No user currently logged in");
+      if (authorities == null) {
+        throw new IllegalStateException("No user currently logged in");
+      }
 
       for (String role : roles) {
         for (GrantedAuthority grantedAuthority : authorities) {
-          if (role.equals(grantedAuthority.getAuthority())) return true;
+          if (role.equals(grantedAuthority.getAuthority())) {
+            return true;
+          }
         }
       }
     }
@@ -98,5 +106,27 @@ public class SecurityUtils {
   public static boolean currentUserIsAnonymous() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     return authentication == null || (authentication instanceof AnonymousAuthenticationToken);
+  }
+
+  /**
+   * Returns whether the current user is an actual user or the system. Also returns true if a user
+   * is running with an elevated SystemSecurityToken.
+   */
+  public static boolean currentUserIsUser() {
+    var auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth instanceof SystemSecurityToken) {
+      return ((SystemSecurityToken) auth).getOriginalAuthentication().isPresent();
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Returns whether the current user is running with an elevated SystemSecurityToken.
+   */
+  public static boolean currentUserIsRunningAsSystem() {
+    var auth = SecurityContextHolder.getContext().getAuthentication();
+    return auth instanceof SystemSecurityToken
+        && ((SystemSecurityToken) auth).getOriginalAuthentication().isPresent();
   }
 }

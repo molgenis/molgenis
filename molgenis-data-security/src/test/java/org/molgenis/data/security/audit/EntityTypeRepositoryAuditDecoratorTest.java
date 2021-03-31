@@ -7,8 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.audit.EntityTypeRepositoryAuditDecorator.AUDIT_DISABLED;
-import static org.molgenis.data.security.audit.EntityTypeRepositoryAuditDecorator.AUDIT_ENABLED;
+import static org.molgenis.data.security.audit.EntityTypeRepositoryAuditDecorator.ENTITY_TYPE_AUDIT_DISABLED;
+import static org.molgenis.data.security.audit.EntityTypeRepositoryAuditDecorator.ENTITY_TYPE_AUDIT_ENABLED;
 import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 
@@ -69,7 +69,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
     decorator.update(newEntityType);
 
     verify(repository).update(newEntityType);
-    verify(auditEventPublisher).publish("bofke", AUDIT_ENABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("bofke", ENTITY_TYPE_AUDIT_ENABLED, Map.of("entityTypeId", "id"));
   }
 
   @Test
@@ -86,7 +87,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
     decorator.update(newEntityType);
 
     verify(repository).update(newEntityType);
-    verify(auditEventPublisher).publish("bofke", AUDIT_DISABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("bofke", ENTITY_TYPE_AUDIT_DISABLED, Map.of("entityTypeId", "id"));
   }
 
   @SuppressWarnings("unchecked")
@@ -113,7 +115,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
             e -> {
               // consume
             });
-    verify(auditEventPublisher).publish("henk", AUDIT_ENABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("henk", ENTITY_TYPE_AUDIT_ENABLED, Map.of("entityTypeId", "id"));
   }
 
   @SuppressWarnings("unchecked")
@@ -138,7 +141,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
             e -> {
               // consume
             });
-    verify(auditEventPublisher).publish("bofke", AUDIT_DISABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("bofke", ENTITY_TYPE_AUDIT_DISABLED, Map.of("entityTypeId", "id"));
   }
 
   @Test
@@ -155,7 +159,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
     decorator.update(newEntityType);
 
     verify(repository).update(newEntityType);
-    verify(auditEventPublisher).publish("bofke", AUDIT_ENABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("bofke", ENTITY_TYPE_AUDIT_ENABLED, Map.of("entityTypeId", "id"));
   }
 
   @Test
@@ -194,7 +199,8 @@ class EntityTypeRepositoryAuditDecoratorTest extends AbstractMockitoSpringContex
             e -> {
               // consume
             });
-    verify(auditEventPublisher).publish("henk", AUDIT_ENABLED, Map.of("entityTypeId", "id"));
+    verify(auditEventPublisher)
+        .publish("henk", ENTITY_TYPE_AUDIT_ENABLED, Map.of("entityTypeId", "id"));
   }
 
   @SuppressWarnings("unchecked")

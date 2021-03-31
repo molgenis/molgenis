@@ -3,6 +3,7 @@ package org.molgenis.audit;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -25,17 +26,19 @@ public class AuditEventPublisher {
    *
    * @param principal the principal's name
    * @param type the audit event type
-   * @param data a modifiable map with additional information pertaining to the event
+   * @param data additional information pertaining to the event
    */
   public void publish(@Nullable String principal, String type, Map<String, Object> data) {
     if (principal == null) {
       principal = "<unknown>";
     }
 
-    getTransactionId().ifPresent(id -> data.put("transactionId", id));
+    var mutableData = new HashMap<>(data);
+    getTransactionId().ifPresent(id -> mutableData.put("transactionId", id));
 
     applicationEventPublisher.publishEvent(
-        new AuditApplicationEvent(AuditEvent.create(clock.instant(), principal, type, data)));
+        new AuditApplicationEvent(
+            AuditEvent.create(clock.instant(), principal, type, mutableData)));
   }
 
   private static Optional<String> getTransactionId() {

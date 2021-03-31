@@ -1,5 +1,7 @@
 package org.molgenis.security.audit;
 
+import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
+
 import java.util.HashMap;
 import java.util.stream.Stream;
 import org.molgenis.audit.AuditEvent;
@@ -7,7 +9,6 @@ import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.security.audit.AuthenticationUtils;
 
 /** Publishes {@link AuditEvent}s when changes are made to {@link AuditSettings}. */
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
@@ -49,8 +50,7 @@ public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorato
                 data.put("setting", attr.getName());
                 data.put("oldValue", oldValue);
                 data.put("newValue", newValue);
-                auditEventPublisher.publish(
-                    AuthenticationUtils.getUsername(), AUDIT_SETTING_CHANGED, data);
+                auditEventPublisher.publish(getActualUsername(), AUDIT_SETTING_CHANGED, data);
               }
             });
 

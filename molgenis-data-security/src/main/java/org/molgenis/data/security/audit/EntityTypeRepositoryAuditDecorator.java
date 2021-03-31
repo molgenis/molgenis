@@ -2,11 +2,12 @@ package org.molgenis.data.security.audit;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
 import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
+import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.molgenis.audit.AuditEvent;
 import org.molgenis.audit.AuditEventPublisher;
@@ -18,8 +19,8 @@ import org.molgenis.data.meta.model.Tag;
 /** Publishes {@link AuditEvent}s when an {@link EntityType}'s auditing is enabled or disabled. */
 public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecorator<EntityType> {
 
-  static final String AUDIT_ENABLED = "AUDIT_ENABLED";
-  static final String AUDIT_DISABLED = "AUDIT_DISABLED";
+  static final String ENTITY_TYPE_AUDIT_ENABLED = "ENTITY_TYPE_AUDIT_ENABLED";
+  static final String ENTITY_TYPE_AUDIT_DISABLED = "ENTITY_TYPE_AUDIT_DISABLED";
 
   private final AuditEventPublisher auditEventPublisher;
 
@@ -59,9 +60,11 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
     var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
 
     if (wasAudit && !isAudit) {
-      auditEventPublisher.publish(getUsername(), AUDIT_DISABLED, createDataMap(entityType));
+      auditEventPublisher.publish(
+          getActualUsername(), ENTITY_TYPE_AUDIT_DISABLED, createDataMap(entityType));
     } else if (!wasAudit && isAudit) {
-      auditEventPublisher.publish(getUsername(), AUDIT_ENABLED, createDataMap(entityType));
+      auditEventPublisher.publish(
+          getActualUsername(), ENTITY_TYPE_AUDIT_ENABLED, createDataMap(entityType));
     }
 
     return true;
@@ -70,7 +73,8 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
   private boolean auditAuditTag(EntityType entityType) {
     var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
     if (isAudit) {
-      auditEventPublisher.publish(getUsername(), AUDIT_ENABLED, createDataMap(entityType));
+      auditEventPublisher.publish(
+          getActualUsername(), ENTITY_TYPE_AUDIT_ENABLED, createDataMap(entityType));
     }
     return true;
   }
@@ -80,7 +84,7 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
         && isAudited.getIRI().equals(tag.getRelationIri());
   }
 
-  private static HashMap<String, Object> createDataMap(EntityType entityType) {
+  private static Map<String, Object> createDataMap(EntityType entityType) {
     var data = new HashMap<String, Object>();
     data.put("entityTypeId", entityType.getId());
     return data;

@@ -1,10 +1,10 @@
 package org.molgenis.data.security.audit;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.audit.AuthenticationUtils.getUsername;
-import static org.molgenis.data.security.audit.AuthenticationUtils.isRunByUser;
+import static org.molgenis.security.core.utils.SecurityUtils.getActualUsername;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsUser;
 
-import java.util.HashMap;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.transaction.TransactionListener;
 import org.molgenis.data.transaction.TransactionManager;
@@ -29,8 +29,8 @@ public class AuditTransactionListener implements TransactionListener {
 
   @Override
   public void rollbackTransaction(String transactionId) {
-    if (isRunByUser()) {
-      auditEventPublisher.publish(getUsername(), TRANSACTION_FAILURE, new HashMap<>());
+    if (currentUserIsUser()) {
+      auditEventPublisher.publish(getActualUsername(), TRANSACTION_FAILURE, emptyMap());
     }
   }
 }
