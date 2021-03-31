@@ -90,8 +90,8 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
     var oldEntityType = delegate().findOneById(entityType.getId());
 
     var wasAudit =
-        oldEntityType != null && stream(oldEntityType.getTags()).anyMatch(this::isAuditUsage);
-    var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
+        oldEntityType != null && hasAuditTag(oldEntityType);
+    var isAudit = hasAuditTag(entityType);
 
     if (wasAudit && !isAudit) {
       auditEventPublisher.publish(
@@ -105,7 +105,7 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
   }
 
   private boolean auditAddAuditTag(EntityType entityType) {
-    var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
+    var isAudit = hasAuditTag(entityType);
     if (isAudit) {
       auditEventPublisher.publish(
           getActualUsername(), ENTITY_TYPE_AUDIT_ENABLED, createDataMap(entityType));
@@ -114,7 +114,7 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
   }
 
   private boolean auditDeleteAuditTag(EntityType entityType) {
-    var wasAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
+    var wasAudit = hasAuditTag(entityType);
     if (wasAudit) {
       auditEventPublisher.publish(
           getActualUsername(), ENTITY_TYPE_AUDIT_DISABLED, createDataMap(entityType));
@@ -122,7 +122,12 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
     return true;
   }
 
-  private boolean isAuditUsage(Tag tag) {
+  private static boolean hasAuditTag(EntityType oldEntityType) {
+    return stream(oldEntityType.getTags()).anyMatch(
+        EntityTypeRepositoryAuditDecorator::isAuditUsage);
+  }
+
+  private static boolean isAuditUsage(Tag tag) {
     return AUDIT_USAGE.toString().equals(tag.getObjectIri())
         && isAudited.getIRI().equals(tag.getRelationIri());
   }
