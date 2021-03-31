@@ -13,6 +13,7 @@ import org.molgenis.audit.AuditEvent;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Tag;
 
@@ -43,13 +44,46 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
 
   @Override
   public void add(EntityType entityType) {
-    auditAuditTag(entityType);
+    auditAddAuditTag(entityType);
     delegate().add(entityType);
   }
 
   @Override
   public Integer add(Stream<EntityType> entities) {
-    return delegate().add(entities.filter(this::auditAuditTag));
+    return delegate().add(entities.filter(this::auditAddAuditTag));
+  }
+
+  @Override
+  public void delete(EntityType entity) {
+    auditDeleteAuditTag(entity);
+    delegate().delete(entity);
+  }
+
+  @Override
+  public void deleteById(Object id) {
+    var entityType = delegate().findOneById(id);
+    if (entityType == null) {
+      throw new UnknownEntityTypeException(id.toString());
+    }
+    auditDeleteAuditTag(entityType);
+    delegate().delete(entityType);
+  }
+
+  @Override
+  public void deleteAll() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void delete(Stream<EntityType> entities) {
+    var auditedStream = entities.filter(this::auditDeleteAuditTag);
+    delegate().delete(auditedStream);
+  }
+
+  @Override
+  public void deleteAll(Stream<Object> ids) {
+    var auditedStream = delegate().findAll(ids).filter(this::auditDeleteAuditTag);
+    delegate().delete(auditedStream);
   }
 
   private boolean auditAuditTagChanges(EntityType entityType) {
@@ -70,11 +104,20 @@ public class EntityTypeRepositoryAuditDecorator extends AbstractRepositoryDecora
     return true;
   }
 
-  private boolean auditAuditTag(EntityType entityType) {
+  private boolean auditAddAuditTag(EntityType entityType) {
     var isAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
     if (isAudit) {
       auditEventPublisher.publish(
           getActualUsername(), ENTITY_TYPE_AUDIT_ENABLED, createDataMap(entityType));
+    }
+    return true;
+  }
+
+  private boolean auditDeleteAuditTag(EntityType entityType) {
+    var wasAudit = stream(entityType.getTags()).anyMatch(this::isAuditUsage);
+    if (wasAudit) {
+      auditEventPublisher.publish(
+          getActualUsername(), ENTITY_TYPE_AUDIT_DISABLED, createDataMap(entityType));
     }
     return true;
   }
