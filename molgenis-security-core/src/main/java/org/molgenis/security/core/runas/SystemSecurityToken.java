@@ -6,6 +6,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNER
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 
 import com.google.common.collect.ImmutableList;
+import java.security.Principal;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -79,15 +80,35 @@ public class SystemSecurityToken extends AbstractAuthenticationToken {
     return true;
   }
 
-  @SuppressWarnings("InstantiationOfUtilityClass")
-  public static class SystemPrincipal {
+  public static class SystemPrincipal implements Principal {
 
     private static final SystemPrincipal INSTANCE = new SystemPrincipal();
+    private static final String SYSTEM = "SYSTEM";
 
     private SystemPrincipal() {}
 
     public static SystemPrincipal getInstance() {
       return SystemPrincipal.INSTANCE;
+    }
+
+    @Override
+    public String getName() {
+      return SYSTEM;
+    }
+
+    @Override
+    public boolean equals(Object another) {
+      return this == another;
+    }
+
+    @Override
+    public int hashCode() {
+      return SystemPrincipal.class.hashCode();
+    }
+
+    @Override
+    public String toString() {
+      return "[principal: " + SYSTEM + "]";
     }
   }
 }

@@ -1,10 +1,10 @@
 package org.molgenis.data.security.audit;
 
+import static java.util.Collections.emptyMap;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.molgenis.data.security.audit.AuditTransactionListener.TRANSACTION_FAILURE;
 
-import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,8 +46,7 @@ class AuditTransactionListenerTest extends AbstractMockitoSpringContextTests {
   @WithMockUser("bofke")
   void testRollbackTransaction() {
     listener.rollbackTransaction("id");
-    verify(auditEventPublisher)
-        .publish("bofke", TRANSACTION_FAILURE, Map.of("transactionId", "id"));
+    verify(auditEventPublisher).publish("bofke", TRANSACTION_FAILURE, emptyMap());
   }
 
   @Test

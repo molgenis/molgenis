@@ -2,6 +2,7 @@ package org.molgenis.data.validation.meta.model;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -10,6 +11,7 @@ import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.audit.EntityTypeRepositoryAuditDecorator;
 import org.molgenis.data.security.meta.EntityTypeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -30,6 +32,7 @@ public class EntityTypeRepositoryDecoratorFactory
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
   private final MutableAclService mutableAclService;
   private final MutableAclClassService mutableAclClassService;
+  private final AuditEventPublisher auditEventPublisher;
 
   public EntityTypeRepositoryDecoratorFactory(
       DataService dataService,
@@ -39,7 +42,8 @@ public class EntityTypeRepositoryDecoratorFactory
       EntityTypeValidator entityTypeValidator,
       EntityTypeDependencyResolver entityTypeDependencyResolver,
       MutableAclService mutableAclService,
-      MutableAclClassService mutableAclClassService) {
+      MutableAclClassService mutableAclClassService,
+      AuditEventPublisher auditEventPublisher) {
     super(entityTypeMetadata);
     this.dataService = requireNonNull(dataService);
     this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
@@ -48,10 +52,12 @@ public class EntityTypeRepositoryDecoratorFactory
     this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
     this.mutableAclService = requireNonNull(mutableAclService);
     this.mutableAclClassService = requireNonNull(mutableAclClassService);
+    this.auditEventPublisher = requireNonNull(auditEventPublisher);
   }
 
   @Override
   public Repository<EntityType> createDecoratedRepository(Repository<EntityType> repository) {
+    repository = new EntityTypeRepositoryAuditDecorator(repository, auditEventPublisher);
     repository =
         new EntityTypeRepositoryDecorator(repository, dataService, entityTypeDependencyResolver);
     repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);

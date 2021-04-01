@@ -3,10 +3,13 @@ package org.molgenis.audit;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Component
 public class AuditEventPublisher {
@@ -30,7 +33,16 @@ public class AuditEventPublisher {
       principal = "<unknown>";
     }
 
+    var mutableData = new HashMap<>(data);
+    getTransactionId().ifPresent(id -> mutableData.put("transactionId", id));
+
     applicationEventPublisher.publishEvent(
-        new AuditApplicationEvent(AuditEvent.create(clock.instant(), principal, type, data)));
+        new AuditApplicationEvent(
+            AuditEvent.create(clock.instant(), principal, type, mutableData)));
+  }
+
+  private static Optional<String> getTransactionId() {
+    return Optional.ofNullable(
+        (String) TransactionSynchronizationManager.getResource("transactionId"));
   }
 }
