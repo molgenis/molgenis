@@ -31,7 +31,7 @@ public class HttpLocaleResolver implements LocaleResolver {
 
   @Override
   public Locale resolveLocale(HttpServletRequest request) {
-    String username = SecurityUtils.getCurrentUsername();
+    String username = SecurityUtils.getActualUsername();
 
     Locale locale;
     if (username != null) {
@@ -45,7 +45,7 @@ public class HttpLocaleResolver implements LocaleResolver {
 
   @Override
   public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-    String username = SecurityUtils.getCurrentUsername();
+    String username = SecurityUtils.getActualUsername();
     if (username == null) {
       throw new UnsupportedOperationException("Cannot change language if not logged in");
     }
