@@ -187,6 +187,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.DATE);
+    when(attr.getMaxLength()).thenReturn(null);
     try {
       attributeValidator.validateDefaultValue(attr, true);
       fail();
@@ -202,6 +203,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("2016-01-01");
     when(attr.getDataType()).thenReturn(AttributeType.DATE);
+    when(attr.getMaxLength()).thenReturn(null);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -210,6 +212,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
+    when(attr.getMaxLength()).thenReturn(null);
     try {
       attributeValidator.validateDefaultValue(attr, true);
       fail();
@@ -225,6 +228,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("2016-10-10T12:00:10+0000");
     when(attr.getDataType()).thenReturn(AttributeType.DATE_TIME);
+    when(attr.getMaxLength()).thenReturn(null);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -233,6 +237,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test^");
     when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
+    when(attr.getMaxLength()).thenReturn(255);
     try {
       attributeValidator.validateDefaultValue(attr, true);
       fail();
@@ -246,6 +251,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("http://www.molgenis.org");
     when(attr.getDataType()).thenReturn(AttributeType.HYPERLINK);
+    when(attr.getMaxLength()).thenReturn(255);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -255,6 +261,7 @@ class AttributeValidatorTest {
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
     when(attr.getDataType()).thenReturn(AttributeType.ENUM);
+    when(attr.getMaxLength()).thenReturn(255);
     try {
       attributeValidator.validateDefaultValue(attr, true);
       fail();
@@ -271,6 +278,7 @@ class AttributeValidatorTest {
     when(attr.getDefaultValue()).thenReturn("b");
     when(attr.getEnumOptions()).thenReturn(asList("a", "b", "c"));
     when(attr.getDataType()).thenReturn(AttributeType.ENUM);
+    when(attr.getMaxLength()).thenReturn(255);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -279,6 +287,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
+    when(attr.getMaxLength()).thenReturn(null);
     Exception exception =
         assertThrows(
             MolgenisValidationException.class,
@@ -292,6 +301,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("1.0");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
+    when(attr.getMaxLength()).thenReturn(null);
     Exception exception =
         assertThrows(
             MolgenisValidationException.class,
@@ -305,6 +315,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("123456");
     when(attr.getDataType()).thenReturn(AttributeType.INT);
+    when(attr.getMaxLength()).thenReturn(null);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -313,6 +324,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("test");
     when(attr.getDataType()).thenReturn(LONG);
+    when(attr.getMaxLength()).thenReturn(null);
     Exception exception =
         assertThrows(
             MolgenisValidationException.class,
@@ -326,6 +338,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("123456");
     when(attr.getDataType()).thenReturn(LONG);
+    when(attr.getMaxLength()).thenReturn(null);
     attributeValidator.validateDefaultValue(attr, true);
   }
 
@@ -336,6 +349,7 @@ class AttributeValidatorTest {
 
     Attribute refIdAttribute = mock(Attribute.class);
     when(refIdAttribute.getDataType()).thenReturn(STRING);
+    when(refIdAttribute.getMaxLength()).thenReturn(255);
     when(refIdAttribute.getName()).thenReturn(refIdAttributeName);
     EntityType refEntityType = mock(EntityType.class);
 
@@ -344,6 +358,8 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("invalidEntityId");
     when(attr.getDataType()).thenReturn(AttributeType.XREF);
+    when(attr.getMaxLength()).thenReturn(null);
+
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     attributeValidator.validateDefaultValue(attr, false);
@@ -356,6 +372,7 @@ class AttributeValidatorTest {
 
     Attribute refIdAttribute = mock(Attribute.class);
     when(refIdAttribute.getDataType()).thenReturn(STRING);
+    when(refIdAttribute.getMaxLength()).thenReturn(255);
     when(refIdAttribute.getName()).thenReturn(refIdAttributeName);
     EntityType refEntityType = mock(EntityType.class);
 
@@ -364,6 +381,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("entityId");
     when(attr.getDataType()).thenReturn(AttributeType.XREF);
+    when(attr.getMaxLength()).thenReturn(null);
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     @SuppressWarnings("unchecked")
@@ -388,6 +406,7 @@ class AttributeValidatorTest {
 
     Attribute refIdAttribute = mock(Attribute.class);
     when(refIdAttribute.getDataType()).thenReturn(STRING);
+    when(refIdAttribute.getMaxLength()).thenReturn(255);
     when(refIdAttribute.getName()).thenReturn(refIdAttributeName);
     EntityType refEntityType = mock(EntityType.class);
 
@@ -396,6 +415,7 @@ class AttributeValidatorTest {
     Attribute attr = mock(Attribute.class);
     when(attr.getDefaultValue()).thenReturn("entityId");
     when(attr.getDataType()).thenReturn(AttributeType.XREF);
+    when(attr.getMaxLength()).thenReturn(null);
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     @SuppressWarnings("unchecked")

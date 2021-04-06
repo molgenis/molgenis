@@ -25,7 +25,7 @@ public class AttributeResponse {
   private final String description;
   private final List<?> attributes;
   private final List<String> enumOptions;
-  private final Long maxLength;
+  private final Integer maxLength;
   private final Object refEntity;
   private final String mappedBy;
   private final Boolean auto;
@@ -79,7 +79,7 @@ public class AttributeResponse {
     } else this.enumOptions = null;
 
     if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase())) {
-      this.maxLength = attr.getDataType().getMaxLength();
+      this.maxLength = attr.getMaxLength();
     } else this.maxLength = null;
 
     if (attributesSet == null || attributesSet.contains("expression".toLowerCase())) {
@@ -223,7 +223,7 @@ public class AttributeResponse {
     return enumOptions;
   }
 
-  public Long getMaxLength() {
+  public Integer getMaxLength() {
     return maxLength;
   }
 

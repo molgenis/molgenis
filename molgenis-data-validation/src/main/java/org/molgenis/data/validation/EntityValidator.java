@@ -126,7 +126,7 @@ public class EntityValidator implements Validator {
 
   private void validateSizeConstraint(Entity entity, Attribute attribute, Errors errors) {
     AttributeType attributeType = attribute.getDataType();
-    Long maxLength = attributeType.getMaxLength();
+    Integer maxLength = attribute.getMaxLength();
     if (maxLength == null) {
       return;
     }

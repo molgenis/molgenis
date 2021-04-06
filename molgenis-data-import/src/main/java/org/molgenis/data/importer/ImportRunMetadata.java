@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ImportRunMetadata extends SystemEntityType {
+
   private static final String SIMPLE_NAME = "ImportRun";
   public static final String IMPORT_RUN = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -28,6 +29,7 @@ public class ImportRunMetadata extends SystemEntityType {
   public static final String PROGRESS = "progress";
   public static final String IMPORTEDENTITIES = "importedEntities";
   public static final String NOTIFY = "notify";
+  public static final int MAX_MESSAGE_LENGTH = 256000;
 
   ImportRunMetadata() {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
@@ -49,7 +51,7 @@ public class ImportRunMetadata extends SystemEntityType {
         .setDataType(ENUM)
         .setNillable(false)
         .setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED"));
-    addAttribute(MESSAGE).setDataType(TEXT).setNillable(true);
+    addAttribute(MESSAGE).setDataType(TEXT).setMaxLength(MAX_MESSAGE_LENGTH).setNillable(true);
     addAttribute(PROGRESS).setDataType(INT).setNillable(false);
     addAttribute(IMPORTEDENTITIES).setDataType(TEXT).setNillable(true);
     addAttribute(NOTIFY)

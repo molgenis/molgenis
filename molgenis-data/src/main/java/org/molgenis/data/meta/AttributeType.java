@@ -16,18 +16,18 @@ public enum AttributeType {
   DATE,
   DATE_TIME,
   DECIMAL,
-  EMAIL(255L),
-  ENUM(255L),
+  EMAIL(255),
+  ENUM(255),
   FILE,
-  HTML(65535L),
-  HYPERLINK(255L),
+  HTML(65535),
+  HYPERLINK(255),
   INT,
   LONG,
   MREF,
   ONE_TO_MANY,
-  SCRIPT(65535L),
-  STRING(255L),
-  TEXT(65535L),
+  SCRIPT(65535),
+  STRING(255),
+  TEXT(65535),
   XREF;
 
   private static final Map<String, AttributeType> strValMap;
@@ -40,17 +40,17 @@ public enum AttributeType {
     }
   }
 
-  private final Long maxLength;
+  private final Integer maxLength;
 
   AttributeType() {
     this.maxLength = null;
   }
 
-  AttributeType(long maxLength) {
+  AttributeType(int maxLength) {
     this.maxLength = maxLength;
   }
 
-  public Long getMaxLength() {
+  public Integer getMaxLength() {
     return maxLength;
   }
 

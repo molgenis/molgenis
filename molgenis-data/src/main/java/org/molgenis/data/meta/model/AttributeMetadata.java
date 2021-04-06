@@ -21,6 +21,7 @@ import static org.molgenis.data.util.AttributeUtils.getValidIdAttributeTypes;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -79,6 +80,7 @@ public class AttributeMetadata extends SystemEntityType {
   public static final String VISIBLE_EXPRESSION = "visibleExpression";
   public static final String VALIDATION_EXPRESSION = "validationExpression";
   public static final String DEFAULT_VALUE = "defaultValue";
+  public static final String MAX_LENGTH = "maxLength";
 
   private TagMetadata tagMetadata;
   private EntityTypeMetadata entityTypeMeta;
@@ -191,6 +193,12 @@ public class AttributeMetadata extends SystemEntityType {
         .setDataType(LONG)
         .setLabel("Range max")
         .setValidationExpression(getRangeValidationExpression(RANGE_MAX));
+    addAttribute(MAX_LENGTH)
+        .setDataType(INT)
+        .setLabel("Max length")
+        .setDescription(
+            "Maximum length for string attributes. If not set, falls back to the default for the attribute type.")
+        .setValidationExpression(getMaxLengthValidationExpression());
     addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
     addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
     addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetadata).setLabel("Tags");
@@ -373,6 +381,28 @@ public class AttributeMetadata extends SystemEntityType {
         + "').matches("
         + regex
         + "))).value()";
+  }
+
+  private static String getMaxLengthValidationExpression() {
+    String stringTypeRegex =
+        "/^("
+            + Arrays.stream(AttributeType.values())
+                .filter(
+                    ((Predicate<AttributeType>) EntityTypeUtils::isTextType)
+                        .or(EntityTypeUtils::isStringType))
+                .map(AttributeType::getValueString)
+                .collect(Collectors.joining("|"))
+            + ")$/";
+
+    return "$('"
+        + MAX_LENGTH
+        + "').isNull()"
+        + ".or("
+        + "$('"
+        + TYPE
+        + "').matches("
+        + stringTypeRegex
+        + ")).value()";
   }
 
   // Package private for testability

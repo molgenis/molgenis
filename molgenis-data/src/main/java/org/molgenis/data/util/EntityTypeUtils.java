@@ -149,7 +149,10 @@ public class EntityTypeUtils {
    * @return true if the attribute is a string type.
    */
   public static boolean isStringType(Attribute attr) {
-    AttributeType attrType = attr.getDataType();
+    return isStringType(attr.getDataType());
+  }
+
+  public static boolean isStringType(AttributeType attrType) {
     switch (attrType) {
       case EMAIL:
       case HYPERLINK:
@@ -185,7 +188,10 @@ public class EntityTypeUtils {
    * @return true if the attribute is a text type.
    */
   public static boolean isTextType(Attribute attr) {
-    AttributeType attrType = attr.getDataType();
+    return isTextType(attr.getDataType());
+  }
+
+  public static boolean isTextType(AttributeType attrType) {
     switch (attrType) {
       case HTML:
       case SCRIPT:

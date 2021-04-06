@@ -255,7 +255,7 @@ public class EntityAttributesValidator {
           entity, attribute, entityType, "Not a valid e-mail address.");
     }
 
-    if (email.length() > EMAIL.getMaxLength()) {
+    if (email.length() > attribute.getMaxLength()) {
       return createConstraintViolation(entity, attribute, entityType);
     }
 
@@ -315,7 +315,7 @@ public class EntityAttributesValidator {
       return createConstraintViolation(entity, attribute, entityType, "Not a valid hyperlink.");
     }
 
-    if (link.length() > HYPERLINK.getMaxLength()) {
+    if (link.length() > attribute.getMaxLength()) {
       return createConstraintViolation(entity, attribute, entityType);
     }
 
@@ -374,7 +374,7 @@ public class EntityAttributesValidator {
       return null;
     }
 
-    if (text.length() > fieldType.getMaxLength()) {
+    if (text.length() > attribute.getMaxLength()) {
       return createConstraintViolation(entity, attribute, meta);
     }
 
@@ -410,7 +410,7 @@ public class EntityAttributesValidator {
       message += format("Value must be between %d and %d", range.getMin(), range.getMax());
     }
 
-    Long maxLength = attribute.getDataType().getMaxLength();
+    Integer maxLength = attribute.getMaxLength();
     if (maxLength != null) {
       message += format("Value must be less than or equal to %d characters", maxLength);
     }
