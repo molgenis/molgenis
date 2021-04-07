@@ -72,7 +72,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
 
     Errors errors = mock(Errors.class);
     entityValidator.validate(entity, errors);
-    verify(errors).rejectValue(attributeName, "constraints.MaxLength", new Object[] {255L}, null);
+    verify(errors).rejectValue(attributeName, "constraints.MaxLength", new Object[] {255}, null);
   }
 
   @Test
