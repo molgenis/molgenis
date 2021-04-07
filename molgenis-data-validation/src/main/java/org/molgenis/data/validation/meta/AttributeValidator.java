@@ -190,7 +190,11 @@ public class AttributeValidator {
       AttributeType fieldType = attr.getDataType();
       if (attr.getMaxLength() != null && value.length() > attr.getMaxLength()) {
         throw new MolgenisDataException(
-            "Default value for attribute [" + attr.getName() + "] exceeds the maximum length");
+            "Default value for attribute ["
+                + attr.getName()
+                + "] exceeds the maximum length ["
+                + attr.getMaxLength()
+                + "]");
       }
 
       if (fieldType == AttributeType.EMAIL) {
