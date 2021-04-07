@@ -104,6 +104,7 @@ class PostgreSqlQueryGeneratorTest {
     when(refIdAttrStr.getIdentifier()).thenReturn("refIdAttrStrId");
     when(refIdAttrStr.getName()).thenReturn("refIdAttrStr");
     when(refIdAttrStr.getDataType()).thenReturn(STRING);
+    when(refIdAttrStr.getMaxLength()).thenReturn(255);
     EntityType refEntityTypeString = mock(EntityType.class);
     when(refEntityTypeString.getId()).thenReturn("refEntityStr");
     when(refEntityTypeString.getIdAttribute()).thenReturn(refIdAttrStr);
@@ -123,6 +124,7 @@ class PostgreSqlQueryGeneratorTest {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
+    when(idAttr.getMaxLength()).thenReturn(255);
     when(entityType.getIdAttribute()).thenReturn(idAttr);
 
     List<Attribute> atomicAttrs = Lists.newArrayList();
@@ -149,6 +151,7 @@ class PostgreSqlQueryGeneratorTest {
               when(attr.getIdentifier()).thenReturn(attrNameBuilder.toString() + "Id");
               when(attr.getName()).thenReturn(attrNameBuilder.toString());
               when(attr.getDataType()).thenReturn(attrType);
+              when(attr.getMaxLength()).thenReturn(attrType.getMaxLength());
               when(attr.getExpression()).thenReturn(hasExpression ? "expression" : null);
               when(attr.isUnique()).thenReturn(unique);
               when(attr.isNillable()).thenReturn(nillable);
@@ -380,6 +383,7 @@ class PostgreSqlQueryGeneratorTest {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
     when(refIdAttr.getDataType()).thenReturn(STRING);
+    when(refIdAttr.getMaxLength()).thenReturn(255);
     EntityType refEntityType =
         when(mock(EntityType.class).getId()).thenReturn("refEntity").getMock();
     when(refEntityType.getId()).thenReturn("refEntityId");
@@ -390,6 +394,7 @@ class PostgreSqlQueryGeneratorTest {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
+    when(idAttr.getMaxLength()).thenReturn(255);
     when(entityType.getIdAttribute()).thenReturn(idAttr);
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
@@ -408,6 +413,7 @@ class PostgreSqlQueryGeneratorTest {
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
     when(idAttr.getIdentifier()).thenReturn("idAttrId");
     when(idAttr.getDataType()).thenReturn(STRING);
+    when(idAttr.getMaxLength()).thenReturn(255);
     when(entityType.getIdAttribute()).thenReturn(idAttr);
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
@@ -764,6 +770,7 @@ class PostgreSqlQueryGeneratorTest {
     when(refIdAttrStr.getIdentifier()).thenReturn("refIdAttrId");
     when(refIdAttrStr.getName()).thenReturn("refIdAttrStr");
     when(refIdAttrStr.getDataType()).thenReturn(STRING);
+    when(refIdAttrStr.getMaxLength()).thenReturn(255);
     EntityType refEntityTypeString = mock(EntityType.class);
     when(refEntityTypeString.getId()).thenReturn("refEntityStrId");
     when(refEntityTypeString.toString()).thenReturn("refEntityStr");
@@ -1196,6 +1203,7 @@ class PostgreSqlQueryGeneratorTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(attrType);
+    when(attr.getMaxLength()).thenReturn(attrType.getMaxLength());
     when(attr.isNillable()).thenReturn(nillable);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getEnumOptions())

@@ -372,7 +372,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
     }
 
     // data type changes
-    if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType())) {
+    if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType())
+        || !Objects.equals(attr.getMaxLength(), updatedAttr.getMaxLength())) {
       if (updatedAttr.isReadOnly()) {
         dropTableTriggers(entityType);
       }
