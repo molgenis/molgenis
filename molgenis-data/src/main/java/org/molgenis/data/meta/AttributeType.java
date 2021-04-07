@@ -6,6 +6,8 @@ import static java.util.stream.Collectors.toList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 public enum AttributeType {
@@ -50,6 +52,8 @@ public enum AttributeType {
     this.maxLength = maxLength;
   }
 
+  @Nullable
+  @CheckForNull
   public Integer getMaxLength() {
     return maxLength;
   }

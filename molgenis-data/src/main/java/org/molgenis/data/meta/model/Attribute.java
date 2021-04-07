@@ -768,6 +768,8 @@ public class Attribute extends StaticEntity implements Labeled {
     return getInversedBy() != null;
   }
 
+  @Nullable
+  @CheckForNull
   public Integer getMaxLength() {
     return Optional.ofNullable(getInt(MAX_LENGTH)).orElse(getDataType().getMaxLength());
   }
