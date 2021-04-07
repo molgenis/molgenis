@@ -4,12 +4,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.EMAIL;
-import static org.molgenis.data.meta.AttributeType.HTML;
-import static org.molgenis.data.meta.AttributeType.HYPERLINK;
-import static org.molgenis.data.meta.AttributeType.SCRIPT;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -104,16 +98,10 @@ public class EntityAttributesValidator {
         violation = checkEnum(entity, attribute, entityType);
         break;
       case HTML:
-        violation = checkText(entity, attribute, entityType, HTML);
-        break;
       case SCRIPT:
-        violation = checkText(entity, attribute, entityType, SCRIPT);
-        break;
       case TEXT:
-        violation = checkText(entity, attribute, entityType, TEXT);
-        break;
       case STRING:
-        violation = checkText(entity, attribute, entityType, STRING);
+        violation = checkText(entity, attribute, entityType);
         break;
       case CATEGORICAL:
       case FILE:
@@ -368,7 +356,7 @@ public class EntityAttributesValidator {
   }
 
   private static ConstraintViolation checkText(
-      Entity entity, Attribute attribute, EntityType meta, AttributeType fieldType) {
+      Entity entity, Attribute attribute, EntityType meta) {
     String text = entity.getString(attribute.getName());
     if (text == null) {
       return null;
