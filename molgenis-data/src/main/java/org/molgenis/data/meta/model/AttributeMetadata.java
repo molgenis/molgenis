@@ -197,7 +197,8 @@ public class AttributeMetadata extends SystemEntityType {
         .setDataType(INT)
         .setLabel("Max length")
         .setDescription(
-            "Maximum length for string attributes. If not set, falls back to the default for the attribute type.")
+            "Maximum length for string attributes. If not set, falls back to the default for the attribute type. "
+                + "N.B. If you lower this value, existing data will be truncated!")
         .setValidationExpression(getMaxLengthValidationExpression());
     addAttribute(IS_READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
     addAttribute(IS_UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
