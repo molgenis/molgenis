@@ -14,6 +14,7 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_LA
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_LABEL_ATTRIBUTE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_MAPPED_BY;
+import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_MAX_LENGTH;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_NAME;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_NILLABLE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_PART_OF_ATTRIBUTE;
@@ -64,6 +65,7 @@ public class AttributeMapper {
             .put(EMX_ATTRIBUTES_PART_OF_ATTRIBUTE, AttributeMetadata.PARENT)
             .put(EMX_ATTRIBUTES_RANGE_MAX, AttributeMetadata.RANGE_MAX)
             .put(EMX_ATTRIBUTES_RANGE_MIN, AttributeMetadata.RANGE_MIN)
+            .put(EMX_ATTRIBUTES_MAX_LENGTH, AttributeMetadata.MAX_LENGTH)
             .put(EMX_ATTRIBUTES_MAPPED_BY, AttributeMetadata.MAPPED_BY)
             .put(EMX_ATTRIBUTES_EXPRESSION, AttributeMetadata.EXPRESSION)
             .put(EMX_ATTRIBUTES_VALIDATION_EXPRESSION, AttributeMetadata.VALIDATION_EXPRESSION)

@@ -62,6 +62,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
     doReturn("validate").when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn("molgenis").when(attr).get(AttributeMetadata.DEFAULT_VALUE);
     doReturn(true).when(attr).get(AttributeMetadata.IS_AUTO);
+    doReturn(null).when(attr).get(AttributeMetadata.MAX_LENGTH);
 
     List<Object> expected =
         newArrayList(
@@ -81,6 +82,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             "true",
             null,
             "compound",
+            null,
             null,
             null,
             null,
@@ -148,6 +150,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
     doReturn("express").when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn("validate").when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn("molgenis").when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(null).when(attr).get(AttributeMetadata.MAX_LENGTH);
 
     List<Object> expected =
         newArrayList(
@@ -169,6 +172,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             "compound",
             "1",
             "2",
+            null,
             null,
             "express",
             "validate",
@@ -234,6 +238,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
     doReturn("express").when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn("validate").when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn("molgenis").when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(null).when(attr).get(AttributeMetadata.MAX_LENGTH);
 
     List<Object> expected =
         newArrayList(
@@ -251,6 +256,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             "false",
             "false",
             "true",
+            null,
             null,
             null,
             null,
@@ -320,6 +326,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
     doReturn(null).when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(218).when(attr).get(AttributeMetadata.MAX_LENGTH);
 
     List<Object> expected =
         newArrayList(
@@ -341,6 +348,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             null,
             null,
             null,
+            "218",
             null,
             null,
             null,
@@ -406,6 +414,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
     doReturn(null).when(attr).get(AttributeMetadata.EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.VALIDATION_EXPRESSION);
     doReturn(null).when(attr).get(AttributeMetadata.DEFAULT_VALUE);
+    doReturn(null).when(attr).get(AttributeMetadata.MAX_LENGTH);
     doReturn(null).when(attr).get("isAuto");
     doReturn("Dutch Label").when(attr).get("labelNl");
     doReturn("Dutch description").when(attr).get("descriptionNl");
@@ -441,6 +450,7 @@ class AttributeMapperTest extends AbstractMockitoTest {
             "false",
             "true",
             "enum1,enum2",
+            null,
             null,
             null,
             null,
