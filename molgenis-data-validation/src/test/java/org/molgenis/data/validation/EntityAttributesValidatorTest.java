@@ -51,13 +51,16 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
 
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
     when(idAttr.getDataType()).thenReturn(STRING);
+    when(idAttr.getMaxLength()).thenReturn(255);
     Attribute intRangeMinAttr =
         when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
     when(intRangeMinAttr.getDataType()).thenReturn(INT);
+    when(intRangeMinAttr.getMaxLength()).thenReturn(null);
     when(intRangeMinAttr.getRange()).thenReturn(new Range(1L, null));
     Attribute intRangeMaxAttr =
         when(mock(Attribute.class).getName()).thenReturn("intrangemin").getMock();
     when(intRangeMaxAttr.getDataType()).thenReturn(INT);
+    when(intRangeMaxAttr.getMaxLength()).thenReturn(null);
     when(intRangeMaxAttr.getRange()).thenReturn(new Range(null, 1L));
 
     intRangeMinMeta = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();

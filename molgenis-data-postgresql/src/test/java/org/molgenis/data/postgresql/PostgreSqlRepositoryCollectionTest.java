@@ -206,6 +206,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(STRING);
+    when(updatedAttr.getMaxLength()).thenReturn(255);
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
     ArgumentCaptor<String> captor = forClass(String.class);
     verify(jdbcTemplate, times(2)).execute(captor.capture());
@@ -251,6 +252,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
     when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
     when(refIdAttr.getDataType()).thenReturn(STRING);
+    when(refIdAttr.getMaxLength()).thenReturn(255);
     EntityType refEntityType =
         when(mock(EntityType.class).getId()).thenReturn("refEntity").getMock();
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
@@ -260,6 +262,7 @@ class PostgreSqlRepositoryCollectionTest {
     when(attr.getIdentifier()).thenReturn("attrId");
     when(entityType.getAttribute(attrName)).thenReturn(attr);
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(XREF);
@@ -301,11 +304,13 @@ class PostgreSqlRepositoryCollectionTest {
     when(attr.getExpression()).thenReturn("expression");
     when(attr.hasExpression()).thenReturn(true);
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     when(attr.isNillable()).thenReturn(false);
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getExpression()).thenReturn(null);
     when(updatedAttr.hasExpression()).thenReturn(false);
     when(updatedAttr.getDataType()).thenReturn(STRING);
+    when(updatedAttr.getMaxLength()).thenReturn(255);
     when(updatedAttr.isNillable()).thenReturn(true);
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
     verify(jdbcTemplate)
@@ -319,6 +324,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     when(entityType.getAttribute(attrName)).thenReturn(attr);
     when(attr.hasExpression()).thenReturn(false);
     when(attr.isNillable()).thenReturn(false);
@@ -359,6 +365,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(STRING);
+    when(updatedAttr.getMaxLength()).thenReturn(255);
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
     verify(jdbcTemplate)
         .execute("ALTER TABLE \"entity#6844280e\" ADD \"attr\" character varying(255) NOT NULL");
@@ -495,6 +502,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute refIdAttr1 = when(mock(Attribute.class).getName()).thenReturn("refIdAttr1").getMock();
     when(refIdAttr1.getIdentifier()).thenReturn("refIdAttr0Id");
     when(refIdAttr1.getDataType()).thenReturn(STRING);
+    when(refIdAttr1.getMaxLength()).thenReturn(255);
     EntityType refEntityType1 =
         when(mock(EntityType.class).getId()).thenReturn("refEntity1").getMock();
     when(refEntityType1.getIdAttribute()).thenReturn(refIdAttr1);
@@ -634,6 +642,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     postgreSqlRepoCollection.addAttribute(entityType, attr);
     verify(jdbcTemplate)
         .execute("ALTER TABLE \"entity#6844280e\" ADD \"attr\" character varying(255) NOT NULL");
@@ -649,6 +658,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     when(attr.getDefaultValue()).thenReturn("defaultValue");
     postgreSqlRepoCollection.addAttribute(entityType, attr);
     verify(jdbcTemplate)
@@ -668,6 +678,7 @@ class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(STRING);
+    when(attr.getMaxLength()).thenReturn(255);
     when(attr.isUnique()).thenReturn(true);
     postgreSqlRepoCollection.addAttribute(entityType, attr);
     verify(jdbcTemplate)

@@ -10,6 +10,8 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.jobs.model.JobExecution.MAX_LOG_LENGTH;
+import static org.molgenis.jobs.model.JobExecution.MAX_PROGRESS_MESSAGE_LENGTH;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 import java.util.List;
@@ -77,9 +79,14 @@ public class JobExecutionMetaData extends SystemEntityType {
     addAttribute(PROGRESS_MAX).setDataType(INT).setLabel("Maximum progress").setNillable(true);
     addAttribute(PROGRESS_MESSAGE)
         .setDataType(STRING)
+        .setMaxLength(MAX_PROGRESS_MESSAGE_LENGTH)
         .setLabel("Progress message")
         .setNillable(true);
-    addAttribute(LOG).setDataType(TEXT).setLabel("Log").setNillable(true);
+    addAttribute(LOG)
+        .setDataType(TEXT)
+        .setMaxLength(MAX_LOG_LENGTH)
+        .setLabel("Log")
+        .setNillable(true);
     addAttribute(RESULT_URL).setDataType(HYPERLINK).setLabel("Result URL").setNillable(true);
     addAttribute(FAILURE_EMAIL)
         .setDataType(STRING)

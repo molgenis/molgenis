@@ -75,12 +75,14 @@ import org.slf4j.LoggerFactory;
  * PostgreSqlRepositoryCollection}
  */
 class PostgreSqlQueryGenerator {
+
   private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlQueryGenerator.class);
 
   private static final String UNSPECIFIED_ATTRIBUTE_MSG =
       "Can't use %s without specifying an attribute";
 
   static final String ERR_CODE_READONLY_VIOLATION = "23506";
+  public static final int MAX_VARCHAR_LENGTH = 10 * 1024 * 1024;
 
   private PostgreSqlQueryGenerator() {}
 
@@ -1250,7 +1252,11 @@ class PostgreSqlQueryGenerator {
         case ENUM:
         case HYPERLINK:
         case STRING:
-          return "character varying(255)"; // alias: varchar(255)
+          if (attr.getMaxLength() <= MAX_VARCHAR_LENGTH) {
+            return "character varying(" + attr.getMaxLength() + ")";
+          } else {
+            return "text";
+          }
         case HTML:
         case SCRIPT:
         case TEXT:

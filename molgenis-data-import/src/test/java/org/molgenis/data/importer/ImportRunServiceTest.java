@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;
+import static org.molgenis.data.importer.ImportRunMetadata.MAX_MESSAGE_LENGTH;
 import static org.molgenis.data.importer.ImportStatus.FAILED;
 
 import java.time.Instant;
@@ -74,9 +75,9 @@ class ImportRunServiceTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testFailImportRunTrancatedMessage() {
+  void testFailImportRunTruncatedMessage() {
     StringBuilder messageBuilder = new StringBuilder(65545);
-    for (int i = 0; i < 65535; ++i) {
+    for (int i = 0; i < MAX_MESSAGE_LENGTH; ++i) {
       messageBuilder.append("x");
     }
     String truncated64KbMessage = messageBuilder.toString();

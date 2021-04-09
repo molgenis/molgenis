@@ -30,6 +30,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.IS_VISIBLE;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.AttributeMetadata.LOOKUP_ATTRIBUTE_INDEX;
 import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
+import static org.molgenis.data.meta.model.AttributeMetadata.MAX_LENGTH;
 import static org.molgenis.data.meta.model.AttributeMetadata.NAME;
 import static org.molgenis.data.meta.model.AttributeMetadata.NULLABLE_EXPRESSION;
 import static org.molgenis.data.meta.model.AttributeMetadata.ORDER_BY;
@@ -48,6 +49,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -764,5 +766,16 @@ public class Attribute extends StaticEntity implements Labeled {
    */
   public boolean isInversedBy() {
     return getInversedBy() != null;
+  }
+
+  @Nullable
+  @CheckForNull
+  public Integer getMaxLength() {
+    return Optional.ofNullable(getInt(MAX_LENGTH)).orElse(getDataType().getMaxLength());
+  }
+
+  public Attribute setMaxLength(int maxLength) {
+    set(MAX_LENGTH, maxLength);
+    return this;
   }
 }

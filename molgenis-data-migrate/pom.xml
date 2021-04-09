@@ -1,5 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <properties>
+    <dbunit.version>2.7.0</dbunit.version>
+  </properties>
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
@@ -11,6 +16,108 @@
   <description>Handles application migration on version updates.</description>
 
   <packaging>jar</packaging>
+
+  <profiles>
+  <!-- Profile create-it-db (active by default) creates a new postgres database and drops it after running the tests -->
+  <profile>
+    <id>create-it-db</id>
+    <activation>
+      <activeByDefault>true</activeByDefault>
+    </activation>
+    <properties>
+      <!-- override the it db name and create new database for the test run -->
+      <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
+      <it_db_name>molgenis_migrate_${maven.build.timestamp}</it_db_name>
+    </properties>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <configuration>
+            <argLine>--illegal-access=permit</argLine>
+            <systemPropertyVariables combine.children="append">
+              <!-- These override molgenis-server.properties for the integration test -->
+              <elasticsearch.transport.addresses>${elasticsearch.transport.addresses}
+              </elasticsearch.transport.addresses>
+              <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
+              <db_uri>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</db_uri>
+              <db_user>${it_db_user}</db_user>
+              <db_password>${it_db_password}</db_password>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>sql-maven-plugin</artifactId>
+          <version>${sql-maven-plugin.version}</version>
+          <configuration>
+            <skip>${skipITs}</skip>
+          </configuration>
+          <executions>
+            <execution>
+              <id>create postgres integration database</id>
+              <phase>pre-integration-test</phase>
+            </execution>
+            <execution>
+              <id>drop postgres integration database</id>
+              <phase>post-integration-test</phase>
+            </execution>
+            <execution>
+              <id>create-schema</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>execute</goal>
+              </goals>
+              <configuration>
+                <url>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</url>
+                <autocommit>true</autocommit>
+                <srcFiles>
+                  <srcFile>src/test/resources/org/molgenis/data/migrate/version/8.6-schema.sql</srcFile>
+                </srcFiles>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <!-- can be used to dump development database tables to xml -->
+      <!-- useage: mvn dbunit:export -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>dbunit-maven-plugin</artifactId>
+        <version>1.0-beta-3</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+          </dependency>
+        </dependencies>
+
+        <configuration>
+          <driver>org.postgresql.Driver</driver>
+          <url>jdbc:postgresql://localhost/molgenis</url>
+          <dataTypeFactoryName>org.dbunit.ext.postgresql.PostgresqlDataTypeFactory</dataTypeFactoryName>
+          <username>molgenis</username>
+          <password>molgenis</password>
+          <schema>public</schema>
+          <tables>
+            <!-- here you put the tables you want to dump -->
+            <table><name>"sys_md_Package#a6dc6fe7"</name></table>
+            <table><name>"sys_md_EntityType#6a3870a0"</name></table>
+            <table><name>"sys_md_Attribute#c8d9a252"</name></table>
+            <table><name>"Version"</name></table>
+          </tables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
@@ -32,6 +139,12 @@
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-test</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.dbunit</groupId>
+      <artifactId>dbunit</artifactId>
+      <version>${dbunit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

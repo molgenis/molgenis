@@ -58,6 +58,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateMaxLengthConstraint() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(attribute.getMaxLength()).thenReturn(255);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -71,7 +72,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
 
     Errors errors = mock(Errors.class);
     entityValidator.validate(entity, errors);
-    verify(errors).rejectValue(attributeName, "constraints.MaxLength", new Object[] {255L}, null);
+    verify(errors).rejectValue(attributeName, "constraints.MaxLength", new Object[] {255}, null);
   }
 
   @Test
@@ -96,6 +97,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintMref() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -116,6 +118,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintInt() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -136,6 +139,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintXref() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -156,6 +160,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintDate() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(DATE).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -174,6 +179,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintDateTime() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(DATE_TIME).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -192,6 +198,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintDecimal() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(DECIMAL).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -212,6 +219,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintLong() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -232,6 +240,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNotNullConstraintBool() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
 
     EntityType entityType =
@@ -266,6 +275,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateRangeMinMaxConstraint() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
     long min = 1L;
     long max = 3L;
@@ -289,6 +299,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateRangeMinConstraint() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
     long min = 1L;
     when(attribute.getRange()).thenReturn(new Range(min, null));
@@ -311,6 +322,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateRangeMaxConstraint() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
+    when(attribute.getMaxLength()).thenReturn(null);
     when(attribute.getName()).thenReturn(attributeName);
     long max = 3L;
     when(attribute.getRange()).thenReturn(new Range(null, max));

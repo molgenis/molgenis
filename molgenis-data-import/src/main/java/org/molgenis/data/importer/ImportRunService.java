@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import static java.lang.Math.toIntExact;
 import static java.time.Instant.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.DateTimeFormatter.ofLocalizedTime;
@@ -9,7 +8,7 @@ import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;
-import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.importer.ImportRunMetadata.MAX_MESSAGE_LENGTH;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -138,8 +137,8 @@ public class ImportRunService {
       if (message == null) {
         persistedMessage = contextMessageSource.getMessage("import_unknown_error");
       } else {
-        if (message.length() > TEXT.getMaxLength()) {
-          persistedMessage = message.substring(0, toIntExact(TEXT.getMaxLength()));
+        if (message.length() > MAX_MESSAGE_LENGTH) {
+          persistedMessage = message.substring(0, MAX_MESSAGE_LENGTH);
         } else {
           persistedMessage = message;
         }

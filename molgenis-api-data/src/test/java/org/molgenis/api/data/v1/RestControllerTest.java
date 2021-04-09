@@ -184,6 +184,7 @@ class RestControllerTest extends AbstractMockitoSpringContextTests {
     when(attrId.getLabel()).thenReturn("id");
     when(attrId.getLabel("en")).thenReturn("id");
     when(attrId.getDataType()).thenReturn(STRING);
+    when(attrId.getMaxLength()).thenReturn(255);
     when(attrId.isReadOnly()).thenReturn(true);
     when(attrId.isUnique()).thenReturn(true);
     when(attrId.isNillable()).thenReturn(false);
@@ -195,6 +196,7 @@ class RestControllerTest extends AbstractMockitoSpringContextTests {
     when(attrName.getLabel()).thenReturn("name");
     when(attrName.getLabel("en")).thenReturn("name");
     when(attrName.getDataType()).thenReturn(STRING);
+    when(attrName.getMaxLength()).thenReturn(255);
     when(attrName.isNillable()).thenReturn(true);
     when(attrName.isVisible()).thenReturn(true);
     when(attrName.getChildren()).thenReturn(emptyList());
@@ -204,6 +206,7 @@ class RestControllerTest extends AbstractMockitoSpringContextTests {
     when(attrEnum.getLabel()).thenReturn("enum");
     when(attrEnum.getLabel("en")).thenReturn("enum");
     when(attrEnum.getDataType()).thenReturn(AttributeType.ENUM);
+    when(attrEnum.getMaxLength()).thenReturn(255);
     when(attrEnum.getEnumOptions()).thenReturn(singletonList("enum0, enum1"));
     when(attrEnum.isNillable()).thenReturn(true);
     when(attrEnum.isVisible()).thenReturn(true);
@@ -213,6 +216,7 @@ class RestControllerTest extends AbstractMockitoSpringContextTests {
     when(attrInt.getLabel()).thenReturn("int");
     when(attrInt.getLabel("en")).thenReturn("int");
     when(attrInt.getDataType()).thenReturn(AttributeType.INT);
+    when(attrInt.getMaxLength()).thenReturn(null);
     when(attrInt.isNillable()).thenReturn(true);
     when(attrInt.isVisible()).thenReturn(true);
     when(attrInt.getChildren()).thenReturn(emptyList());
