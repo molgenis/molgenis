@@ -50,7 +50,19 @@ services:
     image: docker.elastic.co/kibana/kibana:5.5.3
     ports:
       - 5601:5601
-    network_mode: ${NETWORK_MODE:-bridge}
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat-oss:7.9.3
+    ports:
+      - "5010:5010"
+      - "9600:9600"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    volumes:
+      - ${PWD}/logs/:/usr/share/filebeat/input/
+      - ${PWD}/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    depends_on:
+      - elasticsearch
 
   minio:
     image: minio/minio:RELEASE.2019-03-20T22-38-47Z

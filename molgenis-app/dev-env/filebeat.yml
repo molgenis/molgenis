@@ -1,0 +1,8 @@
+filebeat.inputs:
+  - type: log
+    json.message_key: message
+    json.keys_under_root: true
+    paths:
+      - /usr/share/filebeat/input/audit.log
+output.elasticsearch:
+  hosts: http://elasticsearch:9200
