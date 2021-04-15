@@ -62,6 +62,7 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
     when(attribute.getSequenceNumber()).thenReturn(2);
     when(attribute.getEntity()).thenReturn(entityType);
     when(attribute.getDataType()).thenReturn(AttributeType.STRING);
+    when(attribute.getMaxLength()).thenReturn(255);
     when(attribute.getLookupAttributeIndex()).thenReturn(null);
     when(attribute.getCascadeDelete()).thenReturn(null);
 
@@ -71,6 +72,7 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
             .setName("MyAttributeName")
             .setSequenceNr(2)
             .setType("string")
+            .setMaxLength(255)
             .setIdAttribute(false)
             .setLabelAttribute(false)
             .setNullable(false)
@@ -127,6 +129,7 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
     when(attribute.getSequenceNumber()).thenReturn(2);
     when(attribute.getEntity()).thenReturn(entityType);
     when(attribute.getDataType()).thenReturn(AttributeType.ENUM);
+    when(attribute.getMaxLength()).thenReturn(255);
     when(attribute.getEnumOptions()).thenReturn(asList("option0", "option1"));
     when(attribute.getLookupAttributeIndex()).thenReturn(null);
     when(attribute.getCascadeDelete()).thenReturn(null);
@@ -137,6 +140,7 @@ class AttributeResponseMapperTest extends AbstractMockitoTest {
             .setName("MyAttributeName")
             .setSequenceNr(2)
             .setType("enum")
+            .setMaxLength(255)
             .setEnumOptions(ImmutableList.of("option0", "option1"))
             .setIdAttribute(false)
             .setLabelAttribute(false)

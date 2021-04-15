@@ -34,6 +34,7 @@
         "name": "myEnum",
         "sequenceNr": 5,
         "type": "enum",
+        "maxLength": 255,
         "idAttribute": false,
         "labelAttribute": false,
         "label": "myEnum",

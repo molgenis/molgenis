@@ -2,5 +2,6 @@
   "id": "v3meta_MyDataset_myString",
   "name": "myString",
   "type": "string",
+  "maxLength": 255,
   "unique": true
 }
