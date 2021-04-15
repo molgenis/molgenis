@@ -4,5 +4,16 @@ filebeat.inputs:
     json.keys_under_root: true
     paths:
       - /usr/share/filebeat/input/audit.log
+    close_inactive: 1000000s
+processors:
+  - timestamp:
+      field: timestamp
+      layouts:
+        - '2006-01-02T15:04:05.999Z'
+      test:
+        - '2021-04-15T09:42:13.247369Z'
+  - drop_fields:
+      fields:
+        - timestamp
 output.elasticsearch:
   hosts: http://elasticsearch:9200
