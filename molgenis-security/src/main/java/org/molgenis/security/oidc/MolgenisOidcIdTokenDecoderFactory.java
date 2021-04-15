@@ -14,6 +14,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenValidator;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -35,17 +36,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@link JwtDecoderFactory factory} that provides a {@link JwtDecoder} used for {@link
- * OidcIdToken} signature verification. The provided {@link JwtDecoder} is associated to a specific
- * {@link ClientRegistration}.
+ * A copy of the spring {@link
+ * org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory},
+ * modified to recreate the JWT Decoder if the JWK set URI changes.
  *
  * @author Joe Grandja
  * @author Rafael Dominguez
  * @author Mark Heckler
- * @since 5.2
- * @see JwtDecoderFactory
- * @see ClientRegistration
- * @see OidcIdToken
+ * @author Fleur Kelpin
+ * @see org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory
  */
 @Component
 public class MolgenisOidcIdTokenDecoderFactory implements JwtDecoderFactory<ClientRegistration> {
@@ -68,7 +67,9 @@ public class MolgenisOidcIdTokenDecoderFactory implements JwtDecoderFactory<Clie
   private final Map<String, JwtDecoder> jwtDecoders = new ConcurrentHashMap<>();
 
   private Function<ClientRegistration, OAuth2TokenValidator<Jwt>> jwtValidatorFactory =
-      new DefaultOidcIdTokenValidatorFactory();
+      clientRegistration ->
+          new DelegatingOAuth2TokenValidator<>(
+              new JwtTimestampValidator(), new OidcIdTokenValidator(clientRegistration));
 
   private Function<ClientRegistration, JwsAlgorithm> jwsAlgorithmResolver =
       (clientRegistration) -> SignatureAlgorithm.RS256;
@@ -114,9 +115,13 @@ public class MolgenisOidcIdTokenDecoderFactory implements JwtDecoderFactory<Clie
   @Override
   public JwtDecoder createDecoder(ClientRegistration clientRegistration) {
     Assert.notNull(clientRegistration, "clientRegistration cannot be null");
+    final var ingredients =
+        clientRegistration.getRegistrationId()
+            + '|'
+            + clientRegistration.getProviderDetails().getJwkSetUri();
     return this.jwtDecoders.computeIfAbsent(
-        clientRegistration.getRegistrationId(),
-        (key) -> {
+        ingredients,
+        key -> {
           NimbusJwtDecoder jwtDecoder = buildDecoder(clientRegistration);
           jwtDecoder.setJwtValidator(this.jwtValidatorFactory.apply(clientRegistration));
           Converter<Map<String, Object>, Map<String, Object>> claimTypeConverter =
@@ -207,7 +212,7 @@ public class MolgenisOidcIdTokenDecoderFactory implements JwtDecoderFactory<Clie
   /**
    * Sets the factory that provides an {@link OAuth2TokenValidator}, which is used by the {@link
    * JwtDecoder}. The default composes {@link JwtTimestampValidator} and {@link
-   * OidcIdTokenValidator}.
+   * org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenValidator}.
    *
    * @param jwtValidatorFactory the factory that provides an {@link OAuth2TokenValidator}
    */
