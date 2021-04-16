@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UnknownUserException;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.security.core.WithMockSystemUser;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -45,6 +46,15 @@ class HttpLocaleResolverTest extends AbstractMockitoSpringContextTests {
     assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
   }
 
+  @WithMockSystemUser(originalUsername = "user")
+  @Test
+  void testResolveLocaleAuthenticatedElevated() {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+    String username = "user";
+    when(userLocaleResolver.resolveLocale(username)).thenReturn(Locale.GERMAN);
+    assertEquals(GERMAN, httpLocaleResolver.resolveLocale(httpServletRequest));
+  }
+
   @Test
   void testResolveLocaleNotAuthenticated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
@@ -55,6 +65,22 @@ class HttpLocaleResolverTest extends AbstractMockitoSpringContextTests {
   @WithMockUser
   @Test
   void testSetLocaleAuthenticated() {
+    HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+    HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+    Locale locale = GERMAN;
+
+    String username = "user";
+    User user = mock(User.class);
+    when(userService.getUser(username)).thenReturn(user);
+    httpLocaleResolver.setLocale(httpServletRequest, httpServletResponse, locale);
+
+    verify(user).setLanguageCode(locale.getLanguage());
+    verify(userService).update(user);
+  }
+
+  @WithMockSystemUser(originalUsername = "user")
+  @Test
+  void testSetLocaleAuthenticatedElevated() {
     HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
     HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
     Locale locale = GERMAN;
