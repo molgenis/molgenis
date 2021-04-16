@@ -59,8 +59,8 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
     volumes:
-      - ${PWD}/logs/:/usr/share/filebeat/input/
-      - ${PWD}/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs/:/usr/share/filebeat/input/
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
     depends_on:
       - elasticsearch
 

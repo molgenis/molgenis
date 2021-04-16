@@ -6,8 +6,16 @@
   </appender>
   <appender name="jobExecutionLogAppender" class="org.molgenis.jobs.model.JobExecutionLogAppender"/>
 
-  <appender name="FILE-AUDIT" class="ch.qos.logback.core.FileAppender">
-    <file>${audit.log.path}</file>
+  <appender name="FILE-AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover -->
+      <fileNamePattern>${audit.log.path}.%d{yyyy-MM-dd}.log</fileNamePattern>
+
+      <!-- keep 30 days' worth of history capped at 3GB total size -->
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
       <providers>
         <logstashMarkers/>

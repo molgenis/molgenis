@@ -3,8 +3,7 @@ filebeat.inputs:
     json.message_key: message
     json.keys_under_root: true
     paths:
-      - /usr/share/filebeat/input/audit.log
-    close_inactive: 1000000s
+      - /usr/share/filebeat/input/audit*.log
 processors:
   - timestamp:
       field: timestamp
