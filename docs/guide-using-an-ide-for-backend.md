@@ -173,6 +173,8 @@ molgenis.home=**your own version of the data dir**
 admin.email=**your own email address**
 audit.log.path=**path to where you want to store the audit log file**
 ```
+>Note: If you want to see the audit log in Kibana in the dev stack, the `audit.log.path` must be 
+> `<molgenis_git_root>/molgenis-app/dev-env/logs/audit.log` 
 * Deployment: Select `+` -> `artifact` -> `molgenis-app:war exploded`
 * Application context: Select `/`
 * Go back to the first tab, you should now have more options in the update and frame deactivation pulldowns.
