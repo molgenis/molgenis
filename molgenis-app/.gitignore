@@ -4,3 +4,4 @@ test-output/
 .classpath
 .project
 /target/
+dev-env/logs/*
