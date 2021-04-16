@@ -25,7 +25,7 @@ class AuditEventLoggerTest {
 
   @BeforeEach
   void beforeEach() {
-    auditEventLogger = new AuditEventLogger();
+    auditEventLogger = new AuditEventLogger("8.7.0");
   }
 
   @Test
@@ -48,7 +48,7 @@ class AuditEventLoggerTest {
     assertEquals(1, appender.list.size());
     var loggingEvent = appender.list.get(0);
     assertEquals(
-        "{\"timestamp\":\"2021-01-06T11:35:02.781470Z\",\"principal\":\"principal\",\"type\":\"TYPE\",\"data\":{\"detail\":{\"foo\":\"bar\"}}",
+        "{\"timestamp\":\"2021-01-06T11:35:02.781470Z\",\"molgenisVersion\":\"8.7.0\",\"principal\":\"principal\",\"type\":\"TYPE\",\"data\":{\"detail\":{\"foo\":\"bar\"}}",
         writeMarkersToString(loggingEvent.getMarker()));
   }
 
