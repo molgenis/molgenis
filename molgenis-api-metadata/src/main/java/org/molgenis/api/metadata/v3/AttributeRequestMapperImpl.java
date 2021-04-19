@@ -103,6 +103,8 @@ class AttributeRequestMapperImpl implements AttributeRequestMapper {
       attribute.setDataType(AttributeType.toEnum(type));
     }
 
+    Optional.ofNullable(attributeRequest.getMaxLength()).ifPresent(attribute::setMaxLength);
+
     EntityType refEntityType;
     String refEntityTypeId = attributeRequest.getRefEntityType();
     if (refEntityTypeId != null) {

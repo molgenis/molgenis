@@ -32,6 +32,10 @@ public abstract class CreateAttributeRequest {
   @CheckForNull
   public abstract String getType();
 
+  @Nullable
+  @CheckForNull
+  public abstract Integer getMaxLength();
+
   @CopyAnnotations(exclude = {CheckForNull.class, Nullable.class})
   @Nullable
   @CheckForNull
@@ -167,6 +171,8 @@ public abstract class CreateAttributeRequest {
     public abstract Builder setName(String newName);
 
     public abstract Builder setType(String newType);
+
+    public abstract Builder setMaxLength(Integer maxLength);
 
     public abstract Builder setParent(@Nullable @CheckForNull String newParent);
 

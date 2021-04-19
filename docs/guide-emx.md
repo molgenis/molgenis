@@ -138,8 +138,8 @@ Defines the data type (default: string)
 
 | Data type    | Description                                                                                   | Expected formatting                                              |
 |--------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| string       | The default data type in  MOLGENIS, describing a character string of <255 characters.         | A string of characters with a length of less than 255            |
-| text         | When having a string with a length of more than 255 characters, this data type is recommended.| A string with characters with a maximum length of 65535		  |
+| string       | The default data type in  MOLGENIS, a character string.                                       | A string of characters                                           |
+| text         | A long character string, when editing the user will be presented with a textarea.             | A string of characters                                		  |
 | int          | Integers. Natural numbers like 1, 2, 3, -1, -2, -3. rangeMin and rangeMax can be defined.     | Non decimal numbers in range[-2^31 , 2^31 -1]                    |
 | long         | Non-decimal number of type long                                                               | Non decimal numbers in range[-2^63 , 2^63 -1]                    |
 | decimal      | Decimal numbers/floats.                                                                       | Decimal numbers with [double-precision](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) ('NaN' not allowed)                        |
@@ -155,6 +155,7 @@ Defines the data type (default: string)
 | email        | An e-mail adress                                                                              | E-mail adress                                                    |
 | enum         | An item chosen from a fixed list of options that can be selected for this data type. The options should be given in an extra column called “enumOptions”. These options cannot be updated without changing meta-data (so deleting the data and meta data and a new upload are required in MOLGENIS 1.x). | A value chosen from the enumOptions list specified as a comma separated list of options in the model.|
 | hyperlink    | A link to a website                                                                           | A link to a website                                              |
+| script       | A piece of code, typically edited in a text editor                                            | A string of characters                                           |
 | one_to_many  | This data type is only supported in MOLGENIS 2.0. A data type that defines the one to many relationship between two columns in two separate tables. Having this data types requires having another table with an xref column which is linked to the one_to_many. The one_to_many requires a refEntity like the other referring data types, but unlike the others, it also requires a “mappedBy” column. In this column the name of the xref in the other column should be specified. For instance, an author can write several books. Books are stored in one table (called “books”) with “author” as xref and as refEntity “authors”. In the authors table authors are stored with books as one_to_many. The books attribute has the refEntity “books” and is mappedBy “author”. | A comma separated list of id’s. Requires having an xref to this attribute in another table. Since one_to_many attributes are mapped by a xref attribute they cannot be specified in data sheets.    |
 
 #### refEntity
@@ -175,6 +176,11 @@ Free text documentation describing the attribute
 
 #### description-{languageCode}
 Description for specified language (can be multiple languages, example: description-nl)
+
+#### maxLength
+The maximum number of characters.
+* For `string`, `email`, `enum` and `hyperlink`, the default is 255.
+* For `text` and `script`, the default is 64 KiB. 
 
 #### rangeMin
 Used to set range in case of int or long attributes

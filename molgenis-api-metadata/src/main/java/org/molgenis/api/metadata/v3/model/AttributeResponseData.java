@@ -19,6 +19,10 @@ public abstract class AttributeResponseData implements MetadataResponseData {
 
   public abstract String getType();
 
+  @Nullable
+  @CheckForNull
+  public abstract Integer getMaxLength();
+
   public abstract boolean isIdAttribute();
 
   public abstract boolean isLabelAttribute();
@@ -107,6 +111,8 @@ public abstract class AttributeResponseData implements MetadataResponseData {
     public abstract Builder setSequenceNr(Integer sequenceNr);
 
     public abstract Builder setType(String type);
+
+    public abstract Builder setMaxLength(Integer maxLength);
 
     public abstract Builder setIdAttribute(boolean isIdAttribute);
 

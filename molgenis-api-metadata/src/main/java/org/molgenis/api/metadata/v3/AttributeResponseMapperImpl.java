@@ -84,6 +84,7 @@ class AttributeResponseMapperImpl implements AttributeResponseMapper {
     builder.setName(attr.getName());
     builder.setSequenceNr(attr.getSequenceNumber());
     builder.setType(getValueString(attr.getDataType()));
+    Optional.ofNullable(attr.getMaxLength()).ifPresent(builder::setMaxLength);
     builder.setIdAttribute(attr.isIdAttribute());
     builder.setLabelAttribute(attr.isLabelAttribute());
     builder.setLookupAttributeIndex(attr.getLookupAttributeIndex());

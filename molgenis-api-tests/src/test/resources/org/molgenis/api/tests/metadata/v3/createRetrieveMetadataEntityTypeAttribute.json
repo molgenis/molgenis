@@ -7,6 +7,7 @@
     "name": "myStringNew",
     "sequenceNr": 3,
     "type": "string",
+    "maxLength": 255,
     "idAttribute": false,
     "labelAttribute": false,
     "label": "myStringNew",

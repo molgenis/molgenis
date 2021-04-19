@@ -6,6 +6,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.lang.Integer.parseInt;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
@@ -27,6 +28,7 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.toEnum;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.MAX_LENGTH;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
@@ -150,6 +152,7 @@ public class EmxMetadataParser implements MetadataParser {
   public static final String EMX_ATTRIBUTES_ENUM_OPTIONS = "enumOptions";
   public static final String EMX_ATTRIBUTES_RANGE_MIN = "rangeMin";
   public static final String EMX_ATTRIBUTES_RANGE_MAX = "rangeMax";
+  public static final String EMX_ATTRIBUTES_MAX_LENGTH = "maxLength";
   public static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
   public static final String EMX_ATTRIBUTES_UNIQUE = "unique";
   public static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
@@ -212,6 +215,7 @@ public class EmxMetadataParser implements MetadataParser {
           EMX_ATTRIBUTES_PART_OF_ATTRIBUTE,
           EMX_ATTRIBUTES_RANGE_MAX,
           EMX_ATTRIBUTES_RANGE_MIN,
+          EMX_ATTRIBUTES_MAX_LENGTH,
           EMX_ATTRIBUTES_READ_ONLY,
           EMX_ATTRIBUTES_REF_ENTITY,
           EMX_ATTRIBUTES_MAPPED_BY,
@@ -881,6 +885,7 @@ public class EmxMetadataParser implements MetadataParser {
     String defaultValue = emxAttrEntity.getString(EMX_ATTRIBUTES_DEFAULT_VALUE);
     Object emxAttrTags = emxAttrEntity.get(EMX_ENTITIES_TAGS);
     String emxAuto = emxAttrEntity.getString(EMX_ATTRIBUTES_AUTO);
+    String maxLength = emxAttrEntity.getString(MAX_LENGTH);
 
     if (emxAuto != null) {
       attr.setAuto(parseBoolean(emxAuto, rowIndex, EMX_ATTRIBUTES_AUTO));
@@ -912,6 +917,9 @@ public class EmxMetadataParser implements MetadataParser {
     if (defaultValue != null) attr.setDefaultValue(defaultValue);
     if (emxIsLookupAttr != null) {
       setLookupAttr(rowIndex, emxEntityName, emxAttr, attr, emxIsLookupAttr);
+    }
+    if (maxLength != null) {
+      attr.setMaxLength(parseInt(maxLength, 10));
     }
 
     if (emxIsLabelAttr != null) {

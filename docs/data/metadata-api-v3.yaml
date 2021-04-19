@@ -485,6 +485,9 @@ components:
         type:
           type: string
           enum: [bool, categorical, categorical_mref, compound, date, date_time, decimal, email, enum, file, html, hyperlink, int, long, mref, one_to_many, script, string, text, xref]
+        maxLength:
+          type: number
+          nullable: true
         mappedBy:
           $ref: "#/components/schemas/Attribute"
           # or nullable
@@ -611,6 +614,9 @@ components:
         type:
           type: string
           enum: [bool, categorical, categorical_mref, compound, date, date_time, decimal, email, enum, file, html, hyperlink, int, long, mref, one_to_many, script, string, text, xref]
+        maxLength:
+          type: number
+          nullable: true
         parent:
           description: the id of the parent attribute
           type: string

@@ -44,6 +44,7 @@
             "name": "label",
             "sequenceNr": 1,
             "type": "string",
+            "maxLength": 255,
             "idAttribute": false,
             "labelAttribute": true,
             "lookupAttributeIndex": 0,
