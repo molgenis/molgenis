@@ -378,6 +378,11 @@
       <artifactId>sentry-logback</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.janino</groupId>
+      <artifactId>janino</artifactId>
+      <version>3.0.6</version>
+    </dependency>
+    <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api-permissions</artifactId>
       <version>${project.version}</version>
