@@ -38,6 +38,7 @@ public class FileStore {
     return new FileStore(storageDir + separator + subdir);
   }
 
+  @SuppressWarnings("javasecurity:S2083") // path traversal attack prevented by validatePathname()
   public boolean createDirectory(String dirName) {
     validatePathname(dirName);
 
@@ -48,6 +49,7 @@ public class FileStore {
     FileUtils.deleteDirectory(getFileUnchecked(dirName));
   }
 
+  @SuppressWarnings("javasecurity:S2083") // path traversal attack prevented by validatePathname()
   public File store(InputStream is, String fileName) throws IOException {
     validatePathname(fileName);
 
@@ -71,6 +73,7 @@ public class FileStore {
    * @param targetDir target directory you want to move to
    * @throws IOException
    */
+  @SuppressWarnings("javasecurity:S2083") // path traversal attack prevented by validatePathname()
   public void move(String sourceDir, String targetDir) throws IOException {
     validatePathname(sourceDir);
     validatePathname(targetDir);
