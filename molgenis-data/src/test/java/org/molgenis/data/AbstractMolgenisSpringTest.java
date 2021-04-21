@@ -54,6 +54,7 @@ public abstract class AbstractMolgenisSpringTest extends AbstractMockitoSpringCo
     config.resetMocks();
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   @Import(MetadataTestConfig.class)
   public static class Config {

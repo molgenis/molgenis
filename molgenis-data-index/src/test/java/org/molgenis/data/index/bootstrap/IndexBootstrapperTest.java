@@ -190,6 +190,7 @@ class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     verify(indexActionRegisterService, never()).register(any(EntityType.class), any());
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   static class Config {
     @Mock IndexService indexService;

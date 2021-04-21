@@ -163,6 +163,7 @@ class JobSchedulerTest extends AbstractMolgenisSpringTest {
     verify(quartzScheduler).deleteJob((jobKey));
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   @Import({SecurityPackage.class, JobTestConfig.class})
   static class Config {

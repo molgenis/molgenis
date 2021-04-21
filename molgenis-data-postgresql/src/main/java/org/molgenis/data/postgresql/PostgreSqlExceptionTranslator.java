@@ -277,10 +277,6 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       // exception message when adding data that does not match constraint
       String columnName = matcher.group(1);
 
-      EntityTypeDescription entityTypeDescription =
-          entityTypeRegistry.getEntityTypeDescription(tableName);
-      entityTypeDescription.getAttributeDescriptionMap().get(columnName);
-
       String attributeName = tryGetAttributeName(tableName, columnName).orElse(null);
       String entityTypeId = tryGetEntityTypeName(tableName).orElse(null);
 

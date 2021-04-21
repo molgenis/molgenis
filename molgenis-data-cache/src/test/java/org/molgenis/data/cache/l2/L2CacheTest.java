@@ -51,6 +51,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+@SuppressWarnings("java:S5979") // mocks are initialized
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = L2CacheTest.Config.class)
 class L2CacheTest extends AbstractMolgenisSpringTest {

@@ -325,6 +325,7 @@ class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     assertEquals(attributeTagMap, ontologyTagService.tagAttributesInEntity("test", tags));
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   static class Config {
     @Mock private DataService dataService;
