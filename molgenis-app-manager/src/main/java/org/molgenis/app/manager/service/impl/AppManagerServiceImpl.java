@@ -231,6 +231,7 @@ public class AppManagerServiceImpl implements AppManagerService {
     return true;
   }
 
+  @SuppressWarnings("javasecurity:S2083") // path traversal attack prevented by FileStore
   private String utf8Encodedfiletostring(File file) {
     try (FileInputStream fileInputStream = new FileInputStream(file)) {
       return IOUtils.toString(fileInputStream, UTF_8);

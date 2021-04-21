@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 
 @Configuration
+@SuppressWarnings("java:S5979") // mocks are initialized
 public class UserAccountControllerTestConfig {
   @Mock private UserAccountService userAccountService;
   @Mock private RecoveryService recoveryService;

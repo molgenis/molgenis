@@ -58,6 +58,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
+@SuppressWarnings("java:S5979") // mocks are initialized
 class PostgreSqlRepositoryTest {
   private PostgreSqlRepository postgreSqlRepo;
   @Mock private JdbcTemplate jdbcTemplate;

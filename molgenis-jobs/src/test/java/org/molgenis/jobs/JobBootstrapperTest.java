@@ -43,6 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+@SuppressWarnings("java:S5979") // mocks are initialized
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = {JobBootstrapperTest.Config.class, JobBootstrapper.class})
 class JobBootstrapperTest extends AbstractMolgenisSpringTest {

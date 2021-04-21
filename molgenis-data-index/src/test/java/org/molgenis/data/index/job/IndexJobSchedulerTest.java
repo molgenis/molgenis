@@ -97,6 +97,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
     assertEquals(5, between(parseInstant(queryMatcher.group(1)), now()).toMinutes());
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   @Import({IndexConfig.class, IndexActionRegisterServiceImpl.class})
   static class Config {

@@ -1,7 +1,7 @@
 package org.molgenis.data.i18n;
 
 import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.List.copyOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -21,6 +21,7 @@ import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.i18n.AllPropertiesMessageSource;
 
+@SuppressWarnings("java:S5979") // mocks are initialized
 class LocalizationPopulatorTest extends AbstractMockitoTest {
   private LocalizationPopulator localizationPopulator;
   private AllPropertiesMessageSource allPropertiesMessageSource;
@@ -75,7 +76,7 @@ class LocalizationPopulatorTest extends AbstractMockitoTest {
     verify(biobankUTF8).set("nl", "\uD83D\uDC00\uD83C\uDDF3\uD83C\uDDF1");
 
     verify(localizationService).store(updateCaptor.capture(), addCaptor.capture());
-    assertEquals(of(enPlusNl, nlOnly), newArrayList(updateCaptor.getValue()));
-    assertEquals(of(enOnly, biobankUTF8), newArrayList(addCaptor.getValue()));
+    assertEquals(of(enPlusNl, nlOnly), copyOf(updateCaptor.getValue()));
+    assertEquals(of(enOnly, biobankUTF8), copyOf(addCaptor.getValue()));
   }
 }

@@ -364,6 +364,7 @@ class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     verify(dataService, never()).delete(INDEX_ACTION_GROUP, indexActionGroup);
   }
 
+  @SuppressWarnings("java:S5979") // mocks are initialized
   @Configuration
   @Import({IndexTestConfig.class, TestHarnessConfig.class})
   static class Config {
