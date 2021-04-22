@@ -31,11 +31,6 @@
       "label": "Navigator"
     },
     {
-      "type": "plugin",
-      "id": "dataexplorer",
-      "label": "Data Explorer"
-    },
-    {
       "type": "menu",
       "id": "dataintegration",
       "label": "Data Integration",
