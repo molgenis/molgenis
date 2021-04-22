@@ -1,6 +1,7 @@
 package org.molgenis.core.ui;
 
 import java.util.EnumSet;
+import java.util.Optional;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.MultipartConfigElement;
@@ -17,19 +18,20 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class MolgenisWebAppInitializer {
+
   private static final int MB = 1024 * 1024;
   // the size threshold after which multi-part files will be written to disk.
   private static final int FILE_SIZE_THRESHOLD = 10 * MB;
   private static final Logger LOG = LoggerFactory.getLogger(MolgenisWebAppInitializer.class);
+  public static final int MAX_FILE_SIZE_DEFAULT = 150;
 
-  @SuppressWarnings("unused")
   protected void onStartup(ServletContext servletContext, Class<?> appConfig) {
-    // no maximum field size provided? default to 32 Mb
-    onStartup(servletContext, appConfig, 32);
+    onStartup(servletContext, appConfig, MAX_FILE_SIZE_DEFAULT);
   }
 
   /** A Molgenis common web application initializer */
-  protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize) {
+  protected void onStartup(
+      ServletContext servletContext, Class<?> appConfig, int maxFileSizeDefault) {
     // Create the 'root' Spring application context
     AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
     rootContext.registerShutdownHook();
@@ -51,6 +53,11 @@ public class MolgenisWebAppInitializer {
       LOG.warn(
           "ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
     } else {
+      int maxFileSize =
+          Optional.ofNullable(System.getProperty("max.file.mb"))
+              .map(prop -> Integer.parseInt(prop, 10))
+              .orElse(maxFileSizeDefault);
+      LOG.info("Max multipart file upload size is {}MiB.", maxFileSize);
       final long maxSize = (long) maxFileSize * MB;
       dispatcherServletRegistration.addMapping("/");
       dispatcherServletRegistration.setMultipartConfig(
