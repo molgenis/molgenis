@@ -55,6 +55,7 @@ public class MolgenisWebAppInitializer {
     } else {
       int maxFileSize =
           Optional.ofNullable(System.getProperty("max.file.mb"))
+              .or(() -> Optional.ofNullable(servletContext.getInitParameter("max.file.mb")))
               .map(prop -> Integer.parseInt(prop, 10))
               .orElse(maxFileSizeDefault);
       LOG.info("Max multipart file upload size is {}MiB.", maxFileSize);
