@@ -56,7 +56,7 @@ GET http://molgenis.mydomain.example/api/v2/<entity_name>?sort=attr0:desc,attr1
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?start=40&num=20
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0==val
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val
-GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val;q=attr1=ge=5
+GET http://molgenis.mydomain.example/api/v2/<entity_name>?q=attr0!=val;attr1=ge=5
 ```
 
 See the [MOLGENIS RSQL documentation](guide-rsql.md) for all supported operators in MOLGENIS and matching examples.
