@@ -71,7 +71,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
    * repository.
    */
   @Override
-  public synchronized Repository<Entity> decorate(Repository<Entity> repository) {
+  public Repository<Entity> decorate(Repository<Entity> repository) {
     String entityTypeId = repository.getEntityType().getId();
 
     if (!EXCLUDED.contains(entityTypeId) && bootstrappingDone) {
