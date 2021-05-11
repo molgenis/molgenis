@@ -2,9 +2,8 @@ package org.molgenis.data.platform.decorators;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.SystemRepositoryDecoratorFactory;
@@ -14,17 +13,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SystemRepositoryDecoratorRegistryImpl implements SystemRepositoryDecoratorRegistry {
-  private final Map<String, SystemRepositoryDecoratorFactory> factories = new HashMap<>();
+
+  private final ConcurrentHashMap<String, SystemRepositoryDecoratorFactory> factories =
+      new ConcurrentHashMap<>();
 
   @Override
-  public synchronized void addFactory(SystemRepositoryDecoratorFactory factory) {
+  public void addFactory(SystemRepositoryDecoratorFactory factory) {
     String factoryId = factory.getEntityType().getId();
     factories.put(factoryId, factory);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public synchronized Repository<Entity> decorate(Repository<Entity> repository) {
+  public Repository<Entity> decorate(Repository<Entity> repository) {
     Repository<Entity> decoratedRepository = repository;
     for (String factoryId : getFactoryIds(repository)) {
       SystemRepositoryDecoratorFactory factory = factories.get(factoryId);
