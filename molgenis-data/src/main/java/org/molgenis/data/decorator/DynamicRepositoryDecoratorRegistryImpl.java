@@ -13,10 +13,10 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -31,8 +31,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepositoryDecoratorRegistry {
 
-  private static final Set<String> EXCLUDED = Sets.newHashSet(DECORATOR_CONFIGURATION);
-  private final Map<String, DynamicRepositoryDecoratorFactory> factories = new HashMap<>();
+  private static final Set<String> EXCLUDED =
+      Sets.newConcurrentHashSet(Set.of(DECORATOR_CONFIGURATION));
+  private final Map<String, DynamicRepositoryDecoratorFactory> factories =
+      new ConcurrentHashMap<>();
   private final DataService dataService;
   private final Gson gson;
   private boolean bootstrappingDone = false;
@@ -45,7 +47,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
   }
 
   @Override
-  public synchronized void addFactory(DynamicRepositoryDecoratorFactory factory) {
+  public void addFactory(DynamicRepositoryDecoratorFactory factory) {
     String factoryId = factory.getId();
     if (factories.containsKey(factoryId)) {
       throw new IllegalArgumentException(format("Duplicate decorator id [%s]", factoryId));
