@@ -1,5 +1,6 @@
 package org.molgenis.jobs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -12,6 +13,7 @@ import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -24,9 +26,19 @@ import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
-import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.test.AbstractMockitoSpringContextTests;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 
-class JobExecutorTest extends AbstractMockitoTest {
+@ContextConfiguration(classes = JobExecutorTest.Config.class)
+class JobExecutorTest extends AbstractMockitoSpringContextTests {
+
+  @Configuration
+  static class Config {}
+
   @Mock private DataService dataService;
   @Mock private EntityManager entityManager;
   @Mock private ExecutorService executorService;
@@ -35,6 +47,7 @@ class JobExecutorTest extends AbstractMockitoTest {
   @Mock private JobExecutionTemplate jobExecutionTemplate;
   @Mock private JobExecutionRegistry jobExecutionRegistry;
   private JobExecutor jobExecutor;
+  private SecurityContext previousContext;
 
   @BeforeEach
   void setUpBeforeMethod() {
@@ -47,6 +60,13 @@ class JobExecutorTest extends AbstractMockitoTest {
             jobExecutionContextFactory,
             jobExecutionRegistry);
     jobExecutor.setJobExecutionTemplate(jobExecutionTemplate);
+
+    previousContext = SecurityContextHolder.getContext();
+  }
+
+  @AfterEach
+  void tearDownAfterEach() {
+    SecurityContextHolder.setContext(previousContext);
   }
 
   @Test
@@ -106,6 +126,7 @@ class JobExecutorTest extends AbstractMockitoTest {
 
   @SuppressWarnings("unchecked")
   @Test
+  @WithMockUser
   void testSubmit() throws ExecutionException, InterruptedException {
     String jobExecutionEntityTypeId = "MyJobExecutionId";
     EntityType jobExecutionEntityType = mock(EntityType.class);
@@ -121,13 +142,16 @@ class JobExecutorTest extends AbstractMockitoTest {
     when(jobFactory.createJob(jobExecution)).thenReturn(job);
 
     JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
-    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    when(jobExecutionContextFactory.createJobExecutionContextWithAuthentication(
+            jobExecution, authentication))
         .thenReturn(jobExecutionContext);
 
     Progress progress = mock(Progress.class);
     when(jobExecutionRegistry.registerJobExecution(jobExecution)).thenReturn(progress);
     doAnswer(
             (InvocationOnMock invocation) -> {
+              assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
               ((Runnable) invocation.getArguments()[0]).run();
               return null;
             })
@@ -160,6 +184,7 @@ class JobExecutorTest extends AbstractMockitoTest {
   // same as testSubmit but with other ExecutorService
   @SuppressWarnings("unchecked")
   @Test
+  @WithMockUser
   void testSubmitExecutorService() throws ExecutionException, InterruptedException {
     ExecutorService myExecutorService = mock(ExecutorService.class);
 
@@ -177,13 +202,16 @@ class JobExecutorTest extends AbstractMockitoTest {
     when(jobFactory.createJob(jobExecution)).thenReturn(job);
 
     JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
-    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    when(jobExecutionContextFactory.createJobExecutionContextWithAuthentication(
+            jobExecution, authentication))
         .thenReturn(jobExecutionContext);
 
     Progress progress = mock(Progress.class);
     when(jobExecutionRegistry.registerJobExecution(jobExecution)).thenReturn(progress);
     doAnswer(
             (InvocationOnMock invocation) -> {
+              assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
               ((Runnable) invocation.getArguments()[0]).run();
               return null;
             })

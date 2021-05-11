@@ -23,6 +23,12 @@ class JobExecutionContextFactoryImpl implements JobExecutionContextFactory {
   @Override
   public JobExecutionContext createJobExecutionContext(JobExecution jobExecution) {
     Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
+    return this.createJobExecutionContextWithAuthentication(jobExecution, authentication);
+  }
+
+  @Override
+  public JobExecutionContext createJobExecutionContextWithAuthentication(
+      JobExecution jobExecution, Authentication authentication) {
     Locale locale = jobExecutorLocaleService.createLocale(jobExecution);
     return JobExecutionContext.create(authentication, locale);
   }
