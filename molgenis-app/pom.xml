@@ -67,7 +67,6 @@
               <db_password>molgenis</db_password>
               <admin.password>admin</admin.password>
               <molgenis.home>/home/molgenis</molgenis.home>
-              <audit.log.path>/home/molgenis/audit.log</audit.log.path>
               <python_script_executable>/usr/bin/python3</python_script_executable>
             </environment>
           </container>

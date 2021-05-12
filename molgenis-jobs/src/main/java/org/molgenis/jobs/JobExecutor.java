@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.UnknownEntityException;
@@ -23,11 +24,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /** Executes {@link ScheduledJob}s. */
 @Service
 public class JobExecutor {
+
   private static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>() {}.getType();
   private static final Logger LOG = LoggerFactory.getLogger(JobExecutor.class);
 
@@ -78,7 +82,7 @@ public class JobExecutor {
     Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
     try {
       long callingThreadId = Thread.currentThread().getId();
-      runJob(jobExecution, molgenisJob, progress, callingThreadId);
+      runJob(jobExecution, molgenisJob, progress, callingThreadId, null);
     } catch (Exception ex) {
       handleJobException(jobExecution, ex);
     } finally {
@@ -121,9 +125,12 @@ public class JobExecutor {
 
     long callingThreadId = Thread.currentThread().getId();
     Progress progress = jobExecutionRegistry.registerJobExecution(jobExecution);
+    var currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
     CompletableFuture<Void> completableFuture =
         CompletableFuture.runAsync(
-            () -> runJob(jobExecution, molgenisJob, progress, callingThreadId), executorService);
+            () ->
+                runJob(jobExecution, molgenisJob, progress, callingThreadId, currentAuthentication),
+            executorService);
 
     return completableFuture.handle(
         (voidResult, throwable) -> {
@@ -178,10 +185,21 @@ public class JobExecutor {
 
   /** @param callingThreadId identifier of the thread that requested execution */
   private void runJob(
-      JobExecution jobExecution, Job<?> job, Progress progress, long callingThreadId) {
+      JobExecution jobExecution,
+      Job<?> job,
+      Progress progress,
+      long callingThreadId,
+      @Nullable Authentication authentication) {
     try {
-      JobExecutionContext jobExecutionContext =
-          jobExecutionContextFactory.createJobExecutionContext(jobExecution);
+      JobExecutionContext jobExecutionContext;
+      if (authentication != null) {
+        jobExecutionContext =
+            jobExecutionContextFactory.createJobExecutionContextWithAuthentication(
+                jobExecution, authentication);
+      } else {
+        jobExecutionContext = jobExecutionContextFactory.createJobExecutionContext(jobExecution);
+      }
+
       jobExecutionTemplate.call(job, progress, jobExecutionContext);
     } finally {
       JobUtils.cleanupAfterRunJob(callingThreadId);

@@ -9,6 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
+
   private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdaterImpl.class);
 
   private final JobExecutionContextFactory jobExecutionContextFactory;
@@ -38,9 +40,12 @@ public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
   }
 
   @Override
+  @RunAsSystem
   public void update(JobExecution jobExecution) {
-    JobExecutionContext jobExecutionContext =
-        jobExecutionContextFactory.createJobExecutionContext(jobExecution);
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    var jobExecutionContext =
+        jobExecutionContextFactory.createJobExecutionContextWithAuthentication(
+            jobExecution, authentication);
     long callingThreadId = Thread.currentThread().getId();
     executorService.execute(() -> runJob(jobExecution, jobExecutionContext, callingThreadId));
   }
