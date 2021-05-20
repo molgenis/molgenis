@@ -24,7 +24,6 @@
 * Data processing
   * [Scripts](guide-scripts.md)
   * [R](guide-r.md)
-  * [Python](guide-python.md)
   * [Schedule jobs](guide-schedule.md)
 * Configuration
   * [Settings](guide-settings.md)
