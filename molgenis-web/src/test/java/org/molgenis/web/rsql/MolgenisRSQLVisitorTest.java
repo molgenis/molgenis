@@ -18,7 +18,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.web.exception.UnknownRsqlOperatorException;
 import org.molgenis.web.exception.UnsupportedRsqlOperationException;
 import org.molgenis.web.exception.UnsupportedRsqlOperatorException;
 
@@ -64,7 +63,7 @@ class MolgenisRSQLVisitorTest {
     ComparisonOperator unknown = new ComparisonOperator("=foo=");
     ComparisonNode node = new ComparisonNode(unknown, "*", List.of("8.3.*"));
 
-    assertThrows(UnknownRsqlOperatorException.class, () -> visitor.visit(node));
+    assertThrows(IllegalStateException.class, () -> visitor.visit(node));
   }
 
   @Test

@@ -16,7 +16,6 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.web.exception.UnknownRsqlOperatorException;
 import org.molgenis.web.exception.UnsupportedRsqlOperationException;
 import org.molgenis.web.exception.UnsupportedRsqlOperatorException;
 
@@ -176,7 +175,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
       case "=fuzzy=":
         throw new UnsupportedRsqlOperatorException(symbol);
       default:
-        throw new UnknownRsqlOperatorException(symbol);
+        throw new IllegalStateException(String.format("Unknown rsql operator: %s", symbol));
     }
     return q;
   }
