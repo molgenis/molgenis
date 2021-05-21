@@ -3,7 +3,10 @@ package org.molgenis.web.rsql;
 import static java.util.Objects.requireNonNull;
 
 import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.Node;
+import cz.jirutka.rsql.parser.RSQLParserException;
+import cz.jirutka.rsql.parser.UnknownOperatorException;
+import org.molgenis.api.convert.QueryParseException;
+import org.molgenis.api.convert.UnknownQueryOperatorException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -25,9 +28,16 @@ public class MolgenisRSQL {
   }
 
   public Query<Entity> createQuery(String rsql, Repository<Entity> repository) {
-    Node rootNode = rsqlParser.parse(rsql);
-    MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(repository);
-
-    return rootNode.accept(visitor);
+    try {
+      var rootNode = rsqlParser.parse(rsql);
+      var visitor = new MolgenisRSQLVisitor(repository);
+      return rootNode.accept(visitor);
+    } catch (RSQLParserException ex) {
+      var cause = ex.getCause();
+      if (cause instanceof UnknownOperatorException) {
+        throw new UnknownQueryOperatorException(((UnknownOperatorException) cause).getOperator());
+      }
+      throw new QueryParseException(ex);
+    }
   }
 }
