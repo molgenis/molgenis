@@ -22,6 +22,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.web.exception.UnsupportedRsqlOperationException;
 
 class MolgenisRSQLTest extends AbstractMockitoTest {
   @Mock private Repository<Entity> repository;
@@ -133,7 +134,8 @@ class MolgenisRSQLTest extends AbstractMockitoTest {
     doReturn(nameAttr).when(entityType).getAttribute("name");
 
     assertThrows(
-        IllegalArgumentException.class, () -> molgenisRSQL.createQuery("name>87", repository));
+        UnsupportedRsqlOperationException.class,
+        () -> molgenisRSQL.createQuery("name>87", repository));
   }
 
   @Test

@@ -10,13 +10,14 @@ import cz.jirutka.rsql.parser.ast.OrNode;
 import java.util.Iterator;
 import java.util.List;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.web.exception.UnsupportedRsqlOperationException;
+import org.molgenis.web.exception.UnsupportedRsqlOperatorException;
 
 /**
  * RSQLVisitor implementation that creates {@link Query} objects for an RSQL tree.
@@ -119,42 +120,42 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
         q.eq(attrName, eqValue);
         break;
       case "=in=":
-        Attribute inAttr = getAttribute(node);
+        var inAttr = getAttribute(node);
         q.in(
             attrName,
             values.stream().map(value -> rsqlValueParser.parse(value, inAttr)).collect(toList()));
         break;
       case "=lt=":
       case "<":
-        Attribute ltAttr = getAttribute(node);
-        validateNumericOrDate(ltAttr);
+        var ltAttr = getAttribute(node);
+        validateNumericOrDate(ltAttr, symbol);
         Object ltValue = rsqlValueParser.parse(values.get(0), ltAttr);
         q.lt(attrName, ltValue);
         break;
       case "=le=":
       case "<=":
-        Attribute leAttr = getAttribute(node);
-        validateNumericOrDate(leAttr);
+        var leAttr = getAttribute(node);
+        validateNumericOrDate(leAttr, symbol);
         Object leValue = rsqlValueParser.parse(values.get(0), leAttr);
         q.le(attrName, leValue);
         break;
       case "=gt=":
       case ">":
-        Attribute gtAttr = getAttribute(node);
-        validateNumericOrDate(gtAttr);
+        var gtAttr = getAttribute(node);
+        validateNumericOrDate(gtAttr, symbol);
         Object gtValue = rsqlValueParser.parse(values.get(0), gtAttr);
         q.gt(attrName, gtValue);
         break;
       case "=ge=":
       case ">=":
-        Attribute geAttr = getAttribute(node);
-        validateNumericOrDate(geAttr);
+        var geAttr = getAttribute(node);
+        validateNumericOrDate(geAttr, symbol);
         Object geValue = rsqlValueParser.parse(values.get(0), geAttr);
         q.ge(attrName, geValue);
         break;
       case "=rng=":
-        Attribute rngAttr = getAttribute(node);
-        validateNumericOrDate(rngAttr);
+        var rngAttr = getAttribute(node);
+        validateNumericOrDate(rngAttr, symbol);
         Object fromValue =
             values.get(0) != null ? rsqlValueParser.parse(values.get(0), rngAttr) : null;
         Object toValue =
@@ -170,18 +171,16 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
         q.not().eq(attrName, notEqValue);
         break;
       case "=should=":
-        throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
       case "=dismax=":
-        throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
       case "=fuzzy=":
-        throw new MolgenisQueryException("Unsupported RSQL query operator [" + symbol + "]");
+        throw new UnsupportedRsqlOperatorException(symbol);
       default:
-        throw new MolgenisQueryException("Unknown RSQL query operator [" + symbol + "]");
+        throw new IllegalStateException(String.format("Unknown rsql operator: %s", symbol));
     }
     return q;
   }
 
-  private void validateNumericOrDate(Attribute attr) {
+  private void validateNumericOrDate(Attribute attr, String symbol) {
     switch (attr.getDataType()) {
       case DATE:
       case DATE_TIME:
@@ -191,22 +190,21 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>> 
         break;
         // $CASES-OMITTED$
       default:
-        throw new IllegalArgumentException(
-            "Can't perform operator '\" + symbol + \"' on attribute '\"" + attr.getName() + "\"");
+        throw new UnsupportedRsqlOperationException(symbol, repository.getEntityType(), attr);
     }
   }
 
   private Attribute getAttribute(ComparisonNode node) {
-    EntityType entityType = repository.getEntityType();
+    var entityType = repository.getEntityType();
     String attrName = node.getSelector();
 
     String[] attrTokens = attrName.split("\\.");
-    Attribute attr = entityType.getAttribute(attrTokens[0]);
+    var attr = entityType.getAttribute(attrTokens[0]);
     if (attr == null) {
       throw new UnknownAttributeException(entityType, attrName);
     }
     EntityType entityTypeAtDepth;
-    for (int i = 1; i < attrTokens.length; ++i) {
+    for (var i = 1; i < attrTokens.length; ++i) {
       entityTypeAtDepth = attr.getRefEntity();
       attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
       if (attr == null) {

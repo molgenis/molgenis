@@ -5,12 +5,12 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.CodedRuntimeException;
 
-class UnknownQueryOperatorException extends CodedRuntimeException {
+public class UnknownQueryOperatorException extends CodedRuntimeException {
   private static final String ERROR_CODE = "API05";
 
   private final String operator;
 
-  UnknownQueryOperatorException(String operator) {
+  public UnknownQueryOperatorException(String operator) {
     super(ERROR_CODE);
     this.operator = requireNonNull(operator);
   }
