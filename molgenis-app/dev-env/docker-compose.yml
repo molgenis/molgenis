@@ -53,9 +53,6 @@ services:
 
   filebeat:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
-    ports:
-      - "5010:5010"
-      - "9600:9600"
     environment:
       ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
     volumes:
