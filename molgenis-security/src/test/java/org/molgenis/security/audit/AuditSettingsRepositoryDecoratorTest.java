@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.audit.AuditSettingsRepositoryDecorator.AUDIT_SETTING_CHANGED;
+import static org.molgenis.security.audit.AuditSettingsRepositoryDecorator.SETTING_CHANGED;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -68,7 +68,7 @@ class AuditSettingsRepositoryDecoratorTest extends AbstractMockitoSpringContextT
     verify(auditEventPublisher)
         .publish(
             "henk",
-            AUDIT_SETTING_CHANGED,
+            SETTING_CHANGED,
             Map.of(
                 "setting",
                 "attr1",
@@ -108,7 +108,7 @@ class AuditSettingsRepositoryDecoratorTest extends AbstractMockitoSpringContextT
     verify(auditEventPublisher)
         .publish(
             "henk",
-            AUDIT_SETTING_CHANGED,
+            SETTING_CHANGED,
             Map.of(
                 "setting",
                 "attr1",
@@ -121,7 +121,7 @@ class AuditSettingsRepositoryDecoratorTest extends AbstractMockitoSpringContextT
     verify(auditEventPublisher)
         .publish(
             "henk",
-            AUDIT_SETTING_CHANGED,
+            SETTING_CHANGED,
             Map.of(
                 "setting",
                 "attr2",

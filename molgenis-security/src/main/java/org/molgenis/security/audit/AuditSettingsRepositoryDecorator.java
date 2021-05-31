@@ -17,7 +17,7 @@ import org.molgenis.data.Repository;
  */
 public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
-  static final String AUDIT_SETTING_CHANGED = "AUDIT_SETTING_CHANGED";
+  static final String SETTING_CHANGED = "SETTING_CHANGED";
   private final AuditEventPublisher auditEventPublisher;
 
   public AuditSettingsRepositoryDecorator(
@@ -55,7 +55,7 @@ public class AuditSettingsRepositoryDecorator extends AbstractRepositoryDecorato
                 data.put("oldValue", oldValue);
                 data.put("newValue", newValue);
                 data.put("entityTypeId", delegate().getEntityType().getId());
-                auditEventPublisher.publish(getActualUsername(), AUDIT_SETTING_CHANGED, data);
+                auditEventPublisher.publish(getActualUsername(), SETTING_CHANGED, data);
               }
             });
 
