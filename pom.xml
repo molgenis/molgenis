@@ -168,6 +168,14 @@
     </repository>
   </distributionManagement>
 
+  <repositories>
+    <repository>
+      <id>molgenis-nexus</id>
+      <name>Maven public group on registry.molgenis.org</name>
+      <url>https://registry.molgenis.org/repository/maven-public</url>
+    </repository>
+  </repositories>
+
   <build>
     <!-- include *.ftl in src folder -->
     <resources>

@@ -13,6 +13,11 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-expressions_2.13</artifactId>
+      <version>0.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-data</artifactId>
       <version>${project.version}</version>
     </dependency>
