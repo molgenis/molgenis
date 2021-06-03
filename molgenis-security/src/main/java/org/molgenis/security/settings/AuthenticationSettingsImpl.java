@@ -61,7 +61,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION))
           .setLabel("Form sign-up moderation")
           .setDescription("Admins must approve users that sign up using the sign-up form")
-          .setVisibleExpression("$('" + SIGNUP_FORM + "').eq(true).value()");
+          .setVisibleExpression(String.format("{%s}", SIGNUP_FORM));
       addAttribute(OIDC_CLIENTS)
           .setDataType(MREF)
           .setRefEntity(oidcClientMetadata)
@@ -80,21 +80,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDescription(
               "Enable or enforce users to sign in with Google Authenticator. "
                   + "Must be disabled if you specify OpenID Connect authentication servers")
-          .setValidationExpression(getSignIn2FAValidationExpression());
-    }
-
-    /**
-     * 2FA should be disabled if there are any OIDC clients enabled.
-     *
-     * @return true if condition is met
-     */
-    private static String getSignIn2FAValidationExpression() {
-      return String.format(
-          "newValue(!($('%s').value() && $('%s').value().length)).or($('%s').eq('%s')).value()",
-          OIDC_CLIENTS,
-          OIDC_CLIENTS,
-          SIGN_IN_2FA,
-          TwoFactorAuthenticationSetting.DISABLED.getLabel());
+          .setValidationExpression("{oidcClients} empty or {sign_in_2fa} = 'Disabled'");
     }
   }
 

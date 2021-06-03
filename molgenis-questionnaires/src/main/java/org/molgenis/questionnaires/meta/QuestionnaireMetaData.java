@@ -47,9 +47,7 @@ public class QuestionnaireMetaData extends SystemEntityType {
     addAttribute(SUBMIT_DATE)
         .setDataType(DATE_TIME)
         .setLabel("Submit date")
-        .setNullableExpression(
-            "$('" + ATTR_STATUS + "').value() !== '" + SUBMITTED.toString() + "'")
-        .setVisibleExpression(
-            "$('" + ATTR_STATUS + "').value() === '" + SUBMITTED.toString() + "'");
+        .setNullableExpression(String.format("{%s} != '%s'", ATTR_STATUS, SUBMITTED))
+        .setVisibleExpression(String.format("{%s} = '%s'", ATTR_STATUS, SUBMITTED));
   }
 }

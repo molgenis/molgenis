@@ -172,7 +172,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
               .setParent(modAttr)
               .setDataType(COMPOUND)
               .setLabel("Data")
-              .setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
+              .setVisibleExpression(String.format("{%s}", MOD_DATA));
 
       // genome browser
       Attribute genomeBrowserAttr =
@@ -180,7 +180,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
               .setParent(dataAttr)
               .setDataType(COMPOUND)
               .setLabel("Genome Browser")
-              .setVisibleExpression("$('" + DATA_GENOME_BROWSER + "').eq(true).value()");
+              .setVisibleExpression(String.format("{%s}", DATA_GENOME_BROWSER));
 
       Attribute genomeBrowserInitAttr =
           addAttribute(GENOMEBROWSER_INIT)
@@ -240,7 +240,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
               .setParent(modAttr)
               .setDataType(COMPOUND)
               .setLabel("Aggregates")
-              .setVisibleExpression("$('" + MOD_AGGREGATES + "').eq(true).value()");
+              .setVisibleExpression(String.format("{%s}", MOD_AGGREGATES));
       addAttribute(AGGREGATES_DISTINCT_SELECT)
           .setParent(aggregatesAttr)
           .setNillable(false)
@@ -252,7 +252,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
           .setDataType(TEXT)
           .setLabel("Distinct attribute overrides")
           .setDescription("JSON object that maps entity names to attribute names")
-          .setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
+          .setVisibleExpression(String.format("{%s}", AGGREGATES_DISTINCT_SELECT));
     }
 
     private void createModReportSettings(Attribute modAttr) {
@@ -261,7 +261,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
               .setParent(modAttr)
               .setDataType(COMPOUND)
               .setLabel("Reports")
-              .setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
+              .setVisibleExpression(String.format("{%s}", MOD_REPORTS));
       addAttribute(REPORTS_ENTITIES)
           .setParent(reportsAttr)
           .setNillable(true)
