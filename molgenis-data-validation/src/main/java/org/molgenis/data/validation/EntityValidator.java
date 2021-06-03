@@ -98,8 +98,8 @@ public class EntityValidator implements Validator {
     if (nullableExpression == null) {
       return;
     }
-    boolean valid = expressionValidator.resolveBooleanExpression(nullableExpression, entity);
-    if (!valid) {
+    Boolean valid = expressionValidator.resolveBooleanExpression(nullableExpression, entity);
+    if (valid != Boolean.TRUE) {
       errors.rejectValue(
           attribute.getName(),
           ERROR_CODE_NULLABLE_EXPRESSION,

@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
@@ -34,6 +35,7 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -42,6 +44,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -55,7 +58,11 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.TemplateExpressionEvaluator;
 import org.molgenis.data.util.EntityUtils;
+import org.molgenis.data.validation.AttributeExpressionParseException;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.SimpleExpressionEvaluator;
+import org.molgenis.data.validation.UnknownAttributesException;
+import org.molgenis.expression.Parser;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
@@ -73,10 +80,15 @@ public class AttributeValidator {
   private final DataService dataService;
   private final EntityManager entityManager;
   private final EmailValidator emailValidator;
+  private final SimpleExpressionEvaluator simpleExpressionEvaluator;
 
-  public AttributeValidator(DataService dataService, EntityManager entityManager) {
+  public AttributeValidator(
+      DataService dataService,
+      EntityManager entityManager,
+      SimpleExpressionEvaluator simpleExpressionEvaluator) {
     this.dataService = requireNonNull(dataService);
     this.entityManager = requireNonNull(entityManager);
+    this.simpleExpressionEvaluator = requireNonNull(simpleExpressionEvaluator);
     this.emailValidator = new EmailValidator();
   }
 
@@ -86,6 +98,7 @@ public class AttributeValidator {
     validateParent(attr);
     validateChildren(attr);
     validateExpression(attr);
+    validateSimpleExpressions(attr);
 
     switch (validationMode) {
       case ADD:
@@ -103,6 +116,35 @@ public class AttributeValidator {
         break;
       default:
         throw new UnexpectedEnumException(validationMode);
+    }
+  }
+
+  private void validateSimpleExpressions(Attribute attr) {
+    final var usedVariables =
+        Stream.of(
+                attr.getValidationExpression(),
+                attr.getNullableExpression(),
+                attr.getVisibleExpression())
+            .filter(Objects::nonNull)
+            .flatMap(expression -> getVariableNames(attr, expression))
+            .collect(toSet());
+
+    if (usedVariables.isEmpty()) {
+      return;
+    }
+    final var availableAttributeNames =
+        stream(attr.getEntity().getAllAttributes()).map(Attribute::getName).collect(toSet());
+    var unknownAttributes = Sets.difference(usedVariables, availableAttributeNames);
+    if (!unknownAttributes.isEmpty()) {
+      throw new UnknownAttributesException(attr, unknownAttributes);
+    }
+  }
+
+  private Stream<String> getVariableNames(Attribute attr, String expression) {
+    try {
+      return simpleExpressionEvaluator.getVariableNames(expression).stream();
+    } catch (Parser.ParseException ex) {
+      throw new AttributeExpressionParseException(expression, attr, ex.getMessage(), ex.index());
     }
   }
 
