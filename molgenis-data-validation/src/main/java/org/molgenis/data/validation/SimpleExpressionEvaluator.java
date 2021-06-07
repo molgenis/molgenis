@@ -13,7 +13,7 @@ import scala.util.Try;
 public class SimpleExpressionEvaluator {
 
   private static final int MAX_EXPRESSIONS_CACHED = 1000;
-  private final Expressions expressionsCache = new Expressions(MAX_EXPRESSIONS_CACHED);
+  private final Expressions expressions = new Expressions(MAX_EXPRESSIONS_CACHED);
 
   public static Object resolve(Entity entity, String variableName) {
     return entity.get(variableName);
@@ -26,7 +26,7 @@ public class SimpleExpressionEvaluator {
    * @return Set of variable names
    */
   public Set<String> getAllVariableNames(List<String> expressions) {
-    return expressionsCache.getAllVariableNames(expressions);
+    return this.expressions.getAllVariableNames(expressions);
   }
 
   /**
@@ -37,7 +37,7 @@ public class SimpleExpressionEvaluator {
    * @throws Parser.ParseException if parsing the expression fails
    */
   public Set<String> getVariableNames(String expression) throws Parser.ParseException {
-    return expressionsCache.getVariableNames(expression);
+    return expressions.getVariableNames(expression);
   }
 
   /**
@@ -49,6 +49,6 @@ public class SimpleExpressionEvaluator {
    *     {@link scala.util.Failure}
    */
   public List<Try<Object>> parseAndEvaluate(List<String> expressions, Map<String, Object> context) {
-    return expressionsCache.parseAndEvaluate(expressions, context);
+    return this.expressions.parseAndEvaluate(expressions, context);
   }
 }

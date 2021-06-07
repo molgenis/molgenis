@@ -80,7 +80,10 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDescription(
               "Enable or enforce users to sign in with Google Authenticator. "
                   + "Must be disabled if you specify OpenID Connect authentication servers")
-          .setValidationExpression("{oidcClients} empty or {sign_in_2fa} = 'Disabled'");
+          .setValidationExpression(
+              String.format(
+                  "{%s} empty or {%s} = '%s'",
+                  OIDC_CLIENTS, SIGN_IN_2FA, TwoFactorAuthenticationSetting.DISABLED.getLabel()));
     }
   }
 

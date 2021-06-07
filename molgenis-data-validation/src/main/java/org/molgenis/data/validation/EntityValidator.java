@@ -1,5 +1,6 @@
 package org.molgenis.data.validation;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Iterables;
@@ -98,8 +99,8 @@ public class EntityValidator implements Validator {
     if (nullableExpression == null) {
       return;
     }
-    Boolean valid = expressionValidator.resolveBooleanExpression(nullableExpression, entity);
-    if (valid != Boolean.TRUE) {
+    var valid = expressionValidator.resolveBooleanExpression(nullableExpression, entity);
+    if (!TRUE.equals(valid)) {
       errors.rejectValue(
           attribute.getName(),
           ERROR_CODE_NULLABLE_EXPRESSION,
