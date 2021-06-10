@@ -6,6 +6,8 @@
 <#assign css = []>
 <#assign version = 2>
 
+<script type=text/javascript src="/@molgenis/expressions"></script>
+<script type=text/javascript src="/@molgenis/molgenis-ui-form"></script>
 <@header css js version/>
 
 <div id="questionnaire-app"></div>
@@ -24,8 +26,6 @@
 
 <script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/manifest.js"></script>
 <script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/vendor.js"></script>
-<script type=text/javascript src="/@molgenis/expressions"></script>
-<script type=text/javascript src="/@molgenis/molgenis-ui-form"></script>
 <script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/app.js"></script>
 
 <@footer version/>

@@ -15,8 +15,8 @@
 "dataexplorer-filter-rsql.js",
 "bootbox.min.js"]>
 
-<@header css js/>
 <script type=text/javascript src="/@molgenis/expressions"></script>
+<@header css js/>
 
 <script>
     window.hasTrackingId = ${hasTrackingId?c}
