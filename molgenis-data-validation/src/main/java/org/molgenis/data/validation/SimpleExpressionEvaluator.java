@@ -6,6 +6,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.data.Entity;
@@ -28,7 +29,7 @@ public class SimpleExpressionEvaluator {
           .collect(Collectors.toList());
     }
     if (isReferenceType(attribute)) {
-      return entity.getEntity(attribute).getIdValue();
+      return Optional.ofNullable(entity.getEntity(attribute)).map(Entity::getIdValue).orElse(null);
     }
     return entity.get(attribute);
   }
