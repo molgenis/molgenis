@@ -27,14 +27,11 @@ services:
       - db-data:/var/lib/postgresql/data
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.5.3
+    image: molgenis/molgenis-elasticsearch:1.0.0
     environment:
       - cluster.name=molgenis
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
-      - xpack.monitoring.enabled=false
-      - xpack.watcher.enabled=false
       - discovery.type=single-node
     ulimits:
       memlock:
