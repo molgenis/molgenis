@@ -16,6 +16,7 @@
 "bootbox.min.js"]>
 
 <@header css js/>
+<script type=text/javascript src="/@molgenis/expressions"></script>
 
 <script>
     window.hasTrackingId = ${hasTrackingId?c}
