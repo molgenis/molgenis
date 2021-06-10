@@ -16,6 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.expression.Parser.ParseException;
 import org.molgenis.test.AbstractMockitoTest;
 import scala.util.Failure;
@@ -25,6 +28,8 @@ import scala.util.Try;
 class ExpressionValidatorTest extends AbstractMockitoTest {
   @Mock private SimpleExpressionEvaluator simpleExpressionEvaluator;
   @Mock private Entity entity;
+  @Mock private EntityType entityType;
+  @Mock private Attribute attribute;
   private ExpressionValidator expressionValidator;
 
   @BeforeEach
@@ -36,7 +41,10 @@ class ExpressionValidatorTest extends AbstractMockitoTest {
   void testResolveBooleanExpressions() {
     final var expressions = List.of("{foo}", "true");
     when(simpleExpressionEvaluator.getAllVariableNames(expressions)).thenReturn(Set.of("foo"));
-    when(entity.get("foo")).thenReturn(false);
+    when(entity.getEntityType()).thenReturn(entityType);
+    when(entityType.getAttributeByName("foo")).thenReturn(attribute);
+    when(attribute.getDataType()).thenReturn(AttributeType.BOOL);
+    when(entity.get(attribute)).thenReturn(false);
     when(simpleExpressionEvaluator.parseAndEvaluate(expressions, Map.of("foo", false)))
         .thenReturn(List.of(new Success<>(false), new Success<>(true)));
     assertEquals(

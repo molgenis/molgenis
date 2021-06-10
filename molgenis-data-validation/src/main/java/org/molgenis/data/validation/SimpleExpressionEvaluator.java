@@ -1,8 +1,13 @@
 package org.molgenis.data.validation;
 
+import static com.google.common.collect.Streams.stream;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.molgenis.data.Entity;
 import org.molgenis.expression.Expressions;
 import org.molgenis.expression.Parser;
@@ -16,7 +21,16 @@ public class SimpleExpressionEvaluator {
   private final Expressions expressions = new Expressions(MAX_EXPRESSIONS_CACHED);
 
   public static Object resolve(Entity entity, String variableName) {
-    return entity.get(variableName);
+    var attribute = entity.getEntityType().getAttributeByName(variableName);
+    if (isMultipleReferenceType(attribute)) {
+      return stream(entity.getEntities(attribute))
+          .map(Entity::getIdValue)
+          .collect(Collectors.toList());
+    }
+    if (isReferenceType(attribute)) {
+      return entity.getEntity(attribute).getIdValue();
+    }
+    return entity.get(attribute);
   }
 
   /**
