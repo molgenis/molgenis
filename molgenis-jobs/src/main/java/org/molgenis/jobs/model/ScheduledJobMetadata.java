@@ -11,8 +11,8 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
-import static org.molgenis.util.RegexUtils.JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX;
-import static org.molgenis.util.RegexUtils.JAVA_SCRIPT_CRON_REGEX;
+import static org.molgenis.util.RegexUtils.COMMA_SEPARATED_EMAIL_LIST_REGEX;
+import static org.molgenis.util.RegexUtils.CRON_REGEX;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,6 @@ public class ScheduledJobMetadata extends SystemEntityType {
   public static final String TYPE = "type";
   public static final String PARAMETERS = "parameters";
   public static final String USER = "user";
-  private static final String MATCH_EXPRESSION_TEMPLATE = "regex('%s', {%s})";
 
   private final ScheduledJobTypeMetadata scheduledJobTypeMetadata;
   private final JobPackage jobPackage;
@@ -61,8 +60,7 @@ public class ScheduledJobMetadata extends SystemEntityType {
                 + "An example input is 0 0 12 * * ? for a job that fires at noon every day. "
                 + "See http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-06.html")
         .setValidationExpression(
-            String.format(
-                MATCH_EXPRESSION_TEMPLATE, escapeJava(JAVA_SCRIPT_CRON_REGEX), CRON_EXPRESSION));
+            String.format("regex('%s', {%s})", escapeJava(CRON_REGEX), CRON_EXPRESSION));
     addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);
     addAttribute(USER)
         .setLabel("Username")
@@ -77,9 +75,8 @@ public class ScheduledJobMetadata extends SystemEntityType {
         .setNillable(true)
         .setValidationExpression(
             String.format(
-                MATCH_EXPRESSION_TEMPLATE,
-                escapeJava(JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX),
-                FAILURE_EMAIL));
+                "{%s} empty or regex('%s', {%s})",
+                FAILURE_EMAIL, escapeJava(COMMA_SEPARATED_EMAIL_LIST_REGEX), FAILURE_EMAIL));
     addAttribute(SUCCESS_EMAIL)
         .setDataType(STRING)
         .setLabel("Success email")
@@ -88,9 +85,8 @@ public class ScheduledJobMetadata extends SystemEntityType {
         .setNillable(true)
         .setValidationExpression(
             String.format(
-                MATCH_EXPRESSION_TEMPLATE,
-                escapeJava(JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX),
-                SUCCESS_EMAIL));
+                "{%s} empty or regex('%s', {%s})",
+                SUCCESS_EMAIL, escapeJava(COMMA_SEPARATED_EMAIL_LIST_REGEX), SUCCESS_EMAIL));
     addAttribute(TYPE)
         .setDataType(CATEGORICAL)
         .setRefEntity(scheduledJobTypeMetadata)
