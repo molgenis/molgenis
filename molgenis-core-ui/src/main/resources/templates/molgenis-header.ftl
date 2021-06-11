@@ -3,7 +3,7 @@
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
 <#include "polyfill-macros.ftl">
-<#macro header css=[] js=[] version=1>
+<#macro header css=[] js=[] version=1 jsGlobal=[]>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
 <!DOCTYPE html>
 <html>
@@ -17,6 +17,10 @@
 
     <#-- Include browser polyfills before any script tags are inserted -->
     <@polyfill/>
+    <#-- Global javascript loaded before require.js -->
+    <#list jsGlobal as js_file_name>
+        <script type=text/javascript src="${js_file_name?html}"></script>
+    </#list>
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="${app_settings.legacyThemeURL?html}" type="text/css" id="bootstrap-theme"/>
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->

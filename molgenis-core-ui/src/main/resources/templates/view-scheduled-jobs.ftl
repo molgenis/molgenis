@@ -3,12 +3,10 @@
 
 <#assign css=[]>
 <#assign js=['scheduled-jobs.js']>
+<#assign version = 1>
+<#assign jsGlobal=['/@molgenis/expressions']>
 
-<script type=text/javascript src="/@molgenis/expressions"></script>
-<script type=text/javascript src="/@molgenis/molgenis-ui-form"></script>
-<@header css js/>
-
-<link rel="stylesheet" href="/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css"/>
+<@header css js version jsGlobal/>
 
 <div class="row">
     <div class="col-md-12">

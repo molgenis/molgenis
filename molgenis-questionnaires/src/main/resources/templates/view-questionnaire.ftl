@@ -4,11 +4,10 @@
 
 <#assign js = []>
 <#assign css = []>
+<#assign jsGlobal = ["/@molgenis/expressions", "/@molgenis/molgenis-ui-form"]>
 <#assign version = 2>
 
-<script type=text/javascript src="/@molgenis/expressions"></script>
-<script type=text/javascript src="/@molgenis/molgenis-ui-form"></script>
-<@header css js version/>
+<@header css js version jsGlobal/>
 
 <div id="questionnaire-app"></div>
 
@@ -21,8 +20,8 @@
     }
 </script>
 
-<link rel="stylesheet" href="/@molgenis-ui/questionnaires/dist/css/app.css"/>
 <link rel="stylesheet" href="/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css"/>
+<link rel="stylesheet" href="/@molgenis-ui/questionnaires/dist/css/app.css"/>
 
 <script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/manifest.js"></script>
 <script type=text/javascript src="/@molgenis-ui/questionnaires/dist/js/vendor.js"></script>

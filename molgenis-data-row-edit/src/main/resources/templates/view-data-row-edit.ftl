@@ -5,10 +5,9 @@
 <#assign js = []>
 <#assign css = []>
 <#assign version = 2>
+<#assign jsGlobal = ["/@molgenis/expressions", "/@molgenis/molgenis-ui-form"]>
 
-<script type=text/javascript src="/@molgenis/expressions"></script>
-<script type=text/javascript src="/@molgenis/molgenis-ui-form"></script>
-<@header css js version/>
+<@header css js version jsGlobal/>
 
 <div id="data-row-edit-plugin"></div>
 
