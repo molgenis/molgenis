@@ -7,6 +7,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
@@ -19,9 +20,11 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -372,6 +375,54 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
                 "Invalid [string] value [null] for attribute [lbl-attr1] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression1"),
             new ConstraintViolation(
                 "Invalid [mref] value [[]] for attribute [lbl-attr2] of entity [lbl-entity] with type [entityType]. Offended nullable expression: expression2"));
+    assertEquals(expectedConstraintViolations, newHashSet(constraintViolations));
+  }
+
+  private static Stream<Arguments> nullableExpressionWithVisibility() {
+    return Stream.of(
+        // if nullable expression is true, no error message, ever
+        arguments(true, true, false),
+        arguments(true, false, false),
+        arguments(true, null, false),
+        // if nullable expression is null or false, visibleExpression can override it if it is false
+        arguments(null, true, true),
+        arguments(null, null, true),
+        arguments(false, true, true),
+        arguments(false, null, true),
+        arguments(null, false, false),
+        arguments(false, false, false));
+  }
+
+  @ParameterizedTest
+  @MethodSource("nullableExpressionWithVisibility")
+  void validateNullableExpressionWithVisibility(Boolean nullable, Boolean visible, boolean error) {
+    String nullableExpression = "nullableExpression";
+    String visibleExpression = "visibleExpression";
+    Attribute attribute = createMockAttribute("attribute", STRING, nullableExpression);
+    when(attribute.getVisibleExpression()).thenReturn(visibleExpression);
+
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("entityType");
+    when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
+    when(entityType.toString()).thenReturn("entityType");
+
+    Entity entity = mock(Entity.class);
+    when(entity.getIdValue()).thenReturn("MyEntityId");
+    when(entity.getLabelValue()).thenReturn("lbl-entity");
+    when(entity.getString("attribute")).thenReturn(null);
+
+    when(simpleExpressionValidator.resolveBooleanExpressions(
+            asList(nullableExpression, visibleExpression), entity))
+        .thenReturn(newArrayList(nullable, visible));
+    Set<ConstraintViolation> constraintViolations =
+        entityAttributesValidator.validate(entity, entityType);
+    Set<ConstraintViolation> expectedConstraintViolations = newHashSet();
+    if (error) {
+      expectedConstraintViolations.add(
+          new ConstraintViolation(
+              "Invalid [string] value [null] for attribute [lbl-attribute] of entity [lbl-entity] "
+                  + "with type [entityType]. Offended nullable expression: nullableExpression"));
+    }
     assertEquals(expectedConstraintViolations, newHashSet(constraintViolations));
   }
 

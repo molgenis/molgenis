@@ -166,7 +166,8 @@ public class AttributeMetadata extends SystemEntityType {
         .setNillable(false)
         .setLabel("Nillable")
         .setDefaultValue("true")
-        .setValidationExpression("{isNullable} or {nullableExpression} empty");
+        .setValidationExpression(
+            "{isNullable} or {nullableExpression} empty and {visibleExpression} empty");
     addAttribute(IS_AUTO)
         .setDataType(BOOL)
         .setNillable(false)
@@ -174,7 +175,7 @@ public class AttributeMetadata extends SystemEntityType {
         .setDescription("Auto generated values")
         .setValidationExpression(
             "!{isAuto} or "
-                + "!!{isIdAttribute} and {type}='string' or "
+                + "{isIdAttribute} and {type}='string' or "
                 + "!{isIdAttribute} and {type} anyof ['date','datetime']");
     addAttribute(IS_VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
     addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");

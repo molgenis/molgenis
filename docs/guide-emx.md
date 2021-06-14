@@ -163,8 +163,10 @@ Used in combination with xref, mref, categorical, categorical_mref or one_to_man
 
 #### nillable
 Whether the column may be left empty. Default: true
-Can also contain an expression to dynamically decide if the attribute should be shown or not.
+Can also contain an expression to dynamically decide if the attribute may be left empty or not.
 See the [Expressions](guide-expressions.md) section for a syntax description.
+If [visible](#visible) is an expression that does not evaluate to true, the attribute
+may be left empty.
 
 #### idAttribute
 Whether this field is the unique key for the entity. Default: false. Use 'AUTO' for auto generated (string) identifiers.

@@ -895,7 +895,9 @@ public class EmxMetadataParser implements MetadataParser {
     if (tagIdentifiers != null && !tagIdentifiers.isEmpty()) {
       attr.setTags(toTags(intermediateResults, tagIdentifiers));
     }
-
+    if (emxAttrVisible != null) {
+      setAttrVisible(rowIndex, attr, emxAttrVisible);
+    }
     if (emxAttrNillable != null) {
       setAttrNullable(rowIndex, attr, emxAttrNillable);
     }
@@ -903,9 +905,6 @@ public class EmxMetadataParser implements MetadataParser {
       setIdAttr(rowIndex, emxAttr, attr, emxIdAttrValue);
     }
     validateAutoAttrValue(rowIndex, attr, emxEntityName);
-    if (emxAttrVisible != null) {
-      setAttrVisible(rowIndex, attr, emxAttrVisible);
-    }
     if (emxAggregatable != null)
       attr.setAggregatable(parseBoolean(emxAggregatable, rowIndex, EMX_ATTRIBUTES_AGGREGATEABLE));
     if (emxReadOnly != null)
@@ -1075,8 +1074,9 @@ public class EmxMetadataParser implements MetadataParser {
   }
 
   void setAttrNullable(int rowIndex, Attribute attr, String emxAttrNillable) {
-    if (emxAttrNillable.equalsIgnoreCase(TRUE.toString())
-        || emxAttrNillable.equalsIgnoreCase(FALSE.toString())) {
+    if ((emxAttrNillable.equalsIgnoreCase(TRUE.toString())
+            || emxAttrNillable.equalsIgnoreCase(FALSE.toString()))
+        && attr.getVisibleExpression() == null) {
       attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
     } else {
       if (!Strings.isNullOrEmpty(emxAttrNillable)) {

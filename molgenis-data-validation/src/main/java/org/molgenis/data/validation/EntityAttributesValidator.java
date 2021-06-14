@@ -1,17 +1,28 @@
 package org.molgenis.data.validation;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.not;
+import static org.molgenis.data.util.EntityUtils.isNullValue;
 
+import com.google.common.collect.Streams;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
@@ -20,7 +31,6 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
@@ -41,7 +51,8 @@ public class EntityAttributesValidator {
   }
 
   public Set<ConstraintViolation> validate(Entity entity, EntityType meta) {
-    Set<ConstraintViolation> violations = checkNullableExpressions(entity, meta);
+    Map<String, Boolean> expressionValues = computeExpressionValues(entity, meta);
+    Set<ConstraintViolation> violations = checkNullableExpressions(entity, meta, expressionValues);
     violations.addAll(checkValidationExpressions(entity, meta));
 
     stream(meta.getAtomicAttributes())
@@ -163,37 +174,73 @@ public class EntityAttributesValidator {
     return null;
   }
 
-  private Set<ConstraintViolation> checkNullableExpressions(Entity entity, EntityType entityType) {
-    List<String> nullableExpressions = new ArrayList<>();
-    List<Attribute> expressionAttributes = new ArrayList<>();
+  private Map<String, Boolean> computeExpressionValues(Entity entity, EntityType entityType) {
+    Set<String> expressions = new TreeSet<>();
 
     for (Attribute attribute : entityType.getAtomicAttributes()) {
       String nullableExpression = attribute.getNullableExpression();
       if (nullableExpression != null) {
-        expressionAttributes.add(attribute);
-        nullableExpressions.add(nullableExpression);
-      }
-    }
-
-    Set<ConstraintViolation> violations = new LinkedHashSet<>();
-
-    if (!nullableExpressions.isEmpty()) {
-      List<Boolean> results =
-          expressionValidator.resolveBooleanExpressions(nullableExpressions, entity);
-      for (int i = 0; i < results.size(); i++) {
-        if (!Boolean.TRUE.equals(results.get(i))
-            && EntityUtils.isNullValue(entity, expressionAttributes.get(i))) {
-          violations.add(
-              createConstraintViolation(
-                  entity,
-                  expressionAttributes.get(i),
-                  entityType,
-                  format("Offended nullable expression: %s", nullableExpressions.get(i))));
+        expressions.add(nullableExpression);
+        String visibleExpression = attribute.getVisibleExpression();
+        if (visibleExpression != null) {
+          expressions.add(visibleExpression);
         }
       }
+      String validationExpression = attribute.getValidationExpression();
+      if (validationExpression != null) {
+        expressions.add(validationExpression);
+      }
     }
 
-    return violations;
+    if (expressions.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    List<String> expressionsList = newArrayList(expressions);
+    List<Boolean> results = expressionValidator.resolveBooleanExpressions(expressionsList, entity);
+
+    return mergeToMap(expressionsList, results);
+  }
+
+  private static <K, V> Map<K, V> mergeToMap(List<K> expressionsList, List<V> results) {
+    Iterator<K> keys = expressionsList.iterator();
+    Iterator<V> values = results.iterator();
+    Map<K, V> result = newHashMap();
+    while (keys.hasNext() || values.hasNext()) {
+      result.put(keys.next(), values.next());
+    }
+    return result;
+  }
+
+  private Set<ConstraintViolation> checkNullableExpressions(
+      Entity entity, EntityType entityType, Map<String, Boolean> expressionValues) {
+    return Streams.stream(entityType.getAtomicAttributes())
+        .filter(attr -> isNullValue(entity, attr))
+        .filter(attr -> isNullableExpressionPresentAndNotTrue(expressionValues, attr))
+        .filter(not(attr -> isVisibleExpressionPresentAndFalse(expressionValues, attr)))
+        .map(
+            attr ->
+                createConstraintViolation(
+                    entity,
+                    attr,
+                    entityType,
+                    format("Offended nullable expression: %s", attr.getNullableExpression())))
+        .collect(Collectors.toSet());
+  }
+
+  private static boolean isVisibleExpressionPresentAndFalse(
+      Map<String, Boolean> expressionValues, Attribute attribute) {
+    return Optional.ofNullable(attribute.getVisibleExpression())
+        .map(expressionValues::get)
+        .filter(FALSE::equals)
+        .isPresent();
+  }
+
+  private static boolean isNullableExpressionPresentAndNotTrue(
+      Map<String, Boolean> expressionValues, Attribute attribute) {
+    return Optional.ofNullable(attribute.getNullableExpression())
+        .filter(expression -> !TRUE.equals(expressionValues.get(expression)))
+        .isPresent();
   }
 
   private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityType meta) {
@@ -213,7 +260,7 @@ public class EntityAttributesValidator {
       List<Boolean> results =
           expressionValidator.resolveBooleanExpressions(validationExpressions, entity);
       for (int i = 0; i < results.size(); i++) {
-        if (!Boolean.TRUE.equals(results.get(i))) {
+        if (!TRUE.equals(results.get(i))) {
           violations.add(
               createConstraintViolation(
                   entity,
@@ -376,7 +423,7 @@ public class EntityAttributesValidator {
 
       if (!enumOptions.contains(value)) {
         return createConstraintViolation(
-            entity, attribute, entityType, "Value must be one of " + enumOptions.toString());
+            entity, attribute, entityType, "Value must be one of " + enumOptions);
       }
     }
 
@@ -464,8 +511,6 @@ public class EntityAttributesValidator {
           }
         }
         return mrefValues;
-      case COMPOUND:
-        return "";
       default:
         return "";
     }
