@@ -163,6 +163,8 @@ Used in combination with xref, mref, categorical, categorical_mref or one_to_man
 
 #### nillable
 Whether the column may be left empty. Default: true
+Can also contain an expression to dynamically decide if the attribute should be shown or not.
+See the [Expressions](guide-expressions.md) section for a syntax description.
 
 #### idAttribute
 Whether this field is the unique key for the entity. Default: false. Use 'AUTO' for auto generated (string) identifiers.
@@ -217,10 +219,11 @@ true/false to indicate a readOnly attribute
 ability to tag the data referring to the tags sections, described below
 
 #### validationExpression
-Magma JavaScript validation expression that must return a bool. Must return true if valid and false if invalid. See the [Expressions](guide-expressions.md) section for a syntax description.
+Validation expression that must return a bool. Must return true if valid and false if invalid. See the [Expressions](guide-expressions.md) section for a syntax description.
 
 #### visible
-true/false to indicate whether the attribute can be seen by users. Can also contain a Magma JavaScript expression to dynamically decide if the attribute should be shown or not. See the [Expressions](guide-expressions.md) section for a syntax description.
+true/false to indicate whether the attribute can be seen by users.
+Can also contain an expression to dynamically decide if the attribute should be shown or not. See the [Expressions](guide-expressions.md) section for a syntax description.
 
 #### defaultValue
 value that will be filled in in the forms when a new entity instance is created. For mref and categorical_mref, this should be a comma separated list of ids. For categorical and xref this should be the id of the refEntity. For bool should be true or false. For datetime should be a string in the format YYYY-MM-DDTHH:mm:ssZZ. For date should be a string in the format YYYY-MM-DD.
