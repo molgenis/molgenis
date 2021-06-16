@@ -15,7 +15,7 @@
 "dataexplorer-filter-rsql.js",
 "bootbox.min.js"]>
 <#assign version=1>
-<#assign jsGlobal=['@molgenis/expressions']>
+<#assign jsGlobal=['/@molgenis/expressions']>
 
 <@header css js version jsGlobal/>
 
