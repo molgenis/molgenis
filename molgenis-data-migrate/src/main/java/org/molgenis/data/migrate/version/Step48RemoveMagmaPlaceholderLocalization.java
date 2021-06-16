@@ -39,7 +39,7 @@ public class Step48RemoveMagmaPlaceholderLocalization extends MolgenisUpgrade {
   }
 
   private void removeKeys() throws IOException {
-    String sql = ResourceUtils.getString("step48-removeMagmaPlaceholderLocalization.sql");
+    var sql = ResourceUtils.getString("step48-removeMagmaPlaceholderLocalization.sql");
     jdbcTemplate.execute(sql);
   }
 }
