@@ -186,6 +186,16 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
   }
 
   @Test
+  void testEvaluateShouldNotEscape() {
+    when(expressionAttribute.getExpression()).thenReturn("{\"template\":\"my {{attr}}\"}");
+    Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(entityType.getAttribute("attr")).thenReturn(attribute);
+    Entity entity = when(mock(Entity.class).getString("attr")).thenReturn("a>b").getMock();
+    when(entity.getEntityType()).thenReturn(entityType);
+    assertEquals("my a>b", templateExpressionEvaluator.evaluate(entity));
+  }
+
+  @Test
   void testEvaluateInt() {
     when(expressionAttribute.getExpression()).thenReturn("{\"template\":\"my {{attr}}\"}");
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
