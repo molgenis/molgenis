@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.HandlebarsException;
 import com.github.jknack.handlebars.TagType;
@@ -30,7 +31,7 @@ import org.molgenis.util.UnexpectedEnumException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
   private static final Handlebars HANDLEBARS =
-      new Handlebars().with(new ConcurrentMapTemplateCache());
+      new Handlebars().with(new ConcurrentMapTemplateCache()).with(EscapingStrategy.NOOP);
 
   private final Attribute attribute;
   private final EntityType entityType;
