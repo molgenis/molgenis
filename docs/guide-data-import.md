@@ -31,7 +31,7 @@ The MOLGENIS upload module supports the following file formats and data:
 
 |file format		|file extention             |data formats     |
 |-------------------|---------------------------|-----------------|
-|CSV              	|".csv" ".txt" ".tsv" ".zip"|EMX              |
+|CSV              	|".csv" ".tsv" ".zip"       |EMX              |
 |Excel            	|".xls" ".xlsx"             |EMX              |
 |OBO                |".obo.zip"                 |OBO
 |OWL              	|".owl.zip"                 |OWL              |
