@@ -57,7 +57,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDescription("If enabled, users will be able to sign up using the sign-up form");
       addAttribute(SIGNUP_FORM_MODERATION)
           .setDataType(BOOL)
-          .setNillable(false)
+          .setNullableExpression("false")
           .setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION))
           .setLabel("Form sign-up moderation")
           .setDescription("Admins must approve users that sign up using the sign-up form")
