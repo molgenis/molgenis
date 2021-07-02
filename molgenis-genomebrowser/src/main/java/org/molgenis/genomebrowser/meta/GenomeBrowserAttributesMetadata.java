@@ -41,7 +41,7 @@ public class GenomeBrowserAttributesMetadata extends SystemEntityType {
         .setLabel("Default configuration");
     addAttribute(ORDER)
         .setDataType(AttributeType.INT)
-        .setVisibleExpression("$('" + DEFAULT + "').eq(true).value()")
+        .setVisibleExpression(String.format("{%s}", DEFAULT))
         .setUnique(true)
         .setLabel("Order")
         .setDescription(

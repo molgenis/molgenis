@@ -23,7 +23,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.IS_UNIQUE;
 import static org.molgenis.data.meta.model.AttributeMetadata.IS_VISIBLE;
 import static org.molgenis.data.meta.model.AttributeMetadata.PARENT;
 import static org.molgenis.data.meta.model.AttributeMetadata.TYPE;
-import static org.molgenis.data.meta.model.AttributeMetadata.getIdAttributeValidationExpression;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 
 import java.util.ArrayList;
@@ -263,26 +262,6 @@ class AttributeTest extends AbstractSystemEntityTest {
     assertFalse(attribute.isReadOnly());
     assertFalse(attribute.isUnique());
     assertTrue(attribute.isNillable());
-  }
-
-  @Test
-  void testIdValidationExpression() {
-    EntityType entityType = createAttributeMetadataMock();
-
-    attribute = new Attribute(entityType);
-    String expression = getIdAttributeValidationExpression();
-    assertEquals(
-        "$('isIdAttribute').eq(false).or($('isIdAttribute').isNull()).or($('isIdAttribute').eq(true)"
-            + ".and("
-            + "$('type').eq('email')"
-            + ".or($('type').eq('hyperlink'))"
-            + ".or($('type').eq('int'))"
-            + ".or($('type').eq('long'))"
-            + ".or($('type').eq('string'))"
-            + ".or($('type').isNull())"
-            + ")"
-            + ".and($('isNullable').eq(false))).value()",
-        expression);
   }
 
   // Regression test for https://github.com/molgenis/molgenis/issues/6566

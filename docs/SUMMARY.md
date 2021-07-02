@@ -11,12 +11,13 @@
   * [Setup authentication](guide-authentication.md)
 * Data management
   * [EMX format](guide-emx.md)
+  * [Using expressions in EMX](guide-expressions.md)
   * [Quickly import data](guide-data-quick-import.md)
   * [Advanced data import](guide-data-import.md)
   * [Modify metadata](guide-data-metadata.md)
   * [Questionnaires](guide-questionnaire.md)
   * [Downloading data](guide-data-download.md)
-  * [Using expressions](guide-expressions.md)
+  * [MagmaScript expressions (mapping service)](guide-magma.md)
 * Access control
   * [Users](guide-users.md)
   * [Groups and roles](guide-groups-roles.md)

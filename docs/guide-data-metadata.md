@@ -140,16 +140,22 @@ __Aggregatable__
 : When checked, allows MOLGENIS to compute aggregation on the values of this attribute.
 
 __Computed value expression__
-: Possible Magma script that allows you to write computed expressions. e.g you have int column A and int column B. For column C you can create
-the following expression: (A/B) * 2.
+: Computes value for a column based on other columns.
+
+For String type attributes, uses a string
+template, e.g.: `{"template": "Hello {{world.label}}"}` which fills in the value of the `label`
+attribute of the `world` reference.
+
+For single reference type attributes, creates an instance of the refEntity type, copying
+attribute values. E.g.: `{Chromosome: foo, Position: bar}`
 
 __Visible expression__
-: Possible Magma script that allows you to write an expression that determines whether the column should be shown or not.
-e.g. $('A').value === true will only show column B when the value in A is true. Useful for one line datasets.
+: Expression that determines whether the column should be shown or not.
+e.g. `{A}` will only show column B when the value in A is truthy. Useful for one line datasets.
 
 __Validation expression__
-: Possible magma script that allows you to write an expression that validates the values inside a column.
-e.g. $('A').value() > 5 will throw a validation error when you try to add data that is lower then 5
+: Expression that validates the values inside a column.
+e.g. `{A} > 5` will throw a validation error when you try to add data that is lower than 5
 
 After you have created some attributes, selected an ID attribute, and feel comfortable with your EntityType, you can hit the 'Save all changes' button.
 If everything is correct, you will get a message saying save was successful. If something went wrong, you will get a message telling you which fields you forgot.

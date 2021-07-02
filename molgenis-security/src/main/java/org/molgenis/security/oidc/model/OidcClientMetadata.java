@@ -32,9 +32,8 @@ public class OidcClientMetadata extends SystemEntityType {
 
   private static final String PROVIDER_DETAILS = "providerDetails";
   public static final String DETAILS_NULLABLE_EXPRESSION =
-      "$('" + ISSUER_URI + "').isNull().not().value()";
-  public static final String DETAILS_VISIBLE_EXPRESSION =
-      "$('" + ISSUER_URI + "').isNull().value()";
+      String.format("{%s} notempty", ISSUER_URI);
+  public static final String DETAILS_VISIBLE_EXPRESSION = String.format("{%s} empty", ISSUER_URI);
   static final String AUTHORIZATION_URI = "authorizationUri";
   static final String TOKEN_URI = "tokenUri";
   static final String JWK_SET_URI = "jwkSetUri";

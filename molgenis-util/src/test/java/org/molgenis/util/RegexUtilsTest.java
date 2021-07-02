@@ -2,48 +2,51 @@ package org.molgenis.util;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.molgenis.util.RegexUtils.COMMA_SEPARATED_EMAIL_LIST_REGEX;
+import static org.molgenis.util.RegexUtils.CRON_REGEX;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class RegexUtilsTest {
-  private static String javaCronJobRegex;
-  private static String javaCommaSeparatedEmailListRegex;
-
-  @BeforeAll
-  static void setup() {
-    javaCronJobRegex = toJavaRegex(RegexUtils.JAVA_SCRIPT_CRON_REGEX);
-    javaCommaSeparatedEmailListRegex =
-        toJavaRegex(RegexUtils.JAVA_SCRIPT_COMMA_SEPARATED_EMAIL_LIST_REGEX);
-  }
 
   @Test
   void cronJobRegex() {
-    assertTrue("0 0 12 * * ?".matches(javaCronJobRegex));
-    assertTrue("".matches(javaCronJobRegex));
+    assertTrue("0 0 12 * * ?".matches(CRON_REGEX));
+    assertTrue("".matches(CRON_REGEX));
   }
 
-  @Test
-  void commaSeparatedEmailListRegex() {
-    assertTrue("c.stroomberg@umcg.nl".matches(javaCommaSeparatedEmailListRegex));
-    assertTrue(
-        "c.stroomberg@umcg.nl, janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
-    assertTrue(
-        "c.stroomberg@umcg.nl,janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
-    assertTrue("".matches(javaCommaSeparatedEmailListRegex));
-    assertTrue("undefined".matches(javaCommaSeparatedEmailListRegex));
-    assertTrue("null".matches(javaCommaSeparatedEmailListRegex));
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "c.stroomberg@umcg.nl",
+        "c.stroomberg@umcg.nl, janjansen@gmail.com",
+        "c.stroomberg@umcg.nl,janjansen@gmail.com",
+        ""
+      })
+  void commaSeparatedEmailListRegex(String value) {
+    assertTrue(value.matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
 
-    assertFalse("c.stroomberg".matches(javaCommaSeparatedEmailListRegex));
-    assertFalse("c.stroomberg@".matches(javaCommaSeparatedEmailListRegex));
-    assertFalse("umcg.nl".matches(javaCommaSeparatedEmailListRegex));
+    assertFalse("c.stroomberg".matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
+    assertFalse("c.stroomberg@".matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
+    assertFalse("umcg.nl".matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
     assertFalse(
-        "c.stroomberg@umcg.nljanjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
+        "c.stroomberg@umcg.nljanjansen@gmail.com".matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
     assertFalse(
-        "c.stroomberg@umcg.nl janjansen@gmail.com".matches(javaCommaSeparatedEmailListRegex));
+        "c.stroomberg@umcg.nl janjansen@gmail.com".matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
   }
 
-  private static String toJavaRegex(String javaScriptRegex) {
-    return javaScriptRegex.substring(1, javaScriptRegex.length() - 1);
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "c.stroomberg",
+        "c.stroomberg@",
+        "umcg.nl",
+        "c.stroomberg@umcg.nljanjansen@gmail.com",
+        "c.stroomberg@umcg.nl janjansen@gmail.com",
+      })
+  void commaSeparatedEmailListRegexInvalid(String value) {
+    assertFalse(value.matches(COMMA_SEPARATED_EMAIL_LIST_REGEX));
   }
 }

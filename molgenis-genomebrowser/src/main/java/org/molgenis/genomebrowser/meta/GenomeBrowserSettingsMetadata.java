@@ -39,11 +39,12 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
   public static final String CONFIGURED = "CONFIGURED";
   public static final String NONE = "NONE";
   public static final String FEATURE_INFO_PLUGIN = "feature_info_plugin";
+  public static final String VARIABLE_EQUALS_STRING = "{%s} = '%s'";
 
   private final GenomeBrowserPackage genomeBrowserPackage;
-  private EntityTypeMetadata entityTypeMetadata;
-  private AttributeMetadata attributeMetadata;
-  private GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata;
+  private final EntityTypeMetadata entityTypeMetadata;
+  private final AttributeMetadata attributeMetadata;
+  private final GenomeBrowserAttributesMetadata genomeBrowserAttributesMetadata;
 
   public GenomeBrowserSettingsMetadata(
       AttributeMetadata attributeMetadata,
@@ -90,11 +91,11 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
         .setLabel("Exon/intron key")
         .setDescription(
             "Value to distinguish Exon and intron values, if the key is present in the label attributes we assume this is an exon")
-        .setVisibleExpression("$('" + TRACK_TYPE + "').eq('" + EXON + "').value()");
+        .setVisibleExpression(String.format(VARIABLE_EQUALS_STRING, TRACK_TYPE, EXON));
     addAttribute(SCORE_ATTR)
         .setLabel("Score attributes")
         .setDescription("Name of the attribute that can be used for the score")
-        .setVisibleExpression("$('" + TRACK_TYPE + "').eq('" + NUMERIC + "').value()");
+        .setVisibleExpression(String.format(VARIABLE_EQUALS_STRING, TRACK_TYPE, NUMERIC));
     addAttribute(ATTRS)
         .setLabel("Feature popup attributes")
         .setDescription(
@@ -111,9 +112,8 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
         .setDataType(MREF)
         .setRefEntity(this)
         .setVisibleExpression(
-            "$('" + MOLGENIS_REFERENCES_MODE + "').eq('" + CONFIGURED + "').value()")
-        .setNullableExpression(
-            "!($('" + MOLGENIS_REFERENCES_MODE + "').eq('" + CONFIGURED + "')).value()")
+            String.format(VARIABLE_EQUALS_STRING, MOLGENIS_REFERENCES_MODE, CONFIGURED))
+        .setNullableExpression(String.format("{%s} != '%s'", MOLGENIS_REFERENCES_MODE, CONFIGURED))
         .setDescription("the genome browser settings that should be shown as reference tracks");
     addAttribute(ACTIONS)
         .setLabel("Actions")

@@ -1,64 +1,60 @@
 package org.molgenis.data.validation;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.js.magma.WithJsMagmaScriptContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.molgenis.expression.Evaluator;
 import org.springframework.stereotype.Component;
+import scala.util.Try;
 
-/** Validates entities using JavaScript expressions. Expressions can use the Magma API. */
 @Component
 public class ExpressionValidator {
-  @SuppressWarnings("unused")
-  private static final Logger LOG = LoggerFactory.getLogger(ExpressionValidator.class);
 
-  private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+  private final SimpleExpressionEvaluator evaluator;
 
-  public ExpressionValidator(JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
-    this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
+  public ExpressionValidator(SimpleExpressionEvaluator evaluator) {
+    this.evaluator = requireNonNull(evaluator);
   }
 
   /**
-   * Resolves a boolean expression (validation or visible expression)
+   * Resolves a boolean expression with an Entity as context.
    *
-   * @param expression JavaScript expression
-   * @param entity entity used during expression evaluation
-   * @return <code>true</code> or <code>false</code>
-   * @throws MolgenisDataException if the script resolves to null or to a non boolean
+   * @param expression expression to evaluate
+   * @param entity the entity to use as context
+   * @return value of the expression or null if evaluation failed
    */
-  @WithJsMagmaScriptContext
-  boolean resolveBooleanExpression(String expression, Entity entity) {
-    return resolveBooleanExpressions(singletonList(expression), entity).get(0);
+  Boolean resolveBooleanExpression(String expression, Entity entity) {
+    return resolveBooleanExpressions(List.of(expression), entity).get(0);
   }
 
   /**
-   * Resolved boolean expressions
+   * Evaluates boolean expressions with an Entity as context.
    *
-   * @param expressions JavaScript expressions
-   * @param entity entity used during expression evaluations
-   * @return for each expression: <code>true</code> or <code>false</code>
+   * @param expressions the expressions to evaluate
+   * @param entity the entity to use as context
+   * @return value of each expression or * null if evaluation failed, in same order as expressions
    */
-  @WithJsMagmaScriptContext
-  List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity) {
-    if (expressions.isEmpty()) {
-      return Collections.emptyList();
-    }
-    return expressions.stream()
-        .map(expression -> jsMagmaScriptEvaluator.eval(expression, entity))
+  public List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity) {
+    Map<String, Object> context = createContext(expressions, entity);
+    return evaluator.parseAndEvaluate(expressions, context).stream()
         .map(this::convertToBoolean)
-        .collect(toList());
+        .collect(Collectors.toList());
   }
 
-  private Boolean convertToBoolean(Object value) {
-    return Optional.ofNullable(value).map(Object::toString).map(Boolean::valueOf).orElse(null);
+  private Map<String, Object> createContext(List<String> expressions, Entity entity) {
+    var variableNames = evaluator.getAllVariableNames(expressions);
+    Map<String, Object> context = new HashMap<>();
+    for (String variableName : variableNames) {
+      context.put(variableName, SimpleExpressionEvaluator.resolve(entity, variableName));
+    }
+    return context;
+  }
+
+  private Boolean convertToBoolean(Try<Object> result) {
+    return result.map(Evaluator::isTruthy).getOrElse(() -> null);
   }
 }

@@ -121,6 +121,8 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
         .contentType(APPLICATION_JSON)
         .body(state.getLabel())
         .when()
-        .put("api/v1/sys_set_auth/auth/sign_in_2fa");
+        .put("api/v1/sys_set_auth/auth/sign_in_2fa")
+        .then()
+        .statusCode(200);
   }
 }

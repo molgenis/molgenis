@@ -28,7 +28,7 @@ public class LanguageMetadata extends SystemEntityType {
     // 2 or 3 characters, alphanumeric, lowercase
     addAttribute(CODE, ROLE_ID)
         .setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
-        .setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
+        .setValidationExpression("regex('^[a-z]{2,3}$',{code})");
     addAttribute(NAME).setNillable(false);
     addAttribute(ACTIVE).setDataType(BOOL).setNillable(false);
   }

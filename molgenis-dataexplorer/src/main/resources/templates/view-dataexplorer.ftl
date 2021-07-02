@@ -14,8 +14,10 @@
 "dataexplorer.js",
 "dataexplorer-filter-rsql.js",
 "bootbox.min.js"]>
+<#assign version=1>
+<#assign jsGlobal=['/@molgenis/expressions']>
 
-<@header css js/>
+<@header css js version jsGlobal/>
 
 <script>
     window.hasTrackingId = ${hasTrackingId?c}

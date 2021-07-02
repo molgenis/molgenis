@@ -6,55 +6,81 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
-import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.script.core.ScriptException;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.expression.Parser.ParseException;
 import org.molgenis.test.AbstractMockitoTest;
+import scala.util.Failure;
+import scala.util.Success;
+import scala.util.Try;
 
 class ExpressionValidatorTest extends AbstractMockitoTest {
-  @Mock private JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+  @Mock private SimpleExpressionEvaluator simpleExpressionEvaluator;
   @Mock private Entity entity;
+  @Mock private EntityType entityType;
+  @Mock private Attribute attribute;
   private ExpressionValidator expressionValidator;
 
   @BeforeEach
   void beforeMethod() {
-    expressionValidator = new ExpressionValidator(jsMagmaScriptEvaluator);
+    expressionValidator = new ExpressionValidator(simpleExpressionEvaluator);
   }
 
   @Test
   void testResolveBooleanExpressions() {
-    when(jsMagmaScriptEvaluator.eval("a", entity)).thenReturn(true);
-    when(jsMagmaScriptEvaluator.eval("b", entity)).thenReturn(false);
+    final var expressions = List.of("{foo}", "true");
+    when(simpleExpressionEvaluator.getAllVariableNames(expressions)).thenReturn(Set.of("foo"));
+    when(entity.getEntityType()).thenReturn(entityType);
+    when(entityType.getAttributeByName("foo")).thenReturn(attribute);
+    when(attribute.getDataType()).thenReturn(AttributeType.BOOL);
+    when(entity.get(attribute)).thenReturn(false);
+    when(simpleExpressionEvaluator.parseAndEvaluate(expressions, Map.of("foo", false)))
+        .thenReturn(List.of(new Success<>(false), new Success<>(true)));
     assertEquals(
-        asList(true, false),
-        expressionValidator.resolveBooleanExpressions(Arrays.asList("a", "b"), entity));
+        asList(false, true),
+        expressionValidator.resolveBooleanExpressions(Arrays.asList("{foo}", "true"), entity));
   }
 
   static Object[][] resultProvider() {
-    // @formatter:off
     return new Object[][] {
-      new Object[] {FALSE, false},
-      new Object[] {"true", true},
-      new Object[] {"TRUE", true},
-      new Object[] {0, false},
-      new Object[] {1, false},
+      new Object[] {new Success<>(FALSE), false},
+      new Object[] {new Success<>(0), false},
+      new Object[] {new Success<>(null), false},
+      new Object[] {new Success<>(0f), false},
+      new Object[] {new Success<>(""), false},
+      new Object[] {new Success<>(Double.NaN), false},
+      new Object[] {new Success<>("TRUE"), true},
+      new Object[] {new Success<>("FALSE"), true},
+      new Object[] {new Success<>(42), true},
+      new Object[] {new Success<>(42f), true},
       new Object[] {
-        new ScriptException("Evaluation failed on line 0, column 10: Undefined is not an object"),
-        false
+        new Failure<>(
+            new ParseException(
+                "Evaluation failed on line 0, column 10: Undefined is not an object", 10)),
+        null
       }
     };
-    // @formatter:on
   }
 
   @ParameterizedTest
   @MethodSource("resultProvider")
-  void testResolveBooleanExpression(Object result, boolean expected) {
-    when(jsMagmaScriptEvaluator.eval("expression", entity)).thenReturn(result);
+  void testResolveBooleanExpression(Try<Object> result, Boolean expected) {
+    when(simpleExpressionEvaluator.getAllVariableNames(List.of("expression")))
+        .thenReturn(Collections.emptySet());
+    when(simpleExpressionEvaluator.parseAndEvaluate(List.of("expression"), Map.of()))
+        .thenReturn(List.of(result));
+
     assertEquals(expected, expressionValidator.resolveBooleanExpression("expression", entity));
   }
 }

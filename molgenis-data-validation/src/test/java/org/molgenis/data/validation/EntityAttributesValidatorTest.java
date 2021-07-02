@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -37,18 +38,14 @@ import org.molgenis.validation.ConstraintViolation;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EntityAttributesValidatorTest extends AbstractMockitoTest {
-  @Mock private ExpressionValidator expressionValidator;
-
-  private EntityAttributesValidator entityAttributesValidator;
+  @Mock private ExpressionValidator simpleExpressionValidator;
+  @InjectMocks private EntityAttributesValidator entityAttributesValidator;
 
   private EntityType intRangeMinMeta;
   private EntityType intRangeMaxMeta;
 
   @BeforeEach
   void setUpBeforeMethod() {
-    expressionValidator = mock(ExpressionValidator.class);
-    entityAttributesValidator = new EntityAttributesValidator(expressionValidator);
-
     Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
     when(idAttr.getDataType()).thenReturn(STRING);
     when(idAttr.getMaxLength()).thenReturn(255);
@@ -364,7 +361,7 @@ class EntityAttributesValidatorTest extends AbstractMockitoTest {
     when(entity.getInt("attr3")).thenReturn(null);
 
     List<Boolean> expressionResults = asList(true, false, false);
-    when(expressionValidator.resolveBooleanExpressions(
+    when(simpleExpressionValidator.resolveBooleanExpressions(
             asList(expression0, expression1, expression2), entity))
         .thenReturn(expressionResults);
     Set<ConstraintViolation> constraintViolations =

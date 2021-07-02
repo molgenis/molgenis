@@ -3,6 +3,7 @@ package org.molgenis.data.security.auth;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.TEXT;
@@ -76,7 +77,8 @@ public class UserMetadata extends SystemEntityType {
         .setUnique(true)
         .setNillable(false)
         .setReadOnly(true)
-        .setValidationExpression("$('" + USERNAME + "').matches(/^[\\S].+[\\S]$/).value()");
+        .setValidationExpression(
+            String.format("regex('%s', {username})", escapeJava("^\\S.+\\S$")));
     addAttribute(PASSWORD)
         .setLabel("Password")
         .setDescription("This is the hashed password, enter a new plaintext password to update.")

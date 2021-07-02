@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>8.8.0-SNAPSHOT</version>
+  <version>9.0.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -167,6 +167,14 @@
       <url>https://registry.molgenis.org/repository/maven-releases</url>
     </repository>
   </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>molgenis-nexus</id>
+      <name>Maven public group on registry.molgenis.org</name>
+      <url>https://registry.molgenis.org/repository/maven-public</url>
+    </repository>
+  </repositories>
 
   <build>
     <!-- include *.ftl in src folder -->

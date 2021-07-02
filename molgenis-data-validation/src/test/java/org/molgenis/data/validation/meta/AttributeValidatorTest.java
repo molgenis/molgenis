@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.quality.Strictness.LENIENT;
 import static org.molgenis.data.Sort.Direction.ASC;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
@@ -25,10 +26,12 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -42,19 +45,16 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.TemplateExpressionSyntaxException;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.SimpleExpressionEvaluator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
+import org.molgenis.test.AbstractMockitoTest;
 
-class AttributeValidatorTest {
-  private AttributeValidator attributeValidator;
-  private DataService dataService;
-  private EntityManager entityManager;
-
-  @BeforeEach
-  void beforeMethod() {
-    dataService = mock(DataService.class);
-    entityManager = mock(EntityManager.class);
-    attributeValidator = new AttributeValidator(dataService, entityManager);
-  }
+@MockitoSettings(strictness = LENIENT)
+class AttributeValidatorTest extends AbstractMockitoTest {
+  @InjectMocks private AttributeValidator attributeValidator;
+  @Mock private DataService dataService;
+  @Mock private EntityManager entityManager;
+  @Mock private SimpleExpressionEvaluator simpleExpressionEvaluator;
 
   @Test
   void validateAttributeInvalidName() {
