@@ -1,5 +1,6 @@
 package org.molgenis.security.oidc;
 
+import static com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
@@ -7,6 +8,7 @@ import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.collect.Sets;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import java.util.Collection;
 import java.util.HashSet;
@@ -40,6 +42,7 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
+
   private final OidcUserMapper oidcUserMapper;
   private final UserDetailsServiceImpl userDetailsServiceImpl;
   private final DataService dataService;
@@ -49,6 +52,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   private final AuditEventPublisher auditEventPublisher;
 
   private static final Logger LOGGER = getLogger(MappedOidcUserService.class);
+  public static final Configuration JSONPATH_CONFIGURATION =
+      Configuration.builder().options(DEFAULT_PATH_LEAF_TO_NULL).build();
 
   public MappedOidcUserService(
       OidcUserMapper oidcUserMapper,
@@ -166,11 +171,14 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
         .collect(toSet());
   }
 
-  private static Set<String> getRolesFromClaim(
+  static Set<String> getRolesFromClaim(
       Map<String, Object> claims, Map<String, Object> configurationMetadata) {
     return Optional.ofNullable(configurationMetadata.get(CLAIMS_ROLE_PATH))
         .filter(String.class::isInstance).map(String.class::cast)
-        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
+        .map(
+            values ->
+                JsonPath.using(JSONPATH_CONFIGURATION).parse(claims).<List<String>>read(values))
+        .stream()
         .flatMap(List::stream)
         .map(SidUtils::createRoleAuthority)
         .collect(toSet());
