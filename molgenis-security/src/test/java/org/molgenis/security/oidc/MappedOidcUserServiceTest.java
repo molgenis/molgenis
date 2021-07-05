@@ -15,6 +15,7 @@ import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.S
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -248,20 +249,18 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
                 Set.of("ROLE_A")));
   }
 
-  private static Stream<Arguments> getRolesFromClaimSource() {
+  private static Stream<Arguments> getStreamClaimsArguments() {
     return Stream.of(
-        Arguments.of(
-            Map.of("roles", List.of("A", "B")),
-            Map.of(CLAIMS_ROLE_PATH, "roles"),
-            Set.of("ROLE_A", "ROLE_B")),
-        Arguments.of(Map.of(), Map.of(CLAIMS_ROLE_PATH, "roles"), Set.of()));
+        Arguments.of(Map.of("claimName", List.of("urn:foo:bar")), Set.of("urn:foo:bar")),
+        Arguments.of(Map.of(), Set.of()));
   }
 
   @ParameterizedTest
-  @MethodSource("getRolesFromClaimSource")
-  void testGetRolesFromClaim(
-      Map<String, Object> claims, Map<String, Object> configurationMetadata, Set<String> expected) {
-    assertEquals(expected, MappedOidcUserService.getRolesFromClaim(claims, configurationMetadata));
+  @MethodSource("getStreamClaimsArguments")
+  void testStreamClaims(Map<String, Object> claims, Set<String> expected) {
+    assertEquals(
+        expected,
+        MappedOidcUserService.streamClaimsForPath(claims, "claimName").collect(Collectors.toSet()));
   }
 
   @Test

@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
@@ -140,8 +142,13 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
       String principal, Map<String, Object> claims, ClientRegistration clientRegistration) {
     final var configurationMetadata =
         clientRegistration.getProviderDetails().getConfigurationMetadata();
-    Set<String> rolesFromClaim = getRolesFromClaim(claims, configurationMetadata);
-    Set<String> voGroupsFromClaim = getVoGroupsFromClaim(claims, configurationMetadata);
+    Set<String> rolesFromClaim =
+        streamClaimsForPath(claims, configurationMetadata.get(CLAIMS_ROLE_PATH))
+            .map(SidUtils::createRoleAuthority)
+            .collect(toSet());
+    Set<String> voGroupsFromClaim =
+        streamClaimsForPath(claims, configurationMetadata.get(CLAIMS_VOGROUP_PATH))
+            .collect(toSet());
     Collection<VOGroup> voGroups = voGroupService.getGroups(voGroupsFromClaim);
     Set<String> rolesFromVoGroups =
         voGroupRoleMembershipService.getCurrentMemberships(voGroups).stream()
@@ -162,25 +169,12 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
     return allRoles.stream().map(SimpleGrantedAuthority::new).collect(toSet());
   }
 
-  private static Set<String> getVoGroupsFromClaim(
-      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
-    return Optional.ofNullable(configurationMetadata.get(CLAIMS_VOGROUP_PATH))
-        .filter(String.class::isInstance).map(String.class::cast)
-        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
-        .flatMap(List::stream)
-        .collect(toSet());
-  }
-
-  static Set<String> getRolesFromClaim(
-      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
-    return Optional.ofNullable(configurationMetadata.get(CLAIMS_ROLE_PATH))
-        .filter(String.class::isInstance).map(String.class::cast)
+  static Stream<String> streamClaimsForPath(Map<String, Object> claims, @Nullable Object path) {
+    return Optional.ofNullable(path).filter(String.class::isInstance).map(String.class::cast)
         .map(
-            values ->
-                JsonPath.using(JSONPATH_CONFIGURATION).parse(claims).<List<String>>read(values))
+            pathString ->
+                JsonPath.using(JSONPATH_CONFIGURATION).parse(claims).<List<String>>read(pathString))
         .stream()
-        .flatMap(List::stream)
-        .map(SidUtils::createRoleAuthority)
-        .collect(toSet());
+        .flatMap(List::stream);
   }
 }
