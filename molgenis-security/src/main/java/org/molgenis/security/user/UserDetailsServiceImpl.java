@@ -48,8 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
   }
 
-  @RunAsSystem
-  public Collection<? extends GrantedAuthority> getAuthorities(User user) {
+  private Collection<? extends GrantedAuthority> getAuthorities(User user) {
     Set<GrantedAuthority> authorities = new LinkedHashSet<>();
 
     if (user.isSuperuser()) {

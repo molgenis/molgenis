@@ -19,7 +19,6 @@ import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.Role;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.VOGroup;
 import org.molgenis.data.security.auth.VOGroupRoleMembership;
 import org.molgenis.data.security.auth.VOGroupService;
@@ -28,10 +27,12 @@ import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcClientMetadata;
-import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -41,7 +42,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
   private final OidcUserMapper oidcUserMapper;
-  private final UserDetailsServiceImpl userDetailsServiceImpl;
+  private final UserDetailsService userDetailsService;
+  private final UserDetailsChecker userDetailsChecker;
   private final DataService dataService;
   private final OidcUserService delegate;
   private final VOGroupService voGroupService;
@@ -52,7 +54,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
 
   public MappedOidcUserService(
       OidcUserMapper oidcUserMapper,
-      UserDetailsServiceImpl userDetailsServiceImpl,
+      UserDetailsService userDetailsService,
+      UserDetailsChecker userDetailsChecker,
       DataService dataService,
       VOGroupService voGroupService,
       VOGroupRoleMembershipService voGroupRoleMembershipService,
@@ -60,7 +63,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
     this(
         new OidcUserService(),
         oidcUserMapper,
-        userDetailsServiceImpl,
+        userDetailsService,
+        userDetailsChecker,
         dataService,
         voGroupService,
         voGroupRoleMembershipService,
@@ -70,14 +74,16 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   MappedOidcUserService(
       OidcUserService delegate,
       OidcUserMapper oidcUserMapper,
-      UserDetailsServiceImpl userDetailsServiceImpl,
+      UserDetailsService userDetailsService,
+      UserDetailsChecker userDetailsChecker,
       DataService dataService,
       VOGroupService voGroupService,
       VOGroupRoleMembershipService voGroupRoleMembershipService,
       AuditEventPublisher auditEventPublisher) {
     this.delegate = requireNonNull(delegate);
     this.oidcUserMapper = requireNonNull(oidcUserMapper);
-    this.userDetailsServiceImpl = requireNonNull(userDetailsServiceImpl);
+    this.userDetailsService = requireNonNull(userDetailsService);
+    this.userDetailsChecker = requireNonNull(userDetailsChecker);
     this.dataService = requireNonNull(dataService);
     this.voGroupService = requireNonNull(voGroupService);
     this.voGroupRoleMembershipService = requireNonNull(voGroupRoleMembershipService);
@@ -113,13 +119,16 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
         usernameAttributeName);
     OidcUser oidcUser =
         new MappedOidcUser(oidcUserFromParent, emailAttributeName, usernameAttributeName);
-    User user = oidcUserMapper.toUser(oidcUser, oidcClient);
-    Set<GrantedAuthority> authorities = new HashSet<>(userDetailsServiceImpl.getAuthorities(user));
+    String username = oidcUserMapper.toUser(oidcUser, oidcClient);
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    userDetailsChecker.check(userDetails);
+    Set<GrantedAuthority> authorities = new HashSet<>(userDetails.getAuthorities());
     authorities.addAll(
         getAuthoritiesFromClaims(
-            user.getUsername(), oidcUser.getClaims(), userRequest.getClientRegistration()));
+            userDetails.getUsername(), oidcUser.getClaims(), userRequest.getClientRegistration()));
     var result =
-        new MappedOidcUser(oidcUserFromParent, authorities, emailAttributeName, user.getUsername());
+        new MappedOidcUser(
+            oidcUserFromParent, authorities, emailAttributeName, userDetails.getUsername());
     LOGGER.debug("Mapped to {}.", result);
     return result;
   }

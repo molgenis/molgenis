@@ -55,6 +55,7 @@ public class SecurityConfig {
   public MappedOidcUserService oidcUserService(
       OidcUserMapper oidcUserMapper,
       UserDetailsServiceImpl userDetailsService,
+      UserDetailsChecker userDetailsChecker,
       DataService dataService,
       VOGroupService voGroupService,
       VOGroupRoleMembershipService voGroupRoleMembershipService,
@@ -62,6 +63,7 @@ public class SecurityConfig {
     return new MappedOidcUserService(
         oidcUserMapper,
         userDetailsService,
+        userDetailsChecker,
         dataService,
         voGroupService,
         voGroupRoleMembershipService,

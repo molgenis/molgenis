@@ -47,9 +47,10 @@ public class OidcUserMapperImpl implements OidcUserMapper {
 
   @Transactional
   @Override
-  public User toUser(OidcUser oidcUser, OidcClient oidcClient) {
+  public String toUser(OidcUser oidcUser, OidcClient oidcClient) {
     verifyOidcUser(oidcUser);
-    return getUser(oidcUser, oidcClient).orElseGet(() -> createUserMapping(oidcUser, oidcClient));
+    var existingUser = getUser(oidcUser, oidcClient);
+    return existingUser.orElseGet(() -> createUserMapping(oidcUser, oidcClient));
   }
 
   private void verifyOidcUser(OidcUser oidcUser) {
@@ -62,7 +63,7 @@ public class OidcUserMapperImpl implements OidcUserMapper {
     }
   }
 
-  private Optional<User> getUser(OidcUser oidcUser, OidcClient oidcClient) {
+  private Optional<String> getUser(OidcUser oidcUser, OidcClient oidcClient) {
     var registrationId = oidcClient.getRegistrationId();
     var subject = oidcUser.getSubject();
     var result =
@@ -73,18 +74,19 @@ public class OidcUserMapperImpl implements OidcUserMapper {
                     .and()
                     .eq(OIDC_USERNAME, subject)
                     .findOne())
-            .map(OidcUserMapping::getUser);
+            .map(OidcUserMapping::getUser)
+            .map(User::getUsername);
     result.ifPresent(
-        user ->
+        userName ->
             LOGGER.debug(
                 "Found existing user mapping for registrationId '{}' and subject '{}' to user '{}'.",
                 registrationId,
                 subject,
-                user.getUsername()));
+                userName));
     return result;
   }
 
-  private User createUserMapping(OidcUser oidcUser, OidcClient oidcClient) {
+  private String createUserMapping(OidcUser oidcUser, OidcClient oidcClient) {
     var email = oidcUser.getEmail();
     User user = dataService.query(USER, User.class).eq(UserMetadata.EMAIL, email).findOne();
     if (user == null) {
@@ -105,7 +107,7 @@ public class OidcUserMapperImpl implements OidcUserMapper {
     LOGGER.debug("Registering new OidcUserMapping...");
     dataService.add(OIDC_USER_MAPPING, oidcUserMapping);
 
-    return user;
+    return user.getUsername();
   }
 
   private User createUser(OidcUser oidcUser) {
