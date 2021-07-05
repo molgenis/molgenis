@@ -32,6 +32,9 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
   @Mock private OidcUserMappingFactory oidcUserMappingFactory;
   @Mock private UserFactory userFactory;
   @Mock private OidcClient oidcClient;
+  @Mock private User user;
+  @Mock private OidcUser oidcUser;
+  @Mock private OidcUserMapping oidcUserMapping;
   private OidcUserMapperImpl oidcUserMapperImpl;
 
   @BeforeEach
@@ -49,15 +52,12 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     String email = "e@mail.com";
     String username = "username";
 
-    OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getEmail()).thenReturn(email);
     when(oidcUser.getEmailVerified()).thenReturn(true);
     when(oidcUser.getSubject()).thenReturn(username);
 
-    User user = mock(User.class);
-
-    OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
     when(oidcUserMapping.getUser()).thenReturn(user);
+    when(user.getUsername()).thenReturn(username);
 
     String registrationId = "google";
     when(oidcClient.getRegistrationId()).thenReturn(registrationId);
@@ -68,7 +68,7 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(query.eq(OIDC_CLIENT, registrationId).and().eq(OIDC_USERNAME, username).findOne())
         .thenReturn(oidcUserMapping);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
+    assertEquals(username, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
   }
 
   @Test
@@ -76,7 +76,6 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     String email = "e@mail.com";
     String username = "username";
 
-    OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getEmail()).thenReturn(email);
     when(oidcUser.getEmailVerified()).thenReturn(true);
     when(oidcUser.getSubject()).thenReturn(username);
@@ -84,13 +83,10 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     String registrationId = "google";
     when(oidcClient.getRegistrationId()).thenReturn(registrationId);
 
-    User user = mock(User.class);
     @SuppressWarnings("unchecked")
     Query<User> query = mock(Query.class, RETURNS_SELF);
     doReturn(query).when(dataService).query(UserMetadata.USER, User.class);
     when(query.eq(UserMetadata.EMAIL, email).findOne()).thenReturn(user);
-
-    OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
 
     @SuppressWarnings("unchecked")
     Query<OidcUserMapping> oidcUserMappingQuery = mock(Query.class, RETURNS_SELF);
@@ -105,8 +101,9 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
         .thenReturn(null);
 
     when(oidcUserMappingFactory.create()).thenReturn(oidcUserMapping);
+    when(user.getUsername()).thenReturn(username);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
+    assertEquals(username, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:username");
     verify(oidcUserMapping).setOidcClient(oidcClient);
@@ -122,7 +119,6 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     String givenName = "MOL";
     String familyName = "GENIS";
 
-    OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getName()).thenReturn(username);
     when(oidcUser.getEmail()).thenReturn(email);
     when(oidcUser.getEmailVerified()).thenReturn(true);
@@ -138,8 +134,6 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(userQuery.eq(UserMetadata.EMAIL, email).findOne()).thenReturn(null);
     when(userQuery.eq(UserMetadata.USERNAME, "username").count()).thenReturn(0L);
 
-    OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
-
     @SuppressWarnings("unchecked")
     Query<OidcUserMapping> oidcUserMappingQuery = mock(Query.class, RETURNS_SELF);
     doReturn(oidcUserMappingQuery)
@@ -154,10 +148,10 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
 
     when(oidcUserMappingFactory.create()).thenReturn(oidcUserMapping);
 
-    User user = mock(User.class);
     when(userFactory.create()).thenReturn(user);
+    when(user.getUsername()).thenReturn(username);
 
-    assertEquals(user, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
+    assertEquals(username, oidcUserMapperImpl.toUser(oidcUser, oidcClient));
     verify(dataService).add(OidcUserMappingMetadata.OIDC_USER_MAPPING, oidcUserMapping);
     verify(oidcUserMapping).setLabel("google:d0197ff1-b8c8-43a4-b9b8-0cf6ff33a6c8");
     verify(oidcUserMapping).setOidcClient(oidcClient);
@@ -178,7 +172,6 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
     String subject = "d0197ff1-b8c8-43a4-b9b8-0cf6ff33a6c8";
     String username = "username";
 
-    OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getName()).thenReturn(username);
     when(oidcUser.getSubject()).thenReturn(subject);
     when(oidcUser.getEmailVerified()).thenReturn(null);
@@ -211,14 +204,12 @@ class OidcUserMapperImplTest extends AbstractMockitoTest {
 
   @Test
   void testToUserEmailMissing() {
-    OidcUser oidcUser = mock(OidcUser.class);
     assertThrows(
         OidcUserMissingEmailException.class, () -> oidcUserMapperImpl.toUser(oidcUser, oidcClient));
   }
 
   @Test
   void testToUserEmailNotVerified() {
-    OidcUser oidcUser = mock(OidcUser.class);
     when(oidcUser.getEmail()).thenReturn("e@mail.com");
     when(oidcUser.getEmailVerified()).thenReturn(false);
     assertThrows(

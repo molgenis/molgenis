@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
@@ -22,17 +23,19 @@ import org.mockito.Mock;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.VOGroup;
 import org.molgenis.data.security.auth.VOGroupRoleMembership;
 import org.molgenis.data.security.auth.VOGroupService;
 import org.molgenis.data.security.permission.VOGroupRoleMembershipService;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcClientMetadata;
-import org.molgenis.security.user.UserDetailsServiceImpl;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -42,13 +45,14 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 class MappedOidcUserServiceTest extends AbstractMockitoTest {
   @Mock private OidcUserMapper oidcUserMapper;
-  @Mock private UserDetailsServiceImpl userDetailsService;
+  @Mock private UserDetailsService userDetailsService;
+  @Mock private UserDetailsChecker userDetailsChecker;
   @Mock private DataService dataService;
   @Mock private OidcUserService delegate;
   @Mock private OidcUserRequest oidcUserRequest;
   @Mock private OidcIdToken oidcIdToken;
   @Mock private OidcClient oidcClient;
-  @Mock private User user;
+  @Mock private UserDetails userDetails;
   @Mock private VOGroupService voGroupService;
   @Mock private VOGroupRoleMembershipService voGroupMembershipService;
   @Mock private VOGroup voGroup;
@@ -68,6 +72,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
             delegate,
             oidcUserMapper,
             userDetailsService,
+            userDetailsChecker,
             dataService,
             voGroupService,
             voGroupMembershipService,
@@ -94,7 +99,7 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
   void testMappedOidcUserService() {
     assertThrows(
         NullPointerException.class,
-        () -> new MappedOidcUserService(null, null, null, null, null, null));
+        () -> new MappedOidcUserService(null, null, null, null, null, null, null));
   }
 
   @Test
@@ -116,16 +121,44 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
-    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn("molgenis");
+    when(userDetailsService.loadUserByUsername("molgenis")).thenReturn(userDetails);
 
-    doReturn(molgenisRoles).when(userDetailsService).getAuthorities(user);
-    when(user.getUsername()).thenReturn("molgenis");
+    doReturn(molgenisRoles).when(userDetails).getAuthorities();
+    when(userDetails.getUsername()).thenReturn("molgenis");
 
     OidcUser result = mappedOidcUserService.loadUser(oidcUserRequest);
 
     assertEquals("molgenis", result.getName());
     assertEquals(molgenisRoles, result.getAuthorities());
     assertEquals("user@example.org", result.getEmail());
+  }
+
+  @Test
+  void testLoadUserDisabled() {
+    Set<GrantedAuthority> tokenAuthorities = Set.of(new SimpleGrantedAuthority("USER"));
+    Set<? extends GrantedAuthority> molgenisRoles =
+        Set.of(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ABCDE_EDITOR"));
+    Map<String, Object> claims =
+        Map.of(SUB, "d8995976-e8d8-4390-839b-007a382fc12b", EMAIL, "user@example.org");
+    when(oidcIdToken.getClaims()).thenReturn(claims);
+    OidcUser oidcUser = new DefaultOidcUser(tokenAuthorities, oidcIdToken);
+    when(delegate.loadUser(oidcUserRequest)).thenReturn(oidcUser);
+
+    when(oidcUserRequest.getClientRegistration()).thenReturn(registration);
+
+    when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, "google", OidcClient.class))
+        .thenReturn(oidcClient);
+    when(oidcClient.getEmailAttributeName()).thenReturn(EMAIL);
+    when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
+
+    var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn("molgenis");
+    when(userDetailsService.loadUserByUsername("molgenis")).thenReturn(userDetails);
+
+    doThrow(new DisabledException("User is disabled")).when(userDetailsChecker).check(userDetails);
+
+    assertThrows(DisabledException.class, () -> mappedOidcUserService.loadUser(oidcUserRequest));
   }
 
   @Test
@@ -157,13 +190,14 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
-    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn("molgenis");
+    when(userDetailsService.loadUserByUsername("molgenis")).thenReturn(userDetails);
 
     doReturn(
             List.of(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ABCDE_EDITOR")))
-        .when(userDetailsService)
-        .getAuthorities(user);
-    when(user.getUsername()).thenReturn("molgenis");
+        .when(userDetails)
+        .getAuthorities();
+    when(userDetails.getUsername()).thenReturn("molgenis");
 
     OidcUser result = mappedOidcUserService.loadUser(oidcUserRequest);
 
@@ -211,13 +245,14 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
-    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn("molgenis");
+    when(userDetailsService.loadUserByUsername("molgenis")).thenReturn(userDetails);
 
     doReturn(
             List.of(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ABCDE_EDITOR")))
-        .when(userDetailsService)
-        .getAuthorities(user);
-    when(user.getUsername()).thenReturn("molgenis");
+        .when(userDetails)
+        .getAuthorities();
+    when(userDetails.getUsername()).thenReturn("molgenis");
 
     when(voGroupService.getGroups(Set.of("urn:mace:surf.nl:sram:group:molgenis:dev")))
         .thenReturn(List.of(voGroup));
@@ -263,10 +298,11 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
     when(oidcClient.getUsernameAttributeName()).thenReturn(SUB);
 
     var userCaptor = ArgumentCaptor.forClass(OidcUser.class);
-    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn(user);
+    when(oidcUserMapper.toUser(userCaptor.capture(), eq(oidcClient))).thenReturn("molgenis");
+    when(userDetailsService.loadUserByUsername("molgenis")).thenReturn(userDetails);
 
-    doReturn(molgenisRoles).when(userDetailsService).getAuthorities(user);
-    when(user.getUsername()).thenReturn("molgenis");
+    doReturn(molgenisRoles).when(userDetails).getAuthorities();
+    when(userDetails.getUsername()).thenReturn("molgenis");
 
     OidcUser result = mappedOidcUserService.loadUser(oidcUserRequest);
 

@@ -2,6 +2,7 @@
 [OAuth2LoginAuthenticationProvider]->[MappedOidcUserService]
 [MappedOidcUserService]->[OidcUserMapper]
 [MappedOidcUserService]->[UserDetailsService]
+[MappedOidcUserService]->[UserDetailsChecker]
 
 [OidcUserMapper]<:-[OidcUserMapperImpl]
 [MappedOidcUserService]->[OidcUserService]
@@ -16,6 +17,8 @@ grantedAuthoritiesMapper]
 
 [UserDetailsService|
 loadUserByUsername(String):UserDetails]
+
+[UserDetailsChecker|check(UserDetails)]
 
 [UserDetails|
 getAuthorities();
@@ -32,7 +35,7 @@ oidcUserMappingFactory;
 userFactory]
 
 [OidcUserMapper|
-toUser(OidcUser, OidcClient): User]
+toUser(OidcUser, OidcClient): String]
 
 [MappedOidcUserService|
 dataService|
