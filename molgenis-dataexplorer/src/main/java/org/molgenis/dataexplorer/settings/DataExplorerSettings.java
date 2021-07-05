@@ -267,6 +267,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
           .setNillable(true)
           .setDataType(TEXT)
           .setLabel("Reports")
+          .setDefaultValue("sys_md_Attribute:model-documentation")
           .setDescription(
               "Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
     }
