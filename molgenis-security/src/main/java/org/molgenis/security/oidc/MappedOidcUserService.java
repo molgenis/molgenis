@@ -1,5 +1,6 @@
 package org.molgenis.security.oidc;
 
+import static com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
@@ -7,6 +8,7 @@ import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.collect.Sets;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.molgenis.audit.AuditEventPublisher;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
@@ -41,6 +45,7 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
+
   private final OidcUserMapper oidcUserMapper;
   private final UserDetailsService userDetailsService;
   private final UserDetailsChecker userDetailsChecker;
@@ -51,6 +56,8 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
   private final AuditEventPublisher auditEventPublisher;
 
   private static final Logger LOGGER = getLogger(MappedOidcUserService.class);
+  public static final Configuration JSONPATH_CONFIGURATION =
+      Configuration.builder().options(DEFAULT_PATH_LEAF_TO_NULL).build();
 
   public MappedOidcUserService(
       OidcUserMapper oidcUserMapper,
@@ -144,8 +151,13 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
       String principal, Map<String, Object> claims, ClientRegistration clientRegistration) {
     final var configurationMetadata =
         clientRegistration.getProviderDetails().getConfigurationMetadata();
-    Set<String> rolesFromClaim = getRolesFromClaim(claims, configurationMetadata);
-    Set<String> voGroupsFromClaim = getVoGroupsFromClaim(claims, configurationMetadata);
+    Set<String> rolesFromClaim =
+        streamClaimsForPath(claims, configurationMetadata.get(CLAIMS_ROLE_PATH))
+            .map(SidUtils::createRoleAuthority)
+            .collect(toSet());
+    Set<String> voGroupsFromClaim =
+        streamClaimsForPath(claims, configurationMetadata.get(CLAIMS_VOGROUP_PATH))
+            .collect(toSet());
     Collection<VOGroup> voGroups = voGroupService.getGroups(voGroupsFromClaim);
     Set<String> rolesFromVoGroups =
         voGroupRoleMembershipService.getCurrentMemberships(voGroups).stream()
@@ -166,22 +178,12 @@ public class MappedOidcUserService implements OAuth2UserService<OidcUserRequest,
     return allRoles.stream().map(SimpleGrantedAuthority::new).collect(toSet());
   }
 
-  private static Set<String> getVoGroupsFromClaim(
-      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
-    return Optional.ofNullable(configurationMetadata.get(CLAIMS_VOGROUP_PATH))
-        .filter(String.class::isInstance).map(String.class::cast)
-        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
-        .flatMap(List::stream)
-        .collect(toSet());
-  }
-
-  private static Set<String> getRolesFromClaim(
-      Map<String, Object> claims, Map<String, Object> configurationMetadata) {
-    return Optional.ofNullable(configurationMetadata.get(CLAIMS_ROLE_PATH))
-        .filter(String.class::isInstance).map(String.class::cast)
-        .map(values -> JsonPath.<List<String>>read(claims, values)).stream()
-        .flatMap(List::stream)
-        .map(SidUtils::createRoleAuthority)
-        .collect(toSet());
+  static Stream<String> streamClaimsForPath(Map<String, Object> claims, @Nullable Object path) {
+    return Optional.ofNullable(path).filter(String.class::isInstance).map(String.class::cast)
+        .map(
+            pathString ->
+                JsonPath.using(JSONPATH_CONFIGURATION).parse(claims).<List<String>>read(pathString))
+        .stream()
+        .flatMap(List::stream);
   }
 }

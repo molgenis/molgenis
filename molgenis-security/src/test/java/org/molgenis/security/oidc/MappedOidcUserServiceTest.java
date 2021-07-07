@@ -16,8 +16,13 @@ import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.S
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.audit.AuditEventPublisher;
@@ -277,6 +282,20 @@ class MappedOidcUserServiceTest extends AbstractMockitoTest {
                 Set.of("urn:mace:surf.nl:sram:group:molgenis:dev"),
                 "rolesFromVoGroupsClaim",
                 Set.of("ROLE_A")));
+  }
+
+  private static Stream<Arguments> getStreamClaimsArguments() {
+    return Stream.of(
+        Arguments.of(Map.of("claimName", List.of("urn:foo:bar")), Set.of("urn:foo:bar")),
+        Arguments.of(Map.of(), Set.of()));
+  }
+
+  @ParameterizedTest
+  @MethodSource("getStreamClaimsArguments")
+  void testStreamClaims(Map<String, Object> claims, Set<String> expected) {
+    assertEquals(
+        expected,
+        MappedOidcUserService.streamClaimsForPath(claims, "claimName").collect(Collectors.toSet()));
   }
 
   @Test
