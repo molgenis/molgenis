@@ -138,7 +138,7 @@
 
 <#-- Start application content -->
 <div class="container-fluid mg-page-content"
-     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 50}</#if>px;">
+     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 50}<#else>50</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
