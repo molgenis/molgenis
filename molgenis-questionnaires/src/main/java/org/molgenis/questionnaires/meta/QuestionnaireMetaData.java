@@ -1,5 +1,6 @@
 package org.molgenis.questionnaires.meta;
 
+import static java.lang.Boolean.FALSE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -47,7 +48,7 @@ public class QuestionnaireMetaData extends SystemEntityType {
     addAttribute(SUBMIT_DATE)
         .setDataType(DATE_TIME)
         .setLabel("Submit date")
-        .setNullableExpression(String.format("{%s} != '%s'", ATTR_STATUS, SUBMITTED))
+        .setNullableExpression(FALSE.toString())
         .setVisibleExpression(String.format("{%s} = '%s'", ATTR_STATUS, SUBMITTED));
   }
 }

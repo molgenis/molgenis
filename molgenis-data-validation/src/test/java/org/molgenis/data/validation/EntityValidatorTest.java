@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -345,6 +346,7 @@ class EntityValidatorTest extends AbstractMockitoTest {
   void testValidateNullableExpressionConstraint() {
     String attributeName = "attr";
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(attribute.isNillable()).thenReturn(true);
     when(attribute.getName()).thenReturn(attributeName);
     String expression = "MyExpression";
     when(attribute.getNullableExpression()).thenReturn(expression);
@@ -361,6 +363,27 @@ class EntityValidatorTest extends AbstractMockitoTest {
     verify(errors)
         .rejectValue(
             attributeName, "constraints.NullableExpression", new Object[] {expression}, null);
+  }
+
+  @Test
+  void testValidateNullableExpressionConstraintInvisible() {
+    Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+    when(attribute.isNillable()).thenReturn(true);
+    String nullableExpression = "nullableExpression";
+    String visibleExpression = "visibleExpression";
+    when(attribute.getNullableExpression()).thenReturn(nullableExpression);
+    when(attribute.getVisibleExpression()).thenReturn(visibleExpression);
+
+    EntityType entityType =
+        when(mock(EntityType.class).getAtomicAttributes())
+            .thenReturn(singletonList(attribute))
+            .getMock();
+
+    Entity entity = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
+
+    Errors errors = mock(Errors.class);
+    entityValidator.validate(entity, errors);
+    verifyNoInteractions(errors);
   }
 
   @Test

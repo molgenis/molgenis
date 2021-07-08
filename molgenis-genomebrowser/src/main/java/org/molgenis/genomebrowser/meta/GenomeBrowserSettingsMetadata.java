@@ -1,5 +1,6 @@
 package org.molgenis.genomebrowser.meta;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.MREF;
@@ -113,7 +114,7 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
         .setRefEntity(this)
         .setVisibleExpression(
             String.format(VARIABLE_EQUALS_STRING, MOLGENIS_REFERENCES_MODE, CONFIGURED))
-        .setNullableExpression(String.format("{%s} != '%s'", MOLGENIS_REFERENCES_MODE, CONFIGURED))
+        .setNullableExpression(FALSE.toString())
         .setDescription("the genome browser settings that should be shown as reference tracks");
     addAttribute(ACTIONS)
         .setLabel("Actions")

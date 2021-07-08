@@ -1,5 +1,6 @@
 package org.molgenis.security.oidc.model;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -31,8 +32,6 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String SCOPES = "scopes";
 
   private static final String PROVIDER_DETAILS = "providerDetails";
-  public static final String DETAILS_NULLABLE_EXPRESSION =
-      String.format("{%s} notempty", ISSUER_URI);
   public static final String DETAILS_VISIBLE_EXPRESSION = String.format("{%s} empty", ISSUER_URI);
   static final String AUTHORIZATION_URI = "authorizationUri";
   static final String TOKEN_URI = "tokenUri";
@@ -81,7 +80,7 @@ public class OidcClientMetadata extends SystemEntityType {
     addAttribute(CLIENT_AUTHENTICATION_METHOD)
         .setLabel("Authentication")
         .setDescription("Client authentication method")
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setNullableExpression(FALSE.toString())
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
         .setDefaultValue("basic");
     addAttribute(AUTHORIZATION_GRANT_TYPE)
@@ -90,13 +89,13 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDataType(ENUM)
         .setEnumOptions(asList("authorization_code", "implicit", "refresh_token"))
         .setDefaultValue("authorization_code")
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setNullableExpression(FALSE.toString())
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION);
     addAttribute(SCOPES)
         .setLabel("Scopes")
         .setDescription("Comma-separated set of scopes")
         .setDefaultValue("openid,email,profile")
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION)
+        .setNullableExpression(FALSE.toString())
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION);
     Attribute providerDetailsAttribute =
         addAttribute(PROVIDER_DETAILS).setDataType(COMPOUND).setLabel("Provider details");
@@ -105,26 +104,26 @@ public class OidcClientMetadata extends SystemEntityType {
         .setLabel("Authorization URI")
         .setDataType(HYPERLINK)
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+        .setNullableExpression(FALSE.toString());
     addAttribute(TOKEN_URI)
         .setParent(providerDetailsAttribute)
         .setLabel("Token URI")
         .setDataType(HYPERLINK)
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+        .setNullableExpression(FALSE.toString());
     addAttribute(JWK_SET_URI)
         .setParent(providerDetailsAttribute)
         .setLabel("JWKS URI")
         .setDescription("JSON Web Key Set URI")
         .setDataType(HYPERLINK)
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+        .setNullableExpression(FALSE.toString());
     addAttribute(USER_INFO_URI)
         .setParent(providerDetailsAttribute)
         .setLabel("User info URI")
         .setDataType(HYPERLINK)
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
-        .setNullableExpression(DETAILS_NULLABLE_EXPRESSION);
+        .setNullableExpression(FALSE.toString());
     addAttribute(CLAIMS_ROLE_PATH)
         .setLabel("Claims role path")
         .setDescription(
