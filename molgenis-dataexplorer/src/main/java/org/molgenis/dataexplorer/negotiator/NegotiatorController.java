@@ -261,7 +261,9 @@ public class NegotiatorController extends PluginController {
   private List<Entity> getBiobankEntities(NegotiatorRequest request) {
     Repository<Entity> repository = dataService.getRepository(request.getBiobankId());
     Query<Entity> molgenisQuery =
-        rsqlQueryConverter.convert(request.getBiobankRsql()).createQuery(repository);
+        rsqlQueryConverter
+            .convert(requireNonNull(request.getBiobankRsql()))
+            .createQuery(repository);
     return molgenisQuery.findAll().collect(toList());
   }
 
