@@ -32,6 +32,7 @@ public class MolgenisWebAppInitializer {
   /** A Molgenis common web application initializer */
   protected void onStartup(
       ServletContext servletContext, Class<?> appConfig, int maxFileSizeDefault) {
+    servletContext.setRequestCharacterEncoding("UTF-8");
     // Create the 'root' Spring application context
     AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
     rootContext.registerShutdownHook();
