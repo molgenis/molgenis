@@ -59,8 +59,6 @@
 
     <!-- artifact publish properties -->
     <registry.id>registry.molgenis.org</registry.id>
-    <!-- don't publish module jars -->
-    <maven.deploy.skip>true</maven.deploy.skip>
 
     <!-- code quality monitoring properties -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
