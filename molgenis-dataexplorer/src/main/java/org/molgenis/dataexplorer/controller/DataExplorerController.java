@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -104,6 +105,8 @@ public class DataExplorerController extends PluginController {
 
   @Autowired private AppSettings appSettings;
 
+  @Autowired private FormSettings formSettings;
+
   @Autowired private DataExplorerService dataExplorerService;
 
   public DataExplorerController() {
@@ -155,6 +158,8 @@ public class DataExplorerController extends PluginController {
     model.addAttribute("hasTrackingId", null != appSettings.getGoogleAnalyticsTrackingId());
     model.addAttribute(
         "hasMolgenisTrackingId", null != appSettings.getGoogleAnalyticsTrackingIdMolgenis());
+
+    model.addAttribute("formSettings", formSettings);
 
     return "view-dataexplorer";
   }
