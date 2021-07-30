@@ -44,7 +44,7 @@ services:
       - 9300:9300
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:5.5.3
+    image: molgenis/molgenis-kibana:1.0.0
     ports:
       - 5601:5601
 
