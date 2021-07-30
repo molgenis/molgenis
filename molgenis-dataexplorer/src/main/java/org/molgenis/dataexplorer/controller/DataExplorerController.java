@@ -159,8 +159,6 @@ public class DataExplorerController extends PluginController {
     model.addAttribute(
         "hasMolgenisTrackingId", null != appSettings.getGoogleAnalyticsTrackingIdMolgenis());
 
-    model.addAttribute("formSettings", formSettings);
-
     return "view-dataexplorer";
   }
 
@@ -204,6 +202,7 @@ public class DataExplorerController extends PluginController {
             "showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
         model.addAttribute(
             "NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
+        model.addAttribute("formSettings", formSettings);
         break;
       case MOD_ENTITIESREPORT:
         // TODO: figure out if we need to know pos and chrom attrs here
