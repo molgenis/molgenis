@@ -14,7 +14,6 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-expressions_2.13</artifactId>
-      <version>0.20.2</version>
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>

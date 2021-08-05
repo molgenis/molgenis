@@ -153,6 +153,7 @@
     <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     <sentry.version>1.7.5</sentry.version>
     <sentry-logback.version>1.7.14</sentry-logback.version>
+    <molgenis-expressions.version>0.21.1</molgenis-expressions.version>
   </properties>
 
   <distributionManagement>
@@ -957,6 +958,11 @@
         <groupId>io.minio</groupId>
         <artifactId>minio</artifactId>
         <version>${minio.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.molgenis</groupId>
+        <artifactId>molgenis-expressions_2.13</artifactId>
+        <version>${molgenis-expressions.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
