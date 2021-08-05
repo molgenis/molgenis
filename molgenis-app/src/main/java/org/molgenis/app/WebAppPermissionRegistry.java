@@ -2,6 +2,7 @@ package org.molgenis.app;
 
 import static org.molgenis.beacon.config.BeaconPackage.PACKAGE_BEACON;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
+import static org.molgenis.core.ui.settings.FormSettings.FORM_SETTINGS;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
@@ -31,6 +32,7 @@ import static org.molgenis.security.core.SidUtils.createAnonymousSid;
 import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.settings.entity.DataExplorerEntitySettings.DATA_EXPLORER_ENTITY_SETTINGS;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -53,7 +55,6 @@ import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.securityui.controller.SecurityUiController;
-import org.molgenis.settings.entity.DataExplorerEntitySettings;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -63,6 +64,7 @@ import org.springframework.stereotype.Component;
 /** Registry of permissions specific for this web application. */
 @Component
 public class WebAppPermissionRegistry implements PermissionRegistry {
+
   private ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder =
       new ImmutableMultimap.Builder<>();
 
@@ -122,8 +124,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(PACKAGE, PACKAGE_ONTOLOGY, viewer, READ);
     register(PACKAGE, PACKAGE_META, viewer, READ);
     register(PACKAGE, PACKAGE_SYSTEM, viewer, READMETA);
-    register(
-        ENTITY_TYPE, DataExplorerEntitySettings.DATA_EXPLORER_ENTITY_SETTINGS, anonymousRole, READ);
+    register(ENTITY_TYPE, DATA_EXPLORER_ENTITY_SETTINGS, anonymousRole, READ);
+    register(ENTITY_TYPE, FORM_SETTINGS, anonymousRole, READ);
   }
 
   @Override
