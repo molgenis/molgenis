@@ -1,7 +1,6 @@
 package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -517,24 +516,7 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Override
   public boolean isEntityTypeCompatible(EntityType newEntityType) {
-    String newEntityTypeId = newEntityType.getId();
-    if (dataService.hasRepository(newEntityTypeId)) {
-      EntityType oldEntityType = dataService.getEntityType(newEntityTypeId);
-      List<Attribute> oldAtomicAttributes =
-          stream(oldEntityType.getAtomicAttributes()).collect(toList());
-
-      LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
-      stream(newEntityType.getAtomicAttributes())
-          .forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
-
-      for (Attribute oldAttribute : oldAtomicAttributes) {
-        if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
-
-        // FIXME This implies that an attribute can never be different when doing an update import?
-        if (!EntityUtils.equals(
-            oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false)) return false;
-      }
-    }
+    // TODO: become more strict to provide concrete early warning
     return true;
   }
 
