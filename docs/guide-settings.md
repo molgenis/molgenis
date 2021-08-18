@@ -4,6 +4,7 @@ There are different items where you can configure settings in MOLGENIS:
 - [Audit settings](guide-auditing.md)
 - [Authentication settings](#authentication-settings)
 - [Mail settings](#mail-settings)
+- [Form settings](#form-settings)
 - [DataExplorer settings](guide-explore.md)
 - OpenCPU settings
 
@@ -99,7 +100,7 @@ You need to add the `mail.from` property otherwise the server resolves to `root@
 ## Authentication settings
 When you are a superuser in MOLGENIS, you can configure three authentication methods:
  * Username/password signin *(default)*
- * Google-sigin
+ * Google-signin
  * Token-authentication
 
 **Username/password signin (default)**  
@@ -117,3 +118,16 @@ The Google-signin setting is used to enable the possibility for users to login w
 
 **Token-authentication**
 No specific superuser settings are necessary for the implementation of token-authentication.
+
+## Form settings
+In forms, some attributes are displayed as radio button groups (categoricals, enums and booleans). If
+these attributes are also nullable, an extra value 'N/A' is added to their radio button groups. This
+makes it possible to "deselect" them. You can turn this feature on/off in the Form settings for each
+attribute type:
+
+- Add null option to nullable enums
+- Add null option to nullable booleans
+- Add null option to nullable categoricals
+
+
+
