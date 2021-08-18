@@ -137,8 +137,23 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid mg-page-content"
-     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 50}<#else>50</#if>px;">
+<script>
+    // Fix bootstrap 3 menu when the menu gets to big and needs 2 lines.
+    function calcHeaderHeight(){
+        let pageContext = document.getElementsByClassName("mg-page-content")[0];
+        let navBar = document.getElementsByClassName("navbar-fixed-top")[0];
+        let logoTopHeight = ${app_settings.logoTopMaxHeight};
+        let logoTopHref = ${app_settings.logoTopHref?js_string};
+        let height = 50;
+
+        if(logoTopHref) height += logoTopHeight; // Correct height for header image
+        if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
+        pageContext.style.marginTop = height + "px";
+    }
+    window.addEventListener('resize', calcHeaderHeight);
+    calcHeaderHeight();
+</script>
+<div class="container-fluid mg-page-content">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
