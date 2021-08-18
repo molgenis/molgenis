@@ -154,7 +154,7 @@
             pageContext.style.marginTop = height + "px";
         }
         window.addEventListener('resize', calcHeaderHeight);
-        calcHeaderHeight();
+        window.addEventListener('load', calcHeaderHeight);
     </script>
 </#if>
 <div class="container-fluid mg-page-content">
