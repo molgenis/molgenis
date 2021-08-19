@@ -137,8 +137,29 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid mg-page-content"
-     style="margin-top: <#if app_settings.logoTopHref?? && (!version?? ||version == 1)>${app_settings.logoTopMaxHeight + 50}<#else>50</#if>px;">
+<#if (!version?? ||version == 1)>
+    <script>
+        // Fix bootstrap 3 menu when the menu gets to big and needs 2 lines.
+        function calcHeaderHeight(){
+            var pageContext = document.getElementById("mg-content");
+            var navBar = document.getElementById("mg-menu-bar");
+            var height = 50;
+
+            <#if app_settings.logoTopHref?has_content>
+                var logoTopHeight = ${app_settings.logoTopMaxHeight};
+                height += logoTopHeight; // Correct height for header image
+            </#if>
+            
+            if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
+            pageContext.style.marginTop = height + "px";
+        }
+        window.removeEventListener('resize', calcHeaderHeight);
+        window.removeEventListener('load', calcHeaderHeight);
+        window.addEventListener('resize', calcHeaderHeight);
+        window.addEventListener('load', calcHeaderHeight);
+    </script>
+</#if>
+<div id="mg-content" class="container-fluid mg-page-content">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -189,7 +210,7 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <nav id="mg-menu-bar" class="navbar navbar-default navbar-fixed-top" role="navigation">
         <#if app_settings.logoTopHref?has_content>
         <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
             <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" style="max-height: ${app_settings.logoTopMaxHeight}px;"></a>
