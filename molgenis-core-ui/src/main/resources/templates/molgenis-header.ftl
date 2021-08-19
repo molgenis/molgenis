@@ -141,23 +141,25 @@
     <script>
         // Fix bootstrap 3 menu when the menu gets to big and needs 2 lines.
         function calcHeaderHeight(){
-            let pageContext = document.getElementsByClassName("mg-page-content")[0];
-            let navBar = document.getElementsByClassName("navbar-fixed-top")[0];
-            let height = 50;
+            var pageContext = document.getElementById("mg-content");
+            var navBar = document.getElementsByClassName("navbar-fixed-top")[0];
+            var height = 50;
 
             <#if app_settings.logoTopHref?has_content>
-                let logoTopHeight = ${app_settings.logoTopMaxHeight};
-                if(logoTopHref) height += logoTopHeight; // Correct height for header image
+                var logoTopHeight = ${app_settings.logoTopMaxHeight};
+                height += logoTopHeight; // Correct height for header image
             </#if>
             
             if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
             pageContext.style.marginTop = height + "px";
         }
+        window.removeEventListener('resize', calcHeaderHeight);
+        window.removeEventListener('load', calcHeaderHeight);
         window.addEventListener('resize', calcHeaderHeight);
         window.addEventListener('load', calcHeaderHeight);
     </script>
 </#if>
-<div class="container-fluid mg-page-content">
+<div id="mg-content" class="container-fluid mg-page-content">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
