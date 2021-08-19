@@ -143,14 +143,7 @@
         function calcHeaderHeight(){
             var pageContext = document.getElementById("mg-content");
             var navBar = document.getElementById("mg-menu-bar");
-            var height = 50;
-
-            <#if app_settings.logoTopHref?has_content>
-                var logoTopHeight = ${app_settings.logoTopMaxHeight};
-                height += logoTopHeight; // Correct height for header image;
-            <#else>
-                if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
-            </#if>        
+            var height = navBar.getBoundingClientRect().height;
             pageContext.style.marginTop = height + "px";
         }
         window.removeEventListener('resize', calcHeaderHeight);
