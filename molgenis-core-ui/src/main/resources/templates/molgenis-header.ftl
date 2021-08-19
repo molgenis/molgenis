@@ -148,9 +148,9 @@
             <#if app_settings.logoTopHref?has_content>
                 var logoTopHeight = ${app_settings.logoTopMaxHeight};
                 height += logoTopHeight; // Correct height for header image
-            </#if>
-            
-            if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
+            </#else>
+                if(navBar.getBoundingClientRect().height>50) height += 50; // Correct height for double sized menu
+            </#if>        
             pageContext.style.marginTop = height + "px";
         }
         window.removeEventListener('resize', calcHeaderHeight);
