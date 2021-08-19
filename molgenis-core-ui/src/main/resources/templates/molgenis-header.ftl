@@ -142,7 +142,7 @@
         // Fix bootstrap 3 menu when the menu gets to big and needs 2 lines.
         function calcHeaderHeight(){
             var pageContext = document.getElementById("mg-content");
-            var navBar = document.getElementsByClassName("navbar-fixed-top")[0];
+            var navBar = document.getElementById("mg-menu-bar");
             var height = 50;
 
             <#if app_settings.logoTopHref?has_content>
@@ -210,7 +210,7 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <nav id="mg-menu-bar" class="navbar navbar-default navbar-fixed-top" role="navigation">
         <#if app_settings.logoTopHref?has_content>
         <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
             <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" style="max-height: ${app_settings.logoTopMaxHeight}px;"></a>
