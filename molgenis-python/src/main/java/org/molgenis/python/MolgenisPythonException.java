@@ -1,10 +1,11 @@
 package org.molgenis.python;
 
+import org.molgenis.script.core.ScriptException;
 import org.molgenis.util.exception.CodedRuntimeException;
 
 /** @deprecated use class that extends from {@link CodedRuntimeException} */
 @Deprecated
-public class MolgenisPythonException extends RuntimeException {
+public class MolgenisPythonException extends ScriptException {
   private static final long serialVersionUID = 4675578564750997809L;
 
   public MolgenisPythonException() {}

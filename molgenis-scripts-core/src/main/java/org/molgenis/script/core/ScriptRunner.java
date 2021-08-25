@@ -8,10 +8,17 @@ import java.util.Map;
  * <p>For each script type a concrete ScriptRunner must be registered by at the ScriptRunnerFactory
  */
 public interface ScriptRunner {
+
   String getName();
 
   /** @return whether the script outputs a file */
   boolean hasFileOutput(Script script);
 
   String runScript(Script script, Map<String, Object> parameters);
+
+  default void runScript(
+      Script script, Map<String, Object> parameters, ScriptOutputHandler outputHandler) {
+    var output = runScript(script, parameters);
+    outputHandler.append(output);
+  }
 }

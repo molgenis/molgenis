@@ -9,6 +9,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.file.FileStore;
@@ -17,6 +19,7 @@ import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.script.core.GenerateScriptException;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptMetadata;
+import org.molgenis.script.core.ScriptOutputHandler;
 import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.script.core.ScriptRunner;
 import org.molgenis.script.core.ScriptRunnerFactory;
@@ -40,6 +43,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SavedScriptRunner {
+
   private final ScriptRunnerFactory scriptRunnerFactory;
   private final DataService dataService;
   private final FileStore fileStore;
@@ -68,7 +72,10 @@ public class SavedScriptRunner {
    * @throws UnknownScriptException if scriptName is unknown
    * @throws GenerateScriptException , if parameter is missing
    */
-  public ScriptResult runScript(String scriptName, Map<String, Object> parameters) {
+  public ScriptResult runScript(
+      String scriptName,
+      Map<String, Object> parameters,
+      @Nullable @CheckForNull ScriptOutputHandler outputHandler) {
     Script script =
         dataService.query(SCRIPT, Script.class).eq(ScriptMetadata.NAME, scriptName).findOne();
     if (script == null) {
@@ -106,9 +113,13 @@ public class SavedScriptRunner {
       fileMeta = createFileMeta(name, file);
       dataService.add(FILE_META, fileMeta);
     }
-    String output = scriptRunner.runScript(script, scriptParameters);
 
-    return new ScriptResult(fileMeta, output);
+    if (outputHandler == null) {
+      outputHandler = new ScriptOutputHandler();
+    }
+    scriptRunner.runScript(script, scriptParameters, outputHandler);
+
+    return new ScriptResult(fileMeta, outputHandler.toString());
   }
 
   private FileMeta createFileMeta(String fileMetaId, File file) {

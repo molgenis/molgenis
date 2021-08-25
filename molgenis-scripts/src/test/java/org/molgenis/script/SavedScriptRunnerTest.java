@@ -27,6 +27,7 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.script.core.GenerateScriptException;
 import org.molgenis.script.core.Script;
+import org.molgenis.script.core.ScriptOutputHandler;
 import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.script.core.ScriptRunner;
 import org.molgenis.script.core.ScriptRunnerFactory;
@@ -35,6 +36,7 @@ import org.molgenis.security.core.token.TokenService;
 import org.molgenis.test.AbstractMockitoTest;
 
 class SavedScriptRunnerTest extends AbstractMockitoTest {
+
   @Mock private ScriptRunnerFactory scriptRunnerFactory;
   @Mock private DataService dataService;
   @Mock private FileStore fileStore;
@@ -54,6 +56,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     String scriptTypeName = "MyScriptType";
     ScriptType scriptType =
         when(mock(ScriptType.class).getName()).thenReturn(scriptTypeName).getMock();
+    var scriptOutputHandler = mock(ScriptOutputHandler.class);
 
     String scriptName = "MyScript";
     Script script = mock(Script.class);
@@ -68,9 +71,9 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     ScriptRunner scriptRunner = mock(ScriptRunner.class);
 
     when(scriptRunnerFactory.getScriptRunner(scriptTypeName)).thenReturn(scriptRunner);
-    savedScriptRunner.runScript(scriptName, emptyMap());
+    savedScriptRunner.runScript(scriptName, emptyMap(), scriptOutputHandler);
 
-    verify(scriptRunner).runScript(script, emptyMap());
+    verify(scriptRunner).runScript(script, emptyMap(), scriptOutputHandler);
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -79,6 +82,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     String scriptTypeName = "MyScriptType";
     ScriptType scriptType =
         when(mock(ScriptType.class).getName()).thenReturn(scriptTypeName).getMock();
+    var scriptOutputHandler = mock(ScriptOutputHandler.class);
 
     String scriptName = "MyScript";
     Script script = mock(Script.class);
@@ -100,7 +104,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     File savedScriptRunnerTest = File.createTempFile("SavedScriptRunnerTest", null);
     try {
       when(fileStore.getFileUnchecked(any())).thenReturn(savedScriptRunnerTest);
-      savedScriptRunner.runScript(scriptName, emptyMap());
+      savedScriptRunner.runScript(scriptName, emptyMap(), scriptOutputHandler);
     } finally {
       savedScriptRunnerTest.delete();
     }
@@ -108,7 +112,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Map<String, Object>> paramsCaptor = ArgumentCaptor.forClass(Map.class);
-    verify(scriptRunner).runScript(eq(script), paramsCaptor.capture());
+    verify(scriptRunner).runScript(eq(script), paramsCaptor.capture(), eq(scriptOutputHandler));
     assertTrue(paramsCaptor.getValue().containsKey("outputFile"));
   }
 
@@ -116,6 +120,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
   @Test
   void testRunScriptMissingParameterValues() {
     String scriptName = "MyScript";
+    var scriptOutputHandler = mock(ScriptOutputHandler.class);
 
     ScriptParameter scriptParameter =
         when(mock(ScriptParameter.class).getName()).thenReturn("param0").getMock();
@@ -129,12 +134,14 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     when(dataService.query("sys_scr_Script", Script.class)).thenReturn(query);
 
     assertThrows(
-        GenerateScriptException.class, () -> savedScriptRunner.runScript(scriptName, emptyMap()));
+        GenerateScriptException.class,
+        () -> savedScriptRunner.runScript(scriptName, emptyMap(), scriptOutputHandler));
   }
 
   @Test
   void testRunScriptUnknownScript() {
     String scriptName = "MyScript";
+    var scriptOutputHandler = mock(ScriptOutputHandler.class);
 
     @SuppressWarnings("unchecked")
     Query<Script> query = mock(Query.class, RETURNS_SELF);
@@ -142,6 +149,7 @@ class SavedScriptRunnerTest extends AbstractMockitoTest {
     when(dataService.query("sys_scr_Script", Script.class)).thenReturn(query);
 
     assertThrows(
-        UnknownEntityException.class, () -> savedScriptRunner.runScript(scriptName, emptyMap()));
+        UnknownEntityException.class,
+        () -> savedScriptRunner.runScript(scriptName, emptyMap(), scriptOutputHandler));
   }
 }
