@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptOutputHandler;
-import org.molgenis.script.core.ScriptUtils;
 import org.molgenis.test.AbstractMockitoTest;
 
 class PythonScriptRunnerTest extends AbstractMockitoTest {
@@ -55,5 +54,4 @@ class PythonScriptRunnerTest extends AbstractMockitoTest {
 
     verify(pythonScriptExecutor).executeScript(scriptString, scriptOutputHandler);
   }
-
 }
