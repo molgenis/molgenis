@@ -10,7 +10,7 @@ class ScriptOutputHandlerTest {
   void testHandler() {
     var handler = new ScriptOutputHandler();
     handler.append("test1");
-    handler.getConsumer().accept("test2");
+    handler.append("test2");
     assertEquals("test1test2", handler.toString());
   }
 }

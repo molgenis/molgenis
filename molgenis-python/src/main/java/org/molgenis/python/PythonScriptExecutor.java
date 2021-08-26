@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.function.Consumer;
 import org.molgenis.script.core.ScriptOutputHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,16 +53,14 @@ public class PythonScriptExecutor {
 
       // Create Python process
       LOG.info("Running python script [{}]", tempScriptFilePath);
-      Process process =
-          Runtime.getRuntime().exec(getCommand(pythonScriptExecutable, tempScriptFilePath));
+      var process =
+          new ProcessBuilder()
+              .command(getCommand(pythonScriptExecutable, tempScriptFilePath))
+              .redirectErrorStream(true)
+              .start();
 
-      // Capture standard error
-      var error = new StringBuilder();
-      Consumer<String> errorConsumer = error::append;
-      new PythonStreamHandler(process.getErrorStream(), errorConsumer).start();
-
-      // Capture standard out
-      new PythonStreamHandler(process.getInputStream(), outputHandler.getConsumer()).start();
+      // Capture standard out and error
+      new PythonStreamHandler(process.getInputStream(), outputHandler).start();
 
       // Wait until script is finished
       process.waitFor();
@@ -72,8 +69,7 @@ public class PythonScriptExecutor {
       if (process.exitValue() > 0) {
         throw new MolgenisPythonException(
             String.format(
-                "Python script process had non-zero exit value: %s Cause: %s",
-                process.exitValue(), error.toString()));
+                "Python script process had non-zero exit value: %s", process.exitValue()));
       }
 
       LOG.info("Script [{}] done", tempScriptFilePath);
