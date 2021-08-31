@@ -162,11 +162,9 @@ Check: [deploy backend services](guide-development-deploy-backend-services.md)
 * Remove any *JVM options* that are MOLGENIS specific. These will override the environment variables below. 
 * In the "Open browser" change the URL to http://localhost *(this will open a browser and serve the frontend of MOLGENIS)*.
 * The tomcat-port needs to point at 8080. This is also defined in the `.env`. 
-* Select the 'EnvFile' tab.<br/>
-  Add env file `molgenis-app/dev-env/intellij-tomcat-env`. <br/>
-  note: If you don't see the 'EnvFile' tab, install the EnvFile plugin
 * Select the 'Startup/Connection' tab.<br/>
-  Copy and paste these variables in the Environment variables area and select 'Pass environment variables'.
+* Copy the content of `molgenis-app/dev-env/intellij-tomcat-env` and paste it into 'Pass environment variables'.
+* Copy and paste the following three variables in the Environment variables area and select 'Pass environment variables'.
   Fill in your home-directory and email address.
 ```properties
 molgenis.home=**your own version of the data dir**
