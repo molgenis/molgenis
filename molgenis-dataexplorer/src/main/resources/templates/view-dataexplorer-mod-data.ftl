@@ -126,6 +126,11 @@
             $.ajax('<@resource_href "/js/dataexplorer-directory.js"/>', {'cache': true}))
             .done(function () {
             <#-- do *not* js escape values below -->
+                molgenis.dataexplorer.data.formSettings = {
+                    addBooleanNullOption: ${formSettings.addBooleanNullOption?c},
+                    addCategoricalNullOption: ${formSettings.addCategoricalNullOption?c},
+                    addEnumNullOption: ${formSettings.addEnumNullOption?c}
+                }
                 molgenis.dataexplorer.data.useDateEditRowPlugin = ${plugin_settings.use_vue_data_row_edit?c}
                 molgenis.dataexplorer.data.setGenomeBrowserSettings({
                 ${plugin_settings.gb_init_location},

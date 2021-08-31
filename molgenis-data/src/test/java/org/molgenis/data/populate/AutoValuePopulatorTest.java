@@ -58,7 +58,7 @@ class AutoValuePopulatorTest {
     when(attrDateTimeAutoTrue.getDataType()).thenReturn(DATE_TIME);
     when(attrDateTimeAutoTrue.isAuto()).thenReturn(true);
     when(entityType.getIdAttribute()).thenReturn(attrId);
-    when(entityType.getAttributes())
+    when(entityType.getAtomicAttributes())
         .thenReturn(
             asList(
                 attrId,

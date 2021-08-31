@@ -15,7 +15,12 @@
     window.__INITIAL_STATE__ = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
-        fallbackLng: '${fallbackLng}'<#if dataExplorerBaseUrl??>,
+        fallbackLng: '${fallbackLng}',
+        formSettings: {
+            addBooleanNullOption: ${formSettings.addBooleanNullOption?c},
+            addCategoricalNullOption: ${formSettings.addCategoricalNullOption?c},
+            addEnumNullOption: ${formSettings.addEnumNullOption?c}
+        }<#if dataExplorerBaseUrl??>,
         dataExplorerBaseUrl: '${dataExplorerBaseUrl}'</#if>
     }
 </script>

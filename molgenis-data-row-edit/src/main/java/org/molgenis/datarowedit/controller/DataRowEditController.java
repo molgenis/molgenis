@@ -2,6 +2,7 @@ package org.molgenis.datarowedit.controller;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
@@ -21,11 +22,14 @@ public class DataRowEditController extends PluginController {
   public static final String VIEW_TEMPLATE = "view-data-row-edit";
   private final MenuReaderService menuReaderService;
 
-  private AppSettings appSettings;
+  private final AppSettings appSettings;
+  private final FormSettings formSettings;
 
-  DataRowEditController(MenuReaderService menuReaderService, AppSettings appSettings) {
+  DataRowEditController(
+      MenuReaderService menuReaderService, AppSettings appSettings, FormSettings formSettings) {
     super(URI);
     this.appSettings = requireNonNull(appSettings);
+    this.formSettings = requireNonNull(formSettings);
     this.menuReaderService = requireNonNull(menuReaderService);
   }
 
@@ -36,6 +40,7 @@ public class DataRowEditController extends PluginController {
     model.addAttribute("fallbackLng", appSettings.getLanguageCode());
     model.addAttribute(
         "dataExplorerBaseUrl", menuReaderService.findMenuItemPath(DataExplorerController.ID));
+    model.addAttribute("formSettings", formSettings);
     return VIEW_TEMPLATE;
   }
 }

@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -28,6 +29,7 @@ class DataRowEditControllerTest {
   @Mock private MenuReaderService menuReaderService;
 
   @Mock private AppSettings appSettings;
+  @Mock private FormSettings formSettings;
 
   @Mock private UserAccountService userAccountService;
 
@@ -43,7 +45,7 @@ class DataRowEditControllerTest {
     when(user.isSuperuser()).thenReturn(false);
 
     DataRowEditController settingsController =
-        new DataRowEditController(menuReaderService, appSettings);
+        new DataRowEditController(menuReaderService, appSettings, formSettings);
     mockMvc = standaloneSetup(settingsController).build();
   }
 

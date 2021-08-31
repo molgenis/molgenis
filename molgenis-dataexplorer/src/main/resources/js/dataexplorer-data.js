@@ -57,6 +57,7 @@
                 onRowEdit: onDataChange,
                 onRowInspect: onRowInspect,
                 onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
+                formSettings: self.formSettings,
                 enableInspect: canRead,
                 onSort: function (e) {
                     tableSort = {

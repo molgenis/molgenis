@@ -33,7 +33,7 @@ public class AutoValuePopulator {
    */
   public void populate(Entity entity) {
     // auto date
-    generateAutoDateOrDateTime(singletonList(entity), entity.getEntityType().getAttributes());
+    generateAutoDateOrDateTime(singletonList(entity), entity.getEntityType().getAtomicAttributes());
 
     // auto id
     Attribute idAttr = entity.getEntityType().getIdAttribute();

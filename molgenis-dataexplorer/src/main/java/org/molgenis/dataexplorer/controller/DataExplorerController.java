@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -103,6 +104,8 @@ public class DataExplorerController extends PluginController {
   @Autowired private MenuReaderService menuReaderService;
 
   @Autowired private AppSettings appSettings;
+
+  @Autowired private FormSettings formSettings;
 
   @Autowired private DataExplorerService dataExplorerService;
 
@@ -199,6 +202,7 @@ public class DataExplorerController extends PluginController {
             "showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
         model.addAttribute(
             "NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
+        model.addAttribute("formSettings", formSettings);
         break;
       case MOD_ENTITIESREPORT:
         // TODO: figure out if we need to know pos and chrom attrs here

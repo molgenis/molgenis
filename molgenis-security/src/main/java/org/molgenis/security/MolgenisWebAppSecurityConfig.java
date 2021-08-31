@@ -245,6 +245,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .clientRegistrationRepository(clientRegistrationRepository)
         .authorizedClientService(authorizedClientService)
         .loginPage(MolgenisLoginController.URI)
+        .defaultSuccessUrl("/")
         .failureUrl(MolgenisLoginController.URI)
         .userInfoEndpoint()
         .oidcUserService(oidcUserService)
