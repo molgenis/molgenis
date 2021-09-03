@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +56,11 @@ import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.model.AclService;
 import org.springframework.security.acls.model.Sid;
+import org.springframework.security.acls.model.SidRetrievalStrategy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,19 +97,25 @@ public class PermissionsController extends ApiController {
   private final ObjectIdentityService objectIdentityService;
   private final UserRoleTools userRoleTools;
   private final EntityHelper entityHelper;
+  private final SidRetrievalStrategy sidRetrievalStrategy;
+  private final AclService aclService;
 
   public PermissionsController(
       PermissionService permissionService,
       RSQLParser rsqlParser,
       ObjectIdentityService objectIdentityService,
       UserRoleTools userRoleTools,
-      EntityHelper entityHelper) {
+      EntityHelper entityHelper,
+      SidRetrievalStrategy sidRetrievalStrategy,
+      AclService aclService) {
     super(PERMISSION_API_IDENTIFIER, 1);
     this.permissionService = requireNonNull(permissionService);
     this.rsqlParser = requireNonNull(rsqlParser);
     this.objectIdentityService = requireNonNull(objectIdentityService);
     this.userRoleTools = requireNonNull(userRoleTools);
     this.entityHelper = requireNonNull(entityHelper);
+    this.sidRetrievalStrategy = requireNonNull(sidRetrievalStrategy);
+    this.aclService = requireNonNull(aclService);
   }
 
   @PostMapping(value = TYPES + "/{" + TYPE_ID + "}")
@@ -173,12 +184,22 @@ public class PermissionsController extends ApiController {
       page = DEFAULT_PAGE;
       pageSize = DEFAULT_PAGESIZE;
     }
-
+    var sids = getUserSids();
     Set<ObjectResponse> data =
         permissionService.getObjects(typeId, page, pageSize).stream()
             .map(
-                labelledObject ->
-                    ObjectResponse.create(labelledObject.getId(), labelledObject.getLabel()))
+                labelledObject -> {
+                  Sid owner =
+                      aclService
+                          .readAclById(new ObjectIdentityImpl(typeId, labelledObject.getId()))
+                          .getOwner();
+                  return ObjectResponse.create(
+                      labelledObject.getId(),
+                      labelledObject.getLabel(),
+                      UserRoleTools.getRolename(owner).orElse(null),
+                      UserRoleTools.getUsername(owner).orElse(null),
+                      Optional.ofNullable(owner).map(sids::contains).orElse(false));
+                })
             .collect(Collectors.toSet());
     int totalItems = objectIdentityService.getNrOfObjectIdentities(typeId);
     return getPermissionResponse("", page, pageSize, totalItems, data);
@@ -193,12 +214,13 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     Set<Sid> sids = getSidsFromQuery(queryString);
+    var userSids = getUserSids();
 
     Set<LabelledPermission> labelledObjectPermissions =
         permissionService.getPermissionsForObject(
             entityHelper.getObjectIdentity(typeId, identifier), sids, inheritance);
     ObjectPermissionResponse permissionResponse =
-        convertToObjectResponse(typeId, identifier, labelledObjectPermissions);
+        convertToObjectResponse(typeId, identifier, labelledObjectPermissions, userSids);
     return ApiResponse.create(permissionResponse);
   }
 
@@ -215,22 +237,27 @@ public class PermissionsController extends ApiController {
           boolean inheritance) {
     validateQueryParams(page, pageSize, inheritance);
     Set<Sid> sids = getSidsFromQuery(queryString);
+    List<Sid> userSids = getUserSids();
 
     PagedApiResponse response;
     TypePermissionsResponse permissionsResponse;
     Map<String, Set<LabelledPermission>> typePermission;
     if (page != null) {
       typePermission = permissionService.getPermissionsForType(typeId, sids, page, pageSize);
-      permissionsResponse = convertToTypeResponse(typeId, typePermission);
+      permissionsResponse = convertToTypeResponse(typeId, typePermission, userSids);
       Integer totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
       response =
           getPermissionResponse(queryString, page, pageSize, totalItems, permissionsResponse);
     } else {
       typePermission = permissionService.getPermissionsForType(typeId, sids, inheritance);
-      permissionsResponse = convertToTypeResponse(typeId, typePermission);
+      permissionsResponse = convertToTypeResponse(typeId, typePermission, userSids);
       response = getPermissionResponse(queryString, permissionsResponse);
     }
     return response;
+  }
+
+  private List<Sid> getUserSids() {
+    return sidRetrievalStrategy.getSids(SecurityContextHolder.getContext().getAuthentication());
   }
 
   @GetMapping()
@@ -349,14 +376,25 @@ public class PermissionsController extends ApiController {
   }
 
   private ObjectPermissionResponse convertToObjectResponse(
-      String typeId, String id, Set<LabelledPermission> labelledObjectPermissions) {
+      String typeId,
+      String id,
+      Set<LabelledPermission> labelledObjectPermissions,
+      List<Sid> userSids) {
     Set<PermissionResponse> permissions = convertToPermissions(labelledObjectPermissions);
     String label = entityHelper.getLabel(typeId, id);
-    return ObjectPermissionResponse.create(id, label, permissions);
+
+    var owner = aclService.readAclById(new ObjectIdentityImpl(typeId, id)).getOwner();
+    return ObjectPermissionResponse.create(
+        id,
+        label,
+        UserRoleTools.getRolename(owner).orElse(null),
+        UserRoleTools.getUsername(owner).orElse(null),
+        Optional.ofNullable(owner).map(userSids::contains).orElse(false),
+        permissions);
   }
 
   private TypePermissionsResponse convertToTypeResponse(
-      String typeId, Map<String, Set<LabelledPermission>> typePermissions) {
+      String typeId, Map<String, Set<LabelledPermission>> typePermissions, List<Sid> userSids) {
     Set<ObjectPermissionResponse> objectPermissions = new LinkedHashSet<>();
     for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
       Set<LabelledPermission> permissions = entry.getValue();
@@ -369,7 +407,8 @@ public class PermissionsController extends ApiController {
             convertToObjectResponse(
                 typeId,
                 labelledObjectPermission.getLabelledObjectIdentity().getIdentifier().toString(),
-                permissions));
+                permissions,
+                userSids));
       }
     }
     String label = entityHelper.getLabel(typeId);
@@ -397,6 +436,7 @@ public class PermissionsController extends ApiController {
 
   private Set<LabelledPermissionResponse> convertLabelledPermissions(
       Set<LabelledPermission> objectPermissionResponses) {
+    List<Sid> userSids = getUserSids();
     Set<LabelledPermissionResponse> permissionResponses = null;
     if (objectPermissionResponses != null) {
       permissionResponses = new LinkedHashSet<>();
@@ -408,10 +448,14 @@ public class PermissionsController extends ApiController {
         }
         LabelledPermissionResponse labelledResponse;
         if (permission.getLabelledObjectIdentity() != null) {
+          Sid owner = aclService.readAclById(permission.getLabelledObjectIdentity()).getOwner();
           ObjectResponse objectResponse =
               ObjectResponse.create(
                   permission.getLabelledObjectIdentity().getIdentifier().toString(),
-                  permission.getLabelledObjectIdentity().getIdentifierLabel());
+                  permission.getLabelledObjectIdentity().getIdentifierLabel(),
+                  UserRoleTools.getRolename(owner).orElse(null),
+                  UserRoleTools.getUsername(owner).orElse(null),
+                  Optional.ofNullable(owner).map(userSids::contains).orElse(false));
           TypeResponse typeResponse =
               TypeResponse.create(
                   permission.getLabelledObjectIdentity().getType(),
